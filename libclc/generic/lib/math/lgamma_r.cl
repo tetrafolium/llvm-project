@@ -162,27 +162,27 @@ _CLC_OVERLOAD _CLC_DEF float lgamma_r(float x, private int *signp) {
 
         float z, w, p1, p2, p3, p;
         switch (i) {
-            case 0:
-                z = y * y;
-                p1 = mad(z, mad(z, mad(z, mad(z, mad(z, a10_f, a8_f), a6_f), a4_f), a2_f), a0_f);
-                p2 = z * mad(z, mad(z, mad(z, mad(z, mad(z, a11_f, a9_f), a7_f), a5_f), a3_f), a1_f);
-                p = mad(y, p1, p2);
-                r += mad(y, -0.5f, p);
-                break;
-            case 1:
-                z = y * y;
-                w = z * y;
-                p1 = mad(w, mad(w, mad(w, mad(w, t12_f, t9_f), t6_f), t3_f), t0_f);
-                p2 = mad(w, mad(w, mad(w, mad(w, t13_f, t10_f), t7_f), t4_f), t1_f);
-                p3 = mad(w, mad(w, mad(w, mad(w, t14_f, t11_f), t8_f), t5_f), t2_f);
-                p = mad(z, p1, -mad(w, -mad(y, p3, p2), tt_f));
-                r += tf_f + p;
-                break;
-            case 2:
-                p1 = y * mad(y, mad(y, mad(y, mad(y, mad(y, u5_f, u4_f), u3_f), u2_f), u1_f), u0_f);
-                p2 = mad(y, mad(y, mad(y, mad(y, mad(y, v5_f, v4_f), v3_f), v2_f), v1_f), 1.0f);
-                r += mad(y, -0.5f, MATH_DIVIDE(p1, p2));
-                break;
+        case 0:
+            z = y * y;
+            p1 = mad(z, mad(z, mad(z, mad(z, mad(z, a10_f, a8_f), a6_f), a4_f), a2_f), a0_f);
+            p2 = z * mad(z, mad(z, mad(z, mad(z, mad(z, a11_f, a9_f), a7_f), a5_f), a3_f), a1_f);
+            p = mad(y, p1, p2);
+            r += mad(y, -0.5f, p);
+            break;
+        case 1:
+            z = y * y;
+            w = z * y;
+            p1 = mad(w, mad(w, mad(w, mad(w, t12_f, t9_f), t6_f), t3_f), t0_f);
+            p2 = mad(w, mad(w, mad(w, mad(w, t13_f, t10_f), t7_f), t4_f), t1_f);
+            p3 = mad(w, mad(w, mad(w, mad(w, t14_f, t11_f), t8_f), t5_f), t2_f);
+            p = mad(z, p1, -mad(w, -mad(y, p3, p2), tt_f));
+            r += tf_f + p;
+            break;
+        case 2:
+            p1 = y * mad(y, mad(y, mad(y, mad(y, mad(y, u5_f, u4_f), u3_f), u2_f), u1_f), u0_f);
+            p2 = mad(y, mad(y, mad(y, mad(y, mad(y, v5_f, v4_f), v3_f), v2_f), v1_f), 1.0f);
+            r += mad(y, -0.5f, MATH_DIVIDE(p1, p2));
+            break;
         }
     } else if (absx < 8.0f) {
         int i = (int) absx;
@@ -428,23 +428,23 @@ _CLC_OVERLOAD _CLC_DEF double lgamma_r(double x, private int *ip) {
         double p, q;
 
         switch (i) {
-            case 0:
-                p = fma(y, fma(y, fma(y, fma(y, a11, a10), a9), a8), a7);
-                p = fma(y, fma(y, fma(y, fma(y, p, a6), a5), a4), a3);
-                p = fma(y, fma(y, fma(y, p, a2), a1), a0);
-                r = fma(y, p - 0.5, r);
-                break;
-            case 1:
-                p = fma(y, fma(y, fma(y, fma(y, t14, t13), t12), t11), t10);
-                p = fma(y, fma(y, fma(y, fma(y, fma(y, p, t9), t8), t7), t6), t5);
-                p = fma(y, fma(y, fma(y, fma(y, fma(y, p, t4), t3), t2), t1), t0);
-                p = fma(y*y, p, -tt);
-                r += (tf + p);
-                break;
-            case 2:
-                p = y * fma(y, fma(y, fma(y, fma(y, fma(y, u5, u4), u3), u2), u1), u0);
-                q = fma(y, fma(y, fma(y, fma(y, fma(y, v5, v4), v3), v2), v1), 1.0);
-                r += fma(-0.5, y, p / q);
+        case 0:
+            p = fma(y, fma(y, fma(y, fma(y, a11, a10), a9), a8), a7);
+            p = fma(y, fma(y, fma(y, fma(y, p, a6), a5), a4), a3);
+            p = fma(y, fma(y, fma(y, p, a2), a1), a0);
+            r = fma(y, p - 0.5, r);
+            break;
+        case 1:
+            p = fma(y, fma(y, fma(y, fma(y, t14, t13), t12), t11), t10);
+            p = fma(y, fma(y, fma(y, fma(y, fma(y, p, t9), t8), t7), t6), t5);
+            p = fma(y, fma(y, fma(y, fma(y, fma(y, p, t4), t3), t2), t1), t0);
+            p = fma(y*y, p, -tt);
+            r += (tf + p);
+            break;
+        case 2:
+            p = y * fma(y, fma(y, fma(y, fma(y, fma(y, u5, u4), u3), u2), u1), u0);
+            q = fma(y, fma(y, fma(y, fma(y, fma(y, v5, v4), v3), v2), v1), 1.0);
+            r += fma(-0.5, y, p / q);
         }
     } else if (absx < 8.0) {
         int i = absx;

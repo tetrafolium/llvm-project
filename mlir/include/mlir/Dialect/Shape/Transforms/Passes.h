@@ -38,7 +38,7 @@ void populateShapeRewritePatterns(MLIRContext *context,
 //
 // After this pass, no cstr_ operations exist.
 void populateRemoveShapeConstraintsPatterns(OwningRewritePatternList &patterns,
-                                            MLIRContext *ctx);
+        MLIRContext *ctx);
 std::unique_ptr<FunctionPass> createRemoveShapeConstraintsPass();
 
 /// Populates patterns for shape dialect structural type conversions and sets up

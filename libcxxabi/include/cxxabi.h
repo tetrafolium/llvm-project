@@ -108,19 +108,19 @@ __cxa_vec_ctor(void *array_address, size_t element_count, size_t element_size,
                void (*constructor)(void *), void (*destructor)(void *));
 
 extern _LIBCXXABI_FUNC_VIS void __cxa_vec_dtor(void *array_address,
-                                               size_t element_count,
-                                               size_t element_size,
-                                               void (*destructor)(void *));
+        size_t element_count,
+        size_t element_size,
+        void (*destructor)(void *));
 
 extern _LIBCXXABI_FUNC_VIS void __cxa_vec_cleanup(void *array_address,
-                                                  size_t element_count,
-                                                  size_t element_size,
-                                                  void (*destructor)(void *));
+        size_t element_count,
+        size_t element_size,
+        void (*destructor)(void *));
 
 extern _LIBCXXABI_FUNC_VIS void __cxa_vec_delete(void *array_address,
-                                                 size_t element_size,
-                                                 size_t padding_size,
-                                                 void (*destructor)(void *));
+        size_t element_size,
+        size_t padding_size,
+        void (*destructor)(void *));
 
 extern _LIBCXXABI_FUNC_VIS void
 __cxa_vec_delete2(void *array_address, size_t element_size, size_t padding_size,
@@ -143,8 +143,8 @@ __cxa_vec_cctor(void *dest_array, void *src_array, size_t element_count,
 
 // 3.4 Demangler API
 extern _LIBCXXABI_FUNC_VIS char *__cxa_demangle(const char *mangled_name,
-                                                char *output_buffer,
-                                                size_t *length, int *status);
+        char *output_buffer,
+        size_t *length, int *status);
 
 // Apple additions to support C++ 0x exception_ptr class
 // These are primitives to wrap a smart pointer around an exception object
@@ -164,7 +164,7 @@ extern _LIBCXXABI_FUNC_VIS unsigned int __cxa_uncaught_exceptions() throw();
 // Linux and Fuchsia TLS support. Not yet an official part of the Itanium ABI.
 // https://sourceware.org/glibc/wiki/Destructor%20support%20for%20thread_local%20variables
 extern _LIBCXXABI_FUNC_VIS int __cxa_thread_atexit(void (*)(void *), void *,
-                                                   void *) throw();
+        void *) throw();
 #endif
 
 } // extern "C"

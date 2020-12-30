@@ -32,17 +32,17 @@ ExternalASTSource::~ExternalASTSource() = default;
 
 llvm::Optional<ASTSourceDescriptor>
 ExternalASTSource::getSourceDescriptor(unsigned ID) {
-  return None;
+    return None;
 }
 
 ExternalASTSource::ExtKind
 ExternalASTSource::hasExternalDefinitions(const Decl *D) {
-  return EK_ReplyHazy;
+    return EK_ReplyHazy;
 }
 
 void ExternalASTSource::FindFileRegionDecls(FileID File, unsigned Offset,
-                                            unsigned Length,
-                                            SmallVectorImpl<Decl *> &Decls) {}
+        unsigned Length,
+        SmallVectorImpl<Decl *> &Decls) {}
 
 void ExternalASTSource::CompleteRedeclChain(const Decl *D) {}
 
@@ -65,39 +65,39 @@ bool ExternalASTSource::layoutRecordType(
     llvm::DenseMap<const FieldDecl *, uint64_t> &FieldOffsets,
     llvm::DenseMap<const CXXRecordDecl *, CharUnits> &BaseOffsets,
     llvm::DenseMap<const CXXRecordDecl *, CharUnits> &VirtualBaseOffsets) {
-  return false;
+    return false;
 }
 
 Decl *ExternalASTSource::GetExternalDecl(uint32_t ID) {
-  return nullptr;
+    return nullptr;
 }
 
 Selector ExternalASTSource::GetExternalSelector(uint32_t ID) {
-  return Selector();
+    return Selector();
 }
 
 uint32_t ExternalASTSource::GetNumExternalSelectors() {
-   return 0;
+    return 0;
 }
 
 Stmt *ExternalASTSource::GetExternalDeclStmt(uint64_t Offset) {
-  return nullptr;
+    return nullptr;
 }
 
 CXXCtorInitializer **
 ExternalASTSource::GetExternalCXXCtorInitializers(uint64_t Offset) {
-  return nullptr;
+    return nullptr;
 }
 
 CXXBaseSpecifier *
 ExternalASTSource::GetExternalCXXBaseSpecifiers(uint64_t Offset) {
-  return nullptr;
+    return nullptr;
 }
 
 bool
 ExternalASTSource::FindExternalVisibleDeclsByName(const DeclContext *DC,
-                                                  DeclarationName Name) {
-  return false;
+        DeclarationName Name) {
+    return false;
 }
 
 void ExternalASTSource::completeVisibleDeclsMap(const DeclContext *DC) {}
@@ -109,19 +109,19 @@ void ExternalASTSource::FindExternalLexicalDecls(
 void ExternalASTSource::getMemoryBufferSizes(MemoryBufferSizes &sizes) const {}
 
 uint32_t ExternalASTSource::incrementGeneration(ASTContext &C) {
-  uint32_t OldGeneration = CurrentGeneration;
+    uint32_t OldGeneration = CurrentGeneration;
 
-  // Make sure the generation of the topmost external source for the context is
-  // incremented. That might not be us.
-  auto *P = C.getExternalSource();
-  if (P && P != this)
-    CurrentGeneration = P->incrementGeneration(C);
-  else {
-    // FIXME: Only bump the generation counter if the current generation number
-    // has been observed?
-    if (!++CurrentGeneration)
-      llvm::report_fatal_error("generation counter overflowed", false);
-  }
+    // Make sure the generation of the topmost external source for the context is
+    // incremented. That might not be us.
+    auto *P = C.getExternalSource();
+    if (P && P != this)
+        CurrentGeneration = P->incrementGeneration(C);
+    else {
+        // FIXME: Only bump the generation counter if the current generation number
+        // has been observed?
+        if (!++CurrentGeneration)
+            llvm::report_fatal_error("generation counter overflowed", false);
+    }
 
-  return OldGeneration;
+    return OldGeneration;
 }

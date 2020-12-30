@@ -18,10 +18,10 @@
 #include "llvm/Target/TargetMachine.h"
 
 namespace llvm {
-  class XCoreSubtarget;
+class XCoreSubtarget;
 
-  class XCoreFrameLowering: public TargetFrameLowering {
-  public:
+class XCoreFrameLowering: public TargetFrameLowering {
+public:
     XCoreFrameLowering(const XCoreSubtarget &STI);
 
     /// emitProlog/emitEpilog - These methods insert prolog and epilog code into
@@ -52,13 +52,13 @@ namespace llvm {
                               RegScavenger *RS = nullptr) const override;
 
     void processFunctionBeforeFrameFinalized(MachineFunction &MF,
-                                     RegScavenger *RS = nullptr) const override;
+            RegScavenger *RS = nullptr) const override;
 
     //! Stack slot size (4 bytes)
     static int stackSlotSize() {
-      return 4;
+        return 4;
     }
-  };
+};
 }
 
 #endif

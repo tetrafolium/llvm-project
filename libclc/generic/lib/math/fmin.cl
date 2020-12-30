@@ -17,11 +17,11 @@ _CLC_DEFINE_BINARY_BUILTIN(double, fmin, __builtin_fmin, double, double);
 
 _CLC_DEF _CLC_OVERLOAD half fmin(half x, half y)
 {
-   if (isnan(x))
-      return y;
-   if (isnan(y))
-      return x;
-   return (y < x) ? y : x;
+    if (isnan(x))
+        return y;
+    if (isnan(y))
+        return x;
+    return (y < x) ? y : x;
 }
 _CLC_BINARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, half, fmin, half, half)
 

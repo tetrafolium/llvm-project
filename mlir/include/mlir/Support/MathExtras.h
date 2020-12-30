@@ -21,19 +21,19 @@ namespace mlir {
 /// Returns the result of MLIR's ceildiv operation on constants. The RHS is
 /// expected to be non-zero.
 inline int64_t ceilDiv(int64_t lhs, int64_t rhs) {
-  assert(rhs != 0);
-  // C/C++'s integer division rounds towards 0.
-  int64_t x = (rhs > 0) ? -1 : 1;
-  return (lhs * rhs > 0) ? ((lhs + x) / rhs) + 1 : -(-lhs / rhs);
+    assert(rhs != 0);
+    // C/C++'s integer division rounds towards 0.
+    int64_t x = (rhs > 0) ? -1 : 1;
+    return (lhs * rhs > 0) ? ((lhs + x) / rhs) + 1 : -(-lhs / rhs);
 }
 
 /// Returns the result of MLIR's floordiv operation on constants. The RHS is
 /// expected to be non-zero.
 inline int64_t floorDiv(int64_t lhs, int64_t rhs) {
-  assert(rhs != 0);
-  // C/C++'s integer division rounds towards 0.
-  int64_t x = (rhs < 0) ? 1 : -1;
-  return (lhs * rhs < 0) ? -((-lhs + x) / rhs) - 1 : lhs / rhs;
+    assert(rhs != 0);
+    // C/C++'s integer division rounds towards 0.
+    int64_t x = (rhs < 0) ? 1 : -1;
+    return (lhs * rhs < 0) ? -((-lhs + x) / rhs) - 1 : lhs / rhs;
 }
 
 /// Returns MLIR's mod operation on constants. MLIR's mod operation yields the
@@ -41,17 +41,17 @@ inline int64_t floorDiv(int64_t lhs, int64_t rhs) {
 /// C's % operator.  The RHS is always expected to be positive, and the result
 /// is always non-negative.
 inline int64_t mod(int64_t lhs, int64_t rhs) {
-  assert(rhs >= 1);
-  return lhs % rhs < 0 ? lhs % rhs + rhs : lhs % rhs;
+    assert(rhs >= 1);
+    return lhs % rhs < 0 ? lhs % rhs + rhs : lhs % rhs;
 }
 
 /// Returns the least common multiple of 'a' and 'b'.
 inline int64_t lcm(int64_t a, int64_t b) {
-  uint64_t x = std::abs(a);
-  uint64_t y = std::abs(b);
-  int64_t lcm = (x * y) / llvm::GreatestCommonDivisor64(x, y);
-  assert((lcm >= a && lcm >= b) && "LCM overflow");
-  return lcm;
+    uint64_t x = std::abs(a);
+    uint64_t y = std::abs(b);
+    int64_t lcm = (x * y) / llvm::GreatestCommonDivisor64(x, y);
+    assert((lcm >= a && lcm >= b) && "LCM overflow");
+    return lcm;
 }
 } // end namespace mlir
 

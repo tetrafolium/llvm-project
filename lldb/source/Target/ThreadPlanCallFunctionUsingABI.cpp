@@ -26,41 +26,41 @@ ThreadPlanCallFunctionUsingABI::ThreadPlanCallFunctionUsingABI(
     const EvaluateExpressionOptions &options)
     : ThreadPlanCallFunction(thread, function, options),
       m_return_type(return_type) {
-  lldb::addr_t start_load_addr = LLDB_INVALID_ADDRESS;
-  lldb::addr_t function_load_addr = LLDB_INVALID_ADDRESS;
-  ABI *abi = nullptr;
+    lldb::addr_t start_load_addr = LLDB_INVALID_ADDRESS;
+    lldb::addr_t function_load_addr = LLDB_INVALID_ADDRESS;
+    ABI *abi = nullptr;
 
-  if (!ConstructorSetup(thread, abi, start_load_addr, function_load_addr))
-    return;
+    if (!ConstructorSetup(thread, abi, start_load_addr, function_load_addr))
+        return;
 
-  if (!abi->PrepareTrivialCall(thread, m_function_sp, function_load_addr,
-                               start_load_addr, prototype, args))
-    return;
+    if (!abi->PrepareTrivialCall(thread, m_function_sp, function_load_addr,
+                                 start_load_addr, prototype, args))
+        return;
 
-  ReportRegisterState("ABI Function call was set up.  Register state was:");
+    ReportRegisterState("ABI Function call was set up.  Register state was:");
 
-  m_valid = true;
+    m_valid = true;
 }
 
 ThreadPlanCallFunctionUsingABI::~ThreadPlanCallFunctionUsingABI() = default;
 
 void ThreadPlanCallFunctionUsingABI::GetDescription(Stream *s,
-                                                    DescriptionLevel level) {
-  if (level == eDescriptionLevelBrief) {
-    s->Printf("Function call thread plan using ABI instead of JIT");
-  } else {
-    s->Printf("Thread plan to call 0x%" PRIx64 " using ABI instead of JIT",
-              m_function_addr.GetLoadAddress(&GetTarget()));
-  }
+        DescriptionLevel level) {
+    if (level == eDescriptionLevelBrief) {
+        s->Printf("Function call thread plan using ABI instead of JIT");
+    } else {
+        s->Printf("Thread plan to call 0x%" PRIx64 " using ABI instead of JIT",
+                  m_function_addr.GetLoadAddress(&GetTarget()));
+    }
 }
 
 void ThreadPlanCallFunctionUsingABI::SetReturnValue() {
-  const ABI *abi = m_process.GetABI().get();
+    const ABI *abi = m_process.GetABI().get();
 
-  // Ask the abi for the return value
-  if (abi) {
-    const bool persistent = false;
-    m_return_valobj_sp =
-        abi->GetReturnValueObject(GetThread(), m_return_type, persistent);
-  }
+    // Ask the abi for the return value
+    if (abi) {
+        const bool persistent = false;
+        m_return_valobj_sp =
+            abi->GetReturnValueObject(GetThread(), m_return_type, persistent);
+    }
 }

@@ -33,16 +33,18 @@ typedef std::thread thread;
 namespace llvm {
 
 struct thread {
-  thread() {}
-  thread(thread &&other) {}
-  template <class Function, class... Args>
-  explicit thread(Function &&f, Args &&... args) {
-    f(std::forward<Args>(args)...);
-  }
-  thread(const thread &) = delete;
+    thread() {}
+    thread(thread &&other) {}
+    template <class Function, class... Args>
+    explicit thread(Function &&f, Args &&... args) {
+        f(std::forward<Args>(args)...);
+    }
+    thread(const thread &) = delete;
 
-  void join() {}
-  static unsigned hardware_concurrency() { return 1; };
+    void join() {}
+    static unsigned hardware_concurrency() {
+        return 1;
+    };
 };
 
 }

@@ -20,7 +20,7 @@ enum {
 #define ASTSTART
 #include "clang/Basic/DiagnosticASTKinds.inc"
 #undef DIAG
-  NUM_BUILTIN_AST_DIAGNOSTICS
+    NUM_BUILTIN_AST_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

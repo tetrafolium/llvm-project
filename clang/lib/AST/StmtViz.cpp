@@ -19,43 +19,43 @@ using namespace clang;
 
 void Stmt::viewAST() const {
 #ifndef NDEBUG
-  llvm::ViewGraph(this,"AST");
+    llvm::ViewGraph(this,"AST");
 #else
-  llvm::errs() << "Stmt::viewAST is only available in debug builds on "
-               << "systems with Graphviz or gv!\n";
+    llvm::errs() << "Stmt::viewAST is only available in debug builds on "
+                 << "systems with Graphviz or gv!\n";
 #endif
 }
 
 namespace llvm {
 template<>
 struct DOTGraphTraits<const Stmt*> : public DefaultDOTGraphTraits {
-  DOTGraphTraits (bool isSimple=false) : DefaultDOTGraphTraits(isSimple) {}
+    DOTGraphTraits (bool isSimple=false) : DefaultDOTGraphTraits(isSimple) {}
 
-  static std::string getNodeLabel(const Stmt* Node, const Stmt* Graph) {
+    static std::string getNodeLabel(const Stmt* Node, const Stmt* Graph) {
 
 #ifndef NDEBUG
-    std::string OutSStr;
-    llvm::raw_string_ostream Out(OutSStr);
+        std::string OutSStr;
+        llvm::raw_string_ostream Out(OutSStr);
 
-    if (Node)
-      Out << Node->getStmtClassName();
-    else
-      Out << "<NULL>";
+        if (Node)
+            Out << Node->getStmtClassName();
+        else
+            Out << "<NULL>";
 
-    std::string OutStr = Out.str();
-    if (OutStr[0] == '\n') OutStr.erase(OutStr.begin());
+        std::string OutStr = Out.str();
+        if (OutStr[0] == '\n') OutStr.erase(OutStr.begin());
 
-    // Process string output to make it nicer...
-    for (unsigned i = 0; i != OutStr.length(); ++i)
-      if (OutStr[i] == '\n') {                            // Left justify
-        OutStr[i] = '\\';
-        OutStr.insert(OutStr.begin()+i+1, 'l');
-      }
+        // Process string output to make it nicer...
+        for (unsigned i = 0; i != OutStr.length(); ++i)
+            if (OutStr[i] == '\n') {                            // Left justify
+                OutStr[i] = '\\';
+                OutStr.insert(OutStr.begin()+i+1, 'l');
+            }
 
-    return OutStr;
+        return OutStr;
 #else
-    return "";
+        return "";
 #endif
-  }
+    }
 };
 } // end namespace llvm

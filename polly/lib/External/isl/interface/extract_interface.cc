@@ -1,18 +1,18 @@
 /*
  * Copyright 2011 Sven Verdoolaege. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  *    1. Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
- * 
+ *
  *    2. Redistributions in binary form must reproduce the above
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY SVEN VERDOOLAEGE ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -24,12 +24,12 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * The views and conclusions contained in the software and documentation
  * are those of the authors and should not be interpreted as
  * representing official policies, either expressed or implied, of
  * Sven Verdoolaege.
- */ 
+ */
 
 #include "isl_config.h"
 #undef PACKAGE
@@ -97,18 +97,18 @@ using namespace llvm::opt;
 #endif
 
 static llvm::cl::opt<string> InputFilename(llvm::cl::Positional,
-			llvm::cl::Required, llvm::cl::desc("<input file>"));
+        llvm::cl::Required, llvm::cl::desc("<input file>"));
 static llvm::cl::list<string> Includes("I",
-			llvm::cl::desc("Header search path"),
-			llvm::cl::value_desc("path"), llvm::cl::Prefix);
+                                       llvm::cl::desc("Header search path"),
+                                       llvm::cl::value_desc("path"), llvm::cl::Prefix);
 
 static llvm::cl::opt<string> OutputLanguage(llvm::cl::Required,
-	llvm::cl::ValueRequired, "language",
-	llvm::cl::desc("Bindings to generate"),
-	llvm::cl::value_desc("name"));
+        llvm::cl::ValueRequired, "language",
+        llvm::cl::desc("Bindings to generate"),
+        llvm::cl::value_desc("name"));
 
 static const char *ResourceDir =
-	CLANG_PREFIX "/lib/clang/" CLANG_VERSION_STRING;
+    CLANG_PREFIX "/lib/clang/" CLANG_VERSION_STRING;
 
 /* Does decl have an attribute of the following form?
  *
@@ -116,26 +116,26 @@ static const char *ResourceDir =
  */
 bool has_annotation(Decl *decl, const char *name)
 {
-	if (!decl->hasAttrs())
-		return false;
+    if (!decl->hasAttrs())
+        return false;
 
-	AttrVec attrs = decl->getAttrs();
-	for (AttrVec::const_iterator i = attrs.begin() ; i != attrs.end(); ++i) {
-		const AnnotateAttr *ann = dyn_cast<AnnotateAttr>(*i);
-		if (!ann)
-			continue;
-		if (ann->getAnnotation().str() == name)
-			return true;
-	}
+    AttrVec attrs = decl->getAttrs();
+    for (AttrVec::const_iterator i = attrs.begin() ; i != attrs.end(); ++i) {
+        const AnnotateAttr *ann = dyn_cast<AnnotateAttr>(*i);
+        if (!ann)
+            continue;
+        if (ann->getAnnotation().str() == name)
+            return true;
+    }
 
-	return false;
+    return false;
 }
 
 /* Is decl marked as exported?
  */
 static bool is_exported(Decl *decl)
 {
-	return has_annotation(decl, "isl_export");
+    return has_annotation(decl, "isl_export");
 }
 
 /* Collect all types and functions that are annotated "isl_export"
@@ -145,32 +145,32 @@ static bool is_exported(Decl *decl)
  * We currently only consider single declarations.
  */
 struct MyASTConsumer : public ASTConsumer {
-	set<RecordDecl *> exported_types;
-	set<FunctionDecl *> exported_functions;
-	set<FunctionDecl *> functions;
+    set<RecordDecl *> exported_types;
+    set<FunctionDecl *> exported_functions;
+    set<FunctionDecl *> functions;
 
-	virtual HandleTopLevelDeclReturn HandleTopLevelDecl(DeclGroupRef D) {
-		Decl *decl;
+    virtual HandleTopLevelDeclReturn HandleTopLevelDecl(DeclGroupRef D) {
+        Decl *decl;
 
-		if (!D.isSingleDecl())
-			return HandleTopLevelDeclContinue;
-		decl = D.getSingleDecl();
-		if (isa<FunctionDecl>(decl))
-			functions.insert(cast<FunctionDecl>(decl));
-		if (!is_exported(decl))
-			return HandleTopLevelDeclContinue;
-		switch (decl->getKind()) {
-		case Decl::Record:
-			exported_types.insert(cast<RecordDecl>(decl));
-			break;
-		case Decl::Function:
-			exported_functions.insert(cast<FunctionDecl>(decl));
-			break;
-		default:
-			break;
-		}
-		return HandleTopLevelDeclContinue;
-	}
+        if (!D.isSingleDecl())
+            return HandleTopLevelDeclContinue;
+        decl = D.getSingleDecl();
+        if (isa<FunctionDecl>(decl))
+            functions.insert(cast<FunctionDecl>(decl));
+        if (!is_exported(decl))
+            return HandleTopLevelDeclContinue;
+        switch (decl->getKind()) {
+        case Decl::Record:
+            exported_types.insert(cast<RecordDecl>(decl));
+            break;
+        case Decl::Function:
+            exported_functions.insert(cast<FunctionDecl>(decl));
+            break;
+        default:
+            break;
+        }
+        return HandleTopLevelDeclContinue;
+    }
 };
 
 #ifdef USE_ARRAYREF
@@ -178,37 +178,47 @@ struct MyASTConsumer : public ASTConsumer {
 #ifdef HAVE_CXXISPRODUCTION
 static Driver *construct_driver(const char *binary, DiagnosticsEngine &Diags)
 {
-	return new Driver(binary, llvm::sys::getDefaultTargetTriple(),
-			    "", false, false, Diags);
+    return new Driver(binary, llvm::sys::getDefaultTargetTriple(),
+                      "", false, false, Diags);
 }
 #elif defined(HAVE_ISPRODUCTION)
 static Driver *construct_driver(const char *binary, DiagnosticsEngine &Diags)
 {
-	return new Driver(binary, llvm::sys::getDefaultTargetTriple(),
-			    "", false, Diags);
+    return new Driver(binary, llvm::sys::getDefaultTargetTriple(),
+                      "", false, Diags);
 }
 #elif defined(DRIVER_CTOR_TAKES_DEFAULTIMAGENAME)
 static Driver *construct_driver(const char *binary, DiagnosticsEngine &Diags)
 {
-	return new Driver(binary, llvm::sys::getDefaultTargetTriple(),
-			    "", Diags);
+    return new Driver(binary, llvm::sys::getDefaultTargetTriple(),
+                      "", Diags);
 }
 #else
 static Driver *construct_driver(const char *binary, DiagnosticsEngine &Diags)
 {
-	return new Driver(binary, llvm::sys::getDefaultTargetTriple(), Diags);
+    return new Driver(binary, llvm::sys::getDefaultTargetTriple(), Diags);
 }
 #endif
 
-namespace clang { namespace driver { class Job; } }
+namespace clang {
+namespace driver {
+class Job;
+}
+}
 
 /* Clang changed its API from 3.5 to 3.6 and once more in 3.7.
  * We fix this with a simple overloaded function here.
  */
 struct ClangAPI {
-	static Job *command(Job *J) { return J; }
-	static Job *command(Job &J) { return &J; }
-	static Command *command(Command &C) { return &C; }
+    static Job *command(Job *J) {
+        return J;
+    }
+    static Job *command(Job &J) {
+        return &J;
+    }
+    static Command *command(Command &C) {
+        return &C;
+    }
 };
 
 #ifdef CREATE_FROM_ARGS_TAKES_ARRAYREF
@@ -217,9 +227,9 @@ struct ClangAPI {
  * In this case, an ArrayRef<const char *>.
  */
 static void create_from_args(CompilerInvocation &invocation,
-	const ArgStringList *args, DiagnosticsEngine &Diags)
+                             const ArgStringList *args, DiagnosticsEngine &Diags)
 {
-	CompilerInvocation::CreateFromArgs(invocation, *args, Diags);
+    CompilerInvocation::CreateFromArgs(invocation, *args, Diags);
 }
 
 #else
@@ -228,11 +238,11 @@ static void create_from_args(CompilerInvocation &invocation,
  * In this case, two "const char *" pointers.
  */
 static void create_from_args(CompilerInvocation &invocation,
-	const ArgStringList *args, DiagnosticsEngine &Diags)
+                             const ArgStringList *args, DiagnosticsEngine &Diags)
 {
-	CompilerInvocation::CreateFromArgs(invocation, args->data() + 1,
-						args->data() + args->size(),
-						Diags);
+    CompilerInvocation::CreateFromArgs(invocation, args->data() + 1,
+                                       args->data() + args->size(),
+                                       Diags);
 }
 
 #endif
@@ -244,8 +254,8 @@ static void create_from_args(CompilerInvocation &invocation,
  */
 static void set_sysroot(ArgStringList &args)
 {
-	args.push_back("-isysroot");
-	args.push_back(CLANG_SYSROOT);
+    args.push_back("-isysroot");
+    args.push_back(CLANG_SYSROOT);
 }
 #else
 /* Set sysroot if required.
@@ -263,35 +273,35 @@ static void set_sysroot(ArgStringList &args)
  * paths on newer clangs and on some platforms.
  */
 static CompilerInvocation *construct_invocation(const char *filename,
-	DiagnosticsEngine &Diags)
+        DiagnosticsEngine &Diags)
 {
-	const char *binary = CLANG_PREFIX"/bin/clang";
-	const unique_ptr<Driver> driver(construct_driver(binary, Diags));
-	std::vector<const char *> Argv;
-	Argv.push_back(binary);
-	Argv.push_back(filename);
-	const unique_ptr<Compilation> compilation(
-		driver->BuildCompilation(llvm::ArrayRef<const char *>(Argv)));
-	JobList &Jobs = compilation->getJobs();
+    const char *binary = CLANG_PREFIX"/bin/clang";
+    const unique_ptr<Driver> driver(construct_driver(binary, Diags));
+    std::vector<const char *> Argv;
+    Argv.push_back(binary);
+    Argv.push_back(filename);
+    const unique_ptr<Compilation> compilation(
+        driver->BuildCompilation(llvm::ArrayRef<const char *>(Argv)));
+    JobList &Jobs = compilation->getJobs();
 
-	Command *cmd = cast<Command>(ClangAPI::command(*Jobs.begin()));
-	if (strcmp(cmd->getCreator().getName(), "clang"))
-		return NULL;
+    Command *cmd = cast<Command>(ClangAPI::command(*Jobs.begin()));
+    if (strcmp(cmd->getCreator().getName(), "clang"))
+        return NULL;
 
-	ArgStringList args = cmd->getArguments();
-	set_sysroot(args);
+    ArgStringList args = cmd->getArguments();
+    set_sysroot(args);
 
-	CompilerInvocation *invocation = new CompilerInvocation;
-	create_from_args(*invocation, &args, Diags);
-	return invocation;
+    CompilerInvocation *invocation = new CompilerInvocation;
+    create_from_args(*invocation, &args, Diags);
+    return invocation;
 }
 
 #else
 
 static CompilerInvocation *construct_invocation(const char *filename,
-	DiagnosticsEngine &Diags)
+        DiagnosticsEngine &Diags)
 {
-	return NULL;
+    return NULL;
 }
 
 #endif
@@ -300,15 +310,15 @@ static CompilerInvocation *construct_invocation(const char *filename,
 
 static TextDiagnosticPrinter *construct_printer(void)
 {
-	return new TextDiagnosticPrinter(llvm::errs(), new DiagnosticOptions());
+    return new TextDiagnosticPrinter(llvm::errs(), new DiagnosticOptions());
 }
 
 #else
 
 static TextDiagnosticPrinter *construct_printer(void)
 {
-	DiagnosticOptions DO;
-	return new TextDiagnosticPrinter(llvm::errs(), DO);
+    DiagnosticOptions DO;
+    return new TextDiagnosticPrinter(llvm::errs(), DO);
 }
 
 #endif
@@ -316,31 +326,31 @@ static TextDiagnosticPrinter *construct_printer(void)
 #ifdef CREATETARGETINFO_TAKES_SHARED_PTR
 
 static TargetInfo *create_target_info(CompilerInstance *Clang,
-	DiagnosticsEngine &Diags)
+                                      DiagnosticsEngine &Diags)
 {
-	shared_ptr<TargetOptions> TO = Clang->getInvocation().TargetOpts;
-	TO->Triple = llvm::sys::getDefaultTargetTriple();
-	return TargetInfo::CreateTargetInfo(Diags, TO);
+    shared_ptr<TargetOptions> TO = Clang->getInvocation().TargetOpts;
+    TO->Triple = llvm::sys::getDefaultTargetTriple();
+    return TargetInfo::CreateTargetInfo(Diags, TO);
 }
 
 #elif defined(CREATETARGETINFO_TAKES_POINTER)
 
 static TargetInfo *create_target_info(CompilerInstance *Clang,
-	DiagnosticsEngine &Diags)
+                                      DiagnosticsEngine &Diags)
 {
-	TargetOptions &TO = Clang->getTargetOpts();
-	TO.Triple = llvm::sys::getDefaultTargetTriple();
-	return TargetInfo::CreateTargetInfo(Diags, &TO);
+    TargetOptions &TO = Clang->getTargetOpts();
+    TO.Triple = llvm::sys::getDefaultTargetTriple();
+    return TargetInfo::CreateTargetInfo(Diags, &TO);
 }
 
 #else
 
 static TargetInfo *create_target_info(CompilerInstance *Clang,
-	DiagnosticsEngine &Diags)
+                                      DiagnosticsEngine &Diags)
 {
-	TargetOptions &TO = Clang->getTargetOpts();
-	TO.Triple = llvm::sys::getDefaultTargetTriple();
-	return TargetInfo::CreateTargetInfo(Diags, TO);
+    TargetOptions &TO = Clang->getTargetOpts();
+    TO.Triple = llvm::sys::getDefaultTargetTriple();
+    return TargetInfo::CreateTargetInfo(Diags, TO);
 }
 
 #endif
@@ -349,14 +359,14 @@ static TargetInfo *create_target_info(CompilerInstance *Clang,
 
 static void create_diagnostics(CompilerInstance *Clang)
 {
-	Clang->createDiagnostics(0, NULL, construct_printer());
+    Clang->createDiagnostics(0, NULL, construct_printer());
 }
 
 #else
 
 static void create_diagnostics(CompilerInstance *Clang)
 {
-	Clang->createDiagnostics(construct_printer());
+    Clang->createDiagnostics(construct_printer());
 }
 
 #endif
@@ -365,14 +375,14 @@ static void create_diagnostics(CompilerInstance *Clang)
 
 static void create_preprocessor(CompilerInstance *Clang)
 {
-	Clang->createPreprocessor(TU_Complete);
+    Clang->createPreprocessor(TU_Complete);
 }
 
 #else
 
 static void create_preprocessor(CompilerInstance *Clang)
 {
-	Clang->createPreprocessor();
+    Clang->createPreprocessor();
 }
 
 #endif
@@ -385,7 +395,7 @@ static void create_preprocessor(CompilerInstance *Clang)
  */
 void add_path(HeaderSearchOptions &HSO, string Path)
 {
-	HSO.AddPath(Path, frontend::Angled, false, true);
+    HSO.AddPath(Path, frontend::Angled, false, true);
 }
 
 #else
@@ -396,7 +406,7 @@ void add_path(HeaderSearchOptions &HSO, string Path)
  */
 void add_path(HeaderSearchOptions &HSO, string Path)
 {
-	HSO.AddPath(Path, frontend::Angled, true, false, false);
+    HSO.AddPath(Path, frontend::Angled, true, false, false);
 }
 
 #endif
@@ -405,15 +415,15 @@ void add_path(HeaderSearchOptions &HSO, string Path)
 
 static void create_main_file_id(SourceManager &SM, const FileEntry *file)
 {
-	SM.setMainFileID(SM.createFileID(file, SourceLocation(),
-					SrcMgr::C_User));
+    SM.setMainFileID(SM.createFileID(file, SourceLocation(),
+                                     SrcMgr::C_User));
 }
 
 #else
 
 static void create_main_file_id(SourceManager &SM, const FileEntry *file)
 {
-	SM.createMainFileID(file);
+    SM.createMainFileID(file);
 }
 
 #endif
@@ -422,19 +432,19 @@ static void create_main_file_id(SourceManager &SM, const FileEntry *file)
 
 static void set_lang_defaults(CompilerInstance *Clang)
 {
-	PreprocessorOptions &PO = Clang->getPreprocessorOpts();
-	TargetOptions &TO = Clang->getTargetOpts();
-	llvm::Triple T(TO.Triple);
-	CompilerInvocation::setLangDefaults(Clang->getLangOpts(), IK_C, T, PO,
-					    LangStandard::lang_unspecified);
+    PreprocessorOptions &PO = Clang->getPreprocessorOpts();
+    TargetOptions &TO = Clang->getTargetOpts();
+    llvm::Triple T(TO.Triple);
+    CompilerInvocation::setLangDefaults(Clang->getLangOpts(), IK_C, T, PO,
+                                        LangStandard::lang_unspecified);
 }
 
 #else
 
 static void set_lang_defaults(CompilerInstance *Clang)
 {
-	CompilerInvocation::setLangDefaults(Clang->getLangOpts(), IK_C,
-					    LangStandard::lang_unspecified);
+    CompilerInvocation::setLangDefaults(Clang->getLangOpts(), IK_C,
+                                        LangStandard::lang_unspecified);
 }
 
 #endif
@@ -442,17 +452,17 @@ static void set_lang_defaults(CompilerInstance *Clang)
 #ifdef SETINVOCATION_TAKES_SHARED_PTR
 
 static void set_invocation(CompilerInstance *Clang,
-	CompilerInvocation *invocation)
+                           CompilerInvocation *invocation)
 {
-	Clang->setInvocation(std::make_shared<CompilerInvocation>(*invocation));
+    Clang->setInvocation(std::make_shared<CompilerInvocation>(*invocation));
 }
 
 #else
 
 static void set_invocation(CompilerInstance *Clang,
-	CompilerInvocation *invocation)
+                           CompilerInvocation *invocation)
 {
-	Clang->setInvocation(invocation);
+    Clang->setInvocation(invocation);
 }
 
 #endif
@@ -463,9 +473,9 @@ static void set_invocation(CompilerInstance *Clang,
  */
 template <class T>
 static const FileEntry *ignore_error_helper(const T obj, int,
-	int[1][sizeof(obj.getError())])
+        int[1][sizeof(obj.getError())])
 {
-	return *obj;
+    return *obj;
 }
 
 /* Helper function for ignore_error that is always enabled,
@@ -475,7 +485,7 @@ static const FileEntry *ignore_error_helper(const T obj, int,
 template <class T>
 static const FileEntry *ignore_error_helper(const T obj, long, void *)
 {
-	return obj;
+    return obj;
 }
 
 /* Given either a const FileEntry * or a llvm::ErrorOr<const FileEntry *>,
@@ -484,7 +494,7 @@ static const FileEntry *ignore_error_helper(const T obj, long, void *)
 template <class T>
 static const FileEntry *ignore_error(const T obj)
 {
-	return ignore_error_helper(obj, 0, NULL);
+    return ignore_error_helper(obj, 0, NULL);
 }
 
 /* Return the FileEntry corresponding to the given file name
@@ -492,7 +502,7 @@ static const FileEntry *ignore_error(const T obj)
  */
 static const FileEntry *getFile(CompilerInstance *Clang, std::string Filename)
 {
-	return ignore_error(Clang->getFileManager().getFile(Filename));
+    return ignore_error(Clang->getFileManager().getFile(Filename));
 }
 
 /* Create an interface generator for the selected language and
@@ -500,89 +510,89 @@ static const FileEntry *getFile(CompilerInstance *Clang, std::string Filename)
  */
 static void generate(MyASTConsumer &consumer, SourceManager &SM)
 {
-	generator *gen;
+    generator *gen;
 
-	if (OutputLanguage.compare("python") == 0) {
-		gen = new python_generator(SM, consumer.exported_types,
-			consumer.exported_functions, consumer.functions);
-	} else if (OutputLanguage.compare("cpp") == 0) {
-		gen = new cpp_generator(SM, consumer.exported_types,
-			consumer.exported_functions, consumer.functions);
-	} else if (OutputLanguage.compare("cpp-checked") == 0) {
-		gen = new cpp_generator(SM, consumer.exported_types,
-			consumer.exported_functions, consumer.functions, true);
-	} else if (OutputLanguage.compare("cpp-checked-conversion") == 0) {
-		gen = new cpp_conversion_generator(SM, consumer.exported_types,
-			consumer.exported_functions, consumer.functions);
-	} else {
-		cerr << "Language '" << OutputLanguage
-		     << "' not recognized." << endl
-		     << "Not generating bindings." << endl;
-		exit(EXIT_FAILURE);
-	}
+    if (OutputLanguage.compare("python") == 0) {
+        gen = new python_generator(SM, consumer.exported_types,
+                                   consumer.exported_functions, consumer.functions);
+    } else if (OutputLanguage.compare("cpp") == 0) {
+        gen = new cpp_generator(SM, consumer.exported_types,
+                                consumer.exported_functions, consumer.functions);
+    } else if (OutputLanguage.compare("cpp-checked") == 0) {
+        gen = new cpp_generator(SM, consumer.exported_types,
+                                consumer.exported_functions, consumer.functions, true);
+    } else if (OutputLanguage.compare("cpp-checked-conversion") == 0) {
+        gen = new cpp_conversion_generator(SM, consumer.exported_types,
+                                           consumer.exported_functions, consumer.functions);
+    } else {
+        cerr << "Language '" << OutputLanguage
+             << "' not recognized." << endl
+             << "Not generating bindings." << endl;
+        exit(EXIT_FAILURE);
+    }
 
-	gen->generate();
+    gen->generate();
 }
 
 int main(int argc, char *argv[])
 {
-	llvm::cl::ParseCommandLineOptions(argc, argv);
+    llvm::cl::ParseCommandLineOptions(argc, argv);
 
-	CompilerInstance *Clang = new CompilerInstance();
-	create_diagnostics(Clang);
-	DiagnosticsEngine &Diags = Clang->getDiagnostics();
-	Diags.setSuppressSystemWarnings(true);
-	TargetInfo *target = create_target_info(Clang, Diags);
-	Clang->setTarget(target);
-	set_lang_defaults(Clang);
-	CompilerInvocation *invocation =
-		construct_invocation(InputFilename.c_str(), Diags);
-	if (invocation)
-		set_invocation(Clang, invocation);
-	Clang->createFileManager();
-	Clang->createSourceManager(Clang->getFileManager());
-	HeaderSearchOptions &HSO = Clang->getHeaderSearchOpts();
-	LangOptions &LO = Clang->getLangOpts();
-	PreprocessorOptions &PO = Clang->getPreprocessorOpts();
-	HSO.ResourceDir = ResourceDir;
+    CompilerInstance *Clang = new CompilerInstance();
+    create_diagnostics(Clang);
+    DiagnosticsEngine &Diags = Clang->getDiagnostics();
+    Diags.setSuppressSystemWarnings(true);
+    TargetInfo *target = create_target_info(Clang, Diags);
+    Clang->setTarget(target);
+    set_lang_defaults(Clang);
+    CompilerInvocation *invocation =
+        construct_invocation(InputFilename.c_str(), Diags);
+    if (invocation)
+        set_invocation(Clang, invocation);
+    Clang->createFileManager();
+    Clang->createSourceManager(Clang->getFileManager());
+    HeaderSearchOptions &HSO = Clang->getHeaderSearchOpts();
+    LangOptions &LO = Clang->getLangOpts();
+    PreprocessorOptions &PO = Clang->getPreprocessorOpts();
+    HSO.ResourceDir = ResourceDir;
 
-	for (llvm::cl::list<string>::size_type i = 0; i < Includes.size(); ++i)
-		add_path(HSO, Includes[i]);
+    for (llvm::cl::list<string>::size_type i = 0; i < Includes.size(); ++i)
+        add_path(HSO, Includes[i]);
 
-	PO.addMacroDef("__isl_give=__attribute__((annotate(\"isl_give\")))");
-	PO.addMacroDef("__isl_keep=__attribute__((annotate(\"isl_keep\")))");
-	PO.addMacroDef("__isl_take=__attribute__((annotate(\"isl_take\")))");
-	PO.addMacroDef("__isl_export=__attribute__((annotate(\"isl_export\")))");
-	PO.addMacroDef("__isl_overload="
-	    "__attribute__((annotate(\"isl_overload\"))) "
-	    "__attribute__((annotate(\"isl_export\")))");
-	PO.addMacroDef("__isl_constructor=__attribute__((annotate(\"isl_constructor\"))) __attribute__((annotate(\"isl_export\")))");
-	PO.addMacroDef("__isl_subclass(super)=__attribute__((annotate(\"isl_subclass(\" #super \")\"))) __attribute__((annotate(\"isl_export\")))");
+    PO.addMacroDef("__isl_give=__attribute__((annotate(\"isl_give\")))");
+    PO.addMacroDef("__isl_keep=__attribute__((annotate(\"isl_keep\")))");
+    PO.addMacroDef("__isl_take=__attribute__((annotate(\"isl_take\")))");
+    PO.addMacroDef("__isl_export=__attribute__((annotate(\"isl_export\")))");
+    PO.addMacroDef("__isl_overload="
+                   "__attribute__((annotate(\"isl_overload\"))) "
+                   "__attribute__((annotate(\"isl_export\")))");
+    PO.addMacroDef("__isl_constructor=__attribute__((annotate(\"isl_constructor\"))) __attribute__((annotate(\"isl_export\")))");
+    PO.addMacroDef("__isl_subclass(super)=__attribute__((annotate(\"isl_subclass(\" #super \")\"))) __attribute__((annotate(\"isl_export\")))");
 
-	create_preprocessor(Clang);
-	Preprocessor &PP = Clang->getPreprocessor();
+    create_preprocessor(Clang);
+    Preprocessor &PP = Clang->getPreprocessor();
 
-	PP.getBuiltinInfo().initializeBuiltins(PP.getIdentifierTable(), LO);
+    PP.getBuiltinInfo().initializeBuiltins(PP.getIdentifierTable(), LO);
 
-	const FileEntry *file = getFile(Clang, InputFilename);
-	assert(file);
-	create_main_file_id(Clang->getSourceManager(), file);
+    const FileEntry *file = getFile(Clang, InputFilename);
+    assert(file);
+    create_main_file_id(Clang->getSourceManager(), file);
 
-	Clang->createASTContext();
-	MyASTConsumer consumer;
-	Sema *sema = new Sema(PP, Clang->getASTContext(), consumer);
+    Clang->createASTContext();
+    MyASTConsumer consumer;
+    Sema *sema = new Sema(PP, Clang->getASTContext(), consumer);
 
-	Diags.getClient()->BeginSourceFile(LO, &PP);
-	ParseAST(*sema);
-	Diags.getClient()->EndSourceFile();
+    Diags.getClient()->BeginSourceFile(LO, &PP);
+    ParseAST(*sema);
+    Diags.getClient()->EndSourceFile();
 
-	generate(consumer, Clang->getSourceManager());
+    generate(consumer, Clang->getSourceManager());
 
-	delete sema;
-	delete Clang;
-	llvm::llvm_shutdown();
+    delete sema;
+    delete Clang;
+    llvm::llvm_shutdown();
 
-	if (Diags.hasErrorOccurred())
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+    if (Diags.hasErrorOccurred())
+        return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }

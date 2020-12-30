@@ -19,23 +19,27 @@ namespace lldb_private {
 
 class StoppointHitCounter {
 public:
-  uint32_t GetValue() const { return m_hit_count; }
+    uint32_t GetValue() const {
+        return m_hit_count;
+    }
 
-  void Increment(uint32_t difference = 1) {
-    lldbassert(std::numeric_limits<uint32_t>::max() - m_hit_count >= difference);
-    m_hit_count += difference;
-  }
+    void Increment(uint32_t difference = 1) {
+        lldbassert(std::numeric_limits<uint32_t>::max() - m_hit_count >= difference);
+        m_hit_count += difference;
+    }
 
-  void Decrement(uint32_t difference = 1) {
-    lldbassert(m_hit_count >= difference);
-    m_hit_count -= difference;
-  }
+    void Decrement(uint32_t difference = 1) {
+        lldbassert(m_hit_count >= difference);
+        m_hit_count -= difference;
+    }
 
-  void Reset() { m_hit_count = 0; }
+    void Reset() {
+        m_hit_count = 0;
+    }
 
 private:
-  /// Number of times this breakpoint/watchpoint has been hit.
-  uint32_t m_hit_count = 0;
+    /// Number of times this breakpoint/watchpoint has been hit.
+    uint32_t m_hit_count = 0;
 };
 
 } // namespace lldb_private

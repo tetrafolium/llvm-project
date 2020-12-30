@@ -40,12 +40,12 @@ Environment::Environment(StringRef Code, StringRef FileName,
     : VirtualSM(new SourceManagerForFile(FileName, Code)), SM(VirtualSM->get()),
       ID(VirtualSM->get().getMainFileID()), FirstStartColumn(FirstStartColumn),
       NextStartColumn(NextStartColumn), LastStartColumn(LastStartColumn) {
-  SourceLocation StartOfFile = SM.getLocForStartOfFile(ID);
-  for (const tooling::Range &Range : Ranges) {
-    SourceLocation Start = StartOfFile.getLocWithOffset(Range.getOffset());
-    SourceLocation End = Start.getLocWithOffset(Range.getLength());
-    CharRanges.push_back(CharSourceRange::getCharRange(Start, End));
-  }
+    SourceLocation StartOfFile = SM.getLocForStartOfFile(ID);
+    for (const tooling::Range &Range : Ranges) {
+        SourceLocation Start = StartOfFile.getLocWithOffset(Range.getOffset());
+        SourceLocation End = Start.getLocWithOffset(Range.getLength());
+        CharRanges.push_back(CharSourceRange::getCharRange(Start, End));
+    }
 }
 
 TokenAnalyzer::TokenAnalyzer(const Environment &Env, const FormatStyle &Style)
@@ -53,76 +53,76 @@ TokenAnalyzer::TokenAnalyzer(const Environment &Env, const FormatStyle &Style)
       AffectedRangeMgr(Env.getSourceManager(), Env.getCharRanges()),
       UnwrappedLines(1),
       Encoding(encoding::detectEncoding(
-          Env.getSourceManager().getBufferData(Env.getFileID()))) {
-  LLVM_DEBUG(
-      llvm::dbgs() << "File encoding: "
-                   << (Encoding == encoding::Encoding_UTF8 ? "UTF8" : "unknown")
-                   << "\n");
-  LLVM_DEBUG(llvm::dbgs() << "Language: " << getLanguageName(Style.Language)
-                          << "\n");
+                   Env.getSourceManager().getBufferData(Env.getFileID()))) {
+    LLVM_DEBUG(
+        llvm::dbgs() << "File encoding: "
+        << (Encoding == encoding::Encoding_UTF8 ? "UTF8" : "unknown")
+        << "\n");
+    LLVM_DEBUG(llvm::dbgs() << "Language: " << getLanguageName(Style.Language)
+               << "\n");
 }
 
 std::pair<tooling::Replacements, unsigned> TokenAnalyzer::process() {
-  tooling::Replacements Result;
-  llvm::SpecificBumpPtrAllocator<FormatToken> Allocator;
-  IdentifierTable IdentTable(getFormattingLangOpts(Style));
-  FormatTokenLexer Lex(Env.getSourceManager(), Env.getFileID(),
-                       Env.getFirstStartColumn(), Style, Encoding, Allocator,
+    tooling::Replacements Result;
+    llvm::SpecificBumpPtrAllocator<FormatToken> Allocator;
+    IdentifierTable IdentTable(getFormattingLangOpts(Style));
+    FormatTokenLexer Lex(Env.getSourceManager(), Env.getFileID(),
+                         Env.getFirstStartColumn(), Style, Encoding, Allocator,
 
-                       IdentTable);
-  ArrayRef<FormatToken *> Toks(Lex.lex());
-  SmallVector<FormatToken *, 10> Tokens(Toks.begin(), Toks.end());
-  UnwrappedLineParser Parser(Style, Lex.getKeywords(),
-                             Env.getFirstStartColumn(), Tokens, *this);
-  Parser.parse();
-  assert(UnwrappedLines.rbegin()->empty());
-  unsigned Penalty = 0;
-  for (unsigned Run = 0, RunE = UnwrappedLines.size(); Run + 1 != RunE; ++Run) {
-    LLVM_DEBUG(llvm::dbgs() << "Run " << Run << "...\n");
-    SmallVector<AnnotatedLine *, 16> AnnotatedLines;
+                         IdentTable);
+    ArrayRef<FormatToken *> Toks(Lex.lex());
+    SmallVector<FormatToken *, 10> Tokens(Toks.begin(), Toks.end());
+    UnwrappedLineParser Parser(Style, Lex.getKeywords(),
+                               Env.getFirstStartColumn(), Tokens, *this);
+    Parser.parse();
+    assert(UnwrappedLines.rbegin()->empty());
+    unsigned Penalty = 0;
+    for (unsigned Run = 0, RunE = UnwrappedLines.size(); Run + 1 != RunE; ++Run) {
+        LLVM_DEBUG(llvm::dbgs() << "Run " << Run << "...\n");
+        SmallVector<AnnotatedLine *, 16> AnnotatedLines;
 
-    TokenAnnotator Annotator(Style, Lex.getKeywords());
-    for (unsigned i = 0, e = UnwrappedLines[Run].size(); i != e; ++i) {
-      AnnotatedLines.push_back(new AnnotatedLine(UnwrappedLines[Run][i]));
-      Annotator.annotate(*AnnotatedLines.back());
+        TokenAnnotator Annotator(Style, Lex.getKeywords());
+        for (unsigned i = 0, e = UnwrappedLines[Run].size(); i != e; ++i) {
+            AnnotatedLines.push_back(new AnnotatedLine(UnwrappedLines[Run][i]));
+            Annotator.annotate(*AnnotatedLines.back());
+        }
+
+        std::pair<tooling::Replacements, unsigned> RunResult =
+            analyze(Annotator, AnnotatedLines, Lex);
+
+        LLVM_DEBUG({
+            llvm::dbgs() << "Replacements for run " << Run << ":\n";
+            for (tooling::Replacements::const_iterator I = RunResult.first.begin(),
+                    E = RunResult.first.end();
+                    I != E; ++I) {
+                llvm::dbgs() << I->toString() << "\n";
+            }
+        });
+        for (unsigned i = 0, e = AnnotatedLines.size(); i != e; ++i) {
+            delete AnnotatedLines[i];
+        }
+
+        Penalty += RunResult.second;
+        for (const auto &R : RunResult.first) {
+            auto Err = Result.add(R);
+            // FIXME: better error handling here. For now, simply return an empty
+            // Replacements to indicate failure.
+            if (Err) {
+                llvm::errs() << llvm::toString(std::move(Err)) << "\n";
+                return {tooling::Replacements(), 0};
+            }
+        }
     }
-
-    std::pair<tooling::Replacements, unsigned> RunResult =
-        analyze(Annotator, AnnotatedLines, Lex);
-
-    LLVM_DEBUG({
-      llvm::dbgs() << "Replacements for run " << Run << ":\n";
-      for (tooling::Replacements::const_iterator I = RunResult.first.begin(),
-                                                 E = RunResult.first.end();
-           I != E; ++I) {
-        llvm::dbgs() << I->toString() << "\n";
-      }
-    });
-    for (unsigned i = 0, e = AnnotatedLines.size(); i != e; ++i) {
-      delete AnnotatedLines[i];
-    }
-
-    Penalty += RunResult.second;
-    for (const auto &R : RunResult.first) {
-      auto Err = Result.add(R);
-      // FIXME: better error handling here. For now, simply return an empty
-      // Replacements to indicate failure.
-      if (Err) {
-        llvm::errs() << llvm::toString(std::move(Err)) << "\n";
-        return {tooling::Replacements(), 0};
-      }
-    }
-  }
-  return {Result, Penalty};
+    return {Result, Penalty};
 }
 
 void TokenAnalyzer::consumeUnwrappedLine(const UnwrappedLine &TheLine) {
-  assert(!UnwrappedLines.empty());
-  UnwrappedLines.back().push_back(TheLine);
+    assert(!UnwrappedLines.empty());
+    UnwrappedLines.back().push_back(TheLine);
 }
 
 void TokenAnalyzer::finishRun() {
-  UnwrappedLines.push_back(SmallVector<UnwrappedLine, 16>());
+    UnwrappedLines.push_back(SmallVector<UnwrappedLine, 16>());
 }
 
 } // end namespace format

@@ -29,14 +29,14 @@ class Operation;
 // cost/storage reduction, and for performing the loop fusion transformation.
 
 struct FusionResult {
-  enum ResultEnum {
-    Success,
-    FailPrecondition,     // Failed precondition for fusion. (e.g. same block).
-    FailBlockDependence,  // Fusion would violate another dependence in block.
-    FailFusionDependence, // Fusion would reverse dependences between loops.
-    FailComputationSlice, // Unable to compute src loop computation slice.
-  } value;
-  FusionResult(ResultEnum v) : value(v) {}
+    enum ResultEnum {
+        Success,
+        FailPrecondition,     // Failed precondition for fusion. (e.g. same block).
+        FailBlockDependence,  // Fusion would violate another dependence in block.
+        FailFusionDependence, // Fusion would reverse dependences between loops.
+        FailComputationSlice, // Unable to compute src loop computation slice.
+    } value;
+    FusionResult(ResultEnum v) : value(v) {}
 };
 
 /// Describes the fusion strategy to be used in the Affine loop fusion
@@ -51,31 +51,31 @@ struct FusionResult {
 // strategies can be used without the assumptions made in the AffineLoopFusion
 // pass.
 struct FusionStrategy {
-  enum StrategyEnum {
-    // Generic loop fusion: Arbitrary loops are considered for fusion. No
-    // assumptions about a specific fusion strategy from AffineLoopFusion pass
-    // are made.
-    // TODO: Generic fusion is not fully implemented by fusion utilities yet.
-    // It should only be used for testing.
-    Generic,
-    // Producer-consumer fusion: Only loops with a producer-consumer
-    // memref dependence are considered for fusion. Currently, assumptions from
-    // the producer-consumer fusion implementation in AffineLoopFusion pass are
-    // made. See pass for specific details.
-    ProducerConsumer,
-    // Sibling fusion: Only sibling loops with no producer-consumer memref
-    // dependences are considered for fusion. Memref reuse is taken into account
-    // for profitability. Currently, assumptions from the sibling fusion
-    // implementation in AffineLoopFusion pass are made. See pass for specific
-    // details.
-    Sibling
-  } strategy;
+    enum StrategyEnum {
+        // Generic loop fusion: Arbitrary loops are considered for fusion. No
+        // assumptions about a specific fusion strategy from AffineLoopFusion pass
+        // are made.
+        // TODO: Generic fusion is not fully implemented by fusion utilities yet.
+        // It should only be used for testing.
+        Generic,
+        // Producer-consumer fusion: Only loops with a producer-consumer
+        // memref dependence are considered for fusion. Currently, assumptions from
+        // the producer-consumer fusion implementation in AffineLoopFusion pass are
+        // made. See pass for specific details.
+        ProducerConsumer,
+        // Sibling fusion: Only sibling loops with no producer-consumer memref
+        // dependences are considered for fusion. Memref reuse is taken into account
+        // for profitability. Currently, assumptions from the sibling fusion
+        // implementation in AffineLoopFusion pass are made. See pass for specific
+        // details.
+        Sibling
+    } strategy;
 
-  // Target memref for this fusion transformation.
-  Value memref;
+    // Target memref for this fusion transformation.
+    Value memref;
 
-  FusionStrategy(StrategyEnum strategy, Value memref)
-      : strategy(strategy), memref(memref) {}
+    FusionStrategy(StrategyEnum strategy, Value memref)
+        : strategy(strategy), memref(memref) {}
 };
 
 /// Checks the feasibility of fusing the loop nest rooted at 'srcForOp' into the
@@ -89,8 +89,9 @@ struct FusionStrategy {
 FusionResult canFuseLoops(AffineForOp srcForOp, AffineForOp dstForOp,
                           unsigned dstLoopDepth,
                           ComputationSliceState *srcSlice,
-                          FusionStrategy fusionStrategy = {
-                              FusionStrategy::Generic, Value()});
+FusionStrategy fusionStrategy = {
+    FusionStrategy::Generic, Value()
+});
 
 /// Fuses 'srcForOp' into 'dstForOp' with destination loop block insertion point
 /// and source slice loop bounds specified in 'srcSlice'.
@@ -101,12 +102,12 @@ void fuseLoops(AffineForOp srcForOp, AffineForOp dstForOp,
 /// and operation count) for a loop nest up until (and including) the innermost
 /// loop body.
 struct LoopNestStats {
-  /// Map from AffineForOp to immediate child AffineForOps in its loop body.
-  DenseMap<Operation *, SmallVector<AffineForOp, 2>> loopMap;
-  /// Map from AffineForOp to count of operations in its loop body.
-  DenseMap<Operation *, uint64_t> opCountMap;
-  /// Map from AffineForOp to its constant trip count.
-  DenseMap<Operation *, uint64_t> tripCountMap;
+    /// Map from AffineForOp to immediate child AffineForOps in its loop body.
+    DenseMap<Operation *, SmallVector<AffineForOp, 2>> loopMap;
+    /// Map from AffineForOp to count of operations in its loop body.
+    DenseMap<Operation *, uint64_t> opCountMap;
+    /// Map from AffineForOp to its constant trip count.
+    DenseMap<Operation *, uint64_t> tripCountMap;
 };
 
 /// Collect loop nest statistics (eg. loop trip count and operation count)

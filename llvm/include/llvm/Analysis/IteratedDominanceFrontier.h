@@ -20,17 +20,17 @@ namespace IDFCalculatorDetail {
 
 /// Specialization for BasicBlock for the optional use of GraphDiff.
 template <bool IsPostDom> struct ChildrenGetterTy<BasicBlock, IsPostDom> {
-  using NodeRef = BasicBlock *;
-  using ChildrenTy = SmallVector<BasicBlock *, 8>;
+    using NodeRef = BasicBlock *;
+    using ChildrenTy = SmallVector<BasicBlock *, 8>;
 
-  ChildrenGetterTy() = default;
-  ChildrenGetterTy(const GraphDiff<BasicBlock *, IsPostDom> *GD) : GD(GD) {
-    assert(GD);
-  }
+    ChildrenGetterTy() = default;
+    ChildrenGetterTy(const GraphDiff<BasicBlock *, IsPostDom> *GD) : GD(GD) {
+        assert(GD);
+    }
 
-  ChildrenTy get(const NodeRef &N);
+    ChildrenTy get(const NodeRef &N);
 
-  const GraphDiff<BasicBlock *, IsPostDom> *GD = nullptr;
+    const GraphDiff<BasicBlock *, IsPostDom> *GD = nullptr;
 };
 
 } // end of namespace IDFCalculatorDetail
@@ -38,18 +38,18 @@ template <bool IsPostDom> struct ChildrenGetterTy<BasicBlock, IsPostDom> {
 template <bool IsPostDom>
 class IDFCalculator final : public IDFCalculatorBase<BasicBlock, IsPostDom> {
 public:
-  using IDFCalculatorBase =
-      typename llvm::IDFCalculatorBase<BasicBlock, IsPostDom>;
-  using ChildrenGetterTy = typename IDFCalculatorBase::ChildrenGetterTy;
+    using IDFCalculatorBase =
+        typename llvm::IDFCalculatorBase<BasicBlock, IsPostDom>;
+    using ChildrenGetterTy = typename IDFCalculatorBase::ChildrenGetterTy;
 
-  IDFCalculator(DominatorTreeBase<BasicBlock, IsPostDom> &DT)
-      : IDFCalculatorBase(DT) {}
+    IDFCalculator(DominatorTreeBase<BasicBlock, IsPostDom> &DT)
+        : IDFCalculatorBase(DT) {}
 
-  IDFCalculator(DominatorTreeBase<BasicBlock, IsPostDom> &DT,
-                const GraphDiff<BasicBlock *, IsPostDom> *GD)
-      : IDFCalculatorBase(DT, ChildrenGetterTy(GD)) {
-    assert(GD);
-  }
+    IDFCalculator(DominatorTreeBase<BasicBlock, IsPostDom> &DT,
+                  const GraphDiff<BasicBlock *, IsPostDom> *GD)
+        : IDFCalculatorBase(DT, ChildrenGetterTy(GD)) {
+        assert(GD);
+    }
 };
 
 using ForwardIDFCalculator = IDFCalculator<false>;
@@ -65,15 +65,15 @@ template <bool IsPostDom>
 typename ChildrenGetterTy<BasicBlock, IsPostDom>::ChildrenTy
 ChildrenGetterTy<BasicBlock, IsPostDom>::get(const NodeRef &N) {
 
-  using OrderedNodeTy =
-      typename IDFCalculatorBase<BasicBlock, IsPostDom>::OrderedNodeTy;
+    using OrderedNodeTy =
+        typename IDFCalculatorBase<BasicBlock, IsPostDom>::OrderedNodeTy;
 
-  if (!GD) {
-    auto Children = children<OrderedNodeTy>(N);
-    return {Children.begin(), Children.end()};
-  }
+    if (!GD) {
+        auto Children = children<OrderedNodeTy>(N);
+        return {Children.begin(), Children.end()};
+    }
 
-  return GD->template getChildren<IsPostDom>(N);
+    return GD->template getChildren<IsPostDom>(N);
 }
 
 } // end of namespace IDFCalculatorDetail

@@ -23,29 +23,29 @@
  * In other cases, the parameter domain is stored in the individual elements.
  */
 static __isl_give isl_multi_pw_aff *FN(BASE,opt_mpa)(__isl_take TYPE *obj,
-	__isl_give isl_pw_aff *(*opt)(__isl_take TYPE *obj, int pos))
+        __isl_give isl_pw_aff *(*opt)(__isl_take TYPE *obj, int pos))
 {
-	int i;
-	isl_size n;
-	isl_multi_pw_aff *mpa;
+    int i;
+    isl_size n;
+    isl_multi_pw_aff *mpa;
 
-	mpa = isl_multi_pw_aff_alloc(FN(TYPE,get_space)(obj));
-	n = isl_multi_pw_aff_size(mpa);
-	if (n < 0)
-		mpa = isl_multi_pw_aff_free(mpa);
-	for (i = 0; i < n; ++i) {
-		isl_pw_aff *pa;
+    mpa = isl_multi_pw_aff_alloc(FN(TYPE,get_space)(obj));
+    n = isl_multi_pw_aff_size(mpa);
+    if (n < 0)
+        mpa = isl_multi_pw_aff_free(mpa);
+    for (i = 0; i < n; ++i) {
+        isl_pw_aff *pa;
 
-		pa = opt(FN(TYPE,copy)(obj), i);
-		mpa = isl_multi_pw_aff_set_pw_aff(mpa, i, pa);
-	}
-	if (isl_multi_pw_aff_has_explicit_domain(mpa)) {
-		isl_set *dom;
+        pa = opt(FN(TYPE,copy)(obj), i);
+        mpa = isl_multi_pw_aff_set_pw_aff(mpa, i, pa);
+    }
+    if (isl_multi_pw_aff_has_explicit_domain(mpa)) {
+        isl_set *dom;
 
-		dom = FN(TYPE,params)(FN(TYPE,copy)(obj));
-		mpa = isl_multi_pw_aff_intersect_params(mpa, dom);
-	}
-	FN(TYPE,free)(obj);
+        dom = FN(TYPE,params)(FN(TYPE,copy)(obj));
+        mpa = isl_multi_pw_aff_intersect_params(mpa, dom);
+    }
+    FN(TYPE,free)(obj);
 
-	return mpa;
+    return mpa;
 }

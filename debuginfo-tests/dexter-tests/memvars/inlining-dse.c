@@ -13,21 +13,21 @@
 int g;
 __attribute__((__always_inline__))
 static void use(int* p) {
-  g = *p;
-  *p = 255;
-  volatile int step = 0;  // DexLabel('use1')
+    g = *p;
+    *p = 255;
+    volatile int step = 0;  // DexLabel('use1')
 }
 
 __attribute__((__noinline__))
 void fun(int param) {
-  //// Make sure first step is in 'fun'.
-  volatile int step = 0;  // DexLabel('fun1')
-  use(&param);
-  return;                 // DexLabel('fun2')
+    //// Make sure first step is in 'fun'.
+    volatile int step = 0;  // DexLabel('fun1')
+    use(&param);
+    return;                 // DexLabel('fun2')
 }
 
 int main() {
-  fun(5);
+    fun(5);
 }
 
 /*

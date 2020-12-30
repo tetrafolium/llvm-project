@@ -22,12 +22,12 @@ namespace format {
 
 class UsingDeclarationsSorter : public TokenAnalyzer {
 public:
-  UsingDeclarationsSorter(const Environment &Env, const FormatStyle &Style);
+    UsingDeclarationsSorter(const Environment &Env, const FormatStyle &Style);
 
-  std::pair<tooling::Replacements, unsigned>
-  analyze(TokenAnnotator &Annotator,
-          SmallVectorImpl<AnnotatedLine *> &AnnotatedLines,
-          FormatTokenLexer &Tokens) override;
+    std::pair<tooling::Replacements, unsigned>
+    analyze(TokenAnnotator &Annotator,
+            SmallVectorImpl<AnnotatedLine *> &AnnotatedLines,
+            FormatTokenLexer &Tokens) override;
 };
 
 } // end namespace format

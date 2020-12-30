@@ -15,25 +15,25 @@
 
 namespace llvm {
 class ARMAsmBackendDarwin : public ARMAsmBackend {
-  const MCRegisterInfo &MRI;
-  Triple TT;
+    const MCRegisterInfo &MRI;
+    Triple TT;
 public:
-  const MachO::CPUSubTypeARM Subtype;
-  ARMAsmBackendDarwin(const Target &T, const MCSubtargetInfo &STI,
-                      const MCRegisterInfo &MRI)
-      : ARMAsmBackend(T, STI, support::little), MRI(MRI),
-        TT(STI.getTargetTriple()),
-        Subtype((MachO::CPUSubTypeARM)cantFail(
-            MachO::getCPUSubType(STI.getTargetTriple()))) {}
+    const MachO::CPUSubTypeARM Subtype;
+    ARMAsmBackendDarwin(const Target &T, const MCSubtargetInfo &STI,
+                        const MCRegisterInfo &MRI)
+        : ARMAsmBackend(T, STI, support::little), MRI(MRI),
+          TT(STI.getTargetTriple()),
+          Subtype((MachO::CPUSubTypeARM)cantFail(
+                      MachO::getCPUSubType(STI.getTargetTriple()))) {}
 
-  std::unique_ptr<MCObjectTargetWriter>
-  createObjectTargetWriter() const override {
-    return createARMMachObjectWriter(
-        /*Is64Bit=*/false, cantFail(MachO::getCPUType(TT)), Subtype);
-  }
+    std::unique_ptr<MCObjectTargetWriter>
+    createObjectTargetWriter() const override {
+        return createARMMachObjectWriter(
+                   /*Is64Bit=*/false, cantFail(MachO::getCPUType(TT)), Subtype);
+    }
 
-  uint32_t generateCompactUnwindEncoding(
-      ArrayRef<MCCFIInstruction> Instrs) const override;
+    uint32_t generateCompactUnwindEncoding(
+        ArrayRef<MCCFIInstruction> Instrs) const override;
 };
 } // end namespace llvm
 

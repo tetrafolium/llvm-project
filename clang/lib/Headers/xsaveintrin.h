@@ -23,12 +23,12 @@
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _xsave(void *__p, unsigned long long __m) {
-  __builtin_ia32_xsave(__p, __m);
+    __builtin_ia32_xsave(__p, __m);
 }
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _xrstor(void *__p, unsigned long long __m) {
-  __builtin_ia32_xrstor(__p, __m);
+    __builtin_ia32_xrstor(__p, __m);
 }
 
 #ifndef _MSC_VER
@@ -48,12 +48,12 @@ void __cdecl _xsetbv(unsigned int, unsigned __int64);
 #ifdef __x86_64__
 static __inline__ void __DEFAULT_FN_ATTRS
 _xsave64(void *__p, unsigned long long __m) {
-  __builtin_ia32_xsave64(__p, __m);
+    __builtin_ia32_xsave64(__p, __m);
 }
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _xrstor64(void *__p, unsigned long long __m) {
-  __builtin_ia32_xrstor64(__p, __m);
+    __builtin_ia32_xrstor64(__p, __m);
 }
 
 #endif

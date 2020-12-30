@@ -21,13 +21,13 @@ enum class COMThreadingMode { SingleThreaded, MultiThreaded };
 
 class InitializeCOMRAII {
 public:
-  explicit InitializeCOMRAII(COMThreadingMode Threading,
-                             bool SpeedOverMemory = false);
-  ~InitializeCOMRAII();
+    explicit InitializeCOMRAII(COMThreadingMode Threading,
+                               bool SpeedOverMemory = false);
+    ~InitializeCOMRAII();
 
 private:
-  InitializeCOMRAII(const InitializeCOMRAII &) = delete;
-  void operator=(const InitializeCOMRAII &) = delete;
+    InitializeCOMRAII(const InitializeCOMRAII &) = delete;
+    void operator=(const InitializeCOMRAII &) = delete;
 };
 }
 }

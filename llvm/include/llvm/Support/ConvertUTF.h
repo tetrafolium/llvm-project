@@ -124,52 +124,52 @@ typedef unsigned char   Boolean; /* 0 or 1 */
 #define UNI_UTF16_BYTE_ORDER_MARK_SWAPPED 0xFFFE
 
 typedef enum {
-  conversionOK,           /* conversion successful */
-  sourceExhausted,        /* partial character in source, but hit end */
-  targetExhausted,        /* insuff. room in target for conversion */
-  sourceIllegal           /* source sequence is illegal/malformed */
+    conversionOK,           /* conversion successful */
+    sourceExhausted,        /* partial character in source, but hit end */
+    targetExhausted,        /* insuff. room in target for conversion */
+    sourceIllegal           /* source sequence is illegal/malformed */
 } ConversionResult;
 
 typedef enum {
-  strictConversion = 0,
-  lenientConversion
+    strictConversion = 0,
+    lenientConversion
 } ConversionFlags;
 
 ConversionResult ConvertUTF8toUTF16 (
-  const UTF8** sourceStart, const UTF8* sourceEnd,
-  UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags);
+    const UTF8** sourceStart, const UTF8* sourceEnd,
+    UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags);
 
 /**
  * Convert a partial UTF8 sequence to UTF32.  If the sequence ends in an
  * incomplete code unit sequence, returns \c sourceExhausted.
  */
 ConversionResult ConvertUTF8toUTF32Partial(
-  const UTF8** sourceStart, const UTF8* sourceEnd,
-  UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
+    const UTF8** sourceStart, const UTF8* sourceEnd,
+    UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
 
 /**
  * Convert a partial UTF8 sequence to UTF32.  If the sequence ends in an
  * incomplete code unit sequence, returns \c sourceIllegal.
  */
 ConversionResult ConvertUTF8toUTF32(
-  const UTF8** sourceStart, const UTF8* sourceEnd,
-  UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
+    const UTF8** sourceStart, const UTF8* sourceEnd,
+    UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
 
 ConversionResult ConvertUTF16toUTF8 (
-  const UTF16** sourceStart, const UTF16* sourceEnd,
-  UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags);
+    const UTF16** sourceStart, const UTF16* sourceEnd,
+    UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags);
 
 ConversionResult ConvertUTF32toUTF8 (
-  const UTF32** sourceStart, const UTF32* sourceEnd,
-  UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags);
+    const UTF32** sourceStart, const UTF32* sourceEnd,
+    UTF8** targetStart, UTF8* targetEnd, ConversionFlags flags);
 
 ConversionResult ConvertUTF16toUTF32 (
-  const UTF16** sourceStart, const UTF16* sourceEnd,
-  UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
+    const UTF16** sourceStart, const UTF16* sourceEnd,
+    UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
 
 ConversionResult ConvertUTF32toUTF16 (
-  const UTF32** sourceStart, const UTF32* sourceEnd,
-  UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags);
+    const UTF32** sourceStart, const UTF32* sourceEnd,
+    UTF16** targetStart, UTF16* targetEnd, ConversionFlags flags);
 
 Boolean isLegalUTF8Sequence(const UTF8 *source, const UTF8 *sourceEnd);
 
@@ -243,15 +243,15 @@ bool ConvertCodePointToUTF8(unsigned Source, char *&ResultPtr);
  * \sa ConvertUTF8toUTF32
  */
 inline ConversionResult convertUTF8Sequence(const UTF8 **source,
-                                            const UTF8 *sourceEnd,
-                                            UTF32 *target,
-                                            ConversionFlags flags) {
-  if (*source == sourceEnd)
-    return sourceExhausted;
-  unsigned size = getNumBytesForUTF8(**source);
-  if ((ptrdiff_t)size > sourceEnd - *source)
-    return sourceExhausted;
-  return ConvertUTF8toUTF32(source, *source + size, &target, target + 1, flags);
+        const UTF8 *sourceEnd,
+        UTF32 *target,
+        ConversionFlags flags) {
+    if (*source == sourceEnd)
+        return sourceExhausted;
+    unsigned size = getNumBytesForUTF8(**source);
+    if ((ptrdiff_t)size > sourceEnd - *source)
+        return sourceExhausted;
+    return ConvertUTF8toUTF32(source, *source + size, &target, target + 1, flags);
 }
 
 /**

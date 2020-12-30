@@ -49,22 +49,26 @@ using namespace __hwasan;
 
 // Fake std::nothrow_t to avoid including <new>.
 namespace std {
-  struct nothrow_t {};
+struct nothrow_t {};
 }  // namespace std
 
 
 
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
-void *operator new(size_t size) { OPERATOR_NEW_BODY(false /*nothrow*/); }
+void *operator new(size_t size) {
+    OPERATOR_NEW_BODY(false /*nothrow*/);
+}
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
-void *operator new[](size_t size) { OPERATOR_NEW_BODY(false /*nothrow*/); }
+void *operator new[](size_t size) {
+    OPERATOR_NEW_BODY(false /*nothrow*/);
+}
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
 void *operator new(size_t size, std::nothrow_t const&) {
-  OPERATOR_NEW_BODY(true /*nothrow*/);
+    OPERATOR_NEW_BODY(true /*nothrow*/);
 }
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
 void *operator new[](size_t size, std::nothrow_t const&) {
-  OPERATOR_NEW_BODY(true /*nothrow*/);
+    OPERATOR_NEW_BODY(true /*nothrow*/);
 }
 
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
@@ -72,10 +76,12 @@ void operator delete(void *ptr) NOEXCEPT { OPERATOR_DELETE_BODY; }
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
 void operator delete[](void *ptr) NOEXCEPT { OPERATOR_DELETE_BODY; }
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
-void operator delete(void *ptr, std::nothrow_t const&) { OPERATOR_DELETE_BODY; }
+void operator delete(void *ptr, std::nothrow_t const&) {
+    OPERATOR_DELETE_BODY;
+}
 INTERCEPTOR_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
 void operator delete[](void *ptr, std::nothrow_t const&) {
-  OPERATOR_DELETE_BODY;
+    OPERATOR_DELETE_BODY;
 }
 
 #endif // OPERATOR_NEW_BODY

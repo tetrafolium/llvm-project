@@ -19,9 +19,9 @@
 using namespace llvm;
 
 enum AsmWriterVariantTy {
-  Default = -1,
-  Generic = 0,
-  Apple = 1
+    Default = -1,
+    Generic = 0,
+    Apple = 1
 };
 
 static cl::opt<AsmWriterVariantTy> AsmWriterVariant(
@@ -31,104 +31,104 @@ static cl::opt<AsmWriterVariantTy> AsmWriterVariant(
                clEnumValN(Apple, "apple", "Emit Apple-style NEON assembly")));
 
 AArch64MCAsmInfoDarwin::AArch64MCAsmInfoDarwin(bool IsILP32) {
-  // We prefer NEON instructions to be printed in the short, Apple-specific
-  // form when targeting Darwin.
-  AssemblerDialect = AsmWriterVariant == Default ? Apple : AsmWriterVariant;
+    // We prefer NEON instructions to be printed in the short, Apple-specific
+    // form when targeting Darwin.
+    AssemblerDialect = AsmWriterVariant == Default ? Apple : AsmWriterVariant;
 
-  PrivateGlobalPrefix = "L";
-  PrivateLabelPrefix = "L";
-  SeparatorString = "%%";
-  CommentString = ";";
-  CalleeSaveStackSlotSize = 8;
-  CodePointerSize = IsILP32 ? 4 : 8;
+    PrivateGlobalPrefix = "L";
+    PrivateLabelPrefix = "L";
+    SeparatorString = "%%";
+    CommentString = ";";
+    CalleeSaveStackSlotSize = 8;
+    CodePointerSize = IsILP32 ? 4 : 8;
 
-  AlignmentIsInBytes = false;
-  UsesELFSectionDirectiveForBSS = true;
-  SupportsDebugInformation = true;
-  UseDataRegionDirectives = true;
+    AlignmentIsInBytes = false;
+    UsesELFSectionDirectiveForBSS = true;
+    SupportsDebugInformation = true;
+    UseDataRegionDirectives = true;
 
-  ExceptionsType = ExceptionHandling::DwarfCFI;
+    ExceptionsType = ExceptionHandling::DwarfCFI;
 }
 
 const MCExpr *AArch64MCAsmInfoDarwin::getExprForPersonalitySymbol(
     const MCSymbol *Sym, unsigned Encoding, MCStreamer &Streamer) const {
-  // On Darwin, we can reference dwarf symbols with foo@GOT-., which
-  // is an indirect pc-relative reference. The default implementation
-  // won't reference using the GOT, so we need this target-specific
-  // version.
-  MCContext &Context = Streamer.getContext();
-  const MCExpr *Res =
-      MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_GOT, Context);
-  MCSymbol *PCSym = Context.createTempSymbol();
-  Streamer.emitLabel(PCSym);
-  const MCExpr *PC = MCSymbolRefExpr::create(PCSym, Context);
-  return MCBinaryExpr::createSub(Res, PC, Context);
+    // On Darwin, we can reference dwarf symbols with foo@GOT-., which
+    // is an indirect pc-relative reference. The default implementation
+    // won't reference using the GOT, so we need this target-specific
+    // version.
+    MCContext &Context = Streamer.getContext();
+    const MCExpr *Res =
+        MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_GOT, Context);
+    MCSymbol *PCSym = Context.createTempSymbol();
+    Streamer.emitLabel(PCSym);
+    const MCExpr *PC = MCSymbolRefExpr::create(PCSym, Context);
+    return MCBinaryExpr::createSub(Res, PC, Context);
 }
 
 AArch64MCAsmInfoELF::AArch64MCAsmInfoELF(const Triple &T) {
-  if (T.getArch() == Triple::aarch64_be)
-    IsLittleEndian = false;
+    if (T.getArch() == Triple::aarch64_be)
+        IsLittleEndian = false;
 
-  // We prefer NEON instructions to be printed in the generic form when
-  // targeting ELF.
-  AssemblerDialect = AsmWriterVariant == Default ? Generic : AsmWriterVariant;
+    // We prefer NEON instructions to be printed in the generic form when
+    // targeting ELF.
+    AssemblerDialect = AsmWriterVariant == Default ? Generic : AsmWriterVariant;
 
-  CodePointerSize = 8;
+    CodePointerSize = 8;
 
-  // ".comm align is in bytes but .align is pow-2."
-  AlignmentIsInBytes = false;
+    // ".comm align is in bytes but .align is pow-2."
+    AlignmentIsInBytes = false;
 
-  CommentString = "//";
-  PrivateGlobalPrefix = ".L";
-  PrivateLabelPrefix = ".L";
-  Code32Directive = ".code\t32";
+    CommentString = "//";
+    PrivateGlobalPrefix = ".L";
+    PrivateLabelPrefix = ".L";
+    Code32Directive = ".code\t32";
 
-  Data16bitsDirective = "\t.hword\t";
-  Data32bitsDirective = "\t.word\t";
-  Data64bitsDirective = "\t.xword\t";
+    Data16bitsDirective = "\t.hword\t";
+    Data32bitsDirective = "\t.word\t";
+    Data64bitsDirective = "\t.xword\t";
 
-  UseDataRegionDirectives = false;
+    UseDataRegionDirectives = false;
 
-  WeakRefDirective = "\t.weak\t";
+    WeakRefDirective = "\t.weak\t";
 
-  SupportsDebugInformation = true;
+    SupportsDebugInformation = true;
 
-  // Exceptions handling
-  ExceptionsType = ExceptionHandling::DwarfCFI;
+    // Exceptions handling
+    ExceptionsType = ExceptionHandling::DwarfCFI;
 
-  HasIdentDirective = true;
+    HasIdentDirective = true;
 }
 
 AArch64MCAsmInfoMicrosoftCOFF::AArch64MCAsmInfoMicrosoftCOFF() {
-  PrivateGlobalPrefix = ".L";
-  PrivateLabelPrefix = ".L";
+    PrivateGlobalPrefix = ".L";
+    PrivateLabelPrefix = ".L";
 
-  Data16bitsDirective = "\t.hword\t";
-  Data32bitsDirective = "\t.word\t";
-  Data64bitsDirective = "\t.xword\t";
+    Data16bitsDirective = "\t.hword\t";
+    Data32bitsDirective = "\t.word\t";
+    Data64bitsDirective = "\t.xword\t";
 
-  AlignmentIsInBytes = false;
-  SupportsDebugInformation = true;
-  CodePointerSize = 8;
+    AlignmentIsInBytes = false;
+    SupportsDebugInformation = true;
+    CodePointerSize = 8;
 
-  CommentString = ";";
-  ExceptionsType = ExceptionHandling::WinEH;
-  WinEHEncodingType = WinEH::EncodingType::Itanium;
+    CommentString = ";";
+    ExceptionsType = ExceptionHandling::WinEH;
+    WinEHEncodingType = WinEH::EncodingType::Itanium;
 }
 
 AArch64MCAsmInfoGNUCOFF::AArch64MCAsmInfoGNUCOFF() {
-  PrivateGlobalPrefix = ".L";
-  PrivateLabelPrefix = ".L";
+    PrivateGlobalPrefix = ".L";
+    PrivateLabelPrefix = ".L";
 
-  Data16bitsDirective = "\t.hword\t";
-  Data32bitsDirective = "\t.word\t";
-  Data64bitsDirective = "\t.xword\t";
+    Data16bitsDirective = "\t.hword\t";
+    Data32bitsDirective = "\t.word\t";
+    Data64bitsDirective = "\t.xword\t";
 
-  AlignmentIsInBytes = false;
-  SupportsDebugInformation = true;
-  CodePointerSize = 8;
+    AlignmentIsInBytes = false;
+    SupportsDebugInformation = true;
+    CodePointerSize = 8;
 
-  CommentString = "//";
-  ExceptionsType = ExceptionHandling::WinEH;
-  WinEHEncodingType = WinEH::EncodingType::Itanium;
+    CommentString = "//";
+    ExceptionsType = ExceptionHandling::WinEH;
+    WinEHEncodingType = WinEH::EncodingType::Itanium;
 }

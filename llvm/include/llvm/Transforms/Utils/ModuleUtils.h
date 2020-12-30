@@ -40,7 +40,7 @@ void appendToGlobalDtors(Module &M, Function *F, int Priority,
                          Constant *Data = nullptr);
 
 FunctionCallee declareSanitizerInitFunction(Module &M, StringRef InitName,
-                                            ArrayRef<Type *> InitArgTypes);
+        ArrayRef<Type *> InitArgTypes);
 
 /// Creates sanitizer constructor function.
 /// \return Returns pointer to constructor.

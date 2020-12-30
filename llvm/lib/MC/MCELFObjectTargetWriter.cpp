@@ -11,15 +11,15 @@
 using namespace llvm;
 
 MCELFObjectTargetWriter::MCELFObjectTargetWriter(bool Is64Bit_, uint8_t OSABI_,
-                                                 uint16_t EMachine_,
-                                                 bool HasRelocationAddend_,
-                                                 uint8_t ABIVersion_)
+        uint16_t EMachine_,
+        bool HasRelocationAddend_,
+        uint8_t ABIVersion_)
     : OSABI(OSABI_), ABIVersion(ABIVersion_), EMachine(EMachine_),
       HasRelocationAddend(HasRelocationAddend_), Is64Bit(Is64Bit_) {}
 
 bool MCELFObjectTargetWriter::needsRelocateWithSymbol(const MCSymbol &Sym,
-                                                      unsigned Type) const {
-  return false;
+        unsigned Type) const {
+    return false;
 }
 
 void
@@ -28,4 +28,4 @@ MCELFObjectTargetWriter::sortRelocs(const MCAssembler &Asm,
 }
 
 void MCELFObjectTargetWriter::addTargetSectionFlags(MCContext &Ctx,
-                                                    MCSectionELF &Sec) {}
+        MCSectionELF &Sec) {}

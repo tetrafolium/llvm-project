@@ -31,8 +31,8 @@ using namespace llvm::orc;
 ExitOnError ExitOnErr;
 
 static cl::opt<std::string>
-    EntryPointName("entry", cl::desc("Symbol to call as main entry point"),
-                   cl::init("main"));
+EntryPointName("entry", cl::desc("Symbol to call as main entry point"),
+               cl::init("main"));
 
 static cl::list<std::string> InputFiles(cl::Positional, cl::OneOrMore,
                                         cl::desc("input files"));
@@ -42,75 +42,75 @@ static cl::list<std::string> InputArgv("args", cl::Positional,
                                        cl::ZeroOrMore, cl::PositionalEatsArgs);
 
 int main(int argc, char *argv[]) {
-  // Initialize LLVM.
-  InitLLVM X(argc, argv);
+    // Initialize LLVM.
+    InitLLVM X(argc, argv);
 
-  InitializeNativeTarget();
-  InitializeNativeTargetAsmPrinter();
+    InitializeNativeTarget();
+    InitializeNativeTargetAsmPrinter();
 
-  cl::ParseCommandLineOptions(argc, argv, "LLJITWithCustomObjectLinkingLayer");
-  ExitOnErr.setBanner(std::string(argv[0]) + ": ");
+    cl::ParseCommandLineOptions(argc, argv, "LLJITWithCustomObjectLinkingLayer");
+    ExitOnErr.setBanner(std::string(argv[0]) + ": ");
 
-  // Detect the host and set code model to small.
-  auto JTMB = ExitOnErr(JITTargetMachineBuilder::detectHost());
-  if (!JTMB.getTargetTriple().isOSLinux())
-    errs()
-        << "Warning: This demo may not work for platforms other than Linux.\n";
+    // Detect the host and set code model to small.
+    auto JTMB = ExitOnErr(JITTargetMachineBuilder::detectHost());
+    if (!JTMB.getTargetTriple().isOSLinux())
+        errs()
+                << "Warning: This demo may not work for platforms other than Linux.\n";
 
-  // Create an LLJIT instance and use a custom object linking layer creator to
-  // register the GDBRegistrationListener with our RTDyldObjectLinkingLayer.
-  auto J =
-      ExitOnErr(LLJITBuilder()
-                    .setJITTargetMachineBuilder(std::move(JTMB))
-                    .setObjectLinkingLayerCreator([&](ExecutionSession &ES,
-                                                      const Triple &TT) {
-                      auto GetMemMgr = []() {
-                        return std::make_unique<SectionMemoryManager>();
-                      };
-                      auto ObjLinkingLayer =
-                          std::make_unique<RTDyldObjectLinkingLayer>(
-                              ES, std::move(GetMemMgr));
+    // Create an LLJIT instance and use a custom object linking layer creator to
+    // register the GDBRegistrationListener with our RTDyldObjectLinkingLayer.
+    auto J =
+        ExitOnErr(LLJITBuilder()
+                  .setJITTargetMachineBuilder(std::move(JTMB))
+                  .setObjectLinkingLayerCreator([&](ExecutionSession &ES,
+    const Triple &TT) {
+        auto GetMemMgr = []() {
+            return std::make_unique<SectionMemoryManager>();
+        };
+        auto ObjLinkingLayer =
+            std::make_unique<RTDyldObjectLinkingLayer>(
+                ES, std::move(GetMemMgr));
 
-                      // Register the event listener.
-                      ObjLinkingLayer->registerJITEventListener(
-                          *JITEventListener::createGDBRegistrationListener());
+        // Register the event listener.
+        ObjLinkingLayer->registerJITEventListener(
+            *JITEventListener::createGDBRegistrationListener());
 
-                      // Make sure the debug info sections aren't stripped.
-                      ObjLinkingLayer->setProcessAllSections(true);
+        // Make sure the debug info sections aren't stripped.
+        ObjLinkingLayer->setProcessAllSections(true);
 
-                      return ObjLinkingLayer;
-                    })
-                    .create());
+        return ObjLinkingLayer;
+    })
+    .create());
 
-  // Make sure that our process symbols are visible to JIT'd code.
-  {
-    MangleAndInterner Mangle(J->getExecutionSession(), J->getDataLayout());
-    J->getMainJITDylib().addGenerator(
-        ExitOnErr(orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
-            J->getDataLayout().getGlobalPrefix(),
-            [MainName = Mangle("main")](const orc::SymbolStringPtr &Name) {
-              return Name != MainName;
-            })));
-  }
-
-  // Load the input modules.
-  for (auto &InputFile : InputFiles) {
-    auto Ctx = std::make_unique<LLVMContext>();
-    SMDiagnostic Err;
-    std::unique_ptr<Module> M = parseIRFile(InputFile, Err, *Ctx);
-    if (!M) {
-      Err.print(argv[0], errs());
-      return 1;
+    // Make sure that our process symbols are visible to JIT'd code.
+    {
+        MangleAndInterner Mangle(J->getExecutionSession(), J->getDataLayout());
+        J->getMainJITDylib().addGenerator(
+            ExitOnErr(orc::DynamicLibrarySearchGenerator::GetForCurrentProcess(
+                          J->getDataLayout().getGlobalPrefix(),
+        [MainName = Mangle("main")](const orc::SymbolStringPtr &Name) {
+            return Name != MainName;
+        })));
     }
 
-    ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(M), std::move(Ctx))));
-  }
+    // Load the input modules.
+    for (auto &InputFile : InputFiles) {
+        auto Ctx = std::make_unique<LLVMContext>();
+        SMDiagnostic Err;
+        std::unique_ptr<Module> M = parseIRFile(InputFile, Err, *Ctx);
+        if (!M) {
+            Err.print(argv[0], errs());
+            return 1;
+        }
 
-  // Look up the entry point, cast it to a C main function pointer, then use
-  // runAsMain to call it.
-  auto EntrySym = ExitOnErr(J->lookup(EntryPointName));
-  auto EntryFn =
-      jitTargetAddressToFunction<int (*)(int, char *[])>(EntrySym.getAddress());
+        ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(M), std::move(Ctx))));
+    }
 
-  return runAsMain(EntryFn, InputArgv, StringRef(InputFiles.front()));
+    // Look up the entry point, cast it to a C main function pointer, then use
+    // runAsMain to call it.
+    auto EntrySym = ExitOnErr(J->lookup(EntryPointName));
+    auto EntryFn =
+        jitTargetAddressToFunction<int (*)(int, char *[])>(EntrySym.getAddress());
+
+    return runAsMain(EntryFn, InputArgv, StringRef(InputFiles.front()));
 }

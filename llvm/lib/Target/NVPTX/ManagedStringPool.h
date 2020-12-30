@@ -23,24 +23,24 @@ namespace llvm {
 /// owned by the string pool and will be deleted together with the managed
 /// string pool.
 class ManagedStringPool {
-  SmallVector<std::string *, 8> Pool;
+    SmallVector<std::string *, 8> Pool;
 
 public:
-  ManagedStringPool() = default;
+    ManagedStringPool() = default;
 
-  ~ManagedStringPool() {
-    SmallVectorImpl<std::string *>::iterator Current = Pool.begin();
-    while (Current != Pool.end()) {
-      delete *Current;
-      ++Current;
+    ~ManagedStringPool() {
+        SmallVectorImpl<std::string *>::iterator Current = Pool.begin();
+        while (Current != Pool.end()) {
+            delete *Current;
+            ++Current;
+        }
     }
-  }
 
-  std::string *getManagedString(const char *S) {
-    std::string *Str = new std::string(S);
-    Pool.push_back(Str);
-    return Str;
-  }
+    std::string *getManagedString(const char *S) {
+        std::string *Str = new std::string(S);
+        Pool.push_back(Str);
+        return Str;
+    }
 };
 
 } // end namespace llvm

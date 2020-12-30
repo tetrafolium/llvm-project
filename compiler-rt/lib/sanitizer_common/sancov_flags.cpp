@@ -15,7 +15,7 @@
 #include "sanitizer_platform.h"
 
 SANITIZER_INTERFACE_WEAK_DEF(const char*, __sancov_default_options, void) {
-  return "";
+    return "";
 }
 
 using namespace __sanitizer;
@@ -38,21 +38,21 @@ static void RegisterSancovFlags(FlagParser *parser, SancovFlags *f) {
 }
 
 static const char *MaybeCallSancovDefaultOptions() {
-  return (&__sancov_default_options) ? __sancov_default_options() : "";
+    return (&__sancov_default_options) ? __sancov_default_options() : "";
 }
 
 void InitializeSancovFlags() {
-  SancovFlags *f = sancov_flags();
-  f->SetDefaults();
+    SancovFlags *f = sancov_flags();
+    f->SetDefaults();
 
-  FlagParser parser;
-  RegisterSancovFlags(&parser, f);
+    FlagParser parser;
+    RegisterSancovFlags(&parser, f);
 
-  parser.ParseString(MaybeCallSancovDefaultOptions());
-  parser.ParseStringFromEnv("SANCOV_OPTIONS");
+    parser.ParseString(MaybeCallSancovDefaultOptions());
+    parser.ParseStringFromEnv("SANCOV_OPTIONS");
 
-  ReportUnrecognizedFlags();
-  if (f->help) parser.PrintFlagDescriptions();
+    ReportUnrecognizedFlags();
+    if (f->help) parser.PrintFlagDescriptions();
 }
 
 }  // namespace __sancov

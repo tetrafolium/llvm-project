@@ -31,42 +31,42 @@ namespace performance {
 
 class PerformanceModule : public ClangTidyModule {
 public:
-  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<FasterStringFindCheck>(
-        "performance-faster-string-find");
-    CheckFactories.registerCheck<ForRangeCopyCheck>(
-        "performance-for-range-copy");
-    CheckFactories.registerCheck<ImplicitConversionInLoopCheck>(
-        "performance-implicit-conversion-in-loop");
-    CheckFactories.registerCheck<InefficientAlgorithmCheck>(
-        "performance-inefficient-algorithm");
-    CheckFactories.registerCheck<InefficientStringConcatenationCheck>(
-        "performance-inefficient-string-concatenation");
-    CheckFactories.registerCheck<InefficientVectorOperationCheck>(
-        "performance-inefficient-vector-operation");
-    CheckFactories.registerCheck<MoveConstArgCheck>(
-        "performance-move-const-arg");
-    CheckFactories.registerCheck<MoveConstructorInitCheck>(
-        "performance-move-constructor-init");
-    CheckFactories.registerCheck<NoAutomaticMoveCheck>(
-        "performance-no-automatic-move");
-    CheckFactories.registerCheck<NoIntToPtrCheck>("performance-no-int-to-ptr");
-    CheckFactories.registerCheck<NoexceptMoveConstructorCheck>(
-        "performance-noexcept-move-constructor");
-    CheckFactories.registerCheck<TriviallyDestructibleCheck>(
-        "performance-trivially-destructible");
-    CheckFactories.registerCheck<TypePromotionInMathFnCheck>(
-        "performance-type-promotion-in-math-fn");
-    CheckFactories.registerCheck<UnnecessaryCopyInitialization>(
-        "performance-unnecessary-copy-initialization");
-    CheckFactories.registerCheck<UnnecessaryValueParamCheck>(
-        "performance-unnecessary-value-param");
-  }
+    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+        CheckFactories.registerCheck<FasterStringFindCheck>(
+            "performance-faster-string-find");
+        CheckFactories.registerCheck<ForRangeCopyCheck>(
+            "performance-for-range-copy");
+        CheckFactories.registerCheck<ImplicitConversionInLoopCheck>(
+            "performance-implicit-conversion-in-loop");
+        CheckFactories.registerCheck<InefficientAlgorithmCheck>(
+            "performance-inefficient-algorithm");
+        CheckFactories.registerCheck<InefficientStringConcatenationCheck>(
+            "performance-inefficient-string-concatenation");
+        CheckFactories.registerCheck<InefficientVectorOperationCheck>(
+            "performance-inefficient-vector-operation");
+        CheckFactories.registerCheck<MoveConstArgCheck>(
+            "performance-move-const-arg");
+        CheckFactories.registerCheck<MoveConstructorInitCheck>(
+            "performance-move-constructor-init");
+        CheckFactories.registerCheck<NoAutomaticMoveCheck>(
+            "performance-no-automatic-move");
+        CheckFactories.registerCheck<NoIntToPtrCheck>("performance-no-int-to-ptr");
+        CheckFactories.registerCheck<NoexceptMoveConstructorCheck>(
+            "performance-noexcept-move-constructor");
+        CheckFactories.registerCheck<TriviallyDestructibleCheck>(
+            "performance-trivially-destructible");
+        CheckFactories.registerCheck<TypePromotionInMathFnCheck>(
+            "performance-type-promotion-in-math-fn");
+        CheckFactories.registerCheck<UnnecessaryCopyInitialization>(
+            "performance-unnecessary-copy-initialization");
+        CheckFactories.registerCheck<UnnecessaryValueParamCheck>(
+            "performance-unnecessary-value-param");
+    }
 };
 
 // Register the PerformanceModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<PerformanceModule>
-    X("performance-module", "Adds performance checks.");
+X("performance-module", "Adds performance checks.");
 
 } // namespace performance
 

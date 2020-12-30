@@ -16,17 +16,17 @@
 namespace lldb_vscode {
 
 struct ExceptionBreakpoint {
-  std::string filter;
-  std::string label;
-  lldb::LanguageType language;
-  bool default_value;
-  lldb::SBBreakpoint bp;
-  ExceptionBreakpoint(std::string f, std::string l, lldb::LanguageType lang)
-      : filter(std::move(f)), label(std::move(l)), language(lang),
-        default_value(false), bp() {}
+    std::string filter;
+    std::string label;
+    lldb::LanguageType language;
+    bool default_value;
+    lldb::SBBreakpoint bp;
+    ExceptionBreakpoint(std::string f, std::string l, lldb::LanguageType lang)
+        : filter(std::move(f)), label(std::move(l)), language(lang),
+          default_value(false), bp() {}
 
-  void SetBreakpoint();
-  void ClearBreakpoint();
+    void SetBreakpoint();
+    void ClearBreakpoint();
 };
 
 } // namespace lldb_vscode

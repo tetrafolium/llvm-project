@@ -29,7 +29,7 @@ class ModuleOp;
 /// classes with layout information.
 /// Right now this pass only supports Vulkan layout rules.
 std::unique_ptr<OperationPass<mlir::ModuleOp>>
-createDecorateSPIRVCompositeTypeLayoutPass();
+        createDecorateSPIRVCompositeTypeLayoutPass();
 
 /// Creates an operation pass that deduces and attaches the minimal version/
 /// capabilities/extensions requirements for spv.module ops.
@@ -40,7 +40,7 @@ createDecorateSPIRVCompositeTypeLayoutPass();
 /// what the target environment can support; this pass deduces what are
 /// actually needed for a specific spv.module op.
 std::unique_ptr<OperationPass<spirv::ModuleOp>>
-createUpdateVersionCapabilityExtensionPass();
+        createUpdateVersionCapabilityExtensionPass();
 
 /// Creates an operation pass that lowers the ABI attributes specified during
 /// SPIR-V Lowering. Specifically,

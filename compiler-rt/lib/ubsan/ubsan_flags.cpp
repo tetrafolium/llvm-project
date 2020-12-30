@@ -22,12 +22,12 @@
 namespace __ubsan {
 
 static const char *GetFlag(const char *flag) {
-  // We cannot call getenv() from inside a preinit array initializer
-  if (SANITIZER_CAN_USE_PREINIT_ARRAY) {
-    return GetEnv(flag);
-  } else {
-    return getenv(flag);
-  }
+    // We cannot call getenv() from inside a preinit array initializer
+    if (SANITIZER_CAN_USE_PREINIT_ARRAY) {
+        return GetEnv(flag);
+    } else {
+        return getenv(flag);
+    }
 }
 
 Flags ubsan_flags;
@@ -46,35 +46,35 @@ void RegisterUbsanFlags(FlagParser *parser, Flags *f) {
 }
 
 void InitializeFlags() {
-  SetCommonFlagsDefaults();
-  {
-    CommonFlags cf;
-    cf.CopyFrom(*common_flags());
-    cf.external_symbolizer_path = GetFlag("UBSAN_SYMBOLIZER_PATH");
-    OverrideCommonFlags(cf);
-  }
+    SetCommonFlagsDefaults();
+    {
+        CommonFlags cf;
+        cf.CopyFrom(*common_flags());
+        cf.external_symbolizer_path = GetFlag("UBSAN_SYMBOLIZER_PATH");
+        OverrideCommonFlags(cf);
+    }
 
-  Flags *f = flags();
-  f->SetDefaults();
+    Flags *f = flags();
+    f->SetDefaults();
 
-  FlagParser parser;
-  RegisterCommonFlags(&parser);
-  RegisterUbsanFlags(&parser, f);
+    FlagParser parser;
+    RegisterCommonFlags(&parser);
+    RegisterUbsanFlags(&parser, f);
 
-  // Override from user-specified string.
-  parser.ParseString(__ubsan_default_options());
-  // Override from environment variable.
-  parser.ParseStringFromEnv("UBSAN_OPTIONS");
-  InitializeCommonFlags();
-  if (Verbosity()) ReportUnrecognizedFlags();
+    // Override from user-specified string.
+    parser.ParseString(__ubsan_default_options());
+    // Override from environment variable.
+    parser.ParseStringFromEnv("UBSAN_OPTIONS");
+    InitializeCommonFlags();
+    if (Verbosity()) ReportUnrecognizedFlags();
 
-  if (common_flags()->help) parser.PrintFlagDescriptions();
+    if (common_flags()->help) parser.PrintFlagDescriptions();
 }
 
 }  // namespace __ubsan
 
 SANITIZER_INTERFACE_WEAK_DEF(const char *, __ubsan_default_options, void) {
-  return "";
+    return "";
 }
 
 #endif  // CAN_SANITIZE_UB

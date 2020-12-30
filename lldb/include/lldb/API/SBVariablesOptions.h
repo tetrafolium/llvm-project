@@ -18,63 +18,63 @@ namespace lldb {
 
 class LLDB_API SBVariablesOptions {
 public:
-  SBVariablesOptions();
+    SBVariablesOptions();
 
-  SBVariablesOptions(const SBVariablesOptions &options);
+    SBVariablesOptions(const SBVariablesOptions &options);
 
-  SBVariablesOptions &operator=(const SBVariablesOptions &options);
+    SBVariablesOptions &operator=(const SBVariablesOptions &options);
 
-  ~SBVariablesOptions();
+    ~SBVariablesOptions();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  bool GetIncludeArguments() const;
+    bool GetIncludeArguments() const;
 
-  void SetIncludeArguments(bool);
+    void SetIncludeArguments(bool);
 
-  bool GetIncludeRecognizedArguments(const lldb::SBTarget &) const;
+    bool GetIncludeRecognizedArguments(const lldb::SBTarget &) const;
 
-  void SetIncludeRecognizedArguments(bool);
+    void SetIncludeRecognizedArguments(bool);
 
-  bool GetIncludeLocals() const;
+    bool GetIncludeLocals() const;
 
-  void SetIncludeLocals(bool);
+    void SetIncludeLocals(bool);
 
-  bool GetIncludeStatics() const;
+    bool GetIncludeStatics() const;
 
-  void SetIncludeStatics(bool);
+    void SetIncludeStatics(bool);
 
-  bool GetInScopeOnly() const;
+    bool GetInScopeOnly() const;
 
-  void SetInScopeOnly(bool);
+    void SetInScopeOnly(bool);
 
-  bool GetIncludeRuntimeSupportValues() const;
+    bool GetIncludeRuntimeSupportValues() const;
 
-  void SetIncludeRuntimeSupportValues(bool);
+    void SetIncludeRuntimeSupportValues(bool);
 
-  lldb::DynamicValueType GetUseDynamic() const;
+    lldb::DynamicValueType GetUseDynamic() const;
 
-  void SetUseDynamic(lldb::DynamicValueType);
+    void SetUseDynamic(lldb::DynamicValueType);
 
 protected:
-  VariablesOptionsImpl *operator->();
+    VariablesOptionsImpl *operator->();
 
-  const VariablesOptionsImpl *operator->() const;
+    const VariablesOptionsImpl *operator->() const;
 
-  VariablesOptionsImpl *get();
+    VariablesOptionsImpl *get();
 
-  VariablesOptionsImpl &ref();
+    VariablesOptionsImpl &ref();
 
-  const VariablesOptionsImpl &ref() const;
+    const VariablesOptionsImpl &ref() const;
 
-  SBVariablesOptions(VariablesOptionsImpl *lldb_object_ptr);
+    SBVariablesOptions(VariablesOptionsImpl *lldb_object_ptr);
 
-  void SetOptions(VariablesOptionsImpl *lldb_object_ptr);
+    void SetOptions(VariablesOptionsImpl *lldb_object_ptr);
 
 private:
-  std::unique_ptr<VariablesOptionsImpl> m_opaque_up;
+    std::unique_ptr<VariablesOptionsImpl> m_opaque_up;
 };
 
 } // namespace lldb

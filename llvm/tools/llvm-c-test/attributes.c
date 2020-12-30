@@ -18,69 +18,69 @@
 #include <stdlib.h>
 
 int llvm_test_function_attributes(void) {
-  LLVMEnablePrettyStackTrace();
+    LLVMEnablePrettyStackTrace();
 
-  LLVMModuleRef M = llvm_load_module(false, true);
+    LLVMModuleRef M = llvm_load_module(false, true);
 
-  LLVMValueRef F = LLVMGetFirstFunction(M);
-  while (F) {
-    // Read attributes
-    int Idx, ParamCount;
-    for (Idx = LLVMAttributeFunctionIndex, ParamCount = LLVMCountParams(F);
-         Idx <= ParamCount; ++Idx) {
-      int AttrCount = LLVMGetAttributeCountAtIndex(F, Idx);
-      LLVMAttributeRef *Attrs = 0;
-      if (AttrCount) {
-        Attrs =
-            (LLVMAttributeRef *)malloc(AttrCount * sizeof(LLVMAttributeRef));
-        assert(Attrs);
-      }
-      LLVMGetAttributesAtIndex(F, Idx, Attrs);
-      free(Attrs);
+    LLVMValueRef F = LLVMGetFirstFunction(M);
+    while (F) {
+        // Read attributes
+        int Idx, ParamCount;
+        for (Idx = LLVMAttributeFunctionIndex, ParamCount = LLVMCountParams(F);
+                Idx <= ParamCount; ++Idx) {
+            int AttrCount = LLVMGetAttributeCountAtIndex(F, Idx);
+            LLVMAttributeRef *Attrs = 0;
+            if (AttrCount) {
+                Attrs =
+                    (LLVMAttributeRef *)malloc(AttrCount * sizeof(LLVMAttributeRef));
+                assert(Attrs);
+            }
+            LLVMGetAttributesAtIndex(F, Idx, Attrs);
+            free(Attrs);
+        }
+        F = LLVMGetNextFunction(F);
     }
-    F = LLVMGetNextFunction(F);
-  }
 
-  LLVMDisposeModule(M);
+    LLVMDisposeModule(M);
 
-  return 0;
+    return 0;
 }
 
 int llvm_test_callsite_attributes(void) {
-  LLVMEnablePrettyStackTrace();
+    LLVMEnablePrettyStackTrace();
 
-  LLVMModuleRef M = llvm_load_module(false, true);
+    LLVMModuleRef M = llvm_load_module(false, true);
 
-  LLVMValueRef F = LLVMGetFirstFunction(M);
-  while (F) {
-    LLVMBasicBlockRef BB;
-    for (BB = LLVMGetFirstBasicBlock(F); BB; BB = LLVMGetNextBasicBlock(BB)) {
-      LLVMValueRef I;
-      for (I = LLVMGetFirstInstruction(BB); I; I = LLVMGetNextInstruction(I)) {
-        if (LLVMIsACallInst(I)) {
-          // Read attributes
-          int Idx, ParamCount;
-          for (Idx = LLVMAttributeFunctionIndex,
-              ParamCount = LLVMCountParams(F);
-               Idx <= ParamCount; ++Idx) {
-            int AttrCount = LLVMGetCallSiteAttributeCount(I, Idx);
-            LLVMAttributeRef *Attrs = 0;
-            if (AttrCount) {
-              Attrs = (LLVMAttributeRef *)malloc(
-                  AttrCount * sizeof(LLVMAttributeRef));
-              assert(Attrs);
+    LLVMValueRef F = LLVMGetFirstFunction(M);
+    while (F) {
+        LLVMBasicBlockRef BB;
+        for (BB = LLVMGetFirstBasicBlock(F); BB; BB = LLVMGetNextBasicBlock(BB)) {
+            LLVMValueRef I;
+            for (I = LLVMGetFirstInstruction(BB); I; I = LLVMGetNextInstruction(I)) {
+                if (LLVMIsACallInst(I)) {
+                    // Read attributes
+                    int Idx, ParamCount;
+                    for (Idx = LLVMAttributeFunctionIndex,
+                            ParamCount = LLVMCountParams(F);
+                            Idx <= ParamCount; ++Idx) {
+                        int AttrCount = LLVMGetCallSiteAttributeCount(I, Idx);
+                        LLVMAttributeRef *Attrs = 0;
+                        if (AttrCount) {
+                            Attrs = (LLVMAttributeRef *)malloc(
+                                        AttrCount * sizeof(LLVMAttributeRef));
+                            assert(Attrs);
+                        }
+                        LLVMGetCallSiteAttributes(I, Idx, Attrs);
+                        free(Attrs);
+                    }
+                }
             }
-            LLVMGetCallSiteAttributes(I, Idx, Attrs);
-            free(Attrs);
-          }
         }
-      }
+
+        F = LLVMGetNextFunction(F);
     }
 
-    F = LLVMGetNextFunction(F);
-  }
+    LLVMDisposeModule(M);
 
-  LLVMDisposeModule(M);
-
-  return 0;
+    return 0;
 }

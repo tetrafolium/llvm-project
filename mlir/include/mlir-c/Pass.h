@@ -55,7 +55,7 @@ MLIR_CAPI_EXPORTED void mlirPassManagerDestroy(MlirPassManager passManager);
 
 /// Checks if a PassManager is null.
 static inline bool mlirPassManagerIsNull(MlirPassManager passManager) {
-  return !passManager.ptr;
+    return !passManager.ptr;
 }
 
 /// Cast a top-level PassManager to a generic OpPassManager.
@@ -84,7 +84,7 @@ MLIR_CAPI_EXPORTED MlirOpPassManager mlirOpPassManagerGetNestedUnder(
  * If the pass is not a generic operation pass or a ModulePass, a new
  * OpPassManager is implicitly nested under the provided PassManager. */
 MLIR_CAPI_EXPORTED void mlirPassManagerAddOwnedPass(MlirPassManager passManager,
-                                                    MlirPass pass);
+        MlirPass pass);
 
 /** Add a pass and transfer ownership to the provided mlirOpPassManager. If the
  * pass is not a generic operation pass or matching the type of the provided
@@ -97,8 +97,8 @@ mlirOpPassManagerAddOwnedPass(MlirOpPassManager passManager, MlirPass pass);
  * representation and forwarding `userData to `callback`. Note that the callback
  * may be called several times with consecutive chunks of the string. */
 MLIR_CAPI_EXPORTED void mlirPrintPassPipeline(MlirOpPassManager passManager,
-                                              MlirStringCallback callback,
-                                              void *userData);
+        MlirStringCallback callback,
+        void *userData);
 
 /** Parse a textual MLIR pass pipeline and add it to the provided OpPassManager.
  */

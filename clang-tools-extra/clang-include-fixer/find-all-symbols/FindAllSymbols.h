@@ -33,27 +33,27 @@ class HeaderMapCollector;
 ///
 class FindAllSymbols : public ast_matchers::MatchFinder::MatchCallback {
 public:
-  explicit FindAllSymbols(SymbolReporter *Reporter,
-                          HeaderMapCollector *Collector = nullptr)
-      : Reporter(Reporter), Collector(Collector) {}
+    explicit FindAllSymbols(SymbolReporter *Reporter,
+                            HeaderMapCollector *Collector = nullptr)
+        : Reporter(Reporter), Collector(Collector) {}
 
-  void registerMatchers(ast_matchers::MatchFinder *MatchFinder);
+    void registerMatchers(ast_matchers::MatchFinder *MatchFinder);
 
-  void run(const ast_matchers::MatchFinder::MatchResult &result) override;
+    void run(const ast_matchers::MatchFinder::MatchResult &result) override;
 
 protected:
-  void onEndOfTranslationUnit() override;
+    void onEndOfTranslationUnit() override;
 
 private:
-  // Current source file being processed, filled by first symbol found.
-  std::string Filename;
-  // Findings for the current source file, flushed on onEndOfTranslationUnit.
-  SymbolInfo::SignalMap FileSymbols;
-  // Reporter for SymbolInfo.
-  SymbolReporter *const Reporter;
-  // A remapping header file collector allowing clients include a different
-  // header.
-  HeaderMapCollector *const Collector;
+    // Current source file being processed, filled by first symbol found.
+    std::string Filename;
+    // Findings for the current source file, flushed on onEndOfTranslationUnit.
+    SymbolInfo::SignalMap FileSymbols;
+    // Reporter for SymbolInfo.
+    SymbolReporter *const Reporter;
+    // A remapping header file collector allowing clients include a different
+    // header.
+    HeaderMapCollector *const Collector;
 };
 
 } // namespace find_all_symbols

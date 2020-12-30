@@ -18,7 +18,7 @@ static __inline__ void
 __attribute__((__always_inline__, __nodebug__,  __target__("movdiri")))
 _directstoreu_u32 (void *__dst, unsigned int  __value)
 {
-  __builtin_ia32_directstore_u32((unsigned int *)__dst, (unsigned int)__value);
+    __builtin_ia32_directstore_u32((unsigned int *)__dst, (unsigned int)__value);
 }
 
 #ifdef __x86_64__
@@ -28,7 +28,7 @@ static __inline__ void
 __attribute__((__always_inline__, __nodebug__,  __target__("movdiri")))
 _directstoreu_u64 (void *__dst, unsigned long __value)
 {
-  __builtin_ia32_directstore_u64((unsigned long *)__dst, __value);
+    __builtin_ia32_directstore_u64((unsigned long *)__dst, __value);
 }
 
 #endif /* __x86_64__ */
@@ -43,7 +43,7 @@ static __inline__ void
 __attribute__((__always_inline__, __nodebug__,  __target__("movdir64b")))
 _movdir64b (void *__dst __attribute__((align_value(64))), const void *__src)
 {
-  __builtin_ia32_movdir64b(__dst, __src);
+    __builtin_ia32_movdir64b(__dst, __src);
 }
 
 #endif /* _MOVDIRINTRIN_H */

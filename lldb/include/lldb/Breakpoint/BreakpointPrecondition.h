@@ -20,10 +20,10 @@ class Stream;
 
 class BreakpointPrecondition {
 public:
-  virtual ~BreakpointPrecondition() = default;
-  virtual bool EvaluatePrecondition(StoppointCallbackContext &context);
-  virtual Status ConfigurePrecondition(Args &args);
-  virtual void GetDescription(Stream &stream, lldb::DescriptionLevel level);
+    virtual ~BreakpointPrecondition() = default;
+    virtual bool EvaluatePrecondition(StoppointCallbackContext &context);
+    virtual Status ConfigurePrecondition(Args &args);
+    virtual void GetDescription(Stream &stream, lldb::DescriptionLevel level);
 };
 } // namespace lldb_private
 

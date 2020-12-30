@@ -17,34 +17,36 @@ namespace objcopy {
 namespace macho {
 
 class MachOLayoutBuilder {
-  Object &O;
-  bool Is64Bit;
-  uint64_t PageSize;
+    Object &O;
+    bool Is64Bit;
+    uint64_t PageSize;
 
-  // Points to the __LINKEDIT segment if it exists.
-  MachO::macho_load_command *LinkEditLoadCommand = nullptr;
-  StringTableBuilder StrTableBuilder;
+    // Points to the __LINKEDIT segment if it exists.
+    MachO::macho_load_command *LinkEditLoadCommand = nullptr;
+    StringTableBuilder StrTableBuilder;
 
-  uint32_t computeSizeOfCmds() const;
-  void constructStringTable();
-  void updateSymbolIndexes();
-  void updateDySymTab(MachO::macho_load_command &MLC);
-  uint64_t layoutSegments();
-  uint64_t layoutRelocations(uint64_t Offset);
-  Error layoutTail(uint64_t Offset);
+    uint32_t computeSizeOfCmds() const;
+    void constructStringTable();
+    void updateSymbolIndexes();
+    void updateDySymTab(MachO::macho_load_command &MLC);
+    uint64_t layoutSegments();
+    uint64_t layoutRelocations(uint64_t Offset);
+    Error layoutTail(uint64_t Offset);
 
-  static StringTableBuilder::Kind getStringTableBuilderKind(const Object &O,
-                                                            bool Is64Bit);
+    static StringTableBuilder::Kind getStringTableBuilderKind(const Object &O,
+            bool Is64Bit);
 
 public:
-  MachOLayoutBuilder(Object &O, bool Is64Bit, uint64_t PageSize)
-      : O(O), Is64Bit(Is64Bit), PageSize(PageSize),
-        StrTableBuilder(getStringTableBuilderKind(O, Is64Bit)) {}
+    MachOLayoutBuilder(Object &O, bool Is64Bit, uint64_t PageSize)
+        : O(O), Is64Bit(Is64Bit), PageSize(PageSize),
+          StrTableBuilder(getStringTableBuilderKind(O, Is64Bit)) {}
 
-  // Recomputes and updates fields in the given object such as file offsets.
-  Error layout();
+    // Recomputes and updates fields in the given object such as file offsets.
+    Error layout();
 
-  StringTableBuilder &getStringTableBuilder() { return StrTableBuilder; }
+    StringTableBuilder &getStringTableBuilder() {
+        return StrTableBuilder;
+    }
 };
 
 } // end namespace macho

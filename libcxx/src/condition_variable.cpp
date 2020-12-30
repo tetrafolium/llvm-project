@@ -40,7 +40,7 @@ condition_variable::wait(unique_lock<mutex>& lk) _NOEXCEPT
 {
     if (!lk.owns_lock())
         __throw_system_error(EPERM,
-                                  "condition_variable::wait: mutex not locked");
+                             "condition_variable::wait: mutex not locked");
     int ec = __libcpp_condvar_wait(&__cv_, lk.mutex()->native_handle());
     if (ec)
         __throw_system_error(ec, "condition_variable wait failed");
@@ -48,12 +48,12 @@ condition_variable::wait(unique_lock<mutex>& lk) _NOEXCEPT
 
 void
 condition_variable::__do_timed_wait(unique_lock<mutex>& lk,
-     chrono::time_point<chrono::system_clock, chrono::nanoseconds> tp) _NOEXCEPT
+                                    chrono::time_point<chrono::system_clock, chrono::nanoseconds> tp) _NOEXCEPT
 {
     using namespace chrono;
     if (!lk.owns_lock())
         __throw_system_error(EPERM,
-                            "condition_variable::timed wait: mutex not locked");
+                             "condition_variable::timed wait: mutex not locked");
     nanoseconds d = tp.time_since_epoch();
     if (d > nanoseconds(0x59682F000000E941))
         d = nanoseconds(0x59682F000000E941);

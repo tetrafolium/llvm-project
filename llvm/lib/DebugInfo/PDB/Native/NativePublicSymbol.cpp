@@ -25,24 +25,28 @@ NativePublicSymbol::~NativePublicSymbol() {}
 void NativePublicSymbol::dump(raw_ostream &OS, int Indent,
                               PdbSymbolIdField ShowIdFields,
                               PdbSymbolIdField RecurseIdFields) const {
-  NativeRawSymbol::dump(OS, Indent, ShowIdFields, RecurseIdFields);
-  dumpSymbolField(OS, "name", getName(), Indent);
-  dumpSymbolField(OS, "offset", getAddressOffset(), Indent);
-  dumpSymbolField(OS, "section", getAddressSection(), Indent);
+    NativeRawSymbol::dump(OS, Indent, ShowIdFields, RecurseIdFields);
+    dumpSymbolField(OS, "name", getName(), Indent);
+    dumpSymbolField(OS, "offset", getAddressOffset(), Indent);
+    dumpSymbolField(OS, "section", getAddressSection(), Indent);
 }
 
-uint32_t NativePublicSymbol::getAddressOffset() const { return Sym.Offset; }
+uint32_t NativePublicSymbol::getAddressOffset() const {
+    return Sym.Offset;
+}
 
-uint32_t NativePublicSymbol::getAddressSection() const { return Sym.Segment; }
+uint32_t NativePublicSymbol::getAddressSection() const {
+    return Sym.Segment;
+}
 
 std::string NativePublicSymbol::getName() const {
-  return std::string(Sym.Name);
+    return std::string(Sym.Name);
 }
 
 uint32_t NativePublicSymbol::getRelativeVirtualAddress() const {
-  return Session.getRVAFromSectOffset(Sym.Segment, Sym.Offset);
+    return Session.getRVAFromSectOffset(Sym.Segment, Sym.Offset);
 }
 
 uint64_t NativePublicSymbol::getVirtualAddress() const {
-  return Session.getVAFromSectOffset(Sym.Segment, Sym.Offset);
+    return Session.getVAFromSectOffset(Sym.Segment, Sym.Offset);
 }

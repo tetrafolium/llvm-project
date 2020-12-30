@@ -22,64 +22,70 @@ namespace clang {
 /// The configuration is represented as typed, named values, making it easier
 /// and safer to work with compared to an array of string command line flags.
 struct TestClangConfig {
-  TestLanguage Language;
+    TestLanguage Language;
 
-  /// The argument of the `-target` command line flag.
-  std::string Target;
+    /// The argument of the `-target` command line flag.
+    std::string Target;
 
-  bool isC() const { return Language == Lang_C89 || Language == Lang_C99; }
+    bool isC() const {
+        return Language == Lang_C89 || Language == Lang_C99;
+    }
 
-  bool isC99OrLater() const { return Language == Lang_C99; }
+    bool isC99OrLater() const {
+        return Language == Lang_C99;
+    }
 
-  bool isCXX() const {
-    return Language == Lang_CXX03 || Language == Lang_CXX11 ||
-           Language == Lang_CXX14 || Language == Lang_CXX17 ||
-           Language == Lang_CXX20;
-  }
+    bool isCXX() const {
+        return Language == Lang_CXX03 || Language == Lang_CXX11 ||
+               Language == Lang_CXX14 || Language == Lang_CXX17 ||
+               Language == Lang_CXX20;
+    }
 
-  bool isCXX11OrLater() const {
-    return Language == Lang_CXX11 || Language == Lang_CXX14 ||
-           Language == Lang_CXX17 || Language == Lang_CXX20;
-  }
+    bool isCXX11OrLater() const {
+        return Language == Lang_CXX11 || Language == Lang_CXX14 ||
+               Language == Lang_CXX17 || Language == Lang_CXX20;
+    }
 
-  bool isCXX14OrLater() const {
-    return Language == Lang_CXX14 || Language == Lang_CXX17 ||
-           Language == Lang_CXX20;
-  }
+    bool isCXX14OrLater() const {
+        return Language == Lang_CXX14 || Language == Lang_CXX17 ||
+               Language == Lang_CXX20;
+    }
 
-  bool isCXX17OrLater() const {
-    return Language == Lang_CXX17 || Language == Lang_CXX20;
-  }
+    bool isCXX17OrLater() const {
+        return Language == Lang_CXX17 || Language == Lang_CXX20;
+    }
 
-  bool isCXX20OrLater() const { return Language == Lang_CXX20; }
+    bool isCXX20OrLater() const {
+        return Language == Lang_CXX20;
+    }
 
-  bool supportsCXXDynamicExceptionSpecification() const {
-    return Language == Lang_CXX03 || Language == Lang_CXX11 ||
-           Language == Lang_CXX14;
-  }
+    bool supportsCXXDynamicExceptionSpecification() const {
+        return Language == Lang_CXX03 || Language == Lang_CXX11 ||
+               Language == Lang_CXX14;
+    }
 
-  bool hasDelayedTemplateParsing() const {
-    return Target == "x86_64-pc-win32-msvc";
-  }
+    bool hasDelayedTemplateParsing() const {
+        return Target == "x86_64-pc-win32-msvc";
+    }
 
-  std::vector<std::string> getCommandLineArgs() const {
-    std::vector<std::string> Result = getCommandLineArgsForTesting(Language);
-    Result.push_back("-target");
-    Result.push_back(Target);
-    return Result;
-  }
+    std::vector<std::string> getCommandLineArgs() const {
+        std::vector<std::string> Result = getCommandLineArgsForTesting(Language);
+        Result.push_back("-target");
+        Result.push_back(Target);
+        return Result;
+    }
 
-  std::string toString() const {
-    std::string Result;
-    llvm::raw_string_ostream OS(Result);
-    OS << "{ Language=" << Language << ", Target=" << Target << " }";
-    return OS.str();
-  }
+    std::string toString() const {
+        std::string Result;
+        llvm::raw_string_ostream OS(Result);
+        OS << "{ Language=" << Language << ", Target=" << Target << " }";
+        return OS.str();
+    }
 
-  friend std::ostream &operator<<(std::ostream &OS,
-                                  const TestClangConfig &ClangConfig) {
-    return OS << ClangConfig.toString();
-  }
+    friend std::ostream &operator<<(std::ostream &OS,
+                                    const TestClangConfig &ClangConfig) {
+        return OS << ClangConfig.toString();
+    }
 };
 
 } // end namespace clang

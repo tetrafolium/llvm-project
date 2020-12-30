@@ -27,7 +27,7 @@ class RegionPass;
 FunctionPass *createFunctionPassPrinter(const PassInfo *PI, raw_ostream &out);
 
 CallGraphSCCPass *createCallGraphPassPrinter(const PassInfo *PI,
-                                             raw_ostream &out);
+        raw_ostream &out);
 
 ModulePass *createModulePassPrinter(const PassInfo *PI, raw_ostream &out);
 

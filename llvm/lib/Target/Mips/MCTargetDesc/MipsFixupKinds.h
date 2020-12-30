@@ -13,15 +13,15 @@
 
 namespace llvm {
 namespace Mips {
-  // Although most of the current fixup types reflect a unique relocation
-  // one can have multiple fixup types for a given relocation and thus need
-  // to be uniquely named.
-  //
-  // This table *must* be in the same order of
-  // MCFixupKindInfo Infos[Mips::NumTargetFixupKinds]
-  // in MipsAsmBackend.cpp.
-  //
-  enum Fixups {
+// Although most of the current fixup types reflect a unique relocation
+// one can have multiple fixup types for a given relocation and thus need
+// to be uniquely named.
+//
+// This table *must* be in the same order of
+// MCFixupKindInfo Infos[Mips::NumTargetFixupKinds]
+// in MipsAsmBackend.cpp.
+//
+enum Fixups {
     // Branch fixups resulting in R_MIPS_16.
     fixup_Mips_16 = FirstTargetFixupKind,
 
@@ -225,7 +225,7 @@ namespace Mips {
     // Marker
     LastTargetFixupKind,
     NumTargetFixupKinds = LastTargetFixupKind - FirstTargetFixupKind
-  };
+};
 } // namespace Mips
 } // namespace llvm
 

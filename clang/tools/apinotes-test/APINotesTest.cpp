@@ -13,41 +13,41 @@
 #include "llvm/Support/WithColor.h"
 
 static llvm::cl::list<std::string> APINotes(llvm::cl::Positional,
-                                            llvm::cl::desc("[<apinotes> ...]"),
-                                            llvm::cl::Required);
+        llvm::cl::desc("[<apinotes> ...]"),
+        llvm::cl::Required);
 
 static llvm::cl::opt<std::string>
-    OutputFileName("o", llvm::cl::desc("output filename"),
-                   llvm::cl::value_desc("filename"), llvm::cl::init("-"));
+OutputFileName("o", llvm::cl::desc("output filename"),
+               llvm::cl::value_desc("filename"), llvm::cl::init("-"));
 
 int main(int argc, const char **argv) {
-  const bool DisableCrashReporting = true;
-  llvm::sys::PrintStackTraceOnErrorSignal(argv[0], DisableCrashReporting);
-  llvm::cl::ParseCommandLineOptions(argc, argv);
+    const bool DisableCrashReporting = true;
+    llvm::sys::PrintStackTraceOnErrorSignal(argv[0], DisableCrashReporting);
+    llvm::cl::ParseCommandLineOptions(argc, argv);
 
-  auto Error = [](const llvm::Twine &Msg) {
-    llvm::WithColor::error(llvm::errs(), "apinotes-test") << Msg << '\n';
-  };
+    auto Error = [](const llvm::Twine &Msg) {
+        llvm::WithColor::error(llvm::errs(), "apinotes-test") << Msg << '\n';
+    };
 
-  std::error_code EC;
-  auto Out = std::make_unique<llvm::ToolOutputFile>(OutputFileName, EC,
-                                                    llvm::sys::fs::OF_None);
-  if (EC) {
-    Error("failed to open '" + OutputFileName + "': " + EC.message());
-    return EXIT_FAILURE;
-  }
-
-  for (const std::string &Notes : APINotes) {
-    llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> NotesOrError =
-        llvm::MemoryBuffer::getFileOrSTDIN(Notes);
-    if (std::error_code EC = NotesOrError.getError()) {
-      llvm::errs() << EC.message() << '\n';
-      return EXIT_FAILURE;
+    std::error_code EC;
+    auto Out = std::make_unique<llvm::ToolOutputFile>(OutputFileName, EC,
+               llvm::sys::fs::OF_None);
+    if (EC) {
+        Error("failed to open '" + OutputFileName + "': " + EC.message());
+        return EXIT_FAILURE;
     }
 
-    clang::api_notes::parseAndDumpAPINotes((*NotesOrError)->getBuffer(),
-                                           Out->os());
-  }
+    for (const std::string &Notes : APINotes) {
+        llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> NotesOrError =
+                    llvm::MemoryBuffer::getFileOrSTDIN(Notes);
+        if (std::error_code EC = NotesOrError.getError()) {
+            llvm::errs() << EC.message() << '\n';
+            return EXIT_FAILURE;
+        }
 
-  return EXIT_SUCCESS;
+        clang::api_notes::parseAndDumpAPINotes((*NotesOrError)->getBuffer(),
+                                               Out->os());
+    }
+
+    return EXIT_SUCCESS;
 }

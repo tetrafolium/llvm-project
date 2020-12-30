@@ -21,38 +21,40 @@ namespace llvm {
 namespace xray {
 
 class BlockPrinter : public RecordVisitor {
-  enum class State {
-    Start,
-    Preamble,
-    Metadata,
-    Function,
-    Arg,
-    CustomEvent,
-    End,
-  };
+    enum class State {
+        Start,
+        Preamble,
+        Metadata,
+        Function,
+        Arg,
+        CustomEvent,
+        End,
+    };
 
-  raw_ostream &OS;
-  RecordPrinter &RP;
-  State CurrentState = State::Start;
+    raw_ostream &OS;
+    RecordPrinter &RP;
+    State CurrentState = State::Start;
 
 public:
-  explicit BlockPrinter(raw_ostream &O, RecordPrinter &P)
-      : RecordVisitor(), OS(O), RP(P) {}
+    explicit BlockPrinter(raw_ostream &O, RecordPrinter &P)
+        : RecordVisitor(), OS(O), RP(P) {}
 
-  Error visit(BufferExtents &) override;
-  Error visit(WallclockRecord &) override;
-  Error visit(NewCPUIDRecord &) override;
-  Error visit(TSCWrapRecord &) override;
-  Error visit(CustomEventRecord &) override;
-  Error visit(CallArgRecord &) override;
-  Error visit(PIDRecord &) override;
-  Error visit(NewBufferRecord &) override;
-  Error visit(EndBufferRecord &) override;
-  Error visit(FunctionRecord &) override;
-  Error visit(CustomEventRecordV5 &) override;
-  Error visit(TypedEventRecord &) override;
+    Error visit(BufferExtents &) override;
+    Error visit(WallclockRecord &) override;
+    Error visit(NewCPUIDRecord &) override;
+    Error visit(TSCWrapRecord &) override;
+    Error visit(CustomEventRecord &) override;
+    Error visit(CallArgRecord &) override;
+    Error visit(PIDRecord &) override;
+    Error visit(NewBufferRecord &) override;
+    Error visit(EndBufferRecord &) override;
+    Error visit(FunctionRecord &) override;
+    Error visit(CustomEventRecordV5 &) override;
+    Error visit(TypedEventRecord &) override;
 
-  void reset() { CurrentState = State::Start; }
+    void reset() {
+        CurrentState = State::Start;
+    }
 };
 
 } // namespace xray

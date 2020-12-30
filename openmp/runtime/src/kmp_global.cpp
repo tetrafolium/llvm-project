@@ -106,9 +106,10 @@ char const *__kmp_barrier_type_name[bs_last_barrier] = {"plain", "forkjoin"
                                                         ,
                                                         "reduction"
 #endif // KMP_FAST_REDUCTION_BARRIER
-};
+                                                       };
 char const *__kmp_barrier_pattern_name[bp_last_bar] = {"linear", "tree",
-                                                       "hyper", "hierarchical"};
+                                                       "hyper", "hierarchical"
+                                                      };
 
 int __kmp_allThreadsSpecified = 0;
 size_t __kmp_align_alloc = CACHE_LINE;
@@ -154,7 +155,7 @@ int __kmp_dflt_blocktime = KMP_DEFAULT_BLOCKTIME;
 #if KMP_USE_MONITOR
 int __kmp_monitor_wakeups = KMP_MIN_MONITOR_WAKEUPS;
 int __kmp_bt_intervals = KMP_INTERVALS_FROM_BLOCKTIME(KMP_DEFAULT_BLOCKTIME,
-                                                      KMP_MIN_MONITOR_WAKEUPS);
+                         KMP_MIN_MONITOR_WAKEUPS);
 #endif
 #ifdef KMP_ADJUST_BLOCKTIME
 int __kmp_zero_bt = FALSE;
@@ -194,7 +195,8 @@ kmp_nested_nthreads_t __kmp_nested_nth = {NULL, 0, 0};
 #if KMP_USE_ADAPTIVE_LOCKS
 
 kmp_adaptive_backoff_params_t __kmp_adaptive_backoff_params = {
-    1, 1024}; // TODO: tune it!
+    1, 1024
+}; // TODO: tune it!
 
 #if KMP_DEBUG_ADAPTIVE_LOCKS
 const char *__kmp_speculative_statsfile = "-";
@@ -215,7 +217,7 @@ int __kmp_mwait_hints = 0;
 
 /* map OMP 3.0 schedule types with our internal schedule types */
 enum sched_type __kmp_sch_map[kmp_sched_upper - kmp_sched_lower_ext +
-                              kmp_sched_upper_std - kmp_sched_lower - 2] = {
+                kmp_sched_upper_std - kmp_sched_lower - 2] = {
     kmp_sch_static_chunked, // ==> kmp_sched_static            = 1
     kmp_sch_dynamic_chunked, // ==> kmp_sched_dynamic           = 2
     kmp_sch_guided_chunked, // ==> kmp_sched_guided            = 3
@@ -519,11 +521,13 @@ int __kmp_handle_signals = FALSE;
 
 #ifdef DEBUG_SUSPEND
 int get_suspend_count_(void) {
-  int count = __kmp_suspend_count;
-  __kmp_suspend_count = 0;
-  return count;
+    int count = __kmp_suspend_count;
+    __kmp_suspend_count = 0;
+    return count;
 }
-void set_suspend_count_(int *value) { __kmp_suspend_count = *value; }
+void set_suspend_count_(int *value) {
+    __kmp_suspend_count = *value;
+}
 #endif
 
 // Symbols for MS mutual detection.

@@ -34,7 +34,7 @@ _CLC_OVERLOAD _CLC_DEF float expm1(float x) {
     float two_to_jby64 = two_to_jby64_h + two_to_jby64_t;
 
     z2 = mad(z2, two_to_jby64, two_to_jby64_t) + (two_to_jby64_h - 1.0f);
-	//Make subnormals work
+    //Make subnormals work
     z2 = x == 0.f ? x : z2;
     z2 = x < X_MIN | m < -24 ? -1.0f : z2;
     z2 = x > X_MAX ? as_float(PINFBITPATT_SP32) : z2;
@@ -67,20 +67,20 @@ _CLC_OVERLOAD _CLC_DEF double expm1(double x) {
     double z = v * (x + u) * 0.5;
 
     double q = fma(x,
-	           fma(x,
-		       fma(x,
-			   fma(x,
-			       fma(x,
-				   fma(x,
-				       fma(x,
-					   fma(x,2.4360682937111612e-8, 2.7582184028154370e-7),
-					   2.7558212415361945e-6),
-				       2.4801576918453420e-5),
-				   1.9841269447671544e-4),
-			       1.3888888890687830e-3),
-			   8.3333333334012270e-3),
-		       4.1666666666665560e-2),
-		   1.6666666666666632e-1);
+                   fma(x,
+                       fma(x,
+                           fma(x,
+                               fma(x,
+                                   fma(x,
+                                       fma(x,
+                                           fma(x,2.4360682937111612e-8, 2.7582184028154370e-7),
+                                           2.7558212415361945e-6),
+                                       2.4801576918453420e-5),
+                                   1.9841269447671544e-4),
+                               1.3888888890687830e-3),
+                           8.3333333334012270e-3),
+                       4.1666666666665560e-2),
+                   1.6666666666666632e-1);
     q *= x * x * x;
 
     double z1g = (u + y) + (q + (v + z));
@@ -101,12 +101,12 @@ _CLC_OVERLOAD _CLC_DEF double expm1(double x) {
     double r = fma(dn, lnof2_by_64_tail, fma(dn, lnof2_by_64_head, x));
 
     q = fma(r,
-	    fma(r,
-		fma(r,
-		    fma(r, 1.38889490863777199667e-03, 8.33336798434219616221e-03),
-		    4.16666666662260795726e-02),
-		1.66666666665260878863e-01),
-	     5.00000000000000008883e-01);
+            fma(r,
+                fma(r,
+                    fma(r, 1.38889490863777199667e-03, 8.33336798434219616221e-03),
+                    4.16666666662260795726e-02),
+                1.66666666665260878863e-01),
+            5.00000000000000008883e-01);
     q = fma(r*r, q, r);
 
     double twopm = as_double((long)(m + EXPBIAS_DP64) << EXPSHIFTBITS_DP64);

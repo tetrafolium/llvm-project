@@ -35,71 +35,71 @@ using ValueToValueMapTy = ValueMap<const Value *, WeakTrackingVH>;
 /// This is a class that can be implemented by clients to remap types when
 /// cloning constants and instructions.
 class ValueMapTypeRemapper {
-  virtual void anchor(); // Out of line method.
+    virtual void anchor(); // Out of line method.
 
 public:
-  virtual ~ValueMapTypeRemapper() = default;
+    virtual ~ValueMapTypeRemapper() = default;
 
-  /// The client should implement this method if they want to remap types while
-  /// mapping values.
-  virtual Type *remapType(Type *SrcTy) = 0;
+    /// The client should implement this method if they want to remap types while
+    /// mapping values.
+    virtual Type *remapType(Type *SrcTy) = 0;
 };
 
 /// This is a class that can be implemented by clients to materialize Values on
 /// demand.
 class ValueMaterializer {
-  virtual void anchor(); // Out of line method.
+    virtual void anchor(); // Out of line method.
 
 protected:
-  ValueMaterializer() = default;
-  ValueMaterializer(const ValueMaterializer &) = default;
-  ValueMaterializer &operator=(const ValueMaterializer &) = default;
-  ~ValueMaterializer() = default;
+    ValueMaterializer() = default;
+    ValueMaterializer(const ValueMaterializer &) = default;
+    ValueMaterializer &operator=(const ValueMaterializer &) = default;
+    ~ValueMaterializer() = default;
 
 public:
-  /// This method can be implemented to generate a mapped Value on demand. For
-  /// example, if linking lazily. Returns null if the value is not materialized.
-  virtual Value *materialize(Value *V) = 0;
+    /// This method can be implemented to generate a mapped Value on demand. For
+    /// example, if linking lazily. Returns null if the value is not materialized.
+    virtual Value *materialize(Value *V) = 0;
 };
 
 /// These are flags that the value mapping APIs allow.
 enum RemapFlags {
-  RF_None = 0,
+    RF_None = 0,
 
-  /// If this flag is set, the remapper knows that only local values within a
-  /// function (such as an instruction or argument) are mapped, not global
-  /// values like functions and global metadata.
-  RF_NoModuleLevelChanges = 1,
+    /// If this flag is set, the remapper knows that only local values within a
+    /// function (such as an instruction or argument) are mapped, not global
+    /// values like functions and global metadata.
+    RF_NoModuleLevelChanges = 1,
 
-  /// If this flag is set, the remapper ignores missing function-local entries
-  /// (Argument, Instruction, BasicBlock) that are not in the value map.  If it
-  /// is unset, it aborts if an operand is asked to be remapped which doesn't
-  /// exist in the mapping.
-  ///
-  /// There are no such assertions in MapValue(), whose results are almost
-  /// unchanged by this flag.  This flag mainly changes the assertion behaviour
-  /// in RemapInstruction().
-  ///
-  /// Since an Instruction's metadata operands (even that point to SSA values)
-  /// aren't guaranteed to be dominated by their definitions, MapMetadata will
-  /// return "!{}" instead of "null" for \a LocalAsMetadata instances whose SSA
-  /// values are unmapped when this flag is set.  Otherwise, \a MapValue()
-  /// completely ignores this flag.
-  ///
-  /// \a MapMetadata() always ignores this flag.
-  RF_IgnoreMissingLocals = 2,
+    /// If this flag is set, the remapper ignores missing function-local entries
+    /// (Argument, Instruction, BasicBlock) that are not in the value map.  If it
+    /// is unset, it aborts if an operand is asked to be remapped which doesn't
+    /// exist in the mapping.
+    ///
+    /// There are no such assertions in MapValue(), whose results are almost
+    /// unchanged by this flag.  This flag mainly changes the assertion behaviour
+    /// in RemapInstruction().
+    ///
+    /// Since an Instruction's metadata operands (even that point to SSA values)
+    /// aren't guaranteed to be dominated by their definitions, MapMetadata will
+    /// return "!{}" instead of "null" for \a LocalAsMetadata instances whose SSA
+    /// values are unmapped when this flag is set.  Otherwise, \a MapValue()
+    /// completely ignores this flag.
+    ///
+    /// \a MapMetadata() always ignores this flag.
+    RF_IgnoreMissingLocals = 2,
 
-  /// Instruct the remapper to move distinct metadata instead of duplicating it
-  /// when there are module-level changes.
-  RF_MoveDistinctMDs = 4,
+    /// Instruct the remapper to move distinct metadata instead of duplicating it
+    /// when there are module-level changes.
+    RF_MoveDistinctMDs = 4,
 
-  /// Any global values not in value map are mapped to null instead of mapping
-  /// to self.  Illegal if RF_IgnoreMissingLocals is also set.
-  RF_NullMapMissingGlobalValues = 8,
+    /// Any global values not in value map are mapped to null instead of mapping
+    /// to self.  Illegal if RF_IgnoreMissingLocals is also set.
+    RF_NullMapMissingGlobalValues = 8,
 };
 
 inline RemapFlags operator|(RemapFlags LHS, RemapFlags RHS) {
-  return RemapFlags(unsigned(LHS) | unsigned(RHS));
+    return RemapFlags(unsigned(LHS) | unsigned(RHS));
 }
 
 /// Context for (re-)mapping values (and metadata).
@@ -139,51 +139,51 @@ inline RemapFlags operator|(RemapFlags LHS, RemapFlags RHS) {
 /// TODO: Update callers of \a RemapInstruction() and \a MapValue() (etc.) to
 /// use \a ValueMapper directly.
 class ValueMapper {
-  void *pImpl;
+    void *pImpl;
 
 public:
-  ValueMapper(ValueToValueMapTy &VM, RemapFlags Flags = RF_None,
-              ValueMapTypeRemapper *TypeMapper = nullptr,
-              ValueMaterializer *Materializer = nullptr);
-  ValueMapper(ValueMapper &&) = delete;
-  ValueMapper(const ValueMapper &) = delete;
-  ValueMapper &operator=(ValueMapper &&) = delete;
-  ValueMapper &operator=(const ValueMapper &) = delete;
-  ~ValueMapper();
+    ValueMapper(ValueToValueMapTy &VM, RemapFlags Flags = RF_None,
+                ValueMapTypeRemapper *TypeMapper = nullptr,
+                ValueMaterializer *Materializer = nullptr);
+    ValueMapper(ValueMapper &&) = delete;
+    ValueMapper(const ValueMapper &) = delete;
+    ValueMapper &operator=(ValueMapper &&) = delete;
+    ValueMapper &operator=(const ValueMapper &) = delete;
+    ~ValueMapper();
 
-  /// Register an alternate mapping context.
-  ///
-  /// Returns a MappingContextID that can be used with the various schedule*()
-  /// API to switch in a different value map on-the-fly.
-  unsigned
-  registerAlternateMappingContext(ValueToValueMapTy &VM,
-                                  ValueMaterializer *Materializer = nullptr);
+    /// Register an alternate mapping context.
+    ///
+    /// Returns a MappingContextID that can be used with the various schedule*()
+    /// API to switch in a different value map on-the-fly.
+    unsigned
+    registerAlternateMappingContext(ValueToValueMapTy &VM,
+                                    ValueMaterializer *Materializer = nullptr);
 
-  /// Add to the current \a RemapFlags.
-  ///
-  /// \note Like the top-level mapping functions, \a addFlags() must be called
-  /// at the top level, not during a callback in a \a ValueMaterializer.
-  void addFlags(RemapFlags Flags);
+    /// Add to the current \a RemapFlags.
+    ///
+    /// \note Like the top-level mapping functions, \a addFlags() must be called
+    /// at the top level, not during a callback in a \a ValueMaterializer.
+    void addFlags(RemapFlags Flags);
 
-  Metadata *mapMetadata(const Metadata &MD);
-  MDNode *mapMDNode(const MDNode &N);
+    Metadata *mapMetadata(const Metadata &MD);
+    MDNode *mapMDNode(const MDNode &N);
 
-  Value *mapValue(const Value &V);
-  Constant *mapConstant(const Constant &C);
+    Value *mapValue(const Value &V);
+    Constant *mapConstant(const Constant &C);
 
-  void remapInstruction(Instruction &I);
-  void remapFunction(Function &F);
+    void remapInstruction(Instruction &I);
+    void remapFunction(Function &F);
 
-  void scheduleMapGlobalInitializer(GlobalVariable &GV, Constant &Init,
-                                    unsigned MappingContextID = 0);
-  void scheduleMapAppendingVariable(GlobalVariable &GV, Constant *InitPrefix,
-                                    bool IsOldCtorDtor,
-                                    ArrayRef<Constant *> NewMembers,
-                                    unsigned MappingContextID = 0);
-  void scheduleMapGlobalIndirectSymbol(GlobalIndirectSymbol &GIS,
-                                       Constant &Target,
-                                       unsigned MappingContextID = 0);
-  void scheduleRemapFunction(Function &F, unsigned MappingContextID = 0);
+    void scheduleMapGlobalInitializer(GlobalVariable &GV, Constant &Init,
+                                      unsigned MappingContextID = 0);
+    void scheduleMapAppendingVariable(GlobalVariable &GV, Constant *InitPrefix,
+                                      bool IsOldCtorDtor,
+                                      ArrayRef<Constant *> NewMembers,
+                                      unsigned MappingContextID = 0);
+    void scheduleMapGlobalIndirectSymbol(GlobalIndirectSymbol &GIS,
+                                         Constant &Target,
+                                         unsigned MappingContextID = 0);
+    void scheduleRemapFunction(Function &F, unsigned MappingContextID = 0);
 };
 
 /// Look up or compute a value in the value map.
@@ -207,7 +207,7 @@ inline Value *MapValue(const Value *V, ValueToValueMapTy &VM,
                        RemapFlags Flags = RF_None,
                        ValueMapTypeRemapper *TypeMapper = nullptr,
                        ValueMaterializer *Materializer = nullptr) {
-  return ValueMapper(VM, Flags, TypeMapper, Materializer).mapValue(*V);
+    return ValueMapper(VM, Flags, TypeMapper, Materializer).mapValue(*V);
 }
 
 /// Lookup or compute a mapping for a piece of metadata.
@@ -229,7 +229,7 @@ inline Metadata *MapMetadata(const Metadata *MD, ValueToValueMapTy &VM,
                              RemapFlags Flags = RF_None,
                              ValueMapTypeRemapper *TypeMapper = nullptr,
                              ValueMaterializer *Materializer = nullptr) {
-  return ValueMapper(VM, Flags, TypeMapper, Materializer).mapMetadata(*MD);
+    return ValueMapper(VM, Flags, TypeMapper, Materializer).mapMetadata(*MD);
 }
 
 /// Version of MapMetadata with type safety for MDNode.
@@ -237,7 +237,7 @@ inline MDNode *MapMetadata(const MDNode *MD, ValueToValueMapTy &VM,
                            RemapFlags Flags = RF_None,
                            ValueMapTypeRemapper *TypeMapper = nullptr,
                            ValueMaterializer *Materializer = nullptr) {
-  return ValueMapper(VM, Flags, TypeMapper, Materializer).mapMDNode(*MD);
+    return ValueMapper(VM, Flags, TypeMapper, Materializer).mapMDNode(*MD);
 }
 
 /// Convert the instruction operands from referencing the current values into
@@ -252,7 +252,7 @@ inline void RemapInstruction(Instruction *I, ValueToValueMapTy &VM,
                              RemapFlags Flags = RF_None,
                              ValueMapTypeRemapper *TypeMapper = nullptr,
                              ValueMaterializer *Materializer = nullptr) {
-  ValueMapper(VM, Flags, TypeMapper, Materializer).remapInstruction(*I);
+    ValueMapper(VM, Flags, TypeMapper, Materializer).remapInstruction(*I);
 }
 
 /// Remap the operands, metadata, arguments, and instructions of a function.
@@ -265,7 +265,7 @@ inline void RemapFunction(Function &F, ValueToValueMapTy &VM,
                           RemapFlags Flags = RF_None,
                           ValueMapTypeRemapper *TypeMapper = nullptr,
                           ValueMaterializer *Materializer = nullptr) {
-  ValueMapper(VM, Flags, TypeMapper, Materializer).remapFunction(F);
+    ValueMapper(VM, Flags, TypeMapper, Materializer).remapFunction(F);
 }
 
 /// Version of MapValue with type safety for Constant.
@@ -273,7 +273,7 @@ inline Constant *MapValue(const Constant *V, ValueToValueMapTy &VM,
                           RemapFlags Flags = RF_None,
                           ValueMapTypeRemapper *TypeMapper = nullptr,
                           ValueMaterializer *Materializer = nullptr) {
-  return ValueMapper(VM, Flags, TypeMapper, Materializer).mapConstant(*V);
+    return ValueMapper(VM, Flags, TypeMapper, Materializer).mapConstant(*V);
 }
 
 } // end namespace llvm

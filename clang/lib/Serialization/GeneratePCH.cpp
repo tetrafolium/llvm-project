@@ -32,52 +32,52 @@ PCHGenerator::PCHGenerator(
              IncludeTimestamps),
       AllowASTWithErrors(AllowASTWithErrors),
       ShouldCacheASTInMemory(ShouldCacheASTInMemory) {
-  this->Buffer->IsComplete = false;
+    this->Buffer->IsComplete = false;
 }
 
 PCHGenerator::~PCHGenerator() {
 }
 
 void PCHGenerator::HandleTranslationUnit(ASTContext &Ctx) {
-  // Don't create a PCH if there were fatal failures during module loading.
-  if (PP.getModuleLoader().HadFatalFailure)
-    return;
+    // Don't create a PCH if there were fatal failures during module loading.
+    if (PP.getModuleLoader().HadFatalFailure)
+        return;
 
-  bool hasErrors = PP.getDiagnostics().hasErrorOccurred();
-  if (hasErrors && !AllowASTWithErrors)
-    return;
+    bool hasErrors = PP.getDiagnostics().hasErrorOccurred();
+    if (hasErrors && !AllowASTWithErrors)
+        return;
 
-  Module *Module = nullptr;
-  if (PP.getLangOpts().isCompilingModule()) {
-    Module = PP.getHeaderSearchInfo().lookupModule(
-        PP.getLangOpts().CurrentModule, /*AllowSearch*/ false);
-    if (!Module) {
-      assert(hasErrors && "emitting module but current module doesn't exist");
-      return;
+    Module *Module = nullptr;
+    if (PP.getLangOpts().isCompilingModule()) {
+        Module = PP.getHeaderSearchInfo().lookupModule(
+                     PP.getLangOpts().CurrentModule, /*AllowSearch*/ false);
+        if (!Module) {
+            assert(hasErrors && "emitting module but current module doesn't exist");
+            return;
+        }
     }
-  }
 
-  // Errors that do not prevent the PCH from being written should not cause the
-  // overall compilation to fail either.
-  if (AllowASTWithErrors)
-    PP.getDiagnostics().getClient()->clear();
+    // Errors that do not prevent the PCH from being written should not cause the
+    // overall compilation to fail either.
+    if (AllowASTWithErrors)
+        PP.getDiagnostics().getClient()->clear();
 
-  // Emit the PCH file to the Buffer.
-  assert(SemaPtr && "No Sema?");
-  Buffer->Signature =
-      Writer.WriteAST(*SemaPtr, OutputFile, Module, isysroot,
-                      // For serialization we are lenient if the errors were
-                      // only warn-as-error kind.
-                      PP.getDiagnostics().hasUncompilableErrorOccurred(),
-                      ShouldCacheASTInMemory);
+    // Emit the PCH file to the Buffer.
+    assert(SemaPtr && "No Sema?");
+    Buffer->Signature =
+        Writer.WriteAST(*SemaPtr, OutputFile, Module, isysroot,
+                        // For serialization we are lenient if the errors were
+                        // only warn-as-error kind.
+                        PP.getDiagnostics().hasUncompilableErrorOccurred(),
+                        ShouldCacheASTInMemory);
 
-  Buffer->IsComplete = true;
+    Buffer->IsComplete = true;
 }
 
 ASTMutationListener *PCHGenerator::GetASTMutationListener() {
-  return &Writer;
+    return &Writer;
 }
 
 ASTDeserializationListener *PCHGenerator::GetASTDeserializationListener() {
-  return &Writer;
+    return &Writer;
 }

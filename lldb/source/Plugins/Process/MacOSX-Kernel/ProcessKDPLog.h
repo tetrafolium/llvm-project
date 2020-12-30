@@ -28,14 +28,14 @@
 
 namespace lldb_private {
 class ProcessKDPLog {
-  static Log::Channel g_channel;
+    static Log::Channel g_channel;
 
 public:
-  static void Initialize();
+    static void Initialize();
 
-  static Log *GetLogIfAllCategoriesSet(uint32_t mask) {
-    return g_channel.GetLogIfAll(mask);
-  }
+    static Log *GetLogIfAllCategoriesSet(uint32_t mask) {
+        return g_channel.GetLogIfAll(mask);
+    }
 };
 }
 

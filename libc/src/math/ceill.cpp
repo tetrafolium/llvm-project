@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 long double LLVM_LIBC_ENTRYPOINT(ceill)(long double x) {
-  return fputil::ceil(x);
+    return fputil::ceil(x);
 }
 
 } // namespace __llvm_libc

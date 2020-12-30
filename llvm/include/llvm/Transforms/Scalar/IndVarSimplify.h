@@ -23,13 +23,13 @@ class Loop;
 class LPMUpdater;
 
 class IndVarSimplifyPass : public PassInfoMixin<IndVarSimplifyPass> {
-  /// Perform IV widening during the pass.
-  bool WidenIndVars;
+    /// Perform IV widening during the pass.
+    bool WidenIndVars;
 
 public:
-  IndVarSimplifyPass(bool WidenIndVars = true) : WidenIndVars(WidenIndVars) {}
-  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
+    IndVarSimplifyPass(bool WidenIndVars = true) : WidenIndVars(WidenIndVars) {}
+    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
 } // end namespace llvm

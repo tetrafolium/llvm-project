@@ -18,10 +18,10 @@ namespace lldb_private {
 class Process;
 
 enum MmapProt {
-  eMmapProtNone = 0,
-  eMmapProtExec = 1,
-  eMmapProtRead = 2,
-  eMmapProtWrite = 4
+    eMmapProtNone = 0,
+    eMmapProtExec = 1,
+    eMmapProtRead = 2,
+    eMmapProtWrite = 4
 };
 
 bool InferiorCallMmap(Process *proc, lldb::addr_t &allocated_addr,

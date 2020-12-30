@@ -22,35 +22,35 @@
 namespace llvm {
 
 struct AMDGPUPerfHintAnalysis : public CallGraphSCCPass {
-  static char ID;
+    static char ID;
 
 public:
-  AMDGPUPerfHintAnalysis() : CallGraphSCCPass(ID) {}
+    AMDGPUPerfHintAnalysis() : CallGraphSCCPass(ID) {}
 
-  bool runOnSCC(CallGraphSCC &SCC) override;
+    bool runOnSCC(CallGraphSCC &SCC) override;
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesAll();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesAll();
+    }
 
-  bool isMemoryBound(const Function *F) const;
+    bool isMemoryBound(const Function *F) const;
 
-  bool needsWaveLimiter(const Function *F) const;
+    bool needsWaveLimiter(const Function *F) const;
 
-  struct FuncInfo {
-    unsigned MemInstCount;
-    unsigned InstCount;
-    unsigned IAMInstCount; // Indirect access memory instruction count
-    unsigned LSMInstCount; // Large stride memory instruction count
-    FuncInfo() : MemInstCount(0), InstCount(0), IAMInstCount(0),
-                 LSMInstCount(0) {}
-  };
+    struct FuncInfo {
+        unsigned MemInstCount;
+        unsigned InstCount;
+        unsigned IAMInstCount; // Indirect access memory instruction count
+        unsigned LSMInstCount; // Large stride memory instruction count
+        FuncInfo() : MemInstCount(0), InstCount(0), IAMInstCount(0),
+            LSMInstCount(0) {}
+    };
 
-  typedef ValueMap<const Function*, FuncInfo> FuncInfoMap;
+    typedef ValueMap<const Function*, FuncInfo> FuncInfoMap;
 
 private:
 
-  FuncInfoMap FIM;
+    FuncInfoMap FIM;
 };
 } // namespace llvm
 #endif // LLVM_LIB_TARGET_AMDGPU_MDGPUPERFHINTANALYSIS_H

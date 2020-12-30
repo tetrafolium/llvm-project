@@ -28,39 +28,39 @@ class TpiStream;
 /// record.
 class TypeReferenceTracker {
 public:
-  TypeReferenceTracker(InputFile &File);
+    TypeReferenceTracker(InputFile &File);
 
-  // Do the work of marking referenced types.
-  void mark();
+    // Do the work of marking referenced types.
+    void mark();
 
-  // Return true if a symbol record transitively references this type.
-  bool isTypeReferenced(codeview::TypeIndex TI) {
-    return TI.toArrayIndex() <= NumTypeRecords &&
-           TypeReferenced.test(TI.toArrayIndex());
-  }
+    // Return true if a symbol record transitively references this type.
+    bool isTypeReferenced(codeview::TypeIndex TI) {
+        return TI.toArrayIndex() <= NumTypeRecords &&
+               TypeReferenced.test(TI.toArrayIndex());
+    }
 
 private:
-  void addTypeRefsFromSymbol(const codeview::CVSymbol &Sym);
+    void addTypeRefsFromSymbol(const codeview::CVSymbol &Sym);
 
-  // Mark types on this list as referenced.
-  void addReferencedTypes(ArrayRef<uint8_t> RecData,
-                          ArrayRef<codeview::TiReference> Refs);
+    // Mark types on this list as referenced.
+    void addReferencedTypes(ArrayRef<uint8_t> RecData,
+                            ArrayRef<codeview::TiReference> Refs);
 
-  // Consume all types on the worklist.
-  void markReferencedTypes();
+    // Consume all types on the worklist.
+    void markReferencedTypes();
 
-  void addOneTypeRef(codeview::TiRefKind RefKind, codeview::TypeIndex RefTI);
+    void addOneTypeRef(codeview::TiRefKind RefKind, codeview::TypeIndex RefTI);
 
-  InputFile &File;
-  codeview::LazyRandomTypeCollection &Types;
-  codeview::LazyRandomTypeCollection *Ids = nullptr;
-  TpiStream *Tpi = nullptr;
-  BitVector TypeReferenced;
-  BitVector IdReferenced;
-  SmallVector<std::pair<codeview::TiRefKind, codeview::TypeIndex>, 10>
-      RefWorklist;
-  uint32_t NumTypeRecords = 0;
-  uint32_t NumIdRecords = 0;
+    InputFile &File;
+    codeview::LazyRandomTypeCollection &Types;
+    codeview::LazyRandomTypeCollection *Ids = nullptr;
+    TpiStream *Tpi = nullptr;
+    BitVector TypeReferenced;
+    BitVector IdReferenced;
+    SmallVector<std::pair<codeview::TiRefKind, codeview::TypeIndex>, 10>
+    RefWorklist;
+    uint32_t NumTypeRecords = 0;
+    uint32_t NumIdRecords = 0;
 };
 
 } // namespace pdb

@@ -23,116 +23,122 @@
 
 namespace llvm {
 template <typename T> class ArrayRef;
-  class Record;
-  class DagInit;
-  class CodeGenTarget;
+class Record;
+class DagInit;
+class CodeGenTarget;
 
-  class CGIOperandList {
-  public:
+class CGIOperandList {
+public:
     class ConstraintInfo {
-      enum { None, EarlyClobber, Tied } Kind = None;
-      unsigned OtherTiedOperand = 0;
+        enum { None, EarlyClobber, Tied } Kind = None;
+        unsigned OtherTiedOperand = 0;
 
     public:
-      ConstraintInfo() = default;
+        ConstraintInfo() = default;
 
-      static ConstraintInfo getEarlyClobber() {
-        ConstraintInfo I;
-        I.Kind = EarlyClobber;
-        I.OtherTiedOperand = 0;
-        return I;
-      }
+        static ConstraintInfo getEarlyClobber() {
+            ConstraintInfo I;
+            I.Kind = EarlyClobber;
+            I.OtherTiedOperand = 0;
+            return I;
+        }
 
-      static ConstraintInfo getTied(unsigned Op) {
-        ConstraintInfo I;
-        I.Kind = Tied;
-        I.OtherTiedOperand = Op;
-        return I;
-      }
+        static ConstraintInfo getTied(unsigned Op) {
+            ConstraintInfo I;
+            I.Kind = Tied;
+            I.OtherTiedOperand = Op;
+            return I;
+        }
 
-      bool isNone() const { return Kind == None; }
-      bool isEarlyClobber() const { return Kind == EarlyClobber; }
-      bool isTied() const { return Kind == Tied; }
+        bool isNone() const {
+            return Kind == None;
+        }
+        bool isEarlyClobber() const {
+            return Kind == EarlyClobber;
+        }
+        bool isTied() const {
+            return Kind == Tied;
+        }
 
-      unsigned getTiedOperand() const {
-        assert(isTied());
-        return OtherTiedOperand;
-      }
+        unsigned getTiedOperand() const {
+            assert(isTied());
+            return OtherTiedOperand;
+        }
 
-      bool operator==(const ConstraintInfo &RHS) const {
-        if (Kind != RHS.Kind)
-          return false;
-        if (Kind == Tied && OtherTiedOperand != RHS.OtherTiedOperand)
-          return false;
-        return true;
-      }
-      bool operator!=(const ConstraintInfo &RHS) const {
-        return !(*this == RHS);
-      }
+        bool operator==(const ConstraintInfo &RHS) const {
+            if (Kind != RHS.Kind)
+                return false;
+            if (Kind == Tied && OtherTiedOperand != RHS.OtherTiedOperand)
+                return false;
+            return true;
+        }
+        bool operator!=(const ConstraintInfo &RHS) const {
+            return !(*this == RHS);
+        }
     };
 
     /// OperandInfo - The information we keep track of for each operand in the
     /// operand list for a tablegen instruction.
     struct OperandInfo {
-      /// Rec - The definition this operand is declared as.
-      ///
-      Record *Rec;
+        /// Rec - The definition this operand is declared as.
+        ///
+        Record *Rec;
 
-      /// Name - If this operand was assigned a symbolic name, this is it,
-      /// otherwise, it's empty.
-      std::string Name;
+        /// Name - If this operand was assigned a symbolic name, this is it,
+        /// otherwise, it's empty.
+        std::string Name;
 
-      /// PrinterMethodName - The method used to print operands of this type in
-      /// the asmprinter.
-      std::string PrinterMethodName;
+        /// PrinterMethodName - The method used to print operands of this type in
+        /// the asmprinter.
+        std::string PrinterMethodName;
 
-      /// EncoderMethodName - The method used to get the machine operand value
-      /// for binary encoding. "getMachineOpValue" by default.
-      std::string EncoderMethodName;
+        /// EncoderMethodName - The method used to get the machine operand value
+        /// for binary encoding. "getMachineOpValue" by default.
+        std::string EncoderMethodName;
 
-      /// OperandType - A value from MCOI::OperandType representing the type of
-      /// the operand.
-      std::string OperandType;
+        /// OperandType - A value from MCOI::OperandType representing the type of
+        /// the operand.
+        std::string OperandType;
 
-      /// MIOperandNo - Currently (this is meant to be phased out), some logical
-      /// operands correspond to multiple MachineInstr operands.  In the X86
-      /// target for example, one address operand is represented as 4
-      /// MachineOperands.  Because of this, the operand number in the
-      /// OperandList may not match the MachineInstr operand num.  Until it
-      /// does, this contains the MI operand index of this operand.
-      unsigned MIOperandNo;
-      unsigned MINumOperands;   // The number of operands.
+        /// MIOperandNo - Currently (this is meant to be phased out), some logical
+        /// operands correspond to multiple MachineInstr operands.  In the X86
+        /// target for example, one address operand is represented as 4
+        /// MachineOperands.  Because of this, the operand number in the
+        /// OperandList may not match the MachineInstr operand num.  Until it
+        /// does, this contains the MI operand index of this operand.
+        unsigned MIOperandNo;
+        unsigned MINumOperands;   // The number of operands.
 
-      /// DoNotEncode - Bools are set to true in this vector for each operand in
-      /// the DisableEncoding list.  These should not be emitted by the code
-      /// emitter.
-      std::vector<bool> DoNotEncode;
+        /// DoNotEncode - Bools are set to true in this vector for each operand in
+        /// the DisableEncoding list.  These should not be emitted by the code
+        /// emitter.
+        std::vector<bool> DoNotEncode;
 
-      /// MIOperandInfo - Default MI operand type. Note an operand may be made
-      /// up of multiple MI operands.
-      DagInit *MIOperandInfo;
+        /// MIOperandInfo - Default MI operand type. Note an operand may be made
+        /// up of multiple MI operands.
+        DagInit *MIOperandInfo;
 
-      /// Constraint info for this operand.  This operand can have pieces, so we
-      /// track constraint info for each.
-      std::vector<ConstraintInfo> Constraints;
+        /// Constraint info for this operand.  This operand can have pieces, so we
+        /// track constraint info for each.
+        std::vector<ConstraintInfo> Constraints;
 
-      OperandInfo(Record *R, const std::string &N, const std::string &PMN,
-                  const std::string &EMN, const std::string &OT, unsigned MION,
-                  unsigned MINO, DagInit *MIOI)
-      : Rec(R), Name(N), PrinterMethodName(PMN), EncoderMethodName(EMN),
-        OperandType(OT), MIOperandNo(MION), MINumOperands(MINO),
-        MIOperandInfo(MIOI) {}
+        OperandInfo(Record *R, const std::string &N, const std::string &PMN,
+                    const std::string &EMN, const std::string &OT, unsigned MION,
+                    unsigned MINO, DagInit *MIOI)
+            : Rec(R), Name(N), PrinterMethodName(PMN), EncoderMethodName(EMN),
+              OperandType(OT), MIOperandNo(MION), MINumOperands(MINO),
+              MIOperandInfo(MIOI) {}
 
 
-      /// getTiedOperand - If this operand is tied to another one, return the
-      /// other operand number.  Otherwise, return -1.
-      int getTiedRegister() const {
-        for (unsigned j = 0, e = Constraints.size(); j != e; ++j) {
-          const CGIOperandList::ConstraintInfo &CI = Constraints[j];
-          if (CI.isTied()) return CI.getTiedOperand();
+        /// getTiedOperand - If this operand is tied to another one, return the
+        /// other operand number.  Otherwise, return -1.
+        int getTiedRegister() const {
+            for (unsigned j = 0, e = Constraints.size(); j != e; ++j) {
+                const CGIOperandList::ConstraintInfo &CI = Constraints[j];
+                if (CI.isTied()) return CI.getTiedOperand();
+            }
+            return -1;
         }
-        return -1;
-      }
     };
 
     CGIOperandList(Record *D);
@@ -154,19 +160,39 @@ template <typename T> class ArrayRef;
     bool isVariadic;
 
     // Provide transparent accessors to the operand list.
-    bool empty() const { return OperandList.empty(); }
-    unsigned size() const { return OperandList.size(); }
-    const OperandInfo &operator[](unsigned i) const { return OperandList[i]; }
-    OperandInfo &operator[](unsigned i) { return OperandList[i]; }
-    OperandInfo &back() { return OperandList.back(); }
-    const OperandInfo &back() const { return OperandList.back(); }
+    bool empty() const {
+        return OperandList.empty();
+    }
+    unsigned size() const {
+        return OperandList.size();
+    }
+    const OperandInfo &operator[](unsigned i) const {
+        return OperandList[i];
+    }
+    OperandInfo &operator[](unsigned i) {
+        return OperandList[i];
+    }
+    OperandInfo &back() {
+        return OperandList.back();
+    }
+    const OperandInfo &back() const {
+        return OperandList.back();
+    }
 
     typedef std::vector<OperandInfo>::iterator iterator;
     typedef std::vector<OperandInfo>::const_iterator const_iterator;
-    iterator begin() { return OperandList.begin(); }
-    const_iterator begin() const { return OperandList.begin(); }
-    iterator end() { return OperandList.end(); }
-    const_iterator end() const { return OperandList.end(); }
+    iterator begin() {
+        return OperandList.begin();
+    }
+    const_iterator begin() const {
+        return OperandList.begin();
+    }
+    iterator end() {
+        return OperandList.end();
+    }
+    const_iterator end() const {
+        return OperandList.end();
+    }
 
     /// getOperandNamed - Return the index of the operand with the specified
     /// non-empty name.  If the instruction does not have an operand with the
@@ -183,40 +209,40 @@ template <typename T> class ArrayRef;
     /// This aborts if the name is invalid.  If AllowWholeOp is true, references
     /// to operands with suboperands are allowed, otherwise not.
     std::pair<unsigned,unsigned> ParseOperandName(const std::string &Op,
-                                                  bool AllowWholeOp = true);
+            bool AllowWholeOp = true);
 
     /// getFlattenedOperandNumber - Flatten a operand/suboperand pair into a
     /// flat machineinstr operand #.
     unsigned getFlattenedOperandNumber(std::pair<unsigned,unsigned> Op) const {
-      return OperandList[Op.first].MIOperandNo + Op.second;
+        return OperandList[Op.first].MIOperandNo + Op.second;
     }
 
     /// getSubOperandNumber - Unflatten a operand number into an
     /// operand/suboperand pair.
     std::pair<unsigned,unsigned> getSubOperandNumber(unsigned Op) const {
-      for (unsigned i = 0; ; ++i) {
-        assert(i < OperandList.size() && "Invalid flat operand #");
-        if (OperandList[i].MIOperandNo+OperandList[i].MINumOperands > Op)
-          return std::make_pair(i, Op-OperandList[i].MIOperandNo);
-      }
+        for (unsigned i = 0; ; ++i) {
+            assert(i < OperandList.size() && "Invalid flat operand #");
+            if (OperandList[i].MIOperandNo+OperandList[i].MINumOperands > Op)
+                return std::make_pair(i, Op-OperandList[i].MIOperandNo);
+        }
     }
 
 
     /// isFlatOperandNotEmitted - Return true if the specified flat operand #
     /// should not be emitted with the code emitter.
     bool isFlatOperandNotEmitted(unsigned FlatOpNo) const {
-      std::pair<unsigned,unsigned> Op = getSubOperandNumber(FlatOpNo);
-      if (OperandList[Op.first].DoNotEncode.size() > Op.second)
-        return OperandList[Op.first].DoNotEncode[Op.second];
-      return false;
+        std::pair<unsigned,unsigned> Op = getSubOperandNumber(FlatOpNo);
+        if (OperandList[Op.first].DoNotEncode.size() > Op.second)
+            return OperandList[Op.first].DoNotEncode[Op.second];
+        return false;
     }
 
     void ProcessDisableEncoding(std::string Value);
-  };
+};
 
 
-  class CodeGenInstruction {
-  public:
+class CodeGenInstruction {
+public:
     Record *TheDef;            // The actual record defining this instruction.
     StringRef Namespace;       // The namespace the instruction is in.
 
@@ -286,7 +312,7 @@ template <typename T> class ArrayRef;
 
     /// Are there any undefined flags?
     bool hasUndefFlags() const {
-      return mayLoad_Unset || mayStore_Unset || hasSideEffects_Unset;
+        return mayLoad_Unset || mayStore_Unset || hasSideEffects_Unset;
     }
 
     // The record used to infer instruction flags, or NULL if no flag values
@@ -299,35 +325,35 @@ template <typename T> class ArrayRef;
     /// implicit def and it has a known VT, return the VT, otherwise return
     /// MVT::Other.
     MVT::SimpleValueType
-      HasOneImplicitDefWithKnownVT(const CodeGenTarget &TargetInfo) const;
+    HasOneImplicitDefWithKnownVT(const CodeGenTarget &TargetInfo) const;
 
 
     /// FlattenAsmStringVariants - Flatten the specified AsmString to only
     /// include text from the specified variant, returning the new string.
     static std::string FlattenAsmStringVariants(StringRef AsmString,
-                                                unsigned Variant);
+            unsigned Variant);
 
     // Is the specified operand in a generic instruction implicitly a pointer.
     // This can be used on intructions that use typeN or ptypeN to identify
     // operands that should be considered as pointers even though SelectionDAG
     // didn't make a distinction between integer and pointers.
     bool isOperandAPointer(unsigned i) const {
-      return isOperandImpl(i, "IsPointer");
+        return isOperandImpl(i, "IsPointer");
     }
 
     /// Check if the operand is required to be an immediate.
     bool isOperandImmArg(unsigned i) const {
-      return isOperandImpl(i, "IsImmediate");
+        return isOperandImpl(i, "IsImmediate");
     }
 
-  private:
+private:
     bool isOperandImpl(unsigned i, StringRef PropertyName) const;
-  };
+};
 
 
-  /// CodeGenInstAlias - This represents an InstAlias definition.
-  class CodeGenInstAlias {
-  public:
+/// CodeGenInstAlias - This represents an InstAlias definition.
+class CodeGenInstAlias {
+public:
     Record *TheDef;            // The actual record defining this InstAlias.
 
     /// AsmString - The format string used to emit a .s file for the
@@ -344,32 +370,50 @@ template <typename T> class ArrayRef;
 
     struct ResultOperand {
     private:
-      std::string Name;
-      Record *R = nullptr;
-      int64_t Imm = 0;
+        std::string Name;
+        Record *R = nullptr;
+        int64_t Imm = 0;
 
     public:
-      enum {
-        K_Record,
-        K_Imm,
-        K_Reg
-      } Kind;
+        enum {
+            K_Record,
+            K_Imm,
+            K_Reg
+        } Kind;
 
-      ResultOperand(std::string N, Record *r)
-          : Name(std::move(N)), R(r), Kind(K_Record) {}
-      ResultOperand(int64_t I) : Imm(I), Kind(K_Imm) {}
-      ResultOperand(Record *r) : R(r), Kind(K_Reg) {}
+        ResultOperand(std::string N, Record *r)
+            : Name(std::move(N)), R(r), Kind(K_Record) {}
+        ResultOperand(int64_t I) : Imm(I), Kind(K_Imm) {}
+        ResultOperand(Record *r) : R(r), Kind(K_Reg) {}
 
-      bool isRecord() const { return Kind == K_Record; }
-      bool isImm() const { return Kind == K_Imm; }
-      bool isReg() const { return Kind == K_Reg; }
+        bool isRecord() const {
+            return Kind == K_Record;
+        }
+        bool isImm() const {
+            return Kind == K_Imm;
+        }
+        bool isReg() const {
+            return Kind == K_Reg;
+        }
 
-      StringRef getName() const { assert(isRecord()); return Name; }
-      Record *getRecord() const { assert(isRecord()); return R; }
-      int64_t getImm() const { assert(isImm()); return Imm; }
-      Record *getRegister() const { assert(isReg()); return R; }
+        StringRef getName() const {
+            assert(isRecord());
+            return Name;
+        }
+        Record *getRecord() const {
+            assert(isRecord());
+            return R;
+        }
+        int64_t getImm() const {
+            assert(isImm());
+            return Imm;
+        }
+        Record *getRegister() const {
+            assert(isReg());
+            return R;
+        }
 
-      unsigned getMINumOperands() const;
+        unsigned getMINumOperands() const;
     };
 
     /// ResultOperands - The decoded operands for the result instruction.
@@ -387,7 +431,7 @@ template <typename T> class ArrayRef;
     bool tryAliasOpMatch(DagInit *Result, unsigned AliasOpNo,
                          Record *InstOpRec, bool hasSubOps, ArrayRef<SMLoc> Loc,
                          CodeGenTarget &T, ResultOperand &ResOp);
-  };
+};
 }
 
 #endif

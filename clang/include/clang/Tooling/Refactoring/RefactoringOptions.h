@@ -24,18 +24,22 @@ template <typename T,
           typename = std::enable_if_t<traits::IsValidOptionType<T>::value>>
 class OptionalRefactoringOption : public RefactoringOption {
 public:
-  void passToVisitor(RefactoringOptionVisitor &Visitor) final override {
-    Visitor.visit(*this, Value);
-  }
+    void passToVisitor(RefactoringOptionVisitor &Visitor) final override {
+        Visitor.visit(*this, Value);
+    }
 
-  bool isRequired() const override { return false; }
+    bool isRequired() const override {
+        return false;
+    }
 
-  using ValueType = Optional<T>;
+    using ValueType = Optional<T>;
 
-  const ValueType &getValue() const { return Value; }
+    const ValueType &getValue() const {
+        return Value;
+    }
 
 protected:
-  Optional<T> Value;
+    Optional<T> Value;
 };
 
 /// A required refactoring option that stores a value of type \c T.
@@ -43,12 +47,14 @@ template <typename T,
           typename = std::enable_if_t<traits::IsValidOptionType<T>::value>>
 class RequiredRefactoringOption : public OptionalRefactoringOption<T> {
 public:
-  using ValueType = T;
+    using ValueType = T;
 
-  const ValueType &getValue() const {
-    return *OptionalRefactoringOption<T>::Value;
-  }
-  bool isRequired() const final override { return true; }
+    const ValueType &getValue() const {
+        return *OptionalRefactoringOption<T>::Value;
+    }
+    bool isRequired() const final override {
+        return true;
+    }
 };
 
 } // end namespace tooling

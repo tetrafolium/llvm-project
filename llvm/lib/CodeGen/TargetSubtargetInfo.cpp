@@ -25,40 +25,40 @@ TargetSubtargetInfo::TargetSubtargetInfo(
 TargetSubtargetInfo::~TargetSubtargetInfo() = default;
 
 bool TargetSubtargetInfo::enableAtomicExpand() const {
-  return true;
+    return true;
 }
 
 bool TargetSubtargetInfo::enableIndirectBrExpand() const {
-  return false;
+    return false;
 }
 
 bool TargetSubtargetInfo::enableMachineScheduler() const {
-  return false;
+    return false;
 }
 
 bool TargetSubtargetInfo::enableJoinGlobalCopies() const {
-  return enableMachineScheduler();
+    return enableMachineScheduler();
 }
 
 bool TargetSubtargetInfo::enableRALocalReassignment(
     CodeGenOpt::Level OptLevel) const {
-  return true;
+    return true;
 }
 
 bool TargetSubtargetInfo::enableAdvancedRASplitCost() const {
-  return false;
+    return false;
 }
 
 bool TargetSubtargetInfo::enablePostRAScheduler() const {
-  return getSchedModel().PostRAScheduler;
+    return getSchedModel().PostRAScheduler;
 }
 
 bool TargetSubtargetInfo::enablePostRAMachineScheduler() const {
-  return enableMachineScheduler() && enablePostRAScheduler();
+    return enableMachineScheduler() && enablePostRAScheduler();
 }
 
 bool TargetSubtargetInfo::useAA() const {
-  return false;
+    return false;
 }
 
 void TargetSubtargetInfo::mirFileLoaded(MachineFunction &MF) const { }

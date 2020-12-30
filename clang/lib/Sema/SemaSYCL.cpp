@@ -18,32 +18,32 @@ using namespace clang;
 // -----------------------------------------------------------------------------
 
 Sema::SemaDiagnosticBuilder Sema::SYCLDiagIfDeviceCode(SourceLocation Loc,
-                                                       unsigned DiagID) {
-  assert(getLangOpts().SYCLIsDevice &&
-         "Should only be called during SYCL compilation");
-  FunctionDecl *FD = dyn_cast<FunctionDecl>(getCurLexicalContext());
-  SemaDiagnosticBuilder::Kind DiagKind = [this, FD] {
-    if (!FD)
-      return SemaDiagnosticBuilder::K_Nop;
-    if (getEmissionStatus(FD) == Sema::FunctionEmissionStatus::Emitted)
-      return SemaDiagnosticBuilder::K_ImmediateWithCallStack;
-    return SemaDiagnosticBuilder::K_Deferred;
-  }();
-  return SemaDiagnosticBuilder(DiagKind, Loc, DiagID, FD, *this);
+        unsigned DiagID) {
+    assert(getLangOpts().SYCLIsDevice &&
+           "Should only be called during SYCL compilation");
+    FunctionDecl *FD = dyn_cast<FunctionDecl>(getCurLexicalContext());
+    SemaDiagnosticBuilder::Kind DiagKind = [this, FD] {
+        if (!FD)
+            return SemaDiagnosticBuilder::K_Nop;
+        if (getEmissionStatus(FD) == Sema::FunctionEmissionStatus::Emitted)
+            return SemaDiagnosticBuilder::K_ImmediateWithCallStack;
+        return SemaDiagnosticBuilder::K_Deferred;
+    }();
+    return SemaDiagnosticBuilder(DiagKind, Loc, DiagID, FD, *this);
 }
 
 bool Sema::checkSYCLDeviceFunction(SourceLocation Loc, FunctionDecl *Callee) {
-  assert(getLangOpts().SYCLIsDevice &&
-         "Should only be called during SYCL compilation");
-  assert(Callee && "Callee may not be null.");
+    assert(getLangOpts().SYCLIsDevice &&
+           "Should only be called during SYCL compilation");
+    assert(Callee && "Callee may not be null.");
 
-  // Errors in unevaluated context don't need to be generated,
-  // so we can safely skip them.
-  if (isUnevaluatedContext() || isConstantEvaluated())
-    return true;
+    // Errors in unevaluated context don't need to be generated,
+    // so we can safely skip them.
+    if (isUnevaluatedContext() || isConstantEvaluated())
+        return true;
 
-  SemaDiagnosticBuilder::Kind DiagKind = SemaDiagnosticBuilder::K_Nop;
+    SemaDiagnosticBuilder::Kind DiagKind = SemaDiagnosticBuilder::K_Nop;
 
-  return DiagKind != SemaDiagnosticBuilder::K_Immediate &&
-         DiagKind != SemaDiagnosticBuilder::K_ImmediateWithCallStack;
+    return DiagKind != SemaDiagnosticBuilder::K_Immediate &&
+           DiagKind != SemaDiagnosticBuilder::K_ImmediateWithCallStack;
 }

@@ -56,149 +56,151 @@ namespace {
 // This class provides helper functions to expand a memcmp library call into an
 // inline expansion.
 class MemCmpExpansion {
-  struct ResultBlock {
-    BasicBlock *BB = nullptr;
-    PHINode *PhiSrc1 = nullptr;
-    PHINode *PhiSrc2 = nullptr;
+    struct ResultBlock {
+        BasicBlock *BB = nullptr;
+        PHINode *PhiSrc1 = nullptr;
+        PHINode *PhiSrc2 = nullptr;
 
-    ResultBlock() = default;
-  };
+        ResultBlock() = default;
+    };
 
-  CallInst *const CI;
-  ResultBlock ResBlock;
-  const uint64_t Size;
-  unsigned MaxLoadSize;
-  uint64_t NumLoadsNonOneByte;
-  const uint64_t NumLoadsPerBlockForZeroCmp;
-  std::vector<BasicBlock *> LoadCmpBlocks;
-  BasicBlock *EndBlock;
-  PHINode *PhiRes;
-  const bool IsUsedForZeroCmp;
-  const DataLayout &DL;
-  IRBuilder<> Builder;
-  // Represents the decomposition in blocks of the expansion. For example,
-  // comparing 33 bytes on X86+sse can be done with 2x16-byte loads and
-  // 1x1-byte load, which would be represented as [{16, 0}, {16, 16}, {1, 32}.
-  struct LoadEntry {
-    LoadEntry(unsigned LoadSize, uint64_t Offset)
-        : LoadSize(LoadSize), Offset(Offset) {
-    }
+    CallInst *const CI;
+    ResultBlock ResBlock;
+    const uint64_t Size;
+    unsigned MaxLoadSize;
+    uint64_t NumLoadsNonOneByte;
+    const uint64_t NumLoadsPerBlockForZeroCmp;
+    std::vector<BasicBlock *> LoadCmpBlocks;
+    BasicBlock *EndBlock;
+    PHINode *PhiRes;
+    const bool IsUsedForZeroCmp;
+    const DataLayout &DL;
+    IRBuilder<> Builder;
+    // Represents the decomposition in blocks of the expansion. For example,
+    // comparing 33 bytes on X86+sse can be done with 2x16-byte loads and
+    // 1x1-byte load, which would be represented as [{16, 0}, {16, 16}, {1, 32}.
+    struct LoadEntry {
+        LoadEntry(unsigned LoadSize, uint64_t Offset)
+            : LoadSize(LoadSize), Offset(Offset) {
+        }
 
-    // The size of the load for this block, in bytes.
-    unsigned LoadSize;
-    // The offset of this load from the base pointer, in bytes.
-    uint64_t Offset;
-  };
-  using LoadEntryVector = SmallVector<LoadEntry, 8>;
-  LoadEntryVector LoadSequence;
+        // The size of the load for this block, in bytes.
+        unsigned LoadSize;
+        // The offset of this load from the base pointer, in bytes.
+        uint64_t Offset;
+    };
+    using LoadEntryVector = SmallVector<LoadEntry, 8>;
+    LoadEntryVector LoadSequence;
 
-  void createLoadCmpBlocks();
-  void createResultBlock();
-  void setupResultBlockPHINodes();
-  void setupEndBlockPHINodes();
-  Value *getCompareLoadPairs(unsigned BlockIndex, unsigned &LoadIndex);
-  void emitLoadCompareBlock(unsigned BlockIndex);
-  void emitLoadCompareBlockMultipleLoads(unsigned BlockIndex,
-                                         unsigned &LoadIndex);
-  void emitLoadCompareByteBlock(unsigned BlockIndex, unsigned OffsetBytes);
-  void emitMemCmpResultBlock();
-  Value *getMemCmpExpansionZeroCase();
-  Value *getMemCmpEqZeroOneBlock();
-  Value *getMemCmpOneBlock();
-  struct LoadPair {
-    Value *Lhs = nullptr;
-    Value *Rhs = nullptr;
-  };
-  LoadPair getLoadPair(Type *LoadSizeType, bool NeedsBSwap, Type *CmpSizeType,
-                       unsigned OffsetBytes);
+    void createLoadCmpBlocks();
+    void createResultBlock();
+    void setupResultBlockPHINodes();
+    void setupEndBlockPHINodes();
+    Value *getCompareLoadPairs(unsigned BlockIndex, unsigned &LoadIndex);
+    void emitLoadCompareBlock(unsigned BlockIndex);
+    void emitLoadCompareBlockMultipleLoads(unsigned BlockIndex,
+                                           unsigned &LoadIndex);
+    void emitLoadCompareByteBlock(unsigned BlockIndex, unsigned OffsetBytes);
+    void emitMemCmpResultBlock();
+    Value *getMemCmpExpansionZeroCase();
+    Value *getMemCmpEqZeroOneBlock();
+    Value *getMemCmpOneBlock();
+    struct LoadPair {
+        Value *Lhs = nullptr;
+        Value *Rhs = nullptr;
+    };
+    LoadPair getLoadPair(Type *LoadSizeType, bool NeedsBSwap, Type *CmpSizeType,
+                         unsigned OffsetBytes);
 
-  static LoadEntryVector
-  computeGreedyLoadSequence(uint64_t Size, llvm::ArrayRef<unsigned> LoadSizes,
-                            unsigned MaxNumLoads, unsigned &NumLoadsNonOneByte);
-  static LoadEntryVector
-  computeOverlappingLoadSequence(uint64_t Size, unsigned MaxLoadSize,
-                                 unsigned MaxNumLoads,
-                                 unsigned &NumLoadsNonOneByte);
+    static LoadEntryVector
+    computeGreedyLoadSequence(uint64_t Size, llvm::ArrayRef<unsigned> LoadSizes,
+                              unsigned MaxNumLoads, unsigned &NumLoadsNonOneByte);
+    static LoadEntryVector
+    computeOverlappingLoadSequence(uint64_t Size, unsigned MaxLoadSize,
+                                   unsigned MaxNumLoads,
+                                   unsigned &NumLoadsNonOneByte);
 
 public:
-  MemCmpExpansion(CallInst *CI, uint64_t Size,
-                  const TargetTransformInfo::MemCmpExpansionOptions &Options,
-                  const bool IsUsedForZeroCmp, const DataLayout &TheDataLayout);
+    MemCmpExpansion(CallInst *CI, uint64_t Size,
+                    const TargetTransformInfo::MemCmpExpansionOptions &Options,
+                    const bool IsUsedForZeroCmp, const DataLayout &TheDataLayout);
 
-  unsigned getNumBlocks();
-  uint64_t getNumLoads() const { return LoadSequence.size(); }
+    unsigned getNumBlocks();
+    uint64_t getNumLoads() const {
+        return LoadSequence.size();
+    }
 
-  Value *getMemCmpExpansion();
+    Value *getMemCmpExpansion();
 };
 
 MemCmpExpansion::LoadEntryVector MemCmpExpansion::computeGreedyLoadSequence(
     uint64_t Size, llvm::ArrayRef<unsigned> LoadSizes,
     const unsigned MaxNumLoads, unsigned &NumLoadsNonOneByte) {
-  NumLoadsNonOneByte = 0;
-  LoadEntryVector LoadSequence;
-  uint64_t Offset = 0;
-  while (Size && !LoadSizes.empty()) {
-    const unsigned LoadSize = LoadSizes.front();
-    const uint64_t NumLoadsForThisSize = Size / LoadSize;
-    if (LoadSequence.size() + NumLoadsForThisSize > MaxNumLoads) {
-      // Do not expand if the total number of loads is larger than what the
-      // target allows. Note that it's important that we exit before completing
-      // the expansion to avoid using a ton of memory to store the expansion for
-      // large sizes.
-      return {};
+    NumLoadsNonOneByte = 0;
+    LoadEntryVector LoadSequence;
+    uint64_t Offset = 0;
+    while (Size && !LoadSizes.empty()) {
+        const unsigned LoadSize = LoadSizes.front();
+        const uint64_t NumLoadsForThisSize = Size / LoadSize;
+        if (LoadSequence.size() + NumLoadsForThisSize > MaxNumLoads) {
+            // Do not expand if the total number of loads is larger than what the
+            // target allows. Note that it's important that we exit before completing
+            // the expansion to avoid using a ton of memory to store the expansion for
+            // large sizes.
+            return {};
+        }
+        if (NumLoadsForThisSize > 0) {
+            for (uint64_t I = 0; I < NumLoadsForThisSize; ++I) {
+                LoadSequence.push_back({LoadSize, Offset});
+                Offset += LoadSize;
+            }
+            if (LoadSize > 1)
+                ++NumLoadsNonOneByte;
+            Size = Size % LoadSize;
+        }
+        LoadSizes = LoadSizes.drop_front();
     }
-    if (NumLoadsForThisSize > 0) {
-      for (uint64_t I = 0; I < NumLoadsForThisSize; ++I) {
-        LoadSequence.push_back({LoadSize, Offset});
-        Offset += LoadSize;
-      }
-      if (LoadSize > 1)
-        ++NumLoadsNonOneByte;
-      Size = Size % LoadSize;
-    }
-    LoadSizes = LoadSizes.drop_front();
-  }
-  return LoadSequence;
+    return LoadSequence;
 }
 
 MemCmpExpansion::LoadEntryVector
 MemCmpExpansion::computeOverlappingLoadSequence(uint64_t Size,
-                                                const unsigned MaxLoadSize,
-                                                const unsigned MaxNumLoads,
-                                                unsigned &NumLoadsNonOneByte) {
-  // These are already handled by the greedy approach.
-  if (Size < 2 || MaxLoadSize < 2)
-    return {};
+        const unsigned MaxLoadSize,
+        const unsigned MaxNumLoads,
+        unsigned &NumLoadsNonOneByte) {
+    // These are already handled by the greedy approach.
+    if (Size < 2 || MaxLoadSize < 2)
+        return {};
 
-  // We try to do as many non-overlapping loads as possible starting from the
-  // beginning.
-  const uint64_t NumNonOverlappingLoads = Size / MaxLoadSize;
-  assert(NumNonOverlappingLoads && "there must be at least one load");
-  // There remain 0 to (MaxLoadSize - 1) bytes to load, this will be done with
-  // an overlapping load.
-  Size = Size - NumNonOverlappingLoads * MaxLoadSize;
-  // Bail if we do not need an overloapping store, this is already handled by
-  // the greedy approach.
-  if (Size == 0)
-    return {};
-  // Bail if the number of loads (non-overlapping + potential overlapping one)
-  // is larger than the max allowed.
-  if ((NumNonOverlappingLoads + 1) > MaxNumLoads)
-    return {};
+    // We try to do as many non-overlapping loads as possible starting from the
+    // beginning.
+    const uint64_t NumNonOverlappingLoads = Size / MaxLoadSize;
+    assert(NumNonOverlappingLoads && "there must be at least one load");
+    // There remain 0 to (MaxLoadSize - 1) bytes to load, this will be done with
+    // an overlapping load.
+    Size = Size - NumNonOverlappingLoads * MaxLoadSize;
+    // Bail if we do not need an overloapping store, this is already handled by
+    // the greedy approach.
+    if (Size == 0)
+        return {};
+    // Bail if the number of loads (non-overlapping + potential overlapping one)
+    // is larger than the max allowed.
+    if ((NumNonOverlappingLoads + 1) > MaxNumLoads)
+        return {};
 
-  // Add non-overlapping loads.
-  LoadEntryVector LoadSequence;
-  uint64_t Offset = 0;
-  for (uint64_t I = 0; I < NumNonOverlappingLoads; ++I) {
-    LoadSequence.push_back({MaxLoadSize, Offset});
-    Offset += MaxLoadSize;
-  }
+    // Add non-overlapping loads.
+    LoadEntryVector LoadSequence;
+    uint64_t Offset = 0;
+    for (uint64_t I = 0; I < NumNonOverlappingLoads; ++I) {
+        LoadSequence.push_back({MaxLoadSize, Offset});
+        Offset += MaxLoadSize;
+    }
 
-  // Add the last overlapping load.
-  assert(Size > 0 && Size < MaxLoadSize && "broken invariant");
-  LoadSequence.push_back({MaxLoadSize, Offset - (MaxLoadSize - Size)});
-  NumLoadsNonOneByte = 1;
-  return LoadSequence;
+    // Add the last overlapping load.
+    assert(Size > 0 && Size < MaxLoadSize && "broken invariant");
+    LoadSequence.push_back({MaxLoadSize, Offset - (MaxLoadSize - Size)});
+    NumLoadsNonOneByte = 1;
+    return LoadSequence;
 }
 
 // Initialize the basic block structure required for expansion of memcmp call
@@ -216,107 +218,107 @@ MemCmpExpansion::MemCmpExpansion(
     : CI(CI), Size(Size), MaxLoadSize(0), NumLoadsNonOneByte(0),
       NumLoadsPerBlockForZeroCmp(Options.NumLoadsPerBlock),
       IsUsedForZeroCmp(IsUsedForZeroCmp), DL(TheDataLayout), Builder(CI) {
-  assert(Size > 0 && "zero blocks");
-  // Scale the max size down if the target can load more bytes than we need.
-  llvm::ArrayRef<unsigned> LoadSizes(Options.LoadSizes);
-  while (!LoadSizes.empty() && LoadSizes.front() > Size) {
-    LoadSizes = LoadSizes.drop_front();
-  }
-  assert(!LoadSizes.empty() && "cannot load Size bytes");
-  MaxLoadSize = LoadSizes.front();
-  // Compute the decomposition.
-  unsigned GreedyNumLoadsNonOneByte = 0;
-  LoadSequence = computeGreedyLoadSequence(Size, LoadSizes, Options.MaxNumLoads,
-                                           GreedyNumLoadsNonOneByte);
-  NumLoadsNonOneByte = GreedyNumLoadsNonOneByte;
-  assert(LoadSequence.size() <= Options.MaxNumLoads && "broken invariant");
-  // If we allow overlapping loads and the load sequence is not already optimal,
-  // use overlapping loads.
-  if (Options.AllowOverlappingLoads &&
-      (LoadSequence.empty() || LoadSequence.size() > 2)) {
-    unsigned OverlappingNumLoadsNonOneByte = 0;
-    auto OverlappingLoads = computeOverlappingLoadSequence(
-        Size, MaxLoadSize, Options.MaxNumLoads, OverlappingNumLoadsNonOneByte);
-    if (!OverlappingLoads.empty() &&
-        (LoadSequence.empty() ||
-         OverlappingLoads.size() < LoadSequence.size())) {
-      LoadSequence = OverlappingLoads;
-      NumLoadsNonOneByte = OverlappingNumLoadsNonOneByte;
+    assert(Size > 0 && "zero blocks");
+    // Scale the max size down if the target can load more bytes than we need.
+    llvm::ArrayRef<unsigned> LoadSizes(Options.LoadSizes);
+    while (!LoadSizes.empty() && LoadSizes.front() > Size) {
+        LoadSizes = LoadSizes.drop_front();
     }
-  }
-  assert(LoadSequence.size() <= Options.MaxNumLoads && "broken invariant");
+    assert(!LoadSizes.empty() && "cannot load Size bytes");
+    MaxLoadSize = LoadSizes.front();
+    // Compute the decomposition.
+    unsigned GreedyNumLoadsNonOneByte = 0;
+    LoadSequence = computeGreedyLoadSequence(Size, LoadSizes, Options.MaxNumLoads,
+                   GreedyNumLoadsNonOneByte);
+    NumLoadsNonOneByte = GreedyNumLoadsNonOneByte;
+    assert(LoadSequence.size() <= Options.MaxNumLoads && "broken invariant");
+    // If we allow overlapping loads and the load sequence is not already optimal,
+    // use overlapping loads.
+    if (Options.AllowOverlappingLoads &&
+            (LoadSequence.empty() || LoadSequence.size() > 2)) {
+        unsigned OverlappingNumLoadsNonOneByte = 0;
+        auto OverlappingLoads = computeOverlappingLoadSequence(
+                                    Size, MaxLoadSize, Options.MaxNumLoads, OverlappingNumLoadsNonOneByte);
+        if (!OverlappingLoads.empty() &&
+                (LoadSequence.empty() ||
+                 OverlappingLoads.size() < LoadSequence.size())) {
+            LoadSequence = OverlappingLoads;
+            NumLoadsNonOneByte = OverlappingNumLoadsNonOneByte;
+        }
+    }
+    assert(LoadSequence.size() <= Options.MaxNumLoads && "broken invariant");
 }
 
 unsigned MemCmpExpansion::getNumBlocks() {
-  if (IsUsedForZeroCmp)
-    return getNumLoads() / NumLoadsPerBlockForZeroCmp +
-           (getNumLoads() % NumLoadsPerBlockForZeroCmp != 0 ? 1 : 0);
-  return getNumLoads();
+    if (IsUsedForZeroCmp)
+        return getNumLoads() / NumLoadsPerBlockForZeroCmp +
+               (getNumLoads() % NumLoadsPerBlockForZeroCmp != 0 ? 1 : 0);
+    return getNumLoads();
 }
 
 void MemCmpExpansion::createLoadCmpBlocks() {
-  for (unsigned i = 0; i < getNumBlocks(); i++) {
-    BasicBlock *BB = BasicBlock::Create(CI->getContext(), "loadbb",
-                                        EndBlock->getParent(), EndBlock);
-    LoadCmpBlocks.push_back(BB);
-  }
+    for (unsigned i = 0; i < getNumBlocks(); i++) {
+        BasicBlock *BB = BasicBlock::Create(CI->getContext(), "loadbb",
+                                            EndBlock->getParent(), EndBlock);
+        LoadCmpBlocks.push_back(BB);
+    }
 }
 
 void MemCmpExpansion::createResultBlock() {
-  ResBlock.BB = BasicBlock::Create(CI->getContext(), "res_block",
-                                   EndBlock->getParent(), EndBlock);
+    ResBlock.BB = BasicBlock::Create(CI->getContext(), "res_block",
+                                     EndBlock->getParent(), EndBlock);
 }
 
 MemCmpExpansion::LoadPair MemCmpExpansion::getLoadPair(Type *LoadSizeType,
-                                                       bool NeedsBSwap,
-                                                       Type *CmpSizeType,
-                                                       unsigned OffsetBytes) {
-  // Get the memory source at offset `OffsetBytes`.
-  Value *LhsSource = CI->getArgOperand(0);
-  Value *RhsSource = CI->getArgOperand(1);
-  Align LhsAlign = LhsSource->getPointerAlignment(DL);
-  Align RhsAlign = RhsSource->getPointerAlignment(DL);
-  if (OffsetBytes > 0) {
-    auto *ByteType = Type::getInt8Ty(CI->getContext());
-    LhsSource = Builder.CreateConstGEP1_64(
-        ByteType, Builder.CreateBitCast(LhsSource, ByteType->getPointerTo()),
-        OffsetBytes);
-    RhsSource = Builder.CreateConstGEP1_64(
-        ByteType, Builder.CreateBitCast(RhsSource, ByteType->getPointerTo()),
-        OffsetBytes);
-    LhsAlign = commonAlignment(LhsAlign, OffsetBytes);
-    RhsAlign = commonAlignment(RhsAlign, OffsetBytes);
-  }
-  LhsSource = Builder.CreateBitCast(LhsSource, LoadSizeType->getPointerTo());
-  RhsSource = Builder.CreateBitCast(RhsSource, LoadSizeType->getPointerTo());
+        bool NeedsBSwap,
+        Type *CmpSizeType,
+        unsigned OffsetBytes) {
+    // Get the memory source at offset `OffsetBytes`.
+    Value *LhsSource = CI->getArgOperand(0);
+    Value *RhsSource = CI->getArgOperand(1);
+    Align LhsAlign = LhsSource->getPointerAlignment(DL);
+    Align RhsAlign = RhsSource->getPointerAlignment(DL);
+    if (OffsetBytes > 0) {
+        auto *ByteType = Type::getInt8Ty(CI->getContext());
+        LhsSource = Builder.CreateConstGEP1_64(
+                        ByteType, Builder.CreateBitCast(LhsSource, ByteType->getPointerTo()),
+                        OffsetBytes);
+        RhsSource = Builder.CreateConstGEP1_64(
+                        ByteType, Builder.CreateBitCast(RhsSource, ByteType->getPointerTo()),
+                        OffsetBytes);
+        LhsAlign = commonAlignment(LhsAlign, OffsetBytes);
+        RhsAlign = commonAlignment(RhsAlign, OffsetBytes);
+    }
+    LhsSource = Builder.CreateBitCast(LhsSource, LoadSizeType->getPointerTo());
+    RhsSource = Builder.CreateBitCast(RhsSource, LoadSizeType->getPointerTo());
 
-  // Create a constant or a load from the source.
-  Value *Lhs = nullptr;
-  if (auto *C = dyn_cast<Constant>(LhsSource))
-    Lhs = ConstantFoldLoadFromConstPtr(C, LoadSizeType, DL);
-  if (!Lhs)
-    Lhs = Builder.CreateAlignedLoad(LoadSizeType, LhsSource, LhsAlign);
+    // Create a constant or a load from the source.
+    Value *Lhs = nullptr;
+    if (auto *C = dyn_cast<Constant>(LhsSource))
+        Lhs = ConstantFoldLoadFromConstPtr(C, LoadSizeType, DL);
+    if (!Lhs)
+        Lhs = Builder.CreateAlignedLoad(LoadSizeType, LhsSource, LhsAlign);
 
-  Value *Rhs = nullptr;
-  if (auto *C = dyn_cast<Constant>(RhsSource))
-    Rhs = ConstantFoldLoadFromConstPtr(C, LoadSizeType, DL);
-  if (!Rhs)
-    Rhs = Builder.CreateAlignedLoad(LoadSizeType, RhsSource, RhsAlign);
+    Value *Rhs = nullptr;
+    if (auto *C = dyn_cast<Constant>(RhsSource))
+        Rhs = ConstantFoldLoadFromConstPtr(C, LoadSizeType, DL);
+    if (!Rhs)
+        Rhs = Builder.CreateAlignedLoad(LoadSizeType, RhsSource, RhsAlign);
 
-  // Swap bytes if required.
-  if (NeedsBSwap) {
-    Function *Bswap = Intrinsic::getDeclaration(CI->getModule(),
-                                                Intrinsic::bswap, LoadSizeType);
-    Lhs = Builder.CreateCall(Bswap, Lhs);
-    Rhs = Builder.CreateCall(Bswap, Rhs);
-  }
+    // Swap bytes if required.
+    if (NeedsBSwap) {
+        Function *Bswap = Intrinsic::getDeclaration(CI->getModule(),
+                          Intrinsic::bswap, LoadSizeType);
+        Lhs = Builder.CreateCall(Bswap, Lhs);
+        Rhs = Builder.CreateCall(Bswap, Rhs);
+    }
 
-  // Zero extend if required.
-  if (CmpSizeType != nullptr && CmpSizeType != LoadSizeType) {
-    Lhs = Builder.CreateZExt(Lhs, CmpSizeType);
-    Rhs = Builder.CreateZExt(Rhs, CmpSizeType);
-  }
-  return {Lhs, Rhs};
+    // Zero extend if required.
+    if (CmpSizeType != nullptr && CmpSizeType != LoadSizeType) {
+        Lhs = Builder.CreateZExt(Lhs, CmpSizeType);
+        Rhs = Builder.CreateZExt(Rhs, CmpSizeType);
+    }
+    return {Lhs, Rhs};
 }
 
 // This function creates the IR instructions for loading and comparing 1 byte.
@@ -324,120 +326,120 @@ MemCmpExpansion::LoadPair MemCmpExpansion::getLoadPair(Type *LoadSizeType,
 // GEPIndex. It then subtracts the two loaded values and adds this result to the
 // final phi node for selecting the memcmp result.
 void MemCmpExpansion::emitLoadCompareByteBlock(unsigned BlockIndex,
-                                               unsigned OffsetBytes) {
-  Builder.SetInsertPoint(LoadCmpBlocks[BlockIndex]);
-  const LoadPair Loads =
-      getLoadPair(Type::getInt8Ty(CI->getContext()), /*NeedsBSwap=*/false,
-                  Type::getInt32Ty(CI->getContext()), OffsetBytes);
-  Value *Diff = Builder.CreateSub(Loads.Lhs, Loads.Rhs);
+        unsigned OffsetBytes) {
+    Builder.SetInsertPoint(LoadCmpBlocks[BlockIndex]);
+    const LoadPair Loads =
+        getLoadPair(Type::getInt8Ty(CI->getContext()), /*NeedsBSwap=*/false,
+                    Type::getInt32Ty(CI->getContext()), OffsetBytes);
+    Value *Diff = Builder.CreateSub(Loads.Lhs, Loads.Rhs);
 
-  PhiRes->addIncoming(Diff, LoadCmpBlocks[BlockIndex]);
+    PhiRes->addIncoming(Diff, LoadCmpBlocks[BlockIndex]);
 
-  if (BlockIndex < (LoadCmpBlocks.size() - 1)) {
-    // Early exit branch if difference found to EndBlock. Otherwise, continue to
-    // next LoadCmpBlock,
-    Value *Cmp = Builder.CreateICmp(ICmpInst::ICMP_NE, Diff,
-                                    ConstantInt::get(Diff->getType(), 0));
-    BranchInst *CmpBr =
-        BranchInst::Create(EndBlock, LoadCmpBlocks[BlockIndex + 1], Cmp);
-    Builder.Insert(CmpBr);
-  } else {
-    // The last block has an unconditional branch to EndBlock.
-    BranchInst *CmpBr = BranchInst::Create(EndBlock);
-    Builder.Insert(CmpBr);
-  }
+    if (BlockIndex < (LoadCmpBlocks.size() - 1)) {
+        // Early exit branch if difference found to EndBlock. Otherwise, continue to
+        // next LoadCmpBlock,
+        Value *Cmp = Builder.CreateICmp(ICmpInst::ICMP_NE, Diff,
+                                        ConstantInt::get(Diff->getType(), 0));
+        BranchInst *CmpBr =
+            BranchInst::Create(EndBlock, LoadCmpBlocks[BlockIndex + 1], Cmp);
+        Builder.Insert(CmpBr);
+    } else {
+        // The last block has an unconditional branch to EndBlock.
+        BranchInst *CmpBr = BranchInst::Create(EndBlock);
+        Builder.Insert(CmpBr);
+    }
 }
 
 /// Generate an equality comparison for one or more pairs of loaded values.
 /// This is used in the case where the memcmp() call is compared equal or not
 /// equal to zero.
 Value *MemCmpExpansion::getCompareLoadPairs(unsigned BlockIndex,
-                                            unsigned &LoadIndex) {
-  assert(LoadIndex < getNumLoads() &&
-         "getCompareLoadPairs() called with no remaining loads");
-  std::vector<Value *> XorList, OrList;
-  Value *Diff = nullptr;
+        unsigned &LoadIndex) {
+    assert(LoadIndex < getNumLoads() &&
+           "getCompareLoadPairs() called with no remaining loads");
+    std::vector<Value *> XorList, OrList;
+    Value *Diff = nullptr;
 
-  const unsigned NumLoads =
-      std::min(getNumLoads() - LoadIndex, NumLoadsPerBlockForZeroCmp);
+    const unsigned NumLoads =
+        std::min(getNumLoads() - LoadIndex, NumLoadsPerBlockForZeroCmp);
 
-  // For a single-block expansion, start inserting before the memcmp call.
-  if (LoadCmpBlocks.empty())
-    Builder.SetInsertPoint(CI);
-  else
-    Builder.SetInsertPoint(LoadCmpBlocks[BlockIndex]);
+    // For a single-block expansion, start inserting before the memcmp call.
+    if (LoadCmpBlocks.empty())
+        Builder.SetInsertPoint(CI);
+    else
+        Builder.SetInsertPoint(LoadCmpBlocks[BlockIndex]);
 
-  Value *Cmp = nullptr;
-  // If we have multiple loads per block, we need to generate a composite
-  // comparison using xor+or. The type for the combinations is the largest load
-  // type.
-  IntegerType *const MaxLoadType =
-      NumLoads == 1 ? nullptr
-                    : IntegerType::get(CI->getContext(), MaxLoadSize * 8);
-  for (unsigned i = 0; i < NumLoads; ++i, ++LoadIndex) {
-    const LoadEntry &CurLoadEntry = LoadSequence[LoadIndex];
-    const LoadPair Loads = getLoadPair(
-        IntegerType::get(CI->getContext(), CurLoadEntry.LoadSize * 8),
-        /*NeedsBSwap=*/false, MaxLoadType, CurLoadEntry.Offset);
+    Value *Cmp = nullptr;
+    // If we have multiple loads per block, we need to generate a composite
+    // comparison using xor+or. The type for the combinations is the largest load
+    // type.
+    IntegerType *const MaxLoadType =
+        NumLoads == 1 ? nullptr
+        : IntegerType::get(CI->getContext(), MaxLoadSize * 8);
+    for (unsigned i = 0; i < NumLoads; ++i, ++LoadIndex) {
+        const LoadEntry &CurLoadEntry = LoadSequence[LoadIndex];
+        const LoadPair Loads = getLoadPair(
+                                   IntegerType::get(CI->getContext(), CurLoadEntry.LoadSize * 8),
+                                   /*NeedsBSwap=*/false, MaxLoadType, CurLoadEntry.Offset);
 
-    if (NumLoads != 1) {
-      // If we have multiple loads per block, we need to generate a composite
-      // comparison using xor+or.
-      Diff = Builder.CreateXor(Loads.Lhs, Loads.Rhs);
-      Diff = Builder.CreateZExt(Diff, MaxLoadType);
-      XorList.push_back(Diff);
-    } else {
-      // If there's only one load per block, we just compare the loaded values.
-      Cmp = Builder.CreateICmpNE(Loads.Lhs, Loads.Rhs);
-    }
-  }
-
-  auto pairWiseOr = [&](std::vector<Value *> &InList) -> std::vector<Value *> {
-    std::vector<Value *> OutList;
-    for (unsigned i = 0; i < InList.size() - 1; i = i + 2) {
-      Value *Or = Builder.CreateOr(InList[i], InList[i + 1]);
-      OutList.push_back(Or);
-    }
-    if (InList.size() % 2 != 0)
-      OutList.push_back(InList.back());
-    return OutList;
-  };
-
-  if (!Cmp) {
-    // Pairwise OR the XOR results.
-    OrList = pairWiseOr(XorList);
-
-    // Pairwise OR the OR results until one result left.
-    while (OrList.size() != 1) {
-      OrList = pairWiseOr(OrList);
+        if (NumLoads != 1) {
+            // If we have multiple loads per block, we need to generate a composite
+            // comparison using xor+or.
+            Diff = Builder.CreateXor(Loads.Lhs, Loads.Rhs);
+            Diff = Builder.CreateZExt(Diff, MaxLoadType);
+            XorList.push_back(Diff);
+        } else {
+            // If there's only one load per block, we just compare the loaded values.
+            Cmp = Builder.CreateICmpNE(Loads.Lhs, Loads.Rhs);
+        }
     }
 
-    assert(Diff && "Failed to find comparison diff");
-    Cmp = Builder.CreateICmpNE(OrList[0], ConstantInt::get(Diff->getType(), 0));
-  }
+    auto pairWiseOr = [&](std::vector<Value *> &InList) -> std::vector<Value *> {
+        std::vector<Value *> OutList;
+        for (unsigned i = 0; i < InList.size() - 1; i = i + 2) {
+            Value *Or = Builder.CreateOr(InList[i], InList[i + 1]);
+            OutList.push_back(Or);
+        }
+        if (InList.size() % 2 != 0)
+            OutList.push_back(InList.back());
+        return OutList;
+    };
 
-  return Cmp;
+    if (!Cmp) {
+        // Pairwise OR the XOR results.
+        OrList = pairWiseOr(XorList);
+
+        // Pairwise OR the OR results until one result left.
+        while (OrList.size() != 1) {
+            OrList = pairWiseOr(OrList);
+        }
+
+        assert(Diff && "Failed to find comparison diff");
+        Cmp = Builder.CreateICmpNE(OrList[0], ConstantInt::get(Diff->getType(), 0));
+    }
+
+    return Cmp;
 }
 
 void MemCmpExpansion::emitLoadCompareBlockMultipleLoads(unsigned BlockIndex,
-                                                        unsigned &LoadIndex) {
-  Value *Cmp = getCompareLoadPairs(BlockIndex, LoadIndex);
+        unsigned &LoadIndex) {
+    Value *Cmp = getCompareLoadPairs(BlockIndex, LoadIndex);
 
-  BasicBlock *NextBB = (BlockIndex == (LoadCmpBlocks.size() - 1))
-                           ? EndBlock
-                           : LoadCmpBlocks[BlockIndex + 1];
-  // Early exit branch if difference found to ResultBlock. Otherwise,
-  // continue to next LoadCmpBlock or EndBlock.
-  BranchInst *CmpBr = BranchInst::Create(ResBlock.BB, NextBB, Cmp);
-  Builder.Insert(CmpBr);
+    BasicBlock *NextBB = (BlockIndex == (LoadCmpBlocks.size() - 1))
+                         ? EndBlock
+                         : LoadCmpBlocks[BlockIndex + 1];
+    // Early exit branch if difference found to ResultBlock. Otherwise,
+    // continue to next LoadCmpBlock or EndBlock.
+    BranchInst *CmpBr = BranchInst::Create(ResBlock.BB, NextBB, Cmp);
+    Builder.Insert(CmpBr);
 
-  // Add a phi edge for the last LoadCmpBlock to Endblock with a value of 0
-  // since early exit to ResultBlock was not taken (no difference was found in
-  // any of the bytes).
-  if (BlockIndex == LoadCmpBlocks.size() - 1) {
-    Value *Zero = ConstantInt::get(Type::getInt32Ty(CI->getContext()), 0);
-    PhiRes->addIncoming(Zero, LoadCmpBlocks[BlockIndex]);
-  }
+    // Add a phi edge for the last LoadCmpBlock to Endblock with a value of 0
+    // since early exit to ResultBlock was not taken (no difference was found in
+    // any of the bytes).
+    if (BlockIndex == LoadCmpBlocks.size() - 1) {
+        Value *Zero = ConstantInt::get(Type::getInt32Ty(CI->getContext()), 0);
+        PhiRes->addIncoming(Zero, LoadCmpBlocks[BlockIndex]);
+    }
 }
 
 // This function creates the IR intructions for loading and comparing using the
@@ -450,186 +452,186 @@ void MemCmpExpansion::emitLoadCompareBlockMultipleLoads(unsigned BlockIndex,
 // a special case through emitLoadCompareByteBlock. The special handling can
 // simply subtract the loaded values and add it to the result phi node.
 void MemCmpExpansion::emitLoadCompareBlock(unsigned BlockIndex) {
-  // There is one load per block in this case, BlockIndex == LoadIndex.
-  const LoadEntry &CurLoadEntry = LoadSequence[BlockIndex];
+    // There is one load per block in this case, BlockIndex == LoadIndex.
+    const LoadEntry &CurLoadEntry = LoadSequence[BlockIndex];
 
-  if (CurLoadEntry.LoadSize == 1) {
-    MemCmpExpansion::emitLoadCompareByteBlock(BlockIndex, CurLoadEntry.Offset);
-    return;
-  }
+    if (CurLoadEntry.LoadSize == 1) {
+        MemCmpExpansion::emitLoadCompareByteBlock(BlockIndex, CurLoadEntry.Offset);
+        return;
+    }
 
-  Type *LoadSizeType =
-      IntegerType::get(CI->getContext(), CurLoadEntry.LoadSize * 8);
-  Type *MaxLoadType = IntegerType::get(CI->getContext(), MaxLoadSize * 8);
-  assert(CurLoadEntry.LoadSize <= MaxLoadSize && "Unexpected load type");
+    Type *LoadSizeType =
+        IntegerType::get(CI->getContext(), CurLoadEntry.LoadSize * 8);
+    Type *MaxLoadType = IntegerType::get(CI->getContext(), MaxLoadSize * 8);
+    assert(CurLoadEntry.LoadSize <= MaxLoadSize && "Unexpected load type");
 
-  Builder.SetInsertPoint(LoadCmpBlocks[BlockIndex]);
+    Builder.SetInsertPoint(LoadCmpBlocks[BlockIndex]);
 
-  const LoadPair Loads =
-      getLoadPair(LoadSizeType, /*NeedsBSwap=*/DL.isLittleEndian(), MaxLoadType,
-                  CurLoadEntry.Offset);
+    const LoadPair Loads =
+        getLoadPair(LoadSizeType, /*NeedsBSwap=*/DL.isLittleEndian(), MaxLoadType,
+                    CurLoadEntry.Offset);
 
-  // Add the loaded values to the phi nodes for calculating memcmp result only
-  // if result is not used in a zero equality.
-  if (!IsUsedForZeroCmp) {
-    ResBlock.PhiSrc1->addIncoming(Loads.Lhs, LoadCmpBlocks[BlockIndex]);
-    ResBlock.PhiSrc2->addIncoming(Loads.Rhs, LoadCmpBlocks[BlockIndex]);
-  }
+    // Add the loaded values to the phi nodes for calculating memcmp result only
+    // if result is not used in a zero equality.
+    if (!IsUsedForZeroCmp) {
+        ResBlock.PhiSrc1->addIncoming(Loads.Lhs, LoadCmpBlocks[BlockIndex]);
+        ResBlock.PhiSrc2->addIncoming(Loads.Rhs, LoadCmpBlocks[BlockIndex]);
+    }
 
-  Value *Cmp = Builder.CreateICmp(ICmpInst::ICMP_EQ, Loads.Lhs, Loads.Rhs);
-  BasicBlock *NextBB = (BlockIndex == (LoadCmpBlocks.size() - 1))
-                           ? EndBlock
-                           : LoadCmpBlocks[BlockIndex + 1];
-  // Early exit branch if difference found to ResultBlock. Otherwise, continue
-  // to next LoadCmpBlock or EndBlock.
-  BranchInst *CmpBr = BranchInst::Create(NextBB, ResBlock.BB, Cmp);
-  Builder.Insert(CmpBr);
+    Value *Cmp = Builder.CreateICmp(ICmpInst::ICMP_EQ, Loads.Lhs, Loads.Rhs);
+    BasicBlock *NextBB = (BlockIndex == (LoadCmpBlocks.size() - 1))
+                         ? EndBlock
+                         : LoadCmpBlocks[BlockIndex + 1];
+    // Early exit branch if difference found to ResultBlock. Otherwise, continue
+    // to next LoadCmpBlock or EndBlock.
+    BranchInst *CmpBr = BranchInst::Create(NextBB, ResBlock.BB, Cmp);
+    Builder.Insert(CmpBr);
 
-  // Add a phi edge for the last LoadCmpBlock to Endblock with a value of 0
-  // since early exit to ResultBlock was not taken (no difference was found in
-  // any of the bytes).
-  if (BlockIndex == LoadCmpBlocks.size() - 1) {
-    Value *Zero = ConstantInt::get(Type::getInt32Ty(CI->getContext()), 0);
-    PhiRes->addIncoming(Zero, LoadCmpBlocks[BlockIndex]);
-  }
+    // Add a phi edge for the last LoadCmpBlock to Endblock with a value of 0
+    // since early exit to ResultBlock was not taken (no difference was found in
+    // any of the bytes).
+    if (BlockIndex == LoadCmpBlocks.size() - 1) {
+        Value *Zero = ConstantInt::get(Type::getInt32Ty(CI->getContext()), 0);
+        PhiRes->addIncoming(Zero, LoadCmpBlocks[BlockIndex]);
+    }
 }
 
 // This function populates the ResultBlock with a sequence to calculate the
 // memcmp result. It compares the two loaded source values and returns -1 if
 // src1 < src2 and 1 if src1 > src2.
 void MemCmpExpansion::emitMemCmpResultBlock() {
-  // Special case: if memcmp result is used in a zero equality, result does not
-  // need to be calculated and can simply return 1.
-  if (IsUsedForZeroCmp) {
+    // Special case: if memcmp result is used in a zero equality, result does not
+    // need to be calculated and can simply return 1.
+    if (IsUsedForZeroCmp) {
+        BasicBlock::iterator InsertPt = ResBlock.BB->getFirstInsertionPt();
+        Builder.SetInsertPoint(ResBlock.BB, InsertPt);
+        Value *Res = ConstantInt::get(Type::getInt32Ty(CI->getContext()), 1);
+        PhiRes->addIncoming(Res, ResBlock.BB);
+        BranchInst *NewBr = BranchInst::Create(EndBlock);
+        Builder.Insert(NewBr);
+        return;
+    }
     BasicBlock::iterator InsertPt = ResBlock.BB->getFirstInsertionPt();
     Builder.SetInsertPoint(ResBlock.BB, InsertPt);
-    Value *Res = ConstantInt::get(Type::getInt32Ty(CI->getContext()), 1);
-    PhiRes->addIncoming(Res, ResBlock.BB);
+
+    Value *Cmp = Builder.CreateICmp(ICmpInst::ICMP_ULT, ResBlock.PhiSrc1,
+                                    ResBlock.PhiSrc2);
+
+    Value *Res =
+        Builder.CreateSelect(Cmp, ConstantInt::get(Builder.getInt32Ty(), -1),
+                             ConstantInt::get(Builder.getInt32Ty(), 1));
+
     BranchInst *NewBr = BranchInst::Create(EndBlock);
     Builder.Insert(NewBr);
-    return;
-  }
-  BasicBlock::iterator InsertPt = ResBlock.BB->getFirstInsertionPt();
-  Builder.SetInsertPoint(ResBlock.BB, InsertPt);
-
-  Value *Cmp = Builder.CreateICmp(ICmpInst::ICMP_ULT, ResBlock.PhiSrc1,
-                                  ResBlock.PhiSrc2);
-
-  Value *Res =
-      Builder.CreateSelect(Cmp, ConstantInt::get(Builder.getInt32Ty(), -1),
-                           ConstantInt::get(Builder.getInt32Ty(), 1));
-
-  BranchInst *NewBr = BranchInst::Create(EndBlock);
-  Builder.Insert(NewBr);
-  PhiRes->addIncoming(Res, ResBlock.BB);
+    PhiRes->addIncoming(Res, ResBlock.BB);
 }
 
 void MemCmpExpansion::setupResultBlockPHINodes() {
-  Type *MaxLoadType = IntegerType::get(CI->getContext(), MaxLoadSize * 8);
-  Builder.SetInsertPoint(ResBlock.BB);
-  // Note: this assumes one load per block.
-  ResBlock.PhiSrc1 =
-      Builder.CreatePHI(MaxLoadType, NumLoadsNonOneByte, "phi.src1");
-  ResBlock.PhiSrc2 =
-      Builder.CreatePHI(MaxLoadType, NumLoadsNonOneByte, "phi.src2");
+    Type *MaxLoadType = IntegerType::get(CI->getContext(), MaxLoadSize * 8);
+    Builder.SetInsertPoint(ResBlock.BB);
+    // Note: this assumes one load per block.
+    ResBlock.PhiSrc1 =
+        Builder.CreatePHI(MaxLoadType, NumLoadsNonOneByte, "phi.src1");
+    ResBlock.PhiSrc2 =
+        Builder.CreatePHI(MaxLoadType, NumLoadsNonOneByte, "phi.src2");
 }
 
 void MemCmpExpansion::setupEndBlockPHINodes() {
-  Builder.SetInsertPoint(&EndBlock->front());
-  PhiRes = Builder.CreatePHI(Type::getInt32Ty(CI->getContext()), 2, "phi.res");
+    Builder.SetInsertPoint(&EndBlock->front());
+    PhiRes = Builder.CreatePHI(Type::getInt32Ty(CI->getContext()), 2, "phi.res");
 }
 
 Value *MemCmpExpansion::getMemCmpExpansionZeroCase() {
-  unsigned LoadIndex = 0;
-  // This loop populates each of the LoadCmpBlocks with the IR sequence to
-  // handle multiple loads per block.
-  for (unsigned I = 0; I < getNumBlocks(); ++I) {
-    emitLoadCompareBlockMultipleLoads(I, LoadIndex);
-  }
+    unsigned LoadIndex = 0;
+    // This loop populates each of the LoadCmpBlocks with the IR sequence to
+    // handle multiple loads per block.
+    for (unsigned I = 0; I < getNumBlocks(); ++I) {
+        emitLoadCompareBlockMultipleLoads(I, LoadIndex);
+    }
 
-  emitMemCmpResultBlock();
-  return PhiRes;
+    emitMemCmpResultBlock();
+    return PhiRes;
 }
 
 /// A memcmp expansion that compares equality with 0 and only has one block of
 /// load and compare can bypass the compare, branch, and phi IR that is required
 /// in the general case.
 Value *MemCmpExpansion::getMemCmpEqZeroOneBlock() {
-  unsigned LoadIndex = 0;
-  Value *Cmp = getCompareLoadPairs(0, LoadIndex);
-  assert(LoadIndex == getNumLoads() && "some entries were not consumed");
-  return Builder.CreateZExt(Cmp, Type::getInt32Ty(CI->getContext()));
+    unsigned LoadIndex = 0;
+    Value *Cmp = getCompareLoadPairs(0, LoadIndex);
+    assert(LoadIndex == getNumLoads() && "some entries were not consumed");
+    return Builder.CreateZExt(Cmp, Type::getInt32Ty(CI->getContext()));
 }
 
 /// A memcmp expansion that only has one block of load and compare can bypass
 /// the compare, branch, and phi IR that is required in the general case.
 Value *MemCmpExpansion::getMemCmpOneBlock() {
-  Type *LoadSizeType = IntegerType::get(CI->getContext(), Size * 8);
-  bool NeedsBSwap = DL.isLittleEndian() && Size != 1;
+    Type *LoadSizeType = IntegerType::get(CI->getContext(), Size * 8);
+    bool NeedsBSwap = DL.isLittleEndian() && Size != 1;
 
-  // The i8 and i16 cases don't need compares. We zext the loaded values and
-  // subtract them to get the suitable negative, zero, or positive i32 result.
-  if (Size < 4) {
-    const LoadPair Loads =
-        getLoadPair(LoadSizeType, NeedsBSwap, Builder.getInt32Ty(),
-                    /*Offset*/ 0);
-    return Builder.CreateSub(Loads.Lhs, Loads.Rhs);
-  }
+    // The i8 and i16 cases don't need compares. We zext the loaded values and
+    // subtract them to get the suitable negative, zero, or positive i32 result.
+    if (Size < 4) {
+        const LoadPair Loads =
+            getLoadPair(LoadSizeType, NeedsBSwap, Builder.getInt32Ty(),
+                        /*Offset*/ 0);
+        return Builder.CreateSub(Loads.Lhs, Loads.Rhs);
+    }
 
-  const LoadPair Loads = getLoadPair(LoadSizeType, NeedsBSwap, LoadSizeType,
-                                     /*Offset*/ 0);
-  // The result of memcmp is negative, zero, or positive, so produce that by
-  // subtracting 2 extended compare bits: sub (ugt, ult).
-  // If a target prefers to use selects to get -1/0/1, they should be able
-  // to transform this later. The inverse transform (going from selects to math)
-  // may not be possible in the DAG because the selects got converted into
-  // branches before we got there.
-  Value *CmpUGT = Builder.CreateICmpUGT(Loads.Lhs, Loads.Rhs);
-  Value *CmpULT = Builder.CreateICmpULT(Loads.Lhs, Loads.Rhs);
-  Value *ZextUGT = Builder.CreateZExt(CmpUGT, Builder.getInt32Ty());
-  Value *ZextULT = Builder.CreateZExt(CmpULT, Builder.getInt32Ty());
-  return Builder.CreateSub(ZextUGT, ZextULT);
+    const LoadPair Loads = getLoadPair(LoadSizeType, NeedsBSwap, LoadSizeType,
+                                       /*Offset*/ 0);
+    // The result of memcmp is negative, zero, or positive, so produce that by
+    // subtracting 2 extended compare bits: sub (ugt, ult).
+    // If a target prefers to use selects to get -1/0/1, they should be able
+    // to transform this later. The inverse transform (going from selects to math)
+    // may not be possible in the DAG because the selects got converted into
+    // branches before we got there.
+    Value *CmpUGT = Builder.CreateICmpUGT(Loads.Lhs, Loads.Rhs);
+    Value *CmpULT = Builder.CreateICmpULT(Loads.Lhs, Loads.Rhs);
+    Value *ZextUGT = Builder.CreateZExt(CmpUGT, Builder.getInt32Ty());
+    Value *ZextULT = Builder.CreateZExt(CmpULT, Builder.getInt32Ty());
+    return Builder.CreateSub(ZextUGT, ZextULT);
 }
 
 // This function expands the memcmp call into an inline expansion and returns
 // the memcmp result.
 Value *MemCmpExpansion::getMemCmpExpansion() {
-  // Create the basic block framework for a multi-block expansion.
-  if (getNumBlocks() != 1) {
-    BasicBlock *StartBlock = CI->getParent();
-    EndBlock = StartBlock->splitBasicBlock(CI, "endblock");
-    setupEndBlockPHINodes();
-    createResultBlock();
+    // Create the basic block framework for a multi-block expansion.
+    if (getNumBlocks() != 1) {
+        BasicBlock *StartBlock = CI->getParent();
+        EndBlock = StartBlock->splitBasicBlock(CI, "endblock");
+        setupEndBlockPHINodes();
+        createResultBlock();
 
-    // If return value of memcmp is not used in a zero equality, we need to
-    // calculate which source was larger. The calculation requires the
-    // two loaded source values of each load compare block.
-    // These will be saved in the phi nodes created by setupResultBlockPHINodes.
-    if (!IsUsedForZeroCmp) setupResultBlockPHINodes();
+        // If return value of memcmp is not used in a zero equality, we need to
+        // calculate which source was larger. The calculation requires the
+        // two loaded source values of each load compare block.
+        // These will be saved in the phi nodes created by setupResultBlockPHINodes.
+        if (!IsUsedForZeroCmp) setupResultBlockPHINodes();
 
-    // Create the number of required load compare basic blocks.
-    createLoadCmpBlocks();
+        // Create the number of required load compare basic blocks.
+        createLoadCmpBlocks();
 
-    // Update the terminator added by splitBasicBlock to branch to the first
-    // LoadCmpBlock.
-    StartBlock->getTerminator()->setSuccessor(0, LoadCmpBlocks[0]);
-  }
+        // Update the terminator added by splitBasicBlock to branch to the first
+        // LoadCmpBlock.
+        StartBlock->getTerminator()->setSuccessor(0, LoadCmpBlocks[0]);
+    }
 
-  Builder.SetCurrentDebugLocation(CI->getDebugLoc());
+    Builder.SetCurrentDebugLocation(CI->getDebugLoc());
 
-  if (IsUsedForZeroCmp)
-    return getNumBlocks() == 1 ? getMemCmpEqZeroOneBlock()
-                               : getMemCmpExpansionZeroCase();
+    if (IsUsedForZeroCmp)
+        return getNumBlocks() == 1 ? getMemCmpEqZeroOneBlock()
+               : getMemCmpExpansionZeroCase();
 
-  if (getNumBlocks() == 1)
-    return getMemCmpOneBlock();
+    if (getNumBlocks() == 1)
+        return getMemCmpOneBlock();
 
-  for (unsigned I = 0; I < getNumBlocks(); ++I) {
-    emitLoadCompareBlock(I);
-  }
+    for (unsigned I = 0; I < getNumBlocks(); ++I) {
+        emitLoadCompareBlock(I);
+    }
 
-  emitMemCmpResultBlock();
-  return PhiRes;
+    emitMemCmpResultBlock();
+    return PhiRes;
 }
 
 // This function checks to see if an expansion of memcmp can be generated.
@@ -708,130 +710,130 @@ Value *MemCmpExpansion::getMemCmpExpansion() {
 static bool expandMemCmp(CallInst *CI, const TargetTransformInfo *TTI,
                          const TargetLowering *TLI, const DataLayout *DL,
                          ProfileSummaryInfo *PSI, BlockFrequencyInfo *BFI) {
-  NumMemCmpCalls++;
+    NumMemCmpCalls++;
 
-  // Early exit from expansion if -Oz.
-  if (CI->getFunction()->hasMinSize())
-    return false;
+    // Early exit from expansion if -Oz.
+    if (CI->getFunction()->hasMinSize())
+        return false;
 
-  // Early exit from expansion if size is not a constant.
-  ConstantInt *SizeCast = dyn_cast<ConstantInt>(CI->getArgOperand(2));
-  if (!SizeCast) {
-    NumMemCmpNotConstant++;
-    return false;
-  }
-  const uint64_t SizeVal = SizeCast->getZExtValue();
+    // Early exit from expansion if size is not a constant.
+    ConstantInt *SizeCast = dyn_cast<ConstantInt>(CI->getArgOperand(2));
+    if (!SizeCast) {
+        NumMemCmpNotConstant++;
+        return false;
+    }
+    const uint64_t SizeVal = SizeCast->getZExtValue();
 
-  if (SizeVal == 0) {
-    return false;
-  }
-  // TTI call to check if target would like to expand memcmp. Also, get the
-  // available load sizes.
-  const bool IsUsedForZeroCmp = isOnlyUsedInZeroEqualityComparison(CI);
-  bool OptForSize = CI->getFunction()->hasOptSize() ||
-                    llvm::shouldOptimizeForSize(CI->getParent(), PSI, BFI);
-  auto Options = TTI->enableMemCmpExpansion(OptForSize,
-                                            IsUsedForZeroCmp);
-  if (!Options) return false;
+    if (SizeVal == 0) {
+        return false;
+    }
+    // TTI call to check if target would like to expand memcmp. Also, get the
+    // available load sizes.
+    const bool IsUsedForZeroCmp = isOnlyUsedInZeroEqualityComparison(CI);
+    bool OptForSize = CI->getFunction()->hasOptSize() ||
+                      llvm::shouldOptimizeForSize(CI->getParent(), PSI, BFI);
+    auto Options = TTI->enableMemCmpExpansion(OptForSize,
+                   IsUsedForZeroCmp);
+    if (!Options) return false;
 
-  if (MemCmpEqZeroNumLoadsPerBlock.getNumOccurrences())
-    Options.NumLoadsPerBlock = MemCmpEqZeroNumLoadsPerBlock;
+    if (MemCmpEqZeroNumLoadsPerBlock.getNumOccurrences())
+        Options.NumLoadsPerBlock = MemCmpEqZeroNumLoadsPerBlock;
 
-  if (OptForSize &&
-      MaxLoadsPerMemcmpOptSize.getNumOccurrences())
-    Options.MaxNumLoads = MaxLoadsPerMemcmpOptSize;
+    if (OptForSize &&
+            MaxLoadsPerMemcmpOptSize.getNumOccurrences())
+        Options.MaxNumLoads = MaxLoadsPerMemcmpOptSize;
 
-  if (!OptForSize && MaxLoadsPerMemcmp.getNumOccurrences())
-    Options.MaxNumLoads = MaxLoadsPerMemcmp;
+    if (!OptForSize && MaxLoadsPerMemcmp.getNumOccurrences())
+        Options.MaxNumLoads = MaxLoadsPerMemcmp;
 
-  MemCmpExpansion Expansion(CI, SizeVal, Options, IsUsedForZeroCmp, *DL);
+    MemCmpExpansion Expansion(CI, SizeVal, Options, IsUsedForZeroCmp, *DL);
 
-  // Don't expand if this will require more loads than desired by the target.
-  if (Expansion.getNumLoads() == 0) {
-    NumMemCmpGreaterThanMax++;
-    return false;
-  }
+    // Don't expand if this will require more loads than desired by the target.
+    if (Expansion.getNumLoads() == 0) {
+        NumMemCmpGreaterThanMax++;
+        return false;
+    }
 
-  NumMemCmpInlined++;
+    NumMemCmpInlined++;
 
-  Value *Res = Expansion.getMemCmpExpansion();
+    Value *Res = Expansion.getMemCmpExpansion();
 
-  // Replace call with result of expansion and erase call.
-  CI->replaceAllUsesWith(Res);
-  CI->eraseFromParent();
+    // Replace call with result of expansion and erase call.
+    CI->replaceAllUsesWith(Res);
+    CI->eraseFromParent();
 
-  return true;
+    return true;
 }
 
 
 
 class ExpandMemCmpPass : public FunctionPass {
 public:
-  static char ID;
+    static char ID;
 
-  ExpandMemCmpPass() : FunctionPass(ID) {
-    initializeExpandMemCmpPassPass(*PassRegistry::getPassRegistry());
-  }
-
-  bool runOnFunction(Function &F) override {
-    if (skipFunction(F)) return false;
-
-    auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
-    if (!TPC) {
-      return false;
+    ExpandMemCmpPass() : FunctionPass(ID) {
+        initializeExpandMemCmpPassPass(*PassRegistry::getPassRegistry());
     }
-    const TargetLowering* TL =
-        TPC->getTM<TargetMachine>().getSubtargetImpl(F)->getTargetLowering();
 
-    const TargetLibraryInfo *TLI =
-        &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
-    const TargetTransformInfo *TTI =
-        &getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
-    auto *PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
-    auto *BFI = (PSI && PSI->hasProfileSummary()) ?
-           &getAnalysis<LazyBlockFrequencyInfoPass>().getBFI() :
-           nullptr;
-    auto PA = runImpl(F, TLI, TTI, TL, PSI, BFI);
-    return !PA.areAllPreserved();
-  }
+    bool runOnFunction(Function &F) override {
+        if (skipFunction(F)) return false;
+
+        auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
+        if (!TPC) {
+            return false;
+        }
+        const TargetLowering* TL =
+            TPC->getTM<TargetMachine>().getSubtargetImpl(F)->getTargetLowering();
+
+        const TargetLibraryInfo *TLI =
+            &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
+        const TargetTransformInfo *TTI =
+            &getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
+        auto *PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
+        auto *BFI = (PSI && PSI->hasProfileSummary()) ?
+                    &getAnalysis<LazyBlockFrequencyInfoPass>().getBFI() :
+                    nullptr;
+        auto PA = runImpl(F, TLI, TTI, TL, PSI, BFI);
+        return !PA.areAllPreserved();
+    }
 
 private:
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequired<TargetLibraryInfoWrapperPass>();
-    AU.addRequired<TargetTransformInfoWrapperPass>();
-    AU.addRequired<ProfileSummaryInfoWrapperPass>();
-    LazyBlockFrequencyInfoPass::getLazyBFIAnalysisUsage(AU);
-    FunctionPass::getAnalysisUsage(AU);
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addRequired<TargetLibraryInfoWrapperPass>();
+        AU.addRequired<TargetTransformInfoWrapperPass>();
+        AU.addRequired<ProfileSummaryInfoWrapperPass>();
+        LazyBlockFrequencyInfoPass::getLazyBFIAnalysisUsage(AU);
+        FunctionPass::getAnalysisUsage(AU);
+    }
 
-  PreservedAnalyses runImpl(Function &F, const TargetLibraryInfo *TLI,
-                            const TargetTransformInfo *TTI,
-                            const TargetLowering* TL,
-                            ProfileSummaryInfo *PSI, BlockFrequencyInfo *BFI);
-  // Returns true if a change was made.
-  bool runOnBlock(BasicBlock &BB, const TargetLibraryInfo *TLI,
-                  const TargetTransformInfo *TTI, const TargetLowering* TL,
-                  const DataLayout& DL, ProfileSummaryInfo *PSI,
-                  BlockFrequencyInfo *BFI);
+    PreservedAnalyses runImpl(Function &F, const TargetLibraryInfo *TLI,
+                              const TargetTransformInfo *TTI,
+                              const TargetLowering* TL,
+                              ProfileSummaryInfo *PSI, BlockFrequencyInfo *BFI);
+    // Returns true if a change was made.
+    bool runOnBlock(BasicBlock &BB, const TargetLibraryInfo *TLI,
+                    const TargetTransformInfo *TTI, const TargetLowering* TL,
+                    const DataLayout& DL, ProfileSummaryInfo *PSI,
+                    BlockFrequencyInfo *BFI);
 };
 
 bool ExpandMemCmpPass::runOnBlock(
     BasicBlock &BB, const TargetLibraryInfo *TLI,
     const TargetTransformInfo *TTI, const TargetLowering* TL,
     const DataLayout& DL, ProfileSummaryInfo *PSI, BlockFrequencyInfo *BFI) {
-  for (Instruction& I : BB) {
-    CallInst *CI = dyn_cast<CallInst>(&I);
-    if (!CI) {
-      continue;
+    for (Instruction& I : BB) {
+        CallInst *CI = dyn_cast<CallInst>(&I);
+        if (!CI) {
+            continue;
+        }
+        LibFunc Func;
+        if (TLI->getLibFunc(*CI, Func) &&
+                (Func == LibFunc_memcmp || Func == LibFunc_bcmp) &&
+                expandMemCmp(CI, TTI, TL, &DL, PSI, BFI)) {
+            return true;
+        }
     }
-    LibFunc Func;
-    if (TLI->getLibFunc(*CI, Func) &&
-        (Func == LibFunc_memcmp || Func == LibFunc_bcmp) &&
-        expandMemCmp(CI, TTI, TL, &DL, PSI, BFI)) {
-      return true;
-    }
-  }
-  return false;
+    return false;
 }
 
 
@@ -839,22 +841,22 @@ PreservedAnalyses ExpandMemCmpPass::runImpl(
     Function &F, const TargetLibraryInfo *TLI, const TargetTransformInfo *TTI,
     const TargetLowering* TL, ProfileSummaryInfo *PSI,
     BlockFrequencyInfo *BFI) {
-  const DataLayout& DL = F.getParent()->getDataLayout();
-  bool MadeChanges = false;
-  for (auto BBIt = F.begin(); BBIt != F.end();) {
-    if (runOnBlock(*BBIt, TLI, TTI, TL, DL, PSI, BFI)) {
-      MadeChanges = true;
-      // If changes were made, restart the function from the beginning, since
-      // the structure of the function was changed.
-      BBIt = F.begin();
-    } else {
-      ++BBIt;
+    const DataLayout& DL = F.getParent()->getDataLayout();
+    bool MadeChanges = false;
+    for (auto BBIt = F.begin(); BBIt != F.end();) {
+        if (runOnBlock(*BBIt, TLI, TTI, TL, DL, PSI, BFI)) {
+            MadeChanges = true;
+            // If changes were made, restart the function from the beginning, since
+            // the structure of the function was changed.
+            BBIt = F.begin();
+        } else {
+            ++BBIt;
+        }
     }
-  }
-  if (MadeChanges)
-    for (BasicBlock &BB : F)
-      SimplifyInstructionsInBlock(&BB);
-  return MadeChanges ? PreservedAnalyses::none() : PreservedAnalyses::all();
+    if (MadeChanges)
+        for (BasicBlock &BB : F)
+            SimplifyInstructionsInBlock(&BB);
+    return MadeChanges ? PreservedAnalyses::none() : PreservedAnalyses::all();
 }
 
 } // namespace
@@ -870,5 +872,5 @@ INITIALIZE_PASS_END(ExpandMemCmpPass, "expandmemcmp",
                     "Expand memcmp() to load/stores", false, false)
 
 FunctionPass *llvm::createExpandMemCmpPass() {
-  return new ExpandMemCmpPass();
+    return new ExpandMemCmpPass();
 }

@@ -16,8 +16,8 @@ const int ape = 32;
 }
 
 int main() {
-  printf("hello %d\n", monkey::ape); // DexLabel('main')
-  return 0;
+    printf("hello %d\n", monkey::ape); // DexLabel('main')
+    return 0;
 }
 
 // DexExpectWatchValue('monkey::ape', 32, on_line='main')

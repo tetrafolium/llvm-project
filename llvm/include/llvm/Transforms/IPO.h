@@ -95,7 +95,7 @@ ModulePass *createEliminateAvailableExternallyPass();
 /// unused.
 ///
 ModulePass *createGVExtractionPass(std::vector<GlobalValue*>& GVs, bool
-                                  deleteFn = false, bool keepConstInit = false);
+                                   deleteFn = false, bool keepConstInit = false);
 
 //===----------------------------------------------------------------------===//
 /// This pass performs iterative function importing from other modules.
@@ -190,7 +190,7 @@ createBlockExtractorPass(const SmallVectorImpl<BasicBlock *> &BlocksToExtract,
                          bool EraseFunctions);
 ModulePass *
 createBlockExtractorPass(const SmallVectorImpl<SmallVector<BasicBlock *, 16>>
-                             &GroupsOfBlocksToExtract,
+                         &GroupsOfBlocksToExtract,
                          bool EraseFunctions);
 
 /// createStripDeadPrototypesPass - This pass removes any function declarations
@@ -236,9 +236,9 @@ ModulePass *createCalledValuePropagationPass();
 
 /// What to do with the summary when running passes that operate on it.
 enum class PassSummaryAction {
-  None,   ///< Do nothing.
-  Import, ///< Import information from summary.
-  Export, ///< Export information to summary.
+    None,   ///< Do nothing.
+    Import, ///< Import information from summary.
+    Export, ///< Export information to summary.
 };
 
 /// This pass lowers type metadata and the llvm.type.test intrinsic to
@@ -286,7 +286,7 @@ ModulePass *createSampleProfileLoaderPass(StringRef Name);
 
 /// Write ThinLTO-ready bitcode to Str.
 ModulePass *createWriteThinLTOBitcodePass(raw_ostream &Str,
-                                          raw_ostream *ThinLinkOS = nullptr);
+        raw_ostream *ThinLinkOS = nullptr);
 
 } // End llvm namespace
 

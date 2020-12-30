@@ -25,12 +25,12 @@ namespace orc {
 /// ExecutionSession.
 class MangleAndInterner {
 public:
-  MangleAndInterner(ExecutionSession &ES, const DataLayout &DL);
-  SymbolStringPtr operator()(StringRef Name);
+    MangleAndInterner(ExecutionSession &ES, const DataLayout &DL);
+    SymbolStringPtr operator()(StringRef Name);
 
 private:
-  ExecutionSession &ES;
-  const DataLayout &DL;
+    ExecutionSession &ES;
+    const DataLayout &DL;
 };
 
 /// Maps IR global values to their linker symbol names / flags.
@@ -38,27 +38,27 @@ private:
 /// This utility can be used when adding new IR globals in the JIT.
 class IRSymbolMapper {
 public:
-  struct ManglingOptions {
-    bool EmulatedTLS = false;
-  };
+    struct ManglingOptions {
+        bool EmulatedTLS = false;
+    };
 
-  using SymbolNameToDefinitionMap = std::map<SymbolStringPtr, GlobalValue *>;
+    using SymbolNameToDefinitionMap = std::map<SymbolStringPtr, GlobalValue *>;
 
-  /// Add mangled symbols for the given GlobalValues to SymbolFlags.
-  /// If a SymbolToDefinitionMap pointer is supplied then it will be populated
-  /// with Name-to-GlobalValue* mappings. Note that this mapping is not
-  /// necessarily one-to-one: thread-local GlobalValues, for example, may
-  /// produce more than one symbol, in which case the map will contain duplicate
-  /// values.
-  static void add(ExecutionSession &ES, const ManglingOptions &MO,
-                  ArrayRef<GlobalValue *> GVs, SymbolFlagsMap &SymbolFlags,
-                  SymbolNameToDefinitionMap *SymbolToDefinition = nullptr);
+    /// Add mangled symbols for the given GlobalValues to SymbolFlags.
+    /// If a SymbolToDefinitionMap pointer is supplied then it will be populated
+    /// with Name-to-GlobalValue* mappings. Note that this mapping is not
+    /// necessarily one-to-one: thread-local GlobalValues, for example, may
+    /// produce more than one symbol, in which case the map will contain duplicate
+    /// values.
+    static void add(ExecutionSession &ES, const ManglingOptions &MO,
+                    ArrayRef<GlobalValue *> GVs, SymbolFlagsMap &SymbolFlags,
+                    SymbolNameToDefinitionMap *SymbolToDefinition = nullptr);
 };
 
 /// Returns a SymbolFlagsMap for the object file represented by the given
 /// buffer, or an error if the buffer does not contain a valid object file.
 Expected<std::pair<SymbolFlagsMap, SymbolStringPtr>>
-getObjectSymbolInfo(ExecutionSession &ES, MemoryBufferRef ObjBuffer);
+        getObjectSymbolInfo(ExecutionSession &ES, MemoryBufferRef ObjBuffer);
 
 } // End namespace orc
 } // End namespace llvm

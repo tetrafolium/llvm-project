@@ -20,17 +20,19 @@ namespace intrinsics {
 
 template <typename Op>
 struct FoldedValueBuilder {
-  // Builder-based
-  template <typename... Args>
-  FoldedValueBuilder(OperationFolder *folder, Args... args) {
-    value = folder ? folder->create<Op>(ScopedContext::getBuilderRef(),
-                                        ScopedContext::getLocation(), args...)
-                   : ScopedContext::getBuilderRef().create<Op>(
-                         ScopedContext::getLocation(), args...);
-  }
+    // Builder-based
+    template <typename... Args>
+    FoldedValueBuilder(OperationFolder *folder, Args... args) {
+        value = folder ? folder->create<Op>(ScopedContext::getBuilderRef(),
+                                            ScopedContext::getLocation(), args...)
+                : ScopedContext::getBuilderRef().create<Op>(
+                    ScopedContext::getLocation(), args...);
+    }
 
-  operator Value() { return value; }
-  Value value;
+    operator Value() {
+        return value;
+    }
+    Value value;
 };
 
 using folded_std_constant_index = FoldedValueBuilder<ConstantIndexOp>;

@@ -19,28 +19,28 @@
 namespace lldb_private {
 
 class HostInfoLinux : public HostInfoPosix {
-  friend class HostInfoBase;
+    friend class HostInfoBase;
 
 private:
-  // Static class, unconstructable.
-  HostInfoLinux();
-  ~HostInfoLinux();
+    // Static class, unconstructable.
+    HostInfoLinux();
+    ~HostInfoLinux();
 
 public:
-  static void Initialize();
+    static void Initialize();
 
-  static llvm::VersionTuple GetOSVersion();
-  static bool GetOSBuildString(std::string &s);
-  static bool GetOSKernelDescription(std::string &s);
-  static llvm::StringRef GetDistributionId();
-  static FileSpec GetProgramFileSpec();
+    static llvm::VersionTuple GetOSVersion();
+    static bool GetOSBuildString(std::string &s);
+    static bool GetOSKernelDescription(std::string &s);
+    static llvm::StringRef GetDistributionId();
+    static FileSpec GetProgramFileSpec();
 
 protected:
-  static bool ComputeSupportExeDirectory(FileSpec &file_spec);
-  static bool ComputeSystemPluginsDirectory(FileSpec &file_spec);
-  static bool ComputeUserPluginsDirectory(FileSpec &file_spec);
-  static void ComputeHostArchitectureSupport(ArchSpec &arch_32,
-                                             ArchSpec &arch_64);
+    static bool ComputeSupportExeDirectory(FileSpec &file_spec);
+    static bool ComputeSystemPluginsDirectory(FileSpec &file_spec);
+    static bool ComputeUserPluginsDirectory(FileSpec &file_spec);
+    static void ComputeHostArchitectureSupport(ArchSpec &arch_32,
+            ArchSpec &arch_64);
 };
 }
 

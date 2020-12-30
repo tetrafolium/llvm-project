@@ -34,92 +34,92 @@ using LoadStorePair = std::pair<Instruction *, Instruction *>;
 /// instrumentation pass.
 class InstrProfiling : public PassInfoMixin<InstrProfiling> {
 public:
-  InstrProfiling() : IsCS(false) {}
-  InstrProfiling(const InstrProfOptions &Options, bool IsCS = false)
-      : Options(Options), IsCS(IsCS) {}
+    InstrProfiling() : IsCS(false) {}
+    InstrProfiling(const InstrProfOptions &Options, bool IsCS = false)
+        : Options(Options), IsCS(IsCS) {}
 
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
-  bool run(Module &M,
-           std::function<const TargetLibraryInfo &(Function &F)> GetTLI);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    bool run(Module &M,
+             std::function<const TargetLibraryInfo &(Function &F)> GetTLI);
 
 private:
-  InstrProfOptions Options;
-  Module *M;
-  Triple TT;
-  std::function<const TargetLibraryInfo &(Function &F)> GetTLI;
-  struct PerFunctionProfileData {
-    uint32_t NumValueSites[IPVK_Last + 1];
-    GlobalVariable *RegionCounters = nullptr;
-    GlobalVariable *DataVar = nullptr;
+    InstrProfOptions Options;
+    Module *M;
+    Triple TT;
+    std::function<const TargetLibraryInfo &(Function &F)> GetTLI;
+    struct PerFunctionProfileData {
+        uint32_t NumValueSites[IPVK_Last + 1];
+        GlobalVariable *RegionCounters = nullptr;
+        GlobalVariable *DataVar = nullptr;
 
-    PerFunctionProfileData() {
-      memset(NumValueSites, 0, sizeof(uint32_t) * (IPVK_Last + 1));
-    }
-  };
-  DenseMap<GlobalVariable *, PerFunctionProfileData> ProfileDataMap;
-  std::vector<GlobalValue *> UsedVars;
-  std::vector<GlobalVariable *> ReferencedNames;
-  GlobalVariable *NamesVar;
-  size_t NamesSize;
+        PerFunctionProfileData() {
+            memset(NumValueSites, 0, sizeof(uint32_t) * (IPVK_Last + 1));
+        }
+    };
+    DenseMap<GlobalVariable *, PerFunctionProfileData> ProfileDataMap;
+    std::vector<GlobalValue *> UsedVars;
+    std::vector<GlobalVariable *> ReferencedNames;
+    GlobalVariable *NamesVar;
+    size_t NamesSize;
 
-  // Is this lowering for the context-sensitive instrumentation.
-  bool IsCS;
+    // Is this lowering for the context-sensitive instrumentation.
+    bool IsCS;
 
-  // vector of counter load/store pairs to be register promoted.
-  std::vector<LoadStorePair> PromotionCandidates;
+    // vector of counter load/store pairs to be register promoted.
+    std::vector<LoadStorePair> PromotionCandidates;
 
-  int64_t TotalCountersPromoted = 0;
+    int64_t TotalCountersPromoted = 0;
 
-  /// Lower instrumentation intrinsics in the function. Returns true if there
-  /// any lowering.
-  bool lowerIntrinsics(Function *F);
+    /// Lower instrumentation intrinsics in the function. Returns true if there
+    /// any lowering.
+    bool lowerIntrinsics(Function *F);
 
-  /// Register-promote counter loads and stores in loops.
-  void promoteCounterLoadStores(Function *F);
+    /// Register-promote counter loads and stores in loops.
+    void promoteCounterLoadStores(Function *F);
 
-  /// Returns true if relocating counters at runtime is enabled.
-  bool isRuntimeCounterRelocationEnabled() const;
+    /// Returns true if relocating counters at runtime is enabled.
+    bool isRuntimeCounterRelocationEnabled() const;
 
-  /// Returns true if profile counter update register promotion is enabled.
-  bool isCounterPromotionEnabled() const;
+    /// Returns true if profile counter update register promotion is enabled.
+    bool isCounterPromotionEnabled() const;
 
-  /// Count the number of instrumented value sites for the function.
-  void computeNumValueSiteCounts(InstrProfValueProfileInst *Ins);
+    /// Count the number of instrumented value sites for the function.
+    void computeNumValueSiteCounts(InstrProfValueProfileInst *Ins);
 
-  /// Replace instrprof_value_profile with a call to runtime library.
-  void lowerValueProfileInst(InstrProfValueProfileInst *Ins);
+    /// Replace instrprof_value_profile with a call to runtime library.
+    void lowerValueProfileInst(InstrProfValueProfileInst *Ins);
 
-  /// Replace instrprof_increment with an increment of the appropriate value.
-  void lowerIncrement(InstrProfIncrementInst *Inc);
+    /// Replace instrprof_increment with an increment of the appropriate value.
+    void lowerIncrement(InstrProfIncrementInst *Inc);
 
-  /// Force emitting of name vars for unused functions.
-  void lowerCoverageData(GlobalVariable *CoverageNamesVar);
+    /// Force emitting of name vars for unused functions.
+    void lowerCoverageData(GlobalVariable *CoverageNamesVar);
 
-  /// Get the region counters for an increment, creating them if necessary.
-  ///
-  /// If the counter array doesn't yet exist, the profile data variables
-  /// referring to them will also be created.
-  GlobalVariable *getOrCreateRegionCounters(InstrProfIncrementInst *Inc);
+    /// Get the region counters for an increment, creating them if necessary.
+    ///
+    /// If the counter array doesn't yet exist, the profile data variables
+    /// referring to them will also be created.
+    GlobalVariable *getOrCreateRegionCounters(InstrProfIncrementInst *Inc);
 
-  /// Emit the section with compressed function names.
-  void emitNameData();
+    /// Emit the section with compressed function names.
+    void emitNameData();
 
-  /// Emit value nodes section for value profiling.
-  void emitVNodes();
+    /// Emit value nodes section for value profiling.
+    void emitVNodes();
 
-  /// Emit runtime registration functions for each profile data variable.
-  void emitRegistration();
+    /// Emit runtime registration functions for each profile data variable.
+    void emitRegistration();
 
-  /// Emit the necessary plumbing to pull in the runtime initialization.
-  /// Returns true if a change was made.
-  bool emitRuntimeHook();
+    /// Emit the necessary plumbing to pull in the runtime initialization.
+    /// Returns true if a change was made.
+    bool emitRuntimeHook();
 
-  /// Add uses of our data variables and runtime hook.
-  void emitUses();
+    /// Add uses of our data variables and runtime hook.
+    void emitUses();
 
-  /// Create a static initializer for our data, on platforms that need it,
-  /// and for any profile output file that was specified.
-  void emitInitialization();
+    /// Create a static initializer for our data, on platforms that need it,
+    /// and for any profile output file that was specified.
+    void emitInitialization();
 };
 
 } // end namespace llvm

@@ -71,202 +71,208 @@ namespace lldb_private {
 /// objects alive with extra shared pointer references to these  objects.
 class ExecutionContextRef {
 public:
-  /// Default Constructor.
-  ExecutionContextRef();
+    /// Default Constructor.
+    ExecutionContextRef();
 
-  /// Copy Constructor.
-  ExecutionContextRef(const ExecutionContextRef &rhs);
+    /// Copy Constructor.
+    ExecutionContextRef(const ExecutionContextRef &rhs);
 
-  /// Construct using an ExecutionContext object that might be nullptr.
-  ///
-  /// If \a exe_ctx_ptr is valid, then make weak references to any valid
-  /// objects in the ExecutionContext, otherwise no weak references to any
-  /// execution context objects will be made.
-  ExecutionContextRef(const ExecutionContext *exe_ctx_ptr);
+    /// Construct using an ExecutionContext object that might be nullptr.
+    ///
+    /// If \a exe_ctx_ptr is valid, then make weak references to any valid
+    /// objects in the ExecutionContext, otherwise no weak references to any
+    /// execution context objects will be made.
+    ExecutionContextRef(const ExecutionContext *exe_ctx_ptr);
 
-  /// Construct using an ExecutionContext object.
-  ///
-  /// Make weak references to any valid objects in the ExecutionContext.
-  ExecutionContextRef(const ExecutionContext &exe_ctx);
+    /// Construct using an ExecutionContext object.
+    ///
+    /// Make weak references to any valid objects in the ExecutionContext.
+    ExecutionContextRef(const ExecutionContext &exe_ctx);
 
-  /// Construct using the target and all the selected items inside of it (the
-  /// process and its selected thread, and the thread's selected frame). If
-  /// there is no selected thread, default to the first thread If there is no
-  /// selected frame, default to the first frame.
-  ExecutionContextRef(Target *target, bool adopt_selected);
+    /// Construct using the target and all the selected items inside of it (the
+    /// process and its selected thread, and the thread's selected frame). If
+    /// there is no selected thread, default to the first thread If there is no
+    /// selected frame, default to the first frame.
+    ExecutionContextRef(Target *target, bool adopt_selected);
 
-  /// Construct using an execution context scope.
-  ///
-  /// If the ExecutionContextScope object is valid and refers to a frame, make
-  /// weak references too the frame, thread, process and target. If the
-  /// ExecutionContextScope object is valid and refers to a thread, make weak
-  /// references too the thread, process and target. If the
-  /// ExecutionContextScope object is valid and refers to a process, make weak
-  /// references too the process and target. If the ExecutionContextScope
-  /// object is valid and refers to a target, make weak references too the
-  /// target.
-  ExecutionContextRef(ExecutionContextScope *exe_scope);
+    /// Construct using an execution context scope.
+    ///
+    /// If the ExecutionContextScope object is valid and refers to a frame, make
+    /// weak references too the frame, thread, process and target. If the
+    /// ExecutionContextScope object is valid and refers to a thread, make weak
+    /// references too the thread, process and target. If the
+    /// ExecutionContextScope object is valid and refers to a process, make weak
+    /// references too the process and target. If the ExecutionContextScope
+    /// object is valid and refers to a target, make weak references too the
+    /// target.
+    ExecutionContextRef(ExecutionContextScope *exe_scope);
 
-  /// Construct using an execution context scope.
-  ///
-  /// If the ExecutionContextScope object refers to a frame, make weak
-  /// references too the frame, thread, process and target. If the
-  /// ExecutionContextScope object refers to a thread, make weak references
-  /// too the thread, process and target. If the ExecutionContextScope object
-  /// refers to a process, make weak references too the process and target. If
-  /// the ExecutionContextScope object refers to a target, make weak
-  /// references too the target.
-  ExecutionContextRef(ExecutionContextScope &exe_scope);
+    /// Construct using an execution context scope.
+    ///
+    /// If the ExecutionContextScope object refers to a frame, make weak
+    /// references too the frame, thread, process and target. If the
+    /// ExecutionContextScope object refers to a thread, make weak references
+    /// too the thread, process and target. If the ExecutionContextScope object
+    /// refers to a process, make weak references too the process and target. If
+    /// the ExecutionContextScope object refers to a target, make weak
+    /// references too the target.
+    ExecutionContextRef(ExecutionContextScope &exe_scope);
 
-  ~ExecutionContextRef();
+    ~ExecutionContextRef();
 
-  /// Assignment operator
-  ///
-  /// Copy all weak references in \a rhs.
-  ExecutionContextRef &operator=(const ExecutionContextRef &rhs);
+    /// Assignment operator
+    ///
+    /// Copy all weak references in \a rhs.
+    ExecutionContextRef &operator=(const ExecutionContextRef &rhs);
 
-  /// Assignment operator from a ExecutionContext
-  ///
-  /// Make weak references to any strongly referenced objects in \a exe_ctx.
-  ExecutionContextRef &operator=(const ExecutionContext &exe_ctx);
+    /// Assignment operator from a ExecutionContext
+    ///
+    /// Make weak references to any strongly referenced objects in \a exe_ctx.
+    ExecutionContextRef &operator=(const ExecutionContext &exe_ctx);
 
-  /// Clear the object's state.
-  ///
-  /// Sets the process and thread to nullptr, and the frame index to an
-  /// invalid value.
-  void Clear();
+    /// Clear the object's state.
+    ///
+    /// Sets the process and thread to nullptr, and the frame index to an
+    /// invalid value.
+    void Clear();
 
-  /// Set accessor that creates a weak reference to the target referenced in
-  /// \a target_sp.
-  ///
-  /// If \a target_sp is valid this object will create a weak reference to
-  /// that object, otherwise any previous target weak reference contained in
-  /// this object will be reset.
-  ///
-  /// Only the weak reference to the target will be updated, no other weak
-  /// references will be modified. If you want this execution context to make
-  /// a weak reference to the target's process, use the
-  /// ExecutionContextRef::SetContext() functions.
-  ///
-  /// \see ExecutionContextRef::SetContext(const lldb::TargetSP &, bool)
-  void SetTargetSP(const lldb::TargetSP &target_sp);
+    /// Set accessor that creates a weak reference to the target referenced in
+    /// \a target_sp.
+    ///
+    /// If \a target_sp is valid this object will create a weak reference to
+    /// that object, otherwise any previous target weak reference contained in
+    /// this object will be reset.
+    ///
+    /// Only the weak reference to the target will be updated, no other weak
+    /// references will be modified. If you want this execution context to make
+    /// a weak reference to the target's process, use the
+    /// ExecutionContextRef::SetContext() functions.
+    ///
+    /// \see ExecutionContextRef::SetContext(const lldb::TargetSP &, bool)
+    void SetTargetSP(const lldb::TargetSP &target_sp);
 
-  /// Set accessor that creates a weak reference to the process referenced in
-  /// \a process_sp.
-  ///
-  /// If \a process_sp is valid this object will create a weak reference to
-  /// that object, otherwise any previous process weak reference contained in
-  /// this object will be reset.
-  ///
-  /// Only the weak reference to the process will be updated, no other weak
-  /// references will be modified. If you want this execution context to make
-  /// a weak reference to the target, use the
-  /// ExecutionContextRef::SetContext() functions.
-  ///
-  /// \see ExecutionContextRef::SetContext(const lldb::ProcessSP &)
-  void SetProcessSP(const lldb::ProcessSP &process_sp);
+    /// Set accessor that creates a weak reference to the process referenced in
+    /// \a process_sp.
+    ///
+    /// If \a process_sp is valid this object will create a weak reference to
+    /// that object, otherwise any previous process weak reference contained in
+    /// this object will be reset.
+    ///
+    /// Only the weak reference to the process will be updated, no other weak
+    /// references will be modified. If you want this execution context to make
+    /// a weak reference to the target, use the
+    /// ExecutionContextRef::SetContext() functions.
+    ///
+    /// \see ExecutionContextRef::SetContext(const lldb::ProcessSP &)
+    void SetProcessSP(const lldb::ProcessSP &process_sp);
 
-  /// Set accessor that creates a weak reference to the thread referenced in
-  /// \a thread_sp.
-  ///
-  /// If \a thread_sp is valid this object will create a weak reference to
-  /// that object, otherwise any previous thread weak reference contained in
-  /// this object will be reset.
-  ///
-  /// Only the weak reference to the thread will be updated, no other weak
-  /// references will be modified. If you want this execution context to make
-  /// a weak reference to the thread's process and target, use the
-  /// ExecutionContextRef::SetContext() functions.
-  ///
-  /// \see ExecutionContextRef::SetContext(const lldb::ThreadSP &)
-  void SetThreadSP(const lldb::ThreadSP &thread_sp);
+    /// Set accessor that creates a weak reference to the thread referenced in
+    /// \a thread_sp.
+    ///
+    /// If \a thread_sp is valid this object will create a weak reference to
+    /// that object, otherwise any previous thread weak reference contained in
+    /// this object will be reset.
+    ///
+    /// Only the weak reference to the thread will be updated, no other weak
+    /// references will be modified. If you want this execution context to make
+    /// a weak reference to the thread's process and target, use the
+    /// ExecutionContextRef::SetContext() functions.
+    ///
+    /// \see ExecutionContextRef::SetContext(const lldb::ThreadSP &)
+    void SetThreadSP(const lldb::ThreadSP &thread_sp);
 
-  /// Set accessor that creates a weak reference to the frame referenced in \a
-  /// frame_sp.
-  ///
-  /// If \a frame_sp is valid this object will create a weak reference to that
-  /// object, otherwise any previous frame weak reference contained in this
-  /// object will be reset.
-  ///
-  /// Only the weak reference to the frame will be updated, no other weak
-  /// references will be modified. If you want this execution context to make
-  /// a weak reference to the frame's thread, process and target, use the
-  /// ExecutionContextRef::SetContext() functions.
-  ///
-  /// \see ExecutionContextRef::SetContext(const lldb::StackFrameSP &)
-  void SetFrameSP(const lldb::StackFrameSP &frame_sp);
+    /// Set accessor that creates a weak reference to the frame referenced in \a
+    /// frame_sp.
+    ///
+    /// If \a frame_sp is valid this object will create a weak reference to that
+    /// object, otherwise any previous frame weak reference contained in this
+    /// object will be reset.
+    ///
+    /// Only the weak reference to the frame will be updated, no other weak
+    /// references will be modified. If you want this execution context to make
+    /// a weak reference to the frame's thread, process and target, use the
+    /// ExecutionContextRef::SetContext() functions.
+    ///
+    /// \see ExecutionContextRef::SetContext(const lldb::StackFrameSP &)
+    void SetFrameSP(const lldb::StackFrameSP &frame_sp);
 
-  void SetTargetPtr(Target *target, bool adopt_selected);
+    void SetTargetPtr(Target *target, bool adopt_selected);
 
-  void SetProcessPtr(Process *process);
+    void SetProcessPtr(Process *process);
 
-  void SetThreadPtr(Thread *thread);
+    void SetThreadPtr(Thread *thread);
 
-  void SetFramePtr(StackFrame *frame);
+    void SetFramePtr(StackFrame *frame);
 
-  /// Get accessor that creates a strong reference from the weak target
-  /// reference contained in this object.
-  ///
-  /// \returns
-  ///     A shared pointer to a target that is not guaranteed to be valid.
-  lldb::TargetSP GetTargetSP() const;
+    /// Get accessor that creates a strong reference from the weak target
+    /// reference contained in this object.
+    ///
+    /// \returns
+    ///     A shared pointer to a target that is not guaranteed to be valid.
+    lldb::TargetSP GetTargetSP() const;
 
-  /// Get accessor that creates a strong reference from the weak process
-  /// reference contained in this object.
-  ///
-  /// \returns
-  ///     A shared pointer to a process that is not guaranteed to be valid.
-  lldb::ProcessSP GetProcessSP() const;
+    /// Get accessor that creates a strong reference from the weak process
+    /// reference contained in this object.
+    ///
+    /// \returns
+    ///     A shared pointer to a process that is not guaranteed to be valid.
+    lldb::ProcessSP GetProcessSP() const;
 
-  /// Get accessor that creates a strong reference from the weak thread
-  /// reference contained in this object.
-  ///
-  /// \returns
-  ///     A shared pointer to a thread that is not guaranteed to be valid.
-  lldb::ThreadSP GetThreadSP() const;
+    /// Get accessor that creates a strong reference from the weak thread
+    /// reference contained in this object.
+    ///
+    /// \returns
+    ///     A shared pointer to a thread that is not guaranteed to be valid.
+    lldb::ThreadSP GetThreadSP() const;
 
-  /// Get accessor that creates a strong reference from the weak frame
-  /// reference contained in this object.
-  ///
-  /// \returns
-  ///     A shared pointer to a frame that is not guaranteed to be valid.
-  lldb::StackFrameSP GetFrameSP() const;
+    /// Get accessor that creates a strong reference from the weak frame
+    /// reference contained in this object.
+    ///
+    /// \returns
+    ///     A shared pointer to a frame that is not guaranteed to be valid.
+    lldb::StackFrameSP GetFrameSP() const;
 
-  /// Create an ExecutionContext object from this object.
-  ///
-  /// Create strong references to any execution context objects that are still
-  /// valid. Any of the returned shared pointers in the ExecutionContext
-  /// objects is not guaranteed to be valid. \returns
-  ///     An execution context object that has strong references to
-  ///     any valid weak references in this object.
-  ExecutionContext Lock(bool thread_and_frame_only_if_stopped) const;
+    /// Create an ExecutionContext object from this object.
+    ///
+    /// Create strong references to any execution context objects that are still
+    /// valid. Any of the returned shared pointers in the ExecutionContext
+    /// objects is not guaranteed to be valid. \returns
+    ///     An execution context object that has strong references to
+    ///     any valid weak references in this object.
+    ExecutionContext Lock(bool thread_and_frame_only_if_stopped) const;
 
-  /// Returns true if this object has a weak reference to a thread. The return
-  /// value is only an indication of whether this object has a weak reference
-  /// and does not indicate whether the weak reference is valid or not.
-  bool HasThreadRef() const { return m_tid != LLDB_INVALID_THREAD_ID; }
+    /// Returns true if this object has a weak reference to a thread. The return
+    /// value is only an indication of whether this object has a weak reference
+    /// and does not indicate whether the weak reference is valid or not.
+    bool HasThreadRef() const {
+        return m_tid != LLDB_INVALID_THREAD_ID;
+    }
 
-  /// Returns true if this object has a weak reference to a frame. The return
-  /// value is only an indication of whether this object has a weak reference
-  /// and does not indicate whether the weak reference is valid or not.
-  bool HasFrameRef() const { return m_stack_id.IsValid(); }
+    /// Returns true if this object has a weak reference to a frame. The return
+    /// value is only an indication of whether this object has a weak reference
+    /// and does not indicate whether the weak reference is valid or not.
+    bool HasFrameRef() const {
+        return m_stack_id.IsValid();
+    }
 
-  void ClearThread() {
-    m_thread_wp.reset();
-    m_tid = LLDB_INVALID_THREAD_ID;
-  }
+    void ClearThread() {
+        m_thread_wp.reset();
+        m_tid = LLDB_INVALID_THREAD_ID;
+    }
 
-  void ClearFrame() { m_stack_id.Clear(); }
+    void ClearFrame() {
+        m_stack_id.Clear();
+    }
 
 protected:
-  // Member variables
-  lldb::TargetWP m_target_wp;         ///< A weak reference to a target
-  lldb::ProcessWP m_process_wp;       ///< A weak reference to a process
-  mutable lldb::ThreadWP m_thread_wp; ///< A weak reference to a thread
-  lldb::tid_t m_tid;  ///< The thread ID that this object refers to in case the
-                      ///backing object changes
-  StackID m_stack_id; ///< The stack ID that this object refers to in case the
-                      ///backing object changes
+    // Member variables
+    lldb::TargetWP m_target_wp;         ///< A weak reference to a target
+    lldb::ProcessWP m_process_wp;       ///< A weak reference to a process
+    mutable lldb::ThreadWP m_thread_wp; ///< A weak reference to a thread
+    lldb::tid_t m_tid;  ///< The thread ID that this object refers to in case the
+    ///backing object changes
+    StackID m_stack_id; ///< The stack ID that this object refers to in case the
+    ///backing object changes
 };
 
 /// \class ExecutionContext ExecutionContext.h
@@ -290,277 +296,289 @@ protected:
 /// ExecutionContextRef objects.
 class ExecutionContext {
 public:
-  /// Default Constructor.
-  ExecutionContext();
+    /// Default Constructor.
+    ExecutionContext();
 
-  // Copy constructor
-  ExecutionContext(const ExecutionContext &rhs);
+    // Copy constructor
+    ExecutionContext(const ExecutionContext &rhs);
 
-  // Adopt the target and optionally its current context.
-  ExecutionContext(Target *t, bool fill_current_process_thread_frame = true);
+    // Adopt the target and optionally its current context.
+    ExecutionContext(Target *t, bool fill_current_process_thread_frame = true);
 
-  // Create execution contexts from shared pointers
-  ExecutionContext(const lldb::TargetSP &target_sp, bool get_process);
-  ExecutionContext(const lldb::ProcessSP &process_sp);
-  ExecutionContext(const lldb::ThreadSP &thread_sp);
-  ExecutionContext(const lldb::StackFrameSP &frame_sp);
+    // Create execution contexts from shared pointers
+    ExecutionContext(const lldb::TargetSP &target_sp, bool get_process);
+    ExecutionContext(const lldb::ProcessSP &process_sp);
+    ExecutionContext(const lldb::ThreadSP &thread_sp);
+    ExecutionContext(const lldb::StackFrameSP &frame_sp);
 
-  // Create execution contexts from weak pointers
-  ExecutionContext(const lldb::TargetWP &target_wp, bool get_process);
-  ExecutionContext(const lldb::ProcessWP &process_wp);
-  ExecutionContext(const lldb::ThreadWP &thread_wp);
-  ExecutionContext(const lldb::StackFrameWP &frame_wp);
-  ExecutionContext(const ExecutionContextRef &exe_ctx_ref);
-  ExecutionContext(const ExecutionContextRef *exe_ctx_ref,
-                   bool thread_and_frame_only_if_stopped = false);
+    // Create execution contexts from weak pointers
+    ExecutionContext(const lldb::TargetWP &target_wp, bool get_process);
+    ExecutionContext(const lldb::ProcessWP &process_wp);
+    ExecutionContext(const lldb::ThreadWP &thread_wp);
+    ExecutionContext(const lldb::StackFrameWP &frame_wp);
+    ExecutionContext(const ExecutionContextRef &exe_ctx_ref);
+    ExecutionContext(const ExecutionContextRef *exe_ctx_ref,
+                     bool thread_and_frame_only_if_stopped = false);
 
-  // These two variants take in a locker, and grab the target, lock the API
-  // mutex into locker, then fill in the rest of the shared pointers.
-  ExecutionContext(const ExecutionContextRef &exe_ctx_ref,
-                   std::unique_lock<std::recursive_mutex> &locker);
-  ExecutionContext(const ExecutionContextRef *exe_ctx_ref,
-                   std::unique_lock<std::recursive_mutex> &locker);
-  // Create execution contexts from execution context scopes
-  ExecutionContext(ExecutionContextScope *exe_scope);
-  ExecutionContext(ExecutionContextScope &exe_scope);
+    // These two variants take in a locker, and grab the target, lock the API
+    // mutex into locker, then fill in the rest of the shared pointers.
+    ExecutionContext(const ExecutionContextRef &exe_ctx_ref,
+                     std::unique_lock<std::recursive_mutex> &locker);
+    ExecutionContext(const ExecutionContextRef *exe_ctx_ref,
+                     std::unique_lock<std::recursive_mutex> &locker);
+    // Create execution contexts from execution context scopes
+    ExecutionContext(ExecutionContextScope *exe_scope);
+    ExecutionContext(ExecutionContextScope &exe_scope);
 
-  /// Construct with process, thread, and frame index.
-  ///
-  /// Initialize with process \a p, thread \a t, and frame index \a f.
-  ///
-  /// \param[in] process
-  ///     The process for this execution context.
-  ///
-  /// \param[in] thread
-  ///     The thread for this execution context.
-  ///
-  /// \param[in] frame
-  ///     The frame index for this execution context.
-  ExecutionContext(Process *process, Thread *thread = nullptr,
-                   StackFrame *frame = nullptr);
+    /// Construct with process, thread, and frame index.
+    ///
+    /// Initialize with process \a p, thread \a t, and frame index \a f.
+    ///
+    /// \param[in] process
+    ///     The process for this execution context.
+    ///
+    /// \param[in] thread
+    ///     The thread for this execution context.
+    ///
+    /// \param[in] frame
+    ///     The frame index for this execution context.
+    ExecutionContext(Process *process, Thread *thread = nullptr,
+                     StackFrame *frame = nullptr);
 
-  ~ExecutionContext();
+    ~ExecutionContext();
 
-  ExecutionContext &operator=(const ExecutionContext &rhs);
+    ExecutionContext &operator=(const ExecutionContext &rhs);
 
-  bool operator==(const ExecutionContext &rhs) const;
+    bool operator==(const ExecutionContext &rhs) const;
 
-  bool operator!=(const ExecutionContext &rhs) const;
+    bool operator!=(const ExecutionContext &rhs) const;
 
-  /// Clear the object's state.
-  ///
-  /// Sets the process and thread to nullptr, and the frame index to an
-  /// invalid value.
-  void Clear();
+    /// Clear the object's state.
+    ///
+    /// Sets the process and thread to nullptr, and the frame index to an
+    /// invalid value.
+    void Clear();
 
-  RegisterContext *GetRegisterContext() const;
+    RegisterContext *GetRegisterContext() const;
 
-  ExecutionContextScope *GetBestExecutionContextScope() const;
+    ExecutionContextScope *GetBestExecutionContextScope() const;
 
-  uint32_t GetAddressByteSize() const;
+    uint32_t GetAddressByteSize() const;
 
-  lldb::ByteOrder GetByteOrder() const;
+    lldb::ByteOrder GetByteOrder() const;
 
-  /// Returns a pointer to the target object.
-  ///
-  /// The returned pointer might be nullptr. Calling HasTargetScope(),
-  /// HasProcessScope(), HasThreadScope(), or HasFrameScope() can help to pre-
-  /// validate this pointer so that this accessor can freely be used without
-  /// having to check for nullptr each time.
-  ///
-  /// \see ExecutionContext::HasTargetScope() const @see
-  /// ExecutionContext::HasProcessScope() const @see
-  /// ExecutionContext::HasThreadScope() const @see
-  /// ExecutionContext::HasFrameScope() const
-  Target *GetTargetPtr() const;
+    /// Returns a pointer to the target object.
+    ///
+    /// The returned pointer might be nullptr. Calling HasTargetScope(),
+    /// HasProcessScope(), HasThreadScope(), or HasFrameScope() can help to pre-
+    /// validate this pointer so that this accessor can freely be used without
+    /// having to check for nullptr each time.
+    ///
+    /// \see ExecutionContext::HasTargetScope() const @see
+    /// ExecutionContext::HasProcessScope() const @see
+    /// ExecutionContext::HasThreadScope() const @see
+    /// ExecutionContext::HasFrameScope() const
+    Target *GetTargetPtr() const;
 
-  /// Returns a pointer to the process object.
-  ///
-  /// The returned pointer might be nullptr. Calling HasProcessScope(),
-  /// HasThreadScope(), or HasFrameScope()  can help to pre-validate this
-  /// pointer so that this accessor can freely be used without having to check
-  /// for nullptr each time.
-  ///
-  /// \see ExecutionContext::HasProcessScope() const @see
-  /// ExecutionContext::HasThreadScope() const @see
-  /// ExecutionContext::HasFrameScope() const
-  Process *GetProcessPtr() const;
+    /// Returns a pointer to the process object.
+    ///
+    /// The returned pointer might be nullptr. Calling HasProcessScope(),
+    /// HasThreadScope(), or HasFrameScope()  can help to pre-validate this
+    /// pointer so that this accessor can freely be used without having to check
+    /// for nullptr each time.
+    ///
+    /// \see ExecutionContext::HasProcessScope() const @see
+    /// ExecutionContext::HasThreadScope() const @see
+    /// ExecutionContext::HasFrameScope() const
+    Process *GetProcessPtr() const;
 
-  /// Returns a pointer to the thread object.
-  ///
-  /// The returned pointer might be nullptr. Calling HasThreadScope() or
-  /// HasFrameScope() can help to pre-validate this pointer so that this
-  /// accessor can freely be used without having to check for nullptr each
-  /// time.
-  ///
-  /// \see ExecutionContext::HasThreadScope() const @see
-  /// ExecutionContext::HasFrameScope() const
-  Thread *GetThreadPtr() const { return m_thread_sp.get(); }
+    /// Returns a pointer to the thread object.
+    ///
+    /// The returned pointer might be nullptr. Calling HasThreadScope() or
+    /// HasFrameScope() can help to pre-validate this pointer so that this
+    /// accessor can freely be used without having to check for nullptr each
+    /// time.
+    ///
+    /// \see ExecutionContext::HasThreadScope() const @see
+    /// ExecutionContext::HasFrameScope() const
+    Thread *GetThreadPtr() const {
+        return m_thread_sp.get();
+    }
 
-  /// Returns a pointer to the frame object.
-  ///
-  /// The returned pointer might be nullptr. Calling HasFrameScope(), can help
-  /// to pre-validate this pointer so that this accessor can freely be used
-  /// without having to check for nullptr each time.
-  ///
-  /// \see ExecutionContext::HasFrameScope() const
-  StackFrame *GetFramePtr() const { return m_frame_sp.get(); }
+    /// Returns a pointer to the frame object.
+    ///
+    /// The returned pointer might be nullptr. Calling HasFrameScope(), can help
+    /// to pre-validate this pointer so that this accessor can freely be used
+    /// without having to check for nullptr each time.
+    ///
+    /// \see ExecutionContext::HasFrameScope() const
+    StackFrame *GetFramePtr() const {
+        return m_frame_sp.get();
+    }
 
-  /// Returns a reference to the target object.
-  ///
-  /// Clients should call HasTargetScope(), HasProcessScope(),
-  /// HasThreadScope(), or HasFrameScope() prior to calling this function to
-  /// ensure that this ExecutionContext object contains a valid target.
-  ///
-  /// \see ExecutionContext::HasTargetScope() const @see
-  /// ExecutionContext::HasProcessScope() const @see
-  /// ExecutionContext::HasThreadScope() const @see
-  /// ExecutionContext::HasFrameScope() const
-  Target &GetTargetRef() const;
+    /// Returns a reference to the target object.
+    ///
+    /// Clients should call HasTargetScope(), HasProcessScope(),
+    /// HasThreadScope(), or HasFrameScope() prior to calling this function to
+    /// ensure that this ExecutionContext object contains a valid target.
+    ///
+    /// \see ExecutionContext::HasTargetScope() const @see
+    /// ExecutionContext::HasProcessScope() const @see
+    /// ExecutionContext::HasThreadScope() const @see
+    /// ExecutionContext::HasFrameScope() const
+    Target &GetTargetRef() const;
 
-  /// Returns a reference to the process object.
-  ///
-  /// Clients should call HasProcessScope(), HasThreadScope(), or
-  /// HasFrameScope() prior to calling this  function to ensure that this
-  /// ExecutionContext object contains a valid target.
-  ///
-  /// \see ExecutionContext::HasProcessScope() const @see
-  /// ExecutionContext::HasThreadScope() const @see
-  /// ExecutionContext::HasFrameScope() const
-  Process &GetProcessRef() const;
+    /// Returns a reference to the process object.
+    ///
+    /// Clients should call HasProcessScope(), HasThreadScope(), or
+    /// HasFrameScope() prior to calling this  function to ensure that this
+    /// ExecutionContext object contains a valid target.
+    ///
+    /// \see ExecutionContext::HasProcessScope() const @see
+    /// ExecutionContext::HasThreadScope() const @see
+    /// ExecutionContext::HasFrameScope() const
+    Process &GetProcessRef() const;
 
-  /// Returns a reference to the thread object.
-  ///
-  /// Clients should call HasThreadScope(), or  HasFrameScope() prior to
-  /// calling this  function to ensure that  this ExecutionContext object
-  /// contains a valid target.
-  ///
-  /// \see ExecutionContext::HasThreadScope() const @see
-  /// ExecutionContext::HasFrameScope() const
-  Thread &GetThreadRef() const;
+    /// Returns a reference to the thread object.
+    ///
+    /// Clients should call HasThreadScope(), or  HasFrameScope() prior to
+    /// calling this  function to ensure that  this ExecutionContext object
+    /// contains a valid target.
+    ///
+    /// \see ExecutionContext::HasThreadScope() const @see
+    /// ExecutionContext::HasFrameScope() const
+    Thread &GetThreadRef() const;
 
-  /// Returns a reference to the thread object.
-  ///
-  /// Clients should call HasFrameScope() prior to calling this function to
-  /// ensure that  this ExecutionContext object contains a valid target.
-  ///
-  /// \see ExecutionContext::HasFrameScope() const
-  StackFrame &GetFrameRef() const;
+    /// Returns a reference to the thread object.
+    ///
+    /// Clients should call HasFrameScope() prior to calling this function to
+    /// ensure that  this ExecutionContext object contains a valid target.
+    ///
+    /// \see ExecutionContext::HasFrameScope() const
+    StackFrame &GetFrameRef() const;
 
-  /// Get accessor to get the target shared pointer.
-  ///
-  /// The returned shared pointer is not guaranteed to be valid.
-  const lldb::TargetSP &GetTargetSP() const { return m_target_sp; }
+    /// Get accessor to get the target shared pointer.
+    ///
+    /// The returned shared pointer is not guaranteed to be valid.
+    const lldb::TargetSP &GetTargetSP() const {
+        return m_target_sp;
+    }
 
-  /// Get accessor to get the process shared pointer.
-  ///
-  /// The returned shared pointer is not guaranteed to be valid.
-  const lldb::ProcessSP &GetProcessSP() const { return m_process_sp; }
+    /// Get accessor to get the process shared pointer.
+    ///
+    /// The returned shared pointer is not guaranteed to be valid.
+    const lldb::ProcessSP &GetProcessSP() const {
+        return m_process_sp;
+    }
 
-  /// Get accessor to get the thread shared pointer.
-  ///
-  /// The returned shared pointer is not guaranteed to be valid.
-  const lldb::ThreadSP &GetThreadSP() const { return m_thread_sp; }
+    /// Get accessor to get the thread shared pointer.
+    ///
+    /// The returned shared pointer is not guaranteed to be valid.
+    const lldb::ThreadSP &GetThreadSP() const {
+        return m_thread_sp;
+    }
 
-  /// Get accessor to get the frame shared pointer.
-  ///
-  /// The returned shared pointer is not guaranteed to be valid.
-  const lldb::StackFrameSP &GetFrameSP() const { return m_frame_sp; }
+    /// Get accessor to get the frame shared pointer.
+    ///
+    /// The returned shared pointer is not guaranteed to be valid.
+    const lldb::StackFrameSP &GetFrameSP() const {
+        return m_frame_sp;
+    }
 
-  /// Set accessor to set only the target shared pointer.
-  void SetTargetSP(const lldb::TargetSP &target_sp);
+    /// Set accessor to set only the target shared pointer.
+    void SetTargetSP(const lldb::TargetSP &target_sp);
 
-  /// Set accessor to set only the process shared pointer.
-  void SetProcessSP(const lldb::ProcessSP &process_sp);
+    /// Set accessor to set only the process shared pointer.
+    void SetProcessSP(const lldb::ProcessSP &process_sp);
 
-  /// Set accessor to set only the thread shared pointer.
-  void SetThreadSP(const lldb::ThreadSP &thread_sp);
+    /// Set accessor to set only the thread shared pointer.
+    void SetThreadSP(const lldb::ThreadSP &thread_sp);
 
-  /// Set accessor to set only the frame shared pointer.
-  void SetFrameSP(const lldb::StackFrameSP &frame_sp);
+    /// Set accessor to set only the frame shared pointer.
+    void SetFrameSP(const lldb::StackFrameSP &frame_sp);
 
-  /// Set accessor to set only the target shared pointer from a target
-  /// pointer.
-  void SetTargetPtr(Target *target);
+    /// Set accessor to set only the target shared pointer from a target
+    /// pointer.
+    void SetTargetPtr(Target *target);
 
-  /// Set accessor to set only the process shared pointer from a process
-  /// pointer.
-  void SetProcessPtr(Process *process);
+    /// Set accessor to set only the process shared pointer from a process
+    /// pointer.
+    void SetProcessPtr(Process *process);
 
-  /// Set accessor to set only the thread shared pointer from a thread
-  /// pointer.
-  void SetThreadPtr(Thread *thread);
+    /// Set accessor to set only the thread shared pointer from a thread
+    /// pointer.
+    void SetThreadPtr(Thread *thread);
 
-  /// Set accessor to set only the frame shared pointer from a frame pointer.
-  void SetFramePtr(StackFrame *frame);
+    /// Set accessor to set only the frame shared pointer from a frame pointer.
+    void SetFramePtr(StackFrame *frame);
 
-  // Set the execution context using a target shared pointer.
-  //
-  // If "target_sp" is valid, sets the target context to match and if
-  // "get_process" is true, sets the process shared pointer if the target
-  // currently has a process.
-  void SetContext(const lldb::TargetSP &target_sp, bool get_process);
+    // Set the execution context using a target shared pointer.
+    //
+    // If "target_sp" is valid, sets the target context to match and if
+    // "get_process" is true, sets the process shared pointer if the target
+    // currently has a process.
+    void SetContext(const lldb::TargetSP &target_sp, bool get_process);
 
-  // Set the execution context using a process shared pointer.
-  //
-  // If "process_sp" is valid, then set the process and target in this context.
-  // Thread and frame contexts will be cleared. If "process_sp" is not valid,
-  // all shared pointers are reset.
-  void SetContext(const lldb::ProcessSP &process_sp);
+    // Set the execution context using a process shared pointer.
+    //
+    // If "process_sp" is valid, then set the process and target in this context.
+    // Thread and frame contexts will be cleared. If "process_sp" is not valid,
+    // all shared pointers are reset.
+    void SetContext(const lldb::ProcessSP &process_sp);
 
-  // Set the execution context using a thread shared pointer.
-  //
-  // If "thread_sp" is valid, then set the thread, process and target in this
-  // context. The frame context will be cleared. If "thread_sp" is not valid,
-  // all shared pointers are reset.
-  void SetContext(const lldb::ThreadSP &thread_sp);
+    // Set the execution context using a thread shared pointer.
+    //
+    // If "thread_sp" is valid, then set the thread, process and target in this
+    // context. The frame context will be cleared. If "thread_sp" is not valid,
+    // all shared pointers are reset.
+    void SetContext(const lldb::ThreadSP &thread_sp);
 
-  // Set the execution context using a frame shared pointer.
-  //
-  // If "frame_sp" is valid, then set the frame, thread, process and target in
-  // this context If "frame_sp" is not valid, all shared pointers are reset.
-  void SetContext(const lldb::StackFrameSP &frame_sp);
+    // Set the execution context using a frame shared pointer.
+    //
+    // If "frame_sp" is valid, then set the frame, thread, process and target in
+    // this context If "frame_sp" is not valid, all shared pointers are reset.
+    void SetContext(const lldb::StackFrameSP &frame_sp);
 
-  /// Returns true the ExecutionContext object contains a valid target.
-  ///
-  /// This function can be called after initializing an ExecutionContext
-  /// object, and if it returns true, calls to GetTargetPtr() and
-  /// GetTargetRef() do not need to be checked for validity.
-  bool HasTargetScope() const;
+    /// Returns true the ExecutionContext object contains a valid target.
+    ///
+    /// This function can be called after initializing an ExecutionContext
+    /// object, and if it returns true, calls to GetTargetPtr() and
+    /// GetTargetRef() do not need to be checked for validity.
+    bool HasTargetScope() const;
 
-  /// Returns true the ExecutionContext object contains a valid target and
-  /// process.
-  ///
-  /// This function can be called after initializing an ExecutionContext
-  /// object, and if it returns true, calls to GetTargetPtr() and
-  /// GetTargetRef(), GetProcessPtr(), and GetProcessRef(), do not need to be
-  /// checked for validity.
-  bool HasProcessScope() const;
+    /// Returns true the ExecutionContext object contains a valid target and
+    /// process.
+    ///
+    /// This function can be called after initializing an ExecutionContext
+    /// object, and if it returns true, calls to GetTargetPtr() and
+    /// GetTargetRef(), GetProcessPtr(), and GetProcessRef(), do not need to be
+    /// checked for validity.
+    bool HasProcessScope() const;
 
-  /// Returns true the ExecutionContext object contains a valid target,
-  /// process, and thread.
-  ///
-  /// This function can be called after initializing an ExecutionContext
-  /// object, and if it returns true, calls to GetTargetPtr(), GetTargetRef(),
-  /// GetProcessPtr(), GetProcessRef(), GetThreadPtr(), and GetThreadRef() do
-  /// not need to be checked for validity.
-  bool HasThreadScope() const;
+    /// Returns true the ExecutionContext object contains a valid target,
+    /// process, and thread.
+    ///
+    /// This function can be called after initializing an ExecutionContext
+    /// object, and if it returns true, calls to GetTargetPtr(), GetTargetRef(),
+    /// GetProcessPtr(), GetProcessRef(), GetThreadPtr(), and GetThreadRef() do
+    /// not need to be checked for validity.
+    bool HasThreadScope() const;
 
-  /// Returns true the ExecutionContext object contains a valid target,
-  /// process, thread and frame.
-  ///
-  /// This function can be called after initializing an ExecutionContext
-  /// object, and if it returns true, calls to GetTargetPtr(), GetTargetRef(),
-  /// GetProcessPtr(), GetProcessRef(), GetThreadPtr(), GetThreadRef(),
-  /// GetFramePtr(), and GetFrameRef() do not need to be checked for validity.
-  bool HasFrameScope() const;
+    /// Returns true the ExecutionContext object contains a valid target,
+    /// process, thread and frame.
+    ///
+    /// This function can be called after initializing an ExecutionContext
+    /// object, and if it returns true, calls to GetTargetPtr(), GetTargetRef(),
+    /// GetProcessPtr(), GetProcessRef(), GetThreadPtr(), GetThreadRef(),
+    /// GetFramePtr(), and GetFrameRef() do not need to be checked for validity.
+    bool HasFrameScope() const;
 
 protected:
-  // Member variables
-  lldb::TargetSP m_target_sp; ///< The target that owns the process/thread/frame
-  lldb::ProcessSP m_process_sp;  ///< The process that owns the thread/frame
-  lldb::ThreadSP m_thread_sp;    ///< The thread that owns the frame
-  lldb::StackFrameSP m_frame_sp; ///< The stack frame in thread.
+    // Member variables
+    lldb::TargetSP m_target_sp; ///< The target that owns the process/thread/frame
+    lldb::ProcessSP m_process_sp;  ///< The process that owns the thread/frame
+    lldb::ThreadSP m_thread_sp;    ///< The thread that owns the frame
+    lldb::StackFrameSP m_frame_sp; ///< The stack frame in thread.
 };
 
 } // namespace lldb_private

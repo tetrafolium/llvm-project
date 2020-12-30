@@ -18,19 +18,21 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY LanaiToolChain : public Generic_ELF {
 public:
-  LanaiToolChain(const Driver &D, const llvm::Triple &Triple,
-                 const llvm::opt::ArgList &Args)
-      : Generic_ELF(D, Triple, Args) {}
+    LanaiToolChain(const Driver &D, const llvm::Triple &Triple,
+                   const llvm::opt::ArgList &Args)
+        : Generic_ELF(D, Triple, Args) {}
 
-  // No support for finding a C++ standard library yet.
-  void addLibCxxIncludePaths(
-      const llvm::opt::ArgList &DriverArgs,
-      llvm::opt::ArgStringList &CC1Args) const override {}
-  void addLibStdCxxIncludePaths(
-      const llvm::opt::ArgList &DriverArgs,
-      llvm::opt::ArgStringList &CC1Args) const override {}
+    // No support for finding a C++ standard library yet.
+    void addLibCxxIncludePaths(
+        const llvm::opt::ArgList &DriverArgs,
+        llvm::opt::ArgStringList &CC1Args) const override {}
+    void addLibStdCxxIncludePaths(
+        const llvm::opt::ArgList &DriverArgs,
+        llvm::opt::ArgStringList &CC1Args) const override {}
 
-  bool IsIntegratedAssemblerDefault() const override { return true; }
+    bool IsIntegratedAssemblerDefault() const override {
+        return true;
+    }
 };
 
 } // end namespace toolchains

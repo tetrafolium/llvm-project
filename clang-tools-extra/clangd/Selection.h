@@ -75,94 +75,96 @@ namespace clangd {
 // point back into the AST it was constructed with.
 class SelectionTree {
 public:
-  // Create selection trees for the given range, and pass them to Func.
-  //
-  // There may be multiple possible selection trees:
-  // - if the range is empty and borders two tokens, a tree for the right token
-  //   and a tree for the left token will be yielded.
-  // - Func should return true on success (stop) and false on failure (continue)
-  //
-  // Always yields at least one tree. If no tokens are touched, it is empty.
-  static bool createEach(ASTContext &AST, const syntax::TokenBuffer &Tokens,
-                         unsigned Begin, unsigned End,
-                         llvm::function_ref<bool(SelectionTree)> Func);
+    // Create selection trees for the given range, and pass them to Func.
+    //
+    // There may be multiple possible selection trees:
+    // - if the range is empty and borders two tokens, a tree for the right token
+    //   and a tree for the left token will be yielded.
+    // - Func should return true on success (stop) and false on failure (continue)
+    //
+    // Always yields at least one tree. If no tokens are touched, it is empty.
+    static bool createEach(ASTContext &AST, const syntax::TokenBuffer &Tokens,
+                           unsigned Begin, unsigned End,
+                           llvm::function_ref<bool(SelectionTree)> Func);
 
-  // Create a selection tree for the given range.
-  //
-  // Where ambiguous (range is empty and borders two tokens), prefer the token
-  // on the right.
-  static SelectionTree createRight(ASTContext &AST,
-                                   const syntax::TokenBuffer &Tokens,
-                                   unsigned Begin, unsigned End);
+    // Create a selection tree for the given range.
+    //
+    // Where ambiguous (range is empty and borders two tokens), prefer the token
+    // on the right.
+    static SelectionTree createRight(ASTContext &AST,
+                                     const syntax::TokenBuffer &Tokens,
+                                     unsigned Begin, unsigned End);
 
-  // Copies are no good - contain pointers to other nodes.
-  SelectionTree(const SelectionTree &) = delete;
-  SelectionTree &operator=(const SelectionTree &) = delete;
-  // Moves are OK though - internal storage is pointer-stable when moved.
-  SelectionTree(SelectionTree &&) = default;
-  SelectionTree &operator=(SelectionTree &&) = default;
+    // Copies are no good - contain pointers to other nodes.
+    SelectionTree(const SelectionTree &) = delete;
+    SelectionTree &operator=(const SelectionTree &) = delete;
+    // Moves are OK though - internal storage is pointer-stable when moved.
+    SelectionTree(SelectionTree &&) = default;
+    SelectionTree &operator=(SelectionTree &&) = default;
 
-  // Describes to what extent an AST node is covered by the selection.
-  enum Selection : unsigned char {
-    // The AST node owns no characters covered by the selection.
-    // Note that characters owned by children don't count:
-    //   if (x == 0) scream();
-    //       ^^^^^^
-    // The IfStmt would be Unselected because all the selected characters are
-    // associated with its children.
-    // (Invisible nodes like ImplicitCastExpr are always unselected).
-    Unselected,
-    // The AST node owns selected characters, but is not completely covered.
-    Partial,
-    // The AST node owns characters, and is covered by the selection.
-    Complete,
-  };
-  // An AST node that is implicated in the selection.
-  // (Either selected directly, or some descendant is selected).
-  struct Node {
-    // The parent within the selection tree. nullptr for TranslationUnitDecl.
-    Node *Parent;
-    // Direct children within the selection tree.
-    llvm::SmallVector<const Node *> Children;
-    // The corresponding node from the full AST.
-    DynTypedNode ASTNode;
-    // The extent to which this node is covered by the selection.
-    Selection Selected;
-    // Walk up the AST to get the DeclContext of this Node,
-    // which is not the node itself.
-    const DeclContext &getDeclContext() const;
-    // Printable node kind, like "CXXRecordDecl" or "AutoTypeLoc".
-    std::string kind() const;
-    // If this node is a wrapper with no syntax (e.g. implicit cast), return
-    // its contents. (If multiple wrappers are present, unwraps all of them).
-    const Node &ignoreImplicit() const;
-    // If this node is inside a wrapper with no syntax (e.g. implicit cast),
-    // return that wrapper. (If multiple are present, unwraps all of them).
-    const Node &outerImplicit() const;
-  };
-  // The most specific common ancestor of all the selected nodes.
-  // Returns nullptr if the common ancestor is the root.
-  // (This is to avoid accidentally traversing the TUDecl and thus preamble).
-  const Node *commonAncestor() const;
-  // The selection node corresponding to TranslationUnitDecl.
-  const Node &root() const { return *Root; }
+    // Describes to what extent an AST node is covered by the selection.
+    enum Selection : unsigned char {
+        // The AST node owns no characters covered by the selection.
+        // Note that characters owned by children don't count:
+        //   if (x == 0) scream();
+        //       ^^^^^^
+        // The IfStmt would be Unselected because all the selected characters are
+        // associated with its children.
+        // (Invisible nodes like ImplicitCastExpr are always unselected).
+        Unselected,
+        // The AST node owns selected characters, but is not completely covered.
+        Partial,
+        // The AST node owns characters, and is covered by the selection.
+        Complete,
+    };
+    // An AST node that is implicated in the selection.
+    // (Either selected directly, or some descendant is selected).
+    struct Node {
+        // The parent within the selection tree. nullptr for TranslationUnitDecl.
+        Node *Parent;
+        // Direct children within the selection tree.
+        llvm::SmallVector<const Node *> Children;
+        // The corresponding node from the full AST.
+        DynTypedNode ASTNode;
+        // The extent to which this node is covered by the selection.
+        Selection Selected;
+        // Walk up the AST to get the DeclContext of this Node,
+        // which is not the node itself.
+        const DeclContext &getDeclContext() const;
+        // Printable node kind, like "CXXRecordDecl" or "AutoTypeLoc".
+        std::string kind() const;
+        // If this node is a wrapper with no syntax (e.g. implicit cast), return
+        // its contents. (If multiple wrappers are present, unwraps all of them).
+        const Node &ignoreImplicit() const;
+        // If this node is inside a wrapper with no syntax (e.g. implicit cast),
+        // return that wrapper. (If multiple are present, unwraps all of them).
+        const Node &outerImplicit() const;
+    };
+    // The most specific common ancestor of all the selected nodes.
+    // Returns nullptr if the common ancestor is the root.
+    // (This is to avoid accidentally traversing the TUDecl and thus preamble).
+    const Node *commonAncestor() const;
+    // The selection node corresponding to TranslationUnitDecl.
+    const Node &root() const {
+        return *Root;
+    }
 
 private:
-  // Creates a selection tree for the given range in the main file.
-  // The range includes bytes [Start, End).
-  SelectionTree(ASTContext &AST, const syntax::TokenBuffer &Tokens,
-                unsigned Start, unsigned End);
+    // Creates a selection tree for the given range in the main file.
+    // The range includes bytes [Start, End).
+    SelectionTree(ASTContext &AST, const syntax::TokenBuffer &Tokens,
+                  unsigned Start, unsigned End);
 
-  std::deque<Node> Nodes; // Stable-pointer storage.
-  const Node *Root;
-  clang::PrintingPolicy PrintPolicy;
+    std::deque<Node> Nodes; // Stable-pointer storage.
+    const Node *Root;
+    clang::PrintingPolicy PrintPolicy;
 
-  void print(llvm::raw_ostream &OS, const Node &N, int Indent) const;
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
-                                       const SelectionTree &T) {
-    T.print(OS, T.root(), 1);
-    return OS;
-  }
+    void print(llvm::raw_ostream &OS, const Node &N, int Indent) const;
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
+                                         const SelectionTree &T) {
+        T.print(OS, T.root(), 1);
+        return OS;
+    }
 };
 
 } // namespace clangd

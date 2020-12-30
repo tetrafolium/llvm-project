@@ -21,8 +21,12 @@
 
 #include "lldb/Host/Time.h"
 
-time_t timegm(struct tm *t) { return (time_t)timegm64(t); }
+time_t timegm(struct tm *t) {
+    return (time_t)timegm64(t);
+}
 
-int posix_openpt(int flags) { return open("/dev/ptmx", flags); }
+int posix_openpt(int flags) {
+    return open("/dev/ptmx", flags);
+}
 
 #endif

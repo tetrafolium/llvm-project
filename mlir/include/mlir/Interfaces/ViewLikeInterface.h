@@ -22,9 +22,9 @@ namespace mlir {
 /// operands into a list of triples. Such a list can be more convenient to
 /// manipulate.
 struct Range {
-  Value offset;
-  Value size;
-  Value stride;
+    Value offset;
+    Value size;
+    Value stride;
 };
 
 class OffsetSizeAndStrideOpInterface;
@@ -91,7 +91,7 @@ parseListOfOperandsOrIntegers(OpAsmParser &parser, OperationState &result,
 ParseResult parseOffsetsSizesAndStrides(
     OpAsmParser &parser, OperationState &result, ArrayRef<int> segmentSizes,
     llvm::function_ref<ParseResult(OpAsmParser &, OperationState &)>
-        preResolutionFn = nullptr,
+    preResolutionFn = nullptr,
     llvm::function_ref<ParseResult(OpAsmParser &)> parseOptionalOffsetPrefix =
         nullptr,
     llvm::function_ref<ParseResult(OpAsmParser &)> parseOptionalSizePrefix =

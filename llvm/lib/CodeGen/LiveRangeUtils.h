@@ -25,35 +25,35 @@ namespace llvm {
 template<typename LiveRangeT, typename EqClassesT>
 static void DistributeRange(LiveRangeT &LR, LiveRangeT *SplitLRs[],
                             EqClassesT VNIClasses) {
-  // Move segments to new intervals.
-  typename LiveRangeT::iterator J = LR.begin(), E = LR.end();
-  while (J != E && VNIClasses[J->valno->id] == 0)
-    ++J;
-  for (typename LiveRangeT::iterator I = J; I != E; ++I) {
-    if (unsigned eq = VNIClasses[I->valno->id]) {
-      assert((SplitLRs[eq-1]->empty() || SplitLRs[eq-1]->expiredAt(I->start)) &&
-             "New intervals should be empty");
-      SplitLRs[eq-1]->segments.push_back(*I);
-    } else
-      *J++ = *I;
-  }
-  LR.segments.erase(J, E);
-
-  // Transfer VNInfos to their new owners and renumber them.
-  unsigned j = 0, e = LR.getNumValNums();
-  while (j != e && VNIClasses[j] == 0)
-    ++j;
-  for (unsigned i = j; i != e; ++i) {
-    VNInfo *VNI = LR.getValNumInfo(i);
-    if (unsigned eq = VNIClasses[i]) {
-      VNI->id = SplitLRs[eq-1]->getNumValNums();
-      SplitLRs[eq-1]->valnos.push_back(VNI);
-    } else {
-      VNI->id = j;
-      LR.valnos[j++] = VNI;
+    // Move segments to new intervals.
+    typename LiveRangeT::iterator J = LR.begin(), E = LR.end();
+    while (J != E && VNIClasses[J->valno->id] == 0)
+        ++J;
+    for (typename LiveRangeT::iterator I = J; I != E; ++I) {
+        if (unsigned eq = VNIClasses[I->valno->id]) {
+            assert((SplitLRs[eq-1]->empty() || SplitLRs[eq-1]->expiredAt(I->start)) &&
+                   "New intervals should be empty");
+            SplitLRs[eq-1]->segments.push_back(*I);
+        } else
+            *J++ = *I;
     }
-  }
-  LR.valnos.resize(j);
+    LR.segments.erase(J, E);
+
+    // Transfer VNInfos to their new owners and renumber them.
+    unsigned j = 0, e = LR.getNumValNums();
+    while (j != e && VNIClasses[j] == 0)
+        ++j;
+    for (unsigned i = j; i != e; ++i) {
+        VNInfo *VNI = LR.getValNumInfo(i);
+        if (unsigned eq = VNIClasses[i]) {
+            VNI->id = SplitLRs[eq-1]->getNumValNums();
+            SplitLRs[eq-1]->valnos.push_back(VNI);
+        } else {
+            VNI->id = j;
+            LR.valnos[j++] = VNI;
+        }
+    }
+    LR.valnos.resize(j);
 }
 
 } // End llvm namespace

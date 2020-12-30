@@ -36,14 +36,14 @@ class raw_ostream;
 /// microsoft STL.
 class Printable {
 public:
-  std::function<void(raw_ostream &OS)> Print;
-  Printable(std::function<void(raw_ostream &OS)> Print)
-      : Print(std::move(Print)) {}
+    std::function<void(raw_ostream &OS)> Print;
+    Printable(std::function<void(raw_ostream &OS)> Print)
+        : Print(std::move(Print)) {}
 };
 
 inline raw_ostream &operator<<(raw_ostream &OS, const Printable &P) {
-  P.Print(OS);
-  return OS;
+    P.Print(OS);
+    return OS;
 }
 
 }

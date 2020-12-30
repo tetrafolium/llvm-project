@@ -15,16 +15,16 @@ using namespace lldb;
 using namespace lldb_private;
 
 SystemRuntime *SystemRuntime::FindPlugin(Process *process) {
-  SystemRuntimeCreateInstance create_callback = nullptr;
-  for (uint32_t idx = 0;
-       (create_callback = PluginManager::GetSystemRuntimeCreateCallbackAtIndex(
-            idx)) != nullptr;
-       ++idx) {
-    std::unique_ptr<SystemRuntime> instance_up(create_callback(process));
-    if (instance_up)
-      return instance_up.release();
-  }
-  return nullptr;
+    SystemRuntimeCreateInstance create_callback = nullptr;
+    for (uint32_t idx = 0;
+            (create_callback = PluginManager::GetSystemRuntimeCreateCallbackAtIndex(
+                                   idx)) != nullptr;
+            ++idx) {
+        std::unique_ptr<SystemRuntime> instance_up(create_callback(process));
+        if (instance_up)
+            return instance_up.release();
+    }
+    return nullptr;
 }
 
 SystemRuntime::SystemRuntime(Process *process) : Runtime(process), m_types() {}
@@ -40,10 +40,10 @@ void SystemRuntime::Detach() {}
 void SystemRuntime::ModulesDidLoad(const ModuleList &module_list) {}
 
 const std::vector<ConstString> &SystemRuntime::GetExtendedBacktraceTypes() {
-  return m_types;
+    return m_types;
 }
 
 ThreadSP SystemRuntime::GetExtendedBacktraceThread(ThreadSP thread,
-                                                   ConstString type) {
-  return ThreadSP();
+        ConstString type) {
+    return ThreadSP();
 }

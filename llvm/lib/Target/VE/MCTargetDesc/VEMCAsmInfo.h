@@ -20,10 +20,10 @@ namespace llvm {
 class Triple;
 
 class VEELFMCAsmInfo : public MCAsmInfoELF {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit VEELFMCAsmInfo(const Triple &TheTriple);
+    explicit VEELFMCAsmInfo(const Triple &TheTriple);
 };
 
 } // namespace llvm

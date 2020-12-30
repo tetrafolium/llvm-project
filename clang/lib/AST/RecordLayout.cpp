@@ -19,12 +19,12 @@
 using namespace clang;
 
 void ASTRecordLayout::Destroy(ASTContext &Ctx) {
-  if (CXXInfo) {
-    CXXInfo->~CXXRecordLayoutInfo();
-    Ctx.Deallocate(CXXInfo);
-  }
-  this->~ASTRecordLayout();
-  Ctx.Deallocate(this);
+    if (CXXInfo) {
+        CXXInfo->~CXXRecordLayoutInfo();
+        Ctx.Deallocate(CXXInfo);
+    }
+    this->~ASTRecordLayout();
+    Ctx.Deallocate(this);
 }
 
 ASTRecordLayout::ASTRecordLayout(const ASTContext &Ctx, CharUnits size,
@@ -38,7 +38,7 @@ ASTRecordLayout::ASTRecordLayout(const ASTContext &Ctx, CharUnits size,
       PreferredAlignment(preferredAlignment),
       UnadjustedAlignment(unadjustedAlignment),
       RequiredAlignment(requiredAlignment) {
-  FieldOffsets.append(Ctx, fieldoffsets.begin(), fieldoffsets.end());
+    FieldOffsets.append(Ctx, fieldoffsets.begin(), fieldoffsets.end());
 }
 
 // Constructor for C++ records.
@@ -58,34 +58,34 @@ ASTRecordLayout::ASTRecordLayout(
       UnadjustedAlignment(unadjustedAlignment),
       RequiredAlignment(requiredAlignment),
       CXXInfo(new (Ctx) CXXRecordLayoutInfo) {
-  FieldOffsets.append(Ctx, fieldoffsets.begin(), fieldoffsets.end());
+    FieldOffsets.append(Ctx, fieldoffsets.begin(), fieldoffsets.end());
 
-  CXXInfo->PrimaryBase.setPointer(PrimaryBase);
-  CXXInfo->PrimaryBase.setInt(IsPrimaryBaseVirtual);
-  CXXInfo->NonVirtualSize = nonvirtualsize;
-  CXXInfo->NonVirtualAlignment = nonvirtualalignment;
-  CXXInfo->PreferredNVAlignment = preferrednvalignment;
-  CXXInfo->SizeOfLargestEmptySubobject = SizeOfLargestEmptySubobject;
-  CXXInfo->BaseOffsets = BaseOffsets;
-  CXXInfo->VBaseOffsets = VBaseOffsets;
-  CXXInfo->HasOwnVFPtr = hasOwnVFPtr;
-  CXXInfo->VBPtrOffset = vbptroffset;
-  CXXInfo->HasExtendableVFPtr = hasExtendableVFPtr;
-  CXXInfo->BaseSharingVBPtr = BaseSharingVBPtr;
-  CXXInfo->EndsWithZeroSizedObject = EndsWithZeroSizedObject;
-  CXXInfo->LeadsWithZeroSizedBase = LeadsWithZeroSizedBase;
+    CXXInfo->PrimaryBase.setPointer(PrimaryBase);
+    CXXInfo->PrimaryBase.setInt(IsPrimaryBaseVirtual);
+    CXXInfo->NonVirtualSize = nonvirtualsize;
+    CXXInfo->NonVirtualAlignment = nonvirtualalignment;
+    CXXInfo->PreferredNVAlignment = preferrednvalignment;
+    CXXInfo->SizeOfLargestEmptySubobject = SizeOfLargestEmptySubobject;
+    CXXInfo->BaseOffsets = BaseOffsets;
+    CXXInfo->VBaseOffsets = VBaseOffsets;
+    CXXInfo->HasOwnVFPtr = hasOwnVFPtr;
+    CXXInfo->VBPtrOffset = vbptroffset;
+    CXXInfo->HasExtendableVFPtr = hasExtendableVFPtr;
+    CXXInfo->BaseSharingVBPtr = BaseSharingVBPtr;
+    CXXInfo->EndsWithZeroSizedObject = EndsWithZeroSizedObject;
+    CXXInfo->LeadsWithZeroSizedBase = LeadsWithZeroSizedBase;
 
 #ifndef NDEBUG
     if (const CXXRecordDecl *PrimaryBase = getPrimaryBase()) {
-      if (isPrimaryBaseVirtual()) {
-        if (Ctx.getTargetInfo().getCXXABI().hasPrimaryVBases()) {
-          assert(getVBaseClassOffset(PrimaryBase).isZero() &&
-                 "Primary virtual base must be at offset 0!");
+        if (isPrimaryBaseVirtual()) {
+            if (Ctx.getTargetInfo().getCXXABI().hasPrimaryVBases()) {
+                assert(getVBaseClassOffset(PrimaryBase).isZero() &&
+                       "Primary virtual base must be at offset 0!");
+            }
+        } else {
+            assert(getBaseClassOffset(PrimaryBase).isZero() &&
+                   "Primary base must be at offset 0!");
         }
-      } else {
-        assert(getBaseClassOffset(PrimaryBase).isZero() &&
-               "Primary base must be at offset 0!");
-      }
     }
 #endif
 }

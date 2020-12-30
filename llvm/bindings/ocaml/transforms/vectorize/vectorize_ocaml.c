@@ -21,12 +21,12 @@
 
 /* [<Llvm.PassManager.any] Llvm.PassManager.t -> unit */
 CAMLprim value llvm_add_loop_vectorize(LLVMPassManagerRef PM) {
-  LLVMAddLoopVectorizePass(PM);
-  return Val_unit;
+    LLVMAddLoopVectorizePass(PM);
+    return Val_unit;
 }
 
 /* [<Llvm.PassManager.any] Llvm.PassManager.t -> unit */
 CAMLprim value llvm_add_slp_vectorize(LLVMPassManagerRef PM) {
-  LLVMAddSLPVectorizePass(PM);
-  return Val_unit;
+    LLVMAddSLPVectorizePass(PM);
+    return Val_unit;
 }

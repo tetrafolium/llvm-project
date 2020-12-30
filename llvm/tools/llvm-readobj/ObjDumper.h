@@ -34,113 +34,115 @@ class ScopedPrinter;
 
 class ObjDumper {
 public:
-  ObjDumper(ScopedPrinter &Writer, StringRef ObjName);
-  virtual ~ObjDumper();
+    ObjDumper(ScopedPrinter &Writer, StringRef ObjName);
+    virtual ~ObjDumper();
 
-  virtual bool canDumpContent() { return true; }
+    virtual bool canDumpContent() {
+        return true;
+    }
 
-  virtual void printFileHeaders() = 0;
-  virtual void printSectionHeaders() = 0;
-  virtual void printRelocations() = 0;
-  virtual void printSymbols(bool PrintSymbols, bool PrintDynamicSymbols) {
-    if (PrintSymbols)
-      printSymbols();
-    if (PrintDynamicSymbols)
-      printDynamicSymbols();
-  }
-  virtual void printProgramHeaders(bool PrintProgramHeaders,
-                                   cl::boolOrDefault PrintSectionMapping) {
-    if (PrintProgramHeaders)
-      printProgramHeaders();
-    if (PrintSectionMapping == cl::BOU_TRUE)
-      printSectionMapping();
-  }
+    virtual void printFileHeaders() = 0;
+    virtual void printSectionHeaders() = 0;
+    virtual void printRelocations() = 0;
+    virtual void printSymbols(bool PrintSymbols, bool PrintDynamicSymbols) {
+        if (PrintSymbols)
+            printSymbols();
+        if (PrintDynamicSymbols)
+            printDynamicSymbols();
+    }
+    virtual void printProgramHeaders(bool PrintProgramHeaders,
+                                     cl::boolOrDefault PrintSectionMapping) {
+        if (PrintProgramHeaders)
+            printProgramHeaders();
+        if (PrintSectionMapping == cl::BOU_TRUE)
+            printSectionMapping();
+    }
 
-  virtual void printUnwindInfo() = 0;
+    virtual void printUnwindInfo() = 0;
 
-  // Only implemented for ELF at this time.
-  virtual void printDependentLibs() {}
-  virtual void printDynamicRelocations() { }
-  virtual void printDynamicTable() { }
-  virtual void printNeededLibraries() { }
-  virtual void printSectionAsHex(StringRef SectionName) {}
-  virtual void printHashTable() { }
-  virtual void printGnuHashTable() {}
-  virtual void printHashSymbols() {}
-  virtual void printLoadName() {}
-  virtual void printVersionInfo() {}
-  virtual void printGroupSections() {}
-  virtual void printHashHistograms() {}
-  virtual void printCGProfile() {}
-  virtual void printAddrsig() {}
-  virtual void printNotes() {}
-  virtual void printELFLinkerOptions() {}
-  virtual void printStackSizes() {}
-  virtual void printSectionDetails() {}
-  virtual void printArchSpecificInfo() {}
+    // Only implemented for ELF at this time.
+    virtual void printDependentLibs() {}
+    virtual void printDynamicRelocations() { }
+    virtual void printDynamicTable() { }
+    virtual void printNeededLibraries() { }
+    virtual void printSectionAsHex(StringRef SectionName) {}
+    virtual void printHashTable() { }
+    virtual void printGnuHashTable() {}
+    virtual void printHashSymbols() {}
+    virtual void printLoadName() {}
+    virtual void printVersionInfo() {}
+    virtual void printGroupSections() {}
+    virtual void printHashHistograms() {}
+    virtual void printCGProfile() {}
+    virtual void printAddrsig() {}
+    virtual void printNotes() {}
+    virtual void printELFLinkerOptions() {}
+    virtual void printStackSizes() {}
+    virtual void printSectionDetails() {}
+    virtual void printArchSpecificInfo() {}
 
-  // Only implemented for PE/COFF.
-  virtual void printCOFFImports() { }
-  virtual void printCOFFExports() { }
-  virtual void printCOFFDirectives() { }
-  virtual void printCOFFBaseReloc() { }
-  virtual void printCOFFDebugDirectory() { }
-  virtual void printCOFFTLSDirectory() {}
-  virtual void printCOFFResources() {}
-  virtual void printCOFFLoadConfig() { }
-  virtual void printCodeViewDebugInfo() { }
-  virtual void
-  mergeCodeViewTypes(llvm::codeview::MergingTypeTableBuilder &CVIDs,
-                     llvm::codeview::MergingTypeTableBuilder &CVTypes,
-                     llvm::codeview::GlobalTypeTableBuilder &GlobalCVIDs,
-                     llvm::codeview::GlobalTypeTableBuilder &GlobalCVTypes,
-                     bool GHash) {}
+    // Only implemented for PE/COFF.
+    virtual void printCOFFImports() { }
+    virtual void printCOFFExports() { }
+    virtual void printCOFFDirectives() { }
+    virtual void printCOFFBaseReloc() { }
+    virtual void printCOFFDebugDirectory() { }
+    virtual void printCOFFTLSDirectory() {}
+    virtual void printCOFFResources() {}
+    virtual void printCOFFLoadConfig() { }
+    virtual void printCodeViewDebugInfo() { }
+    virtual void
+    mergeCodeViewTypes(llvm::codeview::MergingTypeTableBuilder &CVIDs,
+                       llvm::codeview::MergingTypeTableBuilder &CVTypes,
+                       llvm::codeview::GlobalTypeTableBuilder &GlobalCVIDs,
+                       llvm::codeview::GlobalTypeTableBuilder &GlobalCVTypes,
+                       bool GHash) {}
 
-  // Only implemented for MachO.
-  virtual void printMachODataInCode() { }
-  virtual void printMachOVersionMin() { }
-  virtual void printMachODysymtab() { }
-  virtual void printMachOSegment() { }
-  virtual void printMachOIndirectSymbols() { }
-  virtual void printMachOLinkerOptions() { }
+    // Only implemented for MachO.
+    virtual void printMachODataInCode() { }
+    virtual void printMachOVersionMin() { }
+    virtual void printMachODysymtab() { }
+    virtual void printMachOSegment() { }
+    virtual void printMachOIndirectSymbols() { }
+    virtual void printMachOLinkerOptions() { }
 
-  virtual void printStackMap() const = 0;
+    virtual void printStackMap() const = 0;
 
-  void printSectionsAsString(const object::ObjectFile &Obj,
-                             ArrayRef<std::string> Sections);
-  void printSectionsAsHex(const object::ObjectFile &Obj,
-                          ArrayRef<std::string> Sections);
+    void printSectionsAsString(const object::ObjectFile &Obj,
+                               ArrayRef<std::string> Sections);
+    void printSectionsAsHex(const object::ObjectFile &Obj,
+                            ArrayRef<std::string> Sections);
 
-  std::function<Error(const Twine &Msg)> WarningHandler;
-  void reportUniqueWarning(Error Err) const;
-  void reportUniqueWarning(const Twine &Msg) const;
+    std::function<Error(const Twine &Msg)> WarningHandler;
+    void reportUniqueWarning(Error Err) const;
+    void reportUniqueWarning(const Twine &Msg) const;
 
 protected:
-  ScopedPrinter &W;
+    ScopedPrinter &W;
 
 private:
-  virtual void printSymbols() {}
-  virtual void printDynamicSymbols() {}
-  virtual void printProgramHeaders() {}
-  virtual void printSectionMapping() {}
+    virtual void printSymbols() {}
+    virtual void printDynamicSymbols() {}
+    virtual void printProgramHeaders() {}
+    virtual void printSectionMapping() {}
 
-  std::unordered_set<std::string> Warnings;
+    std::unordered_set<std::string> Warnings;
 };
 
 std::unique_ptr<ObjDumper> createCOFFDumper(const object::COFFObjectFile &Obj,
-                                            ScopedPrinter &Writer);
+        ScopedPrinter &Writer);
 
 std::unique_ptr<ObjDumper> createELFDumper(const object::ELFObjectFileBase &Obj,
-                                           ScopedPrinter &Writer);
+        ScopedPrinter &Writer);
 
 std::unique_ptr<ObjDumper> createMachODumper(const object::MachOObjectFile &Obj,
-                                             ScopedPrinter &Writer);
+        ScopedPrinter &Writer);
 
 std::unique_ptr<ObjDumper> createWasmDumper(const object::WasmObjectFile &Obj,
-                                            ScopedPrinter &Writer);
+        ScopedPrinter &Writer);
 
 std::unique_ptr<ObjDumper> createXCOFFDumper(const object::XCOFFObjectFile &Obj,
-                                             ScopedPrinter &Writer);
+        ScopedPrinter &Writer);
 
 void dumpCOFFImportFile(const object::COFFImportFile *File,
                         ScopedPrinter &Writer);

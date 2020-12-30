@@ -38,19 +38,19 @@ extern "C" {
 /// This struct defines the core interface for pass plugins and is supposed to
 /// be filled out by plugin implementors. LLVM-side users of a plugin are
 /// expected to use the \c PassPlugin class below to interface with it.
-struct PassPluginLibraryInfo {
-  /// The API version understood by this plugin, usually \c
-  /// LLVM_PLUGIN_API_VERSION
-  uint32_t APIVersion;
-  /// A meaningful name of the plugin.
-  const char *PluginName;
-  /// The version of the plugin.
-  const char *PluginVersion;
+    struct PassPluginLibraryInfo {
+        /// The API version understood by this plugin, usually \c
+        /// LLVM_PLUGIN_API_VERSION
+        uint32_t APIVersion;
+        /// A meaningful name of the plugin.
+        const char *PluginName;
+        /// The version of the plugin.
+        const char *PluginVersion;
 
-  /// The callback for registering plugin passes with a \c PassBuilder
-  /// instance
-  void (*RegisterPassBuilderCallbacks)(PassBuilder &);
-};
+        /// The callback for registering plugin passes with a \c PassBuilder
+        /// instance
+        void (*RegisterPassBuilderCallbacks)(PassBuilder &);
+    };
 }
 
 /// A loaded pass plugin.
@@ -59,37 +59,45 @@ struct PassPluginLibraryInfo {
 /// its interface defined by the \c PassPluginLibraryInfo it exposes.
 class PassPlugin {
 public:
-  /// Attempts to load a pass plugin from a given file.
-  ///
-  /// \returns Returns an error if either the library cannot be found or loaded,
-  /// there is no public entry point, or the plugin implements the wrong API
-  /// version.
-  static Expected<PassPlugin> Load(const std::string &Filename);
+    /// Attempts to load a pass plugin from a given file.
+    ///
+    /// \returns Returns an error if either the library cannot be found or loaded,
+    /// there is no public entry point, or the plugin implements the wrong API
+    /// version.
+    static Expected<PassPlugin> Load(const std::string &Filename);
 
-  /// Get the filename of the loaded plugin.
-  StringRef getFilename() const { return Filename; }
+    /// Get the filename of the loaded plugin.
+    StringRef getFilename() const {
+        return Filename;
+    }
 
-  /// Get the plugin name
-  StringRef getPluginName() const { return Info.PluginName; }
+    /// Get the plugin name
+    StringRef getPluginName() const {
+        return Info.PluginName;
+    }
 
-  /// Get the plugin version
-  StringRef getPluginVersion() const { return Info.PluginVersion; }
+    /// Get the plugin version
+    StringRef getPluginVersion() const {
+        return Info.PluginVersion;
+    }
 
-  /// Get the plugin API version
-  uint32_t getAPIVersion() const { return Info.APIVersion; }
+    /// Get the plugin API version
+    uint32_t getAPIVersion() const {
+        return Info.APIVersion;
+    }
 
-  /// Invoke the PassBuilder callback registration
-  void registerPassBuilderCallbacks(PassBuilder &PB) const {
-    Info.RegisterPassBuilderCallbacks(PB);
-  }
+    /// Invoke the PassBuilder callback registration
+    void registerPassBuilderCallbacks(PassBuilder &PB) const {
+        Info.RegisterPassBuilderCallbacks(PB);
+    }
 
 private:
-  PassPlugin(const std::string &Filename, const sys::DynamicLibrary &Library)
-      : Filename(Filename), Library(Library), Info() {}
+    PassPlugin(const std::string &Filename, const sys::DynamicLibrary &Library)
+        : Filename(Filename), Library(Library), Info() {}
 
-  std::string Filename;
-  sys::DynamicLibrary Library;
-  PassPluginLibraryInfo Info;
+    std::string Filename;
+    sys::DynamicLibrary Library;
+    PassPluginLibraryInfo Info;
 };
 }
 

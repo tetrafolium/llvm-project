@@ -37,7 +37,7 @@ MCAsmBackend *createRISCVAsmBackend(const Target &T, const MCSubtargetInfo &STI,
                                     const MCTargetOptions &Options);
 
 std::unique_ptr<MCObjectTargetWriter> createRISCVELFObjectWriter(uint8_t OSABI,
-                                                                 bool Is64Bit);
+        bool Is64Bit);
 }
 
 // Defines symbolic names for RISC-V registers.

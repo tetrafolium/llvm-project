@@ -17,41 +17,41 @@ namespace tidy {
 namespace cppcoreguidelines {
 
 void ProBoundsPointerArithmeticCheck::registerMatchers(MatchFinder *Finder) {
-  if (!getLangOpts().CPlusPlus)
-    return;
+    if (!getLangOpts().CPlusPlus)
+        return;
 
-  const auto AllPointerTypes = anyOf(
-      hasType(pointerType()), hasType(autoType(hasDeducedType(pointerType()))),
-      hasType(decltypeType(hasUnderlyingType(pointerType()))));
+    const auto AllPointerTypes = anyOf(
+                                     hasType(pointerType()), hasType(autoType(hasDeducedType(pointerType()))),
+                                     hasType(decltypeType(hasUnderlyingType(pointerType()))));
 
-  // Flag all operators +, -, +=, -=, ++, -- that result in a pointer
-  Finder->addMatcher(
-      binaryOperator(
-          hasAnyOperatorName("+", "-", "+=", "-="), AllPointerTypes,
-          unless(hasLHS(ignoringImpCasts(declRefExpr(to(isImplicit()))))))
-          .bind("expr"),
-      this);
+    // Flag all operators +, -, +=, -=, ++, -- that result in a pointer
+    Finder->addMatcher(
+        binaryOperator(
+            hasAnyOperatorName("+", "-", "+=", "-="), AllPointerTypes,
+            unless(hasLHS(ignoringImpCasts(declRefExpr(to(isImplicit()))))))
+        .bind("expr"),
+        this);
 
-  Finder->addMatcher(
-      unaryOperator(hasAnyOperatorName("++", "--"), hasType(pointerType()))
-          .bind("expr"),
-      this);
+    Finder->addMatcher(
+        unaryOperator(hasAnyOperatorName("++", "--"), hasType(pointerType()))
+        .bind("expr"),
+        this);
 
-  // Array subscript on a pointer (not an array) is also pointer arithmetic
-  Finder->addMatcher(
-      arraySubscriptExpr(
-          hasBase(ignoringImpCasts(
-              anyOf(AllPointerTypes,
-                    hasType(decayedType(hasDecayedType(pointerType())))))))
-          .bind("expr"),
-      this);
+    // Array subscript on a pointer (not an array) is also pointer arithmetic
+    Finder->addMatcher(
+        arraySubscriptExpr(
+            hasBase(ignoringImpCasts(
+                        anyOf(AllPointerTypes,
+                              hasType(decayedType(hasDecayedType(pointerType())))))))
+        .bind("expr"),
+        this);
 }
 
 void ProBoundsPointerArithmeticCheck::check(
     const MatchFinder::MatchResult &Result) {
-  const auto *MatchedExpr = Result.Nodes.getNodeAs<Expr>("expr");
+    const auto *MatchedExpr = Result.Nodes.getNodeAs<Expr>("expr");
 
-  diag(MatchedExpr->getExprLoc(), "do not use pointer arithmetic");
+    diag(MatchedExpr->getExprLoc(), "do not use pointer arithmetic");
 }
 
 } // namespace cppcoreguidelines

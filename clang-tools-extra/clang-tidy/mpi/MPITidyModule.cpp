@@ -18,17 +18,17 @@ namespace mpi {
 
 class MPIModule : public ClangTidyModule {
 public:
-  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<BufferDerefCheck>("mpi-buffer-deref");
-    CheckFactories.registerCheck<TypeMismatchCheck>("mpi-type-mismatch");
-  }
+    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+        CheckFactories.registerCheck<BufferDerefCheck>("mpi-buffer-deref");
+        CheckFactories.registerCheck<TypeMismatchCheck>("mpi-type-mismatch");
+    }
 };
 
 } // namespace mpi
 
 // Register the MPITidyModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<mpi::MPIModule>
-    X("mpi-module", "Adds MPI clang-tidy checks.");
+X("mpi-module", "Adds MPI clang-tidy checks.");
 
 // This anchor is used to force the linker to link in the generated object file
 // and thus register the MPIModule.

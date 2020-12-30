@@ -26,21 +26,25 @@ void NativeTypeBuiltin::dump(raw_ostream &OS, int Indent,
                              PdbSymbolIdField RecurseIdFields) const {}
 
 PDB_SymType NativeTypeBuiltin::getSymTag() const {
-  return PDB_SymType::BuiltinType;
+    return PDB_SymType::BuiltinType;
 }
 
-PDB_BuiltinType NativeTypeBuiltin::getBuiltinType() const { return Type; }
+PDB_BuiltinType NativeTypeBuiltin::getBuiltinType() const {
+    return Type;
+}
 
 bool NativeTypeBuiltin::isConstType() const {
-  return (Mods & ModifierOptions::Const) != ModifierOptions::None;
+    return (Mods & ModifierOptions::Const) != ModifierOptions::None;
 }
 
-uint64_t NativeTypeBuiltin::getLength() const { return Length; }
+uint64_t NativeTypeBuiltin::getLength() const {
+    return Length;
+}
 
 bool NativeTypeBuiltin::isUnalignedType() const {
-  return (Mods & ModifierOptions::Unaligned) != ModifierOptions::None;
+    return (Mods & ModifierOptions::Unaligned) != ModifierOptions::None;
 }
 
 bool NativeTypeBuiltin::isVolatileType() const {
-  return (Mods & ModifierOptions::Volatile) != ModifierOptions::None;
+    return (Mods & ModifierOptions::Volatile) != ModifierOptions::None;
 }

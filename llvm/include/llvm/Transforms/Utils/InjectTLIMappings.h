@@ -19,18 +19,18 @@
 namespace llvm {
 class InjectTLIMappings : public PassInfoMixin<InjectTLIMappings> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 // Legacy pass
 class InjectTLIMappingsLegacy : public FunctionPass {
 public:
-  static char ID;
-  InjectTLIMappingsLegacy() : FunctionPass(ID) {
-    initializeInjectTLIMappingsLegacyPass(*PassRegistry::getPassRegistry());
-  }
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
-  bool runOnFunction(Function &F) override;
+    static char ID;
+    InjectTLIMappingsLegacy() : FunctionPass(ID) {
+        initializeInjectTLIMappingsLegacyPass(*PassRegistry::getPassRegistry());
+    }
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnFunction(Function &F) override;
 };
 
 } // End namespace llvm

@@ -29,7 +29,7 @@ class Module;
 /// Pass to perform interprocedural constant propagation.
 class IPSCCPPass : public PassInfoMixin<IPSCCPPass> {
 public:
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

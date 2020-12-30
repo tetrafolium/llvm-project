@@ -104,27 +104,27 @@ namespace {
 
 class SpeculativeExecutionLegacyPass : public FunctionPass {
 public:
-  static char ID;
-  explicit SpeculativeExecutionLegacyPass(bool OnlyIfDivergentTarget = false)
-      : FunctionPass(ID), OnlyIfDivergentTarget(OnlyIfDivergentTarget ||
-                                                SpecExecOnlyIfDivergentTarget),
-        Impl(OnlyIfDivergentTarget) {}
+    static char ID;
+    explicit SpeculativeExecutionLegacyPass(bool OnlyIfDivergentTarget = false)
+        : FunctionPass(ID), OnlyIfDivergentTarget(OnlyIfDivergentTarget ||
+                SpecExecOnlyIfDivergentTarget),
+          Impl(OnlyIfDivergentTarget) {}
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
-  bool runOnFunction(Function &F) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnFunction(Function &F) override;
 
-  StringRef getPassName() const override {
-    if (OnlyIfDivergentTarget)
-      return "Speculatively execute instructions if target has divergent "
-             "branches";
-    return "Speculatively execute instructions";
-  }
+    StringRef getPassName() const override {
+        if (OnlyIfDivergentTarget)
+            return "Speculatively execute instructions if target has divergent "
+                   "branches";
+        return "Speculatively execute instructions";
+    }
 
 private:
-  // Variable preserved purely for correct name printing.
-  const bool OnlyIfDivergentTarget;
+    // Variable preserved purely for correct name printing.
+    const bool OnlyIfDivergentTarget;
 
-  SpeculativeExecutionPass Impl;
+    SpeculativeExecutionPass Impl;
 };
 } // namespace
 
@@ -136,83 +136,83 @@ INITIALIZE_PASS_END(SpeculativeExecutionLegacyPass, "speculative-execution",
                     "Speculatively execute instructions", false, false)
 
 void SpeculativeExecutionLegacyPass::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.addRequired<TargetTransformInfoWrapperPass>();
-  AU.addPreserved<GlobalsAAWrapperPass>();
-  AU.setPreservesCFG();
+    AU.addRequired<TargetTransformInfoWrapperPass>();
+    AU.addPreserved<GlobalsAAWrapperPass>();
+    AU.setPreservesCFG();
 }
 
 bool SpeculativeExecutionLegacyPass::runOnFunction(Function &F) {
-  if (skipFunction(F))
-    return false;
+    if (skipFunction(F))
+        return false;
 
-  auto *TTI = &getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
-  return Impl.runImpl(F, TTI);
+    auto *TTI = &getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
+    return Impl.runImpl(F, TTI);
 }
 
 namespace llvm {
 
 bool SpeculativeExecutionPass::runImpl(Function &F, TargetTransformInfo *TTI) {
-  if (OnlyIfDivergentTarget && !TTI->hasBranchDivergence()) {
-    LLVM_DEBUG(dbgs() << "Not running SpeculativeExecution because "
-                         "TTI->hasBranchDivergence() is false.\n");
-    return false;
-  }
+    if (OnlyIfDivergentTarget && !TTI->hasBranchDivergence()) {
+        LLVM_DEBUG(dbgs() << "Not running SpeculativeExecution because "
+                   "TTI->hasBranchDivergence() is false.\n");
+        return false;
+    }
 
-  this->TTI = TTI;
-  bool Changed = false;
-  for (auto& B : F) {
-    Changed |= runOnBasicBlock(B);
-  }
-  return Changed;
+    this->TTI = TTI;
+    bool Changed = false;
+    for (auto& B : F) {
+        Changed |= runOnBasicBlock(B);
+    }
+    return Changed;
 }
 
 bool SpeculativeExecutionPass::runOnBasicBlock(BasicBlock &B) {
-  BranchInst *BI = dyn_cast<BranchInst>(B.getTerminator());
-  if (BI == nullptr)
+    BranchInst *BI = dyn_cast<BranchInst>(B.getTerminator());
+    if (BI == nullptr)
+        return false;
+
+    if (BI->getNumSuccessors() != 2)
+        return false;
+    BasicBlock &Succ0 = *BI->getSuccessor(0);
+    BasicBlock &Succ1 = *BI->getSuccessor(1);
+
+    if (&B == &Succ0 || &B == &Succ1 || &Succ0 == &Succ1) {
+        return false;
+    }
+
+    // Hoist from if-then (triangle).
+    if (Succ0.getSinglePredecessor() != nullptr &&
+            Succ0.getSingleSuccessor() == &Succ1) {
+        return considerHoistingFromTo(Succ0, B);
+    }
+
+    // Hoist from if-else (triangle).
+    if (Succ1.getSinglePredecessor() != nullptr &&
+            Succ1.getSingleSuccessor() == &Succ0) {
+        return considerHoistingFromTo(Succ1, B);
+    }
+
+    // Hoist from if-then-else (diamond), but only if it is equivalent to
+    // an if-else or if-then due to one of the branches doing nothing.
+    if (Succ0.getSinglePredecessor() != nullptr &&
+            Succ1.getSinglePredecessor() != nullptr &&
+            Succ1.getSingleSuccessor() != nullptr &&
+            Succ1.getSingleSuccessor() != &B &&
+            Succ1.getSingleSuccessor() == Succ0.getSingleSuccessor()) {
+        // If a block has only one instruction, then that is a terminator
+        // instruction so that the block does nothing. This does happen.
+        if (Succ1.size() == 1) // equivalent to if-then
+            return considerHoistingFromTo(Succ0, B);
+        if (Succ0.size() == 1) // equivalent to if-else
+            return considerHoistingFromTo(Succ1, B);
+    }
+
     return false;
-
-  if (BI->getNumSuccessors() != 2)
-    return false;
-  BasicBlock &Succ0 = *BI->getSuccessor(0);
-  BasicBlock &Succ1 = *BI->getSuccessor(1);
-
-  if (&B == &Succ0 || &B == &Succ1 || &Succ0 == &Succ1) {
-    return false;
-  }
-
-  // Hoist from if-then (triangle).
-  if (Succ0.getSinglePredecessor() != nullptr &&
-      Succ0.getSingleSuccessor() == &Succ1) {
-    return considerHoistingFromTo(Succ0, B);
-  }
-
-  // Hoist from if-else (triangle).
-  if (Succ1.getSinglePredecessor() != nullptr &&
-      Succ1.getSingleSuccessor() == &Succ0) {
-    return considerHoistingFromTo(Succ1, B);
-  }
-
-  // Hoist from if-then-else (diamond), but only if it is equivalent to
-  // an if-else or if-then due to one of the branches doing nothing.
-  if (Succ0.getSinglePredecessor() != nullptr &&
-      Succ1.getSinglePredecessor() != nullptr &&
-      Succ1.getSingleSuccessor() != nullptr &&
-      Succ1.getSingleSuccessor() != &B &&
-      Succ1.getSingleSuccessor() == Succ0.getSingleSuccessor()) {
-    // If a block has only one instruction, then that is a terminator
-    // instruction so that the block does nothing. This does happen.
-    if (Succ1.size() == 1) // equivalent to if-then
-      return considerHoistingFromTo(Succ0, B);
-    if (Succ0.size() == 1) // equivalent to if-else
-      return considerHoistingFromTo(Succ1, B);
-  }
-
-  return false;
 }
 
 static unsigned ComputeSpeculationCost(const Instruction *I,
                                        const TargetTransformInfo &TTI) {
-  switch (Operator::getOpcode(I)) {
+    switch (Operator::getOpcode(I)) {
     case Instruction::GetElementPtr:
     case Instruction::Add:
     case Instruction::Mul:
@@ -252,79 +252,79 @@ static unsigned ComputeSpeculationCost(const Instruction *I,
     case Instruction::ShuffleVector:
     case Instruction::ExtractValue:
     case Instruction::InsertValue:
-      return TTI.getUserCost(I, TargetTransformInfo::TCK_SizeAndLatency);
+        return TTI.getUserCost(I, TargetTransformInfo::TCK_SizeAndLatency);
 
     default:
-      return UINT_MAX; // Disallow anything not explicitly listed.
-  }
+        return UINT_MAX; // Disallow anything not explicitly listed.
+    }
 }
 
 bool SpeculativeExecutionPass::considerHoistingFromTo(
     BasicBlock &FromBlock, BasicBlock &ToBlock) {
-  SmallPtrSet<const Instruction *, 8> NotHoisted;
-  const auto AllPrecedingUsesFromBlockHoisted = [&NotHoisted](const User *U) {
-    // Debug variable has special operand to check it's not hoisted.
-    if (const auto *DVI = dyn_cast<DbgVariableIntrinsic>(U)) {
-      if (const auto *I =
-              dyn_cast_or_null<Instruction>(DVI->getVariableLocation()))
-        if (NotHoisted.count(I) == 0)
-          return true;
-      return false;
+    SmallPtrSet<const Instruction *, 8> NotHoisted;
+    const auto AllPrecedingUsesFromBlockHoisted = [&NotHoisted](const User *U) {
+        // Debug variable has special operand to check it's not hoisted.
+        if (const auto *DVI = dyn_cast<DbgVariableIntrinsic>(U)) {
+            if (const auto *I =
+                        dyn_cast_or_null<Instruction>(DVI->getVariableLocation()))
+                if (NotHoisted.count(I) == 0)
+                    return true;
+            return false;
+        }
+
+        // Usially debug label instrinsic corresponds to label in LLVM IR. In these
+        // cases we should not move it here.
+        // TODO: Possible special processing needed to detect it is related to a
+        // hoisted instruction.
+        if (isa<DbgLabelInst>(U))
+            return false;
+
+        for (const Value *V : U->operand_values()) {
+            if (const Instruction *I = dyn_cast<Instruction>(V)) {
+                if (NotHoisted.count(I) > 0)
+                    return false;
+            }
+        }
+        return true;
+    };
+
+    unsigned TotalSpeculationCost = 0;
+    unsigned NotHoistedInstCount = 0;
+    for (const auto &I : FromBlock) {
+        const unsigned Cost = ComputeSpeculationCost(&I, *TTI);
+        if (Cost != UINT_MAX && isSafeToSpeculativelyExecute(&I) &&
+                AllPrecedingUsesFromBlockHoisted(&I)) {
+            TotalSpeculationCost += Cost;
+            if (TotalSpeculationCost > SpecExecMaxSpeculationCost)
+                return false;  // too much to hoist
+        } else {
+            // Debug info instrinsics should not be counted for threshold.
+            if (!isa<DbgInfoIntrinsic>(I))
+                NotHoistedInstCount++;
+            if (NotHoistedInstCount > SpecExecMaxNotHoisted)
+                return false; // too much left behind
+            NotHoisted.insert(&I);
+        }
     }
 
-    // Usially debug label instrinsic corresponds to label in LLVM IR. In these
-    // cases we should not move it here.
-    // TODO: Possible special processing needed to detect it is related to a
-    // hoisted instruction.
-    if (isa<DbgLabelInst>(U))
-      return false;
-
-    for (const Value *V : U->operand_values()) {
-      if (const Instruction *I = dyn_cast<Instruction>(V)) {
-        if (NotHoisted.count(I) > 0)
-          return false;
-      }
+    for (auto I = FromBlock.begin(); I != FromBlock.end();) {
+        // We have to increment I before moving Current as moving Current
+        // changes the list that I is iterating through.
+        auto Current = I;
+        ++I;
+        if (!NotHoisted.count(&*Current)) {
+            Current->moveBefore(ToBlock.getTerminator());
+        }
     }
     return true;
-  };
-
-  unsigned TotalSpeculationCost = 0;
-  unsigned NotHoistedInstCount = 0;
-  for (const auto &I : FromBlock) {
-    const unsigned Cost = ComputeSpeculationCost(&I, *TTI);
-    if (Cost != UINT_MAX && isSafeToSpeculativelyExecute(&I) &&
-        AllPrecedingUsesFromBlockHoisted(&I)) {
-      TotalSpeculationCost += Cost;
-      if (TotalSpeculationCost > SpecExecMaxSpeculationCost)
-        return false;  // too much to hoist
-    } else {
-      // Debug info instrinsics should not be counted for threshold.
-      if (!isa<DbgInfoIntrinsic>(I))
-        NotHoistedInstCount++;
-      if (NotHoistedInstCount > SpecExecMaxNotHoisted)
-        return false; // too much left behind
-      NotHoisted.insert(&I);
-    }
-  }
-
-  for (auto I = FromBlock.begin(); I != FromBlock.end();) {
-    // We have to increment I before moving Current as moving Current
-    // changes the list that I is iterating through.
-    auto Current = I;
-    ++I;
-    if (!NotHoisted.count(&*Current)) {
-      Current->moveBefore(ToBlock.getTerminator());
-    }
-  }
-  return true;
 }
 
 FunctionPass *createSpeculativeExecutionPass() {
-  return new SpeculativeExecutionLegacyPass();
+    return new SpeculativeExecutionLegacyPass();
 }
 
 FunctionPass *createSpeculativeExecutionIfHasBranchDivergencePass() {
-  return new SpeculativeExecutionLegacyPass(/* OnlyIfDivergentTarget = */ true);
+    return new SpeculativeExecutionLegacyPass(/* OnlyIfDivergentTarget = */ true);
 }
 
 SpeculativeExecutionPass::SpeculativeExecutionPass(bool OnlyIfDivergentTarget)
@@ -332,16 +332,16 @@ SpeculativeExecutionPass::SpeculativeExecutionPass(bool OnlyIfDivergentTarget)
                             SpecExecOnlyIfDivergentTarget) {}
 
 PreservedAnalyses SpeculativeExecutionPass::run(Function &F,
-                                                FunctionAnalysisManager &AM) {
-  auto *TTI = &AM.getResult<TargetIRAnalysis>(F);
+        FunctionAnalysisManager &AM) {
+    auto *TTI = &AM.getResult<TargetIRAnalysis>(F);
 
-  bool Changed = runImpl(F, TTI);
+    bool Changed = runImpl(F, TTI);
 
-  if (!Changed)
-    return PreservedAnalyses::all();
-  PreservedAnalyses PA;
-  PA.preserve<GlobalsAA>();
-  PA.preserveSet<CFGAnalyses>();
-  return PA;
+    if (!Changed)
+        return PreservedAnalyses::all();
+    PreservedAnalyses PA;
+    PA.preserve<GlobalsAA>();
+    PA.preserveSet<CFGAnalyses>();
+    return PA;
 }
 }  // namespace llvm

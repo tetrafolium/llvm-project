@@ -14,17 +14,21 @@
 static llvm::codegen::RegisterCodeGenFlags CGF;
 
 llvm::TargetOptions lld::initTargetOptionsFromCodeGenFlags() {
-  return llvm::codegen::InitTargetOptionsFromCodeGenFlags(llvm::Triple());
+    return llvm::codegen::InitTargetOptionsFromCodeGenFlags(llvm::Triple());
 }
 
 llvm::Optional<llvm::Reloc::Model> lld::getRelocModelFromCMModel() {
-  return llvm::codegen::getExplicitRelocModel();
+    return llvm::codegen::getExplicitRelocModel();
 }
 
 llvm::Optional<llvm::CodeModel::Model> lld::getCodeModelFromCMModel() {
-  return llvm::codegen::getExplicitCodeModel();
+    return llvm::codegen::getExplicitCodeModel();
 }
 
-std::string lld::getCPUStr() { return llvm::codegen::getCPUStr(); }
+std::string lld::getCPUStr() {
+    return llvm::codegen::getCPUStr();
+}
 
-std::vector<std::string> lld::getMAttrs() { return llvm::codegen::getMAttrs(); }
+std::vector<std::string> lld::getMAttrs() {
+    return llvm::codegen::getMAttrs();
+}

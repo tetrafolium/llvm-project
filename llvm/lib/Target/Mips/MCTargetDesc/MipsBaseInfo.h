@@ -26,8 +26,8 @@ namespace llvm {
 /// instruction info tracks.
 ///
 namespace MipsII {
-  /// Target Operand Flag enum.
-  enum TOF {
+/// Target Operand Flag enum.
+enum TOF {
     //===------------------------------------------------------------------===//
     // Mips Specific MachineOperand flags.
 
@@ -93,9 +93,9 @@ namespace MipsII {
 
     /// Helper operand used to generate R_MIPS_JALR
     MO_JALR
-  };
+};
 
-  enum {
+enum {
     //===------------------------------------------------------------------===//
     // Instruction encodings.  These are the standard/most common forms for
     // Mips instructions.
@@ -127,13 +127,13 @@ namespace MipsII {
     /// HasFCCRegOperand - Instruction uses an $fcc<x> register.
     HasFCCRegOperand = 1 << 6
 
-  };
+};
 
-  enum OperandType : unsigned {
+enum OperandType : unsigned {
     OPERAND_FIRST_MIPS_MEM_IMM = MCOI::OPERAND_FIRST_TARGET,
     OPERAND_MEM_SIMM9 = OPERAND_FIRST_MIPS_MEM_IMM,
     OPERAND_LAST_MIPS_MEM_IMM = OPERAND_MEM_SIMM9
-  };
+};
 }
 }
 

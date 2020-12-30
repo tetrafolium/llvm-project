@@ -127,7 +127,7 @@ _CLC_OVERLOAD _CLC_DEF double cosh(double x) {
 
     double y = fabs(x);
 
-    // In this range we find the integer part y0 of y 
+    // In this range we find the integer part y0 of y
     // and the increment dy = y - y0. We then compute
     // z = cosh(y) = cosh(y0)cosh(dy) + sinh(y0)sinh(dy)
     // where sinh(y0) and cosh(y0) are tabulated above.
@@ -137,29 +137,29 @@ _CLC_OVERLOAD _CLC_DEF double cosh(double x) {
     double dy2 = dy * dy;
 
     double sdy = dy * dy2 *
-	         fma(dy2,
-		     fma(dy2,
-			 fma(dy2,
-			     fma(dy2,
-				 fma(dy2,
-				     fma(dy2, 0.7746188980094184251527126e-12, 0.160576793121939886190847e-9),
-				     0.250521176994133472333666e-7),
-				 0.275573191913636406057211e-5),
-			     0.198412698413242405162014e-3),
-			 0.833333333333329931873097e-2),
-		     0.166666666666666667013899e0);
+                 fma(dy2,
+                     fma(dy2,
+                         fma(dy2,
+                             fma(dy2,
+                                 fma(dy2,
+                                     fma(dy2, 0.7746188980094184251527126e-12, 0.160576793121939886190847e-9),
+                                     0.250521176994133472333666e-7),
+                                 0.275573191913636406057211e-5),
+                             0.198412698413242405162014e-3),
+                         0.833333333333329931873097e-2),
+                     0.166666666666666667013899e0);
 
     double cdy = dy2 * fma(dy2,
-	                   fma(dy2,
-			       fma(dy2,
-				   fma(dy2,
-				       fma(dy2,
-					   fma(dy2, 0.1163921388172173692062032e-10, 0.208744349831471353536305e-8),
-					   0.275573350756016588011357e-6),
-				       0.248015872460622433115785e-4),
-				   0.138888888889814854814536e-2),
-			       0.416666666666660876512776e-1),
-			   0.500000000000000005911074e0);
+                           fma(dy2,
+                               fma(dy2,
+                                   fma(dy2,
+                                       fma(dy2,
+                                           fma(dy2, 0.1163921388172173692062032e-10, 0.208744349831471353536305e-8),
+                                           0.275573350756016588011357e-6),
+                                       0.248015872460622433115785e-4),
+                                   0.138888888889814854814536e-2),
+                               0.416666666666660876512776e-1),
+                           0.500000000000000005911074e0);
 
     // At this point sinh(dy) is approximated by dy + sdy,
     // and cosh(dy) is approximated by 1 + cdy.

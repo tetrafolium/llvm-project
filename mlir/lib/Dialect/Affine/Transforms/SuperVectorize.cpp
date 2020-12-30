@@ -541,31 +541,31 @@ isVectorizableLoopPtrFactory(const DenseSet<Operation *> &parallelLoops,
 static std::vector<NestedPattern>
 makePatterns(const DenseSet<Operation *> &parallelLoops, int vectorRank,
              ArrayRef<int64_t> fastestVaryingPattern) {
-  using matcher::For;
-  int64_t d0 = fastestVaryingPattern.empty() ? -1 : fastestVaryingPattern[0];
-  int64_t d1 = fastestVaryingPattern.size() < 2 ? -1 : fastestVaryingPattern[1];
-  int64_t d2 = fastestVaryingPattern.size() < 3 ? -1 : fastestVaryingPattern[2];
-  switch (vectorRank) {
-  case 1:
-    return {For(isVectorizableLoopPtrFactory(parallelLoops, d0))};
-  case 2:
-    return {For(isVectorizableLoopPtrFactory(parallelLoops, d0),
-                For(isVectorizableLoopPtrFactory(parallelLoops, d1)))};
-  case 3:
-    return {For(isVectorizableLoopPtrFactory(parallelLoops, d0),
-                For(isVectorizableLoopPtrFactory(parallelLoops, d1),
-                    For(isVectorizableLoopPtrFactory(parallelLoops, d2))))};
-  default: {
-    return std::vector<NestedPattern>();
-  }
-  }
+    using matcher::For;
+    int64_t d0 = fastestVaryingPattern.empty() ? -1 : fastestVaryingPattern[0];
+    int64_t d1 = fastestVaryingPattern.size() < 2 ? -1 : fastestVaryingPattern[1];
+    int64_t d2 = fastestVaryingPattern.size() < 3 ? -1 : fastestVaryingPattern[2];
+    switch (vectorRank) {
+    case 1:
+        return {For(isVectorizableLoopPtrFactory(parallelLoops, d0))};
+    case 2:
+        return {For(isVectorizableLoopPtrFactory(parallelLoops, d0),
+                    For(isVectorizableLoopPtrFactory(parallelLoops, d1)))};
+    case 3:
+        return {For(isVectorizableLoopPtrFactory(parallelLoops, d0),
+                    For(isVectorizableLoopPtrFactory(parallelLoops, d1),
+                        For(isVectorizableLoopPtrFactory(parallelLoops, d2))))};
+    default: {
+        return std::vector<NestedPattern>();
+    }
+    }
 }
 
 static NestedPattern &vectorTransferPattern() {
-  static auto pattern = matcher::Op([](Operation &op) {
-    return isa<vector::TransferReadOp, vector::TransferWriteOp>(op);
-  });
-  return pattern;
+    static auto pattern = matcher::Op([](Operation &op) {
+        return isa<vector::TransferReadOp, vector::TransferWriteOp>(op);
+    });
+    return pattern;
 }
 
 namespace {
@@ -573,28 +573,28 @@ namespace {
 /// Base state for the vectorize pass.
 /// Command line arguments are preempted by non-empty pass arguments.
 struct Vectorize : public AffineVectorizeBase<Vectorize> {
-  Vectorize() = default;
-  Vectorize(ArrayRef<int64_t> virtualVectorSize);
-  void runOnFunction() override;
+    Vectorize() = default;
+    Vectorize(ArrayRef<int64_t> virtualVectorSize);
+    void runOnFunction() override;
 };
 
 } // end anonymous namespace
 
 Vectorize::Vectorize(ArrayRef<int64_t> virtualVectorSize) {
-  vectorSizes = virtualVectorSize;
+    vectorSizes = virtualVectorSize;
 }
 
 static void vectorizeLoopIfProfitable(Operation *loop, unsigned depthInPattern,
                                       unsigned patternDepth,
                                       VectorizationStrategy *strategy) {
-  assert(patternDepth > depthInPattern &&
-         "patternDepth is greater than depthInPattern");
-  if (patternDepth - depthInPattern > strategy->vectorSizes.size()) {
-    // Don't vectorize this loop
-    return;
-  }
-  strategy->loopToVectorDim[loop] =
-      strategy->vectorSizes.size() - (patternDepth - depthInPattern);
+    assert(patternDepth > depthInPattern &&
+           "patternDepth is greater than depthInPattern");
+    if (patternDepth - depthInPattern > strategy->vectorSizes.size()) {
+        // Don't vectorize this loop
+        return;
+    }
+    strategy->loopToVectorDim[loop] =
+        strategy->vectorSizes.size() - (patternDepth - depthInPattern);
 }
 
 /// Implements a simple strawman strategy for vectorization.
@@ -613,18 +613,18 @@ static void vectorizeLoopIfProfitable(Operation *loop, unsigned depthInPattern,
 /// Then we can quantify the above to build a cost model and search over
 /// strategies.
 static LogicalResult analyzeProfitability(ArrayRef<NestedMatch> matches,
-                                          unsigned depthInPattern,
-                                          unsigned patternDepth,
-                                          VectorizationStrategy *strategy) {
-  for (auto m : matches) {
-    if (failed(analyzeProfitability(m.getMatchedChildren(), depthInPattern + 1,
-                                    patternDepth, strategy))) {
-      return failure();
+        unsigned depthInPattern,
+        unsigned patternDepth,
+        VectorizationStrategy *strategy) {
+    for (auto m : matches) {
+        if (failed(analyzeProfitability(m.getMatchedChildren(), depthInPattern + 1,
+                                        patternDepth, strategy))) {
+            return failure();
+        }
+        vectorizeLoopIfProfitable(m.getMatchedOperation(), depthInPattern,
+                                  patternDepth, strategy);
     }
-    vectorizeLoopIfProfitable(m.getMatchedOperation(), depthInPattern,
-                              patternDepth, strategy);
-  }
-  return success();
+    return success();
 }
 
 ///// end TODO: Hoist to a VectorizationStrategy.cpp when appropriate /////
@@ -632,104 +632,104 @@ static LogicalResult analyzeProfitability(ArrayRef<NestedMatch> matches,
 namespace {
 
 struct VectorizationState {
-  /// Adds an entry of pre/post vectorization operations in the state.
-  void registerReplacement(Operation *key, Operation *value);
-  /// When the current vectorization pattern is successful, this erases the
-  /// operations that were marked for erasure in the proper order and resets
-  /// the internal state for the next pattern.
-  void finishVectorizationPattern();
+    /// Adds an entry of pre/post vectorization operations in the state.
+    void registerReplacement(Operation *key, Operation *value);
+    /// When the current vectorization pattern is successful, this erases the
+    /// operations that were marked for erasure in the proper order and resets
+    /// the internal state for the next pattern.
+    void finishVectorizationPattern();
 
-  // In-order tracking of original Operation that have been vectorized.
-  // Erase in reverse order.
-  SmallVector<Operation *, 16> toErase;
-  // Set of Operation that have been vectorized (the values in the
-  // vectorizationMap for hashed access). The vectorizedSet is used in
-  // particular to filter the operations that have already been vectorized by
-  // this pattern, when iterating over nested loops in this pattern.
-  DenseSet<Operation *> vectorizedSet;
-  // Map of old scalar Operation to new vectorized Operation.
-  DenseMap<Operation *, Operation *> vectorizationMap;
-  // Map of old scalar Value to new vectorized Value.
-  DenseMap<Value, Value> replacementMap;
-  // The strategy drives which loop to vectorize by which amount.
-  const VectorizationStrategy *strategy;
-  // Use-def roots. These represent the starting points for the worklist in the
-  // vectorizeNonTerminals function. They consist of the subset of load
-  // operations that have been vectorized. They can be retrieved from
-  // `vectorizationMap` but it is convenient to keep track of them in a separate
-  // data structure.
-  DenseSet<Operation *> roots;
-  // Terminal operations for the worklist in the vectorizeNonTerminals
-  // function. They consist of the subset of store operations that have been
-  // vectorized. They can be retrieved from `vectorizationMap` but it is
-  // convenient to keep track of them in a separate data structure. Since they
-  // do not necessarily belong to use-def chains starting from loads (e.g
-  // storing a constant), we need to handle them in a post-pass.
-  DenseSet<Operation *> terminals;
-  // Checks that the type of `op` is AffineStoreOp and adds it to the terminals
-  // set.
-  void registerTerminal(Operation *op);
-  // Folder used to factor out constant creation.
-  OperationFolder *folder;
+    // In-order tracking of original Operation that have been vectorized.
+    // Erase in reverse order.
+    SmallVector<Operation *, 16> toErase;
+    // Set of Operation that have been vectorized (the values in the
+    // vectorizationMap for hashed access). The vectorizedSet is used in
+    // particular to filter the operations that have already been vectorized by
+    // this pattern, when iterating over nested loops in this pattern.
+    DenseSet<Operation *> vectorizedSet;
+    // Map of old scalar Operation to new vectorized Operation.
+    DenseMap<Operation *, Operation *> vectorizationMap;
+    // Map of old scalar Value to new vectorized Value.
+    DenseMap<Value, Value> replacementMap;
+    // The strategy drives which loop to vectorize by which amount.
+    const VectorizationStrategy *strategy;
+    // Use-def roots. These represent the starting points for the worklist in the
+    // vectorizeNonTerminals function. They consist of the subset of load
+    // operations that have been vectorized. They can be retrieved from
+    // `vectorizationMap` but it is convenient to keep track of them in a separate
+    // data structure.
+    DenseSet<Operation *> roots;
+    // Terminal operations for the worklist in the vectorizeNonTerminals
+    // function. They consist of the subset of store operations that have been
+    // vectorized. They can be retrieved from `vectorizationMap` but it is
+    // convenient to keep track of them in a separate data structure. Since they
+    // do not necessarily belong to use-def chains starting from loads (e.g
+    // storing a constant), we need to handle them in a post-pass.
+    DenseSet<Operation *> terminals;
+    // Checks that the type of `op` is AffineStoreOp and adds it to the terminals
+    // set.
+    void registerTerminal(Operation *op);
+    // Folder used to factor out constant creation.
+    OperationFolder *folder;
 
 private:
-  void registerReplacement(Value key, Value value);
+    void registerReplacement(Value key, Value value);
 };
 
 } // end namespace
 
 void VectorizationState::registerReplacement(Operation *key, Operation *value) {
-  LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ commit vectorized op: ");
-  LLVM_DEBUG(key->print(dbgs()));
-  LLVM_DEBUG(dbgs() << "  into  ");
-  LLVM_DEBUG(value->print(dbgs()));
-  assert(key->getNumResults() == 1 && "already registered");
-  assert(value->getNumResults() == 1 && "already registered");
-  assert(vectorizedSet.count(value) == 0 && "already registered");
-  assert(vectorizationMap.count(key) == 0 && "already registered");
-  toErase.push_back(key);
-  vectorizedSet.insert(value);
-  vectorizationMap.insert(std::make_pair(key, value));
-  registerReplacement(key->getResult(0), value->getResult(0));
-  if (isa<AffineLoadOp>(key)) {
-    assert(roots.count(key) == 0 && "root was already inserted previously");
-    roots.insert(key);
-  }
+    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ commit vectorized op: ");
+    LLVM_DEBUG(key->print(dbgs()));
+    LLVM_DEBUG(dbgs() << "  into  ");
+    LLVM_DEBUG(value->print(dbgs()));
+    assert(key->getNumResults() == 1 && "already registered");
+    assert(value->getNumResults() == 1 && "already registered");
+    assert(vectorizedSet.count(value) == 0 && "already registered");
+    assert(vectorizationMap.count(key) == 0 && "already registered");
+    toErase.push_back(key);
+    vectorizedSet.insert(value);
+    vectorizationMap.insert(std::make_pair(key, value));
+    registerReplacement(key->getResult(0), value->getResult(0));
+    if (isa<AffineLoadOp>(key)) {
+        assert(roots.count(key) == 0 && "root was already inserted previously");
+        roots.insert(key);
+    }
 }
 
 void VectorizationState::registerTerminal(Operation *op) {
-  assert(isa<AffineStoreOp>(op) && "terminal must be a AffineStoreOp");
-  assert(terminals.count(op) == 0 &&
-         "terminal was already inserted previously");
-  terminals.insert(op);
+    assert(isa<AffineStoreOp>(op) && "terminal must be a AffineStoreOp");
+    assert(terminals.count(op) == 0 &&
+           "terminal was already inserted previously");
+    terminals.insert(op);
 }
 
 void VectorizationState::finishVectorizationPattern() {
-  while (!toErase.empty()) {
-    auto *op = toErase.pop_back_val();
-    LLVM_DEBUG(dbgs() << "\n[early-vect] finishVectorizationPattern erase: ");
-    LLVM_DEBUG(op->print(dbgs()));
-    op->erase();
-  }
+    while (!toErase.empty()) {
+        auto *op = toErase.pop_back_val();
+        LLVM_DEBUG(dbgs() << "\n[early-vect] finishVectorizationPattern erase: ");
+        LLVM_DEBUG(op->print(dbgs()));
+        op->erase();
+    }
 }
 
 void VectorizationState::registerReplacement(Value key, Value value) {
-  assert(replacementMap.count(key) == 0 && "replacement already registered");
-  replacementMap.insert(std::make_pair(key, value));
+    assert(replacementMap.count(key) == 0 && "replacement already registered");
+    replacementMap.insert(std::make_pair(key, value));
 }
 
 // Apply 'map' with 'mapOperands' returning resulting values in 'results'.
 static void computeMemoryOpIndices(Operation *op, AffineMap map,
                                    ValueRange mapOperands,
                                    SmallVectorImpl<Value> &results) {
-  OpBuilder builder(op);
-  for (auto resultExpr : map.getResults()) {
-    auto singleResMap =
-        AffineMap::get(map.getNumDims(), map.getNumSymbols(), resultExpr);
-    auto afOp =
-        builder.create<AffineApplyOp>(op->getLoc(), singleResMap, mapOperands);
-    results.push_back(afOp);
-  }
+    OpBuilder builder(op);
+    for (auto resultExpr : map.getResults()) {
+        auto singleResMap =
+            AffineMap::get(map.getNumDims(), map.getNumSymbols(), resultExpr);
+        auto afOp =
+            builder.create<AffineApplyOp>(op->getLoc(), singleResMap, mapOperands);
+        results.push_back(afOp);
+    }
 }
 
 ////// TODO: Hoist to a VectorizationMaterialize.cpp when appropriate. ////
@@ -749,80 +749,80 @@ static void computeMemoryOpIndices(Operation *op, AffineMap map,
 /// the last step. Here we merely register the store operation.
 template <typename LoadOrStoreOpPointer>
 static LogicalResult vectorizeRootOrTerminal(Value iv,
-                                             LoadOrStoreOpPointer memoryOp,
-                                             VectorizationState *state) {
-  auto memRefType = memoryOp.getMemRef().getType().template cast<MemRefType>();
+        LoadOrStoreOpPointer memoryOp,
+        VectorizationState *state) {
+    auto memRefType = memoryOp.getMemRef().getType().template cast<MemRefType>();
 
-  auto elementType = memRefType.getElementType();
-  // TODO: ponder whether we want to further vectorize a vector value.
-  assert(VectorType::isValidElementType(elementType) &&
-         "Not a valid vector element type");
-  auto vectorType = VectorType::get(state->strategy->vectorSizes, elementType);
+    auto elementType = memRefType.getElementType();
+    // TODO: ponder whether we want to further vectorize a vector value.
+    assert(VectorType::isValidElementType(elementType) &&
+           "Not a valid vector element type");
+    auto vectorType = VectorType::get(state->strategy->vectorSizes, elementType);
 
-  // Materialize a MemRef with 1 vector.
-  auto *opInst = memoryOp.getOperation();
-  // For now, vector.transfers must be aligned, operate only on indices with an
-  // identity subset of AffineMap and do not change layout.
-  // TODO: increase the expressiveness power of vector.transfer operations
-  // as needed by various targets.
-  if (auto load = dyn_cast<AffineLoadOp>(opInst)) {
-    OpBuilder b(opInst);
-    ValueRange mapOperands = load.getMapOperands();
-    SmallVector<Value, 8> indices;
-    indices.reserve(load.getMemRefType().getRank());
-    if (load.getAffineMap() !=
-        b.getMultiDimIdentityMap(load.getMemRefType().getRank())) {
-      computeMemoryOpIndices(opInst, load.getAffineMap(), mapOperands, indices);
+    // Materialize a MemRef with 1 vector.
+    auto *opInst = memoryOp.getOperation();
+    // For now, vector.transfers must be aligned, operate only on indices with an
+    // identity subset of AffineMap and do not change layout.
+    // TODO: increase the expressiveness power of vector.transfer operations
+    // as needed by various targets.
+    if (auto load = dyn_cast<AffineLoadOp>(opInst)) {
+        OpBuilder b(opInst);
+        ValueRange mapOperands = load.getMapOperands();
+        SmallVector<Value, 8> indices;
+        indices.reserve(load.getMemRefType().getRank());
+        if (load.getAffineMap() !=
+                b.getMultiDimIdentityMap(load.getMemRefType().getRank())) {
+            computeMemoryOpIndices(opInst, load.getAffineMap(), mapOperands, indices);
+        } else {
+            indices.append(mapOperands.begin(), mapOperands.end());
+        }
+        auto permutationMap =
+            makePermutationMap(opInst, indices, state->strategy->loopToVectorDim);
+        if (!permutationMap)
+            return LogicalResult::Failure;
+        LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ permutationMap: ");
+        LLVM_DEBUG(permutationMap.print(dbgs()));
+        auto transfer = b.create<vector::TransferReadOp>(
+                            opInst->getLoc(), vectorType, memoryOp.getMemRef(), indices,
+                            permutationMap);
+        state->registerReplacement(opInst, transfer.getOperation());
     } else {
-      indices.append(mapOperands.begin(), mapOperands.end());
+        state->registerTerminal(opInst);
     }
-    auto permutationMap =
-        makePermutationMap(opInst, indices, state->strategy->loopToVectorDim);
-    if (!permutationMap)
-      return LogicalResult::Failure;
-    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ permutationMap: ");
-    LLVM_DEBUG(permutationMap.print(dbgs()));
-    auto transfer = b.create<vector::TransferReadOp>(
-        opInst->getLoc(), vectorType, memoryOp.getMemRef(), indices,
-        permutationMap);
-    state->registerReplacement(opInst, transfer.getOperation());
-  } else {
-    state->registerTerminal(opInst);
-  }
-  return success();
+    return success();
 }
 /// end TODO: Hoist to a VectorizationMaterialize.cpp when appropriate. ///
 
 /// Coarsens the loops bounds and transforms all remaining load and store
 /// operations into the appropriate vector.transfer.
 static LogicalResult vectorizeAffineForOp(AffineForOp loop, int64_t step,
-                                          VectorizationState *state) {
-  loop.setStep(step);
+        VectorizationState *state) {
+    loop.setStep(step);
 
-  FilterFunctionType notVectorizedThisPattern = [state](Operation &op) {
-    if (!matcher::isLoadOrStore(op)) {
-      return false;
+    FilterFunctionType notVectorizedThisPattern = [state](Operation &op) {
+        if (!matcher::isLoadOrStore(op)) {
+            return false;
+        }
+        return state->vectorizationMap.count(&op) == 0 &&
+               state->vectorizedSet.count(&op) == 0 &&
+               state->roots.count(&op) == 0 && state->terminals.count(&op) == 0;
+    };
+    auto loadAndStores = matcher::Op(notVectorizedThisPattern);
+    SmallVector<NestedMatch, 8> loadAndStoresMatches;
+    loadAndStores.match(loop.getOperation(), &loadAndStoresMatches);
+    for (auto ls : loadAndStoresMatches) {
+        auto *opInst = ls.getMatchedOperation();
+        auto load = dyn_cast<AffineLoadOp>(opInst);
+        auto store = dyn_cast<AffineStoreOp>(opInst);
+        LLVM_DEBUG(opInst->print(dbgs()));
+        LogicalResult result =
+            load ? vectorizeRootOrTerminal(loop.getInductionVar(), load, state)
+            : vectorizeRootOrTerminal(loop.getInductionVar(), store, state);
+        if (failed(result)) {
+            return failure();
+        }
     }
-    return state->vectorizationMap.count(&op) == 0 &&
-           state->vectorizedSet.count(&op) == 0 &&
-           state->roots.count(&op) == 0 && state->terminals.count(&op) == 0;
-  };
-  auto loadAndStores = matcher::Op(notVectorizedThisPattern);
-  SmallVector<NestedMatch, 8> loadAndStoresMatches;
-  loadAndStores.match(loop.getOperation(), &loadAndStoresMatches);
-  for (auto ls : loadAndStoresMatches) {
-    auto *opInst = ls.getMatchedOperation();
-    auto load = dyn_cast<AffineLoadOp>(opInst);
-    auto store = dyn_cast<AffineStoreOp>(opInst);
-    LLVM_DEBUG(opInst->print(dbgs()));
-    LogicalResult result =
-        load ? vectorizeRootOrTerminal(loop.getInductionVar(), load, state)
-             : vectorizeRootOrTerminal(loop.getInductionVar(), store, state);
-    if (failed(result)) {
-      return failure();
-    }
-  }
-  return success();
+    return success();
 }
 
 /// Returns a FilterFunctionType that can be used in NestedPattern to match a
@@ -831,19 +831,19 @@ static LogicalResult vectorizeAffineForOp(AffineForOp loop, int64_t step,
 static FilterFunctionType
 isVectorizableLoopPtrFactory(const DenseSet<Operation *> &parallelLoops,
                              int fastestVaryingMemRefDimension) {
-  return [&parallelLoops, fastestVaryingMemRefDimension](Operation &forOp) {
-    auto loop = cast<AffineForOp>(forOp);
-    auto parallelIt = parallelLoops.find(loop);
-    if (parallelIt == parallelLoops.end())
-      return false;
-    int memRefDim = -1;
-    auto vectorizableBody =
-        isVectorizableLoopBody(loop, &memRefDim, vectorTransferPattern());
-    if (!vectorizableBody)
-      return false;
-    return memRefDim == -1 || fastestVaryingMemRefDimension == -1 ||
-           memRefDim == fastestVaryingMemRefDimension;
-  };
+    return [&parallelLoops, fastestVaryingMemRefDimension](Operation &forOp) {
+        auto loop = cast<AffineForOp>(forOp);
+        auto parallelIt = parallelLoops.find(loop);
+        if (parallelIt == parallelLoops.end())
+            return false;
+        int memRefDim = -1;
+        auto vectorizableBody =
+            isVectorizableLoopBody(loop, &memRefDim, vectorTransferPattern());
+        if (!vectorizableBody)
+            return false;
+        return memRefDim == -1 || fastestVaryingMemRefDimension == -1 ||
+               memRefDim == fastestVaryingMemRefDimension;
+    };
 }
 
 /// Apply vectorization of `loop` according to `state`. `loops` are processed in
@@ -852,38 +852,38 @@ isVectorizableLoopPtrFactory(const DenseSet<Operation *> &parallelLoops,
 static LogicalResult
 vectorizeLoopsAndLoads(std::vector<SmallVector<AffineForOp, 2>> &loops,
                        VectorizationState *state) {
-  // Vectorize loops in inner-to-outer order. If any children fails, the parent
-  // will fail too.
-  for (auto &loopsInLevel : llvm::reverse(loops)) {
-    for (AffineForOp loop : loopsInLevel) {
-      // 1. This loop may have been omitted from vectorization for various
-      // reasons (e.g. due to the performance model or pattern depth > vector
-      // size).
-      auto it = state->strategy->loopToVectorDim.find(loop.getOperation());
-      if (it == state->strategy->loopToVectorDim.end())
-        continue;
+    // Vectorize loops in inner-to-outer order. If any children fails, the parent
+    // will fail too.
+    for (auto &loopsInLevel : llvm::reverse(loops)) {
+        for (AffineForOp loop : loopsInLevel) {
+            // 1. This loop may have been omitted from vectorization for various
+            // reasons (e.g. due to the performance model or pattern depth > vector
+            // size).
+            auto it = state->strategy->loopToVectorDim.find(loop.getOperation());
+            if (it == state->strategy->loopToVectorDim.end())
+                continue;
 
-      // 2. Actual inner-to-outer transformation.
-      auto vectorDim = it->second;
-      assert(vectorDim < state->strategy->vectorSizes.size() &&
-             "vector dim overflow");
-      //   a. get actual vector size
-      auto vectorSize = state->strategy->vectorSizes[vectorDim];
-      //   b. loop transformation for early vectorization is still subject to
-      //     exploratory tradeoffs (see top of the file). Apply coarsening,
-      //     i.e.:
-      //        | ub -> ub
-      //        | step -> step * vectorSize
-      LLVM_DEBUG(dbgs() << "\n[early-vect] vectorizeForOp by " << vectorSize
-                        << " : \n"
-                        << loop);
-      if (failed(
-              vectorizeAffineForOp(loop, loop.getStep() * vectorSize, state)))
-        return failure();
-    } // end for.
-  }
+            // 2. Actual inner-to-outer transformation.
+            auto vectorDim = it->second;
+            assert(vectorDim < state->strategy->vectorSizes.size() &&
+                   "vector dim overflow");
+            //   a. get actual vector size
+            auto vectorSize = state->strategy->vectorSizes[vectorDim];
+            //   b. loop transformation for early vectorization is still subject to
+            //     exploratory tradeoffs (see top of the file). Apply coarsening,
+            //     i.e.:
+            //        | ub -> ub
+            //        | step -> step * vectorSize
+            LLVM_DEBUG(dbgs() << "\n[early-vect] vectorizeForOp by " << vectorSize
+                       << " : \n"
+                       << loop);
+            if (failed(
+                        vectorizeAffineForOp(loop, loop.getStep() * vectorSize, state)))
+                return failure();
+        } // end for.
+    }
 
-  return success();
+    return success();
 }
 
 /// Tries to transform a scalar constant into a vector splat of that constant.
@@ -892,28 +892,28 @@ vectorizeLoopsAndLoads(std::vector<SmallVector<AffineForOp, 2>> &loops,
 /// If `type` is not a valid vector type or if the scalar constant is not a
 /// valid vector element type, returns nullptr.
 static Value vectorizeConstant(Operation *op, ConstantOp constant, Type type) {
-  if (!type || !type.isa<VectorType>() ||
-      !VectorType::isValidElementType(constant.getType())) {
-    return nullptr;
-  }
-  OpBuilder b(op);
-  Location loc = op->getLoc();
-  auto vectorType = type.cast<VectorType>();
-  auto attr = DenseElementsAttr::get(vectorType, constant.getValue());
-  auto *constantOpInst = constant.getOperation();
+    if (!type || !type.isa<VectorType>() ||
+            !VectorType::isValidElementType(constant.getType())) {
+        return nullptr;
+    }
+    OpBuilder b(op);
+    Location loc = op->getLoc();
+    auto vectorType = type.cast<VectorType>();
+    auto attr = DenseElementsAttr::get(vectorType, constant.getValue());
+    auto *constantOpInst = constant.getOperation();
 
-  OperationState state(loc, constantOpInst->getName().getStringRef(), {},
-                       {vectorType}, {b.getNamedAttr("value", attr)});
+    OperationState state(loc, constantOpInst->getName().getStringRef(), {},
+    {vectorType}, {b.getNamedAttr("value", attr)});
 
-  return b.createOperation(state)->getResult(0);
+    return b.createOperation(state)->getResult(0);
 }
 
 /// Returns the vector type resulting from applying the provided vectorization
 /// strategy on the scalar type.
 static VectorType getVectorType(Type scalarTy,
                                 const VectorizationStrategy *strategy) {
-  assert(!scalarTy.isa<VectorType>() && "Expected scalar type");
-  return VectorType::get(strategy->vectorSizes, scalarTy);
+    assert(!scalarTy.isa<VectorType>() && "Expected scalar type");
+    return VectorType::get(strategy->vectorSizes, scalarTy);
 }
 
 /// Returns true if the provided value is vector uniform given the vectorization
@@ -922,26 +922,26 @@ static VectorType getVectorType(Type scalarTy,
 // vectorization strategy are considered vector uniforms.
 static bool isUniformDefinition(Value value,
                                 const VectorizationStrategy *strategy) {
-  for (auto loopToDim : strategy->loopToVectorDim) {
-    auto loop = cast<AffineForOp>(loopToDim.first);
-    if (!loop.isDefinedOutsideOfLoop(value))
-      return false;
-  }
-  return true;
+    for (auto loopToDim : strategy->loopToVectorDim) {
+        auto loop = cast<AffineForOp>(loopToDim.first);
+        if (!loop.isDefinedOutsideOfLoop(value))
+            return false;
+    }
+    return true;
 }
 
 /// Generates a broadcast op for the provided uniform value using the
 /// vectorization strategy in 'state'.
 static Value vectorizeUniform(Value value, VectorizationState *state) {
-  OpBuilder builder(value.getContext());
-  builder.setInsertionPointAfterValue(value);
+    OpBuilder builder(value.getContext());
+    builder.setInsertionPointAfterValue(value);
 
-  auto vectorTy = getVectorType(value.getType(), state->strategy);
-  auto bcast = builder.create<BroadcastOp>(value.getLoc(), vectorTy, value);
+    auto vectorTy = getVectorType(value.getType(), state->strategy);
+    auto bcast = builder.create<BroadcastOp>(value.getLoc(), vectorTy, value);
 
-  // Add broadcast to the replacement map to reuse it for other uses.
-  state->replacementMap[value] = bcast;
-  return bcast;
+    // Add broadcast to the replacement map to reuse it for other uses.
+    state->replacementMap[value] = bcast;
+    return bcast;
 }
 
 /// Tries to vectorize a given operand `op` of Operation `op` during
@@ -968,39 +968,39 @@ static Value vectorizeUniform(Value value, VectorizationState *state) {
 /// TODO: handle more complex cases.
 static Value vectorizeOperand(Value operand, Operation *op,
                               VectorizationState *state) {
-  LLVM_DEBUG(dbgs() << "\n[early-vect]vectorize operand: " << operand);
-  // 1. If this value has already been vectorized this round, we are done.
-  if (state->vectorizedSet.count(operand.getDefiningOp()) > 0) {
-    LLVM_DEBUG(dbgs() << " -> already vector operand");
-    return operand;
-  }
-  // 1.b. Delayed on-demand replacement of a use.
-  //    Note that we cannot just call replaceAllUsesWith because it may result
-  //    in ops with mixed types, for ops whose operands have not all yet
-  //    been vectorized. This would be invalid IR.
-  auto it = state->replacementMap.find(operand);
-  if (it != state->replacementMap.end()) {
-    auto res = it->second;
-    LLVM_DEBUG(dbgs() << "-> delayed replacement by: " << res);
-    return res;
-  }
-  // 2. TODO: broadcast needed.
-  if (operand.getType().isa<VectorType>()) {
-    LLVM_DEBUG(dbgs() << "-> non-vectorizable");
+    LLVM_DEBUG(dbgs() << "\n[early-vect]vectorize operand: " << operand);
+    // 1. If this value has already been vectorized this round, we are done.
+    if (state->vectorizedSet.count(operand.getDefiningOp()) > 0) {
+        LLVM_DEBUG(dbgs() << " -> already vector operand");
+        return operand;
+    }
+    // 1.b. Delayed on-demand replacement of a use.
+    //    Note that we cannot just call replaceAllUsesWith because it may result
+    //    in ops with mixed types, for ops whose operands have not all yet
+    //    been vectorized. This would be invalid IR.
+    auto it = state->replacementMap.find(operand);
+    if (it != state->replacementMap.end()) {
+        auto res = it->second;
+        LLVM_DEBUG(dbgs() << "-> delayed replacement by: " << res);
+        return res;
+    }
+    // 2. TODO: broadcast needed.
+    if (operand.getType().isa<VectorType>()) {
+        LLVM_DEBUG(dbgs() << "-> non-vectorizable");
+        return nullptr;
+    }
+    // 3. vectorize constant.
+    if (auto constant = operand.getDefiningOp<ConstantOp>())
+        return vectorizeConstant(op, constant,
+                                 getVectorType(operand.getType(), state->strategy));
+
+    // 4. Uniform values.
+    if (isUniformDefinition(operand, state->strategy))
+        return vectorizeUniform(operand, state);
+
+    // 5. currently non-vectorizable.
+    LLVM_DEBUG(dbgs() << "-> non-vectorizable: " << operand);
     return nullptr;
-  }
-  // 3. vectorize constant.
-  if (auto constant = operand.getDefiningOp<ConstantOp>())
-    return vectorizeConstant(op, constant,
-                             getVectorType(operand.getType(), state->strategy));
-
-  // 4. Uniform values.
-  if (isUniformDefinition(operand, state->strategy))
-    return vectorizeUniform(operand, state);
-
-  // 5. currently non-vectorizable.
-  LLVM_DEBUG(dbgs() << "-> non-vectorizable: " << operand);
-  return nullptr;
 }
 
 /// Encodes Operation-specific behavior for vectorization. In general we assume
@@ -1014,76 +1014,78 @@ static Value vectorizeOperand(Value operand, Operation *op,
 // do one-off logic here; ideally it would be TableGen'd.
 static Operation *vectorizeOneOperation(Operation *opInst,
                                         VectorizationState *state) {
-  // Sanity checks.
-  assert(!isa<AffineLoadOp>(opInst) &&
-         "all loads must have already been fully vectorized independently");
-  assert(!isa<vector::TransferReadOp>(opInst) &&
-         "vector.transfer_read cannot be further vectorized");
-  assert(!isa<vector::TransferWriteOp>(opInst) &&
-         "vector.transfer_write cannot be further vectorized");
+    // Sanity checks.
+    assert(!isa<AffineLoadOp>(opInst) &&
+           "all loads must have already been fully vectorized independently");
+    assert(!isa<vector::TransferReadOp>(opInst) &&
+           "vector.transfer_read cannot be further vectorized");
+    assert(!isa<vector::TransferWriteOp>(opInst) &&
+           "vector.transfer_write cannot be further vectorized");
 
-  if (auto store = dyn_cast<AffineStoreOp>(opInst)) {
-    OpBuilder b(opInst);
-    auto memRef = store.getMemRef();
-    auto value = store.getValueToStore();
-    auto vectorValue = vectorizeOperand(value, opInst, state);
-    if (!vectorValue)
-      return nullptr;
+    if (auto store = dyn_cast<AffineStoreOp>(opInst)) {
+        OpBuilder b(opInst);
+        auto memRef = store.getMemRef();
+        auto value = store.getValueToStore();
+        auto vectorValue = vectorizeOperand(value, opInst, state);
+        if (!vectorValue)
+            return nullptr;
 
-    ValueRange mapOperands = store.getMapOperands();
-    SmallVector<Value, 8> indices;
-    indices.reserve(store.getMemRefType().getRank());
-    if (store.getAffineMap() !=
-        b.getMultiDimIdentityMap(store.getMemRefType().getRank())) {
-      computeMemoryOpIndices(opInst, store.getAffineMap(), mapOperands,
-                             indices);
-    } else {
-      indices.append(mapOperands.begin(), mapOperands.end());
+        ValueRange mapOperands = store.getMapOperands();
+        SmallVector<Value, 8> indices;
+        indices.reserve(store.getMemRefType().getRank());
+        if (store.getAffineMap() !=
+                b.getMultiDimIdentityMap(store.getMemRefType().getRank())) {
+            computeMemoryOpIndices(opInst, store.getAffineMap(), mapOperands,
+                                   indices);
+        } else {
+            indices.append(mapOperands.begin(), mapOperands.end());
+        }
+
+        auto permutationMap =
+            makePermutationMap(opInst, indices, state->strategy->loopToVectorDim);
+        if (!permutationMap)
+            return nullptr;
+        LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ permutationMap: ");
+        LLVM_DEBUG(permutationMap.print(dbgs()));
+        auto transfer = b.create<vector::TransferWriteOp>(
+                            opInst->getLoc(), vectorValue, memRef, indices, permutationMap);
+        auto *res = transfer.getOperation();
+        LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ vectorized store: " << *res);
+        // "Terminals" (i.e. AffineStoreOps) are erased on the spot.
+        opInst->erase();
+        return res;
+    }
+    if (opInst->getNumRegions() != 0)
+        return nullptr;
+
+    SmallVector<Type, 8> vectorTypes;
+    for (auto v : opInst->getResults()) {
+        vectorTypes.push_back(
+            VectorType::get(state->strategy->vectorSizes, v.getType()));
+    }
+    SmallVector<Value, 8> vectorOperands;
+    for (auto v : opInst->getOperands()) {
+        vectorOperands.push_back(vectorizeOperand(v, opInst, state));
+    }
+    // Check whether a single operand is null. If so, vectorization failed.
+    bool success = llvm::all_of(vectorOperands, [](Value op) {
+        return op;
+    });
+    if (!success) {
+        LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ an operand failed vectorize");
+        return nullptr;
     }
 
-    auto permutationMap =
-        makePermutationMap(opInst, indices, state->strategy->loopToVectorDim);
-    if (!permutationMap)
-      return nullptr;
-    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ permutationMap: ");
-    LLVM_DEBUG(permutationMap.print(dbgs()));
-    auto transfer = b.create<vector::TransferWriteOp>(
-        opInst->getLoc(), vectorValue, memRef, indices, permutationMap);
-    auto *res = transfer.getOperation();
-    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ vectorized store: " << *res);
-    // "Terminals" (i.e. AffineStoreOps) are erased on the spot.
-    opInst->erase();
-    return res;
-  }
-  if (opInst->getNumRegions() != 0)
-    return nullptr;
-
-  SmallVector<Type, 8> vectorTypes;
-  for (auto v : opInst->getResults()) {
-    vectorTypes.push_back(
-        VectorType::get(state->strategy->vectorSizes, v.getType()));
-  }
-  SmallVector<Value, 8> vectorOperands;
-  for (auto v : opInst->getOperands()) {
-    vectorOperands.push_back(vectorizeOperand(v, opInst, state));
-  }
-  // Check whether a single operand is null. If so, vectorization failed.
-  bool success = llvm::all_of(vectorOperands, [](Value op) { return op; });
-  if (!success) {
-    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ an operand failed vectorize");
-    return nullptr;
-  }
-
-  // Create a clone of the op with the proper operands and return types.
-  // TODO: The following assumes there is always an op with a fixed
-  // name that works both in scalar mode and vector mode.
-  // TODO: Is it worth considering an Operation.clone operation which
-  // changes the type so we can promote an Operation with less boilerplate?
-  OpBuilder b(opInst);
-  OperationState newOp(opInst->getLoc(), opInst->getName().getStringRef(),
-                       vectorOperands, vectorTypes, opInst->getAttrs(),
-                       /*successors=*/{}, /*regions=*/{});
-  return b.createOperation(newOp);
+    // Create a clone of the op with the proper operands and return types.
+    // TODO: The following assumes there is always an op with a fixed
+    // name that works both in scalar mode and vector mode.
+    // TODO: Is it worth considering an Operation.clone operation which
+    // changes the type so we can promote an Operation with less boilerplate?
+    OpBuilder b(opInst);
+    OperationState newOp(opInst->getLoc(), opInst->getName().getStringRef(),
+                         vectorOperands, vectorTypes, opInst->getAttrs(),
+                         /*successors=*/ {}, /*regions=*/ {});
+    return b.createOperation(newOp);
 }
 
 /// Iterates over the forward slice from the loads in the vectorization pattern
@@ -1095,43 +1097,43 @@ static Operation *vectorizeOneOperation(Operation *opInst,
 ///   operation, replacing each operand by a replacement operands retrieved from
 ///   replacementMap. If any such replacement is missing, vectorization fails.
 static LogicalResult vectorizeNonTerminals(VectorizationState *state) {
-  // 1. create initial worklist with the uses of the roots.
-  SetVector<Operation *> worklist;
-  // Note: state->roots have already been vectorized and must not be vectorized
-  // again. This fits `getForwardSlice` which does not insert `op` in the
-  // result.
-  // Note: we have to exclude terminals because some of their defs may not be
-  // nested under the vectorization pattern (e.g. constants defined in an
-  // encompassing scope).
-  // TODO: Use a backward slice for terminals, avoid special casing and
-  // merge implementations.
-  for (auto *op : state->roots) {
-    getForwardSlice(op, &worklist, [state](Operation *op) {
-      return state->terminals.count(op) == 0; // propagate if not terminal
-    });
-  }
-  // We merged multiple slices, topological order may not hold anymore.
-  worklist = topologicalSort(worklist);
-
-  for (unsigned i = 0; i < worklist.size(); ++i) {
-    auto *op = worklist[i];
-    LLVM_DEBUG(dbgs() << "\n[early-vect] vectorize use: ");
-    LLVM_DEBUG(op->print(dbgs()));
-
-    // Create vector form of the operation.
-    // Insert it just before op, on success register op as replaced.
-    auto *vectorizedInst = vectorizeOneOperation(op, state);
-    if (!vectorizedInst) {
-      return failure();
+    // 1. create initial worklist with the uses of the roots.
+    SetVector<Operation *> worklist;
+    // Note: state->roots have already been vectorized and must not be vectorized
+    // again. This fits `getForwardSlice` which does not insert `op` in the
+    // result.
+    // Note: we have to exclude terminals because some of their defs may not be
+    // nested under the vectorization pattern (e.g. constants defined in an
+    // encompassing scope).
+    // TODO: Use a backward slice for terminals, avoid special casing and
+    // merge implementations.
+    for (auto *op : state->roots) {
+        getForwardSlice(op, &worklist, [state](Operation *op) {
+            return state->terminals.count(op) == 0; // propagate if not terminal
+        });
     }
+    // We merged multiple slices, topological order may not hold anymore.
+    worklist = topologicalSort(worklist);
 
-    // 3. Register replacement for future uses in the scope.
-    //    Note that we cannot just call replaceAllUsesWith because it may
-    //    result in ops with mixed types, for ops whose operands have not all
-    //    yet been vectorized. This would be invalid IR.
-    state->registerReplacement(op, vectorizedInst);
-  }
-  return success();
+    for (unsigned i = 0; i < worklist.size(); ++i) {
+        auto *op = worklist[i];
+        LLVM_DEBUG(dbgs() << "\n[early-vect] vectorize use: ");
+        LLVM_DEBUG(op->print(dbgs()));
+
+        // Create vector form of the operation.
+        // Insert it just before op, on success register op as replaced.
+        auto *vectorizedInst = vectorizeOneOperation(op, state);
+        if (!vectorizedInst) {
+            return failure();
+        }
+
+        // 3. Register replacement for future uses in the scope.
+        //    Note that we cannot just call replaceAllUsesWith because it may
+        //    result in ops with mixed types, for ops whose operands have not all
+        //    yet been vectorized. This would be invalid IR.
+        state->registerReplacement(op, vectorizedInst);
+    }
+    return success();
 }
 
 /// Recursive implementation to convert all the nested loops in 'match' to a 2D
@@ -1141,16 +1143,16 @@ static LogicalResult vectorizeNonTerminals(VectorizationState *state) {
 static void
 getMatchedAffineLoopsRec(NestedMatch match, unsigned currentLevel,
                          std::vector<SmallVector<AffineForOp, 2>> &loops) {
-  // Add a new empty level to the output if it doesn't exist already.
-  assert(currentLevel <= loops.size() && "Unexpected currentLevel");
-  if (currentLevel == loops.size())
-    loops.push_back(SmallVector<AffineForOp, 2>());
+    // Add a new empty level to the output if it doesn't exist already.
+    assert(currentLevel <= loops.size() && "Unexpected currentLevel");
+    if (currentLevel == loops.size())
+        loops.push_back(SmallVector<AffineForOp, 2>());
 
-  // Add current match and recursively visit its children.
-  loops[currentLevel].push_back(cast<AffineForOp>(match.getMatchedOperation()));
-  for (auto childMatch : match.getMatchedChildren()) {
-    getMatchedAffineLoopsRec(childMatch, currentLevel + 1, loops);
-  }
+    // Add current match and recursively visit its children.
+    loops[currentLevel].push_back(cast<AffineForOp>(match.getMatchedOperation()));
+    for (auto childMatch : match.getMatchedChildren()) {
+        getMatchedAffineLoopsRec(childMatch, currentLevel + 1, loops);
+    }
 }
 
 /// Converts all the nested loops in 'match' to a 2D vector container that
@@ -1161,7 +1163,7 @@ getMatchedAffineLoopsRec(NestedMatch match, unsigned currentLevel,
 static void
 getMatchedAffineLoops(NestedMatch match,
                       std::vector<SmallVector<AffineForOp, 2>> &loops) {
-  getMatchedAffineLoopsRec(match, /*currLoopDepth=*/0, loops);
+    getMatchedAffineLoopsRec(match, /*currLoopDepth=*/0, loops);
 }
 
 /// Internal implementation to vectorize affine loops from a single loop nest
@@ -1169,83 +1171,83 @@ getMatchedAffineLoops(NestedMatch match,
 static LogicalResult
 vectorizeLoopNest(std::vector<SmallVector<AffineForOp, 2>> &loops,
                   const VectorizationStrategy &strategy) {
-  assert(loops[0].size() == 1 && "Expected single root loop");
-  AffineForOp rootLoop = loops[0][0];
-  OperationFolder folder(rootLoop.getContext());
-  VectorizationState state;
-  state.strategy = &strategy;
-  state.folder = &folder;
+    assert(loops[0].size() == 1 && "Expected single root loop");
+    AffineForOp rootLoop = loops[0][0];
+    OperationFolder folder(rootLoop.getContext());
+    VectorizationState state;
+    state.strategy = &strategy;
+    state.folder = &folder;
 
-  // Since patterns are recursive, they can very well intersect.
-  // Since we do not want a fully greedy strategy in general, we decouple
-  // pattern matching, from profitability analysis, from application.
-  // As a consequence we must check that each root pattern is still
-  // vectorizable. If a pattern is not vectorizable anymore, we just skip it.
-  // TODO: implement a non-greedy profitability analysis that keeps only
-  // non-intersecting patterns.
-  if (!isVectorizableLoopBody(rootLoop, vectorTransferPattern())) {
-    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ loop is not vectorizable");
-    return failure();
-  }
-
-  /// Sets up error handling for this root loop. This is how the root match
-  /// maintains a clone for handling failure and restores the proper state via
-  /// RAII.
-  auto *loopInst = rootLoop.getOperation();
-  OpBuilder builder(loopInst);
-  auto clonedLoop = cast<AffineForOp>(builder.clone(*loopInst));
-  struct Guard {
-    LogicalResult failure() {
-      loop.getInductionVar().replaceAllUsesWith(clonedLoop.getInductionVar());
-      loop.erase();
-      return mlir::failure();
+    // Since patterns are recursive, they can very well intersect.
+    // Since we do not want a fully greedy strategy in general, we decouple
+    // pattern matching, from profitability analysis, from application.
+    // As a consequence we must check that each root pattern is still
+    // vectorizable. If a pattern is not vectorizable anymore, we just skip it.
+    // TODO: implement a non-greedy profitability analysis that keeps only
+    // non-intersecting patterns.
+    if (!isVectorizableLoopBody(rootLoop, vectorTransferPattern())) {
+        LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ loop is not vectorizable");
+        return failure();
     }
-    LogicalResult success() {
-      clonedLoop.erase();
-      return mlir::success();
+
+    /// Sets up error handling for this root loop. This is how the root match
+    /// maintains a clone for handling failure and restores the proper state via
+    /// RAII.
+    auto *loopInst = rootLoop.getOperation();
+    OpBuilder builder(loopInst);
+    auto clonedLoop = cast<AffineForOp>(builder.clone(*loopInst));
+    struct Guard {
+        LogicalResult failure() {
+            loop.getInductionVar().replaceAllUsesWith(clonedLoop.getInductionVar());
+            loop.erase();
+            return mlir::failure();
+        }
+        LogicalResult success() {
+            clonedLoop.erase();
+            return mlir::success();
+        }
+        AffineForOp loop;
+        AffineForOp clonedLoop;
+    } guard{rootLoop, clonedLoop};
+
+    //////////////////////////////////////////////////////////////////////////////
+    // Start vectorizing.
+    // From now on, any error triggers the scope guard above.
+    //////////////////////////////////////////////////////////////////////////////
+    // 1. Vectorize all the loop candidates, in inner-to-outer order.
+    // This also vectorizes the roots (AffineLoadOp) as well as registers the
+    // terminals (AffineStoreOp) for post-processing vectorization (we need to
+    // wait for all use-def chains into them to be vectorized first).
+    if (failed(vectorizeLoopsAndLoads(loops, &state))) {
+        LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ failed root vectorizeLoop");
+        return guard.failure();
     }
-    AffineForOp loop;
-    AffineForOp clonedLoop;
-  } guard{rootLoop, clonedLoop};
 
-  //////////////////////////////////////////////////////////////////////////////
-  // Start vectorizing.
-  // From now on, any error triggers the scope guard above.
-  //////////////////////////////////////////////////////////////////////////////
-  // 1. Vectorize all the loop candidates, in inner-to-outer order.
-  // This also vectorizes the roots (AffineLoadOp) as well as registers the
-  // terminals (AffineStoreOp) for post-processing vectorization (we need to
-  // wait for all use-def chains into them to be vectorized first).
-  if (failed(vectorizeLoopsAndLoads(loops, &state))) {
-    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ failed root vectorizeLoop");
-    return guard.failure();
-  }
-
-  // 2. Vectorize operations reached by use-def chains from root except the
-  // terminals (store operations) that need to be post-processed separately.
-  // TODO: add more as we expand.
-  if (failed(vectorizeNonTerminals(&state))) {
-    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ failed vectorizeNonTerminals");
-    return guard.failure();
-  }
-
-  // 3. Post-process terminals.
-  // Note: we have to post-process terminals because some of their defs may not
-  // be nested under the vectorization pattern (e.g. constants defined in an
-  // encompassing scope).
-  // TODO: Use a backward slice for terminals, avoid special casing and
-  // merge implementations.
-  for (auto *op : state.terminals) {
-    if (!vectorizeOneOperation(op, &state)) { // nullptr == failure
-      LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ failed to vectorize terminals");
-      return guard.failure();
+    // 2. Vectorize operations reached by use-def chains from root except the
+    // terminals (store operations) that need to be post-processed separately.
+    // TODO: add more as we expand.
+    if (failed(vectorizeNonTerminals(&state))) {
+        LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ failed vectorizeNonTerminals");
+        return guard.failure();
     }
-  }
 
-  // 4. Finish this vectorization pattern.
-  LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ success vectorizing pattern");
-  state.finishVectorizationPattern();
-  return guard.success();
+    // 3. Post-process terminals.
+    // Note: we have to post-process terminals because some of their defs may not
+    // be nested under the vectorization pattern (e.g. constants defined in an
+    // encompassing scope).
+    // TODO: Use a backward slice for terminals, avoid special casing and
+    // merge implementations.
+    for (auto *op : state.terminals) {
+        if (!vectorizeOneOperation(op, &state)) { // nullptr == failure
+            LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ failed to vectorize terminals");
+            return guard.failure();
+        }
+    }
+
+    // 4. Finish this vectorization pattern.
+    LLVM_DEBUG(dbgs() << "\n[early-vect]+++++ success vectorizing pattern");
+    state.finishVectorizationPattern();
+    return guard.success();
 }
 
 /// Vectorization is a recursive procedure where anything below can fail. The
@@ -1254,9 +1256,9 @@ vectorizeLoopNest(std::vector<SmallVector<AffineForOp, 2>> &loops,
 /// below it fails.
 static LogicalResult vectorizeRootMatch(NestedMatch m,
                                         const VectorizationStrategy &strategy) {
-  std::vector<SmallVector<AffineForOp, 2>> loopsToVectorize;
-  getMatchedAffineLoops(m, loopsToVectorize);
-  return vectorizeLoopNest(loopsToVectorize, strategy);
+    std::vector<SmallVector<AffineForOp, 2>> loopsToVectorize;
+    getMatchedAffineLoops(m, loopsToVectorize);
+    return vectorizeLoopNest(loopsToVectorize, strategy);
 }
 
 /// Internal implementation to vectorize affine loops in 'loops' using the n-D
@@ -1267,66 +1269,66 @@ static LogicalResult vectorizeRootMatch(NestedMatch m,
 static void vectorizeLoops(Operation *parentOp, DenseSet<Operation *> &loops,
                            ArrayRef<int64_t> vectorSizes,
                            ArrayRef<int64_t> fastestVaryingPattern) {
-  for (auto &pat :
-       makePatterns(loops, vectorSizes.size(), fastestVaryingPattern)) {
-    LLVM_DEBUG(dbgs() << "\n******************************************");
-    LLVM_DEBUG(dbgs() << "\n******************************************");
-    LLVM_DEBUG(dbgs() << "\n[early-vect] new pattern on parent op\n");
-    LLVM_DEBUG(parentOp->print(dbgs()));
+    for (auto &pat :
+            makePatterns(loops, vectorSizes.size(), fastestVaryingPattern)) {
+        LLVM_DEBUG(dbgs() << "\n******************************************");
+        LLVM_DEBUG(dbgs() << "\n******************************************");
+        LLVM_DEBUG(dbgs() << "\n[early-vect] new pattern on parent op\n");
+        LLVM_DEBUG(parentOp->print(dbgs()));
 
-    unsigned patternDepth = pat.getDepth();
+        unsigned patternDepth = pat.getDepth();
 
-    SmallVector<NestedMatch, 8> matches;
-    pat.match(parentOp, &matches);
-    // Iterate over all the top-level matches and vectorize eagerly.
-    // This automatically prunes intersecting matches.
-    for (auto m : matches) {
-      VectorizationStrategy strategy;
-      // TODO: depending on profitability, elect to reduce the vector size.
-      strategy.vectorSizes.assign(vectorSizes.begin(), vectorSizes.end());
-      if (failed(analyzeProfitability(m.getMatchedChildren(), 1, patternDepth,
-                                      &strategy))) {
-        continue;
-      }
-      vectorizeLoopIfProfitable(m.getMatchedOperation(), 0, patternDepth,
-                                &strategy);
-      // TODO: if pattern does not apply, report it; alter the
-      // cost/benefit.
-      vectorizeRootMatch(m, strategy);
-      // TODO: some diagnostics if failure to vectorize occurs.
+        SmallVector<NestedMatch, 8> matches;
+        pat.match(parentOp, &matches);
+        // Iterate over all the top-level matches and vectorize eagerly.
+        // This automatically prunes intersecting matches.
+        for (auto m : matches) {
+            VectorizationStrategy strategy;
+            // TODO: depending on profitability, elect to reduce the vector size.
+            strategy.vectorSizes.assign(vectorSizes.begin(), vectorSizes.end());
+            if (failed(analyzeProfitability(m.getMatchedChildren(), 1, patternDepth,
+                                            &strategy))) {
+                continue;
+            }
+            vectorizeLoopIfProfitable(m.getMatchedOperation(), 0, patternDepth,
+                                      &strategy);
+            // TODO: if pattern does not apply, report it; alter the
+            // cost/benefit.
+            vectorizeRootMatch(m, strategy);
+            // TODO: some diagnostics if failure to vectorize occurs.
+        }
     }
-  }
-  LLVM_DEBUG(dbgs() << "\n");
+    LLVM_DEBUG(dbgs() << "\n");
 }
 
 std::unique_ptr<OperationPass<FuncOp>>
 createSuperVectorizePass(ArrayRef<int64_t> virtualVectorSize) {
-  return std::make_unique<Vectorize>(virtualVectorSize);
+    return std::make_unique<Vectorize>(virtualVectorSize);
 }
 std::unique_ptr<OperationPass<FuncOp>> createSuperVectorizePass() {
-  return std::make_unique<Vectorize>();
+    return std::make_unique<Vectorize>();
 }
 
 /// Applies vectorization to the current function by searching over a bunch of
 /// predetermined patterns.
 void Vectorize::runOnFunction() {
-  FuncOp f = getFunction();
-  if (!fastestVaryingPattern.empty() &&
-      fastestVaryingPattern.size() != vectorSizes.size()) {
-    f.emitRemark("Fastest varying pattern specified with different size than "
-                 "the vector size.");
-    return signalPassFailure();
-  }
+    FuncOp f = getFunction();
+    if (!fastestVaryingPattern.empty() &&
+            fastestVaryingPattern.size() != vectorSizes.size()) {
+        f.emitRemark("Fastest varying pattern specified with different size than "
+                     "the vector size.");
+        return signalPassFailure();
+    }
 
-  DenseSet<Operation *> parallelLoops;
-  f.walk([&parallelLoops](AffineForOp loop) {
-    if (isLoopParallel(loop))
-      parallelLoops.insert(loop);
-  });
+    DenseSet<Operation *> parallelLoops;
+    f.walk([&parallelLoops](AffineForOp loop) {
+        if (isLoopParallel(loop))
+            parallelLoops.insert(loop);
+    });
 
-  // Thread-safe RAII local context, BumpPtrAllocator freed on exit.
-  NestedPatternContext mlContext;
-  vectorizeLoops(f, parallelLoops, vectorSizes, fastestVaryingPattern);
+    // Thread-safe RAII local context, BumpPtrAllocator freed on exit.
+    NestedPatternContext mlContext;
+    vectorizeLoops(f, parallelLoops, vectorSizes, fastestVaryingPattern);
 }
 
 /// Verify that affine loops in 'loops' meet the nesting criteria expected by
@@ -1337,32 +1339,32 @@ void Vectorize::runOnFunction() {
 ///     previous nesting level.
 static void
 verifyLoopNesting(const std::vector<SmallVector<AffineForOp, 2>> &loops) {
-  assert(!loops.empty() && "Expected at least one loop");
-  assert(loops[0].size() == 1 && "Expected only one root loop");
+    assert(!loops.empty() && "Expected at least one loop");
+    assert(loops[0].size() == 1 && "Expected only one root loop");
 
-  // Traverse loops outer-to-inner to check some invariants.
-  for (int i = 1, end = loops.size(); i < end; ++i) {
-    for (AffineForOp loop : loops[i]) {
-      //  Check that each loop at this level is nested in one of the loops from
-      //  the previous level.
-      bool parentFound = false;
-      for (AffineForOp maybeParent : loops[i - 1]) {
-        if (maybeParent->isProperAncestor(loop)) {
-          parentFound = true;
-          break;
-        }
-      }
-      assert(parentFound && "Child loop not nested in any parent loop");
+    // Traverse loops outer-to-inner to check some invariants.
+    for (int i = 1, end = loops.size(); i < end; ++i) {
+        for (AffineForOp loop : loops[i]) {
+            //  Check that each loop at this level is nested in one of the loops from
+            //  the previous level.
+            bool parentFound = false;
+            for (AffineForOp maybeParent : loops[i - 1]) {
+                if (maybeParent->isProperAncestor(loop)) {
+                    parentFound = true;
+                    break;
+                }
+            }
+            assert(parentFound && "Child loop not nested in any parent loop");
 
-      //  Check that each loop at this level is not nested in another loop from
-      //  this level.
+            //  Check that each loop at this level is not nested in another loop from
+            //  this level.
 #ifndef NDEBUG
-      for (AffineForOp sibling : loops[i])
-        assert(!sibling->isProperAncestor(loop) &&
-               "Loops at the same level are nested");
+            for (AffineForOp sibling : loops[i])
+                assert(!sibling->isProperAncestor(loop) &&
+                       "Loops at the same level are nested");
 #endif
+        }
     }
-  }
 }
 
 namespace mlir {
@@ -1375,9 +1377,9 @@ namespace mlir {
 void vectorizeAffineLoops(Operation *parentOp, DenseSet<Operation *> &loops,
                           ArrayRef<int64_t> vectorSizes,
                           ArrayRef<int64_t> fastestVaryingPattern) {
-  // Thread-safe RAII local context, BumpPtrAllocator freed on exit.
-  NestedPatternContext mlContext;
-  vectorizeLoops(parentOp, loops, vectorSizes, fastestVaryingPattern);
+    // Thread-safe RAII local context, BumpPtrAllocator freed on exit.
+    NestedPatternContext mlContext;
+    vectorizeLoops(parentOp, loops, vectorSizes, fastestVaryingPattern);
 }
 
 /// External utility to vectorize affine loops from a single loop nest using an
@@ -1418,18 +1420,18 @@ void vectorizeAffineLoops(Operation *parentOp, DenseSet<Operation *> &loops,
 LogicalResult
 vectorizeAffineLoopNest(std::vector<SmallVector<AffineForOp, 2>> &loops,
                         const VectorizationStrategy &strategy) {
-  // Thread-safe RAII local context, BumpPtrAllocator freed on exit.
-  NestedPatternContext mlContext;
-  verifyLoopNesting(loops);
-  return vectorizeLoopNest(loops, strategy);
+    // Thread-safe RAII local context, BumpPtrAllocator freed on exit.
+    NestedPatternContext mlContext;
+    verifyLoopNesting(loops);
+    return vectorizeLoopNest(loops, strategy);
 }
 
 std::unique_ptr<OperationPass<FuncOp>>
 createSuperVectorizePass(ArrayRef<int64_t> virtualVectorSize) {
-  return std::make_unique<Vectorize>(virtualVectorSize);
+    return std::make_unique<Vectorize>(virtualVectorSize);
 }
 std::unique_ptr<OperationPass<FuncOp>> createSuperVectorizePass() {
-  return std::make_unique<Vectorize>();
+    return std::make_unique<Vectorize>();
 }
 
 } // namespace mlir

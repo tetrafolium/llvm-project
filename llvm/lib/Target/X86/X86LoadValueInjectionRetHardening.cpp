@@ -37,19 +37,19 @@ using namespace llvm;
 STATISTIC(NumFences, "Number of LFENCEs inserted for LVI mitigation");
 STATISTIC(NumFunctionsConsidered, "Number of functions analyzed");
 STATISTIC(NumFunctionsMitigated, "Number of functions for which mitigations "
-                                 "were deployed");
+          "were deployed");
 
 namespace {
 
 class X86LoadValueInjectionRetHardeningPass : public MachineFunctionPass {
 public:
-  X86LoadValueInjectionRetHardeningPass() : MachineFunctionPass(ID) {}
-  StringRef getPassName() const override {
-    return "X86 Load Value Injection (LVI) Ret-Hardening";
-  }
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    X86LoadValueInjectionRetHardeningPass() : MachineFunctionPass(ID) {}
+    StringRef getPassName() const override {
+        return "X86 Load Value Injection (LVI) Ret-Hardening";
+    }
+    bool runOnMachineFunction(MachineFunction &MF) override;
 
-  static char ID;
+    static char ID;
 };
 
 } // end anonymous namespace
@@ -58,63 +58,63 @@ char X86LoadValueInjectionRetHardeningPass::ID = 0;
 
 bool X86LoadValueInjectionRetHardeningPass::runOnMachineFunction(
     MachineFunction &MF) {
-  LLVM_DEBUG(dbgs() << "***** " << getPassName() << " : " << MF.getName()
-                    << " *****\n");
-  const X86Subtarget *Subtarget = &MF.getSubtarget<X86Subtarget>();
-  if (!Subtarget->useLVIControlFlowIntegrity() || !Subtarget->is64Bit())
-    return false; // FIXME: support 32-bit
+    LLVM_DEBUG(dbgs() << "***** " << getPassName() << " : " << MF.getName()
+               << " *****\n");
+    const X86Subtarget *Subtarget = &MF.getSubtarget<X86Subtarget>();
+    if (!Subtarget->useLVIControlFlowIntegrity() || !Subtarget->is64Bit())
+        return false; // FIXME: support 32-bit
 
-  // Don't skip functions with the "optnone" attr but participate in opt-bisect.
-  const Function &F = MF.getFunction();
-  if (!F.hasOptNone() && skipFunction(F))
-    return false;
+    // Don't skip functions with the "optnone" attr but participate in opt-bisect.
+    const Function &F = MF.getFunction();
+    if (!F.hasOptNone() && skipFunction(F))
+        return false;
 
-  ++NumFunctionsConsidered;
-  const X86RegisterInfo *TRI = Subtarget->getRegisterInfo();
-  const X86InstrInfo *TII = Subtarget->getInstrInfo();
+    ++NumFunctionsConsidered;
+    const X86RegisterInfo *TRI = Subtarget->getRegisterInfo();
+    const X86InstrInfo *TII = Subtarget->getInstrInfo();
 
-  bool Modified = false;
-  for (auto &MBB : MF) {
-    for (auto MBBI = MBB.begin(); MBBI != MBB.end(); ++MBBI) {
-      if (MBBI->getOpcode() != X86::RETQ)
-        continue;
+    bool Modified = false;
+    for (auto &MBB : MF) {
+        for (auto MBBI = MBB.begin(); MBBI != MBB.end(); ++MBBI) {
+            if (MBBI->getOpcode() != X86::RETQ)
+                continue;
 
-      unsigned ClobberReg = TRI->findDeadCallerSavedReg(MBB, MBBI);
-      if (ClobberReg != X86::NoRegister) {
-        BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::POP64r))
-            .addReg(ClobberReg, RegState::Define)
-            .setMIFlag(MachineInstr::FrameDestroy);
-        BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::LFENCE));
-        BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::JMP64r))
-            .addReg(ClobberReg);
-        MBB.erase(MBBI);
-      } else {
-        // In case there is no available scratch register, we can still read
-        // from RSP to assert that RSP points to a valid page. The write to RSP
-        // is also helpful because it verifies that the stack's write
-        // permissions are intact.
-        MachineInstr *Fence =
-            BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::LFENCE));
-        addRegOffset(BuildMI(MBB, Fence, DebugLoc(), TII->get(X86::SHL64mi)),
-                     X86::RSP, false, 0)
-            .addImm(0)
-            ->addRegisterDead(X86::EFLAGS, TRI);
-      }
+            unsigned ClobberReg = TRI->findDeadCallerSavedReg(MBB, MBBI);
+            if (ClobberReg != X86::NoRegister) {
+                BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::POP64r))
+                .addReg(ClobberReg, RegState::Define)
+                .setMIFlag(MachineInstr::FrameDestroy);
+                BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::LFENCE));
+                BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::JMP64r))
+                .addReg(ClobberReg);
+                MBB.erase(MBBI);
+            } else {
+                // In case there is no available scratch register, we can still read
+                // from RSP to assert that RSP points to a valid page. The write to RSP
+                // is also helpful because it verifies that the stack's write
+                // permissions are intact.
+                MachineInstr *Fence =
+                    BuildMI(MBB, MBBI, DebugLoc(), TII->get(X86::LFENCE));
+                addRegOffset(BuildMI(MBB, Fence, DebugLoc(), TII->get(X86::SHL64mi)),
+                             X86::RSP, false, 0)
+                .addImm(0)
+                ->addRegisterDead(X86::EFLAGS, TRI);
+            }
 
-      ++NumFences;
-      Modified = true;
-      break;
+            ++NumFences;
+            Modified = true;
+            break;
+        }
     }
-  }
 
-  if (Modified)
-    ++NumFunctionsMitigated;
-  return Modified;
+    if (Modified)
+        ++NumFunctionsMitigated;
+    return Modified;
 }
 
 INITIALIZE_PASS(X86LoadValueInjectionRetHardeningPass, PASS_KEY,
                 "X86 LVI ret hardener", false, false)
 
 FunctionPass *llvm::createX86LoadValueInjectionRetHardeningPass() {
-  return new X86LoadValueInjectionRetHardeningPass();
+    return new X86LoadValueInjectionRetHardeningPass();
 }

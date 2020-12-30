@@ -46,32 +46,42 @@ using UnboxedValue = mlir::Value;
 /// Abstract base class.
 class AbstractBox {
 public:
-  AbstractBox() = delete;
-  AbstractBox(mlir::Value addr) : addr{addr} {}
-  mlir::Value getAddr() const { return addr; }
+    AbstractBox() = delete;
+    AbstractBox(mlir::Value addr) : addr{addr} {}
+    mlir::Value getAddr() const {
+        return addr;
+    }
 
 protected:
-  mlir::Value addr;
+    mlir::Value addr;
 };
 
 /// Expressions of CHARACTER type have an associated, possibly dynamic LEN
 /// value.
 class CharBoxValue : public AbstractBox {
 public:
-  CharBoxValue(mlir::Value addr, mlir::Value len)
-      : AbstractBox{addr}, len{len} {}
+    CharBoxValue(mlir::Value addr, mlir::Value len)
+        : AbstractBox{addr}, len{len} {}
 
-  CharBoxValue clone(mlir::Value newBase) const { return {newBase, len}; }
+    CharBoxValue clone(mlir::Value newBase) const {
+        return {newBase, len};
+    }
 
-  mlir::Value getLen() const { return len; }
-  mlir::Value getBuffer() const { return getAddr(); }
+    mlir::Value getLen() const {
+        return len;
+    }
+    mlir::Value getBuffer() const {
+        return getAddr();
+    }
 
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
-                                       const CharBoxValue &);
-  LLVM_DUMP_METHOD void dump() const { llvm::errs() << *this; }
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                         const CharBoxValue &);
+    LLVM_DUMP_METHOD void dump() const {
+        llvm::errs() << *this;
+    }
 
 protected:
-  mlir::Value len;
+    mlir::Value len;
 };
 
 /// Abstract base class.
@@ -80,117 +90,131 @@ protected:
 /// indexing expressions.
 class AbstractArrayBox {
 public:
-  AbstractArrayBox() = default;
-  AbstractArrayBox(llvm::ArrayRef<mlir::Value> extents,
-                   llvm::ArrayRef<mlir::Value> lbounds)
-      : extents{extents.begin(), extents.end()}, lbounds{lbounds.begin(),
-                                                         lbounds.end()} {}
+    AbstractArrayBox() = default;
+    AbstractArrayBox(llvm::ArrayRef<mlir::Value> extents,
+                     llvm::ArrayRef<mlir::Value> lbounds)
+        : extents{extents.begin(), extents.end()}, lbounds{lbounds.begin(),
+                lbounds.end()} {}
 
-  // Every array has extents that describe its shape.
-  const llvm::SmallVectorImpl<mlir::Value> &getExtents() const {
-    return extents;
-  }
+    // Every array has extents that describe its shape.
+    const llvm::SmallVectorImpl<mlir::Value> &getExtents() const {
+        return extents;
+    }
 
-  // An array expression may have user-defined lower bound values.
-  // If this vector is empty, the default in all dimensions in `1`.
-  const llvm::SmallVectorImpl<mlir::Value> &getLBounds() const {
-    return lbounds;
-  }
+    // An array expression may have user-defined lower bound values.
+    // If this vector is empty, the default in all dimensions in `1`.
+    const llvm::SmallVectorImpl<mlir::Value> &getLBounds() const {
+        return lbounds;
+    }
 
-  bool lboundsAllOne() const { return lbounds.empty(); }
+    bool lboundsAllOne() const {
+        return lbounds.empty();
+    }
 
 protected:
-  llvm::SmallVector<mlir::Value, 4> extents;
-  llvm::SmallVector<mlir::Value, 4> lbounds;
+    llvm::SmallVector<mlir::Value, 4> extents;
+    llvm::SmallVector<mlir::Value, 4> lbounds;
 };
 
 /// Expressions with rank > 0 have extents. They may also have lbounds that are
 /// not 1.
 class ArrayBoxValue : public AbstractBox, public AbstractArrayBox {
 public:
-  ArrayBoxValue(mlir::Value addr, llvm::ArrayRef<mlir::Value> extents,
-                llvm::ArrayRef<mlir::Value> lbounds = {})
-      : AbstractBox{addr}, AbstractArrayBox{extents, lbounds} {}
+    ArrayBoxValue(mlir::Value addr, llvm::ArrayRef<mlir::Value> extents,
+                  llvm::ArrayRef<mlir::Value> lbounds = {})
+        : AbstractBox{addr}, AbstractArrayBox{extents, lbounds} {}
 
-  ArrayBoxValue clone(mlir::Value newBase) const {
-    return {newBase, extents, lbounds};
-  }
+    ArrayBoxValue clone(mlir::Value newBase) const {
+        return {newBase, extents, lbounds};
+    }
 
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
-                                       const ArrayBoxValue &);
-  LLVM_DUMP_METHOD void dump() const { operator<<(llvm::errs(), *this); }
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                         const ArrayBoxValue &);
+    LLVM_DUMP_METHOD void dump() const {
+        operator<<(llvm::errs(), *this);
+    }
 };
 
 /// Expressions of type CHARACTER and with rank > 0.
 class CharArrayBoxValue : public CharBoxValue, public AbstractArrayBox {
 public:
-  CharArrayBoxValue(mlir::Value addr, mlir::Value len,
-                    llvm::ArrayRef<mlir::Value> extents,
-                    llvm::ArrayRef<mlir::Value> lbounds = {})
-      : CharBoxValue{addr, len}, AbstractArrayBox{extents, lbounds} {}
+    CharArrayBoxValue(mlir::Value addr, mlir::Value len,
+                      llvm::ArrayRef<mlir::Value> extents,
+                      llvm::ArrayRef<mlir::Value> lbounds = {})
+        : CharBoxValue{addr, len}, AbstractArrayBox{extents, lbounds} {}
 
-  CharArrayBoxValue clone(mlir::Value newBase) const {
-    return {newBase, len, extents, lbounds};
-  }
+    CharArrayBoxValue clone(mlir::Value newBase) const {
+        return {newBase, len, extents, lbounds};
+    }
 
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
-                                       const CharArrayBoxValue &);
-  LLVM_DUMP_METHOD void dump() const { operator<<(llvm::errs(), *this); }
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                         const CharArrayBoxValue &);
+    LLVM_DUMP_METHOD void dump() const {
+        operator<<(llvm::errs(), *this);
+    }
 };
 
 /// Expressions that are procedure POINTERs may need a set of references to
 /// variables in the host scope.
 class ProcBoxValue : public AbstractBox {
 public:
-  ProcBoxValue(mlir::Value addr, mlir::Value context)
-      : AbstractBox{addr}, hostContext{context} {}
+    ProcBoxValue(mlir::Value addr, mlir::Value context)
+        : AbstractBox{addr}, hostContext{context} {}
 
-  ProcBoxValue clone(mlir::Value newBase) const {
-    return {newBase, hostContext};
-  }
+    ProcBoxValue clone(mlir::Value newBase) const {
+        return {newBase, hostContext};
+    }
 
-  mlir::Value getHostContext() const { return hostContext; }
+    mlir::Value getHostContext() const {
+        return hostContext;
+    }
 
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
-                                       const ProcBoxValue &);
-  LLVM_DUMP_METHOD void dump() const { operator<<(llvm::errs(), *this); }
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                         const ProcBoxValue &);
+    LLVM_DUMP_METHOD void dump() const {
+        operator<<(llvm::errs(), *this);
+    }
 
 protected:
-  mlir::Value hostContext;
+    mlir::Value hostContext;
 };
 
 /// In the generalized form, a boxed value can have a dynamic size, be an array
 /// with dynamic extents and lbounds, and take dynamic type parameters.
 class BoxValue : public AbstractBox, public AbstractArrayBox {
 public:
-  BoxValue(mlir::Value addr) : AbstractBox{addr}, AbstractArrayBox{} {}
-  BoxValue(mlir::Value addr, mlir::Value len)
-      : AbstractBox{addr}, AbstractArrayBox{}, len{len} {}
-  BoxValue(mlir::Value addr, llvm::ArrayRef<mlir::Value> extents,
-           llvm::ArrayRef<mlir::Value> lbounds = {})
-      : AbstractBox{addr}, AbstractArrayBox{extents, lbounds} {}
-  BoxValue(mlir::Value addr, mlir::Value len,
-           llvm::ArrayRef<mlir::Value> params,
-           llvm::ArrayRef<mlir::Value> extents,
-           llvm::ArrayRef<mlir::Value> lbounds = {})
-      : AbstractBox{addr}, AbstractArrayBox{extents, lbounds}, len{len},
-        params{params.begin(), params.end()} {}
+    BoxValue(mlir::Value addr) : AbstractBox{addr}, AbstractArrayBox{} {}
+    BoxValue(mlir::Value addr, mlir::Value len)
+        : AbstractBox{addr}, AbstractArrayBox{}, len{len} {}
+    BoxValue(mlir::Value addr, llvm::ArrayRef<mlir::Value> extents,
+             llvm::ArrayRef<mlir::Value> lbounds = {})
+        : AbstractBox{addr}, AbstractArrayBox{extents, lbounds} {}
+    BoxValue(mlir::Value addr, mlir::Value len,
+             llvm::ArrayRef<mlir::Value> params,
+             llvm::ArrayRef<mlir::Value> extents,
+             llvm::ArrayRef<mlir::Value> lbounds = {})
+        : AbstractBox{addr}, AbstractArrayBox{extents, lbounds}, len{len},
+          params{params.begin(), params.end()} {}
 
-  BoxValue clone(mlir::Value newBase) const {
-    return {newBase, len, params, extents, lbounds};
-  }
+    BoxValue clone(mlir::Value newBase) const {
+        return {newBase, len, params, extents, lbounds};
+    }
 
-  mlir::Value getLen() const { return len; }
-  const llvm::SmallVectorImpl<mlir::Value> &getLenTypeParams() const {
-    return params;
-  }
+    mlir::Value getLen() const {
+        return len;
+    }
+    const llvm::SmallVectorImpl<mlir::Value> &getLenTypeParams() const {
+        return params;
+    }
 
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &, const BoxValue &);
-  LLVM_DUMP_METHOD void dump() const { operator<<(llvm::errs(), *this); }
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &, const BoxValue &);
+    LLVM_DUMP_METHOD void dump() const {
+        operator<<(llvm::errs(), *this);
+    }
 
 protected:
-  mlir::Value len;
-  llvm::SmallVector<mlir::Value, 2> params;
+    mlir::Value len;
+    llvm::SmallVector<mlir::Value, 2> params;
 };
 
 /// Used for triple notation (array slices)
@@ -209,29 +233,31 @@ ExtendedValue substBase(const ExtendedValue &exv, mlir::Value base);
 /// indices if it is an array entity.
 class ExtendedValue {
 public:
-  template <typename A>
-  constexpr ExtendedValue(A &&box) : box{std::forward<A>(box)} {}
+    template <typename A>
+    constexpr ExtendedValue(A &&box) : box{std::forward<A>(box)} {}
 
-  constexpr const CharBoxValue *getCharBox() const {
-    return std::get_if<CharBoxValue>(&box);
-  }
+    constexpr const CharBoxValue *getCharBox() const {
+        return std::get_if<CharBoxValue>(&box);
+    }
 
-  constexpr const UnboxedValue *getUnboxed() const {
-    return std::get_if<UnboxedValue>(&box);
-  }
+    constexpr const UnboxedValue *getUnboxed() const {
+        return std::get_if<UnboxedValue>(&box);
+    }
 
-  /// LLVM style debugging of extended values
-  LLVM_DUMP_METHOD void dump() const { llvm::errs() << *this << '\n'; }
+    /// LLVM style debugging of extended values
+    LLVM_DUMP_METHOD void dump() const {
+        llvm::errs() << *this << '\n';
+    }
 
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
-                                       const ExtendedValue &);
-  friend mlir::Value getBase(const ExtendedValue &exv);
-  friend ExtendedValue substBase(const ExtendedValue &exv, mlir::Value base);
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                         const ExtendedValue &);
+    friend mlir::Value getBase(const ExtendedValue &exv);
+    friend ExtendedValue substBase(const ExtendedValue &exv, mlir::Value base);
 
 private:
-  std::variant<UnboxedValue, CharBoxValue, ArrayBoxValue, CharArrayBoxValue,
-               BoxValue, ProcBoxValue>
-      box;
+    std::variant<UnboxedValue, CharBoxValue, ArrayBoxValue, CharArrayBoxValue,
+        BoxValue, ProcBoxValue>
+        box;
 };
 } // namespace fir
 

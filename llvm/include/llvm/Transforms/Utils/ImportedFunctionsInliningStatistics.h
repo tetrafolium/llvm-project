@@ -43,62 +43,62 @@ class Function;
 /// - number of performed inlines to importing module
 class ImportedFunctionsInliningStatistics {
 private:
-  /// InlineGraphNode represents node in graph of inlined functions.
-  struct InlineGraphNode {
-    // Default-constructible and movable.
-    InlineGraphNode() = default;
-    InlineGraphNode(InlineGraphNode &&) = default;
-    InlineGraphNode &operator=(InlineGraphNode &&) = default;
+    /// InlineGraphNode represents node in graph of inlined functions.
+    struct InlineGraphNode {
+        // Default-constructible and movable.
+        InlineGraphNode() = default;
+        InlineGraphNode(InlineGraphNode &&) = default;
+        InlineGraphNode &operator=(InlineGraphNode &&) = default;
 
-    llvm::SmallVector<InlineGraphNode *, 8> InlinedCallees;
-    /// Incremented every direct inline.
-    int32_t NumberOfInlines = 0;
-    /// Number of inlines into non imported function (possibly indirect via
-    /// intermediate inlines). Computed based on graph search.
-    int32_t NumberOfRealInlines = 0;
-    bool Imported = false;
-    bool Visited = false;
-  };
+        llvm::SmallVector<InlineGraphNode *, 8> InlinedCallees;
+        /// Incremented every direct inline.
+        int32_t NumberOfInlines = 0;
+        /// Number of inlines into non imported function (possibly indirect via
+        /// intermediate inlines). Computed based on graph search.
+        int32_t NumberOfRealInlines = 0;
+        bool Imported = false;
+        bool Visited = false;
+    };
 
 public:
-  ImportedFunctionsInliningStatistics() = default;
-  ImportedFunctionsInliningStatistics(
-      const ImportedFunctionsInliningStatistics &) = delete;
+    ImportedFunctionsInliningStatistics() = default;
+    ImportedFunctionsInliningStatistics(
+        const ImportedFunctionsInliningStatistics &) = delete;
 
-  /// Set information like AllFunctions, ImportedFunctions, ModuleName.
-  void setModuleInfo(const Module &M);
-  /// Record inline of @param Callee to @param Caller for statistis.
-  void recordInline(const Function &Caller, const Function &Callee);
-  /// Dump stats computed with InlinerStatistics class.
-  /// If @param Verbose is true then separate statistics for every inlined
-  /// function will be printed.
-  void dump(bool Verbose);
-
-private:
-  /// Creates new Node in NodeMap and sets attributes, or returns existed one.
-  InlineGraphNode &createInlineGraphNode(const Function &);
-  void calculateRealInlines();
-  void dfs(InlineGraphNode &GraphNode);
-
-  using NodesMapTy =
-      llvm::StringMap<std::unique_ptr<InlineGraphNode>>;
-  using SortedNodesTy =
-      std::vector<const NodesMapTy::MapEntryTy*>;
-  /// Returns vector of elements sorted by
-  /// (-NumberOfInlines, -NumberOfRealInlines, FunctionName).
-  SortedNodesTy getSortedNodes();
+    /// Set information like AllFunctions, ImportedFunctions, ModuleName.
+    void setModuleInfo(const Module &M);
+    /// Record inline of @param Callee to @param Caller for statistis.
+    void recordInline(const Function &Caller, const Function &Callee);
+    /// Dump stats computed with InlinerStatistics class.
+    /// If @param Verbose is true then separate statistics for every inlined
+    /// function will be printed.
+    void dump(bool Verbose);
 
 private:
-  /// This map manage life of all InlineGraphNodes. Unique pointer to
-  /// InlineGraphNode used since the node pointers are also saved in the
-  /// InlinedCallees vector. If it would store InlineGraphNode instead then the
-  /// address of the node would not be invariant.
-  NodesMapTy NodesMap;
-  /// Non external functions that have some other function inlined inside.
-  std::vector<StringRef> NonImportedCallers;
-  int AllFunctions = 0;
-  int ImportedFunctions = 0;
-  StringRef ModuleName;
+    /// Creates new Node in NodeMap and sets attributes, or returns existed one.
+    InlineGraphNode &createInlineGraphNode(const Function &);
+    void calculateRealInlines();
+    void dfs(InlineGraphNode &GraphNode);
+
+    using NodesMapTy =
+        llvm::StringMap<std::unique_ptr<InlineGraphNode>>;
+    using SortedNodesTy =
+        std::vector<const NodesMapTy::MapEntryTy*>;
+    /// Returns vector of elements sorted by
+    /// (-NumberOfInlines, -NumberOfRealInlines, FunctionName).
+    SortedNodesTy getSortedNodes();
+
+private:
+    /// This map manage life of all InlineGraphNodes. Unique pointer to
+    /// InlineGraphNode used since the node pointers are also saved in the
+    /// InlinedCallees vector. If it would store InlineGraphNode instead then the
+    /// address of the node would not be invariant.
+    NodesMapTy NodesMap;
+    /// Non external functions that have some other function inlined inside.
+    std::vector<StringRef> NonImportedCallers;
+    int AllFunctions = 0;
+    int ImportedFunctions = 0;
+    StringRef ModuleName;
 };
 
 } // llvm

@@ -27,7 +27,7 @@
 #define GET_FLAG_OPERAND_IDX(Flags) (((Flags) >> 7) & 0x3)
 
 namespace R600_InstFlag {
-  enum TIF {
+enum TIF {
     TRANS_ONLY = (1 << 0),
     TEX = (1 << 1),
     REDUCTION = (1 << 2),
@@ -46,7 +46,7 @@ namespace R600_InstFlag {
     LDS_1A1D = (1 << 16),
     IS_EXPORT = (1 << 17),
     LDS_1A2D = (1 << 18)
-  };
+};
 }
 
 #define HAS_NATIVE_OPERANDS(Flags) ((Flags) & R600_InstFlag::NATIVE_OPERANDS)
@@ -63,7 +63,7 @@ namespace R600_InstFlag {
 
 namespace OpName {
 
-  enum VecOps {
+enum VecOps {
     UPDATE_EXEC_MASK_X,
     UPDATE_PREDICATE_X,
     WRITE_X,
@@ -135,7 +135,7 @@ namespace OpName {
     IMM_0,
     IMM_1,
     VEC_COUNT
- };
+};
 
 }
 

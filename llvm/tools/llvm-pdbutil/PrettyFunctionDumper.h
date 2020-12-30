@@ -17,24 +17,24 @@ class LinePrinter;
 
 class FunctionDumper : public PDBSymDumper {
 public:
-  FunctionDumper(LinePrinter &P);
+    FunctionDumper(LinePrinter &P);
 
-  enum class PointerType { None, Pointer, Reference };
+    enum class PointerType { None, Pointer, Reference };
 
-  void start(const PDBSymbolTypeFunctionSig &Symbol, const char *Name,
-             PointerType Pointer);
-  void start(const PDBSymbolFunc &Symbol, PointerType Pointer);
+    void start(const PDBSymbolTypeFunctionSig &Symbol, const char *Name,
+               PointerType Pointer);
+    void start(const PDBSymbolFunc &Symbol, PointerType Pointer);
 
-  void dump(const PDBSymbolTypeArray &Symbol) override;
-  void dump(const PDBSymbolTypeBuiltin &Symbol) override;
-  void dump(const PDBSymbolTypeEnum &Symbol) override;
-  void dump(const PDBSymbolTypeFunctionArg &Symbol) override;
-  void dump(const PDBSymbolTypePointer &Symbol) override;
-  void dump(const PDBSymbolTypeTypedef &Symbol) override;
-  void dump(const PDBSymbolTypeUDT &Symbol) override;
+    void dump(const PDBSymbolTypeArray &Symbol) override;
+    void dump(const PDBSymbolTypeBuiltin &Symbol) override;
+    void dump(const PDBSymbolTypeEnum &Symbol) override;
+    void dump(const PDBSymbolTypeFunctionArg &Symbol) override;
+    void dump(const PDBSymbolTypePointer &Symbol) override;
+    void dump(const PDBSymbolTypeTypedef &Symbol) override;
+    void dump(const PDBSymbolTypeUDT &Symbol) override;
 
 private:
-  LinePrinter &Printer;
+    LinePrinter &Printer;
 };
 }
 }

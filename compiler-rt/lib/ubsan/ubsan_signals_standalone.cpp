@@ -45,23 +45,23 @@ namespace __ubsan {
 
 static void OnStackUnwind(const SignalContext &sig, const void *,
                           BufferedStackTrace *stack) {
-  ubsan_GetStackTrace(stack, kStackTraceMax,
-                      StackTrace::GetNextInstructionPc(sig.pc), sig.bp,
-                      sig.context, common_flags()->fast_unwind_on_fatal);
+    ubsan_GetStackTrace(stack, kStackTraceMax,
+                        StackTrace::GetNextInstructionPc(sig.pc), sig.bp,
+                        sig.context, common_flags()->fast_unwind_on_fatal);
 }
 
 static void UBsanOnDeadlySignal(int signo, void *siginfo, void *context) {
-  HandleDeadlySignal(siginfo, context, GetTid(), &OnStackUnwind, nullptr);
+    HandleDeadlySignal(siginfo, context, GetTid(), &OnStackUnwind, nullptr);
 }
 
 static bool is_initialized = false;
 
 void InitializeDeadlySignals() {
-  if (is_initialized)
-    return;
-  is_initialized = true;
-  InitializeSignalInterceptors();
-  InstallDeadlySignalHandlers(&UBsanOnDeadlySignal);
+    if (is_initialized)
+        return;
+    is_initialized = true;
+    InitializeSignalInterceptors();
+    InstallDeadlySignalHandlers(&UBsanOnDeadlySignal);
 }
 
 } // namespace __ubsan

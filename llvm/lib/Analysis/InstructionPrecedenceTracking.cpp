@@ -35,104 +35,104 @@ static cl::opt<bool> ExpensiveAsserts(
 const Instruction *InstructionPrecedenceTracking::getFirstSpecialInstruction(
     const BasicBlock *BB) {
 #ifndef NDEBUG
-  // If there is a bug connected to invalid cache, turn on ExpensiveAsserts to
-  // catch this situation as early as possible.
-  if (ExpensiveAsserts)
-    validateAll();
-  else
-    validate(BB);
+    // If there is a bug connected to invalid cache, turn on ExpensiveAsserts to
+    // catch this situation as early as possible.
+    if (ExpensiveAsserts)
+        validateAll();
+    else
+        validate(BB);
 #endif
 
-  if (FirstSpecialInsts.find(BB) == FirstSpecialInsts.end()) {
-    fill(BB);
-    assert(FirstSpecialInsts.find(BB) != FirstSpecialInsts.end() && "Must be!");
-  }
-  return FirstSpecialInsts[BB];
+    if (FirstSpecialInsts.find(BB) == FirstSpecialInsts.end()) {
+        fill(BB);
+        assert(FirstSpecialInsts.find(BB) != FirstSpecialInsts.end() && "Must be!");
+    }
+    return FirstSpecialInsts[BB];
 }
 
 bool InstructionPrecedenceTracking::hasSpecialInstructions(
     const BasicBlock *BB) {
-  return getFirstSpecialInstruction(BB) != nullptr;
+    return getFirstSpecialInstruction(BB) != nullptr;
 }
 
 bool InstructionPrecedenceTracking::isPreceededBySpecialInstruction(
     const Instruction *Insn) {
-  const Instruction *MaybeFirstSpecial =
-      getFirstSpecialInstruction(Insn->getParent());
-  return MaybeFirstSpecial && MaybeFirstSpecial->comesBefore(Insn);
+    const Instruction *MaybeFirstSpecial =
+        getFirstSpecialInstruction(Insn->getParent());
+    return MaybeFirstSpecial && MaybeFirstSpecial->comesBefore(Insn);
 }
 
 void InstructionPrecedenceTracking::fill(const BasicBlock *BB) {
-  FirstSpecialInsts.erase(BB);
-  for (auto &I : *BB)
-    if (isSpecialInstruction(&I)) {
-      FirstSpecialInsts[BB] = &I;
-      return;
-    }
+    FirstSpecialInsts.erase(BB);
+    for (auto &I : *BB)
+        if (isSpecialInstruction(&I)) {
+            FirstSpecialInsts[BB] = &I;
+            return;
+        }
 
-  // Mark this block as having no special instructions.
-  FirstSpecialInsts[BB] = nullptr;
+    // Mark this block as having no special instructions.
+    FirstSpecialInsts[BB] = nullptr;
 }
 
 #ifndef NDEBUG
 void InstructionPrecedenceTracking::validate(const BasicBlock *BB) const {
-  auto It = FirstSpecialInsts.find(BB);
-  // Bail if we don't have anything cached for this block.
-  if (It == FirstSpecialInsts.end())
-    return;
+    auto It = FirstSpecialInsts.find(BB);
+    // Bail if we don't have anything cached for this block.
+    if (It == FirstSpecialInsts.end())
+        return;
 
-  for (const Instruction &Insn : *BB)
-    if (isSpecialInstruction(&Insn)) {
-      assert(It->second == &Insn &&
-             "Cached first special instruction is wrong!");
-      return;
-    }
+    for (const Instruction &Insn : *BB)
+        if (isSpecialInstruction(&Insn)) {
+            assert(It->second == &Insn &&
+                   "Cached first special instruction is wrong!");
+            return;
+        }
 
-  assert(It->second == nullptr &&
-         "Block is marked as having special instructions but in fact it  has "
-         "none!");
+    assert(It->second == nullptr &&
+           "Block is marked as having special instructions but in fact it  has "
+           "none!");
 }
 
 void InstructionPrecedenceTracking::validateAll() const {
-  // Check that for every known block the cached value is correct.
-  for (auto &It : FirstSpecialInsts)
-    validate(It.first);
+    // Check that for every known block the cached value is correct.
+    for (auto &It : FirstSpecialInsts)
+        validate(It.first);
 }
 #endif
 
 void InstructionPrecedenceTracking::insertInstructionTo(const Instruction *Inst,
-                                                        const BasicBlock *BB) {
-  if (isSpecialInstruction(Inst))
-    FirstSpecialInsts.erase(BB);
+        const BasicBlock *BB) {
+    if (isSpecialInstruction(Inst))
+        FirstSpecialInsts.erase(BB);
 }
 
 void InstructionPrecedenceTracking::removeInstruction(const Instruction *Inst) {
-  if (isSpecialInstruction(Inst))
-    FirstSpecialInsts.erase(Inst->getParent());
+    if (isSpecialInstruction(Inst))
+        FirstSpecialInsts.erase(Inst->getParent());
 }
 
 void InstructionPrecedenceTracking::clear() {
-  FirstSpecialInsts.clear();
+    FirstSpecialInsts.clear();
 #ifndef NDEBUG
-  // The map should be valid after clearing (at least empty).
-  validateAll();
+    // The map should be valid after clearing (at least empty).
+    validateAll();
 #endif
 }
 
 bool ImplicitControlFlowTracking::isSpecialInstruction(
     const Instruction *Insn) const {
-  // If a block's instruction doesn't always pass the control to its successor
-  // instruction, mark the block as having implicit control flow. We use them
-  // to avoid wrong assumptions of sort "if A is executed and B post-dominates
-  // A, then B is also executed". This is not true is there is an implicit
-  // control flow instruction (e.g. a guard) between them.
-  return !isGuaranteedToTransferExecutionToSuccessor(Insn);
+    // If a block's instruction doesn't always pass the control to its successor
+    // instruction, mark the block as having implicit control flow. We use them
+    // to avoid wrong assumptions of sort "if A is executed and B post-dominates
+    // A, then B is also executed". This is not true is there is an implicit
+    // control flow instruction (e.g. a guard) between them.
+    return !isGuaranteedToTransferExecutionToSuccessor(Insn);
 }
 
 bool MemoryWriteTracking::isSpecialInstruction(
     const Instruction *Insn) const {
-  using namespace PatternMatch;
-  if (match(Insn, m_Intrinsic<Intrinsic::experimental_widenable_condition>()))
-    return false;
-  return Insn->mayWriteToMemory();
+    using namespace PatternMatch;
+    if (match(Insn, m_Intrinsic<Intrinsic::experimental_widenable_condition>()))
+        return false;
+    return Insn->mayWriteToMemory();
 }

@@ -23,15 +23,15 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-misleading-indentation.html
 class MisleadingIndentationCheck : public ClangTidyCheck {
 public:
-  MisleadingIndentationCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    MisleadingIndentationCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void danglingElseCheck(const SourceManager &SM, ASTContext *Context,
-                         const IfStmt *If);
-  void missingBracesCheck(const SourceManager &SM, const CompoundStmt *CStmt);
+    void danglingElseCheck(const SourceManager &SM, ASTContext *Context,
+                           const IfStmt *If);
+    void missingBracesCheck(const SourceManager &SM, const CompoundStmt *CStmt);
 };
 
 } // namespace readability

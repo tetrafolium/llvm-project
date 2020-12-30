@@ -27,31 +27,31 @@ constexpr llvm::StringLiteral WarnAtNode = "iter";
 
 class PointerIterationChecker : public Checker<check::ASTCodeBody> {
 public:
-  void checkASTCodeBody(const Decl *D,
-                        AnalysisManager &AM,
-                        BugReporter &BR) const;
+    void checkASTCodeBody(const Decl *D,
+                          AnalysisManager &AM,
+                          BugReporter &BR) const;
 };
 
 static void emitDiagnostics(const BoundNodes &Match, const Decl *D,
                             BugReporter &BR, AnalysisManager &AM,
                             const PointerIterationChecker *Checker) {
-  auto *ADC = AM.getAnalysisDeclContext(D);
+    auto *ADC = AM.getAnalysisDeclContext(D);
 
-  const auto *MarkedStmt = Match.getNodeAs<Stmt>(WarnAtNode);
-  assert(MarkedStmt);
+    const auto *MarkedStmt = Match.getNodeAs<Stmt>(WarnAtNode);
+    assert(MarkedStmt);
 
-  auto Range = MarkedStmt->getSourceRange();
-  auto Location = PathDiagnosticLocation::createBegin(MarkedStmt,
-                                                      BR.getSourceManager(),
-                                                      ADC);
-  std::string Diagnostics;
-  llvm::raw_string_ostream OS(Diagnostics);
-  OS << "Iteration of pointer-like elements "
-     << "can result in non-deterministic ordering";
+    auto Range = MarkedStmt->getSourceRange();
+    auto Location = PathDiagnosticLocation::createBegin(MarkedStmt,
+                    BR.getSourceManager(),
+                    ADC);
+    std::string Diagnostics;
+    llvm::raw_string_ostream OS(Diagnostics);
+    OS << "Iteration of pointer-like elements "
+       << "can result in non-deterministic ordering";
 
-  BR.EmitBasicReport(ADC->getDecl(), Checker,
-                     "Iteration of pointer-like elements", "Non-determinism",
-                     OS.str(), Location, Range);
+    BR.EmitBasicReport(ADC->getDecl(), Checker,
+                       "Iteration of pointer-like elements", "Non-determinism",
+                       OS.str(), Location, Range);
 }
 
 // Assumption: Iteration of ordered containers of pointers is deterministic.
@@ -65,37 +65,37 @@ static void emitDiagnostics(const BoundNodes &Match, const Decl *D,
 
 auto matchUnorderedIterWithPointers() -> decltype(decl()) {
 
-  auto UnorderedContainerM = declRefExpr(to(varDecl(hasType(
-                               recordDecl(hasName("std::unordered_set")
-                             )))));
+    auto UnorderedContainerM = declRefExpr(to(varDecl(hasType(
+            recordDecl(hasName("std::unordered_set")
+                      )))));
 
-  auto PointerTypeM = varDecl(hasType(hasCanonicalType(pointerType())));
+    auto PointerTypeM = varDecl(hasType(hasCanonicalType(pointerType())));
 
-  auto PointerIterM = stmt(cxxForRangeStmt(
-                             hasLoopVariable(PointerTypeM),
-                             hasRangeInit(UnorderedContainerM)
-                      )).bind(WarnAtNode);
+    auto PointerIterM = stmt(cxxForRangeStmt(
+                                 hasLoopVariable(PointerTypeM),
+                                 hasRangeInit(UnorderedContainerM)
+                             )).bind(WarnAtNode);
 
-  return decl(forEachDescendant(PointerIterM));
+    return decl(forEachDescendant(PointerIterM));
 }
 
 void PointerIterationChecker::checkASTCodeBody(const Decl *D,
-                                             AnalysisManager &AM,
-                                             BugReporter &BR) const {
-  auto MatcherM = matchUnorderedIterWithPointers();
+        AnalysisManager &AM,
+        BugReporter &BR) const {
+    auto MatcherM = matchUnorderedIterWithPointers();
 
-  auto Matches = match(MatcherM, *D, AM.getASTContext());
-  for (const auto &Match : Matches)
-    emitDiagnostics(Match, D, BR, AM, this);
+    auto Matches = match(MatcherM, *D, AM.getASTContext());
+    for (const auto &Match : Matches)
+        emitDiagnostics(Match, D, BR, AM, this);
 }
 
 } // end of anonymous namespace
 
 void ento::registerPointerIterationChecker(CheckerManager &Mgr) {
-  Mgr.registerChecker<PointerIterationChecker>();
+    Mgr.registerChecker<PointerIterationChecker>();
 }
 
 bool ento::shouldRegisterPointerIterationChecker(const CheckerManager &mgr) {
-  const LangOptions &LO = mgr.getLangOpts();
-  return LO.CPlusPlus;
+    const LangOptions &LO = mgr.getLangOpts();
+    return LO.CPlusPlus;
 }

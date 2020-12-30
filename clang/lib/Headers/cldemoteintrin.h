@@ -27,7 +27,7 @@
 /// This intrinsic corresponds to the <c> CLDEMOTE </c> instruction.
 static __inline__ void __DEFAULT_FN_ATTRS
 _cldemote(const void * __P) {
-  __builtin_ia32_cldemote(__P);
+    __builtin_ia32_cldemote(__P);
 }
 
 #define _mm_cldemote(p) _cldemote(p)

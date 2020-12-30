@@ -28,18 +28,22 @@ namespace llvm {
 /// record data about the allocations.
 class MemProfilerPass : public PassInfoMixin<MemProfilerPass> {
 public:
-  explicit MemProfilerPass();
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    explicit MemProfilerPass();
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 };
 
 /// Public interface to the memory profiler module pass for instrumenting code
 /// to profile memory allocations and accesses.
 class ModuleMemProfilerPass : public PassInfoMixin<ModuleMemProfilerPass> {
 public:
-  explicit ModuleMemProfilerPass();
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    explicit ModuleMemProfilerPass();
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 };
 
 // Insert MemProfiler instrumentation

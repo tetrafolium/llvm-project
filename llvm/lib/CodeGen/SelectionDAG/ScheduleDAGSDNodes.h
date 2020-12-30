@@ -29,22 +29,22 @@ namespace llvm {
 class AAResults;
 class InstrItineraryData;
 
-  /// ScheduleDAGSDNodes - A ScheduleDAG for scheduling SDNode-based DAGs.
-  ///
-  /// Edges between SUnits are initially based on edges in the SelectionDAG,
-  /// and additional edges can be added by the schedulers as heuristics.
-  /// SDNodes such as Constants, Registers, and a few others that are not
-  /// interesting to schedulers are not allocated SUnits.
-  ///
-  /// SDNodes with MVT::Glue operands are grouped along with the flagged
-  /// nodes into a single SUnit so that they are scheduled together.
-  ///
-  /// SDNode-based scheduling graphs do not use SDep::Anti or SDep::Output
-  /// edges.  Physical register dependence information is not carried in
-  /// the DAG and must be handled explicitly by schedulers.
-  ///
-  class ScheduleDAGSDNodes : public ScheduleDAG {
-  public:
+/// ScheduleDAGSDNodes - A ScheduleDAG for scheduling SDNode-based DAGs.
+///
+/// Edges between SUnits are initially based on edges in the SelectionDAG,
+/// and additional edges can be added by the schedulers as heuristics.
+/// SDNodes such as Constants, Registers, and a few others that are not
+/// interesting to schedulers are not allocated SUnits.
+///
+/// SDNodes with MVT::Glue operands are grouped along with the flagged
+/// nodes into a single SUnit so that they are scheduled together.
+///
+/// SDNode-based scheduling graphs do not use SDep::Anti or SDep::Output
+/// edges.  Physical register dependence information is not carried in
+/// the DAG and must be handled explicitly by schedulers.
+///
+class ScheduleDAGSDNodes : public ScheduleDAG {
+public:
     MachineBasicBlock *BB;
     SelectionDAG *DAG;                    // DAG of the current basic block
     const InstrItineraryData *InstrItins;
@@ -63,22 +63,22 @@ class InstrItineraryData;
     /// isPassiveNode - Return true if the node is a non-scheduled leaf.
     ///
     static bool isPassiveNode(SDNode *Node) {
-      if (isa<ConstantSDNode>(Node))       return true;
-      if (isa<ConstantFPSDNode>(Node))     return true;
-      if (isa<RegisterSDNode>(Node))       return true;
-      if (isa<RegisterMaskSDNode>(Node))   return true;
-      if (isa<GlobalAddressSDNode>(Node))  return true;
-      if (isa<BasicBlockSDNode>(Node))     return true;
-      if (isa<FrameIndexSDNode>(Node))     return true;
-      if (isa<ConstantPoolSDNode>(Node))   return true;
-      if (isa<TargetIndexSDNode>(Node))    return true;
-      if (isa<JumpTableSDNode>(Node))      return true;
-      if (isa<ExternalSymbolSDNode>(Node)) return true;
-      if (isa<MCSymbolSDNode>(Node))       return true;
-      if (isa<BlockAddressSDNode>(Node))   return true;
-      if (Node->getOpcode() == ISD::EntryToken ||
-          isa<MDNodeSDNode>(Node)) return true;
-      return false;
+        if (isa<ConstantSDNode>(Node))       return true;
+        if (isa<ConstantFPSDNode>(Node))     return true;
+        if (isa<RegisterSDNode>(Node))       return true;
+        if (isa<RegisterMaskSDNode>(Node))   return true;
+        if (isa<GlobalAddressSDNode>(Node))  return true;
+        if (isa<BasicBlockSDNode>(Node))     return true;
+        if (isa<FrameIndexSDNode>(Node))     return true;
+        if (isa<ConstantPoolSDNode>(Node))   return true;
+        if (isa<TargetIndexSDNode>(Node))    return true;
+        if (isa<JumpTableSDNode>(Node))      return true;
+        if (isa<ExternalSymbolSDNode>(Node)) return true;
+        if (isa<MCSymbolSDNode>(Node))       return true;
+        if (isa<BlockAddressSDNode>(Node))   return true;
+        if (Node->getOpcode() == ISD::EntryToken ||
+                isa<MDNodeSDNode>(Node)) return true;
+        return false;
     }
 
     /// NewSUnit - Creates a new SUnit and return a ptr to it.
@@ -136,43 +136,47 @@ class InstrItineraryData;
     /// SUnit. This does not need copies of the iterator or any other STLisms.
     /// The iterator creates itself, rather than being provided by the SchedDAG.
     class RegDefIter {
-      const ScheduleDAGSDNodes *SchedDAG;
-      const SDNode *Node;
-      unsigned DefIdx;
-      unsigned NodeNumDefs;
-      MVT ValueType;
+        const ScheduleDAGSDNodes *SchedDAG;
+        const SDNode *Node;
+        unsigned DefIdx;
+        unsigned NodeNumDefs;
+        MVT ValueType;
 
     public:
-      RegDefIter(const SUnit *SU, const ScheduleDAGSDNodes *SD);
+        RegDefIter(const SUnit *SU, const ScheduleDAGSDNodes *SD);
 
-      bool IsValid() const { return Node != nullptr; }
+        bool IsValid() const {
+            return Node != nullptr;
+        }
 
-      MVT GetValue() const {
-        assert(IsValid() && "bad iterator");
-        return ValueType;
-      }
+        MVT GetValue() const {
+            assert(IsValid() && "bad iterator");
+            return ValueType;
+        }
 
-      const SDNode *GetNode() const {
-        return Node;
-      }
+        const SDNode *GetNode() const {
+            return Node;
+        }
 
-      unsigned GetIdx() const {
-        return DefIdx-1;
-      }
+        unsigned GetIdx() const {
+            return DefIdx-1;
+        }
 
-      void Advance();
+        void Advance();
 
     private:
-      void InitNodeNumDefs();
+        void InitNodeNumDefs();
     };
 
-  protected:
+protected:
     /// ForceUnitLatencies - Return true if all scheduling edges should be given
     /// a latency value of one.  The default is to return false; schedulers may
     /// override this as needed.
-    virtual bool forceUnitLatencies() const { return false; }
+    virtual bool forceUnitLatencies() const {
+        return false;
+    }
 
-  private:
+private:
     /// ClusterNeighboringLoads - Cluster loads from "near" addresses into
     /// combined SUnits.
     void ClusterNeighboringLoads(SDNode *Node);
@@ -186,7 +190,7 @@ class InstrItineraryData;
 
     void EmitPhysRegCopy(SUnit *SU, DenseMap<SUnit*, Register> &VRBaseMap,
                          MachineBasicBlock::iterator InsertPos);
-  };
+};
 
 } // end namespace llvm
 

@@ -16,29 +16,29 @@ namespace fuchsia {
 
 namespace {
 AST_MATCHER(FunctionDecl, isFuchsiaOverloadedOperator) {
-  if (const auto *CXXMethodNode = dyn_cast<CXXMethodDecl>(&Node)) {
-    if (CXXMethodNode->isCopyAssignmentOperator() ||
-        CXXMethodNode->isMoveAssignmentOperator())
-      return false;
-    if (CXXMethodNode->getParent()->isLambda())
-      return false;
-  }
-  return Node.isOverloadedOperator();
+    if (const auto *CXXMethodNode = dyn_cast<CXXMethodDecl>(&Node)) {
+        if (CXXMethodNode->isCopyAssignmentOperator() ||
+                CXXMethodNode->isMoveAssignmentOperator())
+            return false;
+        if (CXXMethodNode->getParent()->isLambda())
+            return false;
+    }
+    return Node.isOverloadedOperator();
 }
 } // namespace
 
 void OverloadedOperatorCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(functionDecl(isFuchsiaOverloadedOperator()).bind("decl"),
-                     this);
+    Finder->addMatcher(functionDecl(isFuchsiaOverloadedOperator()).bind("decl"),
+                       this);
 }
 
 void OverloadedOperatorCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *D = Result.Nodes.getNodeAs<FunctionDecl>("decl");
-  assert(D && "No FunctionDecl captured!");
+    const auto *D = Result.Nodes.getNodeAs<FunctionDecl>("decl");
+    assert(D && "No FunctionDecl captured!");
 
-  SourceLocation Loc = D->getBeginLoc();
-  if (Loc.isValid())
-    diag(Loc, "overloading %0 is disallowed") << D;
+    SourceLocation Loc = D->getBeginLoc();
+    if (Loc.isValid())
+        diag(Loc, "overloading %0 is disallowed") << D;
 }
 
 } // namespace fuchsia

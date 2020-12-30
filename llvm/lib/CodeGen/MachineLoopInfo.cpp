@@ -29,125 +29,125 @@ template class llvm::LoopInfoBase<MachineBasicBlock, MachineLoop>;
 
 char MachineLoopInfo::ID = 0;
 MachineLoopInfo::MachineLoopInfo() : MachineFunctionPass(ID) {
-  initializeMachineLoopInfoPass(*PassRegistry::getPassRegistry());
+    initializeMachineLoopInfoPass(*PassRegistry::getPassRegistry());
 }
 INITIALIZE_PASS_BEGIN(MachineLoopInfo, "machine-loops",
-                "Machine Natural Loop Construction", true, true)
+                      "Machine Natural Loop Construction", true, true)
 INITIALIZE_PASS_DEPENDENCY(MachineDominatorTree)
 INITIALIZE_PASS_END(MachineLoopInfo, "machine-loops",
-                "Machine Natural Loop Construction", true, true)
+                    "Machine Natural Loop Construction", true, true)
 
 char &llvm::MachineLoopInfoID = MachineLoopInfo::ID;
 
 bool MachineLoopInfo::runOnMachineFunction(MachineFunction &) {
-  calculate(getAnalysis<MachineDominatorTree>());
-  return false;
+    calculate(getAnalysis<MachineDominatorTree>());
+    return false;
 }
 
 void MachineLoopInfo::calculate(MachineDominatorTree &MDT) {
-  releaseMemory();
-  LI.analyze(MDT.getBase());
+    releaseMemory();
+    LI.analyze(MDT.getBase());
 }
 
 void MachineLoopInfo::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesAll();
-  AU.addRequired<MachineDominatorTree>();
-  MachineFunctionPass::getAnalysisUsage(AU);
+    AU.setPreservesAll();
+    AU.addRequired<MachineDominatorTree>();
+    MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 MachineBasicBlock *MachineLoop::getTopBlock() {
-  MachineBasicBlock *TopMBB = getHeader();
-  MachineFunction::iterator Begin = TopMBB->getParent()->begin();
-  if (TopMBB->getIterator() != Begin) {
-    MachineBasicBlock *PriorMBB = &*std::prev(TopMBB->getIterator());
-    while (contains(PriorMBB)) {
-      TopMBB = PriorMBB;
-      if (TopMBB->getIterator() == Begin)
-        break;
-      PriorMBB = &*std::prev(TopMBB->getIterator());
+    MachineBasicBlock *TopMBB = getHeader();
+    MachineFunction::iterator Begin = TopMBB->getParent()->begin();
+    if (TopMBB->getIterator() != Begin) {
+        MachineBasicBlock *PriorMBB = &*std::prev(TopMBB->getIterator());
+        while (contains(PriorMBB)) {
+            TopMBB = PriorMBB;
+            if (TopMBB->getIterator() == Begin)
+                break;
+            PriorMBB = &*std::prev(TopMBB->getIterator());
+        }
     }
-  }
-  return TopMBB;
+    return TopMBB;
 }
 
 MachineBasicBlock *MachineLoop::getBottomBlock() {
-  MachineBasicBlock *BotMBB = getHeader();
-  MachineFunction::iterator End = BotMBB->getParent()->end();
-  if (BotMBB->getIterator() != std::prev(End)) {
-    MachineBasicBlock *NextMBB = &*std::next(BotMBB->getIterator());
-    while (contains(NextMBB)) {
-      BotMBB = NextMBB;
-      if (BotMBB == &*std::next(BotMBB->getIterator()))
-        break;
-      NextMBB = &*std::next(BotMBB->getIterator());
+    MachineBasicBlock *BotMBB = getHeader();
+    MachineFunction::iterator End = BotMBB->getParent()->end();
+    if (BotMBB->getIterator() != std::prev(End)) {
+        MachineBasicBlock *NextMBB = &*std::next(BotMBB->getIterator());
+        while (contains(NextMBB)) {
+            BotMBB = NextMBB;
+            if (BotMBB == &*std::next(BotMBB->getIterator()))
+                break;
+            NextMBB = &*std::next(BotMBB->getIterator());
+        }
     }
-  }
-  return BotMBB;
+    return BotMBB;
 }
 
 MachineBasicBlock *MachineLoop::findLoopControlBlock() {
-  if (MachineBasicBlock *Latch = getLoopLatch()) {
-    if (isLoopExiting(Latch))
-      return Latch;
-    else
-      return getExitingBlock();
-  }
-  return nullptr;
+    if (MachineBasicBlock *Latch = getLoopLatch()) {
+        if (isLoopExiting(Latch))
+            return Latch;
+        else
+            return getExitingBlock();
+    }
+    return nullptr;
 }
 
 DebugLoc MachineLoop::getStartLoc() const {
-  // Try the pre-header first.
-  if (MachineBasicBlock *PHeadMBB = getLoopPreheader())
-    if (const BasicBlock *PHeadBB = PHeadMBB->getBasicBlock())
-      if (DebugLoc DL = PHeadBB->getTerminator()->getDebugLoc())
-        return DL;
+    // Try the pre-header first.
+    if (MachineBasicBlock *PHeadMBB = getLoopPreheader())
+        if (const BasicBlock *PHeadBB = PHeadMBB->getBasicBlock())
+            if (DebugLoc DL = PHeadBB->getTerminator()->getDebugLoc())
+                return DL;
 
-  // If we have no pre-header or there are no instructions with debug
-  // info in it, try the header.
-  if (MachineBasicBlock *HeadMBB = getHeader())
-    if (const BasicBlock *HeadBB = HeadMBB->getBasicBlock())
-      return HeadBB->getTerminator()->getDebugLoc();
+    // If we have no pre-header or there are no instructions with debug
+    // info in it, try the header.
+    if (MachineBasicBlock *HeadMBB = getHeader())
+        if (const BasicBlock *HeadBB = HeadMBB->getBasicBlock())
+            return HeadBB->getTerminator()->getDebugLoc();
 
-  return DebugLoc();
+    return DebugLoc();
 }
 
 MachineBasicBlock *
 MachineLoopInfo::findLoopPreheader(MachineLoop *L,
                                    bool SpeculativePreheader) const {
-  if (MachineBasicBlock *PB = L->getLoopPreheader())
-    return PB;
+    if (MachineBasicBlock *PB = L->getLoopPreheader())
+        return PB;
 
-  if (!SpeculativePreheader)
-    return nullptr;
+    if (!SpeculativePreheader)
+        return nullptr;
 
-  MachineBasicBlock *HB = L->getHeader(), *LB = L->getLoopLatch();
-  if (HB->pred_size() != 2 || HB->hasAddressTaken())
-    return nullptr;
-  // Find the predecessor of the header that is not the latch block.
-  MachineBasicBlock *Preheader = nullptr;
-  for (MachineBasicBlock *P : HB->predecessors()) {
-    if (P == LB)
-      continue;
-    // Sanity.
-    if (Preheader)
-      return nullptr;
-    Preheader = P;
-  }
+    MachineBasicBlock *HB = L->getHeader(), *LB = L->getLoopLatch();
+    if (HB->pred_size() != 2 || HB->hasAddressTaken())
+        return nullptr;
+    // Find the predecessor of the header that is not the latch block.
+    MachineBasicBlock *Preheader = nullptr;
+    for (MachineBasicBlock *P : HB->predecessors()) {
+        if (P == LB)
+            continue;
+        // Sanity.
+        if (Preheader)
+            return nullptr;
+        Preheader = P;
+    }
 
-  // Check if the preheader candidate is a successor of any other loop
-  // headers. We want to avoid having two loop setups in the same block.
-  for (MachineBasicBlock *S : Preheader->successors()) {
-    if (S == HB)
-      continue;
-    MachineLoop *T = getLoopFor(S);
-    if (T && T->getHeader() == S)
-      return nullptr;
-  }
-  return Preheader;
+    // Check if the preheader candidate is a successor of any other loop
+    // headers. We want to avoid having two loop setups in the same block.
+    for (MachineBasicBlock *S : Preheader->successors()) {
+        if (S == HB)
+            continue;
+        MachineLoop *T = getLoopFor(S);
+        if (T && T->getHeader() == S)
+            return nullptr;
+    }
+    return Preheader;
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void MachineLoop::dump() const {
-  print(dbgs());
+    print(dbgs());
 }
 #endif

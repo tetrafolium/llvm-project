@@ -30,7 +30,7 @@ bad_cast::~bad_cast() _NOEXCEPT
 const char*
 bad_cast::what() const _NOEXCEPT
 {
-  return "std::bad_cast";
+    return "std::bad_cast";
 }
 
 // bad_typeid
@@ -46,7 +46,7 @@ bad_typeid::~bad_typeid() _NOEXCEPT
 const char*
 bad_typeid::what() const _NOEXCEPT
 {
-  return "std::bad_typeid";
+    return "std::bad_typeid";
 }
 
 }  // std

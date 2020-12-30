@@ -26,8 +26,8 @@ class MipsTargetMachine;
 class SelectionDAG;
 class TargetRegisterClass;
 
-  class MipsSETargetLowering : public MipsTargetLowering  {
-  public:
+class MipsSETargetLowering : public MipsTargetLowering  {
+public:
     explicit MipsSETargetLowering(const MipsTargetMachine &TM,
                                   const MipsSubtarget &STI);
 
@@ -54,12 +54,12 @@ class TargetRegisterClass;
                                 MachineBasicBlock *MBB) const override;
 
     bool isShuffleMaskLegal(ArrayRef<int> Mask, EVT VT) const override {
-      return false;
+        return false;
     }
 
     const TargetRegisterClass *getRepRegClassFor(MVT VT) const override;
 
-  private:
+private:
     bool isEligibleForTailCallOptimization(
         const CCState &CCInfo, unsigned NextStackOffset,
         const MipsFunctionInfo &FI) const override;
@@ -124,10 +124,10 @@ class TargetRegisterClass;
                                      MachineBasicBlock *BB) const;
     /// Emit the FILL_FW pseudo instruction
     MachineBasicBlock *emitLD_F16_PSEUDO(MachineInstr &MI,
-                                   MachineBasicBlock *BB) const;
+                                         MachineBasicBlock *BB) const;
     /// Emit the FILL_FD pseudo instruction
     MachineBasicBlock *emitST_F16_PSEUDO(MachineInstr &MI,
-                                   MachineBasicBlock *BB) const;
+                                         MachineBasicBlock *BB) const;
     /// Emit the FEXP2_W_1 pseudo instructions.
     MachineBasicBlock *emitFPEXTEND_PSEUDO(MachineInstr &MI,
                                            MachineBasicBlock *BB,
@@ -136,7 +136,7 @@ class TargetRegisterClass;
     MachineBasicBlock *emitFPROUND_PSEUDO(MachineInstr &MI,
                                           MachineBasicBlock *BBi,
                                           bool IsFGR64) const;
-  };
+};
 
 } // end namespace llvm
 

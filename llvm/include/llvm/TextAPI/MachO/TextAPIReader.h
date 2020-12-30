@@ -21,10 +21,10 @@ class InterfaceFile;
 
 class TextAPIReader {
 public:
-  static Expected<std::unique_ptr<InterfaceFile>>
-  get(MemoryBufferRef InputBuffer);
+    static Expected<std::unique_ptr<InterfaceFile>>
+            get(MemoryBufferRef InputBuffer);
 
-  TextAPIReader() = delete;
+    TextAPIReader() = delete;
 };
 
 } // end namespace MachO.

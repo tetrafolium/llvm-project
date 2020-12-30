@@ -33,8 +33,8 @@ using namespace safestack;
 //
 // For now, store it in a thread-local variable.
 extern "C" {
-__attribute__((visibility(
-    "default"))) __thread void *__safestack_unsafe_stack_ptr = nullptr;
+    __attribute__((visibility(
+                       "default"))) __thread void *__safestack_unsafe_stack_ptr = nullptr;
 }
 
 namespace {
@@ -89,24 +89,24 @@ __thread size_t unsafe_stack_size = 0;
 __thread size_t unsafe_stack_guard = 0;
 
 inline void *unsafe_stack_alloc(size_t size, size_t guard) {
-  SFS_CHECK(size + guard >= size);
-  void *addr = Mmap(nullptr, size + guard, PROT_READ | PROT_WRITE,
-                    MAP_PRIVATE | MAP_ANON, -1, 0);
-  SFS_CHECK(MAP_FAILED != addr);
-  Mprotect(addr, guard, PROT_NONE);
-  return (char *)addr + guard;
+    SFS_CHECK(size + guard >= size);
+    void *addr = Mmap(nullptr, size + guard, PROT_READ | PROT_WRITE,
+                      MAP_PRIVATE | MAP_ANON, -1, 0);
+    SFS_CHECK(MAP_FAILED != addr);
+    Mprotect(addr, guard, PROT_NONE);
+    return (char *)addr + guard;
 }
 
 inline void unsafe_stack_setup(void *start, size_t size, size_t guard) {
-  SFS_CHECK((char *)start + size >= (char *)start);
-  SFS_CHECK((char *)start + guard >= (char *)start);
-  void *stack_ptr = (char *)start + size;
-  SFS_CHECK((((size_t)stack_ptr) & (kStackAlign - 1)) == 0);
+    SFS_CHECK((char *)start + size >= (char *)start);
+    SFS_CHECK((char *)start + guard >= (char *)start);
+    void *stack_ptr = (char *)start + size;
+    SFS_CHECK((((size_t)stack_ptr) & (kStackAlign - 1)) == 0);
 
-  __safestack_unsafe_stack_ptr = stack_ptr;
-  unsafe_stack_start = start;
-  unsafe_stack_size = size;
-  unsafe_stack_guard = guard;
+    __safestack_unsafe_stack_ptr = stack_ptr;
+    unsafe_stack_start = start;
+    unsafe_stack_size = size;
+    unsafe_stack_guard = guard;
 }
 
 /// Thread data for the cleanup handler
@@ -114,39 +114,39 @@ pthread_key_t thread_cleanup_key;
 
 /// Safe stack per-thread information passed to the thread_start function
 struct tinfo {
-  void *(*start_routine)(void *);
-  void *start_routine_arg;
+    void *(*start_routine)(void *);
+    void *start_routine_arg;
 
-  void *unsafe_stack_start;
-  size_t unsafe_stack_size;
-  size_t unsafe_stack_guard;
+    void *unsafe_stack_start;
+    size_t unsafe_stack_size;
+    size_t unsafe_stack_guard;
 };
 
 /// Wrap the thread function in order to deallocate the unsafe stack when the
 /// thread terminates by returning from its main function.
 void *thread_start(void *arg) {
-  struct tinfo *tinfo = (struct tinfo *)arg;
+    struct tinfo *tinfo = (struct tinfo *)arg;
 
-  void *(*start_routine)(void *) = tinfo->start_routine;
-  void *start_routine_arg = tinfo->start_routine_arg;
+    void *(*start_routine)(void *) = tinfo->start_routine;
+    void *start_routine_arg = tinfo->start_routine_arg;
 
-  // Setup the unsafe stack; this will destroy tinfo content
-  unsafe_stack_setup(tinfo->unsafe_stack_start, tinfo->unsafe_stack_size,
-                     tinfo->unsafe_stack_guard);
+    // Setup the unsafe stack; this will destroy tinfo content
+    unsafe_stack_setup(tinfo->unsafe_stack_start, tinfo->unsafe_stack_size,
+                       tinfo->unsafe_stack_guard);
 
-  // Make sure out thread-specific destructor will be called
-  pthread_setspecific(thread_cleanup_key, (void *)1);
+    // Make sure out thread-specific destructor will be called
+    pthread_setspecific(thread_cleanup_key, (void *)1);
 
-  return start_routine(start_routine_arg);
+    return start_routine(start_routine_arg);
 }
 
 /// Linked list used to store exiting threads stack/thread information.
 struct thread_stack_ll {
-  struct thread_stack_ll *next;
-  void *stack_base;
-  size_t size;
-  pid_t pid;
-  ThreadId tid;
+    struct thread_stack_ll *next;
+    void *stack_base;
+    size_t size;
+    pid_t pid;
+    ThreadId tid;
 };
 
 /// Linked list of unsafe stacks for threads that are exiting. We delay
@@ -158,48 +158,48 @@ pthread_mutex_t thread_stacks_mutex = PTHREAD_MUTEX_INITIALIZER;
 /// this thread is terminated. libc can call functions in safestack-instrumented
 /// code (like free) after thread-specific data destructors have run.
 void thread_cleanup_handler(void *_iter) {
-  SFS_CHECK(unsafe_stack_start != nullptr);
-  pthread_setspecific(thread_cleanup_key, NULL);
+    SFS_CHECK(unsafe_stack_start != nullptr);
+    pthread_setspecific(thread_cleanup_key, NULL);
 
-  pthread_mutex_lock(&thread_stacks_mutex);
-  // Temporary list to hold the previous threads stacks so we don't hold the
-  // thread_stacks_mutex for long.
-  thread_stack_ll *temp_stacks = thread_stacks;
-  thread_stacks = nullptr;
-  pthread_mutex_unlock(&thread_stacks_mutex);
+    pthread_mutex_lock(&thread_stacks_mutex);
+    // Temporary list to hold the previous threads stacks so we don't hold the
+    // thread_stacks_mutex for long.
+    thread_stack_ll *temp_stacks = thread_stacks;
+    thread_stacks = nullptr;
+    pthread_mutex_unlock(&thread_stacks_mutex);
 
-  pid_t pid = getpid();
-  ThreadId tid = GetTid();
+    pid_t pid = getpid();
+    ThreadId tid = GetTid();
 
-  // Free stacks for dead threads
-  thread_stack_ll **stackp = &temp_stacks;
-  while (*stackp) {
-    thread_stack_ll *stack = *stackp;
-    if (stack->pid != pid ||
-        (-1 == TgKill(stack->pid, stack->tid, 0) && errno == ESRCH)) {
-      Munmap(stack->stack_base, stack->size);
-      *stackp = stack->next;
-      free(stack);
-    } else
-      stackp = &stack->next;
-  }
+    // Free stacks for dead threads
+    thread_stack_ll **stackp = &temp_stacks;
+    while (*stackp) {
+        thread_stack_ll *stack = *stackp;
+        if (stack->pid != pid ||
+                (-1 == TgKill(stack->pid, stack->tid, 0) && errno == ESRCH)) {
+            Munmap(stack->stack_base, stack->size);
+            *stackp = stack->next;
+            free(stack);
+        } else
+            stackp = &stack->next;
+    }
 
-  thread_stack_ll *cur_stack =
-      (thread_stack_ll *)malloc(sizeof(thread_stack_ll));
-  cur_stack->stack_base = (char *)unsafe_stack_start - unsafe_stack_guard;
-  cur_stack->size = unsafe_stack_size + unsafe_stack_guard;
-  cur_stack->pid = pid;
-  cur_stack->tid = tid;
+    thread_stack_ll *cur_stack =
+        (thread_stack_ll *)malloc(sizeof(thread_stack_ll));
+    cur_stack->stack_base = (char *)unsafe_stack_start - unsafe_stack_guard;
+    cur_stack->size = unsafe_stack_size + unsafe_stack_guard;
+    cur_stack->pid = pid;
+    cur_stack->tid = tid;
 
-  pthread_mutex_lock(&thread_stacks_mutex);
-  // Merge thread_stacks with the current thread's stack and any remaining
-  // temp_stacks
-  *stackp = thread_stacks;
-  cur_stack->next = temp_stacks;
-  thread_stacks = cur_stack;
-  pthread_mutex_unlock(&thread_stacks_mutex);
+    pthread_mutex_lock(&thread_stacks_mutex);
+    // Merge thread_stacks with the current thread's stack and any remaining
+    // temp_stacks
+    *stackp = thread_stacks;
+    cur_stack->next = temp_stacks;
+    thread_stacks = cur_stack;
+    pthread_mutex_unlock(&thread_stacks_mutex);
 
-  unsafe_stack_start = nullptr;
+    unsafe_stack_start = nullptr;
 }
 
 void EnsureInterceptorsInitialized();
@@ -208,51 +208,51 @@ void EnsureInterceptorsInitialized();
 INTERCEPTOR(int, pthread_create, pthread_t *thread,
             const pthread_attr_t *attr,
             void *(*start_routine)(void*), void *arg) {
-  EnsureInterceptorsInitialized();
-  size_t size = 0;
-  size_t guard = 0;
+    EnsureInterceptorsInitialized();
+    size_t size = 0;
+    size_t guard = 0;
 
-  if (attr) {
-    pthread_attr_getstacksize(attr, &size);
-    pthread_attr_getguardsize(attr, &guard);
-  } else {
-    // get pthread default stack size
-    pthread_attr_t tmpattr;
-    pthread_attr_init(&tmpattr);
-    pthread_attr_getstacksize(&tmpattr, &size);
-    pthread_attr_getguardsize(&tmpattr, &guard);
-    pthread_attr_destroy(&tmpattr);
-  }
+    if (attr) {
+        pthread_attr_getstacksize(attr, &size);
+        pthread_attr_getguardsize(attr, &guard);
+    } else {
+        // get pthread default stack size
+        pthread_attr_t tmpattr;
+        pthread_attr_init(&tmpattr);
+        pthread_attr_getstacksize(&tmpattr, &size);
+        pthread_attr_getguardsize(&tmpattr, &guard);
+        pthread_attr_destroy(&tmpattr);
+    }
 
-  SFS_CHECK(size);
-  size = RoundUpTo(size, kStackAlign);
+    SFS_CHECK(size);
+    size = RoundUpTo(size, kStackAlign);
 
-  void *addr = unsafe_stack_alloc(size, guard);
-  // Put tinfo at the end of the buffer. guard may be not page aligned.
-  // If that is so then some bytes after addr can be mprotected.
-  struct tinfo *tinfo =
-      (struct tinfo *)(((char *)addr) + size - sizeof(struct tinfo));
-  tinfo->start_routine = start_routine;
-  tinfo->start_routine_arg = arg;
-  tinfo->unsafe_stack_start = addr;
-  tinfo->unsafe_stack_size = size;
-  tinfo->unsafe_stack_guard = guard;
+    void *addr = unsafe_stack_alloc(size, guard);
+    // Put tinfo at the end of the buffer. guard may be not page aligned.
+    // If that is so then some bytes after addr can be mprotected.
+    struct tinfo *tinfo =
+        (struct tinfo *)(((char *)addr) + size - sizeof(struct tinfo));
+    tinfo->start_routine = start_routine;
+    tinfo->start_routine_arg = arg;
+    tinfo->unsafe_stack_start = addr;
+    tinfo->unsafe_stack_size = size;
+    tinfo->unsafe_stack_guard = guard;
 
-  return REAL(pthread_create)(thread, attr, thread_start, tinfo);
+    return REAL(pthread_create)(thread, attr, thread_start, tinfo);
 }
 
 pthread_mutex_t interceptor_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 bool interceptors_inited = false;
 
 void EnsureInterceptorsInitialized() {
-  MutexLock lock(interceptor_init_mutex);
-  if (interceptors_inited)
-    return;
+    MutexLock lock(interceptor_init_mutex);
+    if (interceptors_inited)
+        return;
 
-  // Initialize pthread interceptors for thread allocation
-  INTERCEPT_FUNCTION(pthread_create);
+    // Initialize pthread interceptors for thread allocation
+    INTERCEPT_FUNCTION(pthread_create);
 
-  interceptors_inited = true;
+    interceptors_inited = true;
 }
 
 }  // namespace
@@ -263,20 +263,20 @@ extern "C" __attribute__((visibility("default")))
 __attribute__((constructor(0)))
 #endif
 void __safestack_init() {
-  // Determine the stack size for the main thread.
-  size_t size = kDefaultUnsafeStackSize;
-  size_t guard = 4096;
+    // Determine the stack size for the main thread.
+    size_t size = kDefaultUnsafeStackSize;
+    size_t guard = 4096;
 
-  struct rlimit limit;
-  if (getrlimit(RLIMIT_STACK, &limit) == 0 && limit.rlim_cur != RLIM_INFINITY)
-    size = limit.rlim_cur;
+    struct rlimit limit;
+    if (getrlimit(RLIMIT_STACK, &limit) == 0 && limit.rlim_cur != RLIM_INFINITY)
+        size = limit.rlim_cur;
 
-  // Allocate unsafe stack for main thread
-  void *addr = unsafe_stack_alloc(size, guard);
-  unsafe_stack_setup(addr, size, guard);
+    // Allocate unsafe stack for main thread
+    void *addr = unsafe_stack_alloc(size, guard);
+    unsafe_stack_setup(addr, size, guard);
 
-  // Setup the cleanup handler
-  pthread_key_create(&thread_cleanup_key, thread_cleanup_handler);
+    // Setup the cleanup handler
+    pthread_key_create(&thread_cleanup_key, thread_cleanup_handler);
 }
 
 #if SANITIZER_CAN_USE_PREINIT_ARRAY
@@ -284,27 +284,27 @@ void __safestack_init() {
 // On other platforms we use the constructor attribute to arrange to run our
 // initialization early.
 extern "C" {
-__attribute__((section(".preinit_array"),
-               used)) void (*__safestack_preinit)(void) = __safestack_init;
+    __attribute__((section(".preinit_array"),
+                   used)) void (*__safestack_preinit)(void) = __safestack_init;
 }
 #endif
 
 extern "C"
-    __attribute__((visibility("default"))) void *__get_unsafe_stack_bottom() {
-  return unsafe_stack_start;
+__attribute__((visibility("default"))) void *__get_unsafe_stack_bottom() {
+    return unsafe_stack_start;
 }
 
 extern "C"
-    __attribute__((visibility("default"))) void *__get_unsafe_stack_top() {
-  return (char*)unsafe_stack_start + unsafe_stack_size;
+__attribute__((visibility("default"))) void *__get_unsafe_stack_top() {
+    return (char*)unsafe_stack_start + unsafe_stack_size;
 }
 
 extern "C"
-    __attribute__((visibility("default"))) void *__get_unsafe_stack_start() {
-  return unsafe_stack_start;
+__attribute__((visibility("default"))) void *__get_unsafe_stack_start() {
+    return unsafe_stack_start;
 }
 
 extern "C"
-    __attribute__((visibility("default"))) void *__get_unsafe_stack_ptr() {
-  return __safestack_unsafe_stack_ptr;
+__attribute__((visibility("default"))) void *__get_unsafe_stack_ptr() {
+    return __safestack_unsafe_stack_ptr;
 }

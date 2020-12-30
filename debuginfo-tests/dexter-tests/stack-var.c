@@ -6,10 +6,10 @@
 
 void __attribute__((noinline, optnone)) bar(int *test) {}
 int main() {
-  int test;
-  test = 23;
-  bar(&test); // DexLabel('before_bar')
-  return test; // DexLabel('after_bar')
+    int test;
+    test = 23;
+    bar(&test); // DexLabel('before_bar')
+    return test; // DexLabel('after_bar')
 }
 
 // DexExpectWatchValue('test', '23', on_line='before_bar')

@@ -20,15 +20,15 @@ namespace include_fixer {
 /// to a symbol name from a symbol database.
 class SymbolIndex {
 public:
-  virtual ~SymbolIndex() = default;
+    virtual ~SymbolIndex() = default;
 
-  /// Search for all `SymbolInfo`s corresponding to an identifier.
-  /// \param Identifier The unqualified identifier being searched for.
-  /// \returns A list of `SymbolInfo` candidates.
-  // FIXME: Expose the type name so we can also insert using declarations (or
-  // fix the usage)
-  virtual std::vector<find_all_symbols::SymbolAndSignals>
-  search(llvm::StringRef Identifier) = 0;
+    /// Search for all `SymbolInfo`s corresponding to an identifier.
+    /// \param Identifier The unqualified identifier being searched for.
+    /// \returns A list of `SymbolInfo` candidates.
+    // FIXME: Expose the type name so we can also insert using declarations (or
+    // fix the usage)
+    virtual std::vector<find_all_symbols::SymbolAndSignals>
+    search(llvm::StringRef Identifier) = 0;
 };
 
 } // namespace include_fixer

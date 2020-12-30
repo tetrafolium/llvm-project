@@ -21,13 +21,13 @@ namespace llvm {
 /// Basic Dead Code Elimination pass.
 class DCEPass : public PassInfoMixin<DCEPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 class RedundantDbgInstEliminationPass
     : public PassInfoMixin<RedundantDbgInstEliminationPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 }
 

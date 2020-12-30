@@ -40,57 +40,61 @@ using namespace llvm;
 namespace {
 
 static Constant *canonicalizeAlias(Constant *C, bool &Changed) {
-  if (auto *GA = dyn_cast<GlobalAlias>(C)) {
-    auto *NewAliasee = canonicalizeAlias(GA->getAliasee(), Changed);
-    if (NewAliasee != GA->getAliasee()) {
-      GA->setAliasee(NewAliasee);
-      Changed = true;
+    if (auto *GA = dyn_cast<GlobalAlias>(C)) {
+        auto *NewAliasee = canonicalizeAlias(GA->getAliasee(), Changed);
+        if (NewAliasee != GA->getAliasee()) {
+            GA->setAliasee(NewAliasee);
+            Changed = true;
+        }
+        return NewAliasee;
     }
-    return NewAliasee;
-  }
 
-  auto *CE = dyn_cast<ConstantExpr>(C);
-  if (!CE)
-    return C;
+    auto *CE = dyn_cast<ConstantExpr>(C);
+    if (!CE)
+        return C;
 
-  std::vector<Constant *> Ops;
-  for (Use &U : CE->operands())
-    Ops.push_back(canonicalizeAlias(cast<Constant>(U), Changed));
-  return CE->getWithOperands(Ops);
+    std::vector<Constant *> Ops;
+    for (Use &U : CE->operands())
+        Ops.push_back(canonicalizeAlias(cast<Constant>(U), Changed));
+    return CE->getWithOperands(Ops);
 }
 
 /// Convert aliases to canonical form.
 static bool canonicalizeAliases(Module &M) {
-  bool Changed = false;
-  for (auto &GA : M.aliases())
-    canonicalizeAlias(&GA, Changed);
-  return Changed;
+    bool Changed = false;
+    for (auto &GA : M.aliases())
+        canonicalizeAlias(&GA, Changed);
+    return Changed;
 }
 
 // Legacy pass that canonicalizes aliases.
 class CanonicalizeAliasesLegacyPass : public ModulePass {
 
 public:
-  /// Pass identification, replacement for typeid
-  static char ID;
+    /// Pass identification, replacement for typeid
+    static char ID;
 
-  /// Specify pass name for debug output
-  StringRef getPassName() const override { return "Canonicalize Aliases"; }
+    /// Specify pass name for debug output
+    StringRef getPassName() const override {
+        return "Canonicalize Aliases";
+    }
 
-  explicit CanonicalizeAliasesLegacyPass() : ModulePass(ID) {}
+    explicit CanonicalizeAliasesLegacyPass() : ModulePass(ID) {}
 
-  bool runOnModule(Module &M) override { return canonicalizeAliases(M); }
+    bool runOnModule(Module &M) override {
+        return canonicalizeAliases(M);
+    }
 };
 char CanonicalizeAliasesLegacyPass::ID = 0;
 
 } // anonymous namespace
 
 PreservedAnalyses CanonicalizeAliasesPass::run(Module &M,
-                                               ModuleAnalysisManager &AM) {
-  if (!canonicalizeAliases(M))
-    return PreservedAnalyses::all();
+        ModuleAnalysisManager &AM) {
+    if (!canonicalizeAliases(M))
+        return PreservedAnalyses::all();
 
-  return PreservedAnalyses::none();
+    return PreservedAnalyses::none();
 }
 
 INITIALIZE_PASS_BEGIN(CanonicalizeAliasesLegacyPass, "canonicalize-aliases",
@@ -100,6 +104,6 @@ INITIALIZE_PASS_END(CanonicalizeAliasesLegacyPass, "canonicalize-aliases",
 
 namespace llvm {
 ModulePass *createCanonicalizeAliasesPass() {
-  return new CanonicalizeAliasesLegacyPass();
+    return new CanonicalizeAliasesLegacyPass();
 }
 } // namespace llvm

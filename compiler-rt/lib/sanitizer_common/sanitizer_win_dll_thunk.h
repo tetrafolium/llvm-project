@@ -20,7 +20,7 @@ uptr dllThunkGetRealAddrOrDie(const char *name);
 int dllThunkIntercept(const char* main_function, uptr dll_function);
 
 int dllThunkInterceptWhenPossible(const char* main_function,
-    const char* default_function, uptr dll_function);
+                                  const char* default_function, uptr dll_function);
 }
 
 extern "C" int __dll_thunk_init();

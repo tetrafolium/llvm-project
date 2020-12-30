@@ -8,10 +8,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to permit
  * persons to whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -70,7 +70,7 @@ struct Block_descriptor {
 struct Block_layout {
     void *isa;
     int flags;
-    int reserved; 
+    int reserved;
     void (*invoke)(void *, ...);
     struct Block_descriptor *descriptor;
     /* Imported variables. */
@@ -109,7 +109,7 @@ enum {
 
 /* Runtime entry point called by compiler when assigning objects inside copy helper routines */
 BLOCK_EXPORT void _Block_object_assign(void *destAddr, const void *object, const int flags);
-    /* BLOCK_FIELD_IS_BYREF is only used from within block copy helpers */
+/* BLOCK_FIELD_IS_BYREF is only used from within block copy helpers */
 
 
 /* runtime entry point called by the compiler when disposing of objects inside dispose helper routine */
@@ -136,10 +136,10 @@ BLOCK_EXPORT void * _NSConcreteWeakBlockVariable[32];
 
 /* the intercept routines that must be used under GC */
 BLOCK_EXPORT void _Block_use_GC( void *(*alloc)(const unsigned long, const bool isOne, const bool isObject),
-                                  void (*setHasRefcount)(const void *, const bool),
-                                  void (*gc_assign_strong)(void *, void **),
-                                  void (*gc_assign_weak)(const void *, void *),
-                                  void (*gc_memmove)(void *, void *, unsigned long));
+                                 void (*setHasRefcount)(const void *, const bool),
+                                 void (*gc_assign_strong)(void *, void **),
+                                 void (*gc_assign_weak)(const void *, void *),
+                                 void (*gc_memmove)(void *, void *, unsigned long));
 
 /* earlier version, now simply transitional */
 BLOCK_EXPORT void _Block_use_GC5( void *(*alloc)(const unsigned long, const bool isOne, const bool isObject),

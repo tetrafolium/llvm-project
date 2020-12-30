@@ -33,18 +33,18 @@
 namespace llvm {
 class InitLLVM {
 public:
-  InitLLVM(int &Argc, const char **&Argv,
-           bool InstallPipeSignalExitHandler = true);
-  InitLLVM(int &Argc, char **&Argv, bool InstallPipeSignalExitHandler = true)
-      : InitLLVM(Argc, const_cast<const char **&>(Argv),
-                 InstallPipeSignalExitHandler) {}
+    InitLLVM(int &Argc, const char **&Argv,
+             bool InstallPipeSignalExitHandler = true);
+    InitLLVM(int &Argc, char **&Argv, bool InstallPipeSignalExitHandler = true)
+        : InitLLVM(Argc, const_cast<const char **&>(Argv),
+                   InstallPipeSignalExitHandler) {}
 
-  ~InitLLVM();
+    ~InitLLVM();
 
 private:
-  BumpPtrAllocator Alloc;
-  SmallVector<const char *, 0> Args;
-  PrettyStackTraceProgram StackPrinter;
+    BumpPtrAllocator Alloc;
+    SmallVector<const char *, 0> Args;
+    PrettyStackTraceProgram StackPrinter;
 };
 } // namespace llvm
 

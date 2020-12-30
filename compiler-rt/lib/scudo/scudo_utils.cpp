@@ -40,20 +40,20 @@ extern int VSNPrintf(char *buff, int buff_length, const char *format,
 namespace __scudo {
 
 FORMAT(1, 2) void NORETURN dieWithMessage(const char *Format, ...) {
-  static const char ScudoError[] = "Scudo ERROR: ";
-  static constexpr uptr PrefixSize = sizeof(ScudoError) - 1;
-  // Our messages are tiny, 256 characters is more than enough.
-  char Message[256];
-  va_list Args;
-  va_start(Args, Format);
-  internal_memcpy(Message, ScudoError, PrefixSize);
-  VSNPrintf(Message + PrefixSize, sizeof(Message) - PrefixSize, Format, Args);
-  va_end(Args);
-  LogMessageOnPrintf(Message);
-  if (common_flags()->abort_on_error)
-    SetAbortMessage(Message);
-  RawWrite(Message);
-  Die();
+    static const char ScudoError[] = "Scudo ERROR: ";
+    static constexpr uptr PrefixSize = sizeof(ScudoError) - 1;
+    // Our messages are tiny, 256 characters is more than enough.
+    char Message[256];
+    va_list Args;
+    va_start(Args, Format);
+    internal_memcpy(Message, ScudoError, PrefixSize);
+    VSNPrintf(Message + PrefixSize, sizeof(Message) - PrefixSize, Format, Args);
+    va_end(Args);
+    LogMessageOnPrintf(Message);
+    if (common_flags()->abort_on_error)
+        SetAbortMessage(Message);
+    RawWrite(Message);
+    Die();
 }
 
 #if defined(__x86_64__) || defined(__i386__)
@@ -71,21 +71,21 @@ FORMAT(1, 2) void NORETURN dieWithMessage(const char *Format, ...) {
 #endif
 
 bool hasHardwareCRC32() {
-  u32 Eax, Ebx, Ecx, Edx;
-  __get_cpuid(0, &Eax, &Ebx, &Ecx, &Edx);
-  const bool IsIntel = (Ebx == signature_INTEL_ebx) &&
-                       (Edx == signature_INTEL_edx) &&
-                       (Ecx == signature_INTEL_ecx);
-  const bool IsAMD = (Ebx == signature_AMD_ebx) &&
-                     (Edx == signature_AMD_edx) &&
-                     (Ecx == signature_AMD_ecx);
-  const bool IsHygon = (Ebx == signature_HYGON_ebx) &&
-                       (Edx == signature_HYGON_edx) &&
-                       (Ecx == signature_HYGON_ecx);
-  if (!IsIntel && !IsAMD && !IsHygon)
-    return false;
-  __get_cpuid(1, &Eax, &Ebx, &Ecx, &Edx);
-  return !!(Ecx & bit_SSE4_2);
+    u32 Eax, Ebx, Ecx, Edx;
+    __get_cpuid(0, &Eax, &Ebx, &Ecx, &Edx);
+    const bool IsIntel = (Ebx == signature_INTEL_ebx) &&
+                         (Edx == signature_INTEL_edx) &&
+                         (Ecx == signature_INTEL_ecx);
+    const bool IsAMD = (Ebx == signature_AMD_ebx) &&
+                       (Edx == signature_AMD_edx) &&
+                       (Ecx == signature_AMD_ecx);
+    const bool IsHygon = (Ebx == signature_HYGON_ebx) &&
+                         (Edx == signature_HYGON_edx) &&
+                         (Ecx == signature_HYGON_ecx);
+    if (!IsIntel && !IsAMD && !IsHygon)
+        return false;
+    __get_cpuid(1, &Eax, &Ebx, &Ecx, &Edx);
+    return !!(Ecx & bit_SSE4_2);
 }
 #elif defined(__arm__) || defined(__aarch64__)
 // For ARM and AArch64, hardware CRC32 support is indicated in the AT_HWCAP
@@ -98,21 +98,26 @@ bool hasHardwareCRC32() {
 # endif
 # if SANITIZER_POSIX
 bool hasHardwareCRC32ARMPosix() {
-  uptr F = internal_open("/proc/self/auxv", O_RDONLY);
-  if (internal_iserror(F))
-    return false;
-  struct { uptr Tag; uptr Value; } Entry = { 0, 0 };
-  for (;;) {
-    uptr N = internal_read(F, &Entry, sizeof(Entry));
-    if (internal_iserror(N) || N != sizeof(Entry) ||
-        (Entry.Tag == 0 && Entry.Value == 0) || Entry.Tag == AT_HWCAP)
-      break;
-  }
-  internal_close(F);
-  return (Entry.Tag == AT_HWCAP && (Entry.Value & HWCAP_CRC32) != 0);
+    uptr F = internal_open("/proc/self/auxv", O_RDONLY);
+    if (internal_iserror(F))
+        return false;
+    struct {
+        uptr Tag;
+        uptr Value;
+    } Entry = { 0, 0 };
+    for (;;) {
+        uptr N = internal_read(F, &Entry, sizeof(Entry));
+        if (internal_iserror(N) || N != sizeof(Entry) ||
+                (Entry.Tag == 0 && Entry.Value == 0) || Entry.Tag == AT_HWCAP)
+            break;
+    }
+    internal_close(F);
+    return (Entry.Tag == AT_HWCAP && (Entry.Value & HWCAP_CRC32) != 0);
 }
 # else
-bool hasHardwareCRC32ARMPosix() { return false; }
+bool hasHardwareCRC32ARMPosix() {
+    return false;
+}
 # endif  // SANITIZER_POSIX
 
 // Bionic doesn't initialize its globals early enough. This causes issues when
@@ -122,24 +127,26 @@ bool hasHardwareCRC32ARMPosix() { return false; }
 // calling getauxval is safe.
 extern "C" SANITIZER_WEAK_ATTRIBUTE char *__progname;
 inline bool areBionicGlobalsInitialized() {
-  return !SANITIZER_ANDROID || (&__progname && __progname);
+    return !SANITIZER_ANDROID || (&__progname && __progname);
 }
 
 bool hasHardwareCRC32() {
 #if SANITIZER_FUCHSIA
-  u32 HWCap;
-  zx_status_t Status = zx_system_get_features(ZX_FEATURE_KIND_CPU, &HWCap);
-  if (Status != ZX_OK || (HWCap & ZX_ARM64_FEATURE_ISA_CRC32) == 0)
-    return false;
-  return true;
+    u32 HWCap;
+    zx_status_t Status = zx_system_get_features(ZX_FEATURE_KIND_CPU, &HWCap);
+    if (Status != ZX_OK || (HWCap & ZX_ARM64_FEATURE_ISA_CRC32) == 0)
+        return false;
+    return true;
 #else
-  if (&getauxval && areBionicGlobalsInitialized())
-    return !!(getauxval(AT_HWCAP) & HWCAP_CRC32);
-  return hasHardwareCRC32ARMPosix();
+    if (&getauxval && areBionicGlobalsInitialized())
+        return !!(getauxval(AT_HWCAP) & HWCAP_CRC32);
+    return hasHardwareCRC32ARMPosix();
 #endif  // SANITIZER_FUCHSIA
 }
 #else
-bool hasHardwareCRC32() { return false; }
+bool hasHardwareCRC32() {
+    return false;
+}
 #endif  // defined(__x86_64__) || defined(__i386__)
 
 }  // namespace __scudo

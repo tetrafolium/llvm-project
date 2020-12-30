@@ -51,23 +51,25 @@ enum class Style { windows, posix, native };
 /// @endcode
 class const_iterator
     : public iterator_facade_base<const_iterator, std::input_iterator_tag,
-                                  const StringRef> {
-  StringRef Path;          ///< The entire path.
-  StringRef Component;     ///< The current component. Not necessarily in Path.
-  size_t    Position = 0;  ///< The iterators current position within Path.
-  Style S = Style::native; ///< The path style to use.
+      const StringRef> {
+    StringRef Path;          ///< The entire path.
+    StringRef Component;     ///< The current component. Not necessarily in Path.
+    size_t    Position = 0;  ///< The iterators current position within Path.
+    Style S = Style::native; ///< The path style to use.
 
-  // An end iterator has Position = Path.size() + 1.
-  friend const_iterator begin(StringRef path, Style style);
-  friend const_iterator end(StringRef path);
+    // An end iterator has Position = Path.size() + 1.
+    friend const_iterator begin(StringRef path, Style style);
+    friend const_iterator end(StringRef path);
 
 public:
-  reference operator*() const { return Component; }
-  const_iterator &operator++();    // preincrement
-  bool operator==(const const_iterator &RHS) const;
+    reference operator*() const {
+        return Component;
+    }
+    const_iterator &operator++();    // preincrement
+    bool operator==(const const_iterator &RHS) const;
 
-  /// Difference in bytes between this and RHS.
-  ptrdiff_t operator-(const const_iterator &RHS) const;
+    /// Difference in bytes between this and RHS.
+    ptrdiff_t operator-(const const_iterator &RHS) const;
 };
 
 /// Reverse path iterator.
@@ -77,22 +79,24 @@ public:
 /// of \a const_iterator
 class reverse_iterator
     : public iterator_facade_base<reverse_iterator, std::input_iterator_tag,
-                                  const StringRef> {
-  StringRef Path;          ///< The entire path.
-  StringRef Component;     ///< The current component. Not necessarily in Path.
-  size_t    Position = 0;  ///< The iterators current position within Path.
-  Style S = Style::native; ///< The path style to use.
+      const StringRef> {
+    StringRef Path;          ///< The entire path.
+    StringRef Component;     ///< The current component. Not necessarily in Path.
+    size_t    Position = 0;  ///< The iterators current position within Path.
+    Style S = Style::native; ///< The path style to use.
 
-  friend reverse_iterator rbegin(StringRef path, Style style);
-  friend reverse_iterator rend(StringRef path);
+    friend reverse_iterator rbegin(StringRef path, Style style);
+    friend reverse_iterator rend(StringRef path);
 
 public:
-  reference operator*() const { return Component; }
-  reverse_iterator &operator++();    // preincrement
-  bool operator==(const reverse_iterator &RHS) const;
+    reference operator*() const {
+        return Component;
+    }
+    reverse_iterator &operator++();    // preincrement
+    bool operator==(const reverse_iterator &RHS) const;
 
-  /// Difference in bytes between this and RHS.
-  ptrdiff_t operator-(const reverse_iterator &RHS) const;
+    /// Difference in bytes between this and RHS.
+    ptrdiff_t operator-(const reverse_iterator &RHS) const;
 };
 
 /// Get begin iterator over \a path.
@@ -185,9 +189,9 @@ bool replace_path_prefix(SmallVectorImpl<char> &Path, StringRef OldPrefix,
 /// @param path Set to \a path + \a component.
 /// @param a The component to be appended to \a path.
 void append(SmallVectorImpl<char> &path, const Twine &a,
-                                         const Twine &b = "",
-                                         const Twine &c = "",
-                                         const Twine &d = "");
+            const Twine &b = "",
+            const Twine &c = "",
+            const Twine &d = "");
 
 void append(SmallVectorImpl<char> &path, Style style, const Twine &a,
             const Twine &b = "", const Twine &c = "", const Twine &d = "");

@@ -17,32 +17,36 @@ using namespace llvm;
 
 void GISelChangeObserver::changingAllUsesOfReg(
     const MachineRegisterInfo &MRI, Register Reg) {
-  for (auto &ChangingMI : MRI.use_instructions(Reg)) {
-    changingInstr(ChangingMI);
-    ChangingAllUsesOfReg.insert(&ChangingMI);
-  }
+    for (auto &ChangingMI : MRI.use_instructions(Reg)) {
+        changingInstr(ChangingMI);
+        ChangingAllUsesOfReg.insert(&ChangingMI);
+    }
 }
 
 void GISelChangeObserver::finishedChangingAllUsesOfReg() {
-  for (auto *ChangedMI : ChangingAllUsesOfReg)
-    changedInstr(*ChangedMI);
-  ChangingAllUsesOfReg.clear();
+    for (auto *ChangedMI : ChangingAllUsesOfReg)
+        changedInstr(*ChangedMI);
+    ChangingAllUsesOfReg.clear();
 }
 
 RAIIDelegateInstaller::RAIIDelegateInstaller(MachineFunction &MF,
-                                             MachineFunction::Delegate *Del)
+        MachineFunction::Delegate *Del)
     : MF(MF), Delegate(Del) {
-  // Register this as the delegate for handling insertions and deletions of
-  // instructions.
-  MF.setDelegate(Del);
+    // Register this as the delegate for handling insertions and deletions of
+    // instructions.
+    MF.setDelegate(Del);
 }
 
-RAIIDelegateInstaller::~RAIIDelegateInstaller() { MF.resetDelegate(Delegate); }
+RAIIDelegateInstaller::~RAIIDelegateInstaller() {
+    MF.resetDelegate(Delegate);
+}
 
 RAIIMFObserverInstaller::RAIIMFObserverInstaller(MachineFunction &MF,
-                                                 GISelChangeObserver &Observer)
+        GISelChangeObserver &Observer)
     : MF(MF) {
-  MF.setObserver(&Observer);
+    MF.setObserver(&Observer);
 }
 
-RAIIMFObserverInstaller::~RAIIMFObserverInstaller() { MF.setObserver(nullptr); }
+RAIIMFObserverInstaller::~RAIIMFObserverInstaller() {
+    MF.setObserver(nullptr);
+}

@@ -17,31 +17,43 @@
 namespace llvm {
 
 class VEMachineFunctionInfo : public MachineFunctionInfo {
-  virtual void anchor();
+    virtual void anchor();
 
 private:
-  Register GlobalBaseReg;
+    Register GlobalBaseReg;
 
-  /// VarArgsFrameOffset - Frame offset to start of varargs area.
-  int VarArgsFrameOffset;
+    /// VarArgsFrameOffset - Frame offset to start of varargs area.
+    int VarArgsFrameOffset;
 
-  /// IsLeafProc - True if the function is a leaf procedure.
-  bool IsLeafProc;
+    /// IsLeafProc - True if the function is a leaf procedure.
+    bool IsLeafProc;
 
 public:
-  VEMachineFunctionInfo()
-      : GlobalBaseReg(), VarArgsFrameOffset(0), IsLeafProc(false) {}
-  explicit VEMachineFunctionInfo(MachineFunction &MF)
-      : GlobalBaseReg(), VarArgsFrameOffset(0), IsLeafProc(false) {}
+    VEMachineFunctionInfo()
+        : GlobalBaseReg(), VarArgsFrameOffset(0), IsLeafProc(false) {}
+    explicit VEMachineFunctionInfo(MachineFunction &MF)
+        : GlobalBaseReg(), VarArgsFrameOffset(0), IsLeafProc(false) {}
 
-  Register getGlobalBaseReg() const { return GlobalBaseReg; }
-  void setGlobalBaseReg(Register Reg) { GlobalBaseReg = Reg; }
+    Register getGlobalBaseReg() const {
+        return GlobalBaseReg;
+    }
+    void setGlobalBaseReg(Register Reg) {
+        GlobalBaseReg = Reg;
+    }
 
-  int getVarArgsFrameOffset() const { return VarArgsFrameOffset; }
-  void setVarArgsFrameOffset(int Offset) { VarArgsFrameOffset = Offset; }
+    int getVarArgsFrameOffset() const {
+        return VarArgsFrameOffset;
+    }
+    void setVarArgsFrameOffset(int Offset) {
+        VarArgsFrameOffset = Offset;
+    }
 
-  void setLeafProc(bool rhs) { IsLeafProc = rhs; }
-  bool isLeafProc() const { return IsLeafProc; }
+    void setLeafProc(bool rhs) {
+        IsLeafProc = rhs;
+    }
+    bool isLeafProc() const {
+        return IsLeafProc;
+    }
 };
 } // namespace llvm
 

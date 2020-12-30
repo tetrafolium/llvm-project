@@ -23,11 +23,11 @@ class SymbolIndex;
 
 /// Helper function for deriving an LSP Location from an index SymbolLocation.
 llvm::Expected<Location> indexToLSPLocation(const SymbolLocation &Loc,
-                                            llvm::StringRef TUPath);
+        llvm::StringRef TUPath);
 
 /// Helper function for deriving an LSP Location for a Symbol.
 llvm::Expected<Location> symbolToLocation(const Symbol &Sym,
-                                          llvm::StringRef TUPath);
+        llvm::StringRef TUPath);
 
 /// Searches for the symbols matching \p Query. The syntax of \p Query can be
 /// the non-qualified name or fully qualified of a symbol. For example,
@@ -40,8 +40,8 @@ llvm::Expected<Location> symbolToLocation(const Symbol &Sym,
 /// \p HintPath This is used when resolving URIs. If empty, URI resolution can
 /// fail if a hint path is required for the scheme of a specific URI.
 llvm::Expected<std::vector<SymbolInformation>>
-getWorkspaceSymbols(llvm::StringRef Query, int Limit,
-                    const SymbolIndex *const Index, llvm::StringRef HintPath);
+        getWorkspaceSymbols(llvm::StringRef Query, int Limit,
+                            const SymbolIndex *const Index, llvm::StringRef HintPath);
 
 /// Retrieves the symbols contained in the "main file" section of an AST in the
 /// same order that they appear.

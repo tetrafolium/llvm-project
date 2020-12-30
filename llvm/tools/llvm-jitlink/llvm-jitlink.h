@@ -36,16 +36,16 @@ struct Session;
 /// ObjectLinkingLayer with additional support for symbol promotion.
 class LLVMJITLinkObjectLinkingLayer : public orc::ObjectLinkingLayer {
 public:
-  using orc::ObjectLinkingLayer::add;
+    using orc::ObjectLinkingLayer::add;
 
-  LLVMJITLinkObjectLinkingLayer(Session &S,
-                                jitlink::JITLinkMemoryManager &MemMgr);
+    LLVMJITLinkObjectLinkingLayer(Session &S,
+                                  jitlink::JITLinkMemoryManager &MemMgr);
 
-  Error add(orc::ResourceTrackerSP RT,
-            std::unique_ptr<MemoryBuffer> O) override;
+    Error add(orc::ResourceTrackerSP RT,
+              std::unique_ptr<MemoryBuffer> O) override;
 
 private:
-  Session &S;
+    Session &S;
 };
 
 using LLVMJITLinkChannel = orc::rpc::FDRawByteChannel;
@@ -59,106 +59,106 @@ using LLVMJITLinkRemoteMemoryAccess =
 class LLVMJITLinkRemoteTargetProcessControl
     : public orc::OrcRPCTargetProcessControlBase<LLVMJITLinkRPCEndpoint> {
 public:
-  using BaseT = orc::OrcRPCTargetProcessControlBase<LLVMJITLinkRPCEndpoint>;
-  static Expected<std::unique_ptr<TargetProcessControl>> LaunchExecutor();
+    using BaseT = orc::OrcRPCTargetProcessControlBase<LLVMJITLinkRPCEndpoint>;
+    static Expected<std::unique_ptr<TargetProcessControl>> LaunchExecutor();
 
-  static Expected<std::unique_ptr<TargetProcessControl>> ConnectToExecutor();
+    static Expected<std::unique_ptr<TargetProcessControl>> ConnectToExecutor();
 
-  Error disconnect() override;
+    Error disconnect() override;
 
 private:
-  using LLVMJITLinkRemoteMemoryAccess =
-      orc::OrcRPCTPCMemoryAccess<LLVMJITLinkRemoteTargetProcessControl>;
+    using LLVMJITLinkRemoteMemoryAccess =
+        orc::OrcRPCTPCMemoryAccess<LLVMJITLinkRemoteTargetProcessControl>;
 
-  using LLVMJITLinkRemoteMemoryManager =
-      orc::OrcRPCTPCJITLinkMemoryManager<LLVMJITLinkRemoteTargetProcessControl>;
+    using LLVMJITLinkRemoteMemoryManager =
+        orc::OrcRPCTPCJITLinkMemoryManager<LLVMJITLinkRemoteTargetProcessControl>;
 
-  LLVMJITLinkRemoteTargetProcessControl(
-      std::shared_ptr<orc::SymbolStringPool> SSP,
-      std::unique_ptr<LLVMJITLinkChannel> Channel,
-      std::unique_ptr<LLVMJITLinkRPCEndpoint> Endpoint,
-      ErrorReporter ReportError, Error &Err)
-      : BaseT(std::move(SSP), *Endpoint, std::move(ReportError)),
-        Channel(std::move(Channel)), Endpoint(std::move(Endpoint)) {
-    ErrorAsOutParameter _(&Err);
+    LLVMJITLinkRemoteTargetProcessControl(
+        std::shared_ptr<orc::SymbolStringPool> SSP,
+        std::unique_ptr<LLVMJITLinkChannel> Channel,
+        std::unique_ptr<LLVMJITLinkRPCEndpoint> Endpoint,
+        ErrorReporter ReportError, Error &Err)
+        : BaseT(std::move(SSP), *Endpoint, std::move(ReportError)),
+          Channel(std::move(Channel)), Endpoint(std::move(Endpoint)) {
+        ErrorAsOutParameter _(&Err);
 
-    ListenerThread = std::thread([&]() {
-      while (!Finished) {
-        if (auto Err = this->Endpoint->handleOne()) {
-          reportError(std::move(Err));
-          return;
+        ListenerThread = std::thread([&]() {
+            while (!Finished) {
+                if (auto Err = this->Endpoint->handleOne()) {
+                    reportError(std::move(Err));
+                    return;
+                }
+            }
+        });
+
+        if (auto Err2 = initializeORCRPCTPCBase()) {
+            Err = joinErrors(std::move(Err2), disconnect());
+            return;
         }
-      }
-    });
 
-    if (auto Err2 = initializeORCRPCTPCBase()) {
-      Err = joinErrors(std::move(Err2), disconnect());
-      return;
+        OwnedMemAccess = std::make_unique<LLVMJITLinkRemoteMemoryAccess>(*this);
+        MemAccess = OwnedMemAccess.get();
+        OwnedMemMgr = std::make_unique<LLVMJITLinkRemoteMemoryManager>(*this);
+        MemMgr = OwnedMemMgr.get();
     }
 
-    OwnedMemAccess = std::make_unique<LLVMJITLinkRemoteMemoryAccess>(*this);
-    MemAccess = OwnedMemAccess.get();
-    OwnedMemMgr = std::make_unique<LLVMJITLinkRemoteMemoryManager>(*this);
-    MemMgr = OwnedMemMgr.get();
-  }
-
-  std::unique_ptr<LLVMJITLinkChannel> Channel;
-  std::unique_ptr<LLVMJITLinkRPCEndpoint> Endpoint;
-  std::unique_ptr<TargetProcessControl::MemoryAccess> OwnedMemAccess;
-  std::unique_ptr<jitlink::JITLinkMemoryManager> OwnedMemMgr;
-  std::atomic<bool> Finished{false};
-  std::thread ListenerThread;
+    std::unique_ptr<LLVMJITLinkChannel> Channel;
+    std::unique_ptr<LLVMJITLinkRPCEndpoint> Endpoint;
+    std::unique_ptr<TargetProcessControl::MemoryAccess> OwnedMemAccess;
+    std::unique_ptr<jitlink::JITLinkMemoryManager> OwnedMemMgr;
+    std::atomic<bool> Finished{false};
+    std::thread ListenerThread;
 };
 
 struct Session {
-  std::unique_ptr<orc::TargetProcessControl> TPC;
-  orc::ExecutionSession ES;
-  orc::JITDylib *MainJD;
-  LLVMJITLinkObjectLinkingLayer ObjLayer;
-  std::vector<orc::JITDylib *> JDSearchOrder;
+    std::unique_ptr<orc::TargetProcessControl> TPC;
+    orc::ExecutionSession ES;
+    orc::JITDylib *MainJD;
+    LLVMJITLinkObjectLinkingLayer ObjLayer;
+    std::vector<orc::JITDylib *> JDSearchOrder;
 
-  ~Session();
+    ~Session();
 
-  static Expected<std::unique_ptr<Session>> Create(Triple TT);
-  void dumpSessionInfo(raw_ostream &OS);
-  void modifyPassConfig(const Triple &FTT,
-                        jitlink::PassConfiguration &PassConfig);
+    static Expected<std::unique_ptr<Session>> Create(Triple TT);
+    void dumpSessionInfo(raw_ostream &OS);
+    void modifyPassConfig(const Triple &FTT,
+                          jitlink::PassConfiguration &PassConfig);
 
-  using MemoryRegionInfo = RuntimeDyldChecker::MemoryRegionInfo;
+    using MemoryRegionInfo = RuntimeDyldChecker::MemoryRegionInfo;
 
-  struct FileInfo {
-    StringMap<MemoryRegionInfo> SectionInfos;
-    StringMap<MemoryRegionInfo> StubInfos;
-    StringMap<MemoryRegionInfo> GOTEntryInfos;
-  };
+    struct FileInfo {
+        StringMap<MemoryRegionInfo> SectionInfos;
+        StringMap<MemoryRegionInfo> StubInfos;
+        StringMap<MemoryRegionInfo> GOTEntryInfos;
+    };
 
-  using SymbolInfoMap = StringMap<MemoryRegionInfo>;
-  using FileInfoMap = StringMap<FileInfo>;
+    using SymbolInfoMap = StringMap<MemoryRegionInfo>;
+    using FileInfoMap = StringMap<FileInfo>;
 
-  Expected<FileInfo &> findFileInfo(StringRef FileName);
-  Expected<MemoryRegionInfo &> findSectionInfo(StringRef FileName,
-                                               StringRef SectionName);
-  Expected<MemoryRegionInfo &> findStubInfo(StringRef FileName,
-                                            StringRef TargetName);
-  Expected<MemoryRegionInfo &> findGOTEntryInfo(StringRef FileName,
-                                                StringRef TargetName);
+    Expected<FileInfo &> findFileInfo(StringRef FileName);
+    Expected<MemoryRegionInfo &> findSectionInfo(StringRef FileName,
+            StringRef SectionName);
+    Expected<MemoryRegionInfo &> findStubInfo(StringRef FileName,
+            StringRef TargetName);
+    Expected<MemoryRegionInfo &> findGOTEntryInfo(StringRef FileName,
+            StringRef TargetName);
 
-  bool isSymbolRegistered(StringRef Name);
-  Expected<MemoryRegionInfo &> findSymbolInfo(StringRef SymbolName,
-                                              Twine ErrorMsgStem);
+    bool isSymbolRegistered(StringRef Name);
+    Expected<MemoryRegionInfo &> findSymbolInfo(StringRef SymbolName,
+            Twine ErrorMsgStem);
 
-  SymbolInfoMap SymbolInfos;
-  FileInfoMap FileInfos;
-  uint64_t SizeBeforePruning = 0;
-  uint64_t SizeAfterFixups = 0;
+    SymbolInfoMap SymbolInfos;
+    FileInfoMap FileInfos;
+    uint64_t SizeBeforePruning = 0;
+    uint64_t SizeAfterFixups = 0;
 
-  StringSet<> HarnessFiles;
-  StringSet<> HarnessExternals;
-  StringSet<> HarnessDefinitions;
-  DenseMap<StringRef, StringRef> CanonicalWeakDefs;
+    StringSet<> HarnessFiles;
+    StringSet<> HarnessExternals;
+    StringSet<> HarnessDefinitions;
+    DenseMap<StringRef, StringRef> CanonicalWeakDefs;
 
 private:
-  Session(std::unique_ptr<orc::TargetProcessControl> TPC, Error &Err);
+    Session(std::unique_ptr<orc::TargetProcessControl> TPC, Error &Err);
 };
 
 /// Record symbols, GOT entries, stubs, and sections for ELF file.

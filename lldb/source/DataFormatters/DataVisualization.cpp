@@ -13,184 +13,186 @@ using namespace lldb;
 using namespace lldb_private;
 
 static FormatManager &GetFormatManager() {
-  static FormatManager g_format_manager;
-  return g_format_manager;
+    static FormatManager g_format_manager;
+    return g_format_manager;
 }
 
-void DataVisualization::ForceUpdate() { GetFormatManager().Changed(); }
+void DataVisualization::ForceUpdate() {
+    GetFormatManager().Changed();
+}
 
 uint32_t DataVisualization::GetCurrentRevision() {
-  return GetFormatManager().GetCurrentRevision();
+    return GetFormatManager().GetCurrentRevision();
 }
 
 bool DataVisualization::ShouldPrintAsOneLiner(ValueObject &valobj) {
-  return GetFormatManager().ShouldPrintAsOneLiner(valobj);
+    return GetFormatManager().ShouldPrintAsOneLiner(valobj);
 }
 
 lldb::TypeFormatImplSP
 DataVisualization::GetFormat(ValueObject &valobj,
                              lldb::DynamicValueType use_dynamic) {
-  return GetFormatManager().GetFormat(valobj, use_dynamic);
+    return GetFormatManager().GetFormat(valobj, use_dynamic);
 }
 
 lldb::TypeFormatImplSP
 DataVisualization::GetFormatForType(lldb::TypeNameSpecifierImplSP type_sp) {
-  return GetFormatManager().GetFormatForType(type_sp);
+    return GetFormatManager().GetFormatForType(type_sp);
 }
 
 lldb::TypeSummaryImplSP
 DataVisualization::GetSummaryFormat(ValueObject &valobj,
                                     lldb::DynamicValueType use_dynamic) {
-  return GetFormatManager().GetSummaryFormat(valobj, use_dynamic);
+    return GetFormatManager().GetSummaryFormat(valobj, use_dynamic);
 }
 
 lldb::TypeSummaryImplSP
 DataVisualization::GetSummaryForType(lldb::TypeNameSpecifierImplSP type_sp) {
-  return GetFormatManager().GetSummaryForType(type_sp);
+    return GetFormatManager().GetSummaryForType(type_sp);
 }
 
 lldb::SyntheticChildrenSP
 DataVisualization::GetSyntheticChildren(ValueObject &valobj,
                                         lldb::DynamicValueType use_dynamic) {
-  return GetFormatManager().GetSyntheticChildren(valobj, use_dynamic);
+    return GetFormatManager().GetSyntheticChildren(valobj, use_dynamic);
 }
 
 lldb::TypeFilterImplSP
 DataVisualization::GetFilterForType(lldb::TypeNameSpecifierImplSP type_sp) {
-  return GetFormatManager().GetFilterForType(type_sp);
+    return GetFormatManager().GetFilterForType(type_sp);
 }
 
 lldb::ScriptedSyntheticChildrenSP
 DataVisualization::GetSyntheticForType(lldb::TypeNameSpecifierImplSP type_sp) {
-  return GetFormatManager().GetSyntheticForType(type_sp);
+    return GetFormatManager().GetSyntheticForType(type_sp);
 }
 
 bool DataVisualization::AnyMatches(
     ConstString type_name, TypeCategoryImpl::FormatCategoryItems items,
     bool only_enabled, const char **matching_category,
     TypeCategoryImpl::FormatCategoryItems *matching_type) {
-  return GetFormatManager().AnyMatches(type_name, items, only_enabled,
-                                       matching_category, matching_type);
+    return GetFormatManager().AnyMatches(type_name, items, only_enabled,
+                                         matching_category, matching_type);
 }
 
 bool DataVisualization::Categories::GetCategory(ConstString category,
-                                                lldb::TypeCategoryImplSP &entry,
-                                                bool allow_create) {
-  entry = GetFormatManager().GetCategory(category, allow_create);
-  return (entry.get() != nullptr);
+        lldb::TypeCategoryImplSP &entry,
+        bool allow_create) {
+    entry = GetFormatManager().GetCategory(category, allow_create);
+    return (entry.get() != nullptr);
 }
 
 bool DataVisualization::Categories::GetCategory(
     lldb::LanguageType language, lldb::TypeCategoryImplSP &entry) {
-  if (LanguageCategory *lang_category =
-          GetFormatManager().GetCategoryForLanguage(language))
-    entry = lang_category->GetCategory();
-  return (entry.get() != nullptr);
+    if (LanguageCategory *lang_category =
+                GetFormatManager().GetCategoryForLanguage(language))
+        entry = lang_category->GetCategory();
+    return (entry.get() != nullptr);
 }
 
 void DataVisualization::Categories::Add(ConstString category) {
-  GetFormatManager().GetCategory(category);
+    GetFormatManager().GetCategory(category);
 }
 
 bool DataVisualization::Categories::Delete(ConstString category) {
-  GetFormatManager().DisableCategory(category);
-  return GetFormatManager().DeleteCategory(category);
+    GetFormatManager().DisableCategory(category);
+    return GetFormatManager().DeleteCategory(category);
 }
 
 void DataVisualization::Categories::Clear() {
-  GetFormatManager().ClearCategories();
+    GetFormatManager().ClearCategories();
 }
 
 void DataVisualization::Categories::Clear(ConstString category) {
-  GetFormatManager().GetCategory(category)->Clear(
-      eFormatCategoryItemSummary | eFormatCategoryItemRegexSummary);
+    GetFormatManager().GetCategory(category)->Clear(
+        eFormatCategoryItemSummary | eFormatCategoryItemRegexSummary);
 }
 
 void DataVisualization::Categories::Enable(ConstString category,
-                                           TypeCategoryMap::Position pos) {
-  if (GetFormatManager().GetCategory(category)->IsEnabled())
-    GetFormatManager().DisableCategory(category);
-  GetFormatManager().EnableCategory(category, pos, {});
+        TypeCategoryMap::Position pos) {
+    if (GetFormatManager().GetCategory(category)->IsEnabled())
+        GetFormatManager().DisableCategory(category);
+    GetFormatManager().EnableCategory(category, pos, {});
 }
 
 void DataVisualization::Categories::Enable(lldb::LanguageType lang_type) {
-  if (LanguageCategory *lang_category =
-          GetFormatManager().GetCategoryForLanguage(lang_type))
-    lang_category->Enable();
+    if (LanguageCategory *lang_category =
+                GetFormatManager().GetCategoryForLanguage(lang_type))
+        lang_category->Enable();
 }
 
 void DataVisualization::Categories::Disable(ConstString category) {
-  if (GetFormatManager().GetCategory(category)->IsEnabled())
-    GetFormatManager().DisableCategory(category);
+    if (GetFormatManager().GetCategory(category)->IsEnabled())
+        GetFormatManager().DisableCategory(category);
 }
 
 void DataVisualization::Categories::Disable(lldb::LanguageType lang_type) {
-  if (LanguageCategory *lang_category =
-          GetFormatManager().GetCategoryForLanguage(lang_type))
-    lang_category->Disable();
+    if (LanguageCategory *lang_category =
+                GetFormatManager().GetCategoryForLanguage(lang_type))
+        lang_category->Disable();
 }
 
 void DataVisualization::Categories::Enable(
     const lldb::TypeCategoryImplSP &category, TypeCategoryMap::Position pos) {
-  if (category.get()) {
-    if (category->IsEnabled())
-      GetFormatManager().DisableCategory(category);
-    GetFormatManager().EnableCategory(category, pos);
-  }
+    if (category.get()) {
+        if (category->IsEnabled())
+            GetFormatManager().DisableCategory(category);
+        GetFormatManager().EnableCategory(category, pos);
+    }
 }
 
 void DataVisualization::Categories::Disable(
     const lldb::TypeCategoryImplSP &category) {
-  if (category.get() && category->IsEnabled())
-    GetFormatManager().DisableCategory(category);
+    if (category.get() && category->IsEnabled())
+        GetFormatManager().DisableCategory(category);
 }
 
 void DataVisualization::Categories::EnableStar() {
-  GetFormatManager().EnableAllCategories();
+    GetFormatManager().EnableAllCategories();
 }
 
 void DataVisualization::Categories::DisableStar() {
-  GetFormatManager().DisableAllCategories();
+    GetFormatManager().DisableAllCategories();
 }
 
 void DataVisualization::Categories::ForEach(
     TypeCategoryMap::ForEachCallback callback) {
-  GetFormatManager().ForEachCategory(callback);
+    GetFormatManager().ForEachCategory(callback);
 }
 
 uint32_t DataVisualization::Categories::GetCount() {
-  return GetFormatManager().GetCategoriesCount();
+    return GetFormatManager().GetCategoriesCount();
 }
 
 lldb::TypeCategoryImplSP
 DataVisualization::Categories::GetCategoryAtIndex(size_t index) {
-  return GetFormatManager().GetCategoryAtIndex(index);
+    return GetFormatManager().GetCategoryAtIndex(index);
 }
 
 bool DataVisualization::NamedSummaryFormats::GetSummaryFormat(
     ConstString type, lldb::TypeSummaryImplSP &entry) {
-  return GetFormatManager().GetNamedSummaryContainer().GetExact(type, entry);
+    return GetFormatManager().GetNamedSummaryContainer().GetExact(type, entry);
 }
 
 void DataVisualization::NamedSummaryFormats::Add(
     ConstString type, const lldb::TypeSummaryImplSP &entry) {
-  GetFormatManager().GetNamedSummaryContainer().Add(type, entry);
+    GetFormatManager().GetNamedSummaryContainer().Add(type, entry);
 }
 
 bool DataVisualization::NamedSummaryFormats::Delete(ConstString type) {
-  return GetFormatManager().GetNamedSummaryContainer().Delete(type);
+    return GetFormatManager().GetNamedSummaryContainer().Delete(type);
 }
 
 void DataVisualization::NamedSummaryFormats::Clear() {
-  GetFormatManager().GetNamedSummaryContainer().Clear();
+    GetFormatManager().GetNamedSummaryContainer().Clear();
 }
 
 void DataVisualization::NamedSummaryFormats::ForEach(
     std::function<bool(const TypeMatcher &, const lldb::TypeSummaryImplSP &)>
-        callback) {
-  GetFormatManager().GetNamedSummaryContainer().ForEach(callback);
+    callback) {
+    GetFormatManager().GetNamedSummaryContainer().ForEach(callback);
 }
 
 uint32_t DataVisualization::NamedSummaryFormats::GetCount() {
-  return GetFormatManager().GetNamedSummaryContainer().GetCount();
+    return GetFormatManager().GetNamedSummaryContainer().GetCount();
 }

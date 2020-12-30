@@ -23,21 +23,23 @@ NativeEnumModules::NativeEnumModules(NativeSession &PDBSession, uint32_t Index)
     : Session(PDBSession), Index(Index) {}
 
 uint32_t NativeEnumModules::getChildCount() const {
-  return Session.getSymbolCache().getNumCompilands();
+    return Session.getSymbolCache().getNumCompilands();
 }
 
 std::unique_ptr<PDBSymbol>
 NativeEnumModules::getChildAtIndex(uint32_t N) const {
-  return Session.getSymbolCache().getOrCreateCompiland(N);
+    return Session.getSymbolCache().getOrCreateCompiland(N);
 }
 
 std::unique_ptr<PDBSymbol> NativeEnumModules::getNext() {
-  if (Index >= getChildCount())
-    return nullptr;
-  return getChildAtIndex(Index++);
+    if (Index >= getChildCount())
+        return nullptr;
+    return getChildAtIndex(Index++);
 }
 
-void NativeEnumModules::reset() { Index = 0; }
+void NativeEnumModules::reset() {
+    Index = 0;
+}
 
 }
 }

@@ -44,32 +44,32 @@ llvm::ModulePass *createDebugifyModulePass();
 llvm::FunctionPass *createDebugifyFunctionPass();
 
 struct NewPMDebugifyPass : public llvm::PassInfoMixin<NewPMDebugifyPass> {
-  llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
+    llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
 };
 
 /// Track how much `debugify` information has been lost.
 struct DebugifyStatistics {
-  /// Number of missing dbg.values.
-  unsigned NumDbgValuesMissing = 0;
+    /// Number of missing dbg.values.
+    unsigned NumDbgValuesMissing = 0;
 
-  /// Number of dbg.values expected.
-  unsigned NumDbgValuesExpected = 0;
+    /// Number of dbg.values expected.
+    unsigned NumDbgValuesExpected = 0;
 
-  /// Number of instructions with empty debug locations.
-  unsigned NumDbgLocsMissing = 0;
+    /// Number of instructions with empty debug locations.
+    unsigned NumDbgLocsMissing = 0;
 
-  /// Number of instructions expected to have debug locations.
-  unsigned NumDbgLocsExpected = 0;
+    /// Number of instructions expected to have debug locations.
+    unsigned NumDbgLocsExpected = 0;
 
-  /// Get the ratio of missing/expected dbg.values.
-  float getMissingValueRatio() const {
-    return float(NumDbgValuesMissing) / float(NumDbgLocsExpected);
-  }
+    /// Get the ratio of missing/expected dbg.values.
+    float getMissingValueRatio() const {
+        return float(NumDbgValuesMissing) / float(NumDbgLocsExpected);
+    }
 
-  /// Get the ratio of missing/expected instructions with locations.
-  float getEmptyLocationRatio() const {
-    return float(NumDbgLocsMissing) / float(NumDbgLocsExpected);
-  }
+    /// Get the ratio of missing/expected instructions with locations.
+    float getEmptyLocationRatio() const {
+        return float(NumDbgLocsMissing) / float(NumDbgLocsExpected);
+    }
 };
 
 /// Map pass names to a per-pass DebugifyStatistics instance.
@@ -89,13 +89,13 @@ createCheckDebugifyFunctionPass(bool Strip = false,
 
 struct NewPMCheckDebugifyPass
     : public llvm::PassInfoMixin<NewPMCheckDebugifyPass> {
-  llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
+    llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
 };
 
 struct DebugifyEachInstrumentation {
-  DebugifyStatsMap StatsMap;
+    DebugifyStatsMap StatsMap;
 
-  void registerCallbacks(PassInstrumentationCallbacks &PIC);
+    void registerCallbacks(PassInstrumentationCallbacks &PIC);
 };
 
 /// DebugifyCustomPassManager wraps each pass with the debugify passes if
@@ -103,48 +103,52 @@ struct DebugifyEachInstrumentation {
 /// NOTE: We support legacy custom pass manager only.
 /// TODO: Add New PM support for custom pass manager.
 class DebugifyCustomPassManager : public legacy::PassManager {
-  DebugifyStatsMap DIStatsMap;
-  bool EnableDebugifyEach = false;
+    DebugifyStatsMap DIStatsMap;
+    bool EnableDebugifyEach = false;
 
 public:
-  using super = legacy::PassManager;
+    using super = legacy::PassManager;
 
-  void add(Pass *P) override {
-    // Wrap each pass with (-check)-debugify passes if requested, making
-    // exceptions for passes which shouldn't see -debugify instrumentation.
-    bool WrapWithDebugify = EnableDebugifyEach && !P->getAsImmutablePass() &&
-                            !isIRPrintingPass(P) && !isBitcodeWriterPass(P);
-    if (!WrapWithDebugify) {
-      super::add(P);
-      return;
+    void add(Pass *P) override {
+        // Wrap each pass with (-check)-debugify passes if requested, making
+        // exceptions for passes which shouldn't see -debugify instrumentation.
+        bool WrapWithDebugify = EnableDebugifyEach && !P->getAsImmutablePass() &&
+                                !isIRPrintingPass(P) && !isBitcodeWriterPass(P);
+        if (!WrapWithDebugify) {
+            super::add(P);
+            return;
+        }
+
+        // Apply -debugify/-check-debugify before/after each pass and collect
+        // debug info loss statistics.
+        PassKind Kind = P->getPassKind();
+        StringRef Name = P->getPassName();
+
+        // TODO: Implement Debugify for LoopPass.
+        switch (Kind) {
+        case PT_Function:
+            super::add(createDebugifyFunctionPass());
+            super::add(P);
+            super::add(createCheckDebugifyFunctionPass(true, Name, &DIStatsMap));
+            break;
+        case PT_Module:
+            super::add(createDebugifyModulePass());
+            super::add(P);
+            super::add(createCheckDebugifyModulePass(true, Name, &DIStatsMap));
+            break;
+        default:
+            super::add(P);
+            break;
+        }
     }
 
-    // Apply -debugify/-check-debugify before/after each pass and collect
-    // debug info loss statistics.
-    PassKind Kind = P->getPassKind();
-    StringRef Name = P->getPassName();
-
-    // TODO: Implement Debugify for LoopPass.
-    switch (Kind) {
-    case PT_Function:
-      super::add(createDebugifyFunctionPass());
-      super::add(P);
-      super::add(createCheckDebugifyFunctionPass(true, Name, &DIStatsMap));
-      break;
-    case PT_Module:
-      super::add(createDebugifyModulePass());
-      super::add(P);
-      super::add(createCheckDebugifyModulePass(true, Name, &DIStatsMap));
-      break;
-    default:
-      super::add(P);
-      break;
+    void enableDebugifyEach() {
+        EnableDebugifyEach = true;
     }
-  }
 
-  void enableDebugifyEach() { EnableDebugifyEach = true; }
-
-  const DebugifyStatsMap &getDebugifyStatsMap() const { return DIStatsMap; }
+    const DebugifyStatsMap &getDebugifyStatsMap() const {
+        return DIStatsMap;
+    }
 };
 } // namespace llvm
 

@@ -34,27 +34,27 @@ RankedTensorType getExtentTensorType(MLIRContext *ctx);
 /// The shape descriptor type represents rank and dimension sizes.
 class ShapeType : public Type::TypeBase<ShapeType, Type, TypeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 };
 
 /// The type of a single dimension.
 class SizeType : public Type::TypeBase<SizeType, Type, TypeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 };
 
 /// The ValueShape represents a (potentially unknown) runtime value and shape.
 class ValueShapeType
     : public Type::TypeBase<ValueShapeType, Type, TypeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 };
 
 /// The Witness represents a runtime constraint, to be used as shape related
 /// preconditions on code execution.
 class WitnessType : public Type::TypeBase<WitnessType, Type, TypeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 };
 
 } // namespace shape

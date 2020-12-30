@@ -104,7 +104,7 @@
 static inline double_t
 roundtoint (double_t x)
 {
-  return round (x);
+    return round (x);
 }
 
 /* Convert x to nearest int in all rounding modes, ties have to be rounded
@@ -114,9 +114,9 @@ static inline int32_t
 converttoint (double_t x)
 {
 # if HAVE_FAST_LROUND
-  return lround (x);
+    return lround (x);
 # else
-  return (long) round (x);
+    return (long) round (x);
 # endif
 }
 #endif
@@ -124,45 +124,45 @@ converttoint (double_t x)
 static inline uint32_t
 asuint (float f)
 {
-  union
-  {
-    float f;
-    uint32_t i;
-  } u = {f};
-  return u.i;
+    union
+    {
+        float f;
+        uint32_t i;
+    } u = {f};
+    return u.i;
 }
 
 static inline float
 asfloat (uint32_t i)
 {
-  union
-  {
-    uint32_t i;
-    float f;
-  } u = {i};
-  return u.f;
+    union
+    {
+        uint32_t i;
+        float f;
+    } u = {i};
+    return u.f;
 }
 
 static inline uint64_t
 asuint64 (double f)
 {
-  union
-  {
-    double f;
-    uint64_t i;
-  } u = {f};
-  return u.i;
+    union
+    {
+        double f;
+        uint64_t i;
+    } u = {f};
+    return u.i;
 }
 
 static inline double
 asdouble (uint64_t i)
 {
-  union
-  {
-    uint64_t i;
-    double f;
-  } u = {i};
-  return u.f;
+    union
+    {
+        uint64_t i;
+        double f;
+    } u = {i};
+    return u.f;
 }
 
 #ifndef IEEE_754_2008_SNAN
@@ -171,19 +171,19 @@ asdouble (uint64_t i)
 static inline int
 issignalingf_inline (float x)
 {
-  uint32_t ix = asuint (x);
-  if (!IEEE_754_2008_SNAN)
-    return (ix & 0x7fc00000) == 0x7fc00000;
-  return 2 * (ix ^ 0x00400000) > 2u * 0x7fc00000;
+    uint32_t ix = asuint (x);
+    if (!IEEE_754_2008_SNAN)
+        return (ix & 0x7fc00000) == 0x7fc00000;
+    return 2 * (ix ^ 0x00400000) > 2u * 0x7fc00000;
 }
 
 static inline int
 issignaling_inline (double x)
 {
-  uint64_t ix = asuint64 (x);
-  if (!IEEE_754_2008_SNAN)
-    return (ix & 0x7ff8000000000000) == 0x7ff8000000000000;
-  return 2 * (ix ^ 0x0008000000000000) > 2 * 0x7ff8000000000000ULL;
+    uint64_t ix = asuint64 (x);
+    if (!IEEE_754_2008_SNAN)
+        return (ix & 0x7ff8000000000000) == 0x7ff8000000000000;
+    return 2 * (ix ^ 0x0008000000000000) > 2 * 0x7ff8000000000000ULL;
 }
 
 #if __aarch64__ && __GNUC__
@@ -191,48 +191,48 @@ issignaling_inline (double x)
 static inline float
 opt_barrier_float (float x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
-  return x;
+    __asm__ __volatile__ ("" : "+w" (x));
+    return x;
 }
 static inline double
 opt_barrier_double (double x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
-  return x;
+    __asm__ __volatile__ ("" : "+w" (x));
+    return x;
 }
 /* Force the evaluation of a floating-point expression for its side-effect.  */
 static inline void
 force_eval_float (float x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
+    __asm__ __volatile__ ("" : "+w" (x));
 }
 static inline void
 force_eval_double (double x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
+    __asm__ __volatile__ ("" : "+w" (x));
 }
 #else
 static inline float
 opt_barrier_float (float x)
 {
-  volatile float y = x;
-  return y;
+    volatile float y = x;
+    return y;
 }
 static inline double
 opt_barrier_double (double x)
 {
-  volatile double y = x;
-  return y;
+    volatile double y = x;
+    return y;
 }
 static inline void
 force_eval_float (float x)
 {
-  volatile float y UNUSED = x;
+    volatile float y UNUSED = x;
 }
 static inline void
 force_eval_double (double x)
 {
-  volatile double y UNUSED = x;
+    volatile double y UNUSED = x;
 }
 #endif
 
@@ -243,12 +243,12 @@ force_eval_double (double x)
 static inline float
 eval_as_float (float x)
 {
-  return x;
+    return x;
 }
 static inline double
 eval_as_double (double x)
 {
-  return x;
+    return x;
 }
 
 /* Error handling tail calls for special cases, with a sign argument.
@@ -289,14 +289,14 @@ HIDDEN double __math_check_uflow (double);
 static inline double
 check_oflow (double x)
 {
-  return WANT_ERRNO ? __math_check_oflow (x) : x;
+    return WANT_ERRNO ? __math_check_oflow (x) : x;
 }
 
 /* Check if the result underflowed to 0.  */
 static inline double
 check_uflow (double x)
 {
-  return WANT_ERRNO ? __math_check_uflow (x) : x;
+    return WANT_ERRNO ? __math_check_uflow (x) : x;
 }
 
 
@@ -305,35 +305,35 @@ check_uflow (double x)
 #define EXP2F_POLY_ORDER 3
 extern const struct exp2f_data
 {
-  uint64_t tab[1 << EXP2F_TABLE_BITS];
-  double shift_scaled;
-  double poly[EXP2F_POLY_ORDER];
-  double shift;
-  double invln2_scaled;
-  double poly_scaled[EXP2F_POLY_ORDER];
+    uint64_t tab[1 << EXP2F_TABLE_BITS];
+    double shift_scaled;
+    double poly[EXP2F_POLY_ORDER];
+    double shift;
+    double invln2_scaled;
+    double poly_scaled[EXP2F_POLY_ORDER];
 } __exp2f_data HIDDEN;
 
 #define LOGF_TABLE_BITS 4
 #define LOGF_POLY_ORDER 4
 extern const struct logf_data
 {
-  struct
-  {
-    double invc, logc;
-  } tab[1 << LOGF_TABLE_BITS];
-  double ln2;
-  double poly[LOGF_POLY_ORDER - 1]; /* First order coefficient is 1.  */
+    struct
+    {
+        double invc, logc;
+    } tab[1 << LOGF_TABLE_BITS];
+    double ln2;
+    double poly[LOGF_POLY_ORDER - 1]; /* First order coefficient is 1.  */
 } __logf_data HIDDEN;
 
 #define LOG2F_TABLE_BITS 4
 #define LOG2F_POLY_ORDER 4
 extern const struct log2f_data
 {
-  struct
-  {
-    double invc, logc;
-  } tab[1 << LOG2F_TABLE_BITS];
-  double poly[LOG2F_POLY_ORDER];
+    struct
+    {
+        double invc, logc;
+    } tab[1 << LOG2F_TABLE_BITS];
+    double poly[LOG2F_POLY_ORDER];
 } __log2f_data HIDDEN;
 
 #define POWF_LOG2_TABLE_BITS 4
@@ -346,11 +346,11 @@ extern const struct log2f_data
 #define POWF_SCALE ((double) (1 << POWF_SCALE_BITS))
 extern const struct powf_log2_data
 {
-  struct
-  {
-    double invc, logc;
-  } tab[1 << POWF_LOG2_TABLE_BITS];
-  double poly[POWF_LOG2_POLY_ORDER];
+    struct
+    {
+        double invc, logc;
+    } tab[1 << POWF_LOG2_TABLE_BITS];
+    double poly[POWF_LOG2_POLY_ORDER];
 } __powf_log2_data HIDDEN;
 
 
@@ -366,14 +366,14 @@ extern const struct powf_log2_data
 #define EXP2_POLY_WIDE 0
 extern const struct exp_data
 {
-  double invln2N;
-  double shift;
-  double negln2hiN;
-  double negln2loN;
-  double poly[4]; /* Last four coefficients.  */
-  double exp2_shift;
-  double exp2_poly[EXP2_POLY_ORDER];
-  uint64_t tab[2*(1 << EXP_TABLE_BITS)];
+    double invln2N;
+    double shift;
+    double negln2hiN;
+    double negln2loN;
+    double poly[4]; /* Last four coefficients.  */
+    double exp2_shift;
+    double exp2_poly[EXP2_POLY_ORDER];
+    uint64_t tab[2*(1 << EXP_TABLE_BITS)];
 } __exp_data HIDDEN;
 
 #define LOG_TABLE_BITS 7
@@ -381,13 +381,17 @@ extern const struct exp_data
 #define LOG_POLY1_ORDER 12
 extern const struct log_data
 {
-  double ln2hi;
-  double ln2lo;
-  double poly[LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
-  double poly1[LOG_POLY1_ORDER - 1];
-  struct {double invc, logc;} tab[1 << LOG_TABLE_BITS];
+    double ln2hi;
+    double ln2lo;
+    double poly[LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
+    double poly1[LOG_POLY1_ORDER - 1];
+    struct {
+        double invc, logc;
+    } tab[1 << LOG_TABLE_BITS];
 #if !HAVE_FAST_FMA
-  struct {double chi, clo;} tab2[1 << LOG_TABLE_BITS];
+    struct {
+        double chi, clo;
+    } tab2[1 << LOG_TABLE_BITS];
 #endif
 } __log_data HIDDEN;
 
@@ -396,13 +400,17 @@ extern const struct log_data
 #define LOG2_POLY1_ORDER 11
 extern const struct log2_data
 {
-  double invln2hi;
-  double invln2lo;
-  double poly[LOG2_POLY_ORDER - 1];
-  double poly1[LOG2_POLY1_ORDER - 1];
-  struct {double invc, logc;} tab[1 << LOG2_TABLE_BITS];
+    double invln2hi;
+    double invln2lo;
+    double poly[LOG2_POLY_ORDER - 1];
+    double poly1[LOG2_POLY1_ORDER - 1];
+    struct {
+        double invc, logc;
+    } tab[1 << LOG2_TABLE_BITS];
 #if !HAVE_FAST_FMA
-  struct {double chi, clo;} tab2[1 << LOG2_TABLE_BITS];
+    struct {
+        double chi, clo;
+    } tab2[1 << LOG2_TABLE_BITS];
 #endif
 } __log2_data HIDDEN;
 
@@ -410,11 +418,13 @@ extern const struct log2_data
 #define POW_LOG_POLY_ORDER 8
 extern const struct pow_log_data
 {
-  double ln2hi;
-  double ln2lo;
-  double poly[POW_LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
-  /* Note: the pad field is unused, but allows slightly faster indexing.  */
-  struct {double invc, pad, logc, logctail;} tab[1 << POW_LOG_TABLE_BITS];
+    double ln2hi;
+    double ln2lo;
+    double poly[POW_LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
+    /* Note: the pad field is unused, but allows slightly faster indexing.  */
+    struct {
+        double invc, pad, logc, logctail;
+    } tab[1 << POW_LOG_TABLE_BITS];
 } __pow_log_data HIDDEN;
 
 #endif

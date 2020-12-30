@@ -17,30 +17,30 @@ namespace tidy {
 namespace bugprone {
 
 void SizeofContainerCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(
-      expr(unless(isInTemplateInstantiation()),
-           expr(sizeOfExpr(has(ignoringParenImpCasts(
-                    expr(hasType(hasCanonicalType(hasDeclaration(cxxRecordDecl(
-                        matchesName("^(::std::|::string)"),
-                        unless(matchesName("^::std::(bitset|array)$")),
-                        hasMethod(cxxMethodDecl(hasName("size"), isPublic(),
-                                                isConst())))))))))))
-               .bind("sizeof"),
-           // Ignore ARRAYSIZE(<array of containers>) pattern.
-           unless(hasAncestor(binaryOperator(
-               hasAnyOperatorName("/", "%"),
-               hasLHS(ignoringParenCasts(sizeOfExpr(expr()))),
-               hasRHS(ignoringParenCasts(equalsBoundNode("sizeof"))))))),
-      this);
+    Finder->addMatcher(
+        expr(unless(isInTemplateInstantiation()),
+             expr(sizeOfExpr(has(ignoringParenImpCasts(
+                                     expr(hasType(hasCanonicalType(hasDeclaration(cxxRecordDecl(
+                                             matchesName("^(::std::|::string)"),
+                                             unless(matchesName("^::std::(bitset|array)$")),
+                                             hasMethod(cxxMethodDecl(hasName("size"), isPublic(),
+                                                     isConst())))))))))))
+             .bind("sizeof"),
+             // Ignore ARRAYSIZE(<array of containers>) pattern.
+             unless(hasAncestor(binaryOperator(
+                                    hasAnyOperatorName("/", "%"),
+                                    hasLHS(ignoringParenCasts(sizeOfExpr(expr()))),
+                                    hasRHS(ignoringParenCasts(equalsBoundNode("sizeof"))))))),
+        this);
 }
 
 void SizeofContainerCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *SizeOf =
-      Result.Nodes.getNodeAs<UnaryExprOrTypeTraitExpr>("sizeof");
+    const auto *SizeOf =
+        Result.Nodes.getNodeAs<UnaryExprOrTypeTraitExpr>("sizeof");
 
-  auto Diag =
-      diag(SizeOf->getBeginLoc(), "sizeof() doesn't return the size of the "
-                                  "container; did you mean .size()?");
+    auto Diag =
+        diag(SizeOf->getBeginLoc(), "sizeof() doesn't return the size of the "
+             "container; did you mean .size()?");
 }
 
 } // namespace bugprone

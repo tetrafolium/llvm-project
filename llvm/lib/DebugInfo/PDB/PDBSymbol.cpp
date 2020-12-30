@@ -62,141 +62,147 @@ PDBSymbol::~PDBSymbol() = default;
 
 std::unique_ptr<PDBSymbol>
 PDBSymbol::createSymbol(const IPDBSession &PDBSession, PDB_SymType Tag) {
-  switch (Tag) {
-    FACTORY_SYMTAG_CASE(Exe, PDBSymbolExe)
-    FACTORY_SYMTAG_CASE(Compiland, PDBSymbolCompiland)
-    FACTORY_SYMTAG_CASE(CompilandDetails, PDBSymbolCompilandDetails)
-    FACTORY_SYMTAG_CASE(CompilandEnv, PDBSymbolCompilandEnv)
-    FACTORY_SYMTAG_CASE(Function, PDBSymbolFunc)
-    FACTORY_SYMTAG_CASE(Block, PDBSymbolBlock)
-    FACTORY_SYMTAG_CASE(Data, PDBSymbolData)
-    FACTORY_SYMTAG_CASE(Annotation, PDBSymbolAnnotation)
-    FACTORY_SYMTAG_CASE(Label, PDBSymbolLabel)
-    FACTORY_SYMTAG_CASE(PublicSymbol, PDBSymbolPublicSymbol)
-    FACTORY_SYMTAG_CASE(UDT, PDBSymbolTypeUDT)
-    FACTORY_SYMTAG_CASE(Enum, PDBSymbolTypeEnum)
-    FACTORY_SYMTAG_CASE(FunctionSig, PDBSymbolTypeFunctionSig)
-    FACTORY_SYMTAG_CASE(PointerType, PDBSymbolTypePointer)
-    FACTORY_SYMTAG_CASE(ArrayType, PDBSymbolTypeArray)
-    FACTORY_SYMTAG_CASE(BuiltinType, PDBSymbolTypeBuiltin)
-    FACTORY_SYMTAG_CASE(Typedef, PDBSymbolTypeTypedef)
-    FACTORY_SYMTAG_CASE(BaseClass, PDBSymbolTypeBaseClass)
-    FACTORY_SYMTAG_CASE(Friend, PDBSymbolTypeFriend)
-    FACTORY_SYMTAG_CASE(FunctionArg, PDBSymbolTypeFunctionArg)
-    FACTORY_SYMTAG_CASE(FuncDebugStart, PDBSymbolFuncDebugStart)
-    FACTORY_SYMTAG_CASE(FuncDebugEnd, PDBSymbolFuncDebugEnd)
-    FACTORY_SYMTAG_CASE(UsingNamespace, PDBSymbolUsingNamespace)
-    FACTORY_SYMTAG_CASE(VTableShape, PDBSymbolTypeVTableShape)
-    FACTORY_SYMTAG_CASE(VTable, PDBSymbolTypeVTable)
-    FACTORY_SYMTAG_CASE(Custom, PDBSymbolCustom)
-    FACTORY_SYMTAG_CASE(Thunk, PDBSymbolThunk)
-    FACTORY_SYMTAG_CASE(CustomType, PDBSymbolTypeCustom)
-    FACTORY_SYMTAG_CASE(ManagedType, PDBSymbolTypeManaged)
-    FACTORY_SYMTAG_CASE(Dimension, PDBSymbolTypeDimension)
-  default:
-    return std::unique_ptr<PDBSymbol>(new PDBSymbolUnknown(PDBSession));
-  }
+    switch (Tag) {
+        FACTORY_SYMTAG_CASE(Exe, PDBSymbolExe)
+        FACTORY_SYMTAG_CASE(Compiland, PDBSymbolCompiland)
+        FACTORY_SYMTAG_CASE(CompilandDetails, PDBSymbolCompilandDetails)
+        FACTORY_SYMTAG_CASE(CompilandEnv, PDBSymbolCompilandEnv)
+        FACTORY_SYMTAG_CASE(Function, PDBSymbolFunc)
+        FACTORY_SYMTAG_CASE(Block, PDBSymbolBlock)
+        FACTORY_SYMTAG_CASE(Data, PDBSymbolData)
+        FACTORY_SYMTAG_CASE(Annotation, PDBSymbolAnnotation)
+        FACTORY_SYMTAG_CASE(Label, PDBSymbolLabel)
+        FACTORY_SYMTAG_CASE(PublicSymbol, PDBSymbolPublicSymbol)
+        FACTORY_SYMTAG_CASE(UDT, PDBSymbolTypeUDT)
+        FACTORY_SYMTAG_CASE(Enum, PDBSymbolTypeEnum)
+        FACTORY_SYMTAG_CASE(FunctionSig, PDBSymbolTypeFunctionSig)
+        FACTORY_SYMTAG_CASE(PointerType, PDBSymbolTypePointer)
+        FACTORY_SYMTAG_CASE(ArrayType, PDBSymbolTypeArray)
+        FACTORY_SYMTAG_CASE(BuiltinType, PDBSymbolTypeBuiltin)
+        FACTORY_SYMTAG_CASE(Typedef, PDBSymbolTypeTypedef)
+        FACTORY_SYMTAG_CASE(BaseClass, PDBSymbolTypeBaseClass)
+        FACTORY_SYMTAG_CASE(Friend, PDBSymbolTypeFriend)
+        FACTORY_SYMTAG_CASE(FunctionArg, PDBSymbolTypeFunctionArg)
+        FACTORY_SYMTAG_CASE(FuncDebugStart, PDBSymbolFuncDebugStart)
+        FACTORY_SYMTAG_CASE(FuncDebugEnd, PDBSymbolFuncDebugEnd)
+        FACTORY_SYMTAG_CASE(UsingNamespace, PDBSymbolUsingNamespace)
+        FACTORY_SYMTAG_CASE(VTableShape, PDBSymbolTypeVTableShape)
+        FACTORY_SYMTAG_CASE(VTable, PDBSymbolTypeVTable)
+        FACTORY_SYMTAG_CASE(Custom, PDBSymbolCustom)
+        FACTORY_SYMTAG_CASE(Thunk, PDBSymbolThunk)
+        FACTORY_SYMTAG_CASE(CustomType, PDBSymbolTypeCustom)
+        FACTORY_SYMTAG_CASE(ManagedType, PDBSymbolTypeManaged)
+        FACTORY_SYMTAG_CASE(Dimension, PDBSymbolTypeDimension)
+    default:
+        return std::unique_ptr<PDBSymbol>(new PDBSymbolUnknown(PDBSession));
+    }
 }
 
 std::unique_ptr<PDBSymbol>
 PDBSymbol::create(const IPDBSession &PDBSession,
                   std::unique_ptr<IPDBRawSymbol> RawSymbol) {
-  auto SymbolPtr = createSymbol(PDBSession, RawSymbol->getSymTag());
-  SymbolPtr->RawSymbol = RawSymbol.get();
-  SymbolPtr->OwnedRawSymbol = std::move(RawSymbol);
-  return SymbolPtr;
+    auto SymbolPtr = createSymbol(PDBSession, RawSymbol->getSymTag());
+    SymbolPtr->RawSymbol = RawSymbol.get();
+    SymbolPtr->OwnedRawSymbol = std::move(RawSymbol);
+    return SymbolPtr;
 }
 
 std::unique_ptr<PDBSymbol> PDBSymbol::create(const IPDBSession &PDBSession,
-                                             IPDBRawSymbol &RawSymbol) {
-  auto SymbolPtr = createSymbol(PDBSession, RawSymbol.getSymTag());
-  SymbolPtr->RawSymbol = &RawSymbol;
-  return SymbolPtr;
+        IPDBRawSymbol &RawSymbol) {
+    auto SymbolPtr = createSymbol(PDBSession, RawSymbol.getSymTag());
+    SymbolPtr->RawSymbol = &RawSymbol;
+    return SymbolPtr;
 }
 
 void PDBSymbol::defaultDump(raw_ostream &OS, int Indent,
                             PdbSymbolIdField ShowFlags,
                             PdbSymbolIdField RecurseFlags) const {
-  RawSymbol->dump(OS, Indent, ShowFlags, RecurseFlags);
+    RawSymbol->dump(OS, Indent, ShowFlags, RecurseFlags);
 }
 
 void PDBSymbol::dumpProperties() const {
-  outs() << "\n";
-  defaultDump(outs(), 0, PdbSymbolIdField::All, PdbSymbolIdField::None);
-  outs().flush();
+    outs() << "\n";
+    defaultDump(outs(), 0, PdbSymbolIdField::All, PdbSymbolIdField::None);
+    outs().flush();
 }
 
 void PDBSymbol::dumpChildStats() const {
-  TagStats Stats;
-  getChildStats(Stats);
-  outs() << "\n";
-  for (auto &Stat : Stats) {
-    outs() << Stat.first << ": " << Stat.second << "\n";
-  }
-  outs().flush();
+    TagStats Stats;
+    getChildStats(Stats);
+    outs() << "\n";
+    for (auto &Stat : Stats) {
+        outs() << Stat.first << ": " << Stat.second << "\n";
+    }
+    outs().flush();
 }
 
-PDB_SymType PDBSymbol::getSymTag() const { return RawSymbol->getSymTag(); }
-uint32_t PDBSymbol::getSymIndexId() const { return RawSymbol->getSymIndexId(); }
+PDB_SymType PDBSymbol::getSymTag() const {
+    return RawSymbol->getSymTag();
+}
+uint32_t PDBSymbol::getSymIndexId() const {
+    return RawSymbol->getSymIndexId();
+}
 
 std::unique_ptr<IPDBEnumSymbols> PDBSymbol::findAllChildren() const {
-  return findAllChildren(PDB_SymType::None);
+    return findAllChildren(PDB_SymType::None);
 }
 
 std::unique_ptr<IPDBEnumSymbols>
 PDBSymbol::findAllChildren(PDB_SymType Type) const {
-  return RawSymbol->findChildren(Type);
+    return RawSymbol->findChildren(Type);
 }
 
 std::unique_ptr<IPDBEnumSymbols>
 PDBSymbol::findChildren(PDB_SymType Type, StringRef Name,
                         PDB_NameSearchFlags Flags) const {
-  return RawSymbol->findChildren(Type, Name, Flags);
+    return RawSymbol->findChildren(Type, Name, Flags);
 }
 
 std::unique_ptr<IPDBEnumSymbols>
 PDBSymbol::findChildrenByRVA(PDB_SymType Type, StringRef Name,
                              PDB_NameSearchFlags Flags, uint32_t RVA) const {
-  return RawSymbol->findChildrenByRVA(Type, Name, Flags, RVA);
+    return RawSymbol->findChildrenByRVA(Type, Name, Flags, RVA);
 }
 
 std::unique_ptr<IPDBEnumSymbols>
 PDBSymbol::findInlineFramesByVA(uint64_t VA) const {
-  return RawSymbol->findInlineFramesByVA(VA);
+    return RawSymbol->findInlineFramesByVA(VA);
 }
 
 std::unique_ptr<IPDBEnumSymbols>
 PDBSymbol::findInlineFramesByRVA(uint32_t RVA) const {
-  return RawSymbol->findInlineFramesByRVA(RVA);
+    return RawSymbol->findInlineFramesByRVA(RVA);
 }
 
 std::unique_ptr<IPDBEnumLineNumbers>
 PDBSymbol::findInlineeLinesByVA(uint64_t VA, uint32_t Length) const {
-  return RawSymbol->findInlineeLinesByVA(VA, Length);
+    return RawSymbol->findInlineeLinesByVA(VA, Length);
 }
 
 std::unique_ptr<IPDBEnumLineNumbers>
 PDBSymbol::findInlineeLinesByRVA(uint32_t RVA, uint32_t Length) const {
-  return RawSymbol->findInlineeLinesByRVA(RVA, Length);
+    return RawSymbol->findInlineeLinesByRVA(RVA, Length);
 }
 
-std::string PDBSymbol::getName() const { return RawSymbol->getName(); }
+std::string PDBSymbol::getName() const {
+    return RawSymbol->getName();
+}
 
 std::unique_ptr<IPDBEnumSymbols>
 PDBSymbol::getChildStats(TagStats &Stats) const {
-  std::unique_ptr<IPDBEnumSymbols> Result(findAllChildren());
-  if (!Result)
-    return nullptr;
-  Stats.clear();
-  while (auto Child = Result->getNext()) {
-    ++Stats[Child->getSymTag()];
-  }
-  Result->reset();
-  return Result;
+    std::unique_ptr<IPDBEnumSymbols> Result(findAllChildren());
+    if (!Result)
+        return nullptr;
+    Stats.clear();
+    while (auto Child = Result->getNext()) {
+        ++Stats[Child->getSymTag()];
+    }
+    Result->reset();
+    return Result;
 }
 
 std::unique_ptr<PDBSymbol> PDBSymbol::getSymbolByIdHelper(uint32_t Id) const {
-  return Session.getSymbolById(Id);
+    return Session.getSymbolById(Id);
 }
 
 void llvm::pdb::dumpSymbolIdField(raw_ostream &OS, StringRef Name,
@@ -205,27 +211,27 @@ void llvm::pdb::dumpSymbolIdField(raw_ostream &OS, StringRef Name,
                                   PdbSymbolIdField FieldId,
                                   PdbSymbolIdField ShowFlags,
                                   PdbSymbolIdField RecurseFlags) {
-  if ((FieldId & ShowFlags) == PdbSymbolIdField::None)
-    return;
+    if ((FieldId & ShowFlags) == PdbSymbolIdField::None)
+        return;
 
-  OS << "\n";
-  OS.indent(Indent);
-  OS << Name << ": " << Value;
-  // Don't recurse unless the user requested it.
-  if ((FieldId & RecurseFlags) == PdbSymbolIdField::None)
-    return;
-  // And obviously don't recurse on the symbol itself.
-  if (FieldId == PdbSymbolIdField::SymIndexId)
-    return;
+    OS << "\n";
+    OS.indent(Indent);
+    OS << Name << ": " << Value;
+    // Don't recurse unless the user requested it.
+    if ((FieldId & RecurseFlags) == PdbSymbolIdField::None)
+        return;
+    // And obviously don't recurse on the symbol itself.
+    if (FieldId == PdbSymbolIdField::SymIndexId)
+        return;
 
-  auto Child = Session.getSymbolById(Value);
+    auto Child = Session.getSymbolById(Value);
 
-  // It could have been a placeholder symbol for a type we don't yet support,
-  // so just exit in that case.
-  if (!Child)
-    return;
+    // It could have been a placeholder symbol for a type we don't yet support,
+    // so just exit in that case.
+    if (!Child)
+        return;
 
-  // Don't recurse more than once, so pass PdbSymbolIdField::None) for the
-  // recurse flags.
-  Child->defaultDump(OS, Indent + 2, ShowFlags, PdbSymbolIdField::None);
+    // Don't recurse more than once, so pass PdbSymbolIdField::None) for the
+    // recurse flags.
+    Child->defaultDump(OS, Indent + 2, ShowFlags, PdbSymbolIdField::None);
 }

@@ -46,13 +46,13 @@ extern "C" SANITIZER_WEAK_ATTRIBUTE unsigned long getauxval(unsigned long type);
 #include <elf.h>
 
 static inline decltype(AuxInfo::a_v) getauxval(decltype(AuxInfo::a_type) type) {
-  for (const AuxInfo *aux = (const AuxInfo *)_dlauxinfo();
-       aux->a_type != AT_NULL; ++aux) {
-    if (type == aux->a_type)
-      return aux->a_v;
-  }
+    for (const AuxInfo *aux = (const AuxInfo *)_dlauxinfo();
+            aux->a_type != AT_NULL; ++aux) {
+        if (type == aux->a_type)
+            return aux->a_v;
+    }
 
-  return 0;
+    return 0;
 }
 
 #endif

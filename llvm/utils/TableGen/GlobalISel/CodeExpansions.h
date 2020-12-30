@@ -17,27 +17,31 @@
 namespace llvm {
 class CodeExpansions {
 public:
-  using const_iterator = StringMap<std::string>::const_iterator;
+    using const_iterator = StringMap<std::string>::const_iterator;
 
 protected:
-  StringMap<std::string> Expansions;
+    StringMap<std::string> Expansions;
 
 public:
-  void declare(StringRef Name, StringRef Expansion) {
-    bool Inserted = Expansions.try_emplace(Name, Expansion).second;
-    assert(Inserted && "Declared variable twice");
-    (void)Inserted;
-  }
+    void declare(StringRef Name, StringRef Expansion) {
+        bool Inserted = Expansions.try_emplace(Name, Expansion).second;
+        assert(Inserted && "Declared variable twice");
+        (void)Inserted;
+    }
 
-  std::string lookup(StringRef Variable) const {
-    return Expansions.lookup(Variable);
-  }
+    std::string lookup(StringRef Variable) const {
+        return Expansions.lookup(Variable);
+    }
 
-  const_iterator begin() const { return Expansions.begin(); }
-  const_iterator end() const { return Expansions.end(); }
-  const_iterator find(StringRef Variable) const {
-    return Expansions.find(Variable);
-  }
+    const_iterator begin() const {
+        return Expansions.begin();
+    }
+    const_iterator end() const {
+        return Expansions.end();
+    }
+    const_iterator find(StringRef Variable) const {
+        return Expansions.find(Variable);
+    }
 };
 } // end namespace llvm
 #endif // ifndef LLVM_UTILS_TABLEGEN_CODEEXPANSIONS_H

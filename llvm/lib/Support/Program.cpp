@@ -34,21 +34,21 @@ int sys::ExecuteAndWait(StringRef Program, ArrayRef<StringRef> Args,
                         unsigned SecondsToWait, unsigned MemoryLimit,
                         std::string *ErrMsg, bool *ExecutionFailed,
                         Optional<ProcessStatistics> *ProcStat) {
-  assert(Redirects.empty() || Redirects.size() == 3);
-  ProcessInfo PI;
-  if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg)) {
+    assert(Redirects.empty() || Redirects.size() == 3);
+    ProcessInfo PI;
+    if (Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg)) {
+        if (ExecutionFailed)
+            *ExecutionFailed = false;
+        ProcessInfo Result =
+            Wait(PI, SecondsToWait, /*WaitUntilTerminates=*/SecondsToWait == 0,
+                 ErrMsg, ProcStat);
+        return Result.ReturnCode;
+    }
+
     if (ExecutionFailed)
-      *ExecutionFailed = false;
-    ProcessInfo Result =
-        Wait(PI, SecondsToWait, /*WaitUntilTerminates=*/SecondsToWait == 0,
-             ErrMsg, ProcStat);
-    return Result.ReturnCode;
-  }
+        *ExecutionFailed = true;
 
-  if (ExecutionFailed)
-    *ExecutionFailed = true;
-
-  return -1;
+    return -1;
 }
 
 ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
@@ -56,42 +56,42 @@ ProcessInfo sys::ExecuteNoWait(StringRef Program, ArrayRef<StringRef> Args,
                                ArrayRef<Optional<StringRef>> Redirects,
                                unsigned MemoryLimit, std::string *ErrMsg,
                                bool *ExecutionFailed) {
-  assert(Redirects.empty() || Redirects.size() == 3);
-  ProcessInfo PI;
-  if (ExecutionFailed)
-    *ExecutionFailed = false;
-  if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg))
+    assert(Redirects.empty() || Redirects.size() == 3);
+    ProcessInfo PI;
     if (ExecutionFailed)
-      *ExecutionFailed = true;
+        *ExecutionFailed = false;
+    if (!Execute(PI, Program, Args, Env, Redirects, MemoryLimit, ErrMsg))
+        if (ExecutionFailed)
+            *ExecutionFailed = true;
 
-  return PI;
+    return PI;
 }
 
 bool sys::commandLineFitsWithinSystemLimits(StringRef Program,
-                                            ArrayRef<const char *> Args) {
-  SmallVector<StringRef, 8> StringRefArgs;
-  StringRefArgs.reserve(Args.size());
-  for (const char *A : Args)
-    StringRefArgs.emplace_back(A);
-  return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
+        ArrayRef<const char *> Args) {
+    SmallVector<StringRef, 8> StringRefArgs;
+    StringRefArgs.reserve(Args.size());
+    for (const char *A : Args)
+        StringRefArgs.emplace_back(A);
+    return commandLineFitsWithinSystemLimits(Program, StringRefArgs);
 }
 
 void sys::printArg(raw_ostream &OS, StringRef Arg, bool Quote) {
-  const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
+    const bool Escape = Arg.find_first_of(" \"\\$") != StringRef::npos;
 
-  if (!Quote && !Escape) {
-    OS << Arg;
-    return;
-  }
+    if (!Quote && !Escape) {
+        OS << Arg;
+        return;
+    }
 
-  // Quote and escape. This isn't really complete, but good enough.
-  OS << '"';
-  for (const auto c : Arg) {
-    if (c == '"' || c == '\\' || c == '$')
-      OS << '\\';
-    OS << c;
-  }
-  OS << '"';
+    // Quote and escape. This isn't really complete, but good enough.
+    OS << '"';
+    for (const auto c : Arg) {
+        if (c == '"' || c == '\\' || c == '$')
+            OS << '\\';
+        OS << c;
+    }
+    OS << '"';
 }
 
 // Include the platform-specific parts of this class.

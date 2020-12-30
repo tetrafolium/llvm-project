@@ -30,8 +30,8 @@ class ProfileSummaryInfo;
 class TargetInstrInfo;
 class TargetRegisterInfo;
 
-  class LLVM_LIBRARY_VISIBILITY BranchFolder {
-  public:
+class LLVM_LIBRARY_VISIBILITY BranchFolder {
+public:
     explicit BranchFolder(bool DefaultEnableTailMerge, bool CommonHoist,
                           MBFIWrapper &FreqInfo,
                           const MachineBranchProbabilityInfo &ProbInfo,
@@ -48,23 +48,27 @@ class TargetRegisterInfo;
                           MachineLoopInfo *mli = nullptr,
                           bool AfterPlacement = false);
 
-  private:
+private:
     class MergePotentialsElt {
-      unsigned Hash;
-      MachineBasicBlock *Block;
+        unsigned Hash;
+        MachineBasicBlock *Block;
 
     public:
-      MergePotentialsElt(unsigned h, MachineBasicBlock *b)
-        : Hash(h), Block(b) {}
+        MergePotentialsElt(unsigned h, MachineBasicBlock *b)
+            : Hash(h), Block(b) {}
 
-      unsigned getHash() const { return Hash; }
-      MachineBasicBlock *getBlock() const { return Block; }
+        unsigned getHash() const {
+            return Hash;
+        }
+        MachineBasicBlock *getBlock() const {
+            return Block;
+        }
 
-      void setBlock(MachineBasicBlock *MBB) {
-        Block = MBB;
-      }
+        void setBlock(MachineBasicBlock *MBB) {
+            Block = MBB;
+        }
 
-      bool operator<(const MergePotentialsElt &) const;
+        bool operator<(const MergePotentialsElt &) const;
     };
 
     using MPIterator = std::vector<MergePotentialsElt>::iterator;
@@ -74,44 +78,44 @@ class TargetRegisterInfo;
     DenseMap<const MachineBasicBlock *, int> EHScopeMembership;
 
     class SameTailElt {
-      MPIterator MPIter;
-      MachineBasicBlock::iterator TailStartPos;
+        MPIterator MPIter;
+        MachineBasicBlock::iterator TailStartPos;
 
     public:
-      SameTailElt(MPIterator mp, MachineBasicBlock::iterator tsp)
-        : MPIter(mp), TailStartPos(tsp) {}
+        SameTailElt(MPIterator mp, MachineBasicBlock::iterator tsp)
+            : MPIter(mp), TailStartPos(tsp) {}
 
-      MPIterator getMPIter() const {
-        return MPIter;
-      }
+        MPIterator getMPIter() const {
+            return MPIter;
+        }
 
-      MergePotentialsElt &getMergePotentialsElt() const {
-        return *getMPIter();
-      }
+        MergePotentialsElt &getMergePotentialsElt() const {
+            return *getMPIter();
+        }
 
-      MachineBasicBlock::iterator getTailStartPos() const {
-        return TailStartPos;
-      }
+        MachineBasicBlock::iterator getTailStartPos() const {
+            return TailStartPos;
+        }
 
-      unsigned getHash() const {
-        return getMergePotentialsElt().getHash();
-      }
+        unsigned getHash() const {
+            return getMergePotentialsElt().getHash();
+        }
 
-      MachineBasicBlock *getBlock() const {
-        return getMergePotentialsElt().getBlock();
-      }
+        MachineBasicBlock *getBlock() const {
+            return getMergePotentialsElt().getBlock();
+        }
 
-      bool tailIsWholeBlock() const {
-        return TailStartPos == getBlock()->begin();
-      }
+        bool tailIsWholeBlock() const {
+            return TailStartPos == getBlock()->begin();
+        }
 
-      void setBlock(MachineBasicBlock *MBB) {
-        getMergePotentialsElt().setBlock(MBB);
-      }
+        void setBlock(MachineBasicBlock *MBB) {
+            getMergePotentialsElt().setBlock(MBB);
+        }
 
-      void setTailStartPos(MachineBasicBlock::iterator Pos) {
-        TailStartPos = Pos;
-      }
+        void setTailStartPos(MachineBasicBlock::iterator Pos) {
+            TailStartPos = Pos;
+        }
     };
     std::vector<SameTailElt> SameTails;
 
@@ -126,15 +130,15 @@ class TargetRegisterInfo;
     MachineLoopInfo *MLI;
     LivePhysRegs LiveRegs;
 
-  private:
+private:
     MBFIWrapper &MBBFreqInfo;
     const MachineBranchProbabilityInfo &MBPI;
     ProfileSummaryInfo *PSI;
 
     bool TailMergeBlocks(MachineFunction &MF);
     bool TryTailMergeBlocks(MachineBasicBlock* SuccBB,
-                       MachineBasicBlock* PredBB,
-                       unsigned MinCommonTailLength);
+                            MachineBasicBlock* PredBB,
+                            unsigned MinCommonTailLength);
     void setCommonTailEdgeWeights(MachineBasicBlock &TailMBB);
 
     /// Delete the instruction OldInst and everything after it, replacing it
@@ -165,7 +169,7 @@ class TargetRegisterInfo;
     /// Remove all blocks with hash CurHash from MergePotentials, restoring
     /// branches at ends of blocks as appropriate.
     void RemoveBlocksWithHash(unsigned CurHash, MachineBasicBlock* SuccBB,
-                                                MachineBasicBlock* PredBB);
+                              MachineBasicBlock* PredBB);
 
     /// None of the blocks to be tail-merged consist only of the common tail.
     /// Create a block that does by splitting one.
@@ -195,7 +199,7 @@ class TargetRegisterInfo;
     /// If the successors of MBB has common instruction sequence at the start of
     /// the function, move the instructions before MBB terminator if it's legal.
     bool HoistCommonCodeInSuccs(MachineBasicBlock *MBB);
-  };
+};
 
 } // end namespace llvm
 

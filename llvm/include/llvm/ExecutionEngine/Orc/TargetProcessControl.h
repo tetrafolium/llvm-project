@@ -31,177 +31,199 @@ namespace orc {
 /// TargetProcessControl supports interaction with a JIT target process.
 class TargetProcessControl {
 public:
-  /// APIs for manipulating memory in the target process.
-  class MemoryAccess {
-  public:
-    /// Callback function for asynchronous writes.
-    using WriteResultFn = unique_function<void(Error)>;
+    /// APIs for manipulating memory in the target process.
+    class MemoryAccess {
+    public:
+        /// Callback function for asynchronous writes.
+        using WriteResultFn = unique_function<void(Error)>;
 
-    virtual ~MemoryAccess();
+        virtual ~MemoryAccess();
 
-    virtual void writeUInt8s(ArrayRef<tpctypes::UInt8Write> Ws,
-                             WriteResultFn OnWriteComplete) = 0;
+        virtual void writeUInt8s(ArrayRef<tpctypes::UInt8Write> Ws,
+                                 WriteResultFn OnWriteComplete) = 0;
 
-    virtual void writeUInt16s(ArrayRef<tpctypes::UInt16Write> Ws,
-                              WriteResultFn OnWriteComplete) = 0;
+        virtual void writeUInt16s(ArrayRef<tpctypes::UInt16Write> Ws,
+                                  WriteResultFn OnWriteComplete) = 0;
 
-    virtual void writeUInt32s(ArrayRef<tpctypes::UInt32Write> Ws,
-                              WriteResultFn OnWriteComplete) = 0;
+        virtual void writeUInt32s(ArrayRef<tpctypes::UInt32Write> Ws,
+                                  WriteResultFn OnWriteComplete) = 0;
 
-    virtual void writeUInt64s(ArrayRef<tpctypes::UInt64Write> Ws,
-                              WriteResultFn OnWriteComplete) = 0;
+        virtual void writeUInt64s(ArrayRef<tpctypes::UInt64Write> Ws,
+                                  WriteResultFn OnWriteComplete) = 0;
 
-    virtual void writeBuffers(ArrayRef<tpctypes::BufferWrite> Ws,
-                              WriteResultFn OnWriteComplete) = 0;
+        virtual void writeBuffers(ArrayRef<tpctypes::BufferWrite> Ws,
+                                  WriteResultFn OnWriteComplete) = 0;
 
-    Error writeUInt8s(ArrayRef<tpctypes::UInt8Write> Ws) {
-      std::promise<MSVCPError> ResultP;
-      auto ResultF = ResultP.get_future();
-      writeUInt8s(Ws, [&](Error Err) { ResultP.set_value(std::move(Err)); });
-      return ResultF.get();
+        Error writeUInt8s(ArrayRef<tpctypes::UInt8Write> Ws) {
+            std::promise<MSVCPError> ResultP;
+            auto ResultF = ResultP.get_future();
+            writeUInt8s(Ws, [&](Error Err) {
+                ResultP.set_value(std::move(Err));
+            });
+            return ResultF.get();
+        }
+
+        Error writeUInt16s(ArrayRef<tpctypes::UInt16Write> Ws) {
+            std::promise<MSVCPError> ResultP;
+            auto ResultF = ResultP.get_future();
+            writeUInt16s(Ws, [&](Error Err) {
+                ResultP.set_value(std::move(Err));
+            });
+            return ResultF.get();
+        }
+
+        Error writeUInt32s(ArrayRef<tpctypes::UInt32Write> Ws) {
+            std::promise<MSVCPError> ResultP;
+            auto ResultF = ResultP.get_future();
+            writeUInt32s(Ws, [&](Error Err) {
+                ResultP.set_value(std::move(Err));
+            });
+            return ResultF.get();
+        }
+
+        Error writeUInt64s(ArrayRef<tpctypes::UInt64Write> Ws) {
+            std::promise<MSVCPError> ResultP;
+            auto ResultF = ResultP.get_future();
+            writeUInt64s(Ws, [&](Error Err) {
+                ResultP.set_value(std::move(Err));
+            });
+            return ResultF.get();
+        }
+
+        Error writeBuffers(ArrayRef<tpctypes::BufferWrite> Ws) {
+            std::promise<MSVCPError> ResultP;
+            auto ResultF = ResultP.get_future();
+            writeBuffers(Ws, [&](Error Err) {
+                ResultP.set_value(std::move(Err));
+            });
+            return ResultF.get();
+        }
+    };
+
+    virtual ~TargetProcessControl();
+
+    /// Intern a symbol name in the SymbolStringPool.
+    SymbolStringPtr intern(StringRef SymName) {
+        return SSP->intern(SymName);
     }
 
-    Error writeUInt16s(ArrayRef<tpctypes::UInt16Write> Ws) {
-      std::promise<MSVCPError> ResultP;
-      auto ResultF = ResultP.get_future();
-      writeUInt16s(Ws, [&](Error Err) { ResultP.set_value(std::move(Err)); });
-      return ResultF.get();
+    /// Return a shared pointer to the SymbolStringPool for this instance.
+    std::shared_ptr<SymbolStringPool> getSymbolStringPool() const {
+        return SSP;
     }
 
-    Error writeUInt32s(ArrayRef<tpctypes::UInt32Write> Ws) {
-      std::promise<MSVCPError> ResultP;
-      auto ResultF = ResultP.get_future();
-      writeUInt32s(Ws, [&](Error Err) { ResultP.set_value(std::move(Err)); });
-      return ResultF.get();
+    /// Return the Triple for the target process.
+    const Triple &getTargetTriple() const {
+        return TargetTriple;
     }
 
-    Error writeUInt64s(ArrayRef<tpctypes::UInt64Write> Ws) {
-      std::promise<MSVCPError> ResultP;
-      auto ResultF = ResultP.get_future();
-      writeUInt64s(Ws, [&](Error Err) { ResultP.set_value(std::move(Err)); });
-      return ResultF.get();
+    /// Get the page size for the target process.
+    unsigned getPageSize() const {
+        return PageSize;
     }
 
-    Error writeBuffers(ArrayRef<tpctypes::BufferWrite> Ws) {
-      std::promise<MSVCPError> ResultP;
-      auto ResultF = ResultP.get_future();
-      writeBuffers(Ws, [&](Error Err) { ResultP.set_value(std::move(Err)); });
-      return ResultF.get();
+    /// Return a MemoryAccess object for the target process.
+    MemoryAccess &getMemoryAccess() const {
+        return *MemAccess;
     }
-  };
 
-  virtual ~TargetProcessControl();
+    /// Return a JITLinkMemoryManager for the target process.
+    jitlink::JITLinkMemoryManager &getMemMgr() const {
+        return *MemMgr;
+    }
 
-  /// Intern a symbol name in the SymbolStringPool.
-  SymbolStringPtr intern(StringRef SymName) { return SSP->intern(SymName); }
+    /// Load the dynamic library at the given path and return a handle to it.
+    /// If LibraryPath is null this function will return the global handle for
+    /// the target process.
+    virtual Expected<tpctypes::DylibHandle> loadDylib(const char *DylibPath) = 0;
 
-  /// Return a shared pointer to the SymbolStringPool for this instance.
-  std::shared_ptr<SymbolStringPool> getSymbolStringPool() const { return SSP; }
+    /// Search for symbols in the target process.
+    ///
+    /// The result of the lookup is a 2-dimentional array of target addresses
+    /// that correspond to the lookup order. If a required symbol is not
+    /// found then this method will return an error. If a weakly referenced
+    /// symbol is not found then it be assigned a '0' value in the result.
+    /// that correspond to the lookup order.
+    virtual Expected<std::vector<tpctypes::LookupResult>>
+            lookupSymbols(ArrayRef<tpctypes::LookupRequest> Request) = 0;
 
-  /// Return the Triple for the target process.
-  const Triple &getTargetTriple() const { return TargetTriple; }
+    /// Run function with a main-like signature.
+    virtual Expected<int32_t> runAsMain(JITTargetAddress MainFnAddr,
+                                        ArrayRef<std::string> Args) = 0;
 
-  /// Get the page size for the target process.
-  unsigned getPageSize() const { return PageSize; }
+    /// Run a wrapper function with signature:
+    ///
+    /// \code{.cpp}
+    ///   CWrapperFunctionResult fn(uint8_t *Data, uint64_t Size);
+    /// \endcode{.cpp}
+    ///
+    virtual Expected<tpctypes::WrapperFunctionResult>
+    runWrapper(JITTargetAddress WrapperFnAddr, ArrayRef<uint8_t> ArgBuffer) = 0;
 
-  /// Return a MemoryAccess object for the target process.
-  MemoryAccess &getMemoryAccess() const { return *MemAccess; }
-
-  /// Return a JITLinkMemoryManager for the target process.
-  jitlink::JITLinkMemoryManager &getMemMgr() const { return *MemMgr; }
-
-  /// Load the dynamic library at the given path and return a handle to it.
-  /// If LibraryPath is null this function will return the global handle for
-  /// the target process.
-  virtual Expected<tpctypes::DylibHandle> loadDylib(const char *DylibPath) = 0;
-
-  /// Search for symbols in the target process.
-  ///
-  /// The result of the lookup is a 2-dimentional array of target addresses
-  /// that correspond to the lookup order. If a required symbol is not
-  /// found then this method will return an error. If a weakly referenced
-  /// symbol is not found then it be assigned a '0' value in the result.
-  /// that correspond to the lookup order.
-  virtual Expected<std::vector<tpctypes::LookupResult>>
-  lookupSymbols(ArrayRef<tpctypes::LookupRequest> Request) = 0;
-
-  /// Run function with a main-like signature.
-  virtual Expected<int32_t> runAsMain(JITTargetAddress MainFnAddr,
-                                      ArrayRef<std::string> Args) = 0;
-
-  /// Run a wrapper function with signature:
-  ///
-  /// \code{.cpp}
-  ///   CWrapperFunctionResult fn(uint8_t *Data, uint64_t Size);
-  /// \endcode{.cpp}
-  ///
-  virtual Expected<tpctypes::WrapperFunctionResult>
-  runWrapper(JITTargetAddress WrapperFnAddr, ArrayRef<uint8_t> ArgBuffer) = 0;
-
-  /// Disconnect from the target process.
-  ///
-  /// This should be called after the JIT session is shut down.
-  virtual Error disconnect() = 0;
+    /// Disconnect from the target process.
+    ///
+    /// This should be called after the JIT session is shut down.
+    virtual Error disconnect() = 0;
 
 protected:
-  TargetProcessControl(std::shared_ptr<SymbolStringPool> SSP)
-      : SSP(std::move(SSP)) {}
+    TargetProcessControl(std::shared_ptr<SymbolStringPool> SSP)
+        : SSP(std::move(SSP)) {}
 
-  std::shared_ptr<SymbolStringPool> SSP;
-  Triple TargetTriple;
-  unsigned PageSize = 0;
-  MemoryAccess *MemAccess = nullptr;
-  jitlink::JITLinkMemoryManager *MemMgr = nullptr;
+    std::shared_ptr<SymbolStringPool> SSP;
+    Triple TargetTriple;
+    unsigned PageSize = 0;
+    MemoryAccess *MemAccess = nullptr;
+    jitlink::JITLinkMemoryManager *MemMgr = nullptr;
 };
 
 /// A TargetProcessControl implementation targeting the current process.
 class SelfTargetProcessControl : public TargetProcessControl,
-                                 private TargetProcessControl::MemoryAccess {
+    private TargetProcessControl::MemoryAccess {
 public:
-  SelfTargetProcessControl(
-      std::shared_ptr<SymbolStringPool> SSP, Triple TargetTriple,
-      unsigned PageSize, std::unique_ptr<jitlink::JITLinkMemoryManager> MemMgr);
+    SelfTargetProcessControl(
+        std::shared_ptr<SymbolStringPool> SSP, Triple TargetTriple,
+        unsigned PageSize, std::unique_ptr<jitlink::JITLinkMemoryManager> MemMgr);
 
-  /// Create a SelfTargetProcessControl with the given memory manager.
-  /// If no memory manager is given a jitlink::InProcessMemoryManager will
-  /// be used by default.
-  static Expected<std::unique_ptr<SelfTargetProcessControl>>
-  Create(std::shared_ptr<SymbolStringPool> SSP,
-         std::unique_ptr<jitlink::JITLinkMemoryManager> MemMgr = nullptr);
+    /// Create a SelfTargetProcessControl with the given memory manager.
+    /// If no memory manager is given a jitlink::InProcessMemoryManager will
+    /// be used by default.
+    static Expected<std::unique_ptr<SelfTargetProcessControl>>
+            Create(std::shared_ptr<SymbolStringPool> SSP,
+                   std::unique_ptr<jitlink::JITLinkMemoryManager> MemMgr = nullptr);
 
-  Expected<tpctypes::DylibHandle> loadDylib(const char *DylibPath) override;
+    Expected<tpctypes::DylibHandle> loadDylib(const char *DylibPath) override;
 
-  Expected<std::vector<tpctypes::LookupResult>>
-  lookupSymbols(ArrayRef<tpctypes::LookupRequest> Request) override;
+    Expected<std::vector<tpctypes::LookupResult>>
+            lookupSymbols(ArrayRef<tpctypes::LookupRequest> Request) override;
 
-  Expected<int32_t> runAsMain(JITTargetAddress MainFnAddr,
-                              ArrayRef<std::string> Args) override;
+    Expected<int32_t> runAsMain(JITTargetAddress MainFnAddr,
+                                ArrayRef<std::string> Args) override;
 
-  Expected<tpctypes::WrapperFunctionResult>
-  runWrapper(JITTargetAddress WrapperFnAddr,
-             ArrayRef<uint8_t> ArgBuffer) override;
+    Expected<tpctypes::WrapperFunctionResult>
+    runWrapper(JITTargetAddress WrapperFnAddr,
+               ArrayRef<uint8_t> ArgBuffer) override;
 
-  Error disconnect() override;
+    Error disconnect() override;
 
 private:
-  void writeUInt8s(ArrayRef<tpctypes::UInt8Write> Ws,
-                   WriteResultFn OnWriteComplete) override;
+    void writeUInt8s(ArrayRef<tpctypes::UInt8Write> Ws,
+                     WriteResultFn OnWriteComplete) override;
 
-  void writeUInt16s(ArrayRef<tpctypes::UInt16Write> Ws,
-                    WriteResultFn OnWriteComplete) override;
+    void writeUInt16s(ArrayRef<tpctypes::UInt16Write> Ws,
+                      WriteResultFn OnWriteComplete) override;
 
-  void writeUInt32s(ArrayRef<tpctypes::UInt32Write> Ws,
-                    WriteResultFn OnWriteComplete) override;
+    void writeUInt32s(ArrayRef<tpctypes::UInt32Write> Ws,
+                      WriteResultFn OnWriteComplete) override;
 
-  void writeUInt64s(ArrayRef<tpctypes::UInt64Write> Ws,
-                    WriteResultFn OnWriteComplete) override;
+    void writeUInt64s(ArrayRef<tpctypes::UInt64Write> Ws,
+                      WriteResultFn OnWriteComplete) override;
 
-  void writeBuffers(ArrayRef<tpctypes::BufferWrite> Ws,
-                    WriteResultFn OnWriteComplete) override;
+    void writeBuffers(ArrayRef<tpctypes::BufferWrite> Ws,
+                      WriteResultFn OnWriteComplete) override;
 
-  std::unique_ptr<jitlink::JITLinkMemoryManager> OwnedMemMgr;
-  char GlobalManglingPrefix = 0;
-  std::vector<std::unique_ptr<sys::DynamicLibrary>> DynamicLibraries;
+    std::unique_ptr<jitlink::JITLinkMemoryManager> OwnedMemMgr;
+    char GlobalManglingPrefix = 0;
+    std::vector<std::unique_ptr<sys::DynamicLibrary>> DynamicLibraries;
 };
 
 } // end namespace orc

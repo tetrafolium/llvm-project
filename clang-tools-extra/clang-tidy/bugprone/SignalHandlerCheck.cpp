@@ -24,37 +24,39 @@ namespace tidy {
 namespace bugprone {
 
 static bool isSystemCall(const FunctionDecl *FD) {
-  // Find a possible redeclaration in system header.
-  // FIXME: Looking at the canonical declaration is not the most exact way
-  // to do this.
+    // Find a possible redeclaration in system header.
+    // FIXME: Looking at the canonical declaration is not the most exact way
+    // to do this.
 
-  // Most common case will be inclusion directly from a header.
-  // This works fine by using canonical declaration.
-  // a.c
-  // #include <sysheader.h>
+    // Most common case will be inclusion directly from a header.
+    // This works fine by using canonical declaration.
+    // a.c
+    // #include <sysheader.h>
 
-  // Next most common case will be extern declaration.
-  // Can't catch this with either approach.
-  // b.c
-  // extern void sysfunc(void);
+    // Next most common case will be extern declaration.
+    // Can't catch this with either approach.
+    // b.c
+    // extern void sysfunc(void);
 
-  // Canonical declaration is the first found declaration, so this works.
-  // c.c
-  // #include <sysheader.h>
-  // extern void sysfunc(void); // redecl won't matter
+    // Canonical declaration is the first found declaration, so this works.
+    // c.c
+    // #include <sysheader.h>
+    // extern void sysfunc(void); // redecl won't matter
 
-  // This does not work with canonical declaration.
-  // Probably this is not a frequently used case but may happen (the first
-  // declaration can be in a non-system header for example).
-  // d.c
-  // extern void sysfunc(void); // Canonical declaration, not in system header.
-  // #include <sysheader.h>
+    // This does not work with canonical declaration.
+    // Probably this is not a frequently used case but may happen (the first
+    // declaration can be in a non-system header for example).
+    // d.c
+    // extern void sysfunc(void); // Canonical declaration, not in system header.
+    // #include <sysheader.h>
 
-  return FD->getASTContext().getSourceManager().isInSystemHeader(
-      FD->getCanonicalDecl()->getLocation());
+    return FD->getASTContext().getSourceManager().isInSystemHeader(
+               FD->getCanonicalDecl()->getLocation());
 }
 
-AST_MATCHER(FunctionDecl, isSystemCall) { return isSystemCall(&Node); }
+AST_MATCHER(FunctionDecl, isSystemCall) {
+    return isSystemCall(&Node);
+}
 
 // This is the  minimal set of safe functions.
 // FIXME: Add checker option to allow a POSIX compliant extended set.
@@ -67,118 +69,118 @@ SignalHandlerCheck::SignalHandlerCheck(StringRef Name,
 
 bool SignalHandlerCheck::isLanguageVersionSupported(
     const LangOptions &LangOpts) const {
-  // FIXME: Make the checker useful on C++ code.
-  if (LangOpts.CPlusPlus)
-    return false;
+    // FIXME: Make the checker useful on C++ code.
+    if (LangOpts.CPlusPlus)
+        return false;
 
-  return true;
+    return true;
 }
 
 void SignalHandlerCheck::registerMatchers(MatchFinder *Finder) {
-  auto SignalFunction = functionDecl(hasAnyName("::signal", "::std::signal"),
-                                     parameterCountIs(2), isSystemCall());
-  auto HandlerExpr =
-      declRefExpr(hasDeclaration(functionDecl().bind("handler_decl")),
-                  unless(isExpandedFromMacro("SIG_IGN")),
-                  unless(isExpandedFromMacro("SIG_DFL")))
-          .bind("handler_expr");
-  Finder->addMatcher(
-      callExpr(callee(SignalFunction), hasArgument(1, HandlerExpr))
-          .bind("register_call"),
-      this);
+    auto SignalFunction = functionDecl(hasAnyName("::signal", "::std::signal"),
+                                       parameterCountIs(2), isSystemCall());
+    auto HandlerExpr =
+        declRefExpr(hasDeclaration(functionDecl().bind("handler_decl")),
+                    unless(isExpandedFromMacro("SIG_IGN")),
+                    unless(isExpandedFromMacro("SIG_DFL")))
+        .bind("handler_expr");
+    Finder->addMatcher(
+        callExpr(callee(SignalFunction), hasArgument(1, HandlerExpr))
+        .bind("register_call"),
+        this);
 }
 
 void SignalHandlerCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *SignalCall = Result.Nodes.getNodeAs<CallExpr>("register_call");
-  const auto *HandlerDecl =
-      Result.Nodes.getNodeAs<FunctionDecl>("handler_decl");
-  const auto *HandlerExpr = Result.Nodes.getNodeAs<DeclRefExpr>("handler_expr");
+    const auto *SignalCall = Result.Nodes.getNodeAs<CallExpr>("register_call");
+    const auto *HandlerDecl =
+        Result.Nodes.getNodeAs<FunctionDecl>("handler_decl");
+    const auto *HandlerExpr = Result.Nodes.getNodeAs<DeclRefExpr>("handler_expr");
 
-  // Visit each function encountered in the callgraph only once.
-  llvm::DenseSet<const FunctionDecl *> SeenFunctions;
+    // Visit each function encountered in the callgraph only once.
+    llvm::DenseSet<const FunctionDecl *> SeenFunctions;
 
-  // The worklist of the callgraph visitation algorithm.
-  std::deque<const CallExpr *> CalledFunctions;
+    // The worklist of the callgraph visitation algorithm.
+    std::deque<const CallExpr *> CalledFunctions;
 
-  auto ProcessFunction = [&](const FunctionDecl *F, const Expr *CallOrRef) {
-    // Ensure that canonical declaration is used.
-    F = F->getCanonicalDecl();
+    auto ProcessFunction = [&](const FunctionDecl *F, const Expr *CallOrRef) {
+        // Ensure that canonical declaration is used.
+        F = F->getCanonicalDecl();
 
-    // Do not visit function if already encountered.
-    if (!SeenFunctions.insert(F).second)
-      return true;
+        // Do not visit function if already encountered.
+        if (!SeenFunctions.insert(F).second)
+            return true;
 
-    // Check if the call is allowed.
-    // Non-system calls are not considered.
-    if (isSystemCall(F)) {
-      if (isSystemCallAllowed(F))
+        // Check if the call is allowed.
+        // Non-system calls are not considered.
+        if (isSystemCall(F)) {
+            if (isSystemCallAllowed(F))
+                return true;
+
+            reportBug(F, CallOrRef, SignalCall, HandlerDecl);
+
+            return false;
+        }
+
+        // Get the body of the encountered non-system call function.
+        const FunctionDecl *FBody;
+        if (!F->hasBody(FBody)) {
+            reportBug(F, CallOrRef, SignalCall, HandlerDecl);
+            return false;
+        }
+
+        // Collect all called functions.
+        auto Matches = match(decl(forEachDescendant(callExpr().bind("call"))),
+                             *FBody, FBody->getASTContext());
+        for (const auto &Match : Matches) {
+            const auto *CE = Match.getNodeAs<CallExpr>("call");
+            if (isa<FunctionDecl>(CE->getCalleeDecl()))
+                CalledFunctions.push_back(CE);
+        }
+
         return true;
+    };
 
-      reportBug(F, CallOrRef, SignalCall, HandlerDecl);
+    if (!ProcessFunction(HandlerDecl, HandlerExpr))
+        return;
 
-      return false;
+    // Visit the definition of every function referenced by the handler function.
+    // Check for allowed function calls.
+    while (!CalledFunctions.empty()) {
+        const CallExpr *FunctionCall = CalledFunctions.front();
+        CalledFunctions.pop_front();
+        // At insertion we have already ensured that only function calls are there.
+        const auto *F = cast<FunctionDecl>(FunctionCall->getCalleeDecl());
+
+        if (!ProcessFunction(F, FunctionCall))
+            break;
     }
-
-    // Get the body of the encountered non-system call function.
-    const FunctionDecl *FBody;
-    if (!F->hasBody(FBody)) {
-      reportBug(F, CallOrRef, SignalCall, HandlerDecl);
-      return false;
-    }
-
-    // Collect all called functions.
-    auto Matches = match(decl(forEachDescendant(callExpr().bind("call"))),
-                         *FBody, FBody->getASTContext());
-    for (const auto &Match : Matches) {
-      const auto *CE = Match.getNodeAs<CallExpr>("call");
-      if (isa<FunctionDecl>(CE->getCalleeDecl()))
-        CalledFunctions.push_back(CE);
-    }
-
-    return true;
-  };
-
-  if (!ProcessFunction(HandlerDecl, HandlerExpr))
-    return;
-
-  // Visit the definition of every function referenced by the handler function.
-  // Check for allowed function calls.
-  while (!CalledFunctions.empty()) {
-    const CallExpr *FunctionCall = CalledFunctions.front();
-    CalledFunctions.pop_front();
-    // At insertion we have already ensured that only function calls are there.
-    const auto *F = cast<FunctionDecl>(FunctionCall->getCalleeDecl());
-
-    if (!ProcessFunction(F, FunctionCall))
-      break;
-  }
 }
 
 bool SignalHandlerCheck::isSystemCallAllowed(const FunctionDecl *FD) const {
-  const IdentifierInfo *II = FD->getIdentifier();
-  // Unnamed functions are not explicitly allowed.
-  if (!II)
+    const IdentifierInfo *II = FD->getIdentifier();
+    // Unnamed functions are not explicitly allowed.
+    if (!II)
+        return false;
+
+    // FIXME: Improve for C++ (check for namespace).
+    if (StrictConformingFunctions.count(II->getName()))
+        return true;
+
     return false;
-
-  // FIXME: Improve for C++ (check for namespace).
-  if (StrictConformingFunctions.count(II->getName()))
-    return true;
-
-  return false;
 }
 
 void SignalHandlerCheck::reportBug(const FunctionDecl *CalledFunction,
                                    const Expr *CallOrRef,
                                    const CallExpr *SignalCall,
                                    const FunctionDecl *HandlerDecl) {
-  diag(CallOrRef->getBeginLoc(),
-       "%0 may not be asynchronous-safe; "
-       "calling it from a signal handler may be dangerous")
-      << CalledFunction;
-  diag(SignalCall->getSourceRange().getBegin(),
-       "signal handler registered here", DiagnosticIDs::Note);
-  diag(HandlerDecl->getBeginLoc(), "handler function declared here",
-       DiagnosticIDs::Note);
+    diag(CallOrRef->getBeginLoc(),
+         "%0 may not be asynchronous-safe; "
+         "calling it from a signal handler may be dangerous")
+            << CalledFunction;
+    diag(SignalCall->getSourceRange().getBegin(),
+         "signal handler registered here", DiagnosticIDs::Note);
+    diag(HandlerDecl->getBeginLoc(), "handler function declared here",
+         DiagnosticIDs::Note);
 }
 
 } // namespace bugprone

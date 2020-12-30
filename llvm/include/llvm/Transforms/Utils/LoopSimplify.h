@@ -52,7 +52,7 @@ class ScalarEvolution;
 /// This pass is responsible for loop canonicalization.
 class LoopSimplifyPass : public PassInfoMixin<LoopSimplifyPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Simplify each loop in a loop nest recursively.

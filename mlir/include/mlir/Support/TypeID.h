@@ -49,52 +49,54 @@ struct TypeIDExported;
 ///  }
 ///
 class TypeID {
-  /// This class represents the storage of a type info object.
-  /// Note: We specify an explicit alignment here to allow use with
-  /// PointerIntPair and other utilities/data structures that require a known
-  /// pointer alignment.
-  struct alignas(8) Storage {};
+    /// This class represents the storage of a type info object.
+    /// Note: We specify an explicit alignment here to allow use with
+    /// PointerIntPair and other utilities/data structures that require a known
+    /// pointer alignment.
+    struct alignas(8) Storage {};
 
 public:
-  TypeID() : TypeID(get<void>()) {}
-  TypeID(const TypeID &) = default;
+    TypeID() : TypeID(get<void>()) {}
+    TypeID(const TypeID &) = default;
 
-  /// Comparison operations.
-  bool operator==(const TypeID &other) const {
-    return storage == other.storage;
-  }
-  bool operator!=(const TypeID &other) const { return !(*this == other); }
+    /// Comparison operations.
+    bool operator==(const TypeID &other) const {
+        return storage == other.storage;
+    }
+    bool operator!=(const TypeID &other) const {
+        return !(*this == other);
+    }
 
-  /// Construct a type info object for the given type T.
-  template <typename T>
-  static TypeID get();
-  template <template <typename> class Trait>
-  static TypeID get();
+    /// Construct a type info object for the given type T.
+    template <typename T>
+    static TypeID get();
+    template <template <typename> class Trait>
+    static TypeID get();
 
-  /// Methods for supporting PointerLikeTypeTraits.
-  const void *getAsOpaquePointer() const {
-    return static_cast<const void *>(storage);
-  }
-  static TypeID getFromOpaquePointer(const void *pointer) {
-    return TypeID(reinterpret_cast<const Storage *>(pointer));
-  }
+    /// Methods for supporting PointerLikeTypeTraits.
+    const void *getAsOpaquePointer() const {
+        return static_cast<const void *>(storage);
+    }
+    static TypeID getFromOpaquePointer(const void *pointer) {
+        return TypeID(reinterpret_cast<const Storage *>(pointer));
+    }
 
-  /// Enable hashing TypeID.
-  friend ::llvm::hash_code hash_value(TypeID id);
+    /// Enable hashing TypeID.
+    friend ::llvm::hash_code hash_value(TypeID id);
 
 private:
-  TypeID(const Storage *storage) : storage(storage) {}
+    TypeID(const Storage *storage) : storage(storage) {}
 
-  /// The storage of this type info object.
-  const Storage *storage;
+    /// The storage of this type info object.
+    const Storage *storage;
 
-  // See TypeIDExported below for an explanation of the trampoline behavior.
-  friend struct detail::TypeIDExported;
+    // See TypeIDExported below for an explanation of the trampoline behavior.
+    friend struct detail::TypeIDExported;
 };
 
 /// Enable hashing TypeID.
 inline ::llvm::hash_code hash_value(TypeID id) {
-  return llvm::hash_value(id.storage);
+    return llvm::hash_value(id.storage);
 }
 
 namespace detail {
@@ -113,56 +115,58 @@ namespace detail {
 /// attaching dllimport and dllexport. Fix this when that information is
 /// available within LLVM.
 struct LLVM_EXTERNAL_VISIBILITY TypeIDExported {
-  template <typename T>
-  static TypeID get() {
-    static TypeID::Storage instance;
-    return TypeID(&instance);
-  }
-  template <template <typename> class Trait>
-  static TypeID get() {
-    static TypeID::Storage instance;
-    return TypeID(&instance);
-  }
+    template <typename T>
+    static TypeID get() {
+        static TypeID::Storage instance;
+        return TypeID(&instance);
+    }
+    template <template <typename> class Trait>
+    static TypeID get() {
+        static TypeID::Storage instance;
+        return TypeID(&instance);
+    }
 };
 
 } // namespace detail
 
 template <typename T>
 TypeID TypeID::get() {
-  return detail::TypeIDExported::get<T>();
+    return detail::TypeIDExported::get<T>();
 }
 template <template <typename> class Trait>
 TypeID TypeID::get() {
-  return detail::TypeIDExported::get<Trait>();
+    return detail::TypeIDExported::get<Trait>();
 }
 
 } // end namespace mlir
 
 namespace llvm {
 template <> struct DenseMapInfo<mlir::TypeID> {
-  static mlir::TypeID getEmptyKey() {
-    void *pointer = llvm::DenseMapInfo<void *>::getEmptyKey();
-    return mlir::TypeID::getFromOpaquePointer(pointer);
-  }
-  static mlir::TypeID getTombstoneKey() {
-    void *pointer = llvm::DenseMapInfo<void *>::getTombstoneKey();
-    return mlir::TypeID::getFromOpaquePointer(pointer);
-  }
-  static unsigned getHashValue(mlir::TypeID val) {
-    return mlir::hash_value(val);
-  }
-  static bool isEqual(mlir::TypeID lhs, mlir::TypeID rhs) { return lhs == rhs; }
+    static mlir::TypeID getEmptyKey() {
+        void *pointer = llvm::DenseMapInfo<void *>::getEmptyKey();
+        return mlir::TypeID::getFromOpaquePointer(pointer);
+    }
+    static mlir::TypeID getTombstoneKey() {
+        void *pointer = llvm::DenseMapInfo<void *>::getTombstoneKey();
+        return mlir::TypeID::getFromOpaquePointer(pointer);
+    }
+    static unsigned getHashValue(mlir::TypeID val) {
+        return mlir::hash_value(val);
+    }
+    static bool isEqual(mlir::TypeID lhs, mlir::TypeID rhs) {
+        return lhs == rhs;
+    }
 };
 
 /// We align TypeID::Storage by 8, so allow LLVM to steal the low bits.
 template <> struct PointerLikeTypeTraits<mlir::TypeID> {
-  static inline void *getAsVoidPointer(mlir::TypeID info) {
-    return const_cast<void *>(info.getAsOpaquePointer());
-  }
-  static inline mlir::TypeID getFromVoidPointer(void *ptr) {
-    return mlir::TypeID::getFromOpaquePointer(ptr);
-  }
-  static constexpr int NumLowBitsAvailable = 3;
+    static inline void *getAsVoidPointer(mlir::TypeID info) {
+        return const_cast<void *>(info.getAsOpaquePointer());
+    }
+    static inline mlir::TypeID getFromVoidPointer(void *ptr) {
+        return mlir::TypeID::getFromOpaquePointer(ptr);
+    }
+    static constexpr int NumLowBitsAvailable = 3;
 };
 
 } // end namespace llvm

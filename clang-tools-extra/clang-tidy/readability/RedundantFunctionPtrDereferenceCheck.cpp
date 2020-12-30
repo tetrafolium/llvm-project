@@ -17,19 +17,19 @@ namespace tidy {
 namespace readability {
 
 void RedundantFunctionPtrDereferenceCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(
-      traverse(TK_AsIs, unaryOperator(hasOperatorName("*"),
-                                      has(implicitCastExpr(hasCastKind(
-                                          CK_FunctionToPointerDecay))))
-                            .bind("op")),
-      this);
+    Finder->addMatcher(
+        traverse(TK_AsIs, unaryOperator(hasOperatorName("*"),
+                                        has(implicitCastExpr(hasCastKind(
+                                                CK_FunctionToPointerDecay))))
+                 .bind("op")),
+        this);
 }
 
 void RedundantFunctionPtrDereferenceCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *Operator = Result.Nodes.getNodeAs<UnaryOperator>("op");
-  diag(Operator->getOperatorLoc(),
-       "redundant repeated dereference of function pointer")
-      << FixItHint::CreateRemoval(Operator->getOperatorLoc());
+    const auto *Operator = Result.Nodes.getNodeAs<UnaryOperator>("op");
+    diag(Operator->getOperatorLoc(),
+         "redundant repeated dereference of function pointer")
+            << FixItHint::CreateRemoval(Operator->getOperatorLoc());
 }
 
 } // namespace readability

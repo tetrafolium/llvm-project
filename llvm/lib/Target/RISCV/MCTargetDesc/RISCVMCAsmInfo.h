@@ -19,13 +19,13 @@ namespace llvm {
 class Triple;
 
 class RISCVMCAsmInfo : public MCAsmInfoELF {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit RISCVMCAsmInfo(const Triple &TargetTriple);
+    explicit RISCVMCAsmInfo(const Triple &TargetTriple);
 
-  const MCExpr *getExprForFDESymbol(const MCSymbol *Sym, unsigned Encoding,
-                                    MCStreamer &Streamer) const override;
+    const MCExpr *getExprForFDESymbol(const MCSymbol *Sym, unsigned Encoding,
+                                      MCStreamer &Streamer) const override;
 };
 
 } // namespace llvm

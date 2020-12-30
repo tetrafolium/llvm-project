@@ -25,63 +25,63 @@ using namespace llvm;
 
 // Determines the size of the frame and maximum call frame size.
 void LanaiFrameLowering::determineFrameLayout(MachineFunction &MF) const {
-  MachineFrameInfo &MFI = MF.getFrameInfo();
-  const LanaiRegisterInfo *LRI = STI.getRegisterInfo();
+    MachineFrameInfo &MFI = MF.getFrameInfo();
+    const LanaiRegisterInfo *LRI = STI.getRegisterInfo();
 
-  // Get the number of bytes to allocate from the FrameInfo.
-  unsigned FrameSize = MFI.getStackSize();
+    // Get the number of bytes to allocate from the FrameInfo.
+    unsigned FrameSize = MFI.getStackSize();
 
-  // Get the alignment.
-  Align StackAlign =
-      LRI->needsStackRealignment(MF) ? MFI.getMaxAlign() : getStackAlign();
+    // Get the alignment.
+    Align StackAlign =
+        LRI->needsStackRealignment(MF) ? MFI.getMaxAlign() : getStackAlign();
 
-  // Get the maximum call frame size of all the calls.
-  unsigned MaxCallFrameSize = MFI.getMaxCallFrameSize();
+    // Get the maximum call frame size of all the calls.
+    unsigned MaxCallFrameSize = MFI.getMaxCallFrameSize();
 
-  // If we have dynamic alloca then MaxCallFrameSize needs to be aligned so
-  // that allocations will be aligned.
-  if (MFI.hasVarSizedObjects())
-    MaxCallFrameSize = alignTo(MaxCallFrameSize, StackAlign);
+    // If we have dynamic alloca then MaxCallFrameSize needs to be aligned so
+    // that allocations will be aligned.
+    if (MFI.hasVarSizedObjects())
+        MaxCallFrameSize = alignTo(MaxCallFrameSize, StackAlign);
 
-  // Update maximum call frame size.
-  MFI.setMaxCallFrameSize(MaxCallFrameSize);
+    // Update maximum call frame size.
+    MFI.setMaxCallFrameSize(MaxCallFrameSize);
 
-  // Include call frame size in total.
-  if (!(hasReservedCallFrame(MF) && MFI.adjustsStack()))
-    FrameSize += MaxCallFrameSize;
+    // Include call frame size in total.
+    if (!(hasReservedCallFrame(MF) && MFI.adjustsStack()))
+        FrameSize += MaxCallFrameSize;
 
-  // Make sure the frame is aligned.
-  FrameSize = alignTo(FrameSize, StackAlign);
+    // Make sure the frame is aligned.
+    FrameSize = alignTo(FrameSize, StackAlign);
 
-  // Update frame info.
-  MFI.setStackSize(FrameSize);
+    // Update frame info.
+    MFI.setStackSize(FrameSize);
 }
 
 // Iterates through each basic block in a machine function and replaces
 // ADJDYNALLOC pseudo instructions with a Lanai:ADDI with the
 // maximum call frame size as the immediate.
 void LanaiFrameLowering::replaceAdjDynAllocPseudo(MachineFunction &MF) const {
-  const LanaiInstrInfo &LII =
-      *static_cast<const LanaiInstrInfo *>(STI.getInstrInfo());
-  unsigned MaxCallFrameSize = MF.getFrameInfo().getMaxCallFrameSize();
+    const LanaiInstrInfo &LII =
+        *static_cast<const LanaiInstrInfo *>(STI.getInstrInfo());
+    unsigned MaxCallFrameSize = MF.getFrameInfo().getMaxCallFrameSize();
 
-  for (MachineFunction::iterator MBB = MF.begin(), E = MF.end(); MBB != E;
-       ++MBB) {
-    MachineBasicBlock::iterator MBBI = MBB->begin();
-    while (MBBI != MBB->end()) {
-      MachineInstr &MI = *MBBI++;
-      if (MI.getOpcode() == Lanai::ADJDYNALLOC) {
-        DebugLoc DL = MI.getDebugLoc();
-        Register Dst = MI.getOperand(0).getReg();
-        Register Src = MI.getOperand(1).getReg();
+    for (MachineFunction::iterator MBB = MF.begin(), E = MF.end(); MBB != E;
+            ++MBB) {
+        MachineBasicBlock::iterator MBBI = MBB->begin();
+        while (MBBI != MBB->end()) {
+            MachineInstr &MI = *MBBI++;
+            if (MI.getOpcode() == Lanai::ADJDYNALLOC) {
+                DebugLoc DL = MI.getDebugLoc();
+                Register Dst = MI.getOperand(0).getReg();
+                Register Src = MI.getOperand(1).getReg();
 
-        BuildMI(*MBB, MI, DL, LII.get(Lanai::ADD_I_LO), Dst)
-            .addReg(Src)
-            .addImm(MaxCallFrameSize);
-        MI.eraseFromParent();
-      }
+                BuildMI(*MBB, MI, DL, LII.get(Lanai::ADD_I_LO), Dst)
+                .addReg(Src)
+                .addImm(MaxCallFrameSize);
+                MI.eraseFromParent();
+            }
+        }
     }
-  }
 }
 
 // Generates the following sequence for function entry:
@@ -90,59 +90,59 @@ void LanaiFrameLowering::replaceAdjDynAllocPseudo(MachineFunction &MF) const {
 //   sub %sp,0x4,%sp        !allocate stack space (as needed)
 void LanaiFrameLowering::emitPrologue(MachineFunction &MF,
                                       MachineBasicBlock &MBB) const {
-  assert(&MF.front() == &MBB && "Shrink-wrapping not yet supported");
+    assert(&MF.front() == &MBB && "Shrink-wrapping not yet supported");
 
-  MachineFrameInfo &MFI = MF.getFrameInfo();
-  const LanaiInstrInfo &LII =
-      *static_cast<const LanaiInstrInfo *>(STI.getInstrInfo());
-  MachineBasicBlock::iterator MBBI = MBB.begin();
+    MachineFrameInfo &MFI = MF.getFrameInfo();
+    const LanaiInstrInfo &LII =
+        *static_cast<const LanaiInstrInfo *>(STI.getInstrInfo());
+    MachineBasicBlock::iterator MBBI = MBB.begin();
 
-  // Debug location must be unknown since the first debug location is used
-  // to determine the end of the prologue.
-  DebugLoc DL;
+    // Debug location must be unknown since the first debug location is used
+    // to determine the end of the prologue.
+    DebugLoc DL;
 
-  // Determine the correct frame layout
-  determineFrameLayout(MF);
+    // Determine the correct frame layout
+    determineFrameLayout(MF);
 
-  // FIXME: This appears to be overallocating.  Needs investigation.
-  // Get the number of bytes to allocate from the FrameInfo.
-  unsigned StackSize = MFI.getStackSize();
+    // FIXME: This appears to be overallocating.  Needs investigation.
+    // Get the number of bytes to allocate from the FrameInfo.
+    unsigned StackSize = MFI.getStackSize();
 
-  // Push old FP
-  // st %fp,-4[*%sp]
-  BuildMI(MBB, MBBI, DL, LII.get(Lanai::SW_RI))
-      .addReg(Lanai::FP)
-      .addReg(Lanai::SP)
-      .addImm(-4)
-      .addImm(LPAC::makePreOp(LPAC::ADD))
-      .setMIFlag(MachineInstr::FrameSetup);
+    // Push old FP
+    // st %fp,-4[*%sp]
+    BuildMI(MBB, MBBI, DL, LII.get(Lanai::SW_RI))
+    .addReg(Lanai::FP)
+    .addReg(Lanai::SP)
+    .addImm(-4)
+    .addImm(LPAC::makePreOp(LPAC::ADD))
+    .setMIFlag(MachineInstr::FrameSetup);
 
-  // Generate new FP
-  // add %sp,8,%fp
-  BuildMI(MBB, MBBI, DL, LII.get(Lanai::ADD_I_LO), Lanai::FP)
-      .addReg(Lanai::SP)
-      .addImm(8)
-      .setMIFlag(MachineInstr::FrameSetup);
+    // Generate new FP
+    // add %sp,8,%fp
+    BuildMI(MBB, MBBI, DL, LII.get(Lanai::ADD_I_LO), Lanai::FP)
+    .addReg(Lanai::SP)
+    .addImm(8)
+    .setMIFlag(MachineInstr::FrameSetup);
 
-  // Allocate space on the stack if needed
-  // sub %sp,StackSize,%sp
-  if (StackSize != 0) {
-    BuildMI(MBB, MBBI, DL, LII.get(Lanai::SUB_I_LO), Lanai::SP)
+    // Allocate space on the stack if needed
+    // sub %sp,StackSize,%sp
+    if (StackSize != 0) {
+        BuildMI(MBB, MBBI, DL, LII.get(Lanai::SUB_I_LO), Lanai::SP)
         .addReg(Lanai::SP)
         .addImm(StackSize)
         .setMIFlag(MachineInstr::FrameSetup);
-  }
+    }
 
-  // Replace ADJDYNANALLOC
-  if (MFI.hasVarSizedObjects())
-    replaceAdjDynAllocPseudo(MF);
+    // Replace ADJDYNANALLOC
+    if (MFI.hasVarSizedObjects())
+        replaceAdjDynAllocPseudo(MF);
 }
 
 MachineBasicBlock::iterator LanaiFrameLowering::eliminateCallFramePseudoInstr(
     MachineFunction & /*MF*/, MachineBasicBlock &MBB,
     MachineBasicBlock::iterator I) const {
-  // Discard ADJCALLSTACKDOWN, ADJCALLSTACKUP instructions.
-  return MBB.erase(I);
+    // Discard ADJCALLSTACKDOWN, ADJCALLSTACKUP instructions.
+    return MBB.erase(I);
 }
 
 // The function epilogue should not depend on the current stack pointer!
@@ -177,43 +177,43 @@ MachineBasicBlock::iterator LanaiFrameLowering::eliminateCallFramePseudoInstr(
 // instructions execute in the delay slots of the load to PC.
 void LanaiFrameLowering::emitEpilogue(MachineFunction & /*MF*/,
                                       MachineBasicBlock &MBB) const {
-  MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
-  const LanaiInstrInfo &LII =
-      *static_cast<const LanaiInstrInfo *>(STI.getInstrInfo());
-  DebugLoc DL = MBBI->getDebugLoc();
+    MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
+    const LanaiInstrInfo &LII =
+        *static_cast<const LanaiInstrInfo *>(STI.getInstrInfo());
+    DebugLoc DL = MBBI->getDebugLoc();
 
-  // Restore the stack pointer using the callee's frame pointer value.
-  BuildMI(MBB, MBBI, DL, LII.get(Lanai::ADD_I_LO), Lanai::SP)
-      .addReg(Lanai::FP)
-      .addImm(0);
+    // Restore the stack pointer using the callee's frame pointer value.
+    BuildMI(MBB, MBBI, DL, LII.get(Lanai::ADD_I_LO), Lanai::SP)
+    .addReg(Lanai::FP)
+    .addImm(0);
 
-  // Restore the frame pointer from the stack.
-  BuildMI(MBB, MBBI, DL, LII.get(Lanai::LDW_RI), Lanai::FP)
-      .addReg(Lanai::FP)
-      .addImm(-8)
-      .addImm(LPAC::ADD);
+    // Restore the frame pointer from the stack.
+    BuildMI(MBB, MBBI, DL, LII.get(Lanai::LDW_RI), Lanai::FP)
+    .addReg(Lanai::FP)
+    .addImm(-8)
+    .addImm(LPAC::ADD);
 }
 
 void LanaiFrameLowering::determineCalleeSaves(MachineFunction &MF,
-                                              BitVector &SavedRegs,
-                                              RegScavenger *RS) const {
-  TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
+        BitVector &SavedRegs,
+        RegScavenger *RS) const {
+    TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
 
-  MachineFrameInfo &MFI = MF.getFrameInfo();
-  const LanaiRegisterInfo *LRI =
-      static_cast<const LanaiRegisterInfo *>(STI.getRegisterInfo());
-  int Offset = -4;
+    MachineFrameInfo &MFI = MF.getFrameInfo();
+    const LanaiRegisterInfo *LRI =
+        static_cast<const LanaiRegisterInfo *>(STI.getRegisterInfo());
+    int Offset = -4;
 
-  // Reserve 4 bytes for the saved RCA
-  MFI.CreateFixedObject(4, Offset, true);
-  Offset -= 4;
-
-  // Reserve 4 bytes for the saved FP
-  MFI.CreateFixedObject(4, Offset, true);
-  Offset -= 4;
-
-  if (LRI->hasBasePointer(MF)) {
+    // Reserve 4 bytes for the saved RCA
     MFI.CreateFixedObject(4, Offset, true);
-    SavedRegs.reset(LRI->getBaseRegister());
-  }
+    Offset -= 4;
+
+    // Reserve 4 bytes for the saved FP
+    MFI.CreateFixedObject(4, Offset, true);
+    Offset -= 4;
+
+    if (LRI->hasBasePointer(MF)) {
+        MFI.CreateFixedObject(4, Offset, true);
+        SavedRegs.reset(LRI->getBaseRegister());
+    }
 }

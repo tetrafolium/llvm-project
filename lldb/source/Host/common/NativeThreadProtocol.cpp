@@ -15,5 +15,5 @@ using namespace lldb;
 using namespace lldb_private;
 
 NativeThreadProtocol::NativeThreadProtocol(NativeProcessProtocol &process,
-                                           lldb::tid_t tid)
+        lldb::tid_t tid)
     : m_process(process), m_tid(tid) {}

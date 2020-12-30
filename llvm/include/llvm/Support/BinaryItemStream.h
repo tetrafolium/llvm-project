@@ -19,8 +19,8 @@
 namespace llvm {
 
 template <typename T> struct BinaryItemTraits {
-  static size_t length(const T &Item) = delete;
-  static ArrayRef<uint8_t> bytes(const T &Item) = delete;
+    static size_t length(const T &Item) = delete;
+    static ArrayRef<uint8_t> bytes(const T &Item) = delete;
 };
 
 /// BinaryItemStream represents a sequence of objects stored in some kind of
@@ -33,73 +33,75 @@ template <typename T> struct BinaryItemTraits {
 template <typename T, typename Traits = BinaryItemTraits<T>>
 class BinaryItemStream : public BinaryStream {
 public:
-  explicit BinaryItemStream(llvm::support::endianness Endian)
-      : Endian(Endian) {}
+    explicit BinaryItemStream(llvm::support::endianness Endian)
+        : Endian(Endian) {}
 
-  llvm::support::endianness getEndian() const override { return Endian; }
+    llvm::support::endianness getEndian() const override {
+        return Endian;
+    }
 
-  Error readBytes(uint32_t Offset, uint32_t Size,
-                  ArrayRef<uint8_t> &Buffer) override {
-    auto ExpectedIndex = translateOffsetIndex(Offset);
-    if (!ExpectedIndex)
-      return ExpectedIndex.takeError();
-    const auto &Item = Items[*ExpectedIndex];
-    if (auto EC = checkOffsetForRead(Offset, Size))
-      return EC;
-    if (Size > Traits::length(Item))
-      return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
-    Buffer = Traits::bytes(Item).take_front(Size);
-    return Error::success();
-  }
+    Error readBytes(uint32_t Offset, uint32_t Size,
+                    ArrayRef<uint8_t> &Buffer) override {
+        auto ExpectedIndex = translateOffsetIndex(Offset);
+        if (!ExpectedIndex)
+            return ExpectedIndex.takeError();
+        const auto &Item = Items[*ExpectedIndex];
+        if (auto EC = checkOffsetForRead(Offset, Size))
+            return EC;
+        if (Size > Traits::length(Item))
+            return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+        Buffer = Traits::bytes(Item).take_front(Size);
+        return Error::success();
+    }
 
-  Error readLongestContiguousChunk(uint32_t Offset,
-                                   ArrayRef<uint8_t> &Buffer) override {
-    auto ExpectedIndex = translateOffsetIndex(Offset);
-    if (!ExpectedIndex)
-      return ExpectedIndex.takeError();
-    Buffer = Traits::bytes(Items[*ExpectedIndex]);
-    return Error::success();
-  }
+    Error readLongestContiguousChunk(uint32_t Offset,
+                                     ArrayRef<uint8_t> &Buffer) override {
+        auto ExpectedIndex = translateOffsetIndex(Offset);
+        if (!ExpectedIndex)
+            return ExpectedIndex.takeError();
+        Buffer = Traits::bytes(Items[*ExpectedIndex]);
+        return Error::success();
+    }
 
-  void setItems(ArrayRef<T> ItemArray) {
-    Items = ItemArray;
-    computeItemOffsets();
-  }
+    void setItems(ArrayRef<T> ItemArray) {
+        Items = ItemArray;
+        computeItemOffsets();
+    }
 
-  uint32_t getLength() override {
-    return ItemEndOffsets.empty() ? 0 : ItemEndOffsets.back();
-  }
+    uint32_t getLength() override {
+        return ItemEndOffsets.empty() ? 0 : ItemEndOffsets.back();
+    }
 
 private:
-  void computeItemOffsets() {
-    ItemEndOffsets.clear();
-    ItemEndOffsets.reserve(Items.size());
-    uint32_t CurrentOffset = 0;
-    for (const auto &Item : Items) {
-      uint32_t Len = Traits::length(Item);
-      assert(Len > 0 && "no empty items");
-      CurrentOffset += Len;
-      ItemEndOffsets.push_back(CurrentOffset);
+    void computeItemOffsets() {
+        ItemEndOffsets.clear();
+        ItemEndOffsets.reserve(Items.size());
+        uint32_t CurrentOffset = 0;
+        for (const auto &Item : Items) {
+            uint32_t Len = Traits::length(Item);
+            assert(Len > 0 && "no empty items");
+            CurrentOffset += Len;
+            ItemEndOffsets.push_back(CurrentOffset);
+        }
     }
-  }
 
-  Expected<uint32_t> translateOffsetIndex(uint32_t Offset) {
-    // Make sure the offset is somewhere in our items array.
-    if (Offset >= getLength())
-      return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
-    ++Offset;
-    auto Iter =
-        std::lower_bound(ItemEndOffsets.begin(), ItemEndOffsets.end(), Offset);
-    size_t Idx = std::distance(ItemEndOffsets.begin(), Iter);
-    assert(Idx < Items.size() && "binary search for offset failed");
-    return Idx;
-  }
+    Expected<uint32_t> translateOffsetIndex(uint32_t Offset) {
+        // Make sure the offset is somewhere in our items array.
+        if (Offset >= getLength())
+            return make_error<BinaryStreamError>(stream_error_code::stream_too_short);
+        ++Offset;
+        auto Iter =
+            std::lower_bound(ItemEndOffsets.begin(), ItemEndOffsets.end(), Offset);
+        size_t Idx = std::distance(ItemEndOffsets.begin(), Iter);
+        assert(Idx < Items.size() && "binary search for offset failed");
+        return Idx;
+    }
 
-  llvm::support::endianness Endian;
-  ArrayRef<T> Items;
+    llvm::support::endianness Endian;
+    ArrayRef<T> Items;
 
-  // Sorted vector of offsets to accelerate lookup.
-  std::vector<uint32_t> ItemEndOffsets;
+    // Sorted vector of offsets to accelerate lookup.
+    std::vector<uint32_t> ItemEndOffsets;
 };
 
 } // end namespace llvm

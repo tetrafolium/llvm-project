@@ -33,14 +33,14 @@ namespace {
 /// Asserts invariants on TweakRegistry. No-op with assertion disabled.
 void validateRegistry() {
 #ifndef NDEBUG
-  llvm::StringSet<> Seen;
-  for (const auto &E : TweakRegistry::entries()) {
-    // REGISTER_TWEAK ensures E.getName() is equal to the tweak class name.
-    // We check that id() matches it.
-    assert(E.instantiate()->id() == E.getName() &&
-           "id should be equal to class name");
-    assert(Seen.try_emplace(E.getName()).second && "duplicate check id");
-  }
+    llvm::StringSet<> Seen;
+    for (const auto &E : TweakRegistry::entries()) {
+        // REGISTER_TWEAK ensures E.getName() is equal to the tweak class name.
+        // We check that id() matches it.
+        assert(E.instantiate()->id() == E.getName() &&
+               "id should be equal to class name");
+        assert(Seen.try_emplace(E.getName()).second && "duplicate check id");
+    }
 #endif
 }
 } // namespace
@@ -50,62 +50,66 @@ Tweak::Selection::Selection(const SymbolIndex *Index, ParsedAST &AST,
                             SelectionTree ASTSelection)
     : Index(Index), AST(&AST), SelectionBegin(RangeBegin),
       SelectionEnd(RangeEnd), ASTSelection(std::move(ASTSelection)) {
-  auto &SM = AST.getSourceManager();
-  Code = SM.getBufferData(SM.getMainFileID());
-  Cursor = SM.getComposedLoc(SM.getMainFileID(), RangeBegin);
+    auto &SM = AST.getSourceManager();
+    Code = SM.getBufferData(SM.getMainFileID());
+    Cursor = SM.getComposedLoc(SM.getMainFileID(), RangeBegin);
 }
 
 std::vector<std::unique_ptr<Tweak>>
-prepareTweaks(const Tweak::Selection &S,
-              llvm::function_ref<bool(const Tweak &)> Filter) {
-  validateRegistry();
+                                 prepareTweaks(const Tweak::Selection &S,
+llvm::function_ref<bool(const Tweak &)> Filter) {
+    validateRegistry();
 
-  std::vector<std::unique_ptr<Tweak>> Available;
-  for (const auto &E : TweakRegistry::entries()) {
-    std::unique_ptr<Tweak> T = E.instantiate();
-    if (!Filter(*T) || !T->prepare(S))
-      continue;
-    Available.push_back(std::move(T));
-  }
-  // Ensure deterministic order of the results.
-  llvm::sort(Available,
-             [](const std::unique_ptr<Tweak> &L,
-                const std::unique_ptr<Tweak> &R) { return L->id() < R->id(); });
-  return Available;
+    std::vector<std::unique_ptr<Tweak>> Available;
+    for (const auto &E : TweakRegistry::entries()) {
+        std::unique_ptr<Tweak> T = E.instantiate();
+        if (!Filter(*T) || !T->prepare(S))
+            continue;
+        Available.push_back(std::move(T));
+    }
+    // Ensure deterministic order of the results.
+    llvm::sort(Available,
+               [](const std::unique_ptr<Tweak> &L,
+    const std::unique_ptr<Tweak> &R) {
+        return L->id() < R->id();
+    });
+    return Available;
 }
 
 llvm::Expected<std::unique_ptr<Tweak>> prepareTweak(StringRef ID,
-                                                    const Tweak::Selection &S) {
-  auto It = llvm::find_if(
-      TweakRegistry::entries(),
-      [ID](const TweakRegistry::entry &E) { return E.getName() == ID; });
-  if (It == TweakRegistry::end())
-    return error("tweak ID {0} is invalid", ID);
-  std::unique_ptr<Tweak> T = It->instantiate();
-  if (!T->prepare(S))
-    return error("failed to prepare() tweak {0}", ID);
-  return std::move(T);
+const Tweak::Selection &S) {
+    auto It = llvm::find_if(
+                  TweakRegistry::entries(),
+    [ID](const TweakRegistry::entry &E) {
+        return E.getName() == ID;
+    });
+    if (It == TweakRegistry::end())
+        return error("tweak ID {0} is invalid", ID);
+    std::unique_ptr<Tweak> T = It->instantiate();
+    if (!T->prepare(S))
+        return error("failed to prepare() tweak {0}", ID);
+    return std::move(T);
 }
 
 llvm::Expected<std::pair<Path, Edit>>
-Tweak::Effect::fileEdit(const SourceManager &SM, FileID FID,
-                        tooling::Replacements Replacements) {
-  Edit Ed(SM.getBufferData(FID), std::move(Replacements));
-  if (auto FilePath = getCanonicalPath(SM.getFileEntryForID(FID), SM))
-    return std::make_pair(*FilePath, std::move(Ed));
-  return error("Failed to get absolute path for edited file: {0}",
-               SM.getFileEntryForID(FID)->getName());
+                                   Tweak::Effect::fileEdit(const SourceManager &SM, FileID FID,
+tooling::Replacements Replacements) {
+    Edit Ed(SM.getBufferData(FID), std::move(Replacements));
+    if (auto FilePath = getCanonicalPath(SM.getFileEntryForID(FID), SM))
+        return std::make_pair(*FilePath, std::move(Ed));
+    return error("Failed to get absolute path for edited file: {0}",
+                 SM.getFileEntryForID(FID)->getName());
 }
 
 llvm::Expected<Tweak::Effect>
 Tweak::Effect::mainFileEdit(const SourceManager &SM,
                             tooling::Replacements Replacements) {
-  auto PathAndEdit = fileEdit(SM, SM.getMainFileID(), std::move(Replacements));
-  if (!PathAndEdit)
-    return PathAndEdit.takeError();
-  Tweak::Effect E;
-  E.ApplyEdits.try_emplace(PathAndEdit->first, PathAndEdit->second);
-  return E;
+    auto PathAndEdit = fileEdit(SM, SM.getMainFileID(), std::move(Replacements));
+    if (!PathAndEdit)
+        return PathAndEdit.takeError();
+    Tweak::Effect E;
+    E.ApplyEdits.try_emplace(PathAndEdit->first, PathAndEdit->second);
+    return E;
 }
 
 } // namespace clangd

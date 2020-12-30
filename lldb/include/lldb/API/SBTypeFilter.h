@@ -16,57 +16,57 @@ namespace lldb {
 
 class LLDB_API SBTypeFilter {
 public:
-  SBTypeFilter();
+    SBTypeFilter();
 
-  SBTypeFilter(uint32_t options); // see lldb::eTypeOption values
+    SBTypeFilter(uint32_t options); // see lldb::eTypeOption values
 
-  SBTypeFilter(const lldb::SBTypeFilter &rhs);
+    SBTypeFilter(const lldb::SBTypeFilter &rhs);
 
-  ~SBTypeFilter();
+    ~SBTypeFilter();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  uint32_t GetNumberOfExpressionPaths();
+    uint32_t GetNumberOfExpressionPaths();
 
-  const char *GetExpressionPathAtIndex(uint32_t i);
+    const char *GetExpressionPathAtIndex(uint32_t i);
 
-  bool ReplaceExpressionPathAtIndex(uint32_t i, const char *item);
+    bool ReplaceExpressionPathAtIndex(uint32_t i, const char *item);
 
-  void AppendExpressionPath(const char *item);
+    void AppendExpressionPath(const char *item);
 
-  void Clear();
+    void Clear();
 
-  uint32_t GetOptions();
+    uint32_t GetOptions();
 
-  void SetOptions(uint32_t);
+    void SetOptions(uint32_t);
 
-  bool GetDescription(lldb::SBStream &description,
-                      lldb::DescriptionLevel description_level);
+    bool GetDescription(lldb::SBStream &description,
+                        lldb::DescriptionLevel description_level);
 
-  lldb::SBTypeFilter &operator=(const lldb::SBTypeFilter &rhs);
+    lldb::SBTypeFilter &operator=(const lldb::SBTypeFilter &rhs);
 
-  bool IsEqualTo(lldb::SBTypeFilter &rhs);
+    bool IsEqualTo(lldb::SBTypeFilter &rhs);
 
-  bool operator==(lldb::SBTypeFilter &rhs);
+    bool operator==(lldb::SBTypeFilter &rhs);
 
-  bool operator!=(lldb::SBTypeFilter &rhs);
+    bool operator!=(lldb::SBTypeFilter &rhs);
 
 protected:
-  friend class SBDebugger;
-  friend class SBTypeCategory;
-  friend class SBValue;
+    friend class SBDebugger;
+    friend class SBTypeCategory;
+    friend class SBValue;
 
-  lldb::TypeFilterImplSP GetSP();
+    lldb::TypeFilterImplSP GetSP();
 
-  void SetSP(const lldb::TypeFilterImplSP &typefilter_impl_sp);
+    void SetSP(const lldb::TypeFilterImplSP &typefilter_impl_sp);
 
-  lldb::TypeFilterImplSP m_opaque_sp;
+    lldb::TypeFilterImplSP m_opaque_sp;
 
-  SBTypeFilter(const lldb::TypeFilterImplSP &);
+    SBTypeFilter(const lldb::TypeFilterImplSP &);
 
-  bool CopyOnWrite_Impl();
+    bool CopyOnWrite_Impl();
 };
 
 } // namespace lldb

@@ -9,62 +9,62 @@
 #ifdef DECLARE_REGISTER_INFOS_ARM64_STRUCT
 
 enum {
-  sve_fpsr = fpu_fpsr,
-  sve_fpcr = fpu_fpcr,
+    sve_fpsr = fpu_fpsr,
+    sve_fpcr = fpu_fpcr,
 
-  sve_vg = exc_far,
+    sve_vg = exc_far,
 
-  sve_z0,
-  sve_z1,
-  sve_z2,
-  sve_z3,
-  sve_z4,
-  sve_z5,
-  sve_z6,
-  sve_z7,
-  sve_z8,
-  sve_z9,
-  sve_z10,
-  sve_z11,
-  sve_z12,
-  sve_z13,
-  sve_z14,
-  sve_z15,
-  sve_z16,
-  sve_z17,
-  sve_z18,
-  sve_z19,
-  sve_z20,
-  sve_z21,
-  sve_z22,
-  sve_z23,
-  sve_z24,
-  sve_z25,
-  sve_z26,
-  sve_z27,
-  sve_z28,
-  sve_z29,
-  sve_z30,
-  sve_z31,
+    sve_z0,
+    sve_z1,
+    sve_z2,
+    sve_z3,
+    sve_z4,
+    sve_z5,
+    sve_z6,
+    sve_z7,
+    sve_z8,
+    sve_z9,
+    sve_z10,
+    sve_z11,
+    sve_z12,
+    sve_z13,
+    sve_z14,
+    sve_z15,
+    sve_z16,
+    sve_z17,
+    sve_z18,
+    sve_z19,
+    sve_z20,
+    sve_z21,
+    sve_z22,
+    sve_z23,
+    sve_z24,
+    sve_z25,
+    sve_z26,
+    sve_z27,
+    sve_z28,
+    sve_z29,
+    sve_z30,
+    sve_z31,
 
-  sve_p0,
-  sve_p1,
-  sve_p2,
-  sve_p3,
-  sve_p4,
-  sve_p5,
-  sve_p6,
-  sve_p7,
-  sve_p8,
-  sve_p9,
-  sve_p10,
-  sve_p11,
-  sve_p12,
-  sve_p13,
-  sve_p14,
-  sve_p15,
+    sve_p0,
+    sve_p1,
+    sve_p2,
+    sve_p3,
+    sve_p4,
+    sve_p5,
+    sve_p6,
+    sve_p7,
+    sve_p8,
+    sve_p9,
+    sve_p10,
+    sve_p11,
+    sve_p12,
+    sve_p13,
+    sve_p14,
+    sve_p15,
 
-  sve_ffr,
+    sve_ffr,
 };
 
 #ifndef SVE_OFFSET_VG
@@ -72,199 +72,295 @@ enum {
 #endif
 
 static uint32_t g_sve_s0_invalidates[] = {sve_z0, fpu_v0, fpu_d0,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s1_invalidates[] = {sve_z1, fpu_v1, fpu_d1,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s2_invalidates[] = {sve_z2, fpu_v2, fpu_d2,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s3_invalidates[] = {sve_z3, fpu_v3, fpu_d3,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s4_invalidates[] = {sve_z4, fpu_v4, fpu_d4,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s5_invalidates[] = {sve_z5, fpu_v5, fpu_d5,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s6_invalidates[] = {sve_z6, fpu_v6, fpu_d6,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s7_invalidates[] = {sve_z7, fpu_v7, fpu_d7,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s8_invalidates[] = {sve_z8, fpu_v8, fpu_d8,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s9_invalidates[] = {sve_z9, fpu_v9, fpu_d9,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_s10_invalidates[] = {sve_z10, fpu_v10, fpu_d10,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s11_invalidates[] = {sve_z11, fpu_v11, fpu_d11,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s12_invalidates[] = {sve_z12, fpu_v12, fpu_d12,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s13_invalidates[] = {sve_z13, fpu_v13, fpu_d13,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s14_invalidates[] = {sve_z14, fpu_v14, fpu_d14,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s15_invalidates[] = {sve_z15, fpu_v15, fpu_d15,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s16_invalidates[] = {sve_z16, fpu_v16, fpu_d16,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s17_invalidates[] = {sve_z17, fpu_v17, fpu_d17,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s18_invalidates[] = {sve_z18, fpu_v18, fpu_d18,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s19_invalidates[] = {sve_z19, fpu_v19, fpu_d19,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s20_invalidates[] = {sve_z20, fpu_v20, fpu_d20,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s21_invalidates[] = {sve_z21, fpu_v21, fpu_d21,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s22_invalidates[] = {sve_z22, fpu_v22, fpu_d22,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s23_invalidates[] = {sve_z23, fpu_v23, fpu_d23,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s24_invalidates[] = {sve_z24, fpu_v24, fpu_d24,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s25_invalidates[] = {sve_z25, fpu_v25, fpu_d25,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s26_invalidates[] = {sve_z26, fpu_v26, fpu_d26,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s27_invalidates[] = {sve_z27, fpu_v27, fpu_d27,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s28_invalidates[] = {sve_z28, fpu_v28, fpu_d28,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s29_invalidates[] = {sve_z29, fpu_v29, fpu_d29,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s30_invalidates[] = {sve_z30, fpu_v30, fpu_d30,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_s31_invalidates[] = {sve_z31, fpu_v31, fpu_d31,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 
 static uint32_t g_sve_d0_invalidates[] = {sve_z0, fpu_v0, fpu_s0,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d1_invalidates[] = {sve_z1, fpu_v1, fpu_s1,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d2_invalidates[] = {sve_z2, fpu_v2, fpu_s2,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d3_invalidates[] = {sve_z3, fpu_v3, fpu_s3,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d4_invalidates[] = {sve_z4, fpu_v4, fpu_s4,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d5_invalidates[] = {sve_z5, fpu_v5, fpu_s5,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d6_invalidates[] = {sve_z6, fpu_v6, fpu_s6,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d7_invalidates[] = {sve_z7, fpu_v7, fpu_s7,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d8_invalidates[] = {sve_z8, fpu_v8, fpu_s8,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d9_invalidates[] = {sve_z9, fpu_v9, fpu_s9,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_d10_invalidates[] = {sve_z10, fpu_v10, fpu_s10,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d11_invalidates[] = {sve_z11, fpu_v11, fpu_s11,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d12_invalidates[] = {sve_z12, fpu_v12, fpu_s12,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d13_invalidates[] = {sve_z13, fpu_v13, fpu_s13,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d14_invalidates[] = {sve_z14, fpu_v14, fpu_s14,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d15_invalidates[] = {sve_z15, fpu_v15, fpu_s15,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d16_invalidates[] = {sve_z16, fpu_v16, fpu_s16,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d17_invalidates[] = {sve_z17, fpu_v17, fpu_s17,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d18_invalidates[] = {sve_z18, fpu_v18, fpu_s18,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d19_invalidates[] = {sve_z19, fpu_v19, fpu_s19,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d20_invalidates[] = {sve_z20, fpu_v20, fpu_s20,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d21_invalidates[] = {sve_z21, fpu_v21, fpu_s21,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d22_invalidates[] = {sve_z22, fpu_v22, fpu_s22,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d23_invalidates[] = {sve_z23, fpu_v23, fpu_s23,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d24_invalidates[] = {sve_z24, fpu_v24, fpu_s24,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d25_invalidates[] = {sve_z25, fpu_v25, fpu_s25,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d26_invalidates[] = {sve_z26, fpu_v26, fpu_s26,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d27_invalidates[] = {sve_z27, fpu_v27, fpu_s27,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d28_invalidates[] = {sve_z28, fpu_v28, fpu_s28,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d29_invalidates[] = {sve_z29, fpu_v29, fpu_s29,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d30_invalidates[] = {sve_z30, fpu_v30, fpu_s30,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_d31_invalidates[] = {sve_z31, fpu_v31, fpu_s31,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 
 static uint32_t g_sve_v0_invalidates[] = {sve_z0, fpu_d0, fpu_s0,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v1_invalidates[] = {sve_z1, fpu_d1, fpu_s1,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v2_invalidates[] = {sve_z2, fpu_d2, fpu_s2,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v3_invalidates[] = {sve_z3, fpu_d3, fpu_s3,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v4_invalidates[] = {sve_z4, fpu_d4, fpu_s4,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v5_invalidates[] = {sve_z5, fpu_d5, fpu_s5,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v6_invalidates[] = {sve_z6, fpu_d6, fpu_s6,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v7_invalidates[] = {sve_z7, fpu_d7, fpu_s7,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v8_invalidates[] = {sve_z8, fpu_d8, fpu_s8,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v9_invalidates[] = {sve_z9, fpu_d9, fpu_s9,
-                                          LLDB_INVALID_REGNUM};
+                                          LLDB_INVALID_REGNUM
+                                         };
 static uint32_t g_sve_v10_invalidates[] = {sve_z10, fpu_d10, fpu_s10,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v11_invalidates[] = {sve_z11, fpu_d11, fpu_s11,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v12_invalidates[] = {sve_z12, fpu_d12, fpu_s12,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v13_invalidates[] = {sve_z13, fpu_d13, fpu_s13,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v14_invalidates[] = {sve_z14, fpu_d14, fpu_s14,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v15_invalidates[] = {sve_z15, fpu_d15, fpu_s15,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v16_invalidates[] = {sve_z16, fpu_d16, fpu_s16,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v17_invalidates[] = {sve_z17, fpu_d17, fpu_s17,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v18_invalidates[] = {sve_z18, fpu_d18, fpu_s18,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v19_invalidates[] = {sve_z19, fpu_d19, fpu_s19,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v20_invalidates[] = {sve_z20, fpu_d20, fpu_s20,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v21_invalidates[] = {sve_z21, fpu_d21, fpu_s21,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v22_invalidates[] = {sve_z22, fpu_d22, fpu_s22,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v23_invalidates[] = {sve_z23, fpu_d23, fpu_s23,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v24_invalidates[] = {sve_z24, fpu_d24, fpu_s24,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v25_invalidates[] = {sve_z25, fpu_d25, fpu_s25,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v26_invalidates[] = {sve_z26, fpu_d26, fpu_s26,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v27_invalidates[] = {sve_z27, fpu_d27, fpu_s27,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v28_invalidates[] = {sve_z28, fpu_d28, fpu_s28,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v29_invalidates[] = {sve_z29, fpu_d29, fpu_s29,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v30_invalidates[] = {sve_z30, fpu_d30, fpu_s30,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 static uint32_t g_sve_v31_invalidates[] = {sve_z31, fpu_d31, fpu_s31,
-                                           LLDB_INVALID_REGNUM};
+                                           LLDB_INVALID_REGNUM
+                                          };
 
 static uint32_t g_contained_z0[] = {sve_z0, LLDB_INVALID_REGNUM};
 static uint32_t g_contained_z1[] = {sve_z1, LLDB_INVALID_REGNUM};

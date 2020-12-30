@@ -39,73 +39,73 @@ namespace dex {
 /// constructing complex iterator trees.
 class Token {
 public:
-  /// Kind specifies Token type which defines semantics for the internal
-  /// representation. Each Kind has different representation stored in Data
-  /// field.
-  // FIXME(kbobyrev): Storing Data hash would be more efficient than storing raw
-  // strings. For example, PathURI store URIs of each directory and its parents,
-  // which induces a lot of overhead because these paths tend to be long and
-  // each parent directory is a prefix.
-  enum class Kind {
-    /// Represents trigram used for fuzzy search of unqualified symbol names.
-    ///
-    /// Data contains 3 bytes with trigram contents.
-    Trigram,
-    /// Scope primitives, e.g. "symbol belongs to namespace foo::bar".
-    ///
-    /// Data stroes full scope name, e.g. "foo::bar::baz::" or "" (for global
-    /// scope).
-    Scope,
-    /// Path Proximity URI to symbol declaration.
-    ///
-    /// Data stores path URI of symbol declaration file or its parent.
-    ///
-    /// Example: "file:///path/to/clang-tools-extra/clangd/index/SymbolIndex.h"
-    /// and some amount of its parents.
-    ProximityURI,
-    /// Type of symbol (see `Symbol::Type`).
-    Type,
-    /// Internal Token type for invalid/special tokens, e.g. empty tokens for
-    /// llvm::DenseMap.
-    Sentinel,
-  };
+    /// Kind specifies Token type which defines semantics for the internal
+    /// representation. Each Kind has different representation stored in Data
+    /// field.
+    // FIXME(kbobyrev): Storing Data hash would be more efficient than storing raw
+    // strings. For example, PathURI store URIs of each directory and its parents,
+    // which induces a lot of overhead because these paths tend to be long and
+    // each parent directory is a prefix.
+    enum class Kind {
+        /// Represents trigram used for fuzzy search of unqualified symbol names.
+        ///
+        /// Data contains 3 bytes with trigram contents.
+        Trigram,
+        /// Scope primitives, e.g. "symbol belongs to namespace foo::bar".
+        ///
+        /// Data stroes full scope name, e.g. "foo::bar::baz::" or "" (for global
+        /// scope).
+        Scope,
+        /// Path Proximity URI to symbol declaration.
+        ///
+        /// Data stores path URI of symbol declaration file or its parent.
+        ///
+        /// Example: "file:///path/to/clang-tools-extra/clangd/index/SymbolIndex.h"
+        /// and some amount of its parents.
+        ProximityURI,
+        /// Type of symbol (see `Symbol::Type`).
+        Type,
+        /// Internal Token type for invalid/special tokens, e.g. empty tokens for
+        /// llvm::DenseMap.
+        Sentinel,
+    };
 
-  Token(Kind TokenKind, llvm::StringRef Data)
-      : Data(Data), TokenKind(TokenKind) {}
+    Token(Kind TokenKind, llvm::StringRef Data)
+        : Data(Data), TokenKind(TokenKind) {}
 
-  bool operator==(const Token &Other) const {
-    return TokenKind == Other.TokenKind && Data == Other.Data;
-  }
-
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const Token &T) {
-    switch (T.TokenKind) {
-    case Kind::Trigram:
-      OS << "T=";
-      break;
-    case Kind::Scope:
-      OS << "S=";
-      break;
-    case Kind::ProximityURI:
-      OS << "U=";
-      break;
-    case Kind::Type:
-      OS << "Ty=";
-      break;
-    case Kind::Sentinel:
-      OS << "?=";
-      break;
+    bool operator==(const Token &Other) const {
+        return TokenKind == Other.TokenKind && Data == Other.Data;
     }
-    return OS << T.Data;
-  }
+
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const Token &T) {
+        switch (T.TokenKind) {
+        case Kind::Trigram:
+            OS << "T=";
+            break;
+        case Kind::Scope:
+            OS << "S=";
+            break;
+        case Kind::ProximityURI:
+            OS << "U=";
+            break;
+        case Kind::Type:
+            OS << "Ty=";
+            break;
+        case Kind::Sentinel:
+            OS << "?=";
+            break;
+        }
+        return OS << T.Data;
+    }
 
 private:
-  /// Representation which is unique among Token with the same Kind.
-  std::string Data;
-  Kind TokenKind;
+    /// Representation which is unique among Token with the same Kind.
+    std::string Data;
+    Kind TokenKind;
 
-  friend llvm::hash_code hash_value(const Token &Token) {
-    return llvm::hash_combine(static_cast<int>(Token.TokenKind), Token.Data);
-  }
+    friend llvm::hash_code hash_value(const Token &Token) {
+        return llvm::hash_combine(static_cast<int>(Token.TokenKind), Token.Data);
+    }
 };
 
 } // namespace dex
@@ -116,22 +116,22 @@ namespace llvm {
 
 // Support Tokens as DenseMap keys.
 template <> struct DenseMapInfo<clang::clangd::dex::Token> {
-  static inline clang::clangd::dex::Token getEmptyKey() {
-    return {clang::clangd::dex::Token::Kind::Sentinel, "EmptyKey"};
-  }
+    static inline clang::clangd::dex::Token getEmptyKey() {
+        return {clang::clangd::dex::Token::Kind::Sentinel, "EmptyKey"};
+    }
 
-  static inline clang::clangd::dex::Token getTombstoneKey() {
-    return {clang::clangd::dex::Token::Kind::Sentinel, "TombstoneKey"};
-  }
+    static inline clang::clangd::dex::Token getTombstoneKey() {
+        return {clang::clangd::dex::Token::Kind::Sentinel, "TombstoneKey"};
+    }
 
-  static unsigned getHashValue(const clang::clangd::dex::Token &Tag) {
-    return hash_value(Tag);
-  }
+    static unsigned getHashValue(const clang::clangd::dex::Token &Tag) {
+        return hash_value(Tag);
+    }
 
-  static bool isEqual(const clang::clangd::dex::Token &LHS,
-                      const clang::clangd::dex::Token &RHS) {
-    return LHS == RHS;
-  }
+    static bool isEqual(const clang::clangd::dex::Token &LHS,
+                        const clang::clangd::dex::Token &RHS) {
+        return LHS == RHS;
+    }
 };
 
 } // namespace llvm

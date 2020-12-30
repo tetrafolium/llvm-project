@@ -24,48 +24,48 @@ using namespace llvm;
 STATISTIC(MCNumEmitted, "Number of MC instructions emitted");
 
 unsigned CSKYMCCodeEmitter::getOImmOpValue(const MCInst &MI, unsigned Idx,
-                                           SmallVectorImpl<MCFixup> &Fixups,
-                                           const MCSubtargetInfo &STI) const {
-  const MCOperand &MO = MI.getOperand(Idx);
-  assert(MO.isImm() && "Unexpected MO type.");
-  return MO.getImm() - 1;
+        SmallVectorImpl<MCFixup> &Fixups,
+        const MCSubtargetInfo &STI) const {
+    const MCOperand &MO = MI.getOperand(Idx);
+    assert(MO.isImm() && "Unexpected MO type.");
+    return MO.getImm() - 1;
 }
 
 void CSKYMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
-                                          SmallVectorImpl<MCFixup> &Fixups,
-                                          const MCSubtargetInfo &STI) const {
-  const MCInstrDesc &Desc = MII.get(MI.getOpcode());
-  unsigned Size = Desc.getSize();
-  uint32_t Bin = getBinaryCodeForInstr(MI, Fixups, STI);
+        SmallVectorImpl<MCFixup> &Fixups,
+        const MCSubtargetInfo &STI) const {
+    const MCInstrDesc &Desc = MII.get(MI.getOpcode());
+    unsigned Size = Desc.getSize();
+    uint32_t Bin = getBinaryCodeForInstr(MI, Fixups, STI);
 
-  uint16_t LO16 = static_cast<uint16_t>(Bin);
-  uint16_t HI16 = static_cast<uint16_t>(Bin >> 16);
+    uint16_t LO16 = static_cast<uint16_t>(Bin);
+    uint16_t HI16 = static_cast<uint16_t>(Bin >> 16);
 
-  if (Size == 4)
-    support::endian::write<uint16_t>(OS, HI16, support::little);
+    if (Size == 4)
+        support::endian::write<uint16_t>(OS, HI16, support::little);
 
-  support::endian::write<uint16_t>(OS, LO16, support::little);
-  ++MCNumEmitted; // Keep track of the # of mi's emitted.
+    support::endian::write<uint16_t>(OS, LO16, support::little);
+    ++MCNumEmitted; // Keep track of the # of mi's emitted.
 }
 
 unsigned
 CSKYMCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
                                      SmallVectorImpl<MCFixup> &Fixups,
                                      const MCSubtargetInfo &STI) const {
-  if (MO.isReg())
-    return Ctx.getRegisterInfo()->getEncodingValue(MO.getReg());
+    if (MO.isReg())
+        return Ctx.getRegisterInfo()->getEncodingValue(MO.getReg());
 
-  if (MO.isImm())
-    return static_cast<unsigned>(MO.getImm());
+    if (MO.isImm())
+        return static_cast<unsigned>(MO.getImm());
 
-  llvm_unreachable("Unhandled expression!");
-  return 0;
+    llvm_unreachable("Unhandled expression!");
+    return 0;
 }
 
 MCCodeEmitter *llvm::createCSKYMCCodeEmitter(const MCInstrInfo &MCII,
-                                             const MCRegisterInfo &MRI,
-                                             MCContext &Ctx) {
-  return new CSKYMCCodeEmitter(Ctx, MCII);
+        const MCRegisterInfo &MRI,
+        MCContext &Ctx) {
+    return new CSKYMCCodeEmitter(Ctx, MCII);
 }
 
 #include "CSKYGenMCCodeEmitter.inc"

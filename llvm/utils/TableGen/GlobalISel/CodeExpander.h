@@ -30,25 +30,25 @@ class raw_ostream;
 /// The emitted code can be given a custom indent to enable both indentation by
 /// an arbitrary amount of whitespace and emission of the code as a comment.
 class CodeExpander {
-  StringRef Code;
-  const CodeExpansions &Expansions;
-  const ArrayRef<SMLoc> &Loc;
-  bool ShowExpansions;
-  StringRef Indent;
+    StringRef Code;
+    const CodeExpansions &Expansions;
+    const ArrayRef<SMLoc> &Loc;
+    bool ShowExpansions;
+    StringRef Indent;
 
 public:
-  CodeExpander(StringRef Code, const CodeExpansions &Expansions,
-               const ArrayRef<SMLoc> &Loc, bool ShowExpansions,
-               StringRef Indent = "    ")
-      : Code(Code), Expansions(Expansions), Loc(Loc),
-        ShowExpansions(ShowExpansions), Indent(Indent) {}
+    CodeExpander(StringRef Code, const CodeExpansions &Expansions,
+                 const ArrayRef<SMLoc> &Loc, bool ShowExpansions,
+                 StringRef Indent = "    ")
+        : Code(Code), Expansions(Expansions), Loc(Loc),
+          ShowExpansions(ShowExpansions), Indent(Indent) {}
 
-  void emit(raw_ostream &OS) const;
+    void emit(raw_ostream &OS) const;
 };
 
 inline raw_ostream &operator<<(raw_ostream &OS, const CodeExpander &Expander) {
-  Expander.emit(OS);
-  return OS;
+    Expander.emit(OS);
+    return OS;
 }
 } // end namespace llvm
 

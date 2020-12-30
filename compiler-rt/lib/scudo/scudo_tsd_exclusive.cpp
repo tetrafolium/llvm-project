@@ -29,37 +29,37 @@ THREADLOCAL ScudoTSD TSD;
 ScudoTSD FallbackTSD;
 
 static void teardownThread(void *Ptr) {
-  uptr I = reinterpret_cast<uptr>(Ptr);
-  // The glibc POSIX thread-local-storage deallocation routine calls user
-  // provided destructors in a loop of PTHREAD_DESTRUCTOR_ITERATIONS.
-  // We want to be called last since other destructors might call free and the
-  // like, so we wait until PTHREAD_DESTRUCTOR_ITERATIONS before draining the
-  // quarantine and swallowing the cache.
-  if (I > 1) {
-    // If pthread_setspecific fails, we will go ahead with the teardown.
-    if (LIKELY(pthread_setspecific(PThreadKey,
-                                   reinterpret_cast<void *>(I - 1)) == 0))
-      return;
-  }
-  TSD.commitBack();
-  ScudoThreadState = ThreadTornDown;
+    uptr I = reinterpret_cast<uptr>(Ptr);
+    // The glibc POSIX thread-local-storage deallocation routine calls user
+    // provided destructors in a loop of PTHREAD_DESTRUCTOR_ITERATIONS.
+    // We want to be called last since other destructors might call free and the
+    // like, so we wait until PTHREAD_DESTRUCTOR_ITERATIONS before draining the
+    // quarantine and swallowing the cache.
+    if (I > 1) {
+        // If pthread_setspecific fails, we will go ahead with the teardown.
+        if (LIKELY(pthread_setspecific(PThreadKey,
+                                       reinterpret_cast<void *>(I - 1)) == 0))
+            return;
+    }
+    TSD.commitBack();
+    ScudoThreadState = ThreadTornDown;
 }
 
 
 static void initOnce() {
-  CHECK_EQ(pthread_key_create(&PThreadKey, teardownThread), 0);
-  initScudo();
-  FallbackTSD.init();
+    CHECK_EQ(pthread_key_create(&PThreadKey, teardownThread), 0);
+    initScudo();
+    FallbackTSD.init();
 }
 
 void initThread(bool MinimalInit) {
-  CHECK_EQ(pthread_once(&GlobalInitialized, initOnce), 0);
-  if (UNLIKELY(MinimalInit))
-    return;
-  CHECK_EQ(pthread_setspecific(PThreadKey, reinterpret_cast<void *>(
-      GetPthreadDestructorIterations())), 0);
-  TSD.init();
-  ScudoThreadState = ThreadInitialized;
+    CHECK_EQ(pthread_once(&GlobalInitialized, initOnce), 0);
+    if (UNLIKELY(MinimalInit))
+        return;
+    CHECK_EQ(pthread_setspecific(PThreadKey, reinterpret_cast<void *>(
+                                     GetPthreadDestructorIterations())), 0);
+    TSD.init();
+    ScudoThreadState = ThreadInitialized;
 }
 
 }  // namespace __scudo

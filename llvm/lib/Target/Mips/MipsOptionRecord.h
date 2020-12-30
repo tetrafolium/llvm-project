@@ -30,51 +30,51 @@ class MipsELFStreamer;
 
 class MipsOptionRecord {
 public:
-  virtual ~MipsOptionRecord() = default;
+    virtual ~MipsOptionRecord() = default;
 
-  virtual void EmitMipsOptionRecord() = 0;
+    virtual void EmitMipsOptionRecord() = 0;
 };
 
 class MipsRegInfoRecord : public MipsOptionRecord {
 public:
-  MipsRegInfoRecord(MipsELFStreamer *S, MCContext &Context)
-      : Streamer(S), Context(Context) {
-    ri_gprmask = 0;
-    ri_cprmask[0] = ri_cprmask[1] = ri_cprmask[2] = ri_cprmask[3] = 0;
-    ri_gp_value = 0;
+    MipsRegInfoRecord(MipsELFStreamer *S, MCContext &Context)
+        : Streamer(S), Context(Context) {
+        ri_gprmask = 0;
+        ri_cprmask[0] = ri_cprmask[1] = ri_cprmask[2] = ri_cprmask[3] = 0;
+        ri_gp_value = 0;
 
-    const MCRegisterInfo *TRI = Context.getRegisterInfo();
-    GPR32RegClass = &(TRI->getRegClass(Mips::GPR32RegClassID));
-    GPR64RegClass = &(TRI->getRegClass(Mips::GPR64RegClassID));
-    FGR32RegClass = &(TRI->getRegClass(Mips::FGR32RegClassID));
-    FGR64RegClass = &(TRI->getRegClass(Mips::FGR64RegClassID));
-    AFGR64RegClass = &(TRI->getRegClass(Mips::AFGR64RegClassID));
-    MSA128BRegClass = &(TRI->getRegClass(Mips::MSA128BRegClassID));
-    COP0RegClass = &(TRI->getRegClass(Mips::COP0RegClassID));
-    COP2RegClass = &(TRI->getRegClass(Mips::COP2RegClassID));
-    COP3RegClass = &(TRI->getRegClass(Mips::COP3RegClassID));
-  }
+        const MCRegisterInfo *TRI = Context.getRegisterInfo();
+        GPR32RegClass = &(TRI->getRegClass(Mips::GPR32RegClassID));
+        GPR64RegClass = &(TRI->getRegClass(Mips::GPR64RegClassID));
+        FGR32RegClass = &(TRI->getRegClass(Mips::FGR32RegClassID));
+        FGR64RegClass = &(TRI->getRegClass(Mips::FGR64RegClassID));
+        AFGR64RegClass = &(TRI->getRegClass(Mips::AFGR64RegClassID));
+        MSA128BRegClass = &(TRI->getRegClass(Mips::MSA128BRegClassID));
+        COP0RegClass = &(TRI->getRegClass(Mips::COP0RegClassID));
+        COP2RegClass = &(TRI->getRegClass(Mips::COP2RegClassID));
+        COP3RegClass = &(TRI->getRegClass(Mips::COP3RegClassID));
+    }
 
-  ~MipsRegInfoRecord() override = default;
+    ~MipsRegInfoRecord() override = default;
 
-  void EmitMipsOptionRecord() override;
-  void SetPhysRegUsed(unsigned Reg, const MCRegisterInfo *MCRegInfo);
+    void EmitMipsOptionRecord() override;
+    void SetPhysRegUsed(unsigned Reg, const MCRegisterInfo *MCRegInfo);
 
 private:
-  MipsELFStreamer *Streamer;
-  MCContext &Context;
-  const MCRegisterClass *GPR32RegClass;
-  const MCRegisterClass *GPR64RegClass;
-  const MCRegisterClass *FGR32RegClass;
-  const MCRegisterClass *FGR64RegClass;
-  const MCRegisterClass *AFGR64RegClass;
-  const MCRegisterClass *MSA128BRegClass;
-  const MCRegisterClass *COP0RegClass;
-  const MCRegisterClass *COP2RegClass;
-  const MCRegisterClass *COP3RegClass;
-  uint32_t ri_gprmask;
-  uint32_t ri_cprmask[4];
-  int64_t ri_gp_value;
+    MipsELFStreamer *Streamer;
+    MCContext &Context;
+    const MCRegisterClass *GPR32RegClass;
+    const MCRegisterClass *GPR64RegClass;
+    const MCRegisterClass *FGR32RegClass;
+    const MCRegisterClass *FGR64RegClass;
+    const MCRegisterClass *AFGR64RegClass;
+    const MCRegisterClass *MSA128BRegClass;
+    const MCRegisterClass *COP0RegClass;
+    const MCRegisterClass *COP2RegClass;
+    const MCRegisterClass *COP3RegClass;
+    uint32_t ri_gprmask;
+    uint32_t ri_cprmask[4];
+    int64_t ri_gp_value;
 };
 
 } // end namespace llvm

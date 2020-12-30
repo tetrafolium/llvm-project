@@ -24,14 +24,16 @@ class OptimizationRemarkEmitter;
 /// previous build to guide current inlining. This is useful for inliner tuning.
 class ReplayInlineAdvisor : public InlineAdvisor {
 public:
-  ReplayInlineAdvisor(FunctionAnalysisManager &FAM, LLVMContext &Context,
-                      StringRef RemarksFile);
-  std::unique_ptr<InlineAdvice> getAdvice(CallBase &CB) override;
-  bool areReplayRemarksLoaded() const { return HasReplayRemarks; }
+    ReplayInlineAdvisor(FunctionAnalysisManager &FAM, LLVMContext &Context,
+                        StringRef RemarksFile);
+    std::unique_ptr<InlineAdvice> getAdvice(CallBase &CB) override;
+    bool areReplayRemarksLoaded() const {
+        return HasReplayRemarks;
+    }
 
 private:
-  StringSet<> InlineSitesFromRemarks;
-  bool HasReplayRemarks = false;
+    StringSet<> InlineSitesFromRemarks;
+    bool HasReplayRemarks = false;
 };
 } // namespace llvm
 #endif // LLVM_ANALYSIS_REPLAYINLINEADVISOR_H

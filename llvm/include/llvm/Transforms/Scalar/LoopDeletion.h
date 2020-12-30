@@ -23,10 +23,10 @@ namespace llvm {
 
 class LoopDeletionPass : public PassInfoMixin<LoopDeletionPass> {
 public:
-  LoopDeletionPass() = default;
+    LoopDeletionPass() = default;
 
-  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
+    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
 } // end namespace llvm

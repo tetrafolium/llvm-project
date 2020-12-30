@@ -75,39 +75,43 @@ void DoPrintPreprocessedInput(Preprocessor &PP, raw_ostream *OS,
 /// FIXME: Migrate DependencyGraphGen to use this interface.
 class DependencyCollector {
 public:
-  virtual ~DependencyCollector();
+    virtual ~DependencyCollector();
 
-  virtual void attachToPreprocessor(Preprocessor &PP);
-  virtual void attachToASTReader(ASTReader &R);
-  ArrayRef<std::string> getDependencies() const { return Dependencies; }
+    virtual void attachToPreprocessor(Preprocessor &PP);
+    virtual void attachToASTReader(ASTReader &R);
+    ArrayRef<std::string> getDependencies() const {
+        return Dependencies;
+    }
 
-  /// Called when a new file is seen. Return true if \p Filename should be added
-  /// to the list of dependencies.
-  ///
-  /// The default implementation ignores <built-in> and system files.
-  virtual bool sawDependency(StringRef Filename, bool FromModule,
-                             bool IsSystem, bool IsModuleFile, bool IsMissing);
+    /// Called when a new file is seen. Return true if \p Filename should be added
+    /// to the list of dependencies.
+    ///
+    /// The default implementation ignores <built-in> and system files.
+    virtual bool sawDependency(StringRef Filename, bool FromModule,
+                               bool IsSystem, bool IsModuleFile, bool IsMissing);
 
-  /// Called when the end of the main file is reached.
-  virtual void finishedMainFile(DiagnosticsEngine &Diags) {}
+    /// Called when the end of the main file is reached.
+    virtual void finishedMainFile(DiagnosticsEngine &Diags) {}
 
-  /// Return true if system files should be passed to sawDependency().
-  virtual bool needSystemDependencies() { return false; }
+    /// Return true if system files should be passed to sawDependency().
+    virtual bool needSystemDependencies() {
+        return false;
+    }
 
-  /// Add a dependency \p Filename if it has not been seen before and
-  /// sawDependency() returns true.
-  virtual void maybeAddDependency(StringRef Filename, bool FromModule,
-                                  bool IsSystem, bool IsModuleFile,
-                                  bool IsMissing);
+    /// Add a dependency \p Filename if it has not been seen before and
+    /// sawDependency() returns true.
+    virtual void maybeAddDependency(StringRef Filename, bool FromModule,
+                                    bool IsSystem, bool IsModuleFile,
+                                    bool IsMissing);
 
 protected:
-  /// Return true if the filename was added to the list of dependencies, false
-  /// otherwise.
-  bool addDependency(StringRef Filename);
+    /// Return true if the filename was added to the list of dependencies, false
+    /// otherwise.
+    bool addDependency(StringRef Filename);
 
 private:
-  llvm::StringSet<> Seen;
-  std::vector<std::string> Dependencies;
+    llvm::StringSet<> Seen;
+    std::vector<std::string> Dependencies;
 };
 
 /// Builds a dependency file when attached to a Preprocessor (for includes) and
@@ -116,64 +120,74 @@ private:
 /// loaded.
 class DependencyFileGenerator : public DependencyCollector {
 public:
-  DependencyFileGenerator(const DependencyOutputOptions &Opts);
+    DependencyFileGenerator(const DependencyOutputOptions &Opts);
 
-  void attachToPreprocessor(Preprocessor &PP) override;
+    void attachToPreprocessor(Preprocessor &PP) override;
 
-  void finishedMainFile(DiagnosticsEngine &Diags) override;
+    void finishedMainFile(DiagnosticsEngine &Diags) override;
 
-  bool needSystemDependencies() final override { return IncludeSystemHeaders; }
+    bool needSystemDependencies() final override {
+        return IncludeSystemHeaders;
+    }
 
-  bool sawDependency(StringRef Filename, bool FromModule, bool IsSystem,
-                     bool IsModuleFile, bool IsMissing) final override;
+    bool sawDependency(StringRef Filename, bool FromModule, bool IsSystem,
+                       bool IsModuleFile, bool IsMissing) final override;
 
 protected:
-  void outputDependencyFile(llvm::raw_ostream &OS);
+    void outputDependencyFile(llvm::raw_ostream &OS);
 
 private:
-  void outputDependencyFile(DiagnosticsEngine &Diags);
+    void outputDependencyFile(DiagnosticsEngine &Diags);
 
-  std::string OutputFile;
-  std::vector<std::string> Targets;
-  bool IncludeSystemHeaders;
-  bool PhonyTarget;
-  bool AddMissingHeaderDeps;
-  bool SeenMissingHeader;
-  bool IncludeModuleFiles;
-  DependencyOutputFormat OutputFormat;
-  unsigned InputFileIndex;
+    std::string OutputFile;
+    std::vector<std::string> Targets;
+    bool IncludeSystemHeaders;
+    bool PhonyTarget;
+    bool AddMissingHeaderDeps;
+    bool SeenMissingHeader;
+    bool IncludeModuleFiles;
+    DependencyOutputFormat OutputFormat;
+    unsigned InputFileIndex;
 };
 
 /// Collects the dependencies for imported modules into a directory.  Users
 /// should attach to the AST reader whenever a module is loaded.
 class ModuleDependencyCollector : public DependencyCollector {
-  std::string DestDir;
-  bool HasErrors = false;
-  llvm::StringSet<> Seen;
-  llvm::vfs::YAMLVFSWriter VFSWriter;
-  llvm::StringMap<std::string> SymLinkMap;
+    std::string DestDir;
+    bool HasErrors = false;
+    llvm::StringSet<> Seen;
+    llvm::vfs::YAMLVFSWriter VFSWriter;
+    llvm::StringMap<std::string> SymLinkMap;
 
-  bool getRealPath(StringRef SrcPath, SmallVectorImpl<char> &Result);
-  std::error_code copyToRoot(StringRef Src, StringRef Dst = {});
+    bool getRealPath(StringRef SrcPath, SmallVectorImpl<char> &Result);
+    std::error_code copyToRoot(StringRef Src, StringRef Dst = {});
 
 public:
-  ModuleDependencyCollector(std::string DestDir)
-      : DestDir(std::move(DestDir)) {}
-  ~ModuleDependencyCollector() override { writeFileMap(); }
+    ModuleDependencyCollector(std::string DestDir)
+        : DestDir(std::move(DestDir)) {}
+    ~ModuleDependencyCollector() override {
+        writeFileMap();
+    }
 
-  StringRef getDest() { return DestDir; }
-  virtual bool insertSeen(StringRef Filename) { return Seen.insert(Filename).second; }
-  virtual void addFile(StringRef Filename, StringRef FileDst = {});
+    StringRef getDest() {
+        return DestDir;
+    }
+    virtual bool insertSeen(StringRef Filename) {
+        return Seen.insert(Filename).second;
+    }
+    virtual void addFile(StringRef Filename, StringRef FileDst = {});
 
-  virtual void addFileMapping(StringRef VPath, StringRef RPath) {
-    VFSWriter.addFileMapping(VPath, RPath);
-  }
+    virtual void addFileMapping(StringRef VPath, StringRef RPath) {
+        VFSWriter.addFileMapping(VPath, RPath);
+    }
 
-  void attachToPreprocessor(Preprocessor &PP) override;
-  void attachToASTReader(ASTReader &R) override;
+    void attachToPreprocessor(Preprocessor &PP) override;
+    void attachToASTReader(ASTReader &R) override;
 
-  virtual void writeFileMap();
-  virtual bool hasErrors() { return HasErrors; }
+    virtual void writeFileMap();
+    virtual bool hasErrors() {
+        return HasErrors;
+    }
 };
 
 /// AttachDependencyGraphGen - Create a dependency graph generator, and attach

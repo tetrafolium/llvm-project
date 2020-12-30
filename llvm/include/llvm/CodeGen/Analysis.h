@@ -55,7 +55,7 @@ unsigned ComputeLinearIndex(Type *Ty,
 inline unsigned ComputeLinearIndex(Type *Ty,
                                    ArrayRef<unsigned> Indices,
                                    unsigned CurIndex = 0) {
-  return ComputeLinearIndex(Ty, Indices.begin(), Indices.end(), CurIndex);
+    return ComputeLinearIndex(Ty, Indices.begin(), Indices.end(), CurIndex);
 }
 
 /// ComputeValueVTs - Given an LLVM IR type, compute a sequence of

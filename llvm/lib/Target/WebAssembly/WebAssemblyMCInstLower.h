@@ -28,19 +28,19 @@ class MachineOperand;
 
 /// This class is used to lower an MachineInstr into an MCInst.
 class LLVM_LIBRARY_VISIBILITY WebAssemblyMCInstLower {
-  MCContext &Ctx;
-  WebAssemblyAsmPrinter &Printer;
+    MCContext &Ctx;
+    WebAssemblyAsmPrinter &Printer;
 
-  MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
-  MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
-  MCOperand lowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym) const;
-  MCOperand lowerTypeIndexOperand(SmallVector<wasm::ValType, 1> &&,
-                                  SmallVector<wasm::ValType, 4> &&) const;
+    MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
+    MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
+    MCOperand lowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym) const;
+    MCOperand lowerTypeIndexOperand(SmallVector<wasm::ValType, 1> &&,
+                                    SmallVector<wasm::ValType, 4> &&) const;
 
 public:
-  WebAssemblyMCInstLower(MCContext &ctx, WebAssemblyAsmPrinter &printer)
-      : Ctx(ctx), Printer(printer) {}
-  void lower(const MachineInstr *MI, MCInst &OutMI) const;
+    WebAssemblyMCInstLower(MCContext &ctx, WebAssemblyAsmPrinter &printer)
+        : Ctx(ctx), Printer(printer) {}
+    void lower(const MachineInstr *MI, MCInst &OutMI) const;
 };
 } // end namespace llvm
 

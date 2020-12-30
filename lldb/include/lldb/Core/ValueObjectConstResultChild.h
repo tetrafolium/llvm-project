@@ -28,51 +28,51 @@ class ValueObject;
 // A child of a ValueObjectConstResult.
 class ValueObjectConstResultChild : public ValueObjectChild {
 public:
-  ValueObjectConstResultChild(ValueObject &parent,
-                              const CompilerType &compiler_type,
-                              ConstString name, uint32_t byte_size,
-                              int32_t byte_offset, uint32_t bitfield_bit_size,
-                              uint32_t bitfield_bit_offset, bool is_base_class,
-                              bool is_deref_of_parent,
-                              lldb::addr_t live_address,
-                              uint64_t language_flags);
+    ValueObjectConstResultChild(ValueObject &parent,
+                                const CompilerType &compiler_type,
+                                ConstString name, uint32_t byte_size,
+                                int32_t byte_offset, uint32_t bitfield_bit_size,
+                                uint32_t bitfield_bit_offset, bool is_base_class,
+                                bool is_deref_of_parent,
+                                lldb::addr_t live_address,
+                                uint64_t language_flags);
 
-  ~ValueObjectConstResultChild() override;
+    ~ValueObjectConstResultChild() override;
 
-  lldb::ValueObjectSP Dereference(Status &error) override;
+    lldb::ValueObjectSP Dereference(Status &error) override;
 
-  ValueObject *CreateChildAtIndex(size_t idx, bool synthetic_array_member,
-                                  int32_t synthetic_index) override;
+    ValueObject *CreateChildAtIndex(size_t idx, bool synthetic_array_member,
+                                    int32_t synthetic_index) override;
 
-  virtual CompilerType GetCompilerType() {
-    return ValueObjectChild::GetCompilerType();
-  }
+    virtual CompilerType GetCompilerType() {
+        return ValueObjectChild::GetCompilerType();
+    }
 
-  lldb::ValueObjectSP GetSyntheticChildAtOffset(
-      uint32_t offset, const CompilerType &type, bool can_create,
-      ConstString name_const_str = ConstString()) override;
+    lldb::ValueObjectSP GetSyntheticChildAtOffset(
+        uint32_t offset, const CompilerType &type, bool can_create,
+        ConstString name_const_str = ConstString()) override;
 
-  lldb::ValueObjectSP AddressOf(Status &error) override;
+    lldb::ValueObjectSP AddressOf(Status &error) override;
 
-  lldb::addr_t GetAddressOf(bool scalar_is_load_address = true,
-                            AddressType *address_type = nullptr) override;
+    lldb::addr_t GetAddressOf(bool scalar_is_load_address = true,
+                              AddressType *address_type = nullptr) override;
 
-  size_t GetPointeeData(DataExtractor &data, uint32_t item_idx = 0,
-                        uint32_t item_count = 1) override;
+    size_t GetPointeeData(DataExtractor &data, uint32_t item_idx = 0,
+                          uint32_t item_count = 1) override;
 
-  lldb::ValueObjectSP Cast(const CompilerType &compiler_type) override;
+    lldb::ValueObjectSP Cast(const CompilerType &compiler_type) override;
 
 protected:
-  ValueObjectConstResultImpl m_impl;
+    ValueObjectConstResultImpl m_impl;
 
 private:
-  friend class ValueObject;
-  friend class ValueObjectConstResult;
-  friend class ValueObjectConstResultImpl;
+    friend class ValueObject;
+    friend class ValueObjectConstResult;
+    friend class ValueObjectConstResultImpl;
 
-  ValueObjectConstResultChild(const ValueObjectConstResultChild &) = delete;
-  const ValueObjectConstResultChild &
-  operator=(const ValueObjectConstResultChild &) = delete;
+    ValueObjectConstResultChild(const ValueObjectConstResultChild &) = delete;
+    const ValueObjectConstResultChild &
+    operator=(const ValueObjectConstResultChild &) = delete;
 };
 
 } // namespace lldb_private

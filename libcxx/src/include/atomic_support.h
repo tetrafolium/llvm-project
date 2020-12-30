@@ -30,7 +30,7 @@
 
 #if !defined(_LIBCPP_HAS_ATOMIC_BUILTINS) && !defined(_LIBCPP_HAS_NO_THREADS)
 # if defined(_LIBCPP_WARNING)
-    _LIBCPP_WARNING("Building libc++ without __atomic builtins is unsupported")
+_LIBCPP_WARNING("Building libc++ without __atomic builtins is unsupported")
 # else
 #   warning Building libc++ without __atomic builtins is unsupported
 # endif
@@ -93,9 +93,9 @@ _ValueType __libcpp_atomic_exchange(_ValueType* __target,
 template <class _ValueType>
 inline _LIBCPP_INLINE_VISIBILITY
 bool __libcpp_atomic_compare_exchange(_ValueType* __val,
-    _ValueType* __expected, _ValueType __after,
-    int __success_order = _AO_Seq,
-    int __fail_order = _AO_Seq)
+                                      _ValueType* __expected, _ValueType __after,
+                                      int __success_order = _AO_Seq,
+                                      int __fail_order = _AO_Seq)
 {
     return __atomic_compare_exchange_n(__val, __expected, __after, true,
                                        __success_order, __fail_order);
@@ -156,8 +156,8 @@ _ValueType __libcpp_atomic_exchange(_ValueType* __target,
 template <class _ValueType>
 inline _LIBCPP_INLINE_VISIBILITY
 bool __libcpp_atomic_compare_exchange(_ValueType* __val,
-    _ValueType* __expected, _ValueType __after,
-    int = 0, int = 0)
+                                      _ValueType* __expected, _ValueType __after,
+                                      int = 0, int = 0)
 {
     if (*__val == *__expected) {
         *__val = __after;

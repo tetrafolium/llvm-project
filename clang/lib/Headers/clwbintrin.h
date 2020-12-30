@@ -30,7 +30,7 @@
 ///    written back.
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_clwb(void const *__p) {
-  __builtin_ia32_clwb(__p);
+    __builtin_ia32_clwb(__p);
 }
 
 #undef __DEFAULT_FN_ATTRS

@@ -108,40 +108,40 @@ struct _LIBCXXABI_HIDDEN __cxa_dependent_exception {
 
 // Verify the negative offsets of different fields.
 static_assert(sizeof(_Unwind_Exception) +
-                      offsetof(__cxa_exception, unwindHeader) ==
-                  sizeof(__cxa_exception),
+              offsetof(__cxa_exception, unwindHeader) ==
+              sizeof(__cxa_exception),
               "unwindHeader has wrong negative offsets");
 static_assert(sizeof(_Unwind_Exception) +
-                      offsetof(__cxa_dependent_exception, unwindHeader) ==
-                  sizeof(__cxa_dependent_exception),
+              offsetof(__cxa_dependent_exception, unwindHeader) ==
+              sizeof(__cxa_dependent_exception),
               "unwindHeader has wrong negative offsets");
 
 #if defined(_LIBCXXABI_ARM_EHABI)
 static_assert(offsetof(__cxa_exception, propagationCount) +
-                      sizeof(_Unwind_Exception) + sizeof(void*) ==
-                  sizeof(__cxa_exception),
+              sizeof(_Unwind_Exception) + sizeof(void*) ==
+              sizeof(__cxa_exception),
               "propagationCount has wrong negative offset");
 static_assert(offsetof(__cxa_dependent_exception, propagationCount) +
-                      sizeof(_Unwind_Exception) + sizeof(void*) ==
-                  sizeof(__cxa_dependent_exception),
+              sizeof(_Unwind_Exception) + sizeof(void*) ==
+              sizeof(__cxa_dependent_exception),
               "propagationCount has wrong negative offset");
 #elif defined(__LP64__) || defined(_WIN64)
 static_assert(offsetof(__cxa_exception, adjustedPtr) +
-                      sizeof(_Unwind_Exception) + sizeof(void*) ==
-                  sizeof(__cxa_exception),
+              sizeof(_Unwind_Exception) + sizeof(void*) ==
+              sizeof(__cxa_exception),
               "adjustedPtr has wrong negative offset");
 static_assert(offsetof(__cxa_dependent_exception, adjustedPtr) +
-                      sizeof(_Unwind_Exception) + sizeof(void*) ==
-                  sizeof(__cxa_dependent_exception),
+              sizeof(_Unwind_Exception) + sizeof(void*) ==
+              sizeof(__cxa_dependent_exception),
               "adjustedPtr has wrong negative offset");
 #else
 static_assert(offsetof(__cxa_exception, referenceCount) +
-                      sizeof(_Unwind_Exception) + sizeof(void*) ==
-                  sizeof(__cxa_exception),
+              sizeof(_Unwind_Exception) + sizeof(void*) ==
+              sizeof(__cxa_exception),
               "referenceCount has wrong negative offset");
 static_assert(offsetof(__cxa_dependent_exception, primaryException) +
-                      sizeof(_Unwind_Exception) + sizeof(void*) ==
-                  sizeof(__cxa_dependent_exception),
+              sizeof(_Unwind_Exception) + sizeof(void*) ==
+              sizeof(__cxa_dependent_exception),
               "primaryException has wrong negative offset");
 #endif
 

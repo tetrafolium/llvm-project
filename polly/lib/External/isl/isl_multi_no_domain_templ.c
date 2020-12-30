@@ -26,9 +26,9 @@
  * does not do anything.
  */
 static __isl_give EL *FN(EL,drop_dims)(__isl_take EL *el,
-	enum isl_dim_type type, unsigned first, unsigned n)
+                                       enum isl_dim_type type, unsigned first, unsigned n)
 {
-	return el;
+    return el;
 }
 
 /* Return the space of "el".
@@ -40,10 +40,10 @@ static __isl_give EL *FN(EL,drop_dims)(__isl_take EL *el,
  */
 static __isl_give isl_space *FN(EL,get_space)(__isl_keep EL *el)
 {
-	if (!el)
-		return NULL;
+    if (!el)
+        return NULL;
 
-	return isl_space_params_alloc(FN(EL,get_ctx)(el), 0);
+    return isl_space_params_alloc(FN(EL,get_ctx)(el), 0);
 }
 
 /* Reset the domain space of "el" to "space".
@@ -52,12 +52,12 @@ static __isl_give isl_space *FN(EL,get_space)(__isl_keep EL *el)
  * does not do anything, apart from error handling and cleaning up memory.
  */
 static __isl_give EL *FN(EL,reset_domain_space)(__isl_take EL *el,
-	__isl_take isl_space *space)
+        __isl_take isl_space *space)
 {
-	if (!space)
-		return FN(EL,free)(el);
-	isl_space_free(space);
-	return el;
+    if (!space)
+        return FN(EL,free)(el);
+    isl_space_free(space);
+    return el;
 }
 
 /* Align the parameters of "el" to those of "space".
@@ -68,12 +68,12 @@ static __isl_give EL *FN(EL,reset_domain_space)(__isl_take EL *el,
  * that this function will never actually get called.
  */
 static __isl_give EL *FN(EL,align_params)(__isl_take EL *el,
-	__isl_take isl_space *space)
+        __isl_take isl_space *space)
 {
-	if (!space)
-		return FN(EL,free)(el);
-	isl_space_free(space);
-	return el;
+    if (!space)
+        return FN(EL,free)(el);
+    isl_space_free(space);
+    return el;
 }
 
 /* Reorder the dimensions of the domain of "el" according
@@ -83,12 +83,12 @@ static __isl_give EL *FN(EL,align_params)(__isl_take EL *el,
  * does not do anything, apart from error handling and cleaning up memory.
  */
 static __isl_give EL *FN(EL,realign_domain)(__isl_take EL *el,
-	__isl_take isl_reordering *r)
+        __isl_take isl_reordering *r)
 {
-	if (!r)
-		return FN(EL,free)(el);
-	isl_reordering_free(r);
-	return el;
+    if (!r)
+        return FN(EL,free)(el);
+    isl_reordering_free(r);
+    return el;
 }
 
 /* Do the parameters of "el" match those of "space"?
@@ -97,11 +97,11 @@ static __isl_give EL *FN(EL,realign_domain)(__isl_take EL *el,
  * simply returns true, except if "el" or "space" are NULL.
  */
 static isl_bool FN(EL,matching_params)(__isl_keep EL *el,
-	__isl_keep isl_space *space)
+                                       __isl_keep isl_space *space)
 {
-	if (!el || !space)
-		return isl_bool_error;
-	return isl_bool_true;
+    if (!el || !space)
+        return isl_bool_error;
+    return isl_bool_true;
 }
 
 /* Check that the domain space of "el" matches "space".
@@ -110,9 +110,9 @@ static isl_bool FN(EL,matching_params)(__isl_keep EL *el,
  * simply returns isl_stat_ok, except if "el" or "space" are NULL.
  */
 static isl_stat FN(EL,check_match_domain_space)(__isl_keep EL *el,
-	__isl_keep isl_space *space)
+        __isl_keep isl_space *space)
 {
-	if (!el || !space)
-		return isl_stat_error;
-	return isl_stat_ok;
+    if (!el || !space)
+        return isl_stat_error;
+    return isl_stat_ok;
 }

@@ -24,8 +24,8 @@
 namespace __ubsan {
 
 static void PreInitAsStandalone() {
-  InitAsStandalone();
-  InitializeDeadlySignals();
+    InitAsStandalone();
+    InitializeDeadlySignals();
 }
 
 } // namespace __ubsan

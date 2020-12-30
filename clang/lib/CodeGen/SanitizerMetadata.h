@@ -30,21 +30,21 @@ namespace CodeGen {
 class CodeGenModule;
 
 class SanitizerMetadata {
-  SanitizerMetadata(const SanitizerMetadata &) = delete;
-  void operator=(const SanitizerMetadata &) = delete;
+    SanitizerMetadata(const SanitizerMetadata &) = delete;
+    void operator=(const SanitizerMetadata &) = delete;
 
-  CodeGenModule &CGM;
+    CodeGenModule &CGM;
 public:
-  SanitizerMetadata(CodeGenModule &CGM);
-  void reportGlobalToASan(llvm::GlobalVariable *GV, const VarDecl &D,
-                          bool IsDynInit = false);
-  void reportGlobalToASan(llvm::GlobalVariable *GV, SourceLocation Loc,
-                          StringRef Name, QualType Ty, bool IsDynInit = false,
-                          bool IsExcluded = false);
-  void disableSanitizerForGlobal(llvm::GlobalVariable *GV);
-  void disableSanitizerForInstruction(llvm::Instruction *I);
+    SanitizerMetadata(CodeGenModule &CGM);
+    void reportGlobalToASan(llvm::GlobalVariable *GV, const VarDecl &D,
+                            bool IsDynInit = false);
+    void reportGlobalToASan(llvm::GlobalVariable *GV, SourceLocation Loc,
+                            StringRef Name, QualType Ty, bool IsDynInit = false,
+                            bool IsExcluded = false);
+    void disableSanitizerForGlobal(llvm::GlobalVariable *GV);
+    void disableSanitizerForInstruction(llvm::Instruction *I);
 private:
-  llvm::MDNode *getLocationMetadata(SourceLocation Loc);
+    llvm::MDNode *getLocationMetadata(SourceLocation Loc);
 };
 }  // end namespace CodeGen
 }  // end namespace clang

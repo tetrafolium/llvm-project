@@ -28,24 +28,26 @@ public:
 #define DISPATCH(NAME)                                                         \
   return static_cast<ImplClass *>(this)->Visit##NAME(static_cast<PTR(NAME)>(A))
 
-  RetTy Visit(PTR(Attr) A) {
-    switch (A->getKind()) {
+    RetTy Visit(PTR(Attr) A) {
+        switch (A->getKind()) {
 
 #define ATTR(NAME)                                                             \
   case attr::NAME:                                                             \
     DISPATCH(NAME##Attr);
 #include "clang/Basic/AttrList.inc"
+        }
+        llvm_unreachable("Attr that isn't part of AttrList.inc!");
     }
-    llvm_unreachable("Attr that isn't part of AttrList.inc!");
-  }
 
-  // If the implementation chooses not to implement a certain visit
-  // method, fall back to the parent.
+    // If the implementation chooses not to implement a certain visit
+    // method, fall back to the parent.
 #define ATTR(NAME)                                                             \
   RetTy Visit##NAME##Attr(PTR(NAME##Attr) A) { DISPATCH(Attr); }
 #include "clang/Basic/AttrList.inc"
 
-  RetTy VisitAttr(PTR(Attr)) { return RetTy(); }
+    RetTy VisitAttr(PTR(Attr)) {
+        return RetTy();
+    }
 
 #undef PTR
 #undef DISPATCH
@@ -59,7 +61,7 @@ public:
 /// also ConstAttrVisitor).
 template <typename ImplClass, typename RetTy = void, typename... ParamTys>
 class AttrVisitor : public attrvisitor::Base<std::add_pointer, ImplClass, RetTy,
-                                             ParamTys...> {};
+    ParamTys...> {};
 
 /// A simple visitor class that helps create attribute visitors.
 ///
@@ -68,7 +70,7 @@ class AttrVisitor : public attrvisitor::Base<std::add_pointer, ImplClass, RetTy,
 template <typename ImplClass, typename RetTy = void, typename... ParamTys>
 class ConstAttrVisitor
     : public attrvisitor::Base<llvm::make_const_ptr, ImplClass, RetTy,
-                               ParamTys...> {};
+      ParamTys...> {};
 
 } // namespace clang
 

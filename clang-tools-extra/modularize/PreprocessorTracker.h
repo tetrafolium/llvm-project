@@ -40,45 +40,45 @@ namespace Modularize {
 /// it to do any needed compilation completion activities in the checker.
 class PreprocessorTracker {
 public:
-  virtual ~PreprocessorTracker();
+    virtual ~PreprocessorTracker();
 
-  // Handle entering a preprocessing session.
-  // (Called after a Preprocessor object is created, but before preprocessing.)
-  virtual void handlePreprocessorEntry(clang::Preprocessor &PP,
-                                       llvm::StringRef RootHeaderFile) = 0;
-  // Handle exiting a preprocessing session.
-  // (Called after preprocessing is complete, but before the Preprocessor
-  // object is destroyed.)
-  virtual void handlePreprocessorExit() = 0;
+    // Handle entering a preprocessing session.
+    // (Called after a Preprocessor object is created, but before preprocessing.)
+    virtual void handlePreprocessorEntry(clang::Preprocessor &PP,
+                                         llvm::StringRef RootHeaderFile) = 0;
+    // Handle exiting a preprocessing session.
+    // (Called after preprocessing is complete, but before the Preprocessor
+    // object is destroyed.)
+    virtual void handlePreprocessorExit() = 0;
 
-  // Handle include directive.
-  // This function is called every time an include directive is seen by the
-  // preprocessor, for the purpose of later checking for 'extern "" {}' or
-  // "namespace {}" blocks containing #include directives.
-  virtual void handleIncludeDirective(llvm::StringRef DirectivePath,
-                                      int DirectiveLine, int DirectiveColumn,
-                                      llvm::StringRef TargetPath) = 0;
+    // Handle include directive.
+    // This function is called every time an include directive is seen by the
+    // preprocessor, for the purpose of later checking for 'extern "" {}' or
+    // "namespace {}" blocks containing #include directives.
+    virtual void handleIncludeDirective(llvm::StringRef DirectivePath,
+                                        int DirectiveLine, int DirectiveColumn,
+                                        llvm::StringRef TargetPath) = 0;
 
-  // Check for include directives within the given source line range.
-  // Report errors if any found.  Returns true if no include directives
-  // found in block.
-  virtual bool checkForIncludesInBlock(clang::Preprocessor &PP,
-                                       clang::SourceRange BlockSourceRange,
-                                       const char *BlockIdentifierMessage,
-                                       llvm::raw_ostream &OS) = 0;
+    // Check for include directives within the given source line range.
+    // Report errors if any found.  Returns true if no include directives
+    // found in block.
+    virtual bool checkForIncludesInBlock(clang::Preprocessor &PP,
+                                         clang::SourceRange BlockSourceRange,
+                                         const char *BlockIdentifierMessage,
+                                         llvm::raw_ostream &OS) = 0;
 
-  // Report on inconsistent macro instances.
-  // Returns true if any mismatches.
-  virtual bool reportInconsistentMacros(llvm::raw_ostream &OS) = 0;
+    // Report on inconsistent macro instances.
+    // Returns true if any mismatches.
+    virtual bool reportInconsistentMacros(llvm::raw_ostream &OS) = 0;
 
-  // Report on inconsistent conditional directive instances.
-  // Returns true if any mismatches.
-  virtual bool reportInconsistentConditionals(llvm::raw_ostream &OS) = 0;
+    // Report on inconsistent conditional directive instances.
+    // Returns true if any mismatches.
+    virtual bool reportInconsistentConditionals(llvm::raw_ostream &OS) = 0;
 
-  // Create instance of PreprocessorTracker.
-  static PreprocessorTracker *create(
-    llvm::SmallVector<std::string, 32> &Headers,
-    bool DoBlockCheckHeaderListOnly);
+    // Create instance of PreprocessorTracker.
+    static PreprocessorTracker *create(
+        llvm::SmallVector<std::string, 32> &Headers,
+        bool DoBlockCheckHeaderListOnly);
 };
 
 } // end namespace Modularize

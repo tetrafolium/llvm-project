@@ -48,48 +48,48 @@ namespace {
 
 template <typename LibClangPathType>
 void getClangResourcesPathImplAIX(LibClangPathType &LibClangPath) {
-  int PrevErrno = errno;
+    int PrevErrno = errno;
 
-  size_t BufSize = 2048u;
-  std::unique_ptr<char[]> Buf;
-  while (true) {
-    Buf = std::make_unique<char []>(BufSize);
-    errno = 0;
-    int Ret = loadquery(L_GETXINFO, Buf.get(), (unsigned int)BufSize);
-    if (Ret != -1)
-      break; // loadquery() was successful.
-    if (errno != ENOMEM)
-      llvm_unreachable("Encountered an unexpected loadquery() failure");
+    size_t BufSize = 2048u;
+    std::unique_ptr<char[]> Buf;
+    while (true) {
+        Buf = std::make_unique<char []>(BufSize);
+        errno = 0;
+        int Ret = loadquery(L_GETXINFO, Buf.get(), (unsigned int)BufSize);
+        if (Ret != -1)
+            break; // loadquery() was successful.
+        if (errno != ENOMEM)
+            llvm_unreachable("Encountered an unexpected loadquery() failure");
 
-    // errno == ENOMEM; try to allocate more memory.
-    if ((BufSize & ~((-1u) >> 1u)) != 0u)
-      llvm::report_fatal_error("BufSize needed for loadquery() too large");
+        // errno == ENOMEM; try to allocate more memory.
+        if ((BufSize & ~((-1u) >> 1u)) != 0u)
+            llvm::report_fatal_error("BufSize needed for loadquery() too large");
 
-    Buf.release();
-    BufSize <<= 1u;
-  }
+        Buf.release();
+        BufSize <<= 1u;
+    }
 
-  // Extract the function entry point from the function descriptor.
-  uint64_t EntryAddr =
-      reinterpret_cast<uintptr_t &>(clang_createTranslationUnit);
+    // Extract the function entry point from the function descriptor.
+    uint64_t EntryAddr =
+        reinterpret_cast<uintptr_t &>(clang_createTranslationUnit);
 
-  // Loop to locate the function entry point in the loadquery() results.
-  ld_xinfo *CurInfo = reinterpret_cast<ld_xinfo *>(Buf.get());
-  while (true) {
-    uint64_t CurTextStart = (uint64_t)CurInfo->ldinfo_textorg;
-    uint64_t CurTextEnd = CurTextStart + CurInfo->ldinfo_textsize;
-    if (CurTextStart <= EntryAddr && EntryAddr < CurTextEnd)
-      break; // Successfully located.
+    // Loop to locate the function entry point in the loadquery() results.
+    ld_xinfo *CurInfo = reinterpret_cast<ld_xinfo *>(Buf.get());
+    while (true) {
+        uint64_t CurTextStart = (uint64_t)CurInfo->ldinfo_textorg;
+        uint64_t CurTextEnd = CurTextStart + CurInfo->ldinfo_textsize;
+        if (CurTextStart <= EntryAddr && EntryAddr < CurTextEnd)
+            break; // Successfully located.
 
-    if (CurInfo->ldinfo_next == 0u)
-      llvm::report_fatal_error("Cannot locate entry point in "
-                               "the loadquery() results");
-    CurInfo = reinterpret_cast<ld_xinfo *>(reinterpret_cast<char *>(CurInfo) +
-                                           CurInfo->ldinfo_next);
-  }
+        if (CurInfo->ldinfo_next == 0u)
+            llvm::report_fatal_error("Cannot locate entry point in "
+                                     "the loadquery() results");
+        CurInfo = reinterpret_cast<ld_xinfo *>(reinterpret_cast<char *>(CurInfo) +
+                                               CurInfo->ldinfo_next);
+    }
 
-  LibClangPath += reinterpret_cast<char *>(CurInfo) + CurInfo->ldinfo_filename;
-  errno = PrevErrno;
+    LibClangPath += reinterpret_cast<char *>(CurInfo) + CurInfo->ldinfo_filename;
+    errno = PrevErrno;
 }
 
 } // end anonymous namespace
@@ -97,56 +97,56 @@ void getClangResourcesPathImplAIX(LibClangPathType &LibClangPath) {
 #endif
 
 const std::string &CIndexer::getClangResourcesPath() {
-  // Did we already compute the path?
-  if (!ResourcesPath.empty())
-    return ResourcesPath;
+    // Did we already compute the path?
+    if (!ResourcesPath.empty())
+        return ResourcesPath;
 
-  SmallString<128> LibClangPath;
+    SmallString<128> LibClangPath;
 
-  // Find the location where this library lives (libclang.dylib).
+    // Find the location where this library lives (libclang.dylib).
 #ifdef _WIN32
-  MEMORY_BASIC_INFORMATION mbi;
-  char path[MAX_PATH];
-  VirtualQuery((void *)(uintptr_t)clang_createTranslationUnit, &mbi,
-               sizeof(mbi));
-  GetModuleFileNameA((HINSTANCE)mbi.AllocationBase, path, MAX_PATH);
+    MEMORY_BASIC_INFORMATION mbi;
+    char path[MAX_PATH];
+    VirtualQuery((void *)(uintptr_t)clang_createTranslationUnit, &mbi,
+                 sizeof(mbi));
+    GetModuleFileNameA((HINSTANCE)mbi.AllocationBase, path, MAX_PATH);
 
 #ifdef __CYGWIN__
-  char w32path[MAX_PATH];
-  strcpy(w32path, path);
+    char w32path[MAX_PATH];
+    strcpy(w32path, path);
 #if CYGWIN_VERSION_API_MAJOR > 0 || CYGWIN_VERSION_API_MINOR >= 181
-  cygwin_conv_path(CCP_WIN_A_TO_POSIX, w32path, path, MAX_PATH);
+    cygwin_conv_path(CCP_WIN_A_TO_POSIX, w32path, path, MAX_PATH);
 #else
-  cygwin_conv_to_full_posix_path(w32path, path);
+    cygwin_conv_to_full_posix_path(w32path, path);
 #endif
 #endif
 
-  LibClangPath += path;
+    LibClangPath += path;
 #elif defined(_AIX)
-  getClangResourcesPathImplAIX(LibClangPath);
+    getClangResourcesPathImplAIX(LibClangPath);
 #else
-  // This silly cast below avoids a C++ warning.
-  Dl_info info;
-  if (dladdr((void *)(uintptr_t)clang_createTranslationUnit, &info) == 0)
-    llvm_unreachable("Call to dladdr() failed");
+    // This silly cast below avoids a C++ warning.
+    Dl_info info;
+    if (dladdr((void *)(uintptr_t)clang_createTranslationUnit, &info) == 0)
+        llvm_unreachable("Call to dladdr() failed");
 
-  // We now have the CIndex directory, locate clang relative to it.
-  LibClangPath += info.dli_fname;
+    // We now have the CIndex directory, locate clang relative to it.
+    LibClangPath += info.dli_fname;
 #endif
 
-  // Cache our result.
-  ResourcesPath = driver::Driver::GetResourcesPath(LibClangPath);
-  return ResourcesPath;
+    // Cache our result.
+    ResourcesPath = driver::Driver::GetResourcesPath(LibClangPath);
+    return ResourcesPath;
 }
 
 StringRef CIndexer::getClangToolchainPath() {
-  if (!ToolchainPath.empty())
+    if (!ToolchainPath.empty())
+        return ToolchainPath;
+    StringRef ResourcePath = getClangResourcesPath();
+    ToolchainPath =
+        std::string(llvm::sys::path::parent_path(llvm::sys::path::parent_path(
+                        llvm::sys::path::parent_path(ResourcePath))));
     return ToolchainPath;
-  StringRef ResourcePath = getClangResourcesPath();
-  ToolchainPath =
-      std::string(llvm::sys::path::parent_path(llvm::sys::path::parent_path(
-          llvm::sys::path::parent_path(ResourcePath))));
-  return ToolchainPath;
 }
 
 LibclangInvocationReporter::LibclangInvocationReporter(
@@ -154,68 +154,68 @@ LibclangInvocationReporter::LibclangInvocationReporter(
     llvm::ArrayRef<const char *> Args,
     llvm::ArrayRef<std::string> InvocationArgs,
     llvm::ArrayRef<CXUnsavedFile> UnsavedFiles) {
-  StringRef Path = Idx.getInvocationEmissionPath();
-  if (Path.empty())
-    return;
+    StringRef Path = Idx.getInvocationEmissionPath();
+    if (Path.empty())
+        return;
 
-  // Create a temporary file for the invocation log.
-  SmallString<256> TempPath;
-  TempPath = Path;
-  llvm::sys::path::append(TempPath, "libclang-%%%%%%%%%%%%");
-  int FD;
-  if (llvm::sys::fs::createUniqueFile(TempPath, FD, TempPath))
-    return;
-  File = std::string(TempPath.begin(), TempPath.end());
-  llvm::raw_fd_ostream OS(FD, /*ShouldClose=*/true);
+    // Create a temporary file for the invocation log.
+    SmallString<256> TempPath;
+    TempPath = Path;
+    llvm::sys::path::append(TempPath, "libclang-%%%%%%%%%%%%");
+    int FD;
+    if (llvm::sys::fs::createUniqueFile(TempPath, FD, TempPath))
+        return;
+    File = std::string(TempPath.begin(), TempPath.end());
+    llvm::raw_fd_ostream OS(FD, /*ShouldClose=*/true);
 
-  // Write out the information about the invocation to it.
-  auto WriteStringKey = [&OS](StringRef Key, StringRef Value) {
-    OS << R"(")" << Key << R"(":")";
-    OS << llvm::yaml::escape(Value) << '"';
-  };
-  OS << '{';
-  WriteStringKey("toolchain", Idx.getClangToolchainPath());
-  OS << ',';
-  WriteStringKey("libclang.operation",
-                 Op == OperationKind::ParseOperation ? "parse" : "complete");
-  OS << ',';
-  OS << R"("libclang.opts":)" << ParseOptions;
-  OS << ',';
-  OS << R"("args":[)";
-  for (const auto &I : llvm::enumerate(Args)) {
-    if (I.index())
-      OS << ',';
-    OS << '"' << llvm::yaml::escape(I.value()) << '"';
-  }
-  if (!InvocationArgs.empty()) {
-    OS << R"(],"invocation-args":[)";
-    for (const auto &I : llvm::enumerate(InvocationArgs)) {
-      if (I.index())
-        OS << ',';
-      OS << '"' << llvm::yaml::escape(I.value()) << '"';
+    // Write out the information about the invocation to it.
+    auto WriteStringKey = [&OS](StringRef Key, StringRef Value) {
+        OS << R"(")" << Key << R"(":")";
+        OS << llvm::yaml::escape(Value) << '"';
+    };
+    OS << '{';
+    WriteStringKey("toolchain", Idx.getClangToolchainPath());
+    OS << ',';
+    WriteStringKey("libclang.operation",
+                   Op == OperationKind::ParseOperation ? "parse" : "complete");
+    OS << ',';
+    OS << R"("libclang.opts":)" << ParseOptions;
+    OS << ',';
+    OS << R"("args":[)";
+    for (const auto &I : llvm::enumerate(Args)) {
+        if (I.index())
+            OS << ',';
+        OS << '"' << llvm::yaml::escape(I.value()) << '"';
     }
-  }
-  if (!UnsavedFiles.empty()) {
-    OS << R"(],"unsaved_file_hashes":[)";
-    for (const auto &UF : llvm::enumerate(UnsavedFiles)) {
-      if (UF.index())
-        OS << ',';
-      OS << '{';
-      WriteStringKey("name", UF.value().Filename);
-      OS << ',';
-      llvm::MD5 Hash;
-      Hash.update(getContents(UF.value()));
-      llvm::MD5::MD5Result Result;
-      Hash.final(Result);
-      SmallString<32> Digest = Result.digest();
-      WriteStringKey("md5", Digest);
-      OS << '}';
+    if (!InvocationArgs.empty()) {
+        OS << R"(],"invocation-args":[)";
+        for (const auto &I : llvm::enumerate(InvocationArgs)) {
+            if (I.index())
+                OS << ',';
+            OS << '"' << llvm::yaml::escape(I.value()) << '"';
+        }
     }
-  }
-  OS << "]}";
+    if (!UnsavedFiles.empty()) {
+        OS << R"(],"unsaved_file_hashes":[)";
+        for (const auto &UF : llvm::enumerate(UnsavedFiles)) {
+            if (UF.index())
+                OS << ',';
+            OS << '{';
+            WriteStringKey("name", UF.value().Filename);
+            OS << ',';
+            llvm::MD5 Hash;
+            Hash.update(getContents(UF.value()));
+            llvm::MD5::MD5Result Result;
+            Hash.final(Result);
+            SmallString<32> Digest = Result.digest();
+            WriteStringKey("md5", Digest);
+            OS << '}';
+        }
+    }
+    OS << "]}";
 }
 
 LibclangInvocationReporter::~LibclangInvocationReporter() {
-  if (!File.empty())
-    llvm::sys::fs::remove(File);
+    if (!File.empty())
+        llvm::sys::fs::remove(File);
 }

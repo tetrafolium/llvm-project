@@ -26,31 +26,31 @@ namespace objcarc {
 /// with effects of instructions in the ARC model (which would handle the notion
 /// of a User or CallOrUser).
 enum class ARCInstKind {
-  Retain,                   ///< objc_retain
-  RetainRV,                 ///< objc_retainAutoreleasedReturnValue
-  ClaimRV,                  ///< objc_unsafeClaimAutoreleasedReturnValue
-  RetainBlock,              ///< objc_retainBlock
-  Release,                  ///< objc_release
-  Autorelease,              ///< objc_autorelease
-  AutoreleaseRV,            ///< objc_autoreleaseReturnValue
-  AutoreleasepoolPush,      ///< objc_autoreleasePoolPush
-  AutoreleasepoolPop,       ///< objc_autoreleasePoolPop
-  NoopCast,                 ///< objc_retainedObject, etc.
-  FusedRetainAutorelease,   ///< objc_retainAutorelease
-  FusedRetainAutoreleaseRV, ///< objc_retainAutoreleaseReturnValue
-  LoadWeakRetained,         ///< objc_loadWeakRetained (primitive)
-  StoreWeak,                ///< objc_storeWeak (primitive)
-  InitWeak,                 ///< objc_initWeak (derived)
-  LoadWeak,                 ///< objc_loadWeak (derived)
-  MoveWeak,                 ///< objc_moveWeak (derived)
-  CopyWeak,                 ///< objc_copyWeak (derived)
-  DestroyWeak,              ///< objc_destroyWeak (derived)
-  StoreStrong,              ///< objc_storeStrong (derived)
-  IntrinsicUser,            ///< llvm.objc.clang.arc.use
-  CallOrUser,               ///< could call objc_release and/or "use" pointers
-  Call,                     ///< could call objc_release
-  User,                     ///< could "use" a pointer
-  None                      ///< anything that is inert from an ARC perspective.
+    Retain,                   ///< objc_retain
+    RetainRV,                 ///< objc_retainAutoreleasedReturnValue
+    ClaimRV,                  ///< objc_unsafeClaimAutoreleasedReturnValue
+    RetainBlock,              ///< objc_retainBlock
+    Release,                  ///< objc_release
+    Autorelease,              ///< objc_autorelease
+    AutoreleaseRV,            ///< objc_autoreleaseReturnValue
+    AutoreleasepoolPush,      ///< objc_autoreleasePoolPush
+    AutoreleasepoolPop,       ///< objc_autoreleasePoolPop
+    NoopCast,                 ///< objc_retainedObject, etc.
+    FusedRetainAutorelease,   ///< objc_retainAutorelease
+    FusedRetainAutoreleaseRV, ///< objc_retainAutoreleaseReturnValue
+    LoadWeakRetained,         ///< objc_loadWeakRetained (primitive)
+    StoreWeak,                ///< objc_storeWeak (primitive)
+    InitWeak,                 ///< objc_initWeak (derived)
+    LoadWeak,                 ///< objc_loadWeak (derived)
+    MoveWeak,                 ///< objc_moveWeak (derived)
+    CopyWeak,                 ///< objc_copyWeak (derived)
+    DestroyWeak,              ///< objc_destroyWeak (derived)
+    StoreStrong,              ///< objc_storeStrong (derived)
+    IntrinsicUser,            ///< llvm.objc.clang.arc.use
+    CallOrUser,               ///< could call objc_release and/or "use" pointers
+    Call,                     ///< could call objc_release
+    User,                     ///< could "use" a pointer
+    None                      ///< anything that is inert from an ARC perspective.
 };
 
 raw_ostream &operator<<(raw_ostream &OS, const ARCInstKind Class);
@@ -102,15 +102,15 @@ ARCInstKind GetFunctionClass(const Function *F);
 /// runtime calls. This allows it to be faster.
 ///
 inline ARCInstKind GetBasicARCInstKind(const Value *V) {
-  if (const CallInst *CI = dyn_cast<CallInst>(V)) {
-    if (const Function *F = CI->getCalledFunction())
-      return GetFunctionClass(F);
-    // Otherwise, be conservative.
-    return ARCInstKind::CallOrUser;
-  }
+    if (const CallInst *CI = dyn_cast<CallInst>(V)) {
+        if (const Function *F = CI->getCalledFunction())
+            return GetFunctionClass(F);
+        // Otherwise, be conservative.
+        return ARCInstKind::CallOrUser;
+    }
 
-  // Otherwise, be conservative.
-  return isa<InvokeInst>(V) ? ARCInstKind::CallOrUser : ARCInstKind::User;
+    // Otherwise, be conservative.
+    return isa<InvokeInst>(V) ? ARCInstKind::CallOrUser : ARCInstKind::User;
 }
 
 /// Map V to its ARCInstKind equivalence class.

@@ -32,12 +32,12 @@ std::string StrError(int errnum);
 template <typename FailT, typename Fun, typename... Args>
 inline decltype(auto) RetryAfterSignal(const FailT &Fail, const Fun &F,
                                        const Args &... As) {
-  decltype(F(As...)) Res;
-  do {
-    errno = 0;
-    Res = F(As...);
-  } while (Res == Fail && errno == EINTR);
-  return Res;
+    decltype(F(As...)) Res;
+    do {
+        errno = 0;
+        Res = F(As...);
+    } while (Res == Fail && errno == EINTR);
+    return Res;
 }
 
 }  // namespace sys

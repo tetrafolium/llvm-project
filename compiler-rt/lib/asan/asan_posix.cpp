@@ -34,35 +34,35 @@
 namespace __asan {
 
 void AsanOnDeadlySignal(int signo, void *siginfo, void *context) {
-  StartReportDeadlySignal();
-  SignalContext sig(siginfo, context);
-  ReportDeadlySignal(sig);
+    StartReportDeadlySignal();
+    SignalContext sig(siginfo, context);
+    ReportDeadlySignal(sig);
 }
 
 bool PlatformUnpoisonStacks() {
-  stack_t signal_stack;
-  CHECK_EQ(0, sigaltstack(nullptr, &signal_stack));
-  uptr sigalt_bottom = (uptr)signal_stack.ss_sp;
-  uptr sigalt_top = (uptr)((char *)signal_stack.ss_sp + signal_stack.ss_size);
-  // If we're executing on the signal alternate stack AND the Linux flag
-  // SS_AUTODISARM was used, then we cannot get the signal alternate stack
-  // bounds from sigaltstack -- sigaltstack's output looks just as if no
-  // alternate stack has ever been set up.
-  // We're always unpoisoning the signal alternate stack to support jumping
-  // between the default stack and signal alternate stack.
-  if (signal_stack.ss_flags != SS_DISABLE)
-    UnpoisonStack(sigalt_bottom, sigalt_top, "sigalt");
+    stack_t signal_stack;
+    CHECK_EQ(0, sigaltstack(nullptr, &signal_stack));
+    uptr sigalt_bottom = (uptr)signal_stack.ss_sp;
+    uptr sigalt_top = (uptr)((char *)signal_stack.ss_sp + signal_stack.ss_size);
+    // If we're executing on the signal alternate stack AND the Linux flag
+    // SS_AUTODISARM was used, then we cannot get the signal alternate stack
+    // bounds from sigaltstack -- sigaltstack's output looks just as if no
+    // alternate stack has ever been set up.
+    // We're always unpoisoning the signal alternate stack to support jumping
+    // between the default stack and signal alternate stack.
+    if (signal_stack.ss_flags != SS_DISABLE)
+        UnpoisonStack(sigalt_bottom, sigalt_top, "sigalt");
 
-  if (signal_stack.ss_flags != SS_ONSTACK)
-    return false;
+    if (signal_stack.ss_flags != SS_ONSTACK)
+        return false;
 
-  // Since we're on the signal altnerate stack, we cannot find the DEFAULT
-  // stack bottom using a local variable.
-  uptr default_bottom, tls_addr, tls_size, stack_size;
-  GetThreadStackAndTls(/*main=*/false, &default_bottom, &stack_size, &tls_addr,
-                       &tls_size);
-  UnpoisonStack(default_bottom, default_bottom + stack_size, "default");
-  return true;
+    // Since we're on the signal altnerate stack, we cannot find the DEFAULT
+    // stack bottom using a local variable.
+    uptr default_bottom, tls_addr, tls_size, stack_size;
+    GetThreadStackAndTls(/*main=*/false, &default_bottom, &stack_size, &tls_addr,
+                                  &tls_size);
+    UnpoisonStack(default_bottom, default_bottom + stack_size, "default");
+    return true;
 }
 
 // ---------------------- TSD ---------------- {{{1
@@ -75,69 +75,69 @@ bool PlatformUnpoisonStacks() {
 static void (*tsd_destructor)(void *tsd) = nullptr;
 
 struct tsd_key {
-  tsd_key() : key(nullptr) {}
-  ~tsd_key() {
-    CHECK(tsd_destructor);
-    if (key)
-      (*tsd_destructor)(key);
-  }
-  void *key;
+    tsd_key() : key(nullptr) {}
+    ~tsd_key() {
+        CHECK(tsd_destructor);
+        if (key)
+            (*tsd_destructor)(key);
+    }
+    void *key;
 };
 
 static thread_local struct tsd_key key;
 
 void AsanTSDInit(void (*destructor)(void *tsd)) {
-  CHECK(!tsd_destructor);
-  tsd_destructor = destructor;
+    CHECK(!tsd_destructor);
+    tsd_destructor = destructor;
 }
 
 void *AsanTSDGet() {
-  CHECK(tsd_destructor);
-  return key.key;
+    CHECK(tsd_destructor);
+    return key.key;
 }
 
 void AsanTSDSet(void *tsd) {
-  CHECK(tsd_destructor);
-  CHECK(tsd);
-  CHECK(!key.key);
-  key.key = tsd;
+    CHECK(tsd_destructor);
+    CHECK(tsd);
+    CHECK(!key.key);
+    key.key = tsd;
 }
 
 void PlatformTSDDtor(void *tsd) {
-  CHECK(tsd_destructor);
-  CHECK_EQ(key.key, tsd);
-  key.key = nullptr;
-  // Make sure that signal handler can not see a stale current thread pointer.
-  atomic_signal_fence(memory_order_seq_cst);
-  AsanThread::TSDDtor(tsd);
+    CHECK(tsd_destructor);
+    CHECK_EQ(key.key, tsd);
+    key.key = nullptr;
+    // Make sure that signal handler can not see a stale current thread pointer.
+    atomic_signal_fence(memory_order_seq_cst);
+    AsanThread::TSDDtor(tsd);
 }
 #else
 static pthread_key_t tsd_key;
 static bool tsd_key_inited = false;
 void AsanTSDInit(void (*destructor)(void *tsd)) {
-  CHECK(!tsd_key_inited);
-  tsd_key_inited = true;
-  CHECK_EQ(0, pthread_key_create(&tsd_key, destructor));
+    CHECK(!tsd_key_inited);
+    tsd_key_inited = true;
+    CHECK_EQ(0, pthread_key_create(&tsd_key, destructor));
 }
 
 void *AsanTSDGet() {
-  CHECK(tsd_key_inited);
-  return pthread_getspecific(tsd_key);
+    CHECK(tsd_key_inited);
+    return pthread_getspecific(tsd_key);
 }
 
 void AsanTSDSet(void *tsd) {
-  CHECK(tsd_key_inited);
-  pthread_setspecific(tsd_key, tsd);
+    CHECK(tsd_key_inited);
+    pthread_setspecific(tsd_key, tsd);
 }
 
 void PlatformTSDDtor(void *tsd) {
-  AsanThreadContext *context = (AsanThreadContext*)tsd;
-  if (context->destructor_iterations > 1) {
-    context->destructor_iterations--;
-    CHECK_EQ(0, pthread_setspecific(tsd_key, tsd));
-    return;
-  }
-  AsanThread::TSDDtor(tsd);
+    AsanThreadContext *context = (AsanThreadContext*)tsd;
+    if (context->destructor_iterations > 1) {
+        context->destructor_iterations--;
+        CHECK_EQ(0, pthread_setspecific(tsd_key, tsd));
+        return;
+    }
+    AsanThread::TSDDtor(tsd);
 }
 #endif
 }  // namespace __asan

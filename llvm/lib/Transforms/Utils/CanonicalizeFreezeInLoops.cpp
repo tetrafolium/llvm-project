@@ -53,49 +53,49 @@ namespace {
 
 class CanonicalizeFreezeInLoops : public LoopPass {
 public:
-  static char ID;
+    static char ID;
 
-  CanonicalizeFreezeInLoops();
+    CanonicalizeFreezeInLoops();
 
 private:
-  bool runOnLoop(Loop *L, LPPassManager &LPM) override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnLoop(Loop *L, LPPassManager &LPM) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 class CanonicalizeFreezeInLoopsImpl {
-  Loop *L;
-  ScalarEvolution &SE;
-  DominatorTree &DT;
+    Loop *L;
+    ScalarEvolution &SE;
+    DominatorTree &DT;
 
-  struct FrozenIndPHIInfo {
-    // A freeze instruction that uses an induction phi
-    FreezeInst *FI = nullptr;
-    // The induction phi, step instruction, the operand idx of StepInst which is
-    // a step value
-    PHINode *PHI;
-    BinaryOperator *StepInst;
-    unsigned StepValIdx = 0;
+    struct FrozenIndPHIInfo {
+        // A freeze instruction that uses an induction phi
+        FreezeInst *FI = nullptr;
+        // The induction phi, step instruction, the operand idx of StepInst which is
+        // a step value
+        PHINode *PHI;
+        BinaryOperator *StepInst;
+        unsigned StepValIdx = 0;
 
-    FrozenIndPHIInfo(PHINode *PHI, BinaryOperator *StepInst)
-        : PHI(PHI), StepInst(StepInst) {}
-  };
+        FrozenIndPHIInfo(PHINode *PHI, BinaryOperator *StepInst)
+            : PHI(PHI), StepInst(StepInst) {}
+    };
 
-  // Can freeze instruction be pushed into operands of I?
-  // In order to do this, I should not create a poison after I's flags are
-  // stripped.
-  bool canHandleInst(const Instruction *I) {
-    auto Opc = I->getOpcode();
-    // If add/sub/mul, drop nsw/nuw flags.
-    return Opc == Instruction::Add || Opc == Instruction::Sub ||
-           Opc == Instruction::Mul;
-  }
+    // Can freeze instruction be pushed into operands of I?
+    // In order to do this, I should not create a poison after I's flags are
+    // stripped.
+    bool canHandleInst(const Instruction *I) {
+        auto Opc = I->getOpcode();
+        // If add/sub/mul, drop nsw/nuw flags.
+        return Opc == Instruction::Add || Opc == Instruction::Sub ||
+               Opc == Instruction::Mul;
+    }
 
-  void InsertFreezeAndForgetFromSCEV(Use &U);
+    void InsertFreezeAndForgetFromSCEV(Use &U);
 
 public:
-  CanonicalizeFreezeInLoopsImpl(Loop *L, ScalarEvolution &SE, DominatorTree &DT)
-      : L(L), SE(SE), DT(DT) {}
-  bool run();
+    CanonicalizeFreezeInLoopsImpl(Loop *L, ScalarEvolution &SE, DominatorTree &DT)
+        : L(L), SE(SE), DT(DT) {}
+    bool run();
 };
 
 } // anonymous namespace
@@ -103,136 +103,136 @@ public:
 // Given U = (value, user), replace value with freeze(value), and let
 // SCEV forget user. The inserted freeze is placed in the preheader.
 void CanonicalizeFreezeInLoopsImpl::InsertFreezeAndForgetFromSCEV(Use &U) {
-  auto *PH = L->getLoopPreheader();
+    auto *PH = L->getLoopPreheader();
 
-  auto *UserI = cast<Instruction>(U.getUser());
-  auto *ValueToFr = U.get();
-  assert(L->contains(UserI->getParent()) &&
-         "Should not process an instruction that isn't inside the loop");
-  if (isGuaranteedNotToBeUndefOrPoison(ValueToFr, nullptr, UserI, &DT))
-    return;
+    auto *UserI = cast<Instruction>(U.getUser());
+    auto *ValueToFr = U.get();
+    assert(L->contains(UserI->getParent()) &&
+           "Should not process an instruction that isn't inside the loop");
+    if (isGuaranteedNotToBeUndefOrPoison(ValueToFr, nullptr, UserI, &DT))
+        return;
 
-  LLVM_DEBUG(dbgs() << "canonfr: inserting freeze:\n");
-  LLVM_DEBUG(dbgs() << "\tUser: " << *U.getUser() << "\n");
-  LLVM_DEBUG(dbgs() << "\tOperand: " << *U.get() << "\n");
+    LLVM_DEBUG(dbgs() << "canonfr: inserting freeze:\n");
+    LLVM_DEBUG(dbgs() << "\tUser: " << *U.getUser() << "\n");
+    LLVM_DEBUG(dbgs() << "\tOperand: " << *U.get() << "\n");
 
-  U.set(new FreezeInst(ValueToFr, ValueToFr->getName() + ".frozen",
-                       PH->getTerminator()));
+    U.set(new FreezeInst(ValueToFr, ValueToFr->getName() + ".frozen",
+                         PH->getTerminator()));
 
-  SE.forgetValue(UserI);
+    SE.forgetValue(UserI);
 }
 
 bool CanonicalizeFreezeInLoopsImpl::run() {
-  // The loop should be in LoopSimplify form.
-  if (!L->isLoopSimplifyForm())
-    return false;
+    // The loop should be in LoopSimplify form.
+    if (!L->isLoopSimplifyForm())
+        return false;
 
-  SmallVector<FrozenIndPHIInfo, 4> Candidates;
+    SmallVector<FrozenIndPHIInfo, 4> Candidates;
 
-  for (auto &PHI : L->getHeader()->phis()) {
-    InductionDescriptor ID;
-    if (!InductionDescriptor::isInductionPHI(&PHI, L, &SE, ID))
-      continue;
+    for (auto &PHI : L->getHeader()->phis()) {
+        InductionDescriptor ID;
+        if (!InductionDescriptor::isInductionPHI(&PHI, L, &SE, ID))
+            continue;
 
-    LLVM_DEBUG(dbgs() << "canonfr: PHI: " << PHI << "\n");
-    FrozenIndPHIInfo Info(&PHI, ID.getInductionBinOp());
-    if (!Info.StepInst || !canHandleInst(Info.StepInst)) {
-      // The stepping instruction has unknown form.
-      // Ignore this PHI.
-      continue;
+        LLVM_DEBUG(dbgs() << "canonfr: PHI: " << PHI << "\n");
+        FrozenIndPHIInfo Info(&PHI, ID.getInductionBinOp());
+        if (!Info.StepInst || !canHandleInst(Info.StepInst)) {
+            // The stepping instruction has unknown form.
+            // Ignore this PHI.
+            continue;
+        }
+
+        Info.StepValIdx = Info.StepInst->getOperand(0) == &PHI;
+        Value *StepV = Info.StepInst->getOperand(Info.StepValIdx);
+        if (auto *StepI = dyn_cast<Instruction>(StepV)) {
+            if (L->contains(StepI->getParent())) {
+                // The step value is inside the loop. Freezing step value will introduce
+                // another freeze into the loop, so skip this PHI.
+                continue;
+            }
+        }
+
+        auto Visit = [&](User *U) {
+            if (auto *FI = dyn_cast<FreezeInst>(U)) {
+                LLVM_DEBUG(dbgs() << "canonfr: found: " << *FI << "\n");
+                Info.FI = FI;
+                Candidates.push_back(Info);
+            }
+        };
+        for_each(PHI.users(), Visit);
+        for_each(Info.StepInst->users(), Visit);
     }
 
-    Info.StepValIdx = Info.StepInst->getOperand(0) == &PHI;
-    Value *StepV = Info.StepInst->getOperand(Info.StepValIdx);
-    if (auto *StepI = dyn_cast<Instruction>(StepV)) {
-      if (L->contains(StepI->getParent())) {
-        // The step value is inside the loop. Freezing step value will introduce
-        // another freeze into the loop, so skip this PHI.
-        continue;
-      }
+    if (Candidates.empty())
+        return false;
+
+    SmallSet<PHINode *, 8> ProcessedPHIs;
+    for (const auto &Info : Candidates) {
+        PHINode *PHI = Info.PHI;
+        if (!ProcessedPHIs.insert(Info.PHI).second)
+            continue;
+
+        BinaryOperator *StepI = Info.StepInst;
+        assert(StepI && "Step instruction should have been found");
+
+        // Drop flags from the step instruction.
+        if (!isGuaranteedNotToBeUndefOrPoison(StepI, nullptr, StepI, &DT)) {
+            LLVM_DEBUG(dbgs() << "canonfr: drop flags: " << *StepI << "\n");
+            StepI->dropPoisonGeneratingFlags();
+            SE.forgetValue(StepI);
+        }
+
+        InsertFreezeAndForgetFromSCEV(StepI->getOperandUse(Info.StepValIdx));
+
+        unsigned OperandIdx =
+            PHI->getOperandNumForIncomingValue(PHI->getIncomingValue(0) == StepI);
+        InsertFreezeAndForgetFromSCEV(PHI->getOperandUse(OperandIdx));
     }
 
-    auto Visit = [&](User *U) {
-      if (auto *FI = dyn_cast<FreezeInst>(U)) {
-        LLVM_DEBUG(dbgs() << "canonfr: found: " << *FI << "\n");
-        Info.FI = FI;
-        Candidates.push_back(Info);
-      }
-    };
-    for_each(PHI.users(), Visit);
-    for_each(Info.StepInst->users(), Visit);
-  }
-
-  if (Candidates.empty())
-    return false;
-
-  SmallSet<PHINode *, 8> ProcessedPHIs;
-  for (const auto &Info : Candidates) {
-    PHINode *PHI = Info.PHI;
-    if (!ProcessedPHIs.insert(Info.PHI).second)
-      continue;
-
-    BinaryOperator *StepI = Info.StepInst;
-    assert(StepI && "Step instruction should have been found");
-
-    // Drop flags from the step instruction.
-    if (!isGuaranteedNotToBeUndefOrPoison(StepI, nullptr, StepI, &DT)) {
-      LLVM_DEBUG(dbgs() << "canonfr: drop flags: " << *StepI << "\n");
-      StepI->dropPoisonGeneratingFlags();
-      SE.forgetValue(StepI);
+    // Finally, remove the old freeze instructions.
+    for (const auto &Item : Candidates) {
+        auto *FI = Item.FI;
+        LLVM_DEBUG(dbgs() << "canonfr: removing " << *FI << "\n");
+        SE.forgetValue(FI);
+        FI->replaceAllUsesWith(FI->getOperand(0));
+        FI->eraseFromParent();
     }
 
-    InsertFreezeAndForgetFromSCEV(StepI->getOperandUse(Info.StepValIdx));
-
-    unsigned OperandIdx =
-        PHI->getOperandNumForIncomingValue(PHI->getIncomingValue(0) == StepI);
-    InsertFreezeAndForgetFromSCEV(PHI->getOperandUse(OperandIdx));
-  }
-
-  // Finally, remove the old freeze instructions.
-  for (const auto &Item : Candidates) {
-    auto *FI = Item.FI;
-    LLVM_DEBUG(dbgs() << "canonfr: removing " << *FI << "\n");
-    SE.forgetValue(FI);
-    FI->replaceAllUsesWith(FI->getOperand(0));
-    FI->eraseFromParent();
-  }
-
-  return true;
+    return true;
 }
 
 CanonicalizeFreezeInLoops::CanonicalizeFreezeInLoops() : LoopPass(ID) {
-  initializeCanonicalizeFreezeInLoopsPass(*PassRegistry::getPassRegistry());
+    initializeCanonicalizeFreezeInLoopsPass(*PassRegistry::getPassRegistry());
 }
 
 void CanonicalizeFreezeInLoops::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.addPreservedID(LoopSimplifyID);
-  AU.addRequired<LoopInfoWrapperPass>();
-  AU.addPreserved<LoopInfoWrapperPass>();
-  AU.addRequiredID(LoopSimplifyID);
-  AU.addRequired<ScalarEvolutionWrapperPass>();
-  AU.addPreserved<ScalarEvolutionWrapperPass>();
-  AU.addRequired<DominatorTreeWrapperPass>();
-  AU.addPreserved<DominatorTreeWrapperPass>();
+    AU.addPreservedID(LoopSimplifyID);
+    AU.addRequired<LoopInfoWrapperPass>();
+    AU.addPreserved<LoopInfoWrapperPass>();
+    AU.addRequiredID(LoopSimplifyID);
+    AU.addRequired<ScalarEvolutionWrapperPass>();
+    AU.addPreserved<ScalarEvolutionWrapperPass>();
+    AU.addRequired<DominatorTreeWrapperPass>();
+    AU.addPreserved<DominatorTreeWrapperPass>();
 }
 
 bool CanonicalizeFreezeInLoops::runOnLoop(Loop *L, LPPassManager &) {
-  if (skipLoop(L))
-    return false;
+    if (skipLoop(L))
+        return false;
 
-  auto &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
-  auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
-  return CanonicalizeFreezeInLoopsImpl(L, SE, DT).run();
+    auto &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
+    auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    return CanonicalizeFreezeInLoopsImpl(L, SE, DT).run();
 }
 
 PreservedAnalyses
 CanonicalizeFreezeInLoopsPass::run(Loop &L, LoopAnalysisManager &AM,
                                    LoopStandardAnalysisResults &AR,
                                    LPMUpdater &U) {
-  if (!CanonicalizeFreezeInLoopsImpl(&L, AR.SE, AR.DT).run())
-    return PreservedAnalyses::all();
+    if (!CanonicalizeFreezeInLoopsImpl(&L, AR.SE, AR.DT).run())
+        return PreservedAnalyses::all();
 
-  return getLoopPassPreservedAnalyses();
+    return getLoopPassPreservedAnalyses();
 }
 
 INITIALIZE_PASS_BEGIN(CanonicalizeFreezeInLoops, "canon-freeze",
@@ -244,7 +244,7 @@ INITIALIZE_PASS_END(CanonicalizeFreezeInLoops, "canon-freeze",
                     "Canonicalize Freeze Instructions in Loops", false, false)
 
 Pass *llvm::createCanonicalizeFreezeInLoopsPass() {
-  return new CanonicalizeFreezeInLoops();
+    return new CanonicalizeFreezeInLoops();
 }
 
 char CanonicalizeFreezeInLoops::ID = 0;

@@ -24,56 +24,58 @@ class MCSubtargetInfo;
 /// Interface to description of machine instruction set.
 class MCInstrInfo {
 public:
-  using ComplexDeprecationPredicate = bool (*)(MCInst &,
-                                               const MCSubtargetInfo &,
-                                               std::string &);
+    using ComplexDeprecationPredicate = bool (*)(MCInst &,
+                                        const MCSubtargetInfo &,
+                                        std::string &);
 
 private:
-  const MCInstrDesc *Desc;          // Raw array to allow static init'n
-  const unsigned *InstrNameIndices; // Array for name indices in InstrNameData
-  const char *InstrNameData;        // Instruction name string pool
-  // Subtarget feature that an instruction is deprecated on, if any
-  // -1 implies this is not deprecated by any single feature. It may still be
-  // deprecated due to a "complex" reason, below.
-  const uint8_t *DeprecatedFeatures;
-  // A complex method to determine if a certain instruction is deprecated or
-  // not, and return the reason for deprecation.
-  const ComplexDeprecationPredicate *ComplexDeprecationInfos;
-  unsigned NumOpcodes;              // Number of entries in the desc array
+    const MCInstrDesc *Desc;          // Raw array to allow static init'n
+    const unsigned *InstrNameIndices; // Array for name indices in InstrNameData
+    const char *InstrNameData;        // Instruction name string pool
+    // Subtarget feature that an instruction is deprecated on, if any
+    // -1 implies this is not deprecated by any single feature. It may still be
+    // deprecated due to a "complex" reason, below.
+    const uint8_t *DeprecatedFeatures;
+    // A complex method to determine if a certain instruction is deprecated or
+    // not, and return the reason for deprecation.
+    const ComplexDeprecationPredicate *ComplexDeprecationInfos;
+    unsigned NumOpcodes;              // Number of entries in the desc array
 
 public:
-  /// Initialize MCInstrInfo, called by TableGen auto-generated routines.
-  /// *DO NOT USE*.
-  void InitMCInstrInfo(const MCInstrDesc *D, const unsigned *NI, const char *ND,
-                       const uint8_t *DF,
-                       const ComplexDeprecationPredicate *CDI, unsigned NO) {
-    Desc = D;
-    InstrNameIndices = NI;
-    InstrNameData = ND;
-    DeprecatedFeatures = DF;
-    ComplexDeprecationInfos = CDI;
-    NumOpcodes = NO;
-  }
+    /// Initialize MCInstrInfo, called by TableGen auto-generated routines.
+    /// *DO NOT USE*.
+    void InitMCInstrInfo(const MCInstrDesc *D, const unsigned *NI, const char *ND,
+                         const uint8_t *DF,
+                         const ComplexDeprecationPredicate *CDI, unsigned NO) {
+        Desc = D;
+        InstrNameIndices = NI;
+        InstrNameData = ND;
+        DeprecatedFeatures = DF;
+        ComplexDeprecationInfos = CDI;
+        NumOpcodes = NO;
+    }
 
-  unsigned getNumOpcodes() const { return NumOpcodes; }
+    unsigned getNumOpcodes() const {
+        return NumOpcodes;
+    }
 
-  /// Return the machine instruction descriptor that corresponds to the
-  /// specified instruction opcode.
-  const MCInstrDesc &get(unsigned Opcode) const {
-    assert(Opcode < NumOpcodes && "Invalid opcode!");
-    return Desc[Opcode];
-  }
+    /// Return the machine instruction descriptor that corresponds to the
+    /// specified instruction opcode.
+    const MCInstrDesc &get(unsigned Opcode) const {
+        assert(Opcode < NumOpcodes && "Invalid opcode!");
+        return Desc[Opcode];
+    }
 
-  /// Returns the name for the instructions with the given opcode.
-  StringRef getName(unsigned Opcode) const {
-    assert(Opcode < NumOpcodes && "Invalid opcode!");
-    return StringRef(&InstrNameData[InstrNameIndices[Opcode]]);
-  }
+    /// Returns the name for the instructions with the given opcode.
+    StringRef getName(unsigned Opcode) const {
+        assert(Opcode < NumOpcodes && "Invalid opcode!");
+        return StringRef(&InstrNameData[InstrNameIndices[Opcode]]);
+    }
 
-  /// Returns true if a certain instruction is deprecated and if so
-  /// returns the reason in \p Info.
-  bool getDeprecatedInfo(MCInst &MI, const MCSubtargetInfo &STI,
-                         std::string &Info) const;
+    /// Returns true if a certain instruction is deprecated and if so
+    /// returns the reason in \p Info.
+    bool getDeprecatedInfo(MCInst &MI, const MCSubtargetInfo &STI,
+                           std::string &Info) const;
 };
 
 } // End llvm namespace

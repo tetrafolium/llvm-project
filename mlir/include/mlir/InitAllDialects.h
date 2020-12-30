@@ -46,34 +46,34 @@ namespace mlir {
 
 // Add all the MLIR dialects to the provided registry.
 inline void registerAllDialects(DialectRegistry &registry) {
-  // clang-format off
-  registry.insert<acc::OpenACCDialect,
-                  AffineDialect,
-                  arm_neon::ArmNeonDialect,
-                  async::AsyncDialect,
-                  avx512::AVX512Dialect,
-                  gpu::GPUDialect,
-                  LLVM::LLVMAVX512Dialect,
-                  LLVM::LLVMDialect,
-                  LLVM::LLVMArmNeonDialect,
-                  LLVM::LLVMArmSVEDialect,
-                  linalg::LinalgDialect,
-                  scf::SCFDialect,
-                  omp::OpenMPDialect,
-                  pdl::PDLDialect,
-                  pdl_interp::PDLInterpDialect,
-                  quant::QuantizationDialect,
-                  spirv::SPIRVDialect,
-                  StandardOpsDialect,
-                  arm_sve::ArmSVEDialect,
-                  vector::VectorDialect,
-                  NVVM::NVVMDialect,
-                  ROCDL::ROCDLDialect,
-                  SDBMDialect,
-                  shape::ShapeDialect,
-                  tensor::TensorDialect,
-                  tosa::TosaDialect>();
-  // clang-format on
+    // clang-format off
+    registry.insert<acc::OpenACCDialect,
+                    AffineDialect,
+                    arm_neon::ArmNeonDialect,
+                    async::AsyncDialect,
+                    avx512::AVX512Dialect,
+                    gpu::GPUDialect,
+                    LLVM::LLVMAVX512Dialect,
+                    LLVM::LLVMDialect,
+                    LLVM::LLVMArmNeonDialect,
+                    LLVM::LLVMArmSVEDialect,
+                    linalg::LinalgDialect,
+                    scf::SCFDialect,
+                    omp::OpenMPDialect,
+                    pdl::PDLDialect,
+                    pdl_interp::PDLInterpDialect,
+                    quant::QuantizationDialect,
+                    spirv::SPIRVDialect,
+                    StandardOpsDialect,
+                    arm_sve::ArmSVEDialect,
+                    vector::VectorDialect,
+                    NVVM::NVVMDialect,
+                    ROCDL::ROCDLDialect,
+                    SDBMDialect,
+                    shape::ShapeDialect,
+                    tensor::TensorDialect,
+                    tosa::TosaDialect>();
+    // clang-format on
 }
 
 } // namespace mlir

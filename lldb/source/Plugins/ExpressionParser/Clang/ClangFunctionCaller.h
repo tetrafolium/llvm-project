@@ -56,95 +56,101 @@ class ClangExpressionParser;
 /// Any of the methods that take arg_addr_ptr can be passed NULL, and the
 /// argument space will be managed for you.
 class ClangFunctionCaller : public FunctionCaller {
-  friend class ASTStructExtractor;
+    friend class ASTStructExtractor;
 
-  class ClangFunctionCallerHelper : public ClangExpressionHelper {
-  public:
-    ClangFunctionCallerHelper(ClangFunctionCaller &owner) : m_owner(owner) {}
+    class ClangFunctionCallerHelper : public ClangExpressionHelper {
+    public:
+        ClangFunctionCallerHelper(ClangFunctionCaller &owner) : m_owner(owner) {}
 
-    ~ClangFunctionCallerHelper() override = default;
+        ~ClangFunctionCallerHelper() override = default;
 
-    /// Return the object that the parser should use when resolving external
-    /// values.  May be NULL if everything should be self-contained.
-    ClangExpressionDeclMap *DeclMap() override { return nullptr; }
+        /// Return the object that the parser should use when resolving external
+        /// values.  May be NULL if everything should be self-contained.
+        ClangExpressionDeclMap *DeclMap() override {
+            return nullptr;
+        }
 
-    /// Return the object that the parser should allow to access ASTs. May be
-    /// NULL if the ASTs do not need to be transformed.
-    ///
-    /// \param[in] passthrough
-    ///     The ASTConsumer that the returned transformer should send
-    ///     the ASTs to after transformation.
-    clang::ASTConsumer *
-    ASTTransformer(clang::ASTConsumer *passthrough) override;
+        /// Return the object that the parser should allow to access ASTs. May be
+        /// NULL if the ASTs do not need to be transformed.
+        ///
+        /// \param[in] passthrough
+        ///     The ASTConsumer that the returned transformer should send
+        ///     the ASTs to after transformation.
+        clang::ASTConsumer *
+        ASTTransformer(clang::ASTConsumer *passthrough) override;
 
-  private:
-    ClangFunctionCaller &m_owner;
-    std::unique_ptr<ASTStructExtractor> m_struct_extractor; ///< The class that
-                                                            ///generates the
-                                                            ///argument struct
-                                                            ///layout.
-  };
+    private:
+        ClangFunctionCaller &m_owner;
+        std::unique_ptr<ASTStructExtractor> m_struct_extractor; ///< The class that
+        ///generates the
+        ///argument struct
+        ///layout.
+    };
 
-  // LLVM RTTI support
-  static char ID;
+    // LLVM RTTI support
+    static char ID;
 
 public:
-  bool isA(const void *ClassID) const override {
-    return ClassID == &ID || FunctionCaller::isA(ClassID);
-  }
-  static bool classof(const Expression *obj) { return obj->isA(&ID); }
+    bool isA(const void *ClassID) const override {
+        return ClassID == &ID || FunctionCaller::isA(ClassID);
+    }
+    static bool classof(const Expression *obj) {
+        return obj->isA(&ID);
+    }
 
-  /// Constructor
-  ///
-  /// \param[in] exe_scope
-  ///     An execution context scope that gets us at least a target and
-  ///     process.
-  ///
-  /// \param[in] return_type
-  ///     A compiler type for the function result.  Should be
-  ///     defined in ast_context.
-  ///
-  /// \param[in] function_address
-  ///     The address of the function to call.
-  ///
-  /// \param[in] arg_value_list
-  ///     The default values to use when calling this function.  Can
-  ///     be overridden using WriteFunctionArguments().
-  ClangFunctionCaller(ExecutionContextScope &exe_scope,
-                      const CompilerType &return_type,
-                      const Address &function_address,
-                      const ValueList &arg_value_list, const char *name);
+    /// Constructor
+    ///
+    /// \param[in] exe_scope
+    ///     An execution context scope that gets us at least a target and
+    ///     process.
+    ///
+    /// \param[in] return_type
+    ///     A compiler type for the function result.  Should be
+    ///     defined in ast_context.
+    ///
+    /// \param[in] function_address
+    ///     The address of the function to call.
+    ///
+    /// \param[in] arg_value_list
+    ///     The default values to use when calling this function.  Can
+    ///     be overridden using WriteFunctionArguments().
+    ClangFunctionCaller(ExecutionContextScope &exe_scope,
+                        const CompilerType &return_type,
+                        const Address &function_address,
+                        const ValueList &arg_value_list, const char *name);
 
-  ~ClangFunctionCaller() override;
+    ~ClangFunctionCaller() override;
 
-  /// Compile the wrapper function
-  ///
-  /// \param[in] thread_to_use_sp
-  ///     Compilation might end up calling functions.  Pass in the thread you
-  ///     want the compilation to use.  If you pass in an empty ThreadSP it will
-  ///     use the currently selected thread.
-  ///
-  /// \param[in] diagnostic_manager
-  ///     The diagnostic manager to report parser errors to.
-  ///
-  /// \return
-  ///     The number of errors.
-  unsigned CompileFunction(lldb::ThreadSP thread_to_use_sp,
-                           DiagnosticManager &diagnostic_manager) override;
+    /// Compile the wrapper function
+    ///
+    /// \param[in] thread_to_use_sp
+    ///     Compilation might end up calling functions.  Pass in the thread you
+    ///     want the compilation to use.  If you pass in an empty ThreadSP it will
+    ///     use the currently selected thread.
+    ///
+    /// \param[in] diagnostic_manager
+    ///     The diagnostic manager to report parser errors to.
+    ///
+    /// \return
+    ///     The number of errors.
+    unsigned CompileFunction(lldb::ThreadSP thread_to_use_sp,
+                             DiagnosticManager &diagnostic_manager) override;
 
-  ExpressionTypeSystemHelper *GetTypeSystemHelper() override {
-    return &m_type_system_helper;
-  }
+    ExpressionTypeSystemHelper *GetTypeSystemHelper() override {
+        return &m_type_system_helper;
+    }
 
 protected:
-  const char *GetWrapperStructName() { return m_wrapper_struct_name.c_str(); }
+    const char *GetWrapperStructName() {
+        return m_wrapper_struct_name.c_str();
+    }
 
 private:
-  // For ClangFunctionCaller only
+    // For ClangFunctionCaller only
 
-  // Note: the parser needs to be destructed before the execution unit, so
-  // declare the execution unit first.
-  ClangFunctionCallerHelper m_type_system_helper;
+    // Note: the parser needs to be destructed before the execution unit, so
+    // declare the execution unit first.
+    ClangFunctionCallerHelper m_type_system_helper;
 };
 
 } // namespace lldb_private

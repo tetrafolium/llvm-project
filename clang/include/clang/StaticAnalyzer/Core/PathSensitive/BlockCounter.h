@@ -27,29 +27,29 @@ namespace ento {
 /// An abstract data type used to count the number of times a given
 /// block has been visited along a path analyzed by CoreEngine.
 class BlockCounter {
-  void *Data;
+    void *Data;
 
-  BlockCounter(void *D) : Data(D) {}
+    BlockCounter(void *D) : Data(D) {}
 
 public:
-  BlockCounter() : Data(nullptr) {}
+    BlockCounter() : Data(nullptr) {}
 
-  unsigned getNumVisited(const StackFrameContext *CallSite,
-                         unsigned BlockID) const;
+    unsigned getNumVisited(const StackFrameContext *CallSite,
+                           unsigned BlockID) const;
 
-  class Factory {
-    void *F;
-  public:
-    Factory(llvm::BumpPtrAllocator& Alloc);
-    ~Factory();
+    class Factory {
+        void *F;
+    public:
+        Factory(llvm::BumpPtrAllocator& Alloc);
+        ~Factory();
 
-    BlockCounter GetEmptyCounter();
-    BlockCounter IncrementCount(BlockCounter BC,
-                                  const StackFrameContext *CallSite,
-                                  unsigned BlockID);
-  };
+        BlockCounter GetEmptyCounter();
+        BlockCounter IncrementCount(BlockCounter BC,
+                                    const StackFrameContext *CallSite,
+                                    unsigned BlockID);
+    };
 
-  friend class Factory;
+    friend class Factory;
 };
 
 } // end GR namespace

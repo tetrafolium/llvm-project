@@ -22,26 +22,26 @@ namespace llvm {
 /// This class is designed to be used by clients that want to iterate across all
 /// attributes in a DWARFDie.
 struct DWARFAttribute {
-  /// The debug info/types offset for this attribute.
-  uint64_t Offset = 0;
-  /// The debug info/types section byte size of the data for this attribute.
-  uint32_t ByteSize = 0;
-  /// The attribute enumeration of this attribute.
-  dwarf::Attribute Attr = dwarf::Attribute(0);
-  /// The form and value for this attribute.
-  DWARFFormValue Value;
+    /// The debug info/types offset for this attribute.
+    uint64_t Offset = 0;
+    /// The debug info/types section byte size of the data for this attribute.
+    uint32_t ByteSize = 0;
+    /// The attribute enumeration of this attribute.
+    dwarf::Attribute Attr = dwarf::Attribute(0);
+    /// The form and value for this attribute.
+    DWARFFormValue Value;
 
-  bool isValid() const {
-    return Offset != 0 && Attr != dwarf::Attribute(0);
-  }
+    bool isValid() const {
+        return Offset != 0 && Attr != dwarf::Attribute(0);
+    }
 
-  explicit operator bool() const {
-    return isValid();
-  }
+    explicit operator bool() const {
+        return isValid();
+    }
 
-  /// Identifies DWARF attributes that may contain a reference to a
-  /// DWARF expression.
-  static bool mayHaveLocationDescription(dwarf::Attribute Attr);
+    /// Identifies DWARF attributes that may contain a reference to a
+    /// DWARF expression.
+    static bool mayHaveLocationDescription(dwarf::Attribute Attr);
 };
 
 } // end namespace llvm

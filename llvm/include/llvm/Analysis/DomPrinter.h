@@ -15,15 +15,15 @@
 #define LLVM_ANALYSIS_DOMPRINTER_H
 
 namespace llvm {
-  class FunctionPass;
-  FunctionPass *createDomPrinterPass();
-  FunctionPass *createDomOnlyPrinterPass();
-  FunctionPass *createDomViewerPass();
-  FunctionPass *createDomOnlyViewerPass();
-  FunctionPass *createPostDomPrinterPass();
-  FunctionPass *createPostDomOnlyPrinterPass();
-  FunctionPass *createPostDomViewerPass();
-  FunctionPass *createPostDomOnlyViewerPass();
+class FunctionPass;
+FunctionPass *createDomPrinterPass();
+FunctionPass *createDomOnlyPrinterPass();
+FunctionPass *createDomViewerPass();
+FunctionPass *createDomOnlyViewerPass();
+FunctionPass *createPostDomPrinterPass();
+FunctionPass *createPostDomOnlyPrinterPass();
+FunctionPass *createPostDomViewerPass();
+FunctionPass *createPostDomOnlyViewerPass();
 } // End llvm namespace
 
 #endif

@@ -37,94 +37,94 @@ class TargetLibraryInfo;
 /// fails, the evaluation object should not be reused.
 class Evaluator {
 public:
-  Evaluator(const DataLayout &DL, const TargetLibraryInfo *TLI)
-      : DL(DL), TLI(TLI) {
-    ValueStack.emplace_back();
-  }
+    Evaluator(const DataLayout &DL, const TargetLibraryInfo *TLI)
+        : DL(DL), TLI(TLI) {
+        ValueStack.emplace_back();
+    }
 
-  ~Evaluator() {
-    for (auto &Tmp : AllocaTmps)
-      // If there are still users of the alloca, the program is doing something
-      // silly, e.g. storing the address of the alloca somewhere and using it
-      // later.  Since this is undefined, we'll just make it be null.
-      if (!Tmp->use_empty())
-        Tmp->replaceAllUsesWith(Constant::getNullValue(Tmp->getType()));
-  }
+    ~Evaluator() {
+        for (auto &Tmp : AllocaTmps)
+            // If there are still users of the alloca, the program is doing something
+            // silly, e.g. storing the address of the alloca somewhere and using it
+            // later.  Since this is undefined, we'll just make it be null.
+            if (!Tmp->use_empty())
+                Tmp->replaceAllUsesWith(Constant::getNullValue(Tmp->getType()));
+    }
 
-  /// Evaluate a call to function F, returning true if successful, false if we
-  /// can't evaluate it.  ActualArgs contains the formal arguments for the
-  /// function.
-  bool EvaluateFunction(Function *F, Constant *&RetVal,
-                        const SmallVectorImpl<Constant*> &ActualArgs);
+    /// Evaluate a call to function F, returning true if successful, false if we
+    /// can't evaluate it.  ActualArgs contains the formal arguments for the
+    /// function.
+    bool EvaluateFunction(Function *F, Constant *&RetVal,
+                          const SmallVectorImpl<Constant*> &ActualArgs);
 
-  /// Evaluate all instructions in block BB, returning true if successful, false
-  /// if we can't evaluate it.  NewBB returns the next BB that control flows
-  /// into, or null upon return.
-  bool EvaluateBlock(BasicBlock::iterator CurInst, BasicBlock *&NextBB);
+    /// Evaluate all instructions in block BB, returning true if successful, false
+    /// if we can't evaluate it.  NewBB returns the next BB that control flows
+    /// into, or null upon return.
+    bool EvaluateBlock(BasicBlock::iterator CurInst, BasicBlock *&NextBB);
 
-  Constant *getVal(Value *V) {
-    if (Constant *CV = dyn_cast<Constant>(V)) return CV;
-    Constant *R = ValueStack.back().lookup(V);
-    assert(R && "Reference to an uncomputed value!");
-    return R;
-  }
+    Constant *getVal(Value *V) {
+        if (Constant *CV = dyn_cast<Constant>(V)) return CV;
+        Constant *R = ValueStack.back().lookup(V);
+        assert(R && "Reference to an uncomputed value!");
+        return R;
+    }
 
-  void setVal(Value *V, Constant *C) {
-    ValueStack.back()[V] = C;
-  }
+    void setVal(Value *V, Constant *C) {
+        ValueStack.back()[V] = C;
+    }
 
-  /// Casts call result to a type of bitcast call expression
-  Constant *castCallResultIfNeeded(Value *CallExpr, Constant *RV);
+    /// Casts call result to a type of bitcast call expression
+    Constant *castCallResultIfNeeded(Value *CallExpr, Constant *RV);
 
-  const DenseMap<Constant*, Constant*> &getMutatedMemory() const {
-    return MutatedMemory;
-  }
+    const DenseMap<Constant*, Constant*> &getMutatedMemory() const {
+        return MutatedMemory;
+    }
 
-  const SmallPtrSetImpl<GlobalVariable*> &getInvariants() const {
-    return Invariants;
-  }
+    const SmallPtrSetImpl<GlobalVariable*> &getInvariants() const {
+        return Invariants;
+    }
 
 private:
-  /// Given call site return callee and list of its formal arguments
-  Function *getCalleeWithFormalArgs(CallBase &CB,
-                                    SmallVectorImpl<Constant *> &Formals);
+    /// Given call site return callee and list of its formal arguments
+    Function *getCalleeWithFormalArgs(CallBase &CB,
+                                      SmallVectorImpl<Constant *> &Formals);
 
-  /// Given call site and callee returns list of callee formal argument
-  /// values converting them when necessary
-  bool getFormalParams(CallBase &CB, Function *F,
-                       SmallVectorImpl<Constant *> &Formals);
+    /// Given call site and callee returns list of callee formal argument
+    /// values converting them when necessary
+    bool getFormalParams(CallBase &CB, Function *F,
+                         SmallVectorImpl<Constant *> &Formals);
 
-  Constant *ComputeLoadResult(Constant *P);
+    Constant *ComputeLoadResult(Constant *P);
 
-  /// As we compute SSA register values, we store their contents here. The back
-  /// of the deque contains the current function and the stack contains the
-  /// values in the calling frames.
-  std::deque<DenseMap<Value*, Constant*>> ValueStack;
+    /// As we compute SSA register values, we store their contents here. The back
+    /// of the deque contains the current function and the stack contains the
+    /// values in the calling frames.
+    std::deque<DenseMap<Value*, Constant*>> ValueStack;
 
-  /// This is used to detect recursion.  In pathological situations we could hit
-  /// exponential behavior, but at least there is nothing unbounded.
-  SmallVector<Function*, 4> CallStack;
+    /// This is used to detect recursion.  In pathological situations we could hit
+    /// exponential behavior, but at least there is nothing unbounded.
+    SmallVector<Function*, 4> CallStack;
 
-  /// For each store we execute, we update this map.  Loads check this to get
-  /// the most up-to-date value.  If evaluation is successful, this state is
-  /// committed to the process.
-  DenseMap<Constant*, Constant*> MutatedMemory;
+    /// For each store we execute, we update this map.  Loads check this to get
+    /// the most up-to-date value.  If evaluation is successful, this state is
+    /// committed to the process.
+    DenseMap<Constant*, Constant*> MutatedMemory;
 
-  /// To 'execute' an alloca, we create a temporary global variable to represent
-  /// its body.  This vector is needed so we can delete the temporary globals
-  /// when we are done.
-  SmallVector<std::unique_ptr<GlobalVariable>, 32> AllocaTmps;
+    /// To 'execute' an alloca, we create a temporary global variable to represent
+    /// its body.  This vector is needed so we can delete the temporary globals
+    /// when we are done.
+    SmallVector<std::unique_ptr<GlobalVariable>, 32> AllocaTmps;
 
-  /// These global variables have been marked invariant by the static
-  /// constructor.
-  SmallPtrSet<GlobalVariable*, 8> Invariants;
+    /// These global variables have been marked invariant by the static
+    /// constructor.
+    SmallPtrSet<GlobalVariable*, 8> Invariants;
 
-  /// These are constants we have checked and know to be simple enough to live
-  /// in a static initializer of a global.
-  SmallPtrSet<Constant*, 8> SimpleConstants;
+    /// These are constants we have checked and know to be simple enough to live
+    /// in a static initializer of a global.
+    SmallPtrSet<Constant*, 8> SimpleConstants;
 
-  const DataLayout &DL;
-  const TargetLibraryInfo *TLI;
+    const DataLayout &DL;
+    const TargetLibraryInfo *TLI;
 };
 
 } // end namespace llvm

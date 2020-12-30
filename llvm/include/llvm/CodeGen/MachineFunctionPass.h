@@ -29,50 +29,50 @@ namespace llvm {
 /// override runOnMachineFunction.
 class MachineFunctionPass : public FunctionPass {
 public:
-  bool doInitialization(Module&) override {
-    // Cache the properties info at module-init time so we don't have to
-    // construct them for every function.
-    RequiredProperties = getRequiredProperties();
-    SetProperties = getSetProperties();
-    ClearedProperties = getClearedProperties();
-    return false;
-  }
+    bool doInitialization(Module&) override {
+        // Cache the properties info at module-init time so we don't have to
+        // construct them for every function.
+        RequiredProperties = getRequiredProperties();
+        SetProperties = getSetProperties();
+        ClearedProperties = getClearedProperties();
+        return false;
+    }
 protected:
-  explicit MachineFunctionPass(char &ID) : FunctionPass(ID) {}
+    explicit MachineFunctionPass(char &ID) : FunctionPass(ID) {}
 
-  /// runOnMachineFunction - This method must be overloaded to perform the
-  /// desired machine code transformation or analysis.
-  ///
-  virtual bool runOnMachineFunction(MachineFunction &MF) = 0;
+    /// runOnMachineFunction - This method must be overloaded to perform the
+    /// desired machine code transformation or analysis.
+    ///
+    virtual bool runOnMachineFunction(MachineFunction &MF) = 0;
 
-  /// getAnalysisUsage - Subclasses that override getAnalysisUsage
-  /// must call this.
-  ///
-  /// For MachineFunctionPasses, calling AU.preservesCFG() indicates that
-  /// the pass does not modify the MachineBasicBlock CFG.
-  ///
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    /// getAnalysisUsage - Subclasses that override getAnalysisUsage
+    /// must call this.
+    ///
+    /// For MachineFunctionPasses, calling AU.preservesCFG() indicates that
+    /// the pass does not modify the MachineBasicBlock CFG.
+    ///
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-  virtual MachineFunctionProperties getRequiredProperties() const {
-    return MachineFunctionProperties();
-  }
-  virtual MachineFunctionProperties getSetProperties() const {
-    return MachineFunctionProperties();
-  }
-  virtual MachineFunctionProperties getClearedProperties() const {
-    return MachineFunctionProperties();
-  }
+    virtual MachineFunctionProperties getRequiredProperties() const {
+        return MachineFunctionProperties();
+    }
+    virtual MachineFunctionProperties getSetProperties() const {
+        return MachineFunctionProperties();
+    }
+    virtual MachineFunctionProperties getClearedProperties() const {
+        return MachineFunctionProperties();
+    }
 
 private:
-  MachineFunctionProperties RequiredProperties;
-  MachineFunctionProperties SetProperties;
-  MachineFunctionProperties ClearedProperties;
+    MachineFunctionProperties RequiredProperties;
+    MachineFunctionProperties SetProperties;
+    MachineFunctionProperties ClearedProperties;
 
-  /// createPrinterPass - Get a machine function printer pass.
-  Pass *createPrinterPass(raw_ostream &O,
-                          const std::string &Banner) const override;
+    /// createPrinterPass - Get a machine function printer pass.
+    Pass *createPrinterPass(raw_ostream &O,
+                            const std::string &Banner) const override;
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 };
 
 } // End llvm namespace

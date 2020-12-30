@@ -19,33 +19,33 @@ namespace lldb_private {
 /// Abstract class that extends \a NativeProcessProtocol with ELF specific
 /// logic. Meant to be subclassed by ELF based NativeProcess* implementations.
 class NativeProcessELF : public NativeProcessProtocol {
-  using NativeProcessProtocol::NativeProcessProtocol;
+    using NativeProcessProtocol::NativeProcessProtocol;
 
 protected:
-  template <typename T> struct ELFLinkMap {
-    T l_addr;
-    T l_name;
-    T l_ld;
-    T l_next;
-    T l_prev;
-  };
+    template <typename T> struct ELFLinkMap {
+        T l_addr;
+        T l_name;
+        T l_ld;
+        T l_next;
+        T l_prev;
+    };
 
-  llvm::Optional<uint64_t> GetAuxValue(enum AuxVector::EntryType type);
+    llvm::Optional<uint64_t> GetAuxValue(enum AuxVector::EntryType type);
 
-  lldb::addr_t GetSharedLibraryInfoAddress() override;
+    lldb::addr_t GetSharedLibraryInfoAddress() override;
 
-  template <typename ELF_EHDR, typename ELF_PHDR, typename ELF_DYN>
-  lldb::addr_t GetELFImageInfoAddress();
+    template <typename ELF_EHDR, typename ELF_PHDR, typename ELF_DYN>
+    lldb::addr_t GetELFImageInfoAddress();
 
-  llvm::Expected<std::vector<SVR4LibraryInfo>>
-  GetLoadedSVR4Libraries() override;
+    llvm::Expected<std::vector<SVR4LibraryInfo>>
+            GetLoadedSVR4Libraries() override;
 
-  template <typename T>
-  llvm::Expected<SVR4LibraryInfo>
-  ReadSVR4LibraryInfo(lldb::addr_t link_map_addr);
+    template <typename T>
+    llvm::Expected<SVR4LibraryInfo>
+    ReadSVR4LibraryInfo(lldb::addr_t link_map_addr);
 
-  std::unique_ptr<AuxVector> m_aux_vector;
-  llvm::Optional<lldb::addr_t> m_shared_library_info_addr;
+    std::unique_ptr<AuxVector> m_aux_vector;
+    llvm::Optional<lldb::addr_t> m_shared_library_info_addr;
 };
 
 // Explicitly declare the two 32/64 bit templates that NativeProcessELF.cpp will

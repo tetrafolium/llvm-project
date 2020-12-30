@@ -40,15 +40,15 @@ class Token;
 /// in uncompressed format (Head) and delta-encoded Payload. It can be
 /// decompressed upon request.
 struct Chunk {
-  /// Keep sizeof(Chunk) == 32.
-  static constexpr size_t PayloadSize = 32 - sizeof(DocID);
+    /// Keep sizeof(Chunk) == 32.
+    static constexpr size_t PayloadSize = 32 - sizeof(DocID);
 
-  llvm::SmallVector<DocID, PayloadSize + 1> decompress() const;
+    llvm::SmallVector<DocID, PayloadSize + 1> decompress() const;
 
-  /// The first element of decompressed Chunk.
-  DocID Head;
-  /// VByte-encoded deltas.
-  std::array<uint8_t, PayloadSize> Payload;
+    /// The first element of decompressed Chunk.
+    DocID Head;
+    /// VByte-encoded deltas.
+    std::array<uint8_t, PayloadSize> Payload;
 };
 static_assert(sizeof(Chunk) == 32, "Chunk should take 32 bytes of memory.");
 
@@ -58,18 +58,20 @@ static_assert(sizeof(Chunk) == 32, "Chunk should take 32 bytes of memory.");
 /// in access time, which is still fast enough in practice.
 class PostingList {
 public:
-  explicit PostingList(llvm::ArrayRef<DocID> Documents);
+    explicit PostingList(llvm::ArrayRef<DocID> Documents);
 
-  /// Constructs DocumentIterator over given posting list. DocumentIterator will
-  /// go through the chunks and decompress them on-the-fly when necessary.
-  /// If given, Tok is only used for the string representation.
-  std::unique_ptr<Iterator> iterator(const Token *Tok = nullptr) const;
+    /// Constructs DocumentIterator over given posting list. DocumentIterator will
+    /// go through the chunks and decompress them on-the-fly when necessary.
+    /// If given, Tok is only used for the string representation.
+    std::unique_ptr<Iterator> iterator(const Token *Tok = nullptr) const;
 
-  /// Returns in-memory size of external storage.
-  size_t bytes() const { return Chunks.capacity() * sizeof(Chunk); }
+    /// Returns in-memory size of external storage.
+    size_t bytes() const {
+        return Chunks.capacity() * sizeof(Chunk);
+    }
 
 private:
-  const std::vector<Chunk> Chunks;
+    const std::vector<Chunk> Chunks;
 };
 
 } // namespace dex

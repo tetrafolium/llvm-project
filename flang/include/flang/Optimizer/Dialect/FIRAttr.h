@@ -27,28 +27,32 @@ struct TypeAttributeStorage;
 
 class ExactTypeAttr
     : public mlir::Attribute::AttrBase<ExactTypeAttr, mlir::Attribute,
-                                       detail::TypeAttributeStorage> {
+      detail::TypeAttributeStorage> {
 public:
-  using Base::Base;
-  using ValueType = mlir::Type;
+    using Base::Base;
+    using ValueType = mlir::Type;
 
-  static constexpr llvm::StringRef getAttrName() { return "instance"; }
-  static ExactTypeAttr get(mlir::Type value);
+    static constexpr llvm::StringRef getAttrName() {
+        return "instance";
+    }
+    static ExactTypeAttr get(mlir::Type value);
 
-  mlir::Type getType() const;
+    mlir::Type getType() const;
 };
 
 class SubclassAttr
     : public mlir::Attribute::AttrBase<SubclassAttr, mlir::Attribute,
-                                       detail::TypeAttributeStorage> {
+      detail::TypeAttributeStorage> {
 public:
-  using Base::Base;
-  using ValueType = mlir::Type;
+    using Base::Base;
+    using ValueType = mlir::Type;
 
-  static constexpr llvm::StringRef getAttrName() { return "subsumed"; }
-  static SubclassAttr get(mlir::Type value);
+    static constexpr llvm::StringRef getAttrName() {
+        return "subsumed";
+    }
+    static SubclassAttr get(mlir::Type value);
 
-  mlir::Type getType() const;
+    mlir::Type getType() const;
 };
 
 // Attributes for building SELECT CASE multiway branches
@@ -59,12 +63,14 @@ public:
 /// is encoded as `#fir.interval, %n, %m`.
 class ClosedIntervalAttr
     : public mlir::Attribute::AttrBase<ClosedIntervalAttr, mlir::Attribute,
-                                       mlir::AttributeStorage> {
+      mlir::AttributeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 
-  static constexpr llvm::StringRef getAttrName() { return "interval"; }
-  static ClosedIntervalAttr get(mlir::MLIRContext *ctxt);
+    static constexpr llvm::StringRef getAttrName() {
+        return "interval";
+    }
+    static ClosedIntervalAttr get(mlir::MLIRContext *ctxt);
 };
 
 /// An upper bound is an open interval (including the bound value) as given as
@@ -73,12 +79,14 @@ public:
 /// `m` and is encoded as `#fir.upper, %m`.
 class UpperBoundAttr
     : public mlir::Attribute::AttrBase<UpperBoundAttr, mlir::Attribute,
-                                       mlir::AttributeStorage> {
+      mlir::AttributeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 
-  static constexpr llvm::StringRef getAttrName() { return "upper"; }
-  static UpperBoundAttr get(mlir::MLIRContext *ctxt);
+    static constexpr llvm::StringRef getAttrName() {
+        return "upper";
+    }
+    static UpperBoundAttr get(mlir::MLIRContext *ctxt);
 };
 
 /// A lower bound is an open interval (including the bound value) as given as
@@ -87,12 +95,14 @@ public:
 /// including `n` and is encoded as `#fir.lower, %n`.
 class LowerBoundAttr
     : public mlir::Attribute::AttrBase<LowerBoundAttr, mlir::Attribute,
-                                       mlir::AttributeStorage> {
+      mlir::AttributeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 
-  static constexpr llvm::StringRef getAttrName() { return "lower"; }
-  static LowerBoundAttr get(mlir::MLIRContext *ctxt);
+    static constexpr llvm::StringRef getAttrName() {
+        return "lower";
+    }
+    static LowerBoundAttr get(mlir::MLIRContext *ctxt);
 };
 
 /// A pointer interval is a closed interval as given as an ssa-value. The
@@ -101,12 +111,14 @@ public:
 /// encoded as `#fir.point, %p`.
 class PointIntervalAttr
     : public mlir::Attribute::AttrBase<PointIntervalAttr, mlir::Attribute,
-                                       mlir::AttributeStorage> {
+      mlir::AttributeStorage> {
 public:
-  using Base::Base;
+    using Base::Base;
 
-  static constexpr llvm::StringRef getAttrName() { return "point"; }
-  static PointIntervalAttr get(mlir::MLIRContext *ctxt);
+    static constexpr llvm::StringRef getAttrName() {
+        return "point";
+    }
+    static PointIntervalAttr get(mlir::MLIRContext *ctxt);
 };
 
 /// A real attribute is used to workaround MLIR's default parsing of a real
@@ -115,16 +127,18 @@ public:
 /// with a kind of `10`.
 class RealAttr
     : public mlir::Attribute::AttrBase<RealAttr, mlir::Attribute,
-                                       detail::RealAttributeStorage> {
+      detail::RealAttributeStorage> {
 public:
-  using Base::Base;
-  using ValueType = std::pair<int, llvm::APFloat>;
+    using Base::Base;
+    using ValueType = std::pair<int, llvm::APFloat>;
 
-  static constexpr llvm::StringRef getAttrName() { return "real"; }
-  static RealAttr get(mlir::MLIRContext *ctxt, const ValueType &key);
+    static constexpr llvm::StringRef getAttrName() {
+        return "real";
+    }
+    static RealAttr get(mlir::MLIRContext *ctxt, const ValueType &key);
 
-  int getFKind() const;
-  llvm::APFloat getValue() const;
+    int getFKind() const;
+    llvm::APFloat getValue() const;
 };
 
 mlir::Attribute parseFirAttribute(FIROpsDialect *dialect,

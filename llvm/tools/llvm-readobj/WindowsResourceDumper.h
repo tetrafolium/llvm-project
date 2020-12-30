@@ -18,15 +18,15 @@ namespace WindowsRes {
 
 class Dumper {
 public:
-  Dumper(WindowsResource *Res, ScopedPrinter &SW) : SW(SW), WinRes(Res) {}
+    Dumper(WindowsResource *Res, ScopedPrinter &SW) : SW(SW), WinRes(Res) {}
 
-  Error printData();
+    Error printData();
 
 private:
-  ScopedPrinter &SW;
-  WindowsResource *WinRes;
+    ScopedPrinter &SW;
+    WindowsResource *WinRes;
 
-  void printEntry(const ResourceEntryRef &Ref);
+    void printEntry(const ResourceEntryRef &Ref);
 };
 
 } // namespace WindowsRes

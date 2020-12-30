@@ -23,10 +23,10 @@
 
 /* unit -> unit */
 CAMLprim value llvm_initialize_all(value Unit) {
-  LLVMInitializeAllTargetInfos();
-  LLVMInitializeAllTargets();
-  LLVMInitializeAllTargetMCs();
-  LLVMInitializeAllAsmPrinters();
-  LLVMInitializeAllAsmParsers();
-  return Val_unit;
+    LLVMInitializeAllTargetInfos();
+    LLVMInitializeAllTargets();
+    LLVMInitializeAllTargetMCs();
+    LLVMInitializeAllAsmPrinters();
+    LLVMInitializeAllAsmParsers();
+    return Val_unit;
 }

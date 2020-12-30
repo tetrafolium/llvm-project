@@ -22,11 +22,11 @@
  * pairwise equal.
  */
 static __isl_give isl_map *FN(FN(isl_multi_pw_aff_lex,ORDER),map_on_space)(
-	__isl_keep isl_multi_pw_aff *mpa1, __isl_keep isl_multi_pw_aff *mpa2,
-	__isl_take isl_space *space)
+    __isl_keep isl_multi_pw_aff *mpa1, __isl_keep isl_multi_pw_aff *mpa2,
+    __isl_take isl_space *space)
 {
-	return isl_multi_pw_aff_lex_map_on_space(mpa1, mpa2,
-					&FN(FN(isl_pw_aff,ORDER),map), space);
+    return isl_multi_pw_aff_lex_map_on_space(mpa1, mpa2,
+            &FN(FN(isl_pw_aff,ORDER),map), space);
 }
 
 /* Return a map containing pairs of elements in the domains of "mpa1" and "mpa2"
@@ -34,18 +34,18 @@ static __isl_give isl_map *FN(FN(isl_multi_pw_aff_lex,ORDER),map_on_space)(
  * to that of "mpa2".
  */
 __isl_give isl_map *FN(FN(isl_multi_pw_aff_lex,ORDER),map)(
-	__isl_take isl_multi_pw_aff *mpa1, __isl_take isl_multi_pw_aff *mpa2)
+    __isl_take isl_multi_pw_aff *mpa1, __isl_take isl_multi_pw_aff *mpa2)
 {
-	return isl_multi_pw_aff_order_map(mpa1, mpa2,
-			&FN(FN(isl_multi_pw_aff_lex,ORDER),map_on_space));
+    return isl_multi_pw_aff_order_map(mpa1, mpa2,
+                                      &FN(FN(isl_multi_pw_aff_lex,ORDER),map_on_space));
 }
 
 /* Return the subset of "map" where the domain and the range
  * have "mpa" values that lexicographically compare as "ORDER".
  */
 __isl_give isl_map *FN(FN(isl_map_lex,ORDER),at_multi_pw_aff)(
-	__isl_take isl_map *map, __isl_take isl_multi_pw_aff *mpa)
+    __isl_take isl_map *map, __isl_take isl_multi_pw_aff *mpa)
 {
-	return isl_map_order_at_multi_pw_aff(map, mpa,
-				&FN(FN(isl_multi_pw_aff_lex,ORDER),map));
+    return isl_map_order_at_multi_pw_aff(map, mpa,
+                                         &FN(FN(isl_multi_pw_aff_lex,ORDER),map));
 }

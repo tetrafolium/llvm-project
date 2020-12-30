@@ -39,106 +39,108 @@ class raw_ostream;
 
 class DemandedBits {
 public:
-  DemandedBits(Function &F, AssumptionCache &AC, DominatorTree &DT) :
-    F(F), AC(AC), DT(DT) {}
+    DemandedBits(Function &F, AssumptionCache &AC, DominatorTree &DT) :
+        F(F), AC(AC), DT(DT) {}
 
-  /// Return the bits demanded from instruction I.
-  ///
-  /// For vector instructions individual vector elements are not distinguished:
-  /// A bit is demanded if it is demanded for any of the vector elements. The
-  /// size of the return value corresponds to the type size in bits of the
-  /// scalar type.
-  ///
-  /// Instructions that do not have integer or vector of integer type are
-  /// accepted, but will always produce a mask with all bits set.
-  APInt getDemandedBits(Instruction *I);
+    /// Return the bits demanded from instruction I.
+    ///
+    /// For vector instructions individual vector elements are not distinguished:
+    /// A bit is demanded if it is demanded for any of the vector elements. The
+    /// size of the return value corresponds to the type size in bits of the
+    /// scalar type.
+    ///
+    /// Instructions that do not have integer or vector of integer type are
+    /// accepted, but will always produce a mask with all bits set.
+    APInt getDemandedBits(Instruction *I);
 
-  /// Return true if, during analysis, I could not be reached.
-  bool isInstructionDead(Instruction *I);
+    /// Return true if, during analysis, I could not be reached.
+    bool isInstructionDead(Instruction *I);
 
-  /// Return whether this use is dead by means of not having any demanded bits.
-  bool isUseDead(Use *U);
+    /// Return whether this use is dead by means of not having any demanded bits.
+    bool isUseDead(Use *U);
 
-  void print(raw_ostream &OS);
+    void print(raw_ostream &OS);
 
-  /// Compute alive bits of one addition operand from alive output and known
-  /// operand bits
-  static APInt determineLiveOperandBitsAdd(unsigned OperandNo,
-                                           const APInt &AOut,
-                                           const KnownBits &LHS,
-                                           const KnownBits &RHS);
+    /// Compute alive bits of one addition operand from alive output and known
+    /// operand bits
+    static APInt determineLiveOperandBitsAdd(unsigned OperandNo,
+            const APInt &AOut,
+            const KnownBits &LHS,
+            const KnownBits &RHS);
 
-  /// Compute alive bits of one subtraction operand from alive output and known
-  /// operand bits
-  static APInt determineLiveOperandBitsSub(unsigned OperandNo,
-                                           const APInt &AOut,
-                                           const KnownBits &LHS,
-                                           const KnownBits &RHS);
+    /// Compute alive bits of one subtraction operand from alive output and known
+    /// operand bits
+    static APInt determineLiveOperandBitsSub(unsigned OperandNo,
+            const APInt &AOut,
+            const KnownBits &LHS,
+            const KnownBits &RHS);
 
 private:
-  void performAnalysis();
-  void determineLiveOperandBits(const Instruction *UserI,
-    const Value *Val, unsigned OperandNo,
-    const APInt &AOut, APInt &AB,
-    KnownBits &Known, KnownBits &Known2, bool &KnownBitsComputed);
+    void performAnalysis();
+    void determineLiveOperandBits(const Instruction *UserI,
+                                  const Value *Val, unsigned OperandNo,
+                                  const APInt &AOut, APInt &AB,
+                                  KnownBits &Known, KnownBits &Known2, bool &KnownBitsComputed);
 
-  Function &F;
-  AssumptionCache &AC;
-  DominatorTree &DT;
+    Function &F;
+    AssumptionCache &AC;
+    DominatorTree &DT;
 
-  bool Analyzed = false;
+    bool Analyzed = false;
 
-  // The set of visited instructions (non-integer-typed only).
-  SmallPtrSet<Instruction*, 32> Visited;
-  DenseMap<Instruction *, APInt> AliveBits;
-  // Uses with no demanded bits. If the user also has no demanded bits, the use
-  // might not be stored explicitly in this map, to save memory during analysis.
-  SmallPtrSet<Use *, 16> DeadUses;
+    // The set of visited instructions (non-integer-typed only).
+    SmallPtrSet<Instruction*, 32> Visited;
+    DenseMap<Instruction *, APInt> AliveBits;
+    // Uses with no demanded bits. If the user also has no demanded bits, the use
+    // might not be stored explicitly in this map, to save memory during analysis.
+    SmallPtrSet<Use *, 16> DeadUses;
 };
 
 class DemandedBitsWrapperPass : public FunctionPass {
 private:
-  mutable Optional<DemandedBits> DB;
+    mutable Optional<DemandedBits> DB;
 
 public:
-  static char ID; // Pass identification, replacement for typeid
+    static char ID; // Pass identification, replacement for typeid
 
-  DemandedBitsWrapperPass();
+    DemandedBitsWrapperPass();
 
-  bool runOnFunction(Function &F) override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnFunction(Function &F) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-  /// Clean up memory in between runs
-  void releaseMemory() override;
+    /// Clean up memory in between runs
+    void releaseMemory() override;
 
-  DemandedBits &getDemandedBits() { return *DB; }
+    DemandedBits &getDemandedBits() {
+        return *DB;
+    }
 
-  void print(raw_ostream &OS, const Module *M) const override;
+    void print(raw_ostream &OS, const Module *M) const override;
 };
 
 /// An analysis that produces \c DemandedBits for a function.
 class DemandedBitsAnalysis : public AnalysisInfoMixin<DemandedBitsAnalysis> {
-  friend AnalysisInfoMixin<DemandedBitsAnalysis>;
+    friend AnalysisInfoMixin<DemandedBitsAnalysis>;
 
-  static AnalysisKey Key;
+    static AnalysisKey Key;
 
 public:
-  /// Provide the result type for this analysis pass.
-  using Result = DemandedBits;
+    /// Provide the result type for this analysis pass.
+    using Result = DemandedBits;
 
-  /// Run the analysis pass over a function and produce demanded bits
-  /// information.
-  DemandedBits run(Function &F, FunctionAnalysisManager &AM);
+    /// Run the analysis pass over a function and produce demanded bits
+    /// information.
+    DemandedBits run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Printer pass for DemandedBits
 class DemandedBitsPrinterPass : public PassInfoMixin<DemandedBitsPrinterPass> {
-  raw_ostream &OS;
+    raw_ostream &OS;
 
 public:
-  explicit DemandedBitsPrinterPass(raw_ostream &OS) : OS(OS) {}
+    explicit DemandedBitsPrinterPass(raw_ostream &OS) : OS(OS) {}
 
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Create a demanded bits analysis pass.

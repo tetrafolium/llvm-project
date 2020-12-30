@@ -22,26 +22,26 @@ namespace xray {
 // This class consolidates common operations related to Function IDs.
 class FuncIdConversionHelper {
 public:
-  using FunctionAddressMap = std::unordered_map<int32_t, uint64_t>;
+    using FunctionAddressMap = std::unordered_map<int32_t, uint64_t>;
 
 private:
-  std::string BinaryInstrMap;
-  symbolize::LLVMSymbolizer &Symbolizer;
-  const FunctionAddressMap &FunctionAddresses;
-  mutable llvm::DenseMap<int32_t, std::string> CachedNames;
+    std::string BinaryInstrMap;
+    symbolize::LLVMSymbolizer &Symbolizer;
+    const FunctionAddressMap &FunctionAddresses;
+    mutable llvm::DenseMap<int32_t, std::string> CachedNames;
 
 public:
-  FuncIdConversionHelper(std::string BinaryInstrMap,
-                         symbolize::LLVMSymbolizer &Symbolizer,
-                         const FunctionAddressMap &FunctionAddresses)
-      : BinaryInstrMap(std::move(BinaryInstrMap)), Symbolizer(Symbolizer),
-        FunctionAddresses(FunctionAddresses) {}
+    FuncIdConversionHelper(std::string BinaryInstrMap,
+                           symbolize::LLVMSymbolizer &Symbolizer,
+                           const FunctionAddressMap &FunctionAddresses)
+        : BinaryInstrMap(std::move(BinaryInstrMap)), Symbolizer(Symbolizer),
+          FunctionAddresses(FunctionAddresses) {}
 
-  // Returns the symbol or a string representation of the function id.
-  std::string SymbolOrNumber(int32_t FuncId) const;
+    // Returns the symbol or a string representation of the function id.
+    std::string SymbolOrNumber(int32_t FuncId) const;
 
-  // Returns the file and column from debug info for the given function id.
-  std::string FileLineAndColumn(int32_t FuncId) const;
+    // Returns the file and column from debug info for the given function id.
+    std::string FileLineAndColumn(int32_t FuncId) const;
 };
 
 } // namespace xray

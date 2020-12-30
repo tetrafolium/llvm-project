@@ -17,36 +17,38 @@
 #include "llvm/CodeGen/TargetFrameLowering.h"
 
 namespace llvm {
-  class MipsSubtarget;
+class MipsSubtarget;
 
 class MipsFrameLowering : public TargetFrameLowering {
 protected:
-  const MipsSubtarget &STI;
+    const MipsSubtarget &STI;
 
 public:
-  explicit MipsFrameLowering(const MipsSubtarget &sti, Align Alignment)
-      : TargetFrameLowering(StackGrowsDown, Alignment, 0, Alignment), STI(sti) {
-  }
+    explicit MipsFrameLowering(const MipsSubtarget &sti, Align Alignment)
+        : TargetFrameLowering(StackGrowsDown, Alignment, 0, Alignment), STI(sti) {
+    }
 
-  static const MipsFrameLowering *create(const MipsSubtarget &ST);
+    static const MipsFrameLowering *create(const MipsSubtarget &ST);
 
-  bool hasFP(const MachineFunction &MF) const override;
+    bool hasFP(const MachineFunction &MF) const override;
 
-  bool hasBP(const MachineFunction &MF) const;
+    bool hasBP(const MachineFunction &MF) const;
 
-  bool isFPCloseToIncomingSP() const override { return false; }
+    bool isFPCloseToIncomingSP() const override {
+        return false;
+    }
 
-  bool enableShrinkWrapping(const MachineFunction &MF) const override {
-    return true;
-  }
+    bool enableShrinkWrapping(const MachineFunction &MF) const override {
+        return true;
+    }
 
-  MachineBasicBlock::iterator
-  eliminateCallFramePseudoInstr(MachineFunction &MF,
-                                MachineBasicBlock &MBB,
-                                MachineBasicBlock::iterator I) const override;
+    MachineBasicBlock::iterator
+    eliminateCallFramePseudoInstr(MachineFunction &MF,
+                                  MachineBasicBlock &MBB,
+                                  MachineBasicBlock::iterator I) const override;
 
 protected:
-  uint64_t estimateStackSize(const MachineFunction &MF) const;
+    uint64_t estimateStackSize(const MachineFunction &MF) const;
 };
 
 /// Create MipsFrameLowering objects.

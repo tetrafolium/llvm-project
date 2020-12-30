@@ -17,22 +17,22 @@ namespace modernize {
 
 class UseAutoCheck : public ClangTidyCheck {
 public:
-  UseAutoCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    UseAutoCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void replaceIterators(const DeclStmt *D, ASTContext *Context);
-  void replaceExpr(const DeclStmt *D, ASTContext *Context,
-                   llvm::function_ref<QualType(const Expr *)> GetType,
-                   StringRef Message);
+    void replaceIterators(const DeclStmt *D, ASTContext *Context);
+    void replaceExpr(const DeclStmt *D, ASTContext *Context,
+                     llvm::function_ref<QualType(const Expr *)> GetType,
+                     StringRef Message);
 
-  const unsigned int MinTypeNameLength;
-  const bool RemoveStars;
+    const unsigned int MinTypeNameLength;
+    const bool RemoveStars;
 };
 
 } // namespace modernize

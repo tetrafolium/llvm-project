@@ -25,39 +25,39 @@ using namespace lldb_private;
 
 class CommandObjectSettingsSet : public CommandObjectRaw {
 public:
-  CommandObjectSettingsSet(CommandInterpreter &interpreter)
-      : CommandObjectRaw(interpreter, "settings set",
-                         "Set the value of the specified debugger setting."),
-        m_options() {
-    CommandArgumentEntry arg1;
-    CommandArgumentEntry arg2;
-    CommandArgumentData var_name_arg;
-    CommandArgumentData value_arg;
+    CommandObjectSettingsSet(CommandInterpreter &interpreter)
+        : CommandObjectRaw(interpreter, "settings set",
+                           "Set the value of the specified debugger setting."),
+          m_options() {
+        CommandArgumentEntry arg1;
+        CommandArgumentEntry arg2;
+        CommandArgumentData var_name_arg;
+        CommandArgumentData value_arg;
 
-    // Define the first (and only) variant of this arg.
-    var_name_arg.arg_type = eArgTypeSettingVariableName;
-    var_name_arg.arg_repetition = eArgRepeatPlain;
+        // Define the first (and only) variant of this arg.
+        var_name_arg.arg_type = eArgTypeSettingVariableName;
+        var_name_arg.arg_repetition = eArgRepeatPlain;
 
-    // There is only one variant this argument could be; put it into the
-    // argument entry.
-    arg1.push_back(var_name_arg);
+        // There is only one variant this argument could be; put it into the
+        // argument entry.
+        arg1.push_back(var_name_arg);
 
-    // Define the first (and only) variant of this arg.
-    value_arg.arg_type = eArgTypeValue;
-    value_arg.arg_repetition = eArgRepeatPlain;
+        // Define the first (and only) variant of this arg.
+        value_arg.arg_type = eArgTypeValue;
+        value_arg.arg_repetition = eArgRepeatPlain;
 
-    // There is only one variant this argument could be; put it into the
-    // argument entry.
-    arg2.push_back(value_arg);
+        // There is only one variant this argument could be; put it into the
+        // argument entry.
+        arg2.push_back(value_arg);
 
-    // Push the data for the first argument into the m_arguments vector.
-    m_arguments.push_back(arg1);
-    m_arguments.push_back(arg2);
+        // Push the data for the first argument into the m_arguments vector.
+        m_arguments.push_back(arg1);
+        m_arguments.push_back(arg2);
 
-    SetHelpLong(
-        "\nWhen setting a dictionary or array variable, you can set multiple entries \
+        SetHelpLong(
+            "\nWhen setting a dictionary or array variable, you can set multiple entries \
 at once by giving the values to the set command.  For example:"
-        R"(
+            R"(
 
 (lldb) settings set target.run-args value1 value2 value3
 (lldb) settings set target.env-vars MYPATH=~/.:/usr/bin  SOME_ENV_VAR=12345

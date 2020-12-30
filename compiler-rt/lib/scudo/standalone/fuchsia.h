@@ -18,10 +18,10 @@
 namespace scudo {
 
 struct MapPlatformData {
-  zx_handle_t Vmar;
-  zx_handle_t Vmo;
-  uintptr_t VmarBase;
-  uint64_t VmoSize;
+    zx_handle_t Vmar;
+    zx_handle_t Vmo;
+    uintptr_t VmarBase;
+    uint64_t VmoSize;
 };
 
 } // namespace scudo

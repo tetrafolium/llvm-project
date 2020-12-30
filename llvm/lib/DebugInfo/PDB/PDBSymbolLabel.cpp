@@ -15,4 +15,6 @@
 using namespace llvm;
 using namespace llvm::pdb;
 
-void PDBSymbolLabel::dump(PDBSymDumper &Dumper) const { Dumper.dump(*this); }
+void PDBSymbolLabel::dump(PDBSymDumper &Dumper) const {
+    Dumper.dump(*this);
+}

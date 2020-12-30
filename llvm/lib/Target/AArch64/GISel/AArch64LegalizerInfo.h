@@ -26,28 +26,28 @@ class AArch64Subtarget;
 /// This class provides the information for the target register banks.
 class AArch64LegalizerInfo : public LegalizerInfo {
 public:
-  AArch64LegalizerInfo(const AArch64Subtarget &ST);
+    AArch64LegalizerInfo(const AArch64Subtarget &ST);
 
-  bool legalizeCustom(LegalizerHelper &Helper, MachineInstr &MI) const override;
+    bool legalizeCustom(LegalizerHelper &Helper, MachineInstr &MI) const override;
 
-  bool legalizeIntrinsic(LegalizerHelper &Helper,
-                         MachineInstr &MI) const override;
+    bool legalizeIntrinsic(LegalizerHelper &Helper,
+                           MachineInstr &MI) const override;
 
 private:
-  bool legalizeVaArg(MachineInstr &MI, MachineRegisterInfo &MRI,
-                     MachineIRBuilder &MIRBuilder) const;
-  bool legalizeLoadStore(MachineInstr &MI, MachineRegisterInfo &MRI,
-                         MachineIRBuilder &MIRBuilder,
-                         GISelChangeObserver &Observer) const;
-  bool legalizeShlAshrLshr(MachineInstr &MI, MachineRegisterInfo &MRI,
+    bool legalizeVaArg(MachineInstr &MI, MachineRegisterInfo &MRI,
+                       MachineIRBuilder &MIRBuilder) const;
+    bool legalizeLoadStore(MachineInstr &MI, MachineRegisterInfo &MRI,
                            MachineIRBuilder &MIRBuilder,
                            GISelChangeObserver &Observer) const;
+    bool legalizeShlAshrLshr(MachineInstr &MI, MachineRegisterInfo &MRI,
+                             MachineIRBuilder &MIRBuilder,
+                             GISelChangeObserver &Observer) const;
 
-  bool legalizeSmallCMGlobalValue(MachineInstr &MI, MachineRegisterInfo &MRI,
-                                  MachineIRBuilder &MIRBuilder,
-                                  GISelChangeObserver &Observer) const;
-  bool legalizeVectorTrunc(MachineInstr &MI, LegalizerHelper &Helper) const;
-  const AArch64Subtarget *ST;
+    bool legalizeSmallCMGlobalValue(MachineInstr &MI, MachineRegisterInfo &MRI,
+                                    MachineIRBuilder &MIRBuilder,
+                                    GISelChangeObserver &Observer) const;
+    bool legalizeVectorTrunc(MachineInstr &MI, LegalizerHelper &Helper) const;
+    const AArch64Subtarget *ST;
 };
 } // End llvm namespace.
 #endif

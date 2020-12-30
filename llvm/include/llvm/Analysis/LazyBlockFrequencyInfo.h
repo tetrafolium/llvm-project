@@ -34,44 +34,44 @@ template <typename FunctionT, typename BranchProbabilityInfoPassT,
           typename LoopInfoT, typename BlockFrequencyInfoT>
 class LazyBlockFrequencyInfo {
 public:
-  LazyBlockFrequencyInfo()
-      : Calculated(false), F(nullptr), BPIPass(nullptr), LI(nullptr) {}
+    LazyBlockFrequencyInfo()
+        : Calculated(false), F(nullptr), BPIPass(nullptr), LI(nullptr) {}
 
-  /// Set up the per-function input.
-  void setAnalysis(const FunctionT *F, BranchProbabilityInfoPassT *BPIPass,
-                   const LoopInfoT *LI) {
-    this->F = F;
-    this->BPIPass = BPIPass;
-    this->LI = LI;
-  }
-
-  /// Retrieve the BFI with the block frequencies computed.
-  BlockFrequencyInfoT &getCalculated() {
-    if (!Calculated) {
-      assert(F && BPIPass && LI && "call setAnalysis");
-      BFI.calculate(
-          *F, BPIPassTrait<BranchProbabilityInfoPassT>::getBPI(BPIPass), *LI);
-      Calculated = true;
+    /// Set up the per-function input.
+    void setAnalysis(const FunctionT *F, BranchProbabilityInfoPassT *BPIPass,
+                     const LoopInfoT *LI) {
+        this->F = F;
+        this->BPIPass = BPIPass;
+        this->LI = LI;
     }
-    return BFI;
-  }
 
-  const BlockFrequencyInfoT &getCalculated() const {
-    return const_cast<LazyBlockFrequencyInfo *>(this)->getCalculated();
-  }
+    /// Retrieve the BFI with the block frequencies computed.
+    BlockFrequencyInfoT &getCalculated() {
+        if (!Calculated) {
+            assert(F && BPIPass && LI && "call setAnalysis");
+            BFI.calculate(
+                *F, BPIPassTrait<BranchProbabilityInfoPassT>::getBPI(BPIPass), *LI);
+            Calculated = true;
+        }
+        return BFI;
+    }
 
-  void releaseMemory() {
-    BFI.releaseMemory();
-    Calculated = false;
-    setAnalysis(nullptr, nullptr, nullptr);
-  }
+    const BlockFrequencyInfoT &getCalculated() const {
+        return const_cast<LazyBlockFrequencyInfo *>(this)->getCalculated();
+    }
+
+    void releaseMemory() {
+        BFI.releaseMemory();
+        Calculated = false;
+        setAnalysis(nullptr, nullptr, nullptr);
+    }
 
 private:
-  BlockFrequencyInfoT BFI;
-  bool Calculated;
-  const FunctionT *F;
-  BranchProbabilityInfoPassT *BPIPass;
-  const LoopInfoT *LI;
+    BlockFrequencyInfoT BFI;
+    bool Calculated;
+    const FunctionT *F;
+    BranchProbabilityInfoPassT *BPIPass;
+    const LoopInfoT *LI;
 };
 
 /// This is an alternative analysis pass to
@@ -99,30 +99,34 @@ private:
 
 class LazyBlockFrequencyInfoPass : public FunctionPass {
 private:
-  LazyBlockFrequencyInfo<Function, LazyBranchProbabilityInfoPass, LoopInfo,
-                         BlockFrequencyInfo>
-      LBFI;
+    LazyBlockFrequencyInfo<Function, LazyBranchProbabilityInfoPass, LoopInfo,
+                           BlockFrequencyInfo>
+                           LBFI;
 
 public:
-  static char ID;
+    static char ID;
 
-  LazyBlockFrequencyInfoPass();
+    LazyBlockFrequencyInfoPass();
 
-  /// Compute and return the block frequencies.
-  BlockFrequencyInfo &getBFI() { return LBFI.getCalculated(); }
+    /// Compute and return the block frequencies.
+    BlockFrequencyInfo &getBFI() {
+        return LBFI.getCalculated();
+    }
 
-  /// Compute and return the block frequencies.
-  const BlockFrequencyInfo &getBFI() const { return LBFI.getCalculated(); }
+    /// Compute and return the block frequencies.
+    const BlockFrequencyInfo &getBFI() const {
+        return LBFI.getCalculated();
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-  /// Helper for client passes to set up the analysis usage on behalf of this
-  /// pass.
-  static void getLazyBFIAnalysisUsage(AnalysisUsage &AU);
+    /// Helper for client passes to set up the analysis usage on behalf of this
+    /// pass.
+    static void getLazyBFIAnalysisUsage(AnalysisUsage &AU);
 
-  bool runOnFunction(Function &F) override;
-  void releaseMemory() override;
-  void print(raw_ostream &OS, const Module *M) const override;
+    bool runOnFunction(Function &F) override;
+    void releaseMemory() override;
+    void print(raw_ostream &OS, const Module *M) const override;
 };
 
 /// Helper for client passes to initialize dependent passes for LBFI.

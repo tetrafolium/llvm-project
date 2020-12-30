@@ -30,11 +30,11 @@ void RegisterAssertFrameRecognizer(Process *process);
 /// Holds the stack frame where the assert is called from.
 class AssertRecognizedStackFrame : public RecognizedStackFrame {
 public:
-  AssertRecognizedStackFrame(lldb::StackFrameSP most_relevant_frame_sp);
-  lldb::StackFrameSP GetMostRelevantFrame() override;
+    AssertRecognizedStackFrame(lldb::StackFrameSP most_relevant_frame_sp);
+    lldb::StackFrameSP GetMostRelevantFrame() override;
 
 private:
-  lldb::StackFrameSP m_most_relevant_frame;
+    lldb::StackFrameSP m_most_relevant_frame;
 };
 
 /// \class AssertFrameRecognizer
@@ -44,9 +44,11 @@ private:
 /// frames and set it as the most relavant frame when found.
 class AssertFrameRecognizer : public StackFrameRecognizer {
 public:
-  std::string GetName() override { return "Assert StackFrame Recognizer"; }
-  lldb::RecognizedStackFrameSP
-  RecognizeFrame(lldb::StackFrameSP frame_sp) override;
+    std::string GetName() override {
+        return "Assert StackFrame Recognizer";
+    }
+    lldb::RecognizedStackFrameSP
+    RecognizeFrame(lldb::StackFrameSP frame_sp) override;
 };
 
 } // namespace lldb_private

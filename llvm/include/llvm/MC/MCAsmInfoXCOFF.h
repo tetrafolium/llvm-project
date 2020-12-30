@@ -14,15 +14,15 @@
 namespace llvm {
 
 class MCAsmInfoXCOFF : public MCAsmInfo {
-  virtual void anchor();
+    virtual void anchor();
 
 protected:
-  MCAsmInfoXCOFF();
+    MCAsmInfoXCOFF();
 
 public:
-  // Return true only when C is an acceptable character inside a
-  // MCSymbolXCOFF.
-  bool isAcceptableChar(char C) const override;
+    // Return true only when C is an acceptable character inside a
+    // MCSymbolXCOFF.
+    bool isAcceptableChar(char C) const override;
 };
 
 } // end namespace llvm

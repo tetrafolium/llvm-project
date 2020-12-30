@@ -39,18 +39,18 @@
 template <typename CppTy, typename CTy>
 static llvm::ArrayRef<CppTy> unwrapList(size_t size, CTy *first,
                                         llvm::SmallVectorImpl<CppTy> &storage) {
-  static_assert(
-      std::is_same<decltype(unwrap(std::declval<CTy>())), CppTy>::value,
-      "incompatible C and C++ types");
+    static_assert(
+        std::is_same<decltype(unwrap(std::declval<CTy>())), CppTy>::value,
+        "incompatible C and C++ types");
 
-  if (size == 0)
-    return llvm::None;
+    if (size == 0)
+        return llvm::None;
 
-  assert(storage.empty() && "expected to populate storage");
-  storage.reserve(size);
-  for (size_t i = 0; i < size; ++i)
-    storage.push_back(unwrap(*(first + i)));
-  return storage;
+    assert(storage.empty() && "expected to populate storage");
+    storage.reserve(size);
+    for (size_t i = 0; i < size; ++i)
+        storage.push_back(unwrap(*(first + i)));
+    return storage;
 }
 
 #endif // MLIR_CAPI_WRAP_H

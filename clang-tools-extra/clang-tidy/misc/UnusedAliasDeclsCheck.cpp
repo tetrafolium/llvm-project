@@ -18,39 +18,39 @@ namespace tidy {
 namespace misc {
 
 void UnusedAliasDeclsCheck::registerMatchers(MatchFinder *Finder) {
-  // We cannot do anything about headers (yet), as the alias declarations
-  // used in one header could be used by some other translation unit.
-  Finder->addMatcher(namespaceAliasDecl(isExpansionInMainFile()).bind("alias"),
-                     this);
-  Finder->addMatcher(nestedNameSpecifier().bind("nns"), this);
+    // We cannot do anything about headers (yet), as the alias declarations
+    // used in one header could be used by some other translation unit.
+    Finder->addMatcher(namespaceAliasDecl(isExpansionInMainFile()).bind("alias"),
+                       this);
+    Finder->addMatcher(nestedNameSpecifier().bind("nns"), this);
 }
 
 void UnusedAliasDeclsCheck::check(const MatchFinder::MatchResult &Result) {
-  if (const auto *AliasDecl = Result.Nodes.getNodeAs<NamedDecl>("alias")) {
-    FoundDecls[AliasDecl] = CharSourceRange::getCharRange(
-        AliasDecl->getBeginLoc(),
-        Lexer::findLocationAfterToken(
-            AliasDecl->getEndLoc(), tok::semi, *Result.SourceManager,
-            getLangOpts(),
-            /*SkipTrailingWhitespaceAndNewLine=*/true));
-    return;
-  }
-
-  if (const auto *NestedName =
-          Result.Nodes.getNodeAs<NestedNameSpecifier>("nns")) {
-    if (const auto *AliasDecl = NestedName->getAsNamespaceAlias()) {
-      FoundDecls[AliasDecl] = CharSourceRange();
+    if (const auto *AliasDecl = Result.Nodes.getNodeAs<NamedDecl>("alias")) {
+        FoundDecls[AliasDecl] = CharSourceRange::getCharRange(
+                                    AliasDecl->getBeginLoc(),
+                                    Lexer::findLocationAfterToken(
+                                        AliasDecl->getEndLoc(), tok::semi, *Result.SourceManager,
+                                        getLangOpts(),
+                                        /*SkipTrailingWhitespaceAndNewLine=*/true));
+        return;
     }
-  }
+
+    if (const auto *NestedName =
+                Result.Nodes.getNodeAs<NestedNameSpecifier>("nns")) {
+        if (const auto *AliasDecl = NestedName->getAsNamespaceAlias()) {
+            FoundDecls[AliasDecl] = CharSourceRange();
+        }
+    }
 }
 
 void UnusedAliasDeclsCheck::onEndOfTranslationUnit() {
-  for (const auto &FoundDecl : FoundDecls) {
-    if (!FoundDecl.second.isValid())
-      continue;
-    diag(FoundDecl.first->getLocation(), "namespace alias decl %0 is unused")
-        << FoundDecl.first << FixItHint::CreateRemoval(FoundDecl.second);
-  }
+    for (const auto &FoundDecl : FoundDecls) {
+        if (!FoundDecl.second.isValid())
+            continue;
+        diag(FoundDecl.first->getLocation(), "namespace alias decl %0 is unused")
+                << FoundDecl.first << FixItHint::CreateRemoval(FoundDecl.second);
+    }
 }
 
 } // namespace misc

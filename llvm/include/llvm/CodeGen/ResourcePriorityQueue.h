@@ -19,22 +19,22 @@
 #include "llvm/CodeGen/ScheduleDAG.h"
 
 namespace llvm {
-  class DFAPacketizer;
-  class InstrItineraryData;
-  class ResourcePriorityQueue;
-  class SelectionDAGISel;
-  class TargetInstrInfo;
-  class TargetRegisterInfo;
+class DFAPacketizer;
+class InstrItineraryData;
+class ResourcePriorityQueue;
+class SelectionDAGISel;
+class TargetInstrInfo;
+class TargetRegisterInfo;
 
-  /// Sorting functions for the Available queue.
-  struct resource_sort {
+/// Sorting functions for the Available queue.
+struct resource_sort {
     ResourcePriorityQueue *PQ;
     explicit resource_sort(ResourcePriorityQueue *pq) : PQ(pq) {}
 
     bool operator()(const SUnit* LHS, const SUnit* RHS) const;
-  };
+};
 
-  class ResourcePriorityQueue : public SchedulingPriorityQueue {
+class ResourcePriorityQueue : public SchedulingPriorityQueue {
     /// SUnits - The SUnits for the current graph.
     std::vector<SUnit> *SUnits;
 
@@ -73,31 +73,33 @@ namespace llvm {
     unsigned ParallelLiveRanges;
     int HorizontalVerticalBalance;
 
-  public:
+public:
     ResourcePriorityQueue(SelectionDAGISel *IS);
 
-    bool isBottomUp() const override { return false; }
+    bool isBottomUp() const override {
+        return false;
+    }
 
     void initNodes(std::vector<SUnit> &sunits) override;
 
     void addNode(const SUnit *SU) override {
-      NumNodesSolelyBlocking.resize(SUnits->size(), 0);
+        NumNodesSolelyBlocking.resize(SUnits->size(), 0);
     }
 
     void updateNode(const SUnit *SU) override {}
 
     void releaseState() override {
-      SUnits = nullptr;
+        SUnits = nullptr;
     }
 
     unsigned getLatency(unsigned NodeNum) const {
-      assert(NodeNum < (*SUnits).size());
-      return (*SUnits)[NodeNum].getHeight();
+        assert(NodeNum < (*SUnits).size());
+        return (*SUnits)[NodeNum].getHeight();
     }
 
     unsigned getNumSolelyBlockNodes(unsigned NodeNum) const {
-      assert(NodeNum < NumNodesSolelyBlocking.size());
-      return NumNodesSolelyBlocking[NodeNum];
+        assert(NodeNum < NumNodesSolelyBlocking.size());
+        return NumNodesSolelyBlocking[NodeNum];
     }
 
     /// Single cost function reflecting benefit of scheduling SU
@@ -110,7 +112,9 @@ namespace llvm {
     int regPressureDelta(SUnit *SU, bool RawPressure = false);
     int rawRegPressureDelta (SUnit *SU, unsigned RCId);
 
-    bool empty() const override { return Queue.empty(); }
+    bool empty() const override {
+        return Queue.empty();
+    }
 
     void push(SUnit *U) override;
 
@@ -128,7 +132,7 @@ private:
     SUnit *getSingleUnscheduledPred(SUnit *SU);
     unsigned numberRCValPredInSU (SUnit *SU, unsigned RCId);
     unsigned numberRCValSuccInSU (SUnit *SU, unsigned RCId);
-  };
+};
 }
 
 #endif

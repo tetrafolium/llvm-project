@@ -15,10 +15,10 @@
 namespace __llvm_libc {
 
 void LLVM_LIBC_ENTRYPOINT(_Exit)(int status) {
-  for (;;) {
-    __llvm_libc::syscall(SYS_exit_group, status);
-    __llvm_libc::syscall(SYS_exit, status);
-  }
+    for (;;) {
+        __llvm_libc::syscall(SYS_exit_group, status);
+        __llvm_libc::syscall(SYS_exit, status);
+    }
 }
 
 } // namespace __llvm_libc

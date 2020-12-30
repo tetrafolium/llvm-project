@@ -40,19 +40,21 @@ namespace modernize {
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-replace-disallow-copy-and-assign-macro.html
 class ReplaceDisallowCopyAndAssignMacroCheck : public ClangTidyCheck {
 public:
-  ReplaceDisallowCopyAndAssignMacroCheck(StringRef Name,
-                                         ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus11;
-  }
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    ReplaceDisallowCopyAndAssignMacroCheck(StringRef Name,
+                                           ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus11;
+    }
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
-  const std::string &getMacroName() const { return MacroName; }
+    const std::string &getMacroName() const {
+        return MacroName;
+    }
 
 private:
-  const std::string MacroName;
+    const std::string MacroName;
 };
 
 } // namespace modernize

@@ -17,9 +17,9 @@ namespace gwp_asan {
 
 uint64_t getThreadID() {
 #ifdef SYS_gettid
-  return syscall(SYS_gettid);
+    return syscall(SYS_gettid);
 #else
-  return kInvalidThreadID;
+    return kInvalidThreadID;
 #endif
 }
 

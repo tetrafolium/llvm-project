@@ -29,84 +29,84 @@ namespace tooling {
 /// Represents the diagnostic message with the error message associated
 /// and the information on the location of the problem.
 struct DiagnosticMessage {
-  DiagnosticMessage(llvm::StringRef Message = "");
+    DiagnosticMessage(llvm::StringRef Message = "");
 
-  /// Constructs a diagnostic message with anoffset to the diagnostic
-  /// within the file where the problem occurred.
-  ///
-  /// \param Loc Should be a file location, it is not meaningful for a macro
-  /// location.
-  ///
-  DiagnosticMessage(llvm::StringRef Message, const SourceManager &Sources,
-                    SourceLocation Loc);
-  std::string Message;
-  std::string FilePath;
-  unsigned FileOffset;
+    /// Constructs a diagnostic message with anoffset to the diagnostic
+    /// within the file where the problem occurred.
+    ///
+    /// \param Loc Should be a file location, it is not meaningful for a macro
+    /// location.
+    ///
+    DiagnosticMessage(llvm::StringRef Message, const SourceManager &Sources,
+                      SourceLocation Loc);
+    std::string Message;
+    std::string FilePath;
+    unsigned FileOffset;
 
-  /// Fixes for this diagnostic, grouped by file path.
-  llvm::StringMap<Replacements> Fix;
+    /// Fixes for this diagnostic, grouped by file path.
+    llvm::StringMap<Replacements> Fix;
 };
 
 /// Represents a range within a specific source file.
 struct FileByteRange {
-  FileByteRange() = default;
+    FileByteRange() = default;
 
-  FileByteRange(const SourceManager &Sources, CharSourceRange Range);
+    FileByteRange(const SourceManager &Sources, CharSourceRange Range);
 
-  std::string FilePath;
-  unsigned FileOffset;
-  unsigned Length;
+    std::string FilePath;
+    unsigned FileOffset;
+    unsigned Length;
 };
 
 /// Represents the diagnostic with the level of severity and possible
 /// fixes to be applied.
 struct Diagnostic {
-  enum Level {
-    Warning = DiagnosticsEngine::Warning,
-    Error = DiagnosticsEngine::Error
-  };
+    enum Level {
+        Warning = DiagnosticsEngine::Warning,
+        Error = DiagnosticsEngine::Error
+    };
 
-  Diagnostic() = default;
+    Diagnostic() = default;
 
-  Diagnostic(llvm::StringRef DiagnosticName, Level DiagLevel,
-             StringRef BuildDirectory);
+    Diagnostic(llvm::StringRef DiagnosticName, Level DiagLevel,
+               StringRef BuildDirectory);
 
-  Diagnostic(llvm::StringRef DiagnosticName, const DiagnosticMessage &Message,
-             const SmallVector<DiagnosticMessage, 1> &Notes, Level DiagLevel,
-             llvm::StringRef BuildDirectory,
-             const SmallVector<FileByteRange, 1> &Ranges);
+    Diagnostic(llvm::StringRef DiagnosticName, const DiagnosticMessage &Message,
+               const SmallVector<DiagnosticMessage, 1> &Notes, Level DiagLevel,
+               llvm::StringRef BuildDirectory,
+               const SmallVector<FileByteRange, 1> &Ranges);
 
-  /// Name identifying the Diagnostic.
-  std::string DiagnosticName;
+    /// Name identifying the Diagnostic.
+    std::string DiagnosticName;
 
-  /// Message associated to the diagnostic.
-  DiagnosticMessage Message;
+    /// Message associated to the diagnostic.
+    DiagnosticMessage Message;
 
-  /// Potential notes about the diagnostic.
-  SmallVector<DiagnosticMessage, 1> Notes;
+    /// Potential notes about the diagnostic.
+    SmallVector<DiagnosticMessage, 1> Notes;
 
-  /// Diagnostic level. Can indicate either an error or a warning.
-  Level DiagLevel;
+    /// Diagnostic level. Can indicate either an error or a warning.
+    Level DiagLevel;
 
-  /// A build directory of the diagnostic source file.
-  ///
-  /// It's an absolute path which is `directory` field of the source file in
-  /// compilation database. If users don't specify the compilation database
-  /// directory, it is the current directory where clang-tidy runs.
-  ///
-  /// Note: it is empty in unittest.
-  std::string BuildDirectory;
+    /// A build directory of the diagnostic source file.
+    ///
+    /// It's an absolute path which is `directory` field of the source file in
+    /// compilation database. If users don't specify the compilation database
+    /// directory, it is the current directory where clang-tidy runs.
+    ///
+    /// Note: it is empty in unittest.
+    std::string BuildDirectory;
 
-  /// Extra source ranges associated with the diagnostic (in addition to the
-  /// location of the Message above).
-  SmallVector<FileByteRange, 1> Ranges;
+    /// Extra source ranges associated with the diagnostic (in addition to the
+    /// location of the Message above).
+    SmallVector<FileByteRange, 1> Ranges;
 };
 
 /// Collection of Diagnostics generated from a single translation unit.
 struct TranslationUnitDiagnostics {
-  /// Name of the main source for the translation unit.
-  std::string MainSourceFile;
-  std::vector<Diagnostic> Diagnostics;
+    /// Name of the main source for the translation unit.
+    std::string MainSourceFile;
+    std::vector<Diagnostic> Diagnostics;
 };
 
 /// Get the first fix to apply for this diagnostic.

@@ -41,52 +41,52 @@ extern bool EnableARCOpts;
 /// Test if the given module looks interesting to run ARC optimization
 /// on.
 inline bool ModuleHasARC(const Module &M) {
-  return
-    M.getNamedValue("llvm.objc.retain") ||
-    M.getNamedValue("llvm.objc.release") ||
-    M.getNamedValue("llvm.objc.autorelease") ||
-    M.getNamedValue("llvm.objc.retainAutoreleasedReturnValue") ||
-    M.getNamedValue("llvm.objc.unsafeClaimAutoreleasedReturnValue") ||
-    M.getNamedValue("llvm.objc.retainBlock") ||
-    M.getNamedValue("llvm.objc.autoreleaseReturnValue") ||
-    M.getNamedValue("llvm.objc.autoreleasePoolPush") ||
-    M.getNamedValue("llvm.objc.loadWeakRetained") ||
-    M.getNamedValue("llvm.objc.loadWeak") ||
-    M.getNamedValue("llvm.objc.destroyWeak") ||
-    M.getNamedValue("llvm.objc.storeWeak") ||
-    M.getNamedValue("llvm.objc.initWeak") ||
-    M.getNamedValue("llvm.objc.moveWeak") ||
-    M.getNamedValue("llvm.objc.copyWeak") ||
-    M.getNamedValue("llvm.objc.retainedObject") ||
-    M.getNamedValue("llvm.objc.unretainedObject") ||
-    M.getNamedValue("llvm.objc.unretainedPointer") ||
-    M.getNamedValue("llvm.objc.clang.arc.use");
+    return
+        M.getNamedValue("llvm.objc.retain") ||
+        M.getNamedValue("llvm.objc.release") ||
+        M.getNamedValue("llvm.objc.autorelease") ||
+        M.getNamedValue("llvm.objc.retainAutoreleasedReturnValue") ||
+        M.getNamedValue("llvm.objc.unsafeClaimAutoreleasedReturnValue") ||
+        M.getNamedValue("llvm.objc.retainBlock") ||
+        M.getNamedValue("llvm.objc.autoreleaseReturnValue") ||
+        M.getNamedValue("llvm.objc.autoreleasePoolPush") ||
+        M.getNamedValue("llvm.objc.loadWeakRetained") ||
+        M.getNamedValue("llvm.objc.loadWeak") ||
+        M.getNamedValue("llvm.objc.destroyWeak") ||
+        M.getNamedValue("llvm.objc.storeWeak") ||
+        M.getNamedValue("llvm.objc.initWeak") ||
+        M.getNamedValue("llvm.objc.moveWeak") ||
+        M.getNamedValue("llvm.objc.copyWeak") ||
+        M.getNamedValue("llvm.objc.retainedObject") ||
+        M.getNamedValue("llvm.objc.unretainedObject") ||
+        M.getNamedValue("llvm.objc.unretainedPointer") ||
+        M.getNamedValue("llvm.objc.clang.arc.use");
 }
 
 /// This is a wrapper around getUnderlyingObject which also knows how to
 /// look through objc_retain and objc_autorelease calls, which we know to return
 /// their argument verbatim.
 inline const Value *GetUnderlyingObjCPtr(const Value *V) {
-  for (;;) {
-    V = getUnderlyingObject(V);
-    if (!IsForwarding(GetBasicARCInstKind(V)))
-      break;
-    V = cast<CallInst>(V)->getArgOperand(0);
-  }
+    for (;;) {
+        V = getUnderlyingObject(V);
+        if (!IsForwarding(GetBasicARCInstKind(V)))
+            break;
+        V = cast<CallInst>(V)->getArgOperand(0);
+    }
 
-  return V;
+    return V;
 }
 
 /// A wrapper for GetUnderlyingObjCPtr used for results memoization.
 inline const Value *
 GetUnderlyingObjCPtrCached(const Value *V,
                            DenseMap<const Value *, WeakTrackingVH> &Cache) {
-  if (auto InCache = Cache.lookup(V))
-    return InCache;
+    if (auto InCache = Cache.lookup(V))
+        return InCache;
 
-  const Value *Computed = GetUnderlyingObjCPtr(V);
-  Cache[V] = const_cast<Value *>(Computed);
-  return Computed;
+    const Value *Computed = GetUnderlyingObjCPtr(V);
+    Cache[V] = const_cast<Value *>(Computed);
+    return Computed;
 }
 
 /// The RCIdentity root of a value \p V is a dominating value U for which
@@ -105,13 +105,13 @@ GetUnderlyingObjCPtrCached(const Value *V,
 /// Thus this function strips off pointer casts and forwarding calls. *NOTE*
 /// This implies that two RCIdentical values must alias.
 inline const Value *GetRCIdentityRoot(const Value *V) {
-  for (;;) {
-    V = V->stripPointerCasts();
-    if (!IsForwarding(GetBasicARCInstKind(V)))
-      break;
-    V = cast<CallInst>(V)->getArgOperand(0);
-  }
-  return V;
+    for (;;) {
+        V = V->stripPointerCasts();
+        if (!IsForwarding(GetBasicARCInstKind(V)))
+            break;
+        V = cast<CallInst>(V)->getArgOperand(0);
+    }
+    return V;
 }
 
 /// Helper which calls const Value *GetRCIdentityRoot(const Value *V) and just
@@ -119,48 +119,48 @@ inline const Value *GetRCIdentityRoot(const Value *V) {
 /// RCIdentityRoot (and by extension GetRCIdentityRoot is) look at that
 /// function.
 inline Value *GetRCIdentityRoot(Value *V) {
-  return const_cast<Value *>(GetRCIdentityRoot((const Value *)V));
+    return const_cast<Value *>(GetRCIdentityRoot((const Value *)V));
 }
 
 /// Assuming the given instruction is one of the special calls such as
 /// objc_retain or objc_release, return the RCIdentity root of the argument of
 /// the call.
 inline Value *GetArgRCIdentityRoot(Value *Inst) {
-  return GetRCIdentityRoot(cast<CallInst>(Inst)->getArgOperand(0));
+    return GetRCIdentityRoot(cast<CallInst>(Inst)->getArgOperand(0));
 }
 
 inline bool IsNullOrUndef(const Value *V) {
-  return isa<ConstantPointerNull>(V) || isa<UndefValue>(V);
+    return isa<ConstantPointerNull>(V) || isa<UndefValue>(V);
 }
 
 inline bool IsNoopInstruction(const Instruction *I) {
-  return isa<BitCastInst>(I) ||
-    (isa<GetElementPtrInst>(I) &&
-     cast<GetElementPtrInst>(I)->hasAllZeroIndices());
+    return isa<BitCastInst>(I) ||
+           (isa<GetElementPtrInst>(I) &&
+            cast<GetElementPtrInst>(I)->hasAllZeroIndices());
 }
 
 /// Test whether the given value is possible a retainable object pointer.
 inline bool IsPotentialRetainableObjPtr(const Value *Op) {
-  // Pointers to static or stack storage are not valid retainable object
-  // pointers.
-  if (isa<Constant>(Op) || isa<AllocaInst>(Op))
-    return false;
-  // Special arguments can not be a valid retainable object pointer.
-  if (const Argument *Arg = dyn_cast<Argument>(Op))
-    if (Arg->hasPassPointeeByValueCopyAttr() || Arg->hasNestAttr() ||
-        Arg->hasStructRetAttr())
-      return false;
-  // Only consider values with pointer types.
-  //
-  // It seemes intuitive to exclude function pointer types as well, since
-  // functions are never retainable object pointers, however clang occasionally
-  // bitcasts retainable object pointers to function-pointer type temporarily.
-  PointerType *Ty = dyn_cast<PointerType>(Op->getType());
-  if (!Ty)
-    return false;
-  // Conservatively assume anything else is a potential retainable object
-  // pointer.
-  return true;
+    // Pointers to static or stack storage are not valid retainable object
+    // pointers.
+    if (isa<Constant>(Op) || isa<AllocaInst>(Op))
+        return false;
+    // Special arguments can not be a valid retainable object pointer.
+    if (const Argument *Arg = dyn_cast<Argument>(Op))
+        if (Arg->hasPassPointeeByValueCopyAttr() || Arg->hasNestAttr() ||
+                Arg->hasStructRetAttr())
+            return false;
+    // Only consider values with pointer types.
+    //
+    // It seemes intuitive to exclude function pointer types as well, since
+    // functions are never retainable object pointers, however clang occasionally
+    // bitcasts retainable object pointers to function-pointer type temporarily.
+    PointerType *Ty = dyn_cast<PointerType>(Op->getType());
+    if (!Ty)
+        return false;
+    // Conservatively assume anything else is a potential retainable object
+    // pointer.
+    return true;
 }
 
 bool IsPotentialRetainableObjPtr(const Value *Op, AAResults &AA);
@@ -168,11 +168,11 @@ bool IsPotentialRetainableObjPtr(const Value *Op, AAResults &AA);
 /// Helper for GetARCInstKind. Determines what kind of construct CS
 /// is.
 inline ARCInstKind GetCallSiteClass(const CallBase &CB) {
-  for (auto I = CB.arg_begin(), E = CB.arg_end(); I != E; ++I)
-    if (IsPotentialRetainableObjPtr(*I))
-      return CB.onlyReadsMemory() ? ARCInstKind::User : ARCInstKind::CallOrUser;
+    for (auto I = CB.arg_begin(), E = CB.arg_end(); I != E; ++I)
+        if (IsPotentialRetainableObjPtr(*I))
+            return CB.onlyReadsMemory() ? ARCInstKind::User : ARCInstKind::CallOrUser;
 
-  return CB.onlyReadsMemory() ? ARCInstKind::None : ARCInstKind::Call;
+    return CB.onlyReadsMemory() ? ARCInstKind::None : ARCInstKind::Call;
 }
 
 /// Return true if this value refers to a distinct and identifiable
@@ -181,88 +181,88 @@ inline ARCInstKind GetCallSiteClass(const CallBase &CB) {
 /// This is similar to AliasAnalysis's isIdentifiedObject, except that it uses
 /// special knowledge of ObjC conventions.
 inline bool IsObjCIdentifiedObject(const Value *V) {
-  // Assume that call results and arguments have their own "provenance".
-  // Constants (including GlobalVariables) and Allocas are never
-  // reference-counted.
-  if (isa<CallInst>(V) || isa<InvokeInst>(V) ||
-      isa<Argument>(V) || isa<Constant>(V) ||
-      isa<AllocaInst>(V))
-    return true;
-
-  if (const LoadInst *LI = dyn_cast<LoadInst>(V)) {
-    const Value *Pointer =
-      GetRCIdentityRoot(LI->getPointerOperand());
-    if (const GlobalVariable *GV = dyn_cast<GlobalVariable>(Pointer)) {
-      // A constant pointer can't be pointing to an object on the heap. It may
-      // be reference-counted, but it won't be deleted.
-      if (GV->isConstant())
-        return true;
-      StringRef Name = GV->getName();
-      // These special variables are known to hold values which are not
-      // reference-counted pointers.
-      if (Name.startswith("\01l_objc_msgSend_fixup_"))
+    // Assume that call results and arguments have their own "provenance".
+    // Constants (including GlobalVariables) and Allocas are never
+    // reference-counted.
+    if (isa<CallInst>(V) || isa<InvokeInst>(V) ||
+            isa<Argument>(V) || isa<Constant>(V) ||
+            isa<AllocaInst>(V))
         return true;
 
-      StringRef Section = GV->getSection();
-      if (Section.find("__message_refs") != StringRef::npos ||
-          Section.find("__objc_classrefs") != StringRef::npos ||
-          Section.find("__objc_superrefs") != StringRef::npos ||
-          Section.find("__objc_methname") != StringRef::npos ||
-          Section.find("__cstring") != StringRef::npos)
-        return true;
+    if (const LoadInst *LI = dyn_cast<LoadInst>(V)) {
+        const Value *Pointer =
+            GetRCIdentityRoot(LI->getPointerOperand());
+        if (const GlobalVariable *GV = dyn_cast<GlobalVariable>(Pointer)) {
+            // A constant pointer can't be pointing to an object on the heap. It may
+            // be reference-counted, but it won't be deleted.
+            if (GV->isConstant())
+                return true;
+            StringRef Name = GV->getName();
+            // These special variables are known to hold values which are not
+            // reference-counted pointers.
+            if (Name.startswith("\01l_objc_msgSend_fixup_"))
+                return true;
+
+            StringRef Section = GV->getSection();
+            if (Section.find("__message_refs") != StringRef::npos ||
+                    Section.find("__objc_classrefs") != StringRef::npos ||
+                    Section.find("__objc_superrefs") != StringRef::npos ||
+                    Section.find("__objc_methname") != StringRef::npos ||
+                    Section.find("__cstring") != StringRef::npos)
+                return true;
+        }
     }
-  }
 
-  return false;
+    return false;
 }
 
 enum class ARCMDKindID {
-  ImpreciseRelease,
-  CopyOnEscape,
-  NoObjCARCExceptions,
+    ImpreciseRelease,
+    CopyOnEscape,
+    NoObjCARCExceptions,
 };
 
 /// A cache of MDKinds used by various ARC optimizations.
 class ARCMDKindCache {
-  Module *M;
+    Module *M;
 
-  /// The Metadata Kind for clang.imprecise_release metadata.
-  llvm::Optional<unsigned> ImpreciseReleaseMDKind;
+    /// The Metadata Kind for clang.imprecise_release metadata.
+    llvm::Optional<unsigned> ImpreciseReleaseMDKind;
 
-  /// The Metadata Kind for clang.arc.copy_on_escape metadata.
-  llvm::Optional<unsigned> CopyOnEscapeMDKind;
+    /// The Metadata Kind for clang.arc.copy_on_escape metadata.
+    llvm::Optional<unsigned> CopyOnEscapeMDKind;
 
-  /// The Metadata Kind for clang.arc.no_objc_arc_exceptions metadata.
-  llvm::Optional<unsigned> NoObjCARCExceptionsMDKind;
+    /// The Metadata Kind for clang.arc.no_objc_arc_exceptions metadata.
+    llvm::Optional<unsigned> NoObjCARCExceptionsMDKind;
 
 public:
-  void init(Module *Mod) {
-    M = Mod;
-    ImpreciseReleaseMDKind = NoneType::None;
-    CopyOnEscapeMDKind = NoneType::None;
-    NoObjCARCExceptionsMDKind = NoneType::None;
-  }
-
-  unsigned get(ARCMDKindID ID) {
-    switch (ID) {
-    case ARCMDKindID::ImpreciseRelease:
-      if (!ImpreciseReleaseMDKind)
-        ImpreciseReleaseMDKind =
-            M->getContext().getMDKindID("clang.imprecise_release");
-      return *ImpreciseReleaseMDKind;
-    case ARCMDKindID::CopyOnEscape:
-      if (!CopyOnEscapeMDKind)
-        CopyOnEscapeMDKind =
-            M->getContext().getMDKindID("clang.arc.copy_on_escape");
-      return *CopyOnEscapeMDKind;
-    case ARCMDKindID::NoObjCARCExceptions:
-      if (!NoObjCARCExceptionsMDKind)
-        NoObjCARCExceptionsMDKind =
-            M->getContext().getMDKindID("clang.arc.no_objc_arc_exceptions");
-      return *NoObjCARCExceptionsMDKind;
+    void init(Module *Mod) {
+        M = Mod;
+        ImpreciseReleaseMDKind = NoneType::None;
+        CopyOnEscapeMDKind = NoneType::None;
+        NoObjCARCExceptionsMDKind = NoneType::None;
     }
-    llvm_unreachable("Covered switch isn't covered?!");
-  }
+
+    unsigned get(ARCMDKindID ID) {
+        switch (ID) {
+        case ARCMDKindID::ImpreciseRelease:
+            if (!ImpreciseReleaseMDKind)
+                ImpreciseReleaseMDKind =
+                    M->getContext().getMDKindID("clang.imprecise_release");
+            return *ImpreciseReleaseMDKind;
+        case ARCMDKindID::CopyOnEscape:
+            if (!CopyOnEscapeMDKind)
+                CopyOnEscapeMDKind =
+                    M->getContext().getMDKindID("clang.arc.copy_on_escape");
+            return *CopyOnEscapeMDKind;
+        case ARCMDKindID::NoObjCARCExceptions:
+            if (!NoObjCARCExceptionsMDKind)
+                NoObjCARCExceptionsMDKind =
+                    M->getContext().getMDKindID("clang.arc.no_objc_arc_exceptions");
+            return *NoObjCARCExceptionsMDKind;
+        }
+        llvm_unreachable("Covered switch isn't covered?!");
+    }
 };
 
 } // end namespace objcarc

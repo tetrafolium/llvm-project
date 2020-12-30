@@ -70,99 +70,99 @@ static cl::opt<std::string> OutputFileName(
     cl::cat(Cat));
 
 LLVM_ATTRIBUTE_NORETURN static void error(Twine Message) {
-  WithColor::error() << Message << '\n';
-  exit(1);
+    WithColor::error() << Message << '\n';
+    exit(1);
 }
 
 namespace {
 
 class PPTraceAction : public ASTFrontendAction {
 public:
-  PPTraceAction(const FilterType &Filters, raw_ostream &OS)
-      : Filters(Filters), OS(OS) {}
+    PPTraceAction(const FilterType &Filters, raw_ostream &OS)
+        : Filters(Filters), OS(OS) {}
 
 protected:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
-                                                 StringRef InFile) override {
-    Preprocessor &PP = CI.getPreprocessor();
-    PP.addPPCallbacks(
-        std::make_unique<PPCallbacksTracker>(Filters, CallbackCalls, PP));
-    return std::make_unique<ASTConsumer>();
-  }
-
-  void EndSourceFileAction() override {
-    OS << "---\n";
-    for (const CallbackCall &Callback : CallbackCalls) {
-      OS << "- Callback: " << Callback.Name << "\n";
-      for (const Argument &Arg : Callback.Arguments)
-        OS << "  " << Arg.Name << ": " << Arg.Value << "\n";
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
+            StringRef InFile) override {
+        Preprocessor &PP = CI.getPreprocessor();
+        PP.addPPCallbacks(
+            std::make_unique<PPCallbacksTracker>(Filters, CallbackCalls, PP));
+        return std::make_unique<ASTConsumer>();
     }
-    OS << "...\n";
 
-    CallbackCalls.clear();
-  }
+    void EndSourceFileAction() override {
+        OS << "---\n";
+        for (const CallbackCall &Callback : CallbackCalls) {
+            OS << "- Callback: " << Callback.Name << "\n";
+            for (const Argument &Arg : Callback.Arguments)
+                OS << "  " << Arg.Name << ": " << Arg.Value << "\n";
+        }
+        OS << "...\n";
+
+        CallbackCalls.clear();
+    }
 
 private:
-  const FilterType &Filters;
-  raw_ostream &OS;
-  std::vector<CallbackCall> CallbackCalls;
+    const FilterType &Filters;
+    raw_ostream &OS;
+    std::vector<CallbackCall> CallbackCalls;
 };
 
 class PPTraceFrontendActionFactory : public tooling::FrontendActionFactory {
 public:
-  PPTraceFrontendActionFactory(const FilterType &Filters, raw_ostream &OS)
-      : Filters(Filters), OS(OS) {}
+    PPTraceFrontendActionFactory(const FilterType &Filters, raw_ostream &OS)
+        : Filters(Filters), OS(OS) {}
 
-  std::unique_ptr<FrontendAction> create() override {
-    return std::make_unique<PPTraceAction>(Filters, OS);
-  }
+    std::unique_ptr<FrontendAction> create() override {
+        return std::make_unique<PPTraceAction>(Filters, OS);
+    }
 
 private:
-  const FilterType &Filters;
-  raw_ostream &OS;
+    const FilterType &Filters;
+    raw_ostream &OS;
 };
 } // namespace
 } // namespace pp_trace
 } // namespace clang
 
 int main(int argc, const char **argv) {
-  using namespace clang::pp_trace;
-  InitLLVM X(argc, argv);
-  auto OptionsParser = clang::tooling::CommonOptionsParser::create(
-      argc, argv, Cat, llvm::cl::ZeroOrMore);
-  if (!OptionsParser)
-    error(toString(OptionsParser.takeError()));
-  // Parse the IgnoreCallbacks list into strings.
-  SmallVector<StringRef, 32> Patterns;
-  FilterType Filters;
-  StringRef(Callbacks).split(Patterns, ",",
-                             /*MaxSplit=*/-1, /*KeepEmpty=*/false);
-  for (StringRef Pattern : Patterns) {
-    Pattern = Pattern.trim();
-    bool Enabled = !Pattern.consume_front("-");
-    Expected<GlobPattern> Pat = GlobPattern::create(Pattern);
-    if (Pat)
-      Filters.emplace_back(std::move(*Pat), Enabled);
-    else
-      error(toString(Pat.takeError()));
-  }
+    using namespace clang::pp_trace;
+    InitLLVM X(argc, argv);
+    auto OptionsParser = clang::tooling::CommonOptionsParser::create(
+                             argc, argv, Cat, llvm::cl::ZeroOrMore);
+    if (!OptionsParser)
+        error(toString(OptionsParser.takeError()));
+    // Parse the IgnoreCallbacks list into strings.
+    SmallVector<StringRef, 32> Patterns;
+    FilterType Filters;
+    StringRef(Callbacks).split(Patterns, ",",
+                               /*MaxSplit=*/-1, /*KeepEmpty=*/false);
+    for (StringRef Pattern : Patterns) {
+        Pattern = Pattern.trim();
+        bool Enabled = !Pattern.consume_front("-");
+        Expected<GlobPattern> Pat = GlobPattern::create(Pattern);
+        if (Pat)
+            Filters.emplace_back(std::move(*Pat), Enabled);
+        else
+            error(toString(Pat.takeError()));
+    }
 
-  // Create the tool and run the compilation.
-  clang::tooling::ClangTool Tool(OptionsParser->getCompilations(),
-                                 OptionsParser->getSourcePathList());
+    // Create the tool and run the compilation.
+    clang::tooling::ClangTool Tool(OptionsParser->getCompilations(),
+                                   OptionsParser->getSourcePathList());
 
-  std::error_code EC;
-  llvm::ToolOutputFile Out(OutputFileName, EC, llvm::sys::fs::OF_Text);
-  if (EC)
-    error(EC.message());
-  PPTraceFrontendActionFactory Factory(Filters, Out.os());
-  int HadErrors = Tool.run(&Factory);
+    std::error_code EC;
+    llvm::ToolOutputFile Out(OutputFileName, EC, llvm::sys::fs::OF_Text);
+    if (EC)
+        error(EC.message());
+    PPTraceFrontendActionFactory Factory(Filters, Out.os());
+    int HadErrors = Tool.run(&Factory);
 
-  // If we had errors, exit early.
-  if (HadErrors)
-    return HadErrors;
+    // If we had errors, exit early.
+    if (HadErrors)
+        return HadErrors;
 
-  Out.keep();
+    Out.keep();
 
-  return 0;
+    return 0;
 }

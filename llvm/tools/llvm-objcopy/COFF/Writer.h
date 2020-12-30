@@ -22,37 +22,37 @@ namespace coff {
 struct Object;
 
 class COFFWriter {
-  Object &Obj;
-  Buffer &Buf;
+    Object &Obj;
+    Buffer &Buf;
 
-  size_t FileSize;
-  size_t FileAlignment;
-  size_t SizeOfInitializedData;
-  StringTableBuilder StrTabBuilder;
+    size_t FileSize;
+    size_t FileAlignment;
+    size_t SizeOfInitializedData;
+    StringTableBuilder StrTabBuilder;
 
-  template <class SymbolTy> std::pair<size_t, size_t> finalizeSymbolTable();
-  Error finalizeRelocTargets();
-  Error finalizeSymbolContents();
-  void layoutSections();
-  size_t finalizeStringTable();
+    template <class SymbolTy> std::pair<size_t, size_t> finalizeSymbolTable();
+    Error finalizeRelocTargets();
+    Error finalizeSymbolContents();
+    void layoutSections();
+    size_t finalizeStringTable();
 
-  Error finalize(bool IsBigObj);
+    Error finalize(bool IsBigObj);
 
-  void writeHeaders(bool IsBigObj);
-  void writeSections();
-  template <class SymbolTy> void writeSymbolStringTables();
+    void writeHeaders(bool IsBigObj);
+    void writeSections();
+    template <class SymbolTy> void writeSymbolStringTables();
 
-  Error write(bool IsBigObj);
+    Error write(bool IsBigObj);
 
-  Error patchDebugDirectory();
-  Expected<uint32_t> virtualAddressToFileAddress(uint32_t RVA);
+    Error patchDebugDirectory();
+    Expected<uint32_t> virtualAddressToFileAddress(uint32_t RVA);
 
 public:
-  virtual ~COFFWriter() {}
-  Error write();
+    virtual ~COFFWriter() {}
+    Error write();
 
-  COFFWriter(Object &Obj, Buffer &Buf)
-      : Obj(Obj), Buf(Buf), StrTabBuilder(StringTableBuilder::WinCOFF) {}
+    COFFWriter(Object &Obj, Buffer &Buf)
+        : Obj(Obj), Buf(Buf), StrTabBuilder(StringTableBuilder::WinCOFF) {}
 };
 
 } // end namespace coff

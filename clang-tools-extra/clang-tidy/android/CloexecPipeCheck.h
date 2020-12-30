@@ -21,10 +21,10 @@ namespace android {
 /// http://clang.llvm.org/extra/clang-tidy/checks/android-cloexec-pipe.html
 class CloexecPipeCheck : public CloexecCheck {
 public:
-  CloexecPipeCheck(StringRef Name, ClangTidyContext *Context)
-      : CloexecCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    CloexecPipeCheck(StringRef Name, ClangTidyContext *Context)
+        : CloexecCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace android

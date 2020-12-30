@@ -37,49 +37,51 @@ class ProcessGDBRemote;
 /// history. This is used to replay GDB packets.
 class GDBRemoteCommunicationReplayServer : public GDBRemoteCommunication {
 public:
-  GDBRemoteCommunicationReplayServer();
+    GDBRemoteCommunicationReplayServer();
 
-  ~GDBRemoteCommunicationReplayServer() override;
+    ~GDBRemoteCommunicationReplayServer() override;
 
-  PacketResult GetPacketAndSendResponse(Timeout<std::micro> timeout,
-                                        Status &error, bool &interrupt,
-                                        bool &quit);
+    PacketResult GetPacketAndSendResponse(Timeout<std::micro> timeout,
+                                          Status &error, bool &interrupt,
+                                          bool &quit);
 
-  bool HandshakeWithClient() { return GetAck() == PacketResult::Success; }
+    bool HandshakeWithClient() {
+        return GetAck() == PacketResult::Success;
+    }
 
-  llvm::Error LoadReplayHistory(const FileSpec &path);
+    llvm::Error LoadReplayHistory(const FileSpec &path);
 
-  bool StartAsyncThread();
-  void StopAsyncThread();
+    bool StartAsyncThread();
+    void StopAsyncThread();
 
-  Status Connect(process_gdb_remote::GDBRemoteCommunicationClient &client);
+    Status Connect(process_gdb_remote::GDBRemoteCommunicationClient &client);
 
 protected:
-  enum {
-    eBroadcastBitAsyncContinue = (1 << 0),
-    eBroadcastBitAsyncThreadShouldExit = (1 << 1),
-  };
+    enum {
+        eBroadcastBitAsyncContinue = (1 << 0),
+        eBroadcastBitAsyncThreadShouldExit = (1 << 1),
+    };
 
-  static void ReceivePacket(GDBRemoteCommunicationReplayServer &server,
-                            bool &done);
-  static lldb::thread_result_t AsyncThread(void *arg);
+    static void ReceivePacket(GDBRemoteCommunicationReplayServer &server,
+                              bool &done);
+    static lldb::thread_result_t AsyncThread(void *arg);
 
-  /// Replay history with the oldest packet at the end.
-  std::vector<GDBRemotePacket> m_packet_history;
+    /// Replay history with the oldest packet at the end.
+    std::vector<GDBRemotePacket> m_packet_history;
 
-  /// Server thread.
-  Broadcaster m_async_broadcaster;
-  lldb::ListenerSP m_async_listener_sp;
-  HostThread m_async_thread;
-  std::recursive_mutex m_async_thread_state_mutex;
+    /// Server thread.
+    Broadcaster m_async_broadcaster;
+    lldb::ListenerSP m_async_listener_sp;
+    HostThread m_async_thread;
+    std::recursive_mutex m_async_thread_state_mutex;
 
-  bool m_skip_acks;
+    bool m_skip_acks;
 
 private:
-  GDBRemoteCommunicationReplayServer(
-      const GDBRemoteCommunicationReplayServer &) = delete;
-  const GDBRemoteCommunicationReplayServer &
-  operator=(const GDBRemoteCommunicationReplayServer &) = delete;
+    GDBRemoteCommunicationReplayServer(
+        const GDBRemoteCommunicationReplayServer &) = delete;
+    const GDBRemoteCommunicationReplayServer &
+    operator=(const GDBRemoteCommunicationReplayServer &) = delete;
 };
 
 } // namespace process_gdb_remote

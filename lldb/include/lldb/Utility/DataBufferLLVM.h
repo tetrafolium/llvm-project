@@ -25,21 +25,23 @@ namespace lldb_private {
 class FileSystem;
 class DataBufferLLVM : public DataBuffer {
 public:
-  ~DataBufferLLVM() override;
+    ~DataBufferLLVM() override;
 
-  uint8_t *GetBytes() override;
-  const uint8_t *GetBytes() const override;
-  lldb::offset_t GetByteSize() const override;
+    uint8_t *GetBytes() override;
+    const uint8_t *GetBytes() const override;
+    lldb::offset_t GetByteSize() const override;
 
-  char *GetChars() { return reinterpret_cast<char *>(GetBytes()); }
+    char *GetChars() {
+        return reinterpret_cast<char *>(GetBytes());
+    }
 
 private:
-  friend FileSystem;
-  /// Construct a DataBufferLLVM from \p Buffer.  \p Buffer must be a valid
-  /// pointer.
-  explicit DataBufferLLVM(std::unique_ptr<llvm::WritableMemoryBuffer> Buffer);
+    friend FileSystem;
+    /// Construct a DataBufferLLVM from \p Buffer.  \p Buffer must be a valid
+    /// pointer.
+    explicit DataBufferLLVM(std::unique_ptr<llvm::WritableMemoryBuffer> Buffer);
 
-  std::unique_ptr<llvm::WritableMemoryBuffer> Buffer;
+    std::unique_ptr<llvm::WritableMemoryBuffer> Buffer;
 };
 }
 

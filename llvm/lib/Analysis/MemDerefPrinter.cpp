@@ -22,24 +22,24 @@
 using namespace llvm;
 
 namespace {
-  struct MemDerefPrinter : public FunctionPass {
+struct MemDerefPrinter : public FunctionPass {
     SmallVector<Value *, 4> Deref;
     SmallPtrSet<Value *, 4> DerefAndAligned;
 
     static char ID; // Pass identification, replacement for typeid
     MemDerefPrinter() : FunctionPass(ID) {
-      initializeMemDerefPrinterPass(*PassRegistry::getPassRegistry());
+        initializeMemDerefPrinterPass(*PassRegistry::getPassRegistry());
     }
     void getAnalysisUsage(AnalysisUsage &AU) const override {
-      AU.setPreservesAll();
+        AU.setPreservesAll();
     }
     bool runOnFunction(Function &F) override;
     void print(raw_ostream &OS, const Module * = nullptr) const override;
     void releaseMemory() override {
-      Deref.clear();
-      DerefAndAligned.clear();
+        Deref.clear();
+        DerefAndAligned.clear();
     }
-  };
+};
 }
 
 char MemDerefPrinter::ID = 0;
@@ -49,64 +49,64 @@ INITIALIZE_PASS_END(MemDerefPrinter, "print-memderefs",
                     "Memory Dereferenciblity of pointers in function", false, true)
 
 FunctionPass *llvm::createMemDerefPrinter() {
-  return new MemDerefPrinter();
+    return new MemDerefPrinter();
 }
 
 bool MemDerefPrinter::runOnFunction(Function &F) {
-  const DataLayout &DL = F.getParent()->getDataLayout();
-  for (auto &I: instructions(F)) {
-    if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
-      Value *PO = LI->getPointerOperand();
-      if (isDereferenceablePointer(PO, LI->getType(), DL))
-        Deref.push_back(PO);
-      if (isDereferenceableAndAlignedPointer(
-              PO, LI->getType(), MaybeAlign(LI->getAlignment()), DL))
-        DerefAndAligned.insert(PO);
+    const DataLayout &DL = F.getParent()->getDataLayout();
+    for (auto &I: instructions(F)) {
+        if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
+            Value *PO = LI->getPointerOperand();
+            if (isDereferenceablePointer(PO, LI->getType(), DL))
+                Deref.push_back(PO);
+            if (isDereferenceableAndAlignedPointer(
+                        PO, LI->getType(), MaybeAlign(LI->getAlignment()), DL))
+                DerefAndAligned.insert(PO);
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 void MemDerefPrinter::print(raw_ostream &OS, const Module *M) const {
-  OS << "The following are dereferenceable:\n";
-  for (Value *V: Deref) {
-    V->print(OS);
-    if (DerefAndAligned.count(V))
-      OS << "\t(aligned)";
-    else
-      OS << "\t(unaligned)";
-    OS << "\n\n";
-  }
+    OS << "The following are dereferenceable:\n";
+    for (Value *V: Deref) {
+        V->print(OS);
+        if (DerefAndAligned.count(V))
+            OS << "\t(aligned)";
+        else
+            OS << "\t(unaligned)";
+        OS << "\n\n";
+    }
 }
 
 PreservedAnalyses MemDerefPrinterPass::run(Function &F,
-                                           FunctionAnalysisManager &AM) {
-  OS << "Memory Dereferencibility of pointers in function '" << F.getName()
-     << "'\n";
+        FunctionAnalysisManager &AM) {
+    OS << "Memory Dereferencibility of pointers in function '" << F.getName()
+       << "'\n";
 
-  SmallVector<Value *, 4> Deref;
-  SmallPtrSet<Value *, 4> DerefAndAligned;
+    SmallVector<Value *, 4> Deref;
+    SmallPtrSet<Value *, 4> DerefAndAligned;
 
-  const DataLayout &DL = F.getParent()->getDataLayout();
-  for (auto &I : instructions(F)) {
-    if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
-      Value *PO = LI->getPointerOperand();
-      if (isDereferenceablePointer(PO, LI->getType(), DL))
-        Deref.push_back(PO);
-      if (isDereferenceableAndAlignedPointer(
-              PO, LI->getType(), MaybeAlign(LI->getAlignment()), DL))
-        DerefAndAligned.insert(PO);
+    const DataLayout &DL = F.getParent()->getDataLayout();
+    for (auto &I : instructions(F)) {
+        if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
+            Value *PO = LI->getPointerOperand();
+            if (isDereferenceablePointer(PO, LI->getType(), DL))
+                Deref.push_back(PO);
+            if (isDereferenceableAndAlignedPointer(
+                        PO, LI->getType(), MaybeAlign(LI->getAlignment()), DL))
+                DerefAndAligned.insert(PO);
+        }
     }
-  }
 
-  OS << "The following are dereferenceable:\n";
-  for (Value *V : Deref) {
-    V->print(OS);
-    if (DerefAndAligned.count(V))
-      OS << "\t(aligned)";
-    else
-      OS << "\t(unaligned)";
-    OS << "\n\n";
-  }
-  return PreservedAnalyses::all();
+    OS << "The following are dereferenceable:\n";
+    for (Value *V : Deref) {
+        V->print(OS);
+        if (DerefAndAligned.count(V))
+            OS << "\t(aligned)";
+        else
+            OS << "\t(unaligned)";
+        OS << "\n\n";
+    }
+    return PreservedAnalyses::all();
 }

@@ -22,164 +22,164 @@ class SBLaunchInfo;
 
 class LLDB_API SBPlatformConnectOptions {
 public:
-  SBPlatformConnectOptions(const char *url);
+    SBPlatformConnectOptions(const char *url);
 
-  SBPlatformConnectOptions(const SBPlatformConnectOptions &rhs);
+    SBPlatformConnectOptions(const SBPlatformConnectOptions &rhs);
 
-  ~SBPlatformConnectOptions();
+    ~SBPlatformConnectOptions();
 
-  SBPlatformConnectOptions &operator=(const SBPlatformConnectOptions &rhs);
+    SBPlatformConnectOptions &operator=(const SBPlatformConnectOptions &rhs);
 
-  const char *GetURL();
+    const char *GetURL();
 
-  void SetURL(const char *url);
+    void SetURL(const char *url);
 
-  bool GetRsyncEnabled();
+    bool GetRsyncEnabled();
 
-  void EnableRsync(const char *options, const char *remote_path_prefix,
-                   bool omit_remote_hostname);
+    void EnableRsync(const char *options, const char *remote_path_prefix,
+                     bool omit_remote_hostname);
 
-  void DisableRsync();
+    void DisableRsync();
 
-  const char *GetLocalCacheDirectory();
+    const char *GetLocalCacheDirectory();
 
-  void SetLocalCacheDirectory(const char *path);
+    void SetLocalCacheDirectory(const char *path);
 
 protected:
-  PlatformConnectOptions *m_opaque_ptr;
+    PlatformConnectOptions *m_opaque_ptr;
 };
 
 class LLDB_API SBPlatformShellCommand {
 public:
-  SBPlatformShellCommand(const char *shell, const char *shell_command);
-  SBPlatformShellCommand(const char *shell_command);
+    SBPlatformShellCommand(const char *shell, const char *shell_command);
+    SBPlatformShellCommand(const char *shell_command);
 
-  SBPlatformShellCommand(const SBPlatformShellCommand &rhs);
+    SBPlatformShellCommand(const SBPlatformShellCommand &rhs);
 
-  SBPlatformShellCommand &operator=(const SBPlatformShellCommand &rhs);
+    SBPlatformShellCommand &operator=(const SBPlatformShellCommand &rhs);
 
-  ~SBPlatformShellCommand();
+    ~SBPlatformShellCommand();
 
-  void Clear();
+    void Clear();
 
-  const char *GetShell();
+    const char *GetShell();
 
-  void SetShell(const char *shell);
+    void SetShell(const char *shell);
 
-  const char *GetCommand();
+    const char *GetCommand();
 
-  void SetCommand(const char *shell_command);
+    void SetCommand(const char *shell_command);
 
-  const char *GetWorkingDirectory();
+    const char *GetWorkingDirectory();
 
-  void SetWorkingDirectory(const char *path);
+    void SetWorkingDirectory(const char *path);
 
-  uint32_t GetTimeoutSeconds();
+    uint32_t GetTimeoutSeconds();
 
-  void SetTimeoutSeconds(uint32_t sec);
+    void SetTimeoutSeconds(uint32_t sec);
 
-  int GetSignal();
+    int GetSignal();
 
-  int GetStatus();
+    int GetStatus();
 
-  const char *GetOutput();
+    const char *GetOutput();
 
 protected:
-  friend class SBPlatform;
+    friend class SBPlatform;
 
-  PlatformShellCommand *m_opaque_ptr;
+    PlatformShellCommand *m_opaque_ptr;
 };
 
 class LLDB_API SBPlatform {
 public:
-  SBPlatform();
+    SBPlatform();
 
-  SBPlatform(const char *platform_name);
+    SBPlatform(const char *platform_name);
 
-  SBPlatform(const SBPlatform &rhs);
+    SBPlatform(const SBPlatform &rhs);
 
-  SBPlatform &operator=(const SBPlatform &rhs);
+    SBPlatform &operator=(const SBPlatform &rhs);
 
-  ~SBPlatform();
+    ~SBPlatform();
 
-  static SBPlatform GetHostPlatform();
+    static SBPlatform GetHostPlatform();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  void Clear();
+    void Clear();
 
-  const char *GetWorkingDirectory();
+    const char *GetWorkingDirectory();
 
-  bool SetWorkingDirectory(const char *path);
+    bool SetWorkingDirectory(const char *path);
 
-  const char *GetName();
+    const char *GetName();
 
-  SBError ConnectRemote(SBPlatformConnectOptions &connect_options);
+    SBError ConnectRemote(SBPlatformConnectOptions &connect_options);
 
-  void DisconnectRemote();
+    void DisconnectRemote();
 
-  bool IsConnected();
+    bool IsConnected();
 
-  // The following functions will work if the platform is connected
-  const char *GetTriple();
+    // The following functions will work if the platform is connected
+    const char *GetTriple();
 
-  const char *GetHostname();
+    const char *GetHostname();
 
-  const char *GetOSBuild();
+    const char *GetOSBuild();
 
-  const char *GetOSDescription();
+    const char *GetOSDescription();
 
-  uint32_t GetOSMajorVersion();
+    uint32_t GetOSMajorVersion();
 
-  uint32_t GetOSMinorVersion();
+    uint32_t GetOSMinorVersion();
 
-  uint32_t GetOSUpdateVersion();
+    uint32_t GetOSUpdateVersion();
 
-  SBError Put(SBFileSpec &src, SBFileSpec &dst);
+    SBError Put(SBFileSpec &src, SBFileSpec &dst);
 
-  SBError Get(SBFileSpec &src, SBFileSpec &dst);
+    SBError Get(SBFileSpec &src, SBFileSpec &dst);
 
-  SBError Install(SBFileSpec &src, SBFileSpec &dst);
+    SBError Install(SBFileSpec &src, SBFileSpec &dst);
 
-  SBError Run(SBPlatformShellCommand &shell_command);
+    SBError Run(SBPlatformShellCommand &shell_command);
 
-  SBError Launch(SBLaunchInfo &launch_info);
+    SBError Launch(SBLaunchInfo &launch_info);
 
-  SBError Kill(const lldb::pid_t pid);
+    SBError Kill(const lldb::pid_t pid);
 
-  SBError
-  MakeDirectory(const char *path,
-                uint32_t file_permissions = eFilePermissionsDirectoryDefault);
+    SBError
+    MakeDirectory(const char *path,
+                  uint32_t file_permissions = eFilePermissionsDirectoryDefault);
 
-  uint32_t GetFilePermissions(const char *path);
+    uint32_t GetFilePermissions(const char *path);
 
-  SBError SetFilePermissions(const char *path, uint32_t file_permissions);
+    SBError SetFilePermissions(const char *path, uint32_t file_permissions);
 
-  SBUnixSignals GetUnixSignals() const;
+    SBUnixSignals GetUnixSignals() const;
 
-  /// Return the environment variables of the remote platform connection
-  /// process.
-  ///
-  /// \return
-  ///     An lldb::SBEnvironment object which is a copy of the platform's
-  ///     environment.
-  SBEnvironment GetEnvironment();
+    /// Return the environment variables of the remote platform connection
+    /// process.
+    ///
+    /// \return
+    ///     An lldb::SBEnvironment object which is a copy of the platform's
+    ///     environment.
+    SBEnvironment GetEnvironment();
 
 protected:
-  friend class SBDebugger;
-  friend class SBTarget;
+    friend class SBDebugger;
+    friend class SBTarget;
 
-  lldb::PlatformSP GetSP() const;
+    lldb::PlatformSP GetSP() const;
 
-  void SetSP(const lldb::PlatformSP &platform_sp);
+    void SetSP(const lldb::PlatformSP &platform_sp);
 
-  SBError ExecuteConnected(
-      const std::function<lldb_private::Status(const lldb::PlatformSP &)>
-          &func);
+    SBError ExecuteConnected(
+        const std::function<lldb_private::Status(const lldb::PlatformSP &)>
+        &func);
 
-  lldb::PlatformSP m_opaque_sp;
+    lldb::PlatformSP m_opaque_sp;
 };
 
 } // namespace lldb

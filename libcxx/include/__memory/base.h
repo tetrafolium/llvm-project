@@ -42,8 +42,8 @@ inline _LIBCPP_NO_CFI _LIBCPP_INLINE_VISIBILITY
 _Tp*
 addressof(_Tp& __x) _NOEXCEPT
 {
-  return reinterpret_cast<_Tp *>(
-      const_cast<char *>(&reinterpret_cast<const volatile char &>(__x)));
+    return reinterpret_cast<_Tp *>(
+        const_cast<char *>(&reinterpret_cast<const volatile char &>(__x)));
 }
 
 #endif // _LIBCPP_HAS_NO_BUILTIN_ADDRESSOF
@@ -58,7 +58,7 @@ inline _LIBCPP_INLINE_VISIBILITY
 __strong _Tp*
 addressof(__strong _Tp& __x) _NOEXCEPT
 {
-  return &__x;
+    return &__x;
 }
 
 #ifdef _LIBCPP_HAS_OBJC_ARC_WEAK
@@ -67,7 +67,7 @@ inline _LIBCPP_INLINE_VISIBILITY
 __weak _Tp*
 addressof(__weak _Tp& __x) _NOEXCEPT
 {
-  return &__x;
+    return &__x;
 }
 #endif
 
@@ -76,7 +76,7 @@ inline _LIBCPP_INLINE_VISIBILITY
 __autoreleasing _Tp*
 addressof(__autoreleasing _Tp& __x) _NOEXCEPT
 {
-  return &__x;
+    return &__x;
 }
 
 template <class _Tp>
@@ -84,7 +84,7 @@ inline _LIBCPP_INLINE_VISIBILITY
 __unsafe_unretained _Tp*
 addressof(__unsafe_unretained _Tp& __x) _NOEXCEPT
 {
-  return &__x;
+    return &__x;
 }
 #endif
 
@@ -97,8 +97,8 @@ template <class _Tp> _Tp* addressof(const _Tp&&) noexcept = delete;
 #if _LIBCPP_STD_VER > 17
 
 template<class _Tp, class ..._Args, class = decltype(
-    ::new (_VSTD::declval<void*>()) _Tp(_VSTD::declval<_Args>()...)
-)>
+             ::new (_VSTD::declval<void*>()) _Tp(_VSTD::declval<_Args>()...)
+                                                )>
 _LIBCPP_INLINE_VISIBILITY
 constexpr _Tp* construct_at(_Tp* __location, _Args&& ...__args) {
     _LIBCPP_ASSERT(__location, "null pointer given to construct_at");

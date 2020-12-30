@@ -39,85 +39,85 @@ using namespace llvm;
 //===----------------------------------------------------------------------===//
 
 namespace llvm {
-  class DataLayout;
-  class DominatorTree;
-  class Function;
-  class Instruction;
-  class TargetLibraryInfo;
-  class TruncInst;
-  class Type;
-  class Value;
+class DataLayout;
+class DominatorTree;
+class Function;
+class Instruction;
+class TargetLibraryInfo;
+class TruncInst;
+class Type;
+class Value;
 
 class TruncInstCombine {
-  TargetLibraryInfo &TLI;
-  const DataLayout &DL;
-  const DominatorTree &DT;
+    TargetLibraryInfo &TLI;
+    const DataLayout &DL;
+    const DominatorTree &DT;
 
-  /// List of all TruncInst instructions to be processed.
-  SmallVector<TruncInst *, 4> Worklist;
+    /// List of all TruncInst instructions to be processed.
+    SmallVector<TruncInst *, 4> Worklist;
 
-  /// Current processed TruncInst instruction.
-  TruncInst *CurrentTruncInst;
+    /// Current processed TruncInst instruction.
+    TruncInst *CurrentTruncInst;
 
-  /// Information per each instruction in the expression dag.
-  struct Info {
-    /// Number of LSBs that are needed to generate a valid expression.
-    unsigned ValidBitWidth = 0;
-    /// Minimum number of LSBs needed to generate the ValidBitWidth.
-    unsigned MinBitWidth = 0;
-    /// The reduced value generated to replace the old instruction.
-    Value *NewValue = nullptr;
-  };
-  /// An ordered map representing expression dag post-dominated by current
-  /// processed TruncInst. It maps each instruction in the dag to its Info
-  /// structure. The map is ordered such that each instruction appears before
-  /// all other instructions in the dag that uses it.
-  MapVector<Instruction *, Info> InstInfoMap;
+    /// Information per each instruction in the expression dag.
+    struct Info {
+        /// Number of LSBs that are needed to generate a valid expression.
+        unsigned ValidBitWidth = 0;
+        /// Minimum number of LSBs needed to generate the ValidBitWidth.
+        unsigned MinBitWidth = 0;
+        /// The reduced value generated to replace the old instruction.
+        Value *NewValue = nullptr;
+    };
+    /// An ordered map representing expression dag post-dominated by current
+    /// processed TruncInst. It maps each instruction in the dag to its Info
+    /// structure. The map is ordered such that each instruction appears before
+    /// all other instructions in the dag that uses it.
+    MapVector<Instruction *, Info> InstInfoMap;
 
 public:
-  TruncInstCombine(TargetLibraryInfo &TLI, const DataLayout &DL,
-                   const DominatorTree &DT)
-      : TLI(TLI), DL(DL), DT(DT), CurrentTruncInst(nullptr) {}
+    TruncInstCombine(TargetLibraryInfo &TLI, const DataLayout &DL,
+                     const DominatorTree &DT)
+        : TLI(TLI), DL(DL), DT(DT), CurrentTruncInst(nullptr) {}
 
-  /// Perform TruncInst pattern optimization on given function.
-  bool run(Function &F);
+    /// Perform TruncInst pattern optimization on given function.
+    bool run(Function &F);
 
 private:
-  /// Build expression dag dominated by the /p CurrentTruncInst and append it to
-  /// the InstInfoMap container.
-  ///
-  /// \return true only if succeed to generate an eligible sub expression dag.
-  bool buildTruncExpressionDag();
+    /// Build expression dag dominated by the /p CurrentTruncInst and append it to
+    /// the InstInfoMap container.
+    ///
+    /// \return true only if succeed to generate an eligible sub expression dag.
+    bool buildTruncExpressionDag();
 
-  /// Calculate the minimal allowed bit-width of the chain ending with the
-  /// currently visited truncate's operand.
-  ///
-  /// \return minimum number of bits to which the chain ending with the
-  /// truncate's operand can be shrunk to.
-  unsigned getMinBitWidth();
+    /// Calculate the minimal allowed bit-width of the chain ending with the
+    /// currently visited truncate's operand.
+    ///
+    /// \return minimum number of bits to which the chain ending with the
+    /// truncate's operand can be shrunk to.
+    unsigned getMinBitWidth();
 
-  /// Build an expression dag dominated by the current processed TruncInst and
-  /// Check if it is eligible to be reduced to a smaller type.
-  ///
-  /// \return the scalar version of the new type to be used for the reduced
-  ///         expression dag, or nullptr if the expression dag is not eligible
-  ///         to be reduced.
-  Type *getBestTruncatedType();
+    /// Build an expression dag dominated by the current processed TruncInst and
+    /// Check if it is eligible to be reduced to a smaller type.
+    ///
+    /// \return the scalar version of the new type to be used for the reduced
+    ///         expression dag, or nullptr if the expression dag is not eligible
+    ///         to be reduced.
+    Type *getBestTruncatedType();
 
-  /// Given a \p V value and a \p SclTy scalar type return the generated reduced
-  /// value of \p V based on the type \p SclTy.
-  ///
-  /// \param V value to be reduced.
-  /// \param SclTy scalar version of new type to reduce to.
-  /// \return the new reduced value.
-  Value *getReducedOperand(Value *V, Type *SclTy);
+    /// Given a \p V value and a \p SclTy scalar type return the generated reduced
+    /// value of \p V based on the type \p SclTy.
+    ///
+    /// \param V value to be reduced.
+    /// \param SclTy scalar version of new type to reduce to.
+    /// \return the new reduced value.
+    Value *getReducedOperand(Value *V, Type *SclTy);
 
-  /// Create a new expression dag using the reduced /p SclTy type and replace
-  /// the old expression dag with it. Also erase all instructions in the old
-  /// dag, except those that are still needed outside the dag.
-  ///
-  /// \param SclTy scalar version of new type to reduce expression dag into.
-  void ReduceExpressionDag(Type *SclTy);
+    /// Create a new expression dag using the reduced /p SclTy type and replace
+    /// the old expression dag with it. Also erase all instructions in the old
+    /// dag, except those that are still needed outside the dag.
+    ///
+    /// \param SclTy scalar version of new type to reduce expression dag into.
+    void ReduceExpressionDag(Type *SclTy);
 };
 } // end namespace llvm.
 

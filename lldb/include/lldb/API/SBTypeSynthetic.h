@@ -16,63 +16,63 @@ namespace lldb {
 
 class LLDB_API SBTypeSynthetic {
 public:
-  SBTypeSynthetic();
+    SBTypeSynthetic();
 
-  static SBTypeSynthetic
-  CreateWithClassName(const char *data,
-                      uint32_t options = 0); // see lldb::eTypeOption values
+    static SBTypeSynthetic
+    CreateWithClassName(const char *data,
+                        uint32_t options = 0); // see lldb::eTypeOption values
 
-  static SBTypeSynthetic
-  CreateWithScriptCode(const char *data,
-                       uint32_t options = 0); // see lldb::eTypeOption values
+    static SBTypeSynthetic
+    CreateWithScriptCode(const char *data,
+                         uint32_t options = 0); // see lldb::eTypeOption values
 
-  SBTypeSynthetic(const lldb::SBTypeSynthetic &rhs);
+    SBTypeSynthetic(const lldb::SBTypeSynthetic &rhs);
 
-  ~SBTypeSynthetic();
+    ~SBTypeSynthetic();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  bool IsClassCode();
+    bool IsClassCode();
 
-  bool IsClassName();
+    bool IsClassName();
 
-  const char *GetData();
+    const char *GetData();
 
-  void SetClassName(const char *data);
+    void SetClassName(const char *data);
 
-  void SetClassCode(const char *data);
+    void SetClassCode(const char *data);
 
-  uint32_t GetOptions();
+    uint32_t GetOptions();
 
-  void SetOptions(uint32_t);
+    void SetOptions(uint32_t);
 
-  bool GetDescription(lldb::SBStream &description,
-                      lldb::DescriptionLevel description_level);
+    bool GetDescription(lldb::SBStream &description,
+                        lldb::DescriptionLevel description_level);
 
-  lldb::SBTypeSynthetic &operator=(const lldb::SBTypeSynthetic &rhs);
+    lldb::SBTypeSynthetic &operator=(const lldb::SBTypeSynthetic &rhs);
 
-  bool IsEqualTo(lldb::SBTypeSynthetic &rhs);
+    bool IsEqualTo(lldb::SBTypeSynthetic &rhs);
 
-  bool operator==(lldb::SBTypeSynthetic &rhs);
+    bool operator==(lldb::SBTypeSynthetic &rhs);
 
-  bool operator!=(lldb::SBTypeSynthetic &rhs);
+    bool operator!=(lldb::SBTypeSynthetic &rhs);
 
 protected:
-  friend class SBDebugger;
-  friend class SBTypeCategory;
-  friend class SBValue;
+    friend class SBDebugger;
+    friend class SBTypeCategory;
+    friend class SBValue;
 
-  lldb::ScriptedSyntheticChildrenSP GetSP();
+    lldb::ScriptedSyntheticChildrenSP GetSP();
 
-  void SetSP(const lldb::ScriptedSyntheticChildrenSP &typefilter_impl_sp);
+    void SetSP(const lldb::ScriptedSyntheticChildrenSP &typefilter_impl_sp);
 
-  lldb::ScriptedSyntheticChildrenSP m_opaque_sp;
+    lldb::ScriptedSyntheticChildrenSP m_opaque_sp;
 
-  SBTypeSynthetic(const lldb::ScriptedSyntheticChildrenSP &);
+    SBTypeSynthetic(const lldb::ScriptedSyntheticChildrenSP &);
 
-  bool CopyOnWrite_Impl();
+    bool CopyOnWrite_Impl();
 };
 
 } // namespace lldb

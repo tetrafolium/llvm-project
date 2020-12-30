@@ -19,17 +19,17 @@ class DIASession;
 
 class DIAEnumSymbols : public IPDBEnumChildren<PDBSymbol> {
 public:
-  explicit DIAEnumSymbols(const DIASession &Session,
-                          CComPtr<IDiaEnumSymbols> DiaEnumerator);
+    explicit DIAEnumSymbols(const DIASession &Session,
+                            CComPtr<IDiaEnumSymbols> DiaEnumerator);
 
-  uint32_t getChildCount() const override;
-  std::unique_ptr<PDBSymbol> getChildAtIndex(uint32_t Index) const override;
-  std::unique_ptr<PDBSymbol> getNext() override;
-  void reset() override;
+    uint32_t getChildCount() const override;
+    std::unique_ptr<PDBSymbol> getChildAtIndex(uint32_t Index) const override;
+    std::unique_ptr<PDBSymbol> getNext() override;
+    void reset() override;
 
 private:
-  const DIASession &Session;
-  CComPtr<IDiaEnumSymbols> Enumerator;
+    const DIASession &Session;
+    CComPtr<IDiaEnumSymbols> Enumerator;
 };
 }
 }

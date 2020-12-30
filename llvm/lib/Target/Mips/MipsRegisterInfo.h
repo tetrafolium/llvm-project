@@ -26,56 +26,56 @@ class TargetRegisterClass;
 
 class MipsRegisterInfo : public MipsGenRegisterInfo {
 public:
-  enum class MipsPtrClass {
-    /// The default register class for integer values.
-    Default = 0,
-    /// The subset of registers permitted in certain microMIPS instructions
-    /// such as lw16.
-    GPR16MM = 1,
-    /// The stack pointer only.
-    StackPointer = 2,
-    /// The global pointer only.
-    GlobalPointer = 3,
-  };
+    enum class MipsPtrClass {
+        /// The default register class for integer values.
+        Default = 0,
+        /// The subset of registers permitted in certain microMIPS instructions
+        /// such as lw16.
+        GPR16MM = 1,
+        /// The stack pointer only.
+        StackPointer = 2,
+        /// The global pointer only.
+        GlobalPointer = 3,
+    };
 
-  MipsRegisterInfo();
+    MipsRegisterInfo();
 
-  /// Get PIC indirect call register
-  static unsigned getPICCallReg();
+    /// Get PIC indirect call register
+    static unsigned getPICCallReg();
 
-  /// Code Generation virtual methods...
-  const TargetRegisterClass *getPointerRegClass(const MachineFunction &MF,
-                                                unsigned Kind) const override;
+    /// Code Generation virtual methods...
+    const TargetRegisterClass *getPointerRegClass(const MachineFunction &MF,
+            unsigned Kind) const override;
 
-  unsigned getRegPressureLimit(const TargetRegisterClass *RC,
-                               MachineFunction &MF) const override;
-  const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
-  const uint32_t *getCallPreservedMask(const MachineFunction &MF,
-                                       CallingConv::ID) const override;
-  static const uint32_t *getMips16RetHelperMask();
+    unsigned getRegPressureLimit(const TargetRegisterClass *RC,
+                                 MachineFunction &MF) const override;
+    const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
+    const uint32_t *getCallPreservedMask(const MachineFunction &MF,
+                                         CallingConv::ID) const override;
+    static const uint32_t *getMips16RetHelperMask();
 
-  BitVector getReservedRegs(const MachineFunction &MF) const override;
+    BitVector getReservedRegs(const MachineFunction &MF) const override;
 
-  bool requiresRegisterScavenging(const MachineFunction &MF) const override;
+    bool requiresRegisterScavenging(const MachineFunction &MF) const override;
 
-  /// Stack Frame Processing Methods
-  void eliminateFrameIndex(MachineBasicBlock::iterator II,
-                           int SPAdj, unsigned FIOperandNum,
-                           RegScavenger *RS = nullptr) const override;
+    /// Stack Frame Processing Methods
+    void eliminateFrameIndex(MachineBasicBlock::iterator II,
+                             int SPAdj, unsigned FIOperandNum,
+                             RegScavenger *RS = nullptr) const override;
 
-  // Stack realignment queries.
-  bool canRealignStack(const MachineFunction &MF) const override;
+    // Stack realignment queries.
+    bool canRealignStack(const MachineFunction &MF) const override;
 
-  /// Debug information queries.
-  Register getFrameRegister(const MachineFunction &MF) const override;
+    /// Debug information queries.
+    Register getFrameRegister(const MachineFunction &MF) const override;
 
-  /// Return GPR register class.
-  virtual const TargetRegisterClass *intRegClass(unsigned Size) const = 0;
+    /// Return GPR register class.
+    virtual const TargetRegisterClass *intRegClass(unsigned Size) const = 0;
 
 private:
-  virtual void eliminateFI(MachineBasicBlock::iterator II, unsigned OpNo,
-                           int FrameIndex, uint64_t StackSize,
-                           int64_t SPOffset) const = 0;
+    virtual void eliminateFI(MachineBasicBlock::iterator II, unsigned OpNo,
+                             int FrameIndex, uint64_t StackSize,
+                             int64_t SPOffset) const = 0;
 };
 
 } // end namespace llvm

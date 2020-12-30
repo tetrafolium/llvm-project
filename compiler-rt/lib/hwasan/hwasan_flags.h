@@ -19,7 +19,7 @@ struct Flags {
 #include "hwasan_flags.inc"
 #undef HWASAN_FLAG
 
-  void SetDefaults();
+    void SetDefaults();
 };
 
 Flags *flags();

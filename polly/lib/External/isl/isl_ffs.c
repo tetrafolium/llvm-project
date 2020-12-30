@@ -14,11 +14,11 @@
  */
 int isl_ffs(int i)
 {
-	unsigned char non_zero;
-	unsigned long index, mask = i;
+    unsigned char non_zero;
+    unsigned long index, mask = i;
 
-	non_zero = _BitScanForward(&index, mask);
+    non_zero = _BitScanForward(&index, mask);
 
-	return non_zero ? 1 + index : 0;
+    return non_zero ? 1 + index : 0;
 }
 #endif

@@ -27,24 +27,24 @@ namespace comments {
 /// \li the first paragraph,
 /// \li a \\result or \\return or \\returns paragraph.
 class BriefParser {
-  Lexer &L;
+    Lexer &L;
 
-  const CommandTraits &Traits;
+    const CommandTraits &Traits;
 
-  /// Current lookahead token.
-  Token Tok;
+    /// Current lookahead token.
+    Token Tok;
 
-  SourceLocation ConsumeToken() {
-    SourceLocation Loc = Tok.getLocation();
-    L.lex(Tok);
-    return Loc;
-  }
+    SourceLocation ConsumeToken() {
+        SourceLocation Loc = Tok.getLocation();
+        L.lex(Tok);
+        return Loc;
+    }
 
 public:
-  BriefParser(Lexer &L, const CommandTraits &Traits);
+    BriefParser(Lexer &L, const CommandTraits &Traits);
 
-  /// Return the best "brief description" we can find.
-  std::string Parse();
+    /// Return the best "brief description" we can find.
+    std::string Parse();
 };
 
 } // end namespace comments

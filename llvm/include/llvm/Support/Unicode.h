@@ -21,8 +21,8 @@ namespace sys {
 namespace unicode {
 
 enum ColumnWidthErrors {
-  ErrorInvalidUTF8 = -2,
-  ErrorNonPrintableCharacter = -1
+    ErrorInvalidUTF8 = -2,
+    ErrorNonPrintableCharacter = -1
 };
 
 /// Determines if a character is likely to be displayed correctly on the

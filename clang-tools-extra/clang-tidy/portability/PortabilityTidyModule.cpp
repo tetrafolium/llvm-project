@@ -18,17 +18,17 @@ namespace portability {
 
 class PortabilityModule : public ClangTidyModule {
 public:
-  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<RestrictSystemIncludesCheck>(
-        "portability-restrict-system-includes");
-    CheckFactories.registerCheck<SIMDIntrinsicsCheck>(
-        "portability-simd-intrinsics");
-  }
+    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+        CheckFactories.registerCheck<RestrictSystemIncludesCheck>(
+            "portability-restrict-system-includes");
+        CheckFactories.registerCheck<SIMDIntrinsicsCheck>(
+            "portability-simd-intrinsics");
+    }
 };
 
 // Register the PortabilityModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<PortabilityModule>
-    X("portability-module", "Adds portability-related checks.");
+X("portability-module", "Adds portability-related checks.");
 
 } // namespace portability
 

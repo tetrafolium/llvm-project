@@ -17,9 +17,9 @@ namespace lldb_private {
 
 class CommandObjectReproducer : public CommandObjectMultiword {
 public:
-  CommandObjectReproducer(CommandInterpreter &interpreter);
+    CommandObjectReproducer(CommandInterpreter &interpreter);
 
-  ~CommandObjectReproducer() override;
+    ~CommandObjectReproducer() override;
 };
 
 } // namespace lldb_private

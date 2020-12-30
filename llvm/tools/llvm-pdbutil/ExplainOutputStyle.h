@@ -25,41 +25,41 @@ class InputFile;
 class ExplainOutputStyle : public OutputStyle {
 
 public:
-  ExplainOutputStyle(InputFile &File, uint64_t FileOffset);
+    ExplainOutputStyle(InputFile &File, uint64_t FileOffset);
 
-  Error dump() override;
+    Error dump() override;
 
 private:
-  Error explainPdbFile();
-  Error explainBinaryFile();
+    Error explainPdbFile();
+    Error explainBinaryFile();
 
-  bool explainPdbBlockStatus();
+    bool explainPdbBlockStatus();
 
-  bool isPdbFpm1() const;
-  bool isPdbFpm2() const;
+    bool isPdbFpm1() const;
+    bool isPdbFpm2() const;
 
-  bool isPdbSuperBlock() const;
-  bool isPdbFpmBlock() const;
-  bool isPdbBlockMapBlock() const;
-  bool isPdbStreamDirectoryBlock() const;
-  Optional<uint32_t> getPdbBlockStreamIndex() const;
+    bool isPdbSuperBlock() const;
+    bool isPdbFpmBlock() const;
+    bool isPdbBlockMapBlock() const;
+    bool isPdbStreamDirectoryBlock() const;
+    Optional<uint32_t> getPdbBlockStreamIndex() const;
 
-  void explainPdbSuperBlockOffset();
-  void explainPdbFpmBlockOffset();
-  void explainPdbBlockMapOffset();
-  void explainPdbStreamDirectoryOffset();
-  void explainPdbStreamOffset(uint32_t Stream);
-  void explainPdbUnknownBlock();
+    void explainPdbSuperBlockOffset();
+    void explainPdbFpmBlockOffset();
+    void explainPdbBlockMapOffset();
+    void explainPdbStreamDirectoryOffset();
+    void explainPdbStreamOffset(uint32_t Stream);
+    void explainPdbUnknownBlock();
 
-  void explainStreamOffset(DbiStream &Stream, uint32_t OffsetInStream);
-  void explainStreamOffset(InfoStream &Stream, uint32_t OffsetInStream);
+    void explainStreamOffset(DbiStream &Stream, uint32_t OffsetInStream);
+    void explainStreamOffset(InfoStream &Stream, uint32_t OffsetInStream);
 
-  uint32_t pdbBlockIndex() const;
-  uint32_t pdbBlockOffset() const;
+    uint32_t pdbBlockIndex() const;
+    uint32_t pdbBlockOffset() const;
 
-  InputFile &File;
-  const uint64_t FileOffset;
-  LinePrinter P;
+    InputFile &File;
+    const uint64_t FileOffset;
+    LinePrinter P;
 };
 } // namespace pdb
 } // namespace llvm

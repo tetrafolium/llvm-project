@@ -48,114 +48,142 @@ class StringRef;
 
 class StatisticBase {
 public:
-  const char *DebugType;
-  const char *Name;
-  const char *Desc;
+    const char *DebugType;
+    const char *Name;
+    const char *Desc;
 
-  StatisticBase(const char *DebugType, const char *Name, const char *Desc)
-      : DebugType(DebugType), Name(Name), Desc(Desc) {}
+    StatisticBase(const char *DebugType, const char *Name, const char *Desc)
+        : DebugType(DebugType), Name(Name), Desc(Desc) {}
 
-  const char *getDebugType() const { return DebugType; }
-  const char *getName() const { return Name; }
-  const char *getDesc() const { return Desc; }
+    const char *getDebugType() const {
+        return DebugType;
+    }
+    const char *getName() const {
+        return Name;
+    }
+    const char *getDesc() const {
+        return Desc;
+    }
 };
 
 class TrackingStatistic : public StatisticBase {
 public:
-  std::atomic<unsigned> Value;
-  std::atomic<bool> Initialized;
+    std::atomic<unsigned> Value;
+    std::atomic<bool> Initialized;
 
-  TrackingStatistic(const char *DebugType, const char *Name, const char *Desc)
-      : StatisticBase(DebugType, Name, Desc), Value(0), Initialized(false) {}
+    TrackingStatistic(const char *DebugType, const char *Name, const char *Desc)
+        : StatisticBase(DebugType, Name, Desc), Value(0), Initialized(false) {}
 
-  unsigned getValue() const { return Value.load(std::memory_order_relaxed); }
-
-  // Allow use of this class as the value itself.
-  operator unsigned() const { return getValue(); }
-
-  const TrackingStatistic &operator=(unsigned Val) {
-    Value.store(Val, std::memory_order_relaxed);
-    return init();
-  }
-
-  const TrackingStatistic &operator++() {
-    Value.fetch_add(1, std::memory_order_relaxed);
-    return init();
-  }
-
-  unsigned operator++(int) {
-    init();
-    return Value.fetch_add(1, std::memory_order_relaxed);
-  }
-
-  const TrackingStatistic &operator--() {
-    Value.fetch_sub(1, std::memory_order_relaxed);
-    return init();
-  }
-
-  unsigned operator--(int) {
-    init();
-    return Value.fetch_sub(1, std::memory_order_relaxed);
-  }
-
-  const TrackingStatistic &operator+=(unsigned V) {
-    if (V == 0)
-      return *this;
-    Value.fetch_add(V, std::memory_order_relaxed);
-    return init();
-  }
-
-  const TrackingStatistic &operator-=(unsigned V) {
-    if (V == 0)
-      return *this;
-    Value.fetch_sub(V, std::memory_order_relaxed);
-    return init();
-  }
-
-  void updateMax(unsigned V) {
-    unsigned PrevMax = Value.load(std::memory_order_relaxed);
-    // Keep trying to update max until we succeed or another thread produces
-    // a bigger max than us.
-    while (V > PrevMax && !Value.compare_exchange_weak(
-                              PrevMax, V, std::memory_order_relaxed)) {
+    unsigned getValue() const {
+        return Value.load(std::memory_order_relaxed);
     }
-    init();
-  }
+
+    // Allow use of this class as the value itself.
+    operator unsigned() const {
+        return getValue();
+    }
+
+    const TrackingStatistic &operator=(unsigned Val) {
+        Value.store(Val, std::memory_order_relaxed);
+        return init();
+    }
+
+    const TrackingStatistic &operator++() {
+        Value.fetch_add(1, std::memory_order_relaxed);
+        return init();
+    }
+
+    unsigned operator++(int) {
+        init();
+        return Value.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    const TrackingStatistic &operator--() {
+        Value.fetch_sub(1, std::memory_order_relaxed);
+        return init();
+    }
+
+    unsigned operator--(int) {
+        init();
+        return Value.fetch_sub(1, std::memory_order_relaxed);
+    }
+
+    const TrackingStatistic &operator+=(unsigned V) {
+        if (V == 0)
+            return *this;
+        Value.fetch_add(V, std::memory_order_relaxed);
+        return init();
+    }
+
+    const TrackingStatistic &operator-=(unsigned V) {
+        if (V == 0)
+            return *this;
+        Value.fetch_sub(V, std::memory_order_relaxed);
+        return init();
+    }
+
+    void updateMax(unsigned V) {
+        unsigned PrevMax = Value.load(std::memory_order_relaxed);
+        // Keep trying to update max until we succeed or another thread produces
+        // a bigger max than us.
+        while (V > PrevMax && !Value.compare_exchange_weak(
+                    PrevMax, V, std::memory_order_relaxed)) {
+        }
+        init();
+    }
 
 protected:
-  TrackingStatistic &init() {
-    if (!Initialized.load(std::memory_order_acquire))
-      RegisterStatistic();
-    return *this;
-  }
+    TrackingStatistic &init() {
+        if (!Initialized.load(std::memory_order_acquire))
+            RegisterStatistic();
+        return *this;
+    }
 
-  void RegisterStatistic();
+    void RegisterStatistic();
 };
 
 class NoopStatistic : public StatisticBase {
 public:
-  using StatisticBase::StatisticBase;
+    using StatisticBase::StatisticBase;
 
-  unsigned getValue() const { return 0; }
+    unsigned getValue() const {
+        return 0;
+    }
 
-  // Allow use of this class as the value itself.
-  operator unsigned() const { return 0; }
+    // Allow use of this class as the value itself.
+    operator unsigned() const {
+        return 0;
+    }
 
-  const NoopStatistic &operator=(unsigned Val) { return *this; }
+    const NoopStatistic &operator=(unsigned Val) {
+        return *this;
+    }
 
-  const NoopStatistic &operator++() { return *this; }
+    const NoopStatistic &operator++() {
+        return *this;
+    }
 
-  unsigned operator++(int) { return 0; }
+    unsigned operator++(int) {
+        return 0;
+    }
 
-  const NoopStatistic &operator--() { return *this; }
+    const NoopStatistic &operator--() {
+        return *this;
+    }
 
-  unsigned operator--(int) { return 0; }
+    unsigned operator--(int) {
+        return 0;
+    }
 
-  const NoopStatistic &operator+=(const unsigned &V) { return *this; }
+    const NoopStatistic &operator+=(const unsigned &V) {
+        return *this;
+    }
 
-  const NoopStatistic &operator-=(const unsigned &V) { return *this; }
+    const NoopStatistic &operator-=(const unsigned &V) {
+        return *this;
+    }
 
-  void updateMax(unsigned V) {}
+    void updateMax(unsigned V) {}
 };
 
 #if LLVM_ENABLE_STATS

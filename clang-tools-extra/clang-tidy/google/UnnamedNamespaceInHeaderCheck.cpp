@@ -22,18 +22,18 @@ UnnamedNamespaceInHeaderCheck::UnnamedNamespaceInHeaderCheck(
     StringRef Name, ClangTidyContext *Context)
     : ClangTidyCheck(Name, Context),
       RawStringHeaderFileExtensions(Options.getLocalOrGlobal(
-          "HeaderFileExtensions", utils::defaultHeaderFileExtensions())) {
-  if (!utils::parseFileExtensions(RawStringHeaderFileExtensions,
-                                  HeaderFileExtensions,
-                                  utils::defaultFileExtensionDelimiters())) {
-    this->configurationDiag("Invalid header file extension: '%0'")
-        << RawStringHeaderFileExtensions;
-  }
+                                        "HeaderFileExtensions", utils::defaultHeaderFileExtensions())) {
+    if (!utils::parseFileExtensions(RawStringHeaderFileExtensions,
+                                    HeaderFileExtensions,
+                                    utils::defaultFileExtensionDelimiters())) {
+        this->configurationDiag("Invalid header file extension: '%0'")
+                << RawStringHeaderFileExtensions;
+    }
 }
 
 void UnnamedNamespaceInHeaderCheck::storeOptions(
     ClangTidyOptions::OptionMap &Opts) {
-  Options.store(Opts, "HeaderFileExtensions", RawStringHeaderFileExtensions);
+    Options.store(Opts, "HeaderFileExtensions", RawStringHeaderFileExtensions);
 }
 
 void UnnamedNamespaceInHeaderCheck::registerMatchers(
@@ -44,14 +44,14 @@ void UnnamedNamespaceInHeaderCheck::registerMatchers(
 
 void UnnamedNamespaceInHeaderCheck::check(
     const MatchFinder::MatchResult &Result) {
-  const auto *N = Result.Nodes.getNodeAs<NamespaceDecl>("anonymousNamespace");
-  SourceLocation Loc = N->getBeginLoc();
-  if (!Loc.isValid())
-    return;
+    const auto *N = Result.Nodes.getNodeAs<NamespaceDecl>("anonymousNamespace");
+    SourceLocation Loc = N->getBeginLoc();
+    if (!Loc.isValid())
+        return;
 
-  if (utils::isPresumedLocInHeaderFile(Loc, *Result.SourceManager,
-                                       HeaderFileExtensions))
-    diag(Loc, "do not use unnamed namespaces in header files");
+    if (utils::isPresumedLocInHeaderFile(Loc, *Result.SourceManager,
+                                         HeaderFileExtensions))
+        diag(Loc, "do not use unnamed namespaces in header files");
 }
 
 } // namespace build

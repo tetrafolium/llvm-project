@@ -15,7 +15,7 @@
 /// Example of bottleneck analysis report for a dot-product on X86 btver2:
 ///
 /// Cycles with backend pressure increase [ 40.76% ]
-/// Throughput Bottlenecks: 
+/// Throughput Bottlenecks:
 ///   Resource Pressure       [ 39.34% ]
 ///   - JFPA  [ 39.34% ]
 ///   - JFPU0  [ 39.34% ]
@@ -43,20 +43,20 @@
 ///              Instruction                     Dependency Information
 /// +----< 2.    vhaddps %xmm3, %xmm3, %xmm4
 /// |
-/// |    < loop carried > 
+/// |    < loop carried >
 /// |
 /// |      0.    vmulps	 %xmm0, %xmm0, %xmm2
 /// +----> 1.    vhaddps %xmm2, %xmm2, %xmm3     ## RESOURCE interference:  JFPA [ probability: 73% ]
 /// +----> 2.    vhaddps %xmm3, %xmm3, %xmm4     ## REGISTER dependency:  %xmm3
 /// |
-/// |    < loop carried > 
+/// |    < loop carried >
 /// |
 /// +----> 1.    vhaddps %xmm2, %xmm2, %xmm3     ## RESOURCE interference:  JFPA [ probability: 73% ]
 ///
 ///
 /// The algorithm that computes the critical sequence is very similar to a
 /// critical path analysis.
-/// 
+///
 /// A dependency graph is used internally to track dependencies between nodes.
 /// Nodes of the graph represent instructions from the input assembly sequence,
 /// and edges of the graph represent data dependencies or processor resource
@@ -93,109 +93,109 @@ namespace llvm {
 namespace mca {
 
 class PressureTracker {
-  const MCSchedModel &SM;
+    const MCSchedModel &SM;
 
-  // Resource pressure distribution. There is an element for every processor
-  // resource declared by the scheduling model. Quantities are number of cycles.
-  SmallVector<unsigned, 4> ResourcePressureDistribution;
+    // Resource pressure distribution. There is an element for every processor
+    // resource declared by the scheduling model. Quantities are number of cycles.
+    SmallVector<unsigned, 4> ResourcePressureDistribution;
 
-  // Each processor resource is associated with a so-called processor resource
-  // mask. This vector allows to correlate processor resource IDs with processor
-  // resource masks. There is exactly one element per each processor resource
-  // declared by the scheduling model.
-  SmallVector<uint64_t, 4> ProcResID2Mask;
+    // Each processor resource is associated with a so-called processor resource
+    // mask. This vector allows to correlate processor resource IDs with processor
+    // resource masks. There is exactly one element per each processor resource
+    // declared by the scheduling model.
+    SmallVector<uint64_t, 4> ProcResID2Mask;
 
-  // Maps processor resource state indices (returned by calls to
-  // `getResourceStateIndex(Mask)` to processor resource identifiers.
-  SmallVector<unsigned, 4> ResIdx2ProcResID;
+    // Maps processor resource state indices (returned by calls to
+    // `getResourceStateIndex(Mask)` to processor resource identifiers.
+    SmallVector<unsigned, 4> ResIdx2ProcResID;
 
-  // Maps Processor Resource identifiers to ResourceUsers indices.
-  SmallVector<unsigned, 4> ProcResID2ResourceUsersIndex;
+    // Maps Processor Resource identifiers to ResourceUsers indices.
+    SmallVector<unsigned, 4> ProcResID2ResourceUsersIndex;
 
-  // Identifies the last user of a processor resource unit.
-  // This vector is updated on every instruction issued event.
-  // There is one entry for every processor resource unit declared by the
-  // processor model. An all_ones value is treated like an invalid instruction
-  // identifier.
-  using User = std::pair<unsigned, unsigned>;
-  SmallVector<User, 4> ResourceUsers;
+    // Identifies the last user of a processor resource unit.
+    // This vector is updated on every instruction issued event.
+    // There is one entry for every processor resource unit declared by the
+    // processor model. An all_ones value is treated like an invalid instruction
+    // identifier.
+    using User = std::pair<unsigned, unsigned>;
+    SmallVector<User, 4> ResourceUsers;
 
-  struct InstructionPressureInfo {
-    unsigned RegisterPressureCycles;
-    unsigned MemoryPressureCycles;
-    unsigned ResourcePressureCycles;
-  };
-  DenseMap<unsigned, InstructionPressureInfo> IPI;
+    struct InstructionPressureInfo {
+        unsigned RegisterPressureCycles;
+        unsigned MemoryPressureCycles;
+        unsigned ResourcePressureCycles;
+    };
+    DenseMap<unsigned, InstructionPressureInfo> IPI;
 
-  void updateResourcePressureDistribution(uint64_t CumulativeMask);
+    void updateResourcePressureDistribution(uint64_t CumulativeMask);
 
-  User getResourceUser(unsigned ProcResID, unsigned UnitID) const {
-    unsigned Index = ProcResID2ResourceUsersIndex[ProcResID];
-    return ResourceUsers[Index + UnitID];
-  }
+    User getResourceUser(unsigned ProcResID, unsigned UnitID) const {
+        unsigned Index = ProcResID2ResourceUsersIndex[ProcResID];
+        return ResourceUsers[Index + UnitID];
+    }
 
 public:
-  PressureTracker(const MCSchedModel &Model);
+    PressureTracker(const MCSchedModel &Model);
 
-  ArrayRef<unsigned> getResourcePressureDistribution() const {
-    return ResourcePressureDistribution;
-  }
+    ArrayRef<unsigned> getResourcePressureDistribution() const {
+        return ResourcePressureDistribution;
+    }
 
-  void getResourceUsers(uint64_t ResourceMask,
-                        SmallVectorImpl<User> &Users) const;
+    void getResourceUsers(uint64_t ResourceMask,
+                          SmallVectorImpl<User> &Users) const;
 
-  unsigned getRegisterPressureCycles(unsigned IID) const {
-    assert(IPI.find(IID) != IPI.end() && "Instruction is not tracked!");
-    const InstructionPressureInfo &Info = IPI.find(IID)->second;
-    return Info.RegisterPressureCycles;
-  }
+    unsigned getRegisterPressureCycles(unsigned IID) const {
+        assert(IPI.find(IID) != IPI.end() && "Instruction is not tracked!");
+        const InstructionPressureInfo &Info = IPI.find(IID)->second;
+        return Info.RegisterPressureCycles;
+    }
 
-  unsigned getMemoryPressureCycles(unsigned IID) const {
-    assert(IPI.find(IID) != IPI.end() && "Instruction is not tracked!");
-    const InstructionPressureInfo &Info = IPI.find(IID)->second;
-    return Info.MemoryPressureCycles;
-  }
+    unsigned getMemoryPressureCycles(unsigned IID) const {
+        assert(IPI.find(IID) != IPI.end() && "Instruction is not tracked!");
+        const InstructionPressureInfo &Info = IPI.find(IID)->second;
+        return Info.MemoryPressureCycles;
+    }
 
-  unsigned getResourcePressureCycles(unsigned IID) const {
-    assert(IPI.find(IID) != IPI.end() && "Instruction is not tracked!");
-    const InstructionPressureInfo &Info = IPI.find(IID)->second;
-    return Info.ResourcePressureCycles;
-  }
+    unsigned getResourcePressureCycles(unsigned IID) const {
+        assert(IPI.find(IID) != IPI.end() && "Instruction is not tracked!");
+        const InstructionPressureInfo &Info = IPI.find(IID)->second;
+        return Info.ResourcePressureCycles;
+    }
 
-  const char *resolveResourceName(uint64_t ResourceMask) const {
-    unsigned Index = getResourceStateIndex(ResourceMask);
-    unsigned ProcResID = ResIdx2ProcResID[Index];
-    const MCProcResourceDesc &PRDesc = *SM.getProcResource(ProcResID);
-    return PRDesc.Name;
-  }
+    const char *resolveResourceName(uint64_t ResourceMask) const {
+        unsigned Index = getResourceStateIndex(ResourceMask);
+        unsigned ProcResID = ResIdx2ProcResID[Index];
+        const MCProcResourceDesc &PRDesc = *SM.getProcResource(ProcResID);
+        return PRDesc.Name;
+    }
 
-  void onInstructionDispatched(unsigned IID);
-  void onInstructionExecuted(unsigned IID);
+    void onInstructionDispatched(unsigned IID);
+    void onInstructionExecuted(unsigned IID);
 
-  void handlePressureEvent(const HWPressureEvent &Event);
-  void handleInstructionIssuedEvent(const HWInstructionIssuedEvent &Event);
+    void handlePressureEvent(const HWPressureEvent &Event);
+    void handleInstructionIssuedEvent(const HWInstructionIssuedEvent &Event);
 };
 
 // A dependency edge.
 struct DependencyEdge {
-  enum DependencyType { DT_INVALID, DT_REGISTER, DT_MEMORY, DT_RESOURCE };
+    enum DependencyType { DT_INVALID, DT_REGISTER, DT_MEMORY, DT_RESOURCE };
 
-  // Dependency edge descriptor.
-  //
-  // It specifies the dependency type, as well as the edge cost in cycles.
-  struct Dependency {
-    DependencyType Type;
-    uint64_t ResourceOrRegID;
-    uint64_t Cost;
-  };
-  Dependency Dep;
+    // Dependency edge descriptor.
+    //
+    // It specifies the dependency type, as well as the edge cost in cycles.
+    struct Dependency {
+        DependencyType Type;
+        uint64_t ResourceOrRegID;
+        uint64_t Cost;
+    };
+    Dependency Dep;
 
-  unsigned FromIID;
-  unsigned ToIID;
+    unsigned FromIID;
+    unsigned ToIID;
 
-  // Used by the bottleneck analysis to compute the interference
-  // probability for processor resources.
-  unsigned Frequency;
+    // Used by the bottleneck analysis to compute the interference
+    // probability for processor resources.
+    unsigned Frequency;
 };
 
 // A dependency graph used by the bottleneck analysis to describe data
@@ -220,121 +220,125 @@ struct DependencyEdge {
 // future" iterations. The graph is kept acyclic mainly because it simplifies the
 // complexity of the algorithm that computes the critical sequence.
 class DependencyGraph {
-  struct DGNode {
-    unsigned NumPredecessors;
-    unsigned NumVisitedPredecessors;
-    uint64_t Cost;
-    unsigned Depth;
+    struct DGNode {
+        unsigned NumPredecessors;
+        unsigned NumVisitedPredecessors;
+        uint64_t Cost;
+        unsigned Depth;
 
-    DependencyEdge CriticalPredecessor;
-    SmallVector<DependencyEdge, 8> OutgoingEdges;
-  };
-  SmallVector<DGNode, 16> Nodes;
+        DependencyEdge CriticalPredecessor;
+        SmallVector<DependencyEdge, 8> OutgoingEdges;
+    };
+    SmallVector<DGNode, 16> Nodes;
 
-  DependencyGraph(const DependencyGraph &) = delete;
-  DependencyGraph &operator=(const DependencyGraph &) = delete;
+    DependencyGraph(const DependencyGraph &) = delete;
+    DependencyGraph &operator=(const DependencyGraph &) = delete;
 
-  void addDependency(unsigned From, unsigned To,
-                     DependencyEdge::Dependency &&DE);
+    void addDependency(unsigned From, unsigned To,
+                       DependencyEdge::Dependency &&DE);
 
-  void pruneEdges(unsigned Iterations);
-  void initializeRootSet(SmallVectorImpl<unsigned> &RootSet) const;
-  void propagateThroughEdges(SmallVectorImpl<unsigned> &RootSet, unsigned Iterations);
+    void pruneEdges(unsigned Iterations);
+    void initializeRootSet(SmallVectorImpl<unsigned> &RootSet) const;
+    void propagateThroughEdges(SmallVectorImpl<unsigned> &RootSet, unsigned Iterations);
 
 #ifndef NDEBUG
-  void dumpDependencyEdge(raw_ostream &OS, const DependencyEdge &DE,
-                          MCInstPrinter &MCIP) const;
+    void dumpDependencyEdge(raw_ostream &OS, const DependencyEdge &DE,
+                            MCInstPrinter &MCIP) const;
 #endif
 
 public:
-  DependencyGraph(unsigned Size) : Nodes(Size) {}
+    DependencyGraph(unsigned Size) : Nodes(Size) {}
 
-  void addRegisterDep(unsigned From, unsigned To, unsigned RegID,
-                      unsigned Cost) {
-    addDependency(From, To, {DependencyEdge::DT_REGISTER, RegID, Cost});
-  }
+    void addRegisterDep(unsigned From, unsigned To, unsigned RegID,
+                        unsigned Cost) {
+        addDependency(From, To, {DependencyEdge::DT_REGISTER, RegID, Cost});
+    }
 
-  void addMemoryDep(unsigned From, unsigned To, unsigned Cost) {
-    addDependency(From, To, {DependencyEdge::DT_MEMORY, /* unused */ 0, Cost});
-  }
+    void addMemoryDep(unsigned From, unsigned To, unsigned Cost) {
+        addDependency(From, To, {DependencyEdge::DT_MEMORY, /* unused */ 0, Cost});
+    }
 
-  void addResourceDep(unsigned From, unsigned To, uint64_t Mask,
-                      unsigned Cost) {
-    addDependency(From, To, {DependencyEdge::DT_RESOURCE, Mask, Cost});
-  }
+    void addResourceDep(unsigned From, unsigned To, uint64_t Mask,
+                        unsigned Cost) {
+        addDependency(From, To, {DependencyEdge::DT_RESOURCE, Mask, Cost});
+    }
 
-  // Called by the bottleneck analysis at the end of simulation to propagate
-  // costs through the edges of the graph, and compute a critical path.
-  void finalizeGraph(unsigned Iterations) {
-    SmallVector<unsigned, 16> RootSet;
-    pruneEdges(Iterations);
-    initializeRootSet(RootSet);
-    propagateThroughEdges(RootSet, Iterations);
-  }
+    // Called by the bottleneck analysis at the end of simulation to propagate
+    // costs through the edges of the graph, and compute a critical path.
+    void finalizeGraph(unsigned Iterations) {
+        SmallVector<unsigned, 16> RootSet;
+        pruneEdges(Iterations);
+        initializeRootSet(RootSet);
+        propagateThroughEdges(RootSet, Iterations);
+    }
 
-  // Returns a sequence of edges representing the critical sequence based on the
-  // simulated run. It assumes that the graph has already been finalized (i.e.
-  // method `finalizeGraph()` has already been called on this graph).
-  void getCriticalSequence(SmallVectorImpl<const DependencyEdge *> &Seq) const;
+    // Returns a sequence of edges representing the critical sequence based on the
+    // simulated run. It assumes that the graph has already been finalized (i.e.
+    // method `finalizeGraph()` has already been called on this graph).
+    void getCriticalSequence(SmallVectorImpl<const DependencyEdge *> &Seq) const;
 
 #ifndef NDEBUG
-  void dump(raw_ostream &OS, MCInstPrinter &MCIP) const;
+    void dump(raw_ostream &OS, MCInstPrinter &MCIP) const;
 #endif
 };
 
 /// A view that collects and prints a few performance numbers.
 class BottleneckAnalysis : public InstructionView {
-  PressureTracker Tracker;
-  DependencyGraph DG;
+    PressureTracker Tracker;
+    DependencyGraph DG;
 
-  unsigned Iterations;
-  unsigned TotalCycles;
+    unsigned Iterations;
+    unsigned TotalCycles;
 
-  bool PressureIncreasedBecauseOfResources;
-  bool PressureIncreasedBecauseOfRegisterDependencies;
-  bool PressureIncreasedBecauseOfMemoryDependencies;
-  // True if throughput was affected by dispatch stalls.
-  bool SeenStallCycles;
+    bool PressureIncreasedBecauseOfResources;
+    bool PressureIncreasedBecauseOfRegisterDependencies;
+    bool PressureIncreasedBecauseOfMemoryDependencies;
+    // True if throughput was affected by dispatch stalls.
+    bool SeenStallCycles;
 
-  struct BackPressureInfo {
-    // Cycles where backpressure increased.
-    unsigned PressureIncreaseCycles;
-    // Cycles where backpressure increased because of pipeline pressure.
-    unsigned ResourcePressureCycles;
-    // Cycles where backpressure increased because of data dependencies.
-    unsigned DataDependencyCycles;
-    // Cycles where backpressure increased because of register dependencies.
-    unsigned RegisterDependencyCycles;
-    // Cycles where backpressure increased because of memory dependencies.
-    unsigned MemoryDependencyCycles;
-  };
-  BackPressureInfo BPI;
+    struct BackPressureInfo {
+        // Cycles where backpressure increased.
+        unsigned PressureIncreaseCycles;
+        // Cycles where backpressure increased because of pipeline pressure.
+        unsigned ResourcePressureCycles;
+        // Cycles where backpressure increased because of data dependencies.
+        unsigned DataDependencyCycles;
+        // Cycles where backpressure increased because of register dependencies.
+        unsigned RegisterDependencyCycles;
+        // Cycles where backpressure increased because of memory dependencies.
+        unsigned MemoryDependencyCycles;
+    };
+    BackPressureInfo BPI;
 
-  // Used to populate the dependency graph DG.
-  void addRegisterDep(unsigned From, unsigned To, unsigned RegID, unsigned Cy);
-  void addMemoryDep(unsigned From, unsigned To, unsigned Cy);
-  void addResourceDep(unsigned From, unsigned To, uint64_t Mask, unsigned Cy);
+    // Used to populate the dependency graph DG.
+    void addRegisterDep(unsigned From, unsigned To, unsigned RegID, unsigned Cy);
+    void addMemoryDep(unsigned From, unsigned To, unsigned Cy);
+    void addResourceDep(unsigned From, unsigned To, uint64_t Mask, unsigned Cy);
 
-  void printInstruction(formatted_raw_ostream &FOS, const MCInst &MCI,
-                        bool UseDifferentColor = false) const;
+    void printInstruction(formatted_raw_ostream &FOS, const MCInst &MCI,
+                          bool UseDifferentColor = false) const;
 
-  // Prints a bottleneck message to OS.
-  void printBottleneckHints(raw_ostream &OS) const;
-  void printCriticalSequence(raw_ostream &OS) const;
+    // Prints a bottleneck message to OS.
+    void printBottleneckHints(raw_ostream &OS) const;
+    void printCriticalSequence(raw_ostream &OS) const;
 
 public:
-  BottleneckAnalysis(const MCSubtargetInfo &STI, MCInstPrinter &MCIP,
-                     ArrayRef<MCInst> Sequence, unsigned Iterations);
+    BottleneckAnalysis(const MCSubtargetInfo &STI, MCInstPrinter &MCIP,
+                       ArrayRef<MCInst> Sequence, unsigned Iterations);
 
-  void onCycleEnd() override;
-  void onEvent(const HWStallEvent &Event) override { SeenStallCycles = true; }
-  void onEvent(const HWPressureEvent &Event) override;
-  void onEvent(const HWInstructionEvent &Event) override;
+    void onCycleEnd() override;
+    void onEvent(const HWStallEvent &Event) override {
+        SeenStallCycles = true;
+    }
+    void onEvent(const HWPressureEvent &Event) override;
+    void onEvent(const HWInstructionEvent &Event) override;
 
-  void printView(raw_ostream &OS) const override;
+    void printView(raw_ostream &OS) const override;
 
 #ifndef NDEBUG
-  void dump(raw_ostream &OS, MCInstPrinter &MCIP) const { DG.dump(OS, MCIP); }
+    void dump(raw_ostream &OS, MCInstPrinter &MCIP) const {
+        DG.dump(OS, MCIP);
+    }
 #endif
 };
 

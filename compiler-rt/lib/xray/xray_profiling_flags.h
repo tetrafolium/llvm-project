@@ -24,12 +24,12 @@ struct ProfilerFlags {
 #include "xray_profiling_flags.inc"
 #undef XRAY_FLAG
 
-  void setDefaults();
+    void setDefaults();
 };
 
 extern ProfilerFlags xray_profiling_flags_dont_use_directly;
 inline ProfilerFlags *profilingFlags() {
-  return &xray_profiling_flags_dont_use_directly;
+    return &xray_profiling_flags_dont_use_directly;
 }
 void registerProfilerFlags(FlagParser *P, ProfilerFlags *F);
 

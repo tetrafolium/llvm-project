@@ -13,7 +13,7 @@
 // and b and d are the low-order parts of x and y.
 // Thinking back to algebra, we use FOIL to do the work.
 
-_CLC_OVERLOAD _CLC_DEF long mul_hi(long x, long y){
+_CLC_OVERLOAD _CLC_DEF long mul_hi(long x, long y) {
     long f, o, i;
     ulong l;
 
@@ -41,7 +41,7 @@ _CLC_OVERLOAD _CLC_DEF long mul_hi(long x, long y){
     return (long)(f + (hadd(o, (i + (long)((ulong)l>>32))) >> 31));
 }
 
-_CLC_OVERLOAD _CLC_DEF ulong mul_hi(ulong x, ulong y){
+_CLC_OVERLOAD _CLC_DEF ulong mul_hi(ulong x, ulong y) {
     ulong f, o, i;
     ulong l;
 

@@ -51,87 +51,87 @@ isl_stat isl_options_set_schedule_carry_self_first(isl_ctx *ctx, int val);
 int isl_options_get_schedule_carry_self_first(isl_ctx *ctx);
 
 __isl_give isl_schedule_constraints *isl_schedule_constraints_copy(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_schedule_constraints *isl_schedule_constraints_on_domain(
-	__isl_take isl_union_set *domain);
+    __isl_take isl_union_set *domain);
 __isl_export
 __isl_give isl_schedule_constraints *isl_schedule_constraints_set_context(
-	__isl_take isl_schedule_constraints *sc, __isl_take isl_set *context);
+    __isl_take isl_schedule_constraints *sc, __isl_take isl_set *context);
 __isl_export
 __isl_give isl_schedule_constraints *isl_schedule_constraints_set_validity(
-	__isl_take isl_schedule_constraints *sc,
-	__isl_take isl_union_map *validity);
+    __isl_take isl_schedule_constraints *sc,
+    __isl_take isl_union_map *validity);
 __isl_export
 __isl_give isl_schedule_constraints *isl_schedule_constraints_set_coincidence(
-	__isl_take isl_schedule_constraints *sc,
-	__isl_take isl_union_map *coincidence);
+    __isl_take isl_schedule_constraints *sc,
+    __isl_take isl_union_map *coincidence);
 __isl_export
 __isl_give isl_schedule_constraints *isl_schedule_constraints_set_proximity(
-	__isl_take isl_schedule_constraints *sc,
-	__isl_take isl_union_map *proximity);
+    __isl_take isl_schedule_constraints *sc,
+    __isl_take isl_union_map *proximity);
 __isl_export
 __isl_give isl_schedule_constraints *
 isl_schedule_constraints_set_conditional_validity(
-	__isl_take isl_schedule_constraints *sc,
-	__isl_take isl_union_map *condition,
-	__isl_take isl_union_map *validity);
+    __isl_take isl_schedule_constraints *sc,
+    __isl_take isl_union_map *condition,
+    __isl_take isl_union_map *validity);
 __isl_null isl_schedule_constraints *isl_schedule_constraints_free(
-	__isl_take isl_schedule_constraints *sc);
+    __isl_take isl_schedule_constraints *sc);
 
 isl_ctx *isl_schedule_constraints_get_ctx(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_union_set *isl_schedule_constraints_get_domain(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_set *isl_schedule_constraints_get_context(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_union_map *isl_schedule_constraints_get_validity(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_union_map *isl_schedule_constraints_get_coincidence(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_union_map *isl_schedule_constraints_get_proximity(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_union_map *isl_schedule_constraints_get_conditional_validity(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 __isl_export
 __isl_give isl_union_map *
 isl_schedule_constraints_get_conditional_validity_condition(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 
 __isl_give isl_schedule_constraints *isl_schedule_constraints_apply(
-	__isl_take isl_schedule_constraints *sc,
-	__isl_take isl_union_map *umap);
+    __isl_take isl_schedule_constraints *sc,
+    __isl_take isl_union_map *umap);
 
 __isl_constructor
 __isl_give isl_schedule_constraints *isl_schedule_constraints_read_from_str(
-	isl_ctx *ctx, const char *str);
+    isl_ctx *ctx, const char *str);
 __isl_give isl_schedule_constraints *isl_schedule_constraints_read_from_file(
-	isl_ctx *ctx, FILE *input);
+    isl_ctx *ctx, FILE *input);
 __isl_give isl_printer *isl_printer_print_schedule_constraints(
-	__isl_take isl_printer *p, __isl_keep isl_schedule_constraints *sc);
+    __isl_take isl_printer *p, __isl_keep isl_schedule_constraints *sc);
 void isl_schedule_constraints_dump(__isl_keep isl_schedule_constraints *sc);
 __isl_give char *isl_schedule_constraints_to_str(
-	__isl_keep isl_schedule_constraints *sc);
+    __isl_keep isl_schedule_constraints *sc);
 
 __isl_export
 __isl_give isl_schedule *isl_schedule_constraints_compute_schedule(
-	__isl_take isl_schedule_constraints *sc);
+    __isl_take isl_schedule_constraints *sc);
 
 __isl_give isl_schedule *isl_union_set_compute_schedule(
-	__isl_take isl_union_set *domain,
-	__isl_take isl_union_map *validity,
-	__isl_take isl_union_map *proximity);
+    __isl_take isl_union_set *domain,
+    __isl_take isl_union_map *validity,
+    __isl_take isl_union_map *proximity);
 
 __isl_give isl_schedule *isl_schedule_empty(__isl_take isl_space *space);
 __isl_export
 __isl_give isl_schedule *isl_schedule_from_domain(
-	__isl_take isl_union_set *domain);
+    __isl_take isl_union_set *domain);
 __isl_give isl_schedule *isl_schedule_copy(__isl_keep isl_schedule *sched);
 __isl_null isl_schedule *isl_schedule_free(__isl_take isl_schedule *sched);
 __isl_export
@@ -139,57 +139,57 @@ __isl_give isl_union_map *isl_schedule_get_map(__isl_keep isl_schedule *sched);
 
 isl_ctx *isl_schedule_get_ctx(__isl_keep isl_schedule *sched);
 isl_bool isl_schedule_plain_is_equal(__isl_keep isl_schedule *schedule1,
-	__isl_keep isl_schedule *schedule2);
+                                     __isl_keep isl_schedule *schedule2);
 
 __isl_export
 __isl_give isl_schedule_node *isl_schedule_get_root(
-	__isl_keep isl_schedule *schedule);
+    __isl_keep isl_schedule *schedule);
 __isl_give isl_union_set *isl_schedule_get_domain(
-	__isl_keep isl_schedule *schedule);
+    __isl_keep isl_schedule *schedule);
 
 isl_stat isl_schedule_foreach_schedule_node_top_down(
-	__isl_keep isl_schedule *sched,
-	isl_bool (*fn)(__isl_keep isl_schedule_node *node, void *user),
-	void *user);
+    __isl_keep isl_schedule *sched,
+    isl_bool (*fn)(__isl_keep isl_schedule_node *node, void *user),
+    void *user);
 __isl_give isl_schedule *isl_schedule_map_schedule_node_bottom_up(
-	__isl_take isl_schedule *schedule,
-	__isl_give isl_schedule_node *(*fn)(
-		__isl_take isl_schedule_node *node, void *user), void *user);
+    __isl_take isl_schedule *schedule,
+    __isl_give isl_schedule_node *(*fn)(
+        __isl_take isl_schedule_node *node, void *user), void *user);
 
 __isl_give isl_schedule *isl_schedule_insert_context(
-	__isl_take isl_schedule *schedule, __isl_take isl_set *context);
+    __isl_take isl_schedule *schedule, __isl_take isl_set *context);
 __isl_give isl_schedule *isl_schedule_insert_partial_schedule(
-	__isl_take isl_schedule *schedule,
-	__isl_take isl_multi_union_pw_aff *partial);
+    __isl_take isl_schedule *schedule,
+    __isl_take isl_multi_union_pw_aff *partial);
 __isl_give isl_schedule *isl_schedule_insert_guard(
-	__isl_take isl_schedule *schedule, __isl_take isl_set *guard);
+    __isl_take isl_schedule *schedule, __isl_take isl_set *guard);
 __isl_give isl_schedule *isl_schedule_sequence(
-	__isl_take isl_schedule *schedule1, __isl_take isl_schedule *schedule2);
+    __isl_take isl_schedule *schedule1, __isl_take isl_schedule *schedule2);
 __isl_give isl_schedule *isl_schedule_set(
-	__isl_take isl_schedule *schedule1, __isl_take isl_schedule *schedule2);
+    __isl_take isl_schedule *schedule1, __isl_take isl_schedule *schedule2);
 __isl_give isl_schedule *isl_schedule_intersect_domain(
-	__isl_take isl_schedule *schedule, __isl_take isl_union_set *domain);
+    __isl_take isl_schedule *schedule, __isl_take isl_union_set *domain);
 __isl_give isl_schedule *isl_schedule_gist_domain_params(
-	__isl_take isl_schedule *schedule, __isl_take isl_set *context);
+    __isl_take isl_schedule *schedule, __isl_take isl_set *context);
 
 __isl_give isl_schedule *isl_schedule_reset_user(
-	__isl_take isl_schedule *schedule);
+    __isl_take isl_schedule *schedule);
 __isl_give isl_schedule *isl_schedule_align_params(
-	__isl_take isl_schedule *schedule, __isl_take isl_space *space);
+    __isl_take isl_schedule *schedule, __isl_take isl_space *space);
 __isl_overload
 __isl_give isl_schedule *isl_schedule_pullback_union_pw_multi_aff(
-	__isl_take isl_schedule *schedule,
-	__isl_take isl_union_pw_multi_aff *upma);
+    __isl_take isl_schedule *schedule,
+    __isl_take isl_union_pw_multi_aff *upma);
 __isl_give isl_schedule *isl_schedule_expand(__isl_take isl_schedule *schedule,
-	__isl_take isl_union_pw_multi_aff *contraction,
-	__isl_take isl_schedule *expansion);
+        __isl_take isl_union_pw_multi_aff *contraction,
+        __isl_take isl_schedule *expansion);
 
 __isl_give isl_schedule *isl_schedule_read_from_file(isl_ctx *ctx, FILE *input);
 __isl_constructor
 __isl_give isl_schedule *isl_schedule_read_from_str(isl_ctx *ctx,
-	const char *str);
+        const char *str);
 __isl_give isl_printer *isl_printer_print_schedule(__isl_take isl_printer *p,
-	__isl_keep isl_schedule *schedule);
+        __isl_keep isl_schedule *schedule);
 void isl_schedule_dump(__isl_keep isl_schedule *schedule);
 __isl_give char *isl_schedule_to_str(__isl_keep isl_schedule *schedule);
 

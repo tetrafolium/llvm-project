@@ -27,98 +27,100 @@ class hash_code;
 namespace clang {
 
 class SanitizerMask {
-  // NOTE: this class assumes kNumElem == 2 in most of the constexpr functions,
-  // in order to work within the C++11 constexpr function constraints. If you
-  // change kNumElem, you'll need to update those member functions as well.
+    // NOTE: this class assumes kNumElem == 2 in most of the constexpr functions,
+    // in order to work within the C++11 constexpr function constraints. If you
+    // change kNumElem, you'll need to update those member functions as well.
 
-  /// Number of array elements.
-  static constexpr unsigned kNumElem = 2;
-  /// Mask value initialized to 0.
-  uint64_t maskLoToHigh[kNumElem]{};
-  /// Number of bits in a mask.
-  static constexpr unsigned kNumBits = sizeof(decltype(maskLoToHigh)) * 8;
-  /// Number of bits in a mask element.
-  static constexpr unsigned kNumBitElem = sizeof(decltype(maskLoToHigh[0])) * 8;
+    /// Number of array elements.
+    static constexpr unsigned kNumElem = 2;
+    /// Mask value initialized to 0.
+    uint64_t maskLoToHigh[kNumElem] {};
+    /// Number of bits in a mask.
+    static constexpr unsigned kNumBits = sizeof(decltype(maskLoToHigh)) * 8;
+    /// Number of bits in a mask element.
+    static constexpr unsigned kNumBitElem = sizeof(decltype(maskLoToHigh[0])) * 8;
 
-  constexpr SanitizerMask(uint64_t mask1, uint64_t mask2)
-      : maskLoToHigh{mask1, mask2} {}
+    constexpr SanitizerMask(uint64_t mask1, uint64_t mask2)
+        : maskLoToHigh{mask1, mask2} {}
 
 public:
-  SanitizerMask() = default;
+    SanitizerMask() = default;
 
-  static constexpr bool checkBitPos(const unsigned Pos) {
-    return Pos < kNumBits;
-  }
+    static constexpr bool checkBitPos(const unsigned Pos) {
+        return Pos < kNumBits;
+    }
 
-  /// Create a mask with a bit enabled at position Pos.
-  static constexpr SanitizerMask bitPosToMask(const unsigned Pos) {
-    uint64_t mask1 = (Pos < kNumBitElem) ? 1ULL << (Pos % kNumBitElem) : 0;
-    uint64_t mask2 = (Pos >= kNumBitElem && Pos < (kNumBitElem * 2))
+    /// Create a mask with a bit enabled at position Pos.
+    static constexpr SanitizerMask bitPosToMask(const unsigned Pos) {
+        uint64_t mask1 = (Pos < kNumBitElem) ? 1ULL << (Pos % kNumBitElem) : 0;
+        uint64_t mask2 = (Pos >= kNumBitElem && Pos < (kNumBitElem * 2))
                          ? 1ULL << (Pos % kNumBitElem)
                          : 0;
-    return SanitizerMask(mask1, mask2);
-  }
+        return SanitizerMask(mask1, mask2);
+    }
 
-  unsigned countPopulation() const {
-    unsigned total = 0;
-    for (const auto &Val : maskLoToHigh)
-      total += llvm::countPopulation(Val);
-    return total;
-  }
+    unsigned countPopulation() const {
+        unsigned total = 0;
+        for (const auto &Val : maskLoToHigh)
+            total += llvm::countPopulation(Val);
+        return total;
+    }
 
-  void flipAllBits() {
-    for (auto &Val : maskLoToHigh)
-      Val = ~Val;
-  }
+    void flipAllBits() {
+        for (auto &Val : maskLoToHigh)
+            Val = ~Val;
+    }
 
-  bool isPowerOf2() const {
-    return countPopulation() == 1;
-  }
+    bool isPowerOf2() const {
+        return countPopulation() == 1;
+    }
 
-  llvm::hash_code hash_value() const;
+    llvm::hash_code hash_value() const;
 
-  constexpr explicit operator bool() const {
-    return maskLoToHigh[0] || maskLoToHigh[1];
-  }
+    constexpr explicit operator bool() const {
+        return maskLoToHigh[0] || maskLoToHigh[1];
+    }
 
-  constexpr bool operator==(const SanitizerMask &V) const {
-    return maskLoToHigh[0] == V.maskLoToHigh[0] &&
-           maskLoToHigh[1] == V.maskLoToHigh[1];
-  }
+    constexpr bool operator==(const SanitizerMask &V) const {
+        return maskLoToHigh[0] == V.maskLoToHigh[0] &&
+               maskLoToHigh[1] == V.maskLoToHigh[1];
+    }
 
-  SanitizerMask &operator&=(const SanitizerMask &RHS) {
-    for (unsigned k = 0; k < kNumElem; k++)
-      maskLoToHigh[k] &= RHS.maskLoToHigh[k];
-    return *this;
-  }
+    SanitizerMask &operator&=(const SanitizerMask &RHS) {
+        for (unsigned k = 0; k < kNumElem; k++)
+            maskLoToHigh[k] &= RHS.maskLoToHigh[k];
+        return *this;
+    }
 
-  SanitizerMask &operator|=(const SanitizerMask &RHS) {
-    for (unsigned k = 0; k < kNumElem; k++)
-      maskLoToHigh[k] |= RHS.maskLoToHigh[k];
-    return *this;
-  }
+    SanitizerMask &operator|=(const SanitizerMask &RHS) {
+        for (unsigned k = 0; k < kNumElem; k++)
+            maskLoToHigh[k] |= RHS.maskLoToHigh[k];
+        return *this;
+    }
 
-  constexpr bool operator!() const { return !bool(*this); }
+    constexpr bool operator!() const {
+        return !bool(*this);
+    }
 
-  constexpr bool operator!=(const SanitizerMask &RHS) const {
-    return !((*this) == RHS);
-  }
+    constexpr bool operator!=(const SanitizerMask &RHS) const {
+        return !((*this) == RHS);
+    }
 
-  friend constexpr inline SanitizerMask operator~(SanitizerMask v) {
-    return SanitizerMask(~v.maskLoToHigh[0], ~v.maskLoToHigh[1]);
-  }
+    friend constexpr inline SanitizerMask operator~(SanitizerMask v) {
+        return SanitizerMask(~v.maskLoToHigh[0], ~v.maskLoToHigh[1]);
+    }
 
-  friend constexpr inline SanitizerMask operator&(SanitizerMask a,
-                                                  const SanitizerMask &b) {
-    return SanitizerMask(a.maskLoToHigh[0] & b.maskLoToHigh[0],
-                         a.maskLoToHigh[1] & b.maskLoToHigh[1]);
-  }
+    friend constexpr inline SanitizerMask operator&(SanitizerMask a,
+            const SanitizerMask &b) {
+        return SanitizerMask(a.maskLoToHigh[0] & b.maskLoToHigh[0],
+                             a.maskLoToHigh[1] & b.maskLoToHigh[1]);
+    }
 
-  friend constexpr inline SanitizerMask operator|(SanitizerMask a,
-                                                  const SanitizerMask &b) {
-    return SanitizerMask(a.maskLoToHigh[0] | b.maskLoToHigh[0],
-                         a.maskLoToHigh[1] | b.maskLoToHigh[1]);
-  }
+    friend constexpr inline SanitizerMask operator|(SanitizerMask a,
+            const SanitizerMask &b) {
+        return SanitizerMask(a.maskLoToHigh[0] | b.maskLoToHigh[0],
+                             a.maskLoToHigh[1] | b.maskLoToHigh[1]);
+    }
 };
 
 // Declaring in clang namespace so that it can be found by ADL.
@@ -127,14 +129,14 @@ llvm::hash_code hash_value(const clang::SanitizerMask &Arg);
 // Define the set of sanitizer kinds, as well as the set of sanitizers each
 // sanitizer group expands into.
 struct SanitizerKind {
-  // Assign ordinals to possible values of -fsanitize= flag, which we will use
-  // as bit positions.
-  enum SanitizerOrdinal : uint64_t {
+    // Assign ordinals to possible values of -fsanitize= flag, which we will use
+    // as bit positions.
+    enum SanitizerOrdinal : uint64_t {
 #define SANITIZER(NAME, ID) SO_##ID,
 #define SANITIZER_GROUP(NAME, ID, ALIAS) SO_##ID##Group,
 #include "clang/Basic/Sanitizers.def"
-    SO_Count
-  };
+        SO_Count
+    };
 
 #define SANITIZER(NAME, ID)                                                    \
   static constexpr SanitizerMask ID = SanitizerMask::bitPosToMask(SO_##ID);    \
@@ -149,29 +151,35 @@ struct SanitizerKind {
 }; // SanitizerKind
 
 struct SanitizerSet {
-  /// Check if a certain (single) sanitizer is enabled.
-  bool has(SanitizerMask K) const {
-    assert(K.isPowerOf2() && "Has to be a single sanitizer.");
-    return static_cast<bool>(Mask & K);
-  }
+    /// Check if a certain (single) sanitizer is enabled.
+    bool has(SanitizerMask K) const {
+        assert(K.isPowerOf2() && "Has to be a single sanitizer.");
+        return static_cast<bool>(Mask & K);
+    }
 
-  /// Check if one or more sanitizers are enabled.
-  bool hasOneOf(SanitizerMask K) const { return static_cast<bool>(Mask & K); }
+    /// Check if one or more sanitizers are enabled.
+    bool hasOneOf(SanitizerMask K) const {
+        return static_cast<bool>(Mask & K);
+    }
 
-  /// Enable or disable a certain (single) sanitizer.
-  void set(SanitizerMask K, bool Value) {
-    assert(K.isPowerOf2() && "Has to be a single sanitizer.");
-    Mask = Value ? (Mask | K) : (Mask & ~K);
-  }
+    /// Enable or disable a certain (single) sanitizer.
+    void set(SanitizerMask K, bool Value) {
+        assert(K.isPowerOf2() && "Has to be a single sanitizer.");
+        Mask = Value ? (Mask | K) : (Mask & ~K);
+    }
 
-  /// Disable the sanitizers specified in \p K.
-  void clear(SanitizerMask K = SanitizerKind::All) { Mask &= ~K; }
+    /// Disable the sanitizers specified in \p K.
+    void clear(SanitizerMask K = SanitizerKind::All) {
+        Mask &= ~K;
+    }
 
-  /// Returns true if no sanitizers are enabled.
-  bool empty() const { return !Mask; }
+    /// Returns true if no sanitizers are enabled.
+    bool empty() const {
+        return !Mask;
+    }
 
-  /// Bitmask of enabled sanitizers.
-  SanitizerMask Mask;
+    /// Bitmask of enabled sanitizers.
+    SanitizerMask Mask;
 };
 
 /// Parse a single value from a -fsanitize= or -fno-sanitize= value list.
@@ -184,9 +192,9 @@ SanitizerMask expandSanitizerGroups(SanitizerMask Kinds);
 
 /// Return the sanitizers which do not affect preprocessing.
 inline SanitizerMask getPPTransparentSanitizers() {
-  return SanitizerKind::CFI | SanitizerKind::Integer |
-         SanitizerKind::ImplicitConversion | SanitizerKind::Nullability |
-         SanitizerKind::Undefined | SanitizerKind::FloatDivideByZero;
+    return SanitizerKind::CFI | SanitizerKind::Integer |
+           SanitizerKind::ImplicitConversion | SanitizerKind::Nullability |
+           SanitizerKind::Undefined | SanitizerKind::FloatDivideByZero;
 }
 
 } // namespace clang

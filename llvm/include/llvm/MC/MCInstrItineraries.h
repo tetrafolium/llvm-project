@@ -56,38 +56,38 @@ namespace llvm {
 /// change stalls, FUs using the same resource (e.g. same register file), etc.
 
 struct InstrStage {
-  enum ReservationKinds {
-    Required = 0,
-    Reserved = 1
-  };
+    enum ReservationKinds {
+        Required = 0,
+        Reserved = 1
+    };
 
-  /// Bitmask representing a set of functional units.
-  typedef uint64_t FuncUnits;
+    /// Bitmask representing a set of functional units.
+    typedef uint64_t FuncUnits;
 
-  unsigned Cycles_;  ///< Length of stage in machine cycles
-  FuncUnits Units_;  ///< Choice of functional units
-  int NextCycles_;   ///< Number of machine cycles to next stage
-  ReservationKinds Kind_; ///< Kind of the FU reservation
+    unsigned Cycles_;  ///< Length of stage in machine cycles
+    FuncUnits Units_;  ///< Choice of functional units
+    int NextCycles_;   ///< Number of machine cycles to next stage
+    ReservationKinds Kind_; ///< Kind of the FU reservation
 
-  /// Returns the number of cycles the stage is occupied.
-  unsigned getCycles() const {
-    return Cycles_;
-  }
+    /// Returns the number of cycles the stage is occupied.
+    unsigned getCycles() const {
+        return Cycles_;
+    }
 
-  /// Returns the choice of FUs.
-  FuncUnits getUnits() const {
-    return Units_;
-  }
+    /// Returns the choice of FUs.
+    FuncUnits getUnits() const {
+        return Units_;
+    }
 
-  ReservationKinds getReservationKind() const {
-    return Kind_;
-  }
+    ReservationKinds getReservationKind() const {
+        return Kind_;
+    }
 
-  /// Returns the number of cycles from the start of this stage to the
-  /// start of the next stage in the itinerary
-  unsigned getNextCycles() const {
-    return (NextCycles_ >= 0) ? (unsigned)NextCycles_ : Cycles_;
-  }
+    /// Returns the number of cycles from the start of this stage to the
+    /// start of the next stage in the itinerary
+    unsigned getNextCycles() const {
+        return (NextCycles_ >= 0) ? (unsigned)NextCycles_ : Cycles_;
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -96,11 +96,11 @@ struct InstrStage {
 /// cycle in which operands are read and written.
 ///
 struct InstrItinerary {
-  int16_t  NumMicroOps;        ///< # of micro-ops, -1 means it's variable
-  uint16_t FirstStage;         ///< Index of first stage in itinerary
-  uint16_t LastStage;          ///< Index of last + 1 stage in itinerary
-  uint16_t FirstOperandCycle;  ///< Index of first operand rd/wr
-  uint16_t LastOperandCycle;   ///< Index of last + 1 operand rd/wr
+    int16_t  NumMicroOps;        ///< # of micro-ops, -1 means it's variable
+    uint16_t FirstStage;         ///< Index of first stage in itinerary
+    uint16_t LastStage;          ///< Index of last + 1 stage in itinerary
+    uint16_t FirstOperandCycle;  ///< Index of first operand rd/wr
+    uint16_t LastOperandCycle;   ///< Index of last + 1 operand rd/wr
 };
 
 //===----------------------------------------------------------------------===//
@@ -108,128 +108,130 @@ struct InstrItinerary {
 ///
 class InstrItineraryData {
 public:
-  MCSchedModel SchedModel =
-      MCSchedModel::GetDefaultSchedModel(); ///< Basic machine properties.
-  const InstrStage *Stages = nullptr;       ///< Array of stages selected
-  const unsigned *OperandCycles = nullptr; ///< Array of operand cycles selected
-  const unsigned *Forwardings = nullptr; ///< Array of pipeline forwarding paths
-  const InstrItinerary *Itineraries =
-      nullptr; ///< Array of itineraries selected
+    MCSchedModel SchedModel =
+        MCSchedModel::GetDefaultSchedModel(); ///< Basic machine properties.
+    const InstrStage *Stages = nullptr;       ///< Array of stages selected
+    const unsigned *OperandCycles = nullptr; ///< Array of operand cycles selected
+    const unsigned *Forwardings = nullptr; ///< Array of pipeline forwarding paths
+    const InstrItinerary *Itineraries =
+        nullptr; ///< Array of itineraries selected
 
-  InstrItineraryData() = default;
-  InstrItineraryData(const MCSchedModel &SM, const InstrStage *S,
-                     const unsigned *OS, const unsigned *F)
-    : SchedModel(SM), Stages(S), OperandCycles(OS), Forwardings(F),
-      Itineraries(SchedModel.InstrItineraries) {}
+    InstrItineraryData() = default;
+    InstrItineraryData(const MCSchedModel &SM, const InstrStage *S,
+                       const unsigned *OS, const unsigned *F)
+        : SchedModel(SM), Stages(S), OperandCycles(OS), Forwardings(F),
+          Itineraries(SchedModel.InstrItineraries) {}
 
-  /// Returns true if there are no itineraries.
-  bool isEmpty() const { return Itineraries == nullptr; }
-
-  /// Returns true if the index is for the end marker itinerary.
-  bool isEndMarker(unsigned ItinClassIndx) const {
-    return ((Itineraries[ItinClassIndx].FirstStage == UINT16_MAX) &&
-            (Itineraries[ItinClassIndx].LastStage == UINT16_MAX));
-  }
-
-  /// Return the first stage of the itinerary.
-  const InstrStage *beginStage(unsigned ItinClassIndx) const {
-    unsigned StageIdx = Itineraries[ItinClassIndx].FirstStage;
-    return Stages + StageIdx;
-  }
-
-  /// Return the last+1 stage of the itinerary.
-  const InstrStage *endStage(unsigned ItinClassIndx) const {
-    unsigned StageIdx = Itineraries[ItinClassIndx].LastStage;
-    return Stages + StageIdx;
-  }
-
-  /// Return the total stage latency of the given class.  The latency is
-  /// the maximum completion time for any stage in the itinerary.  If no stages
-  /// exist, it defaults to one cycle.
-  unsigned getStageLatency(unsigned ItinClassIndx) const {
-    // If the target doesn't provide itinerary information, use a simple
-    // non-zero default value for all instructions.
-    if (isEmpty())
-      return 1;
-
-    // Calculate the maximum completion time for any stage.
-    unsigned Latency = 0, StartCycle = 0;
-    for (const InstrStage *IS = beginStage(ItinClassIndx),
-           *E = endStage(ItinClassIndx); IS != E; ++IS) {
-      Latency = std::max(Latency, StartCycle + IS->getCycles());
-      StartCycle += IS->getNextCycles();
+    /// Returns true if there are no itineraries.
+    bool isEmpty() const {
+        return Itineraries == nullptr;
     }
-    return Latency;
-  }
 
-  /// Return the cycle for the given class and operand.  Return -1 if no
-  /// cycle is specified for the operand.
-  int getOperandCycle(unsigned ItinClassIndx, unsigned OperandIdx) const {
-    if (isEmpty())
-      return -1;
+    /// Returns true if the index is for the end marker itinerary.
+    bool isEndMarker(unsigned ItinClassIndx) const {
+        return ((Itineraries[ItinClassIndx].FirstStage == UINT16_MAX) &&
+                (Itineraries[ItinClassIndx].LastStage == UINT16_MAX));
+    }
 
-    unsigned FirstIdx = Itineraries[ItinClassIndx].FirstOperandCycle;
-    unsigned LastIdx = Itineraries[ItinClassIndx].LastOperandCycle;
-    if ((FirstIdx + OperandIdx) >= LastIdx)
-      return -1;
+    /// Return the first stage of the itinerary.
+    const InstrStage *beginStage(unsigned ItinClassIndx) const {
+        unsigned StageIdx = Itineraries[ItinClassIndx].FirstStage;
+        return Stages + StageIdx;
+    }
 
-    return (int)OperandCycles[FirstIdx + OperandIdx];
-  }
+    /// Return the last+1 stage of the itinerary.
+    const InstrStage *endStage(unsigned ItinClassIndx) const {
+        unsigned StageIdx = Itineraries[ItinClassIndx].LastStage;
+        return Stages + StageIdx;
+    }
 
-  /// Return true if there is a pipeline forwarding between instructions
-  /// of itinerary classes DefClass and UseClasses so that value produced by an
-  /// instruction of itinerary class DefClass, operand index DefIdx can be
-  /// bypassed when it's read by an instruction of itinerary class UseClass,
-  /// operand index UseIdx.
-  bool hasPipelineForwarding(unsigned DefClass, unsigned DefIdx,
-                             unsigned UseClass, unsigned UseIdx) const {
-    unsigned FirstDefIdx = Itineraries[DefClass].FirstOperandCycle;
-    unsigned LastDefIdx = Itineraries[DefClass].LastOperandCycle;
-    if ((FirstDefIdx + DefIdx) >= LastDefIdx)
-      return false;
-    if (Forwardings[FirstDefIdx + DefIdx] == 0)
-      return false;
+    /// Return the total stage latency of the given class.  The latency is
+    /// the maximum completion time for any stage in the itinerary.  If no stages
+    /// exist, it defaults to one cycle.
+    unsigned getStageLatency(unsigned ItinClassIndx) const {
+        // If the target doesn't provide itinerary information, use a simple
+        // non-zero default value for all instructions.
+        if (isEmpty())
+            return 1;
 
-    unsigned FirstUseIdx = Itineraries[UseClass].FirstOperandCycle;
-    unsigned LastUseIdx = Itineraries[UseClass].LastOperandCycle;
-    if ((FirstUseIdx + UseIdx) >= LastUseIdx)
-      return false;
+        // Calculate the maximum completion time for any stage.
+        unsigned Latency = 0, StartCycle = 0;
+        for (const InstrStage *IS = beginStage(ItinClassIndx),
+                *E = endStage(ItinClassIndx); IS != E; ++IS) {
+            Latency = std::max(Latency, StartCycle + IS->getCycles());
+            StartCycle += IS->getNextCycles();
+        }
+        return Latency;
+    }
 
-    return Forwardings[FirstDefIdx + DefIdx] ==
-      Forwardings[FirstUseIdx + UseIdx];
-  }
+    /// Return the cycle for the given class and operand.  Return -1 if no
+    /// cycle is specified for the operand.
+    int getOperandCycle(unsigned ItinClassIndx, unsigned OperandIdx) const {
+        if (isEmpty())
+            return -1;
 
-  /// Compute and return the use operand latency of a given itinerary
-  /// class and operand index if the value is produced by an instruction of the
-  /// specified itinerary class and def operand index.
-  int getOperandLatency(unsigned DefClass, unsigned DefIdx,
-                        unsigned UseClass, unsigned UseIdx) const {
-    if (isEmpty())
-      return -1;
+        unsigned FirstIdx = Itineraries[ItinClassIndx].FirstOperandCycle;
+        unsigned LastIdx = Itineraries[ItinClassIndx].LastOperandCycle;
+        if ((FirstIdx + OperandIdx) >= LastIdx)
+            return -1;
 
-    int DefCycle = getOperandCycle(DefClass, DefIdx);
-    if (DefCycle == -1)
-      return -1;
+        return (int)OperandCycles[FirstIdx + OperandIdx];
+    }
 
-    int UseCycle = getOperandCycle(UseClass, UseIdx);
-    if (UseCycle == -1)
-      return -1;
+    /// Return true if there is a pipeline forwarding between instructions
+    /// of itinerary classes DefClass and UseClasses so that value produced by an
+    /// instruction of itinerary class DefClass, operand index DefIdx can be
+    /// bypassed when it's read by an instruction of itinerary class UseClass,
+    /// operand index UseIdx.
+    bool hasPipelineForwarding(unsigned DefClass, unsigned DefIdx,
+                               unsigned UseClass, unsigned UseIdx) const {
+        unsigned FirstDefIdx = Itineraries[DefClass].FirstOperandCycle;
+        unsigned LastDefIdx = Itineraries[DefClass].LastOperandCycle;
+        if ((FirstDefIdx + DefIdx) >= LastDefIdx)
+            return false;
+        if (Forwardings[FirstDefIdx + DefIdx] == 0)
+            return false;
 
-    UseCycle = DefCycle - UseCycle + 1;
-    if (UseCycle > 0 &&
-        hasPipelineForwarding(DefClass, DefIdx, UseClass, UseIdx))
-      // FIXME: This assumes one cycle benefit for every pipeline forwarding.
-      --UseCycle;
-    return UseCycle;
-  }
+        unsigned FirstUseIdx = Itineraries[UseClass].FirstOperandCycle;
+        unsigned LastUseIdx = Itineraries[UseClass].LastOperandCycle;
+        if ((FirstUseIdx + UseIdx) >= LastUseIdx)
+            return false;
 
-  /// Return the number of micro-ops that the given class decodes to.
-  /// Return -1 for classes that require dynamic lookup via TargetInstrInfo.
-  int getNumMicroOps(unsigned ItinClassIndx) const {
-    if (isEmpty())
-      return 1;
-    return Itineraries[ItinClassIndx].NumMicroOps;
-  }
+        return Forwardings[FirstDefIdx + DefIdx] ==
+               Forwardings[FirstUseIdx + UseIdx];
+    }
+
+    /// Compute and return the use operand latency of a given itinerary
+    /// class and operand index if the value is produced by an instruction of the
+    /// specified itinerary class and def operand index.
+    int getOperandLatency(unsigned DefClass, unsigned DefIdx,
+                          unsigned UseClass, unsigned UseIdx) const {
+        if (isEmpty())
+            return -1;
+
+        int DefCycle = getOperandCycle(DefClass, DefIdx);
+        if (DefCycle == -1)
+            return -1;
+
+        int UseCycle = getOperandCycle(UseClass, UseIdx);
+        if (UseCycle == -1)
+            return -1;
+
+        UseCycle = DefCycle - UseCycle + 1;
+        if (UseCycle > 0 &&
+                hasPipelineForwarding(DefClass, DefIdx, UseClass, UseIdx))
+            // FIXME: This assumes one cycle benefit for every pipeline forwarding.
+            --UseCycle;
+        return UseCycle;
+    }
+
+    /// Return the number of micro-ops that the given class decodes to.
+    /// Return -1 for classes that require dynamic lookup via TargetInstrInfo.
+    int getNumMicroOps(unsigned ItinClassIndx) const {
+        if (isEmpty())
+            return 1;
+        return Itineraries[ItinClassIndx].NumMicroOps;
+    }
 };
 
 } // end namespace llvm

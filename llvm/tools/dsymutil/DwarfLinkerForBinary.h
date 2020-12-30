@@ -33,166 +33,172 @@ namespace dsymutil {
 /// DWARFEmitter interface.
 class DwarfLinkerForBinary {
 public:
-  DwarfLinkerForBinary(raw_fd_ostream &OutFile, BinaryHolder &BinHolder,
-                       LinkOptions Options)
-      : OutFile(OutFile), BinHolder(BinHolder), Options(std::move(Options)) {}
+    DwarfLinkerForBinary(raw_fd_ostream &OutFile, BinaryHolder &BinHolder,
+                         LinkOptions Options)
+        : OutFile(OutFile), BinHolder(BinHolder), Options(std::move(Options)) {}
 
-  /// Link the contents of the DebugMap.
-  bool link(const DebugMap &);
+    /// Link the contents of the DebugMap.
+    bool link(const DebugMap &);
 
-  void reportWarning(const Twine &Warning, StringRef Context,
-                     const DWARFDie *DIE = nullptr) const;
+    void reportWarning(const Twine &Warning, StringRef Context,
+                       const DWARFDie *DIE = nullptr) const;
 
-  /// Flags passed to DwarfLinker::lookForDIEsToKeep
-  enum TraversalFlags {
-    TF_Keep = 1 << 0,            ///< Mark the traversed DIEs as kept.
-    TF_InFunctionScope = 1 << 1, ///< Current scope is a function scope.
-    TF_DependencyWalk = 1 << 2,  ///< Walking the dependencies of a kept DIE.
-    TF_ParentWalk = 1 << 3,      ///< Walking up the parents of a kept DIE.
-    TF_ODR = 1 << 4,             ///< Use the ODR while keeping dependents.
-    TF_SkipPC = 1 << 5,          ///< Skip all location attributes.
-  };
-
-private:
-
-  /// Keeps track of relocations.
-  class AddressManager : public AddressesMap {
-    struct ValidReloc {
-      uint64_t Offset;
-      uint32_t Size;
-      uint64_t Addend;
-      const DebugMapObject::DebugMapEntry *Mapping;
-
-      ValidReloc(uint64_t Offset, uint32_t Size, uint64_t Addend,
-                 const DebugMapObject::DebugMapEntry *Mapping)
-          : Offset(Offset), Size(Size), Addend(Addend), Mapping(Mapping) {}
-
-      bool operator<(const ValidReloc &RHS) const {
-        return Offset < RHS.Offset;
-      }
+    /// Flags passed to DwarfLinker::lookForDIEsToKeep
+    enum TraversalFlags {
+        TF_Keep = 1 << 0,            ///< Mark the traversed DIEs as kept.
+        TF_InFunctionScope = 1 << 1, ///< Current scope is a function scope.
+        TF_DependencyWalk = 1 << 2,  ///< Walking the dependencies of a kept DIE.
+        TF_ParentWalk = 1 << 3,      ///< Walking up the parents of a kept DIE.
+        TF_ODR = 1 << 4,             ///< Use the ODR while keeping dependents.
+        TF_SkipPC = 1 << 5,          ///< Skip all location attributes.
     };
 
-    const DwarfLinkerForBinary &Linker;
+private:
 
-    /// The valid relocations for the current DebugMapObject.
-    /// This vector is sorted by relocation offset.
-    std::vector<ValidReloc> ValidRelocs;
+    /// Keeps track of relocations.
+    class AddressManager : public AddressesMap {
+        struct ValidReloc {
+            uint64_t Offset;
+            uint32_t Size;
+            uint64_t Addend;
+            const DebugMapObject::DebugMapEntry *Mapping;
 
-    /// Index into ValidRelocs of the next relocation to consider. As we walk
-    /// the DIEs in acsending file offset and as ValidRelocs is sorted by file
-    /// offset, keeping this index up to date is all we have to do to have a
-    /// cheap lookup during the root DIE selection and during DIE cloning.
-    unsigned NextValidReloc = 0;
+            ValidReloc(uint64_t Offset, uint32_t Size, uint64_t Addend,
+                       const DebugMapObject::DebugMapEntry *Mapping)
+                : Offset(Offset), Size(Size), Addend(Addend), Mapping(Mapping) {}
 
-    RangesTy AddressRanges;
+            bool operator<(const ValidReloc &RHS) const {
+                return Offset < RHS.Offset;
+            }
+        };
 
-  public:
-    AddressManager(DwarfLinkerForBinary &Linker, const object::ObjectFile &Obj,
-                   const DebugMapObject &DMO)
-        : Linker(Linker) {
-      findValidRelocsInDebugInfo(Obj, DMO);
+        const DwarfLinkerForBinary &Linker;
 
-      // Iterate over the debug map entries and put all the ones that are
-      // functions (because they have a size) into the Ranges map. This map is
-      // very similar to the FunctionRanges that are stored in each unit, with 2
-      // notable differences:
-      //
-      //  1. Obviously this one is global, while the other ones are per-unit.
-      //
-      //  2. This one contains not only the functions described in the DIE
-      //     tree, but also the ones that are only in the debug map.
-      //
-      // The latter information is required to reproduce dsymutil's logic while
-      // linking line tables. The cases where this information matters look like
-      // bugs that need to be investigated, but for now we need to reproduce
-      // dsymutil's behavior.
-      // FIXME: Once we understood exactly if that information is needed,
-      // maybe totally remove this (or try to use it to do a real
-      // -gline-tables-only on Darwin.
-      for (const auto &Entry : DMO.symbols()) {
-        const auto &Mapping = Entry.getValue();
-        if (Mapping.Size && Mapping.ObjectAddress)
-          AddressRanges[*Mapping.ObjectAddress] = ObjFileAddressRange(
-              *Mapping.ObjectAddress + Mapping.Size,
-              int64_t(Mapping.BinaryAddress) - *Mapping.ObjectAddress);
-      }
-    }
-    virtual ~AddressManager() override { clear(); }
+        /// The valid relocations for the current DebugMapObject.
+        /// This vector is sorted by relocation offset.
+        std::vector<ValidReloc> ValidRelocs;
 
-    virtual bool areRelocationsResolved() const override { return true; }
+        /// Index into ValidRelocs of the next relocation to consider. As we walk
+        /// the DIEs in acsending file offset and as ValidRelocs is sorted by file
+        /// offset, keeping this index up to date is all we have to do to have a
+        /// cheap lookup during the root DIE selection and during DIE cloning.
+        unsigned NextValidReloc = 0;
 
-    bool hasValidRelocs(bool ResetRelocsPtr = true) override {
-      if (ResetRelocsPtr)
-        NextValidReloc = 0;
-      return !ValidRelocs.empty();
-    }
+        RangesTy AddressRanges;
 
-    /// \defgroup FindValidRelocations Translate debug map into a list
-    /// of relevant relocations
-    ///
-    /// @{
-    bool findValidRelocsInDebugInfo(const object::ObjectFile &Obj,
-                                    const DebugMapObject &DMO);
+    public:
+        AddressManager(DwarfLinkerForBinary &Linker, const object::ObjectFile &Obj,
+                       const DebugMapObject &DMO)
+            : Linker(Linker) {
+            findValidRelocsInDebugInfo(Obj, DMO);
 
-    bool findValidRelocs(const object::SectionRef &Section,
-                         const object::ObjectFile &Obj,
-                         const DebugMapObject &DMO);
+            // Iterate over the debug map entries and put all the ones that are
+            // functions (because they have a size) into the Ranges map. This map is
+            // very similar to the FunctionRanges that are stored in each unit, with 2
+            // notable differences:
+            //
+            //  1. Obviously this one is global, while the other ones are per-unit.
+            //
+            //  2. This one contains not only the functions described in the DIE
+            //     tree, but also the ones that are only in the debug map.
+            //
+            // The latter information is required to reproduce dsymutil's logic while
+            // linking line tables. The cases where this information matters look like
+            // bugs that need to be investigated, but for now we need to reproduce
+            // dsymutil's behavior.
+            // FIXME: Once we understood exactly if that information is needed,
+            // maybe totally remove this (or try to use it to do a real
+            // -gline-tables-only on Darwin.
+            for (const auto &Entry : DMO.symbols()) {
+                const auto &Mapping = Entry.getValue();
+                if (Mapping.Size && Mapping.ObjectAddress)
+                    AddressRanges[*Mapping.ObjectAddress] = ObjFileAddressRange(
+                            *Mapping.ObjectAddress + Mapping.Size,
+                            int64_t(Mapping.BinaryAddress) - *Mapping.ObjectAddress);
+            }
+        }
+        virtual ~AddressManager() override {
+            clear();
+        }
 
-    void findValidRelocsMachO(const object::SectionRef &Section,
-                              const object::MachOObjectFile &Obj,
-                              const DebugMapObject &DMO);
-    /// @}
+        virtual bool areRelocationsResolved() const override {
+            return true;
+        }
 
-    bool hasValidRelocationAt(uint64_t StartOffset, uint64_t EndOffset,
-                              CompileUnit::DIEInfo &Info);
+        bool hasValidRelocs(bool ResetRelocsPtr = true) override {
+            if (ResetRelocsPtr)
+                NextValidReloc = 0;
+            return !ValidRelocs.empty();
+        }
 
-    bool hasLiveMemoryLocation(const DWARFDie &DIE,
-                               CompileUnit::DIEInfo &Info) override;
-    bool hasLiveAddressRange(const DWARFDie &DIE,
-                             CompileUnit::DIEInfo &Info) override;
+        /// \defgroup FindValidRelocations Translate debug map into a list
+        /// of relevant relocations
+        ///
+        /// @{
+        bool findValidRelocsInDebugInfo(const object::ObjectFile &Obj,
+                                        const DebugMapObject &DMO);
 
-    bool applyValidRelocs(MutableArrayRef<char> Data, uint64_t BaseOffset,
-                          bool IsLittleEndian) override;
+        bool findValidRelocs(const object::SectionRef &Section,
+                             const object::ObjectFile &Obj,
+                             const DebugMapObject &DMO);
 
-    RangesTy &getValidAddressRanges() override { return AddressRanges; }
+        void findValidRelocsMachO(const object::SectionRef &Section,
+                                  const object::MachOObjectFile &Obj,
+                                  const DebugMapObject &DMO);
+        /// @}
 
-    void clear() override {
-      AddressRanges.clear();
-      ValidRelocs.clear();
-      NextValidReloc = 0;
-    }
-  };
+        bool hasValidRelocationAt(uint64_t StartOffset, uint64_t EndOffset,
+                                  CompileUnit::DIEInfo &Info);
+
+        bool hasLiveMemoryLocation(const DWARFDie &DIE,
+                                   CompileUnit::DIEInfo &Info) override;
+        bool hasLiveAddressRange(const DWARFDie &DIE,
+                                 CompileUnit::DIEInfo &Info) override;
+
+        bool applyValidRelocs(MutableArrayRef<char> Data, uint64_t BaseOffset,
+                              bool IsLittleEndian) override;
+
+        RangesTy &getValidAddressRanges() override {
+            return AddressRanges;
+        }
+
+        void clear() override {
+            AddressRanges.clear();
+            ValidRelocs.clear();
+            NextValidReloc = 0;
+        }
+    };
 
 private:
-  /// \defgroup Helpers Various helper methods.
-  ///
-  /// @{
-  bool createStreamer(const Triple &TheTriple, raw_fd_ostream &OutFile);
+    /// \defgroup Helpers Various helper methods.
+    ///
+    /// @{
+    bool createStreamer(const Triple &TheTriple, raw_fd_ostream &OutFile);
 
-  /// Attempt to load a debug object from disk.
-  ErrorOr<const object::ObjectFile &> loadObject(const DebugMapObject &Obj,
-                                                 const Triple &triple);
-  ErrorOr<DWARFFile &> loadObject(const DebugMapObject &Obj,
-                                  const DebugMap &DebugMap,
-                                  remarks::RemarkLinker &RL);
+    /// Attempt to load a debug object from disk.
+    ErrorOr<const object::ObjectFile &> loadObject(const DebugMapObject &Obj,
+            const Triple &triple);
+    ErrorOr<DWARFFile &> loadObject(const DebugMapObject &Obj,
+                                    const DebugMap &DebugMap,
+                                    remarks::RemarkLinker &RL);
 
-  raw_fd_ostream &OutFile;
-  BinaryHolder &BinHolder;
-  LinkOptions Options;
-  std::unique_ptr<DwarfStreamer> Streamer;
-  std::vector<std::unique_ptr<DWARFFile>> ObjectsForLinking;
-  std::vector<std::unique_ptr<DWARFContext>> ContextForLinking;
-  std::vector<std::unique_ptr<AddressManager>> AddressMapForLinking;
-  std::vector<std::string> EmptyWarnings;
+    raw_fd_ostream &OutFile;
+    BinaryHolder &BinHolder;
+    LinkOptions Options;
+    std::unique_ptr<DwarfStreamer> Streamer;
+    std::vector<std::unique_ptr<DWARFFile>> ObjectsForLinking;
+    std::vector<std::unique_ptr<DWARFContext>> ContextForLinking;
+    std::vector<std::unique_ptr<AddressManager>> AddressMapForLinking;
+    std::vector<std::string> EmptyWarnings;
 
-  /// A list of all .swiftinterface files referenced by the debug
-  /// info, mapping Module name to path on disk. The entries need to
-  /// be uniqued and sorted and there are only few entries expected
-  /// per compile unit, which is why this is a std::map.
-  std::map<std::string, std::string> ParseableSwiftInterfaces;
+    /// A list of all .swiftinterface files referenced by the debug
+    /// info, mapping Module name to path on disk. The entries need to
+    /// be uniqued and sorted and there are only few entries expected
+    /// per compile unit, which is why this is a std::map.
+    std::map<std::string, std::string> ParseableSwiftInterfaces;
 
-  bool ModuleCacheHintDisplayed = false;
-  bool ArchiveHintDisplayed = false;
+    bool ModuleCacheHintDisplayed = false;
+    bool ArchiveHintDisplayed = false;
 };
 
 } // end namespace dsymutil

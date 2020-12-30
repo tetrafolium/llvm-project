@@ -19,8 +19,8 @@ CommandObjectLanguage::CommandObjectLanguage(CommandInterpreter &interpreter)
     : CommandObjectMultiword(
           interpreter, "language", "Commands specific to a source language.",
           "language <language-name> <subcommand> [<subcommand-options>]") {
-  // Let the LanguageRuntime populates this command with subcommands
-  LanguageRuntime::InitializeCommands(this);
+    // Let the LanguageRuntime populates this command with subcommands
+    LanguageRuntime::InitializeCommands(this);
 }
 
 CommandObjectLanguage::~CommandObjectLanguage() {}

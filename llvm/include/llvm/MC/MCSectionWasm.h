@@ -24,64 +24,80 @@ class raw_ostream;
 
 /// This represents a section on wasm.
 class MCSectionWasm final : public MCSection {
-  unsigned UniqueID;
+    unsigned UniqueID;
 
-  const MCSymbolWasm *Group;
+    const MCSymbolWasm *Group;
 
-  // The offset of the MC function/data section in the wasm code/data section.
-  // For data relocations the offset is relative to start of the data payload
-  // itself and does not include the size of the section header.
-  uint64_t SectionOffset = 0;
+    // The offset of the MC function/data section in the wasm code/data section.
+    // For data relocations the offset is relative to start of the data payload
+    // itself and does not include the size of the section header.
+    uint64_t SectionOffset = 0;
 
-  // For data sections, this is the index of of the corresponding wasm data
-  // segment
-  uint32_t SegmentIndex = 0;
+    // For data sections, this is the index of of the corresponding wasm data
+    // segment
+    uint32_t SegmentIndex = 0;
 
-  // Whether this data segment is passive
-  bool IsPassive = false;
+    // Whether this data segment is passive
+    bool IsPassive = false;
 
-  // The storage of Name is owned by MCContext's WasmUniquingMap.
-  friend class MCContext;
-  MCSectionWasm(StringRef Name, SectionKind K, const MCSymbolWasm *group,
-                unsigned UniqueID, MCSymbol *Begin)
-      : MCSection(SV_Wasm, Name, K, Begin), UniqueID(UniqueID), Group(group) {}
+    // The storage of Name is owned by MCContext's WasmUniquingMap.
+    friend class MCContext;
+    MCSectionWasm(StringRef Name, SectionKind K, const MCSymbolWasm *group,
+                  unsigned UniqueID, MCSymbol *Begin)
+        : MCSection(SV_Wasm, Name, K, Begin), UniqueID(UniqueID), Group(group) {}
 
 public:
-  /// Decides whether a '.section' directive should be printed before the
-  /// section name
-  bool shouldOmitSectionDirective(StringRef Name, const MCAsmInfo &MAI) const;
+    /// Decides whether a '.section' directive should be printed before the
+    /// section name
+    bool shouldOmitSectionDirective(StringRef Name, const MCAsmInfo &MAI) const;
 
-  const MCSymbolWasm *getGroup() const { return Group; }
+    const MCSymbolWasm *getGroup() const {
+        return Group;
+    }
 
-  void PrintSwitchToSection(const MCAsmInfo &MAI, const Triple &T,
-                            raw_ostream &OS,
-                            const MCExpr *Subsection) const override;
-  bool UseCodeAlign() const override;
-  bool isVirtualSection() const override;
+    void PrintSwitchToSection(const MCAsmInfo &MAI, const Triple &T,
+                              raw_ostream &OS,
+                              const MCExpr *Subsection) const override;
+    bool UseCodeAlign() const override;
+    bool isVirtualSection() const override;
 
-  bool isWasmData() const {
-    return Kind.isGlobalWriteableData() || Kind.isReadOnly() ||
-           Kind.isThreadLocal();
-  }
+    bool isWasmData() const {
+        return Kind.isGlobalWriteableData() || Kind.isReadOnly() ||
+               Kind.isThreadLocal();
+    }
 
-  bool isUnique() const { return UniqueID != ~0U; }
-  unsigned getUniqueID() const { return UniqueID; }
+    bool isUnique() const {
+        return UniqueID != ~0U;
+    }
+    unsigned getUniqueID() const {
+        return UniqueID;
+    }
 
-  uint64_t getSectionOffset() const { return SectionOffset; }
-  void setSectionOffset(uint64_t Offset) { SectionOffset = Offset; }
+    uint64_t getSectionOffset() const {
+        return SectionOffset;
+    }
+    void setSectionOffset(uint64_t Offset) {
+        SectionOffset = Offset;
+    }
 
-  uint32_t getSegmentIndex() const { return SegmentIndex; }
-  void setSegmentIndex(uint32_t Index) { SegmentIndex = Index; }
+    uint32_t getSegmentIndex() const {
+        return SegmentIndex;
+    }
+    void setSegmentIndex(uint32_t Index) {
+        SegmentIndex = Index;
+    }
 
-  bool getPassive() const {
-    assert(isWasmData());
-    return IsPassive;
-  }
-  void setPassive(bool V = true) {
-    assert(isWasmData());
-    IsPassive = V;
-  }
-  static bool classof(const MCSection *S) { return S->getVariant() == SV_Wasm; }
+    bool getPassive() const {
+        assert(isWasmData());
+        return IsPassive;
+    }
+    void setPassive(bool V = true) {
+        assert(isWasmData());
+        IsPassive = V;
+    }
+    static bool classof(const MCSection *S) {
+        return S->getVariant() == SV_Wasm;
+    }
 };
 
 } // end namespace llvm

@@ -16,9 +16,9 @@
 
 namespace llvm {
 
-  class SparcMachineFunctionInfo : public MachineFunctionInfo {
+class SparcMachineFunctionInfo : public MachineFunctionInfo {
     virtual void anchor();
-  private:
+private:
     Register GlobalBaseReg;
 
     /// VarArgsFrameOffset - Frame offset to start of varargs area.
@@ -30,26 +30,42 @@ namespace llvm {
 
     /// IsLeafProc - True if the function is a leaf procedure.
     bool IsLeafProc;
-  public:
+public:
     SparcMachineFunctionInfo()
-      : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
-        IsLeafProc(false) {}
+        : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
+          IsLeafProc(false) {}
     explicit SparcMachineFunctionInfo(MachineFunction &MF)
-      : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
-        IsLeafProc(false) {}
+        : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
+          IsLeafProc(false) {}
 
-    Register getGlobalBaseReg() const { return GlobalBaseReg; }
-    void setGlobalBaseReg(Register Reg) { GlobalBaseReg = Reg; }
+    Register getGlobalBaseReg() const {
+        return GlobalBaseReg;
+    }
+    void setGlobalBaseReg(Register Reg) {
+        GlobalBaseReg = Reg;
+    }
 
-    int getVarArgsFrameOffset() const { return VarArgsFrameOffset; }
-    void setVarArgsFrameOffset(int Offset) { VarArgsFrameOffset = Offset; }
+    int getVarArgsFrameOffset() const {
+        return VarArgsFrameOffset;
+    }
+    void setVarArgsFrameOffset(int Offset) {
+        VarArgsFrameOffset = Offset;
+    }
 
-    Register getSRetReturnReg() const { return SRetReturnReg; }
-    void setSRetReturnReg(Register Reg) { SRetReturnReg = Reg; }
+    Register getSRetReturnReg() const {
+        return SRetReturnReg;
+    }
+    void setSRetReturnReg(Register Reg) {
+        SRetReturnReg = Reg;
+    }
 
-    void setLeafProc(bool rhs) { IsLeafProc = rhs; }
-    bool isLeafProc() const { return IsLeafProc; }
-  };
+    void setLeafProc(bool rhs) {
+        IsLeafProc = rhs;
+    }
+    bool isLeafProc() const {
+        return IsLeafProc;
+    }
+};
 }
 
 #endif

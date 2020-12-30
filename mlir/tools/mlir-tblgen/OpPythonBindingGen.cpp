@@ -517,22 +517,22 @@ static void
 populateBuilderArgs(const Operator &op,
                     llvm::SmallVectorImpl<std::string> &builderArgs,
                     llvm::SmallVectorImpl<std::string> &operandNames) {
-  for (int i = 0, e = op.getNumResults(); i < e; ++i) {
-    std::string name = op.getResultName(i).str();
-    if (name.empty())
-      name = llvm::formatv("_gen_res_{0}", i);
-    name = sanitizeName(name);
-    builderArgs.push_back(name);
-  }
-  for (int i = 0, e = op.getNumArgs(); i < e; ++i) {
-    std::string name = op.getArgName(i).str();
-    if (name.empty())
-      name = llvm::formatv("_gen_arg_{0}", i);
-    name = sanitizeName(name);
-    builderArgs.push_back(name);
-    if (!op.getArg(i).is<NamedAttribute *>())
-      operandNames.push_back(name);
-  }
+    for (int i = 0, e = op.getNumResults(); i < e; ++i) {
+        std::string name = op.getResultName(i).str();
+        if (name.empty())
+            name = llvm::formatv("_gen_res_{0}", i);
+        name = sanitizeName(name);
+        builderArgs.push_back(name);
+    }
+    for (int i = 0, e = op.getNumArgs(); i < e; ++i) {
+        std::string name = op.getArgName(i).str();
+        if (name.empty())
+            name = llvm::formatv("_gen_arg_{0}", i);
+        name = sanitizeName(name);
+        builderArgs.push_back(name);
+        if (!op.getArg(i).is<NamedAttribute *>())
+            operandNames.push_back(name);
+    }
 }
 
 /// Populates `builderLines` with additional lines that are required in the
@@ -544,24 +544,24 @@ static void
 populateBuilderLinesAttr(const Operator &op,
                          llvm::ArrayRef<std::string> argNames,
                          llvm::SmallVectorImpl<std::string> &builderLines) {
-  for (int i = 0, e = op.getNumArgs(); i < e; ++i) {
-    Argument arg = op.getArg(i);
-    auto *attribute = arg.dyn_cast<NamedAttribute *>();
-    if (!attribute)
-      continue;
+    for (int i = 0, e = op.getNumArgs(); i < e; ++i) {
+        Argument arg = op.getArg(i);
+        auto *attribute = arg.dyn_cast<NamedAttribute *>();
+        if (!attribute)
+            continue;
 
-    // Unit attributes are handled specially.
-    if (attribute->attr.getStorageType().trim().equals("::mlir::UnitAttr")) {
-      builderLines.push_back(llvm::formatv(initUnitAttributeTemplate,
-                                           attribute->name, argNames[i]));
-      continue;
-    }
+        // Unit attributes are handled specially.
+        if (attribute->attr.getStorageType().trim().equals("::mlir::UnitAttr")) {
+            builderLines.push_back(llvm::formatv(initUnitAttributeTemplate,
+                                                 attribute->name, argNames[i]));
+            continue;
+        }
 
-    builderLines.push_back(llvm::formatv(attribute->attr.isOptional()
+        builderLines.push_back(llvm::formatv(attribute->attr.isOptional()
                                              ? initOptionalAttributeTemplate
                                              : initAttributeTemplate,
-                                         attribute->name, argNames[i]));
-  }
+                                             attribute->name, argNames[i]));
+    }
 }
 
 /// Populates `builderLines` with additional lines that are required in the
@@ -572,114 +572,114 @@ static void populateBuilderLines(
     llvm::SmallVectorImpl<std::string> &builderLines,
     llvm::function_ref<int(const Operator &)> getNumElements,
     llvm::function_ref<const NamedTypeConstraint &(const Operator &, int)>
-        getElement) {
-  // The segment sizes buffer only has to be populated if there attr-sized
-  // segments trait is present.
-  bool includeSegments = op.getTrait(attrSizedTraitForKind(kind)) != nullptr;
-  if (includeSegments)
-    builderLines.push_back(llvm::formatv(segmentDeclarationTemplate, kind));
+    getElement) {
+    // The segment sizes buffer only has to be populated if there attr-sized
+    // segments trait is present.
+    bool includeSegments = op.getTrait(attrSizedTraitForKind(kind)) != nullptr;
+    if (includeSegments)
+        builderLines.push_back(llvm::formatv(segmentDeclarationTemplate, kind));
 
-  // For each element, find or generate a name.
-  for (int i = 0, e = getNumElements(op); i < e; ++i) {
-    const NamedTypeConstraint &element = getElement(op, i);
-    std::string name = names[i];
+    // For each element, find or generate a name.
+    for (int i = 0, e = getNumElements(op); i < e; ++i) {
+        const NamedTypeConstraint &element = getElement(op, i);
+        std::string name = names[i];
 
-    // Choose the formatting string based on the element kind.
-    llvm::StringRef formatString, segmentFormatString;
-    if (!element.isVariableLength()) {
-      formatString = singleElementAppendTemplate;
-      segmentFormatString = singleElementSegmentTemplate;
-    } else if (element.isOptional()) {
-      formatString = optionalAppendTemplate;
-      segmentFormatString = optionalSegmentTemplate;
-    } else {
-      assert(element.isVariadic() && "unhandled element group type");
-      formatString = variadicAppendTemplate;
-      segmentFormatString = variadicSegmentTemplate;
+        // Choose the formatting string based on the element kind.
+        llvm::StringRef formatString, segmentFormatString;
+        if (!element.isVariableLength()) {
+            formatString = singleElementAppendTemplate;
+            segmentFormatString = singleElementSegmentTemplate;
+        } else if (element.isOptional()) {
+            formatString = optionalAppendTemplate;
+            segmentFormatString = optionalSegmentTemplate;
+        } else {
+            assert(element.isVariadic() && "unhandled element group type");
+            formatString = variadicAppendTemplate;
+            segmentFormatString = variadicSegmentTemplate;
+        }
+
+        // Add the lines.
+        builderLines.push_back(llvm::formatv(formatString.data(), kind, name));
+        if (includeSegments)
+            builderLines.push_back(
+                llvm::formatv(segmentFormatString.data(), kind, name));
     }
 
-    // Add the lines.
-    builderLines.push_back(llvm::formatv(formatString.data(), kind, name));
     if (includeSegments)
-      builderLines.push_back(
-          llvm::formatv(segmentFormatString.data(), kind, name));
-  }
-
-  if (includeSegments)
-    builderLines.push_back(llvm::formatv(segmentAttributeTemplate, kind));
+        builderLines.push_back(llvm::formatv(segmentAttributeTemplate, kind));
 }
 
 /// Emits a default builder constructing an operation from the list of its
 /// result types, followed by a list of its operands.
 static void emitDefaultOpBuilder(const Operator &op, raw_ostream &os) {
-  // If we are asked to skip default builders, comply.
-  if (op.skipDefaultBuilders())
-    return;
+    // If we are asked to skip default builders, comply.
+    if (op.skipDefaultBuilders())
+        return;
 
-  llvm::SmallVector<std::string, 8> builderArgs;
-  llvm::SmallVector<std::string, 8> builderLines;
-  llvm::SmallVector<std::string, 4> operandArgNames;
-  builderArgs.reserve(op.getNumOperands() + op.getNumResults() +
-                      op.getNumNativeAttributes());
-  populateBuilderArgs(op, builderArgs, operandArgNames);
-  populateBuilderLines(
-      op, "result",
-      llvm::makeArrayRef(builderArgs).take_front(op.getNumResults()),
-      builderLines, getNumResults, getResult);
-  populateBuilderLines(op, "operand", operandArgNames, builderLines,
-                       getNumOperands, getOperand);
-  populateBuilderLinesAttr(
-      op, llvm::makeArrayRef(builderArgs).drop_front(op.getNumResults()),
-      builderLines);
+    llvm::SmallVector<std::string, 8> builderArgs;
+    llvm::SmallVector<std::string, 8> builderLines;
+    llvm::SmallVector<std::string, 4> operandArgNames;
+    builderArgs.reserve(op.getNumOperands() + op.getNumResults() +
+                        op.getNumNativeAttributes());
+    populateBuilderArgs(op, builderArgs, operandArgNames);
+    populateBuilderLines(
+        op, "result",
+        llvm::makeArrayRef(builderArgs).take_front(op.getNumResults()),
+        builderLines, getNumResults, getResult);
+    populateBuilderLines(op, "operand", operandArgNames, builderLines,
+                         getNumOperands, getOperand);
+    populateBuilderLinesAttr(
+        op, llvm::makeArrayRef(builderArgs).drop_front(op.getNumResults()),
+        builderLines);
 
-  builderArgs.push_back("loc=None");
-  builderArgs.push_back("ip=None");
-  os << llvm::formatv(initTemplate, op.getOperationName(),
-                      llvm::join(builderArgs, ", "),
-                      llvm::join(builderLines, "\n    "));
+    builderArgs.push_back("loc=None");
+    builderArgs.push_back("ip=None");
+    os << llvm::formatv(initTemplate, op.getOperationName(),
+                        llvm::join(builderArgs, ", "),
+                        llvm::join(builderLines, "\n    "));
 }
 
 static void constructAttributeMapping(const llvm::RecordKeeper &records,
                                       AttributeClasses &attributeClasses) {
-  for (const llvm::Record *rec :
-       records.getAllDerivedDefinitions("PythonAttr")) {
-    attributeClasses.try_emplace(rec->getValueAsString("cppStorageType").trim(),
-                                 rec->getValueAsString("pythonType").trim());
-  }
+    for (const llvm::Record *rec :
+            records.getAllDerivedDefinitions("PythonAttr")) {
+        attributeClasses.try_emplace(rec->getValueAsString("cppStorageType").trim(),
+                                     rec->getValueAsString("pythonType").trim());
+    }
 }
 
 /// Emits bindings for a specific Op to the given output stream.
 static void emitOpBindings(const Operator &op,
                            const AttributeClasses &attributeClasses,
                            raw_ostream &os) {
-  os << llvm::formatv(opClassTemplate, op.getCppClassName(),
-                      op.getOperationName());
-  emitDefaultOpBuilder(op, os);
-  emitOperandAccessors(op, os);
-  emitAttributeAccessors(op, attributeClasses, os);
-  emitResultAccessors(op, os);
+    os << llvm::formatv(opClassTemplate, op.getCppClassName(),
+                        op.getOperationName());
+    emitDefaultOpBuilder(op, os);
+    emitOperandAccessors(op, os);
+    emitAttributeAccessors(op, attributeClasses, os);
+    emitResultAccessors(op, os);
 }
 
 /// Emits bindings for the dialect specified in the command line, including file
 /// headers and utilities. Returns `false` on success to comply with Tablegen
 /// registration requirements.
 static bool emitAllOps(const llvm::RecordKeeper &records, raw_ostream &os) {
-  if (clDialectName.empty())
-    llvm::PrintFatalError("dialect name not provided");
+    if (clDialectName.empty())
+        llvm::PrintFatalError("dialect name not provided");
 
-  AttributeClasses attributeClasses;
-  constructAttributeMapping(records, attributeClasses);
+    AttributeClasses attributeClasses;
+    constructAttributeMapping(records, attributeClasses);
 
-  os << fileHeader;
-  os << llvm::formatv(dialectClassTemplate, clDialectName.getValue());
-  for (const llvm::Record *rec : records.getAllDerivedDefinitions("Op")) {
-    Operator op(rec);
-    if (op.getDialectName() == clDialectName.getValue())
-      emitOpBindings(op, attributeClasses, os);
-  }
-  return false;
+    os << fileHeader;
+    os << llvm::formatv(dialectClassTemplate, clDialectName.getValue());
+    for (const llvm::Record *rec : records.getAllDerivedDefinitions("Op")) {
+        Operator op(rec);
+        if (op.getDialectName() == clDialectName.getValue())
+            emitOpBindings(op, attributeClasses, os);
+    }
+    return false;
 }
 
 static GenRegistration
-    genPythonBindings("gen-python-op-bindings",
-                      "Generate Python bindings for MLIR Ops", &emitAllOps);
+genPythonBindings("gen-python-op-bindings",
+                  "Generate Python bindings for MLIR Ops", &emitAllOps);

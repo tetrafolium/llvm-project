@@ -39,148 +39,148 @@ namespace HSAMD {
 
 class MetadataStreamer {
 public:
-  virtual ~MetadataStreamer(){};
+    virtual ~MetadataStreamer() {};
 
-  virtual bool emitTo(AMDGPUTargetStreamer &TargetStreamer) = 0;
+    virtual bool emitTo(AMDGPUTargetStreamer &TargetStreamer) = 0;
 
-  virtual void begin(const Module &Mod) = 0;
+    virtual void begin(const Module &Mod) = 0;
 
-  virtual void end() = 0;
+    virtual void end() = 0;
 
-  virtual void emitKernel(const MachineFunction &MF,
-                          const SIProgramInfo &ProgramInfo) = 0;
+    virtual void emitKernel(const MachineFunction &MF,
+                            const SIProgramInfo &ProgramInfo) = 0;
 };
 
 class MetadataStreamerV3 final : public MetadataStreamer {
 private:
-  std::unique_ptr<msgpack::Document> HSAMetadataDoc =
-      std::make_unique<msgpack::Document>();
+    std::unique_ptr<msgpack::Document> HSAMetadataDoc =
+        std::make_unique<msgpack::Document>();
 
-  void dump(StringRef HSAMetadataString) const;
+    void dump(StringRef HSAMetadataString) const;
 
-  void verify(StringRef HSAMetadataString) const;
+    void verify(StringRef HSAMetadataString) const;
 
-  Optional<StringRef> getAccessQualifier(StringRef AccQual) const;
+    Optional<StringRef> getAccessQualifier(StringRef AccQual) const;
 
-  Optional<StringRef> getAddressSpaceQualifier(unsigned AddressSpace) const;
+    Optional<StringRef> getAddressSpaceQualifier(unsigned AddressSpace) const;
 
-  StringRef getValueKind(Type *Ty, StringRef TypeQual,
-                         StringRef BaseTypeName) const;
+    StringRef getValueKind(Type *Ty, StringRef TypeQual,
+                           StringRef BaseTypeName) const;
 
-  std::string getTypeName(Type *Ty, bool Signed) const;
+    std::string getTypeName(Type *Ty, bool Signed) const;
 
-  msgpack::ArrayDocNode getWorkGroupDimensions(MDNode *Node) const;
+    msgpack::ArrayDocNode getWorkGroupDimensions(MDNode *Node) const;
 
-  msgpack::MapDocNode getHSAKernelProps(const MachineFunction &MF,
-                                        const SIProgramInfo &ProgramInfo) const;
+    msgpack::MapDocNode getHSAKernelProps(const MachineFunction &MF,
+                                          const SIProgramInfo &ProgramInfo) const;
 
-  void emitVersion();
+    void emitVersion();
 
-  void emitPrintf(const Module &Mod);
+    void emitPrintf(const Module &Mod);
 
-  void emitKernelLanguage(const Function &Func, msgpack::MapDocNode Kern);
+    void emitKernelLanguage(const Function &Func, msgpack::MapDocNode Kern);
 
-  void emitKernelAttrs(const Function &Func, msgpack::MapDocNode Kern);
+    void emitKernelAttrs(const Function &Func, msgpack::MapDocNode Kern);
 
-  void emitKernelArgs(const Function &Func, msgpack::MapDocNode Kern);
+    void emitKernelArgs(const Function &Func, msgpack::MapDocNode Kern);
 
-  void emitKernelArg(const Argument &Arg, unsigned &Offset,
-                     msgpack::ArrayDocNode Args);
+    void emitKernelArg(const Argument &Arg, unsigned &Offset,
+                       msgpack::ArrayDocNode Args);
 
-  void emitKernelArg(const DataLayout &DL, Type *Ty, Align Alignment,
-                     StringRef ValueKind, unsigned &Offset,
-                     msgpack::ArrayDocNode Args, MaybeAlign PointeeAlign = None,
-                     StringRef Name = "", StringRef TypeName = "",
-                     StringRef BaseTypeName = "", StringRef AccQual = "",
-                     StringRef TypeQual = "");
+    void emitKernelArg(const DataLayout &DL, Type *Ty, Align Alignment,
+                       StringRef ValueKind, unsigned &Offset,
+                       msgpack::ArrayDocNode Args, MaybeAlign PointeeAlign = None,
+                       StringRef Name = "", StringRef TypeName = "",
+                       StringRef BaseTypeName = "", StringRef AccQual = "",
+                       StringRef TypeQual = "");
 
-  void emitHiddenKernelArgs(const Function &Func, unsigned &Offset,
-                            msgpack::ArrayDocNode Args);
+    void emitHiddenKernelArgs(const Function &Func, unsigned &Offset,
+                              msgpack::ArrayDocNode Args);
 
-  msgpack::DocNode &getRootMetadata(StringRef Key) {
-    return HSAMetadataDoc->getRoot().getMap(/*Convert=*/true)[Key];
-  }
+    msgpack::DocNode &getRootMetadata(StringRef Key) {
+        return HSAMetadataDoc->getRoot().getMap(/*Convert=*/true)[Key];
+    }
 
-  msgpack::DocNode &getHSAMetadataRoot() {
-    return HSAMetadataDoc->getRoot();
-  }
+    msgpack::DocNode &getHSAMetadataRoot() {
+        return HSAMetadataDoc->getRoot();
+    }
 
 public:
-  MetadataStreamerV3() = default;
-  ~MetadataStreamerV3() = default;
+    MetadataStreamerV3() = default;
+    ~MetadataStreamerV3() = default;
 
-  bool emitTo(AMDGPUTargetStreamer &TargetStreamer) override;
+    bool emitTo(AMDGPUTargetStreamer &TargetStreamer) override;
 
-  void begin(const Module &Mod) override;
+    void begin(const Module &Mod) override;
 
-  void end() override;
+    void end() override;
 
-  void emitKernel(const MachineFunction &MF,
-                  const SIProgramInfo &ProgramInfo) override;
+    void emitKernel(const MachineFunction &MF,
+                    const SIProgramInfo &ProgramInfo) override;
 };
 
 class MetadataStreamerV2 final : public MetadataStreamer {
 private:
-  Metadata HSAMetadata;
+    Metadata HSAMetadata;
 
-  void dump(StringRef HSAMetadataString) const;
+    void dump(StringRef HSAMetadataString) const;
 
-  void verify(StringRef HSAMetadataString) const;
+    void verify(StringRef HSAMetadataString) const;
 
-  AccessQualifier getAccessQualifier(StringRef AccQual) const;
+    AccessQualifier getAccessQualifier(StringRef AccQual) const;
 
-  AddressSpaceQualifier getAddressSpaceQualifier(unsigned AddressSpace) const;
+    AddressSpaceQualifier getAddressSpaceQualifier(unsigned AddressSpace) const;
 
-  ValueKind getValueKind(Type *Ty, StringRef TypeQual,
-                         StringRef BaseTypeName) const;
+    ValueKind getValueKind(Type *Ty, StringRef TypeQual,
+                           StringRef BaseTypeName) const;
 
-  std::string getTypeName(Type *Ty, bool Signed) const;
+    std::string getTypeName(Type *Ty, bool Signed) const;
 
-  std::vector<uint32_t> getWorkGroupDimensions(MDNode *Node) const;
+    std::vector<uint32_t> getWorkGroupDimensions(MDNode *Node) const;
 
-  Kernel::CodeProps::Metadata getHSACodeProps(
-      const MachineFunction &MF,
-      const SIProgramInfo &ProgramInfo) const;
-  Kernel::DebugProps::Metadata getHSADebugProps(
-      const MachineFunction &MF,
-      const SIProgramInfo &ProgramInfo) const;
+    Kernel::CodeProps::Metadata getHSACodeProps(
+        const MachineFunction &MF,
+        const SIProgramInfo &ProgramInfo) const;
+    Kernel::DebugProps::Metadata getHSADebugProps(
+        const MachineFunction &MF,
+        const SIProgramInfo &ProgramInfo) const;
 
-  void emitVersion();
+    void emitVersion();
 
-  void emitPrintf(const Module &Mod);
+    void emitPrintf(const Module &Mod);
 
-  void emitKernelLanguage(const Function &Func);
+    void emitKernelLanguage(const Function &Func);
 
-  void emitKernelAttrs(const Function &Func);
+    void emitKernelAttrs(const Function &Func);
 
-  void emitKernelArgs(const Function &Func);
+    void emitKernelArgs(const Function &Func);
 
-  void emitKernelArg(const Argument &Arg);
+    void emitKernelArg(const Argument &Arg);
 
-  void emitKernelArg(const DataLayout &DL, Type *Ty, Align Alignment,
-                     ValueKind ValueKind, MaybeAlign PointeeAlign = None,
-                     StringRef Name = "", StringRef TypeName = "",
-                     StringRef BaseTypeName = "", StringRef AccQual = "",
-                     StringRef TypeQual = "");
+    void emitKernelArg(const DataLayout &DL, Type *Ty, Align Alignment,
+                       ValueKind ValueKind, MaybeAlign PointeeAlign = None,
+                       StringRef Name = "", StringRef TypeName = "",
+                       StringRef BaseTypeName = "", StringRef AccQual = "",
+                       StringRef TypeQual = "");
 
-  void emitHiddenKernelArgs(const Function &Func);
+    void emitHiddenKernelArgs(const Function &Func);
 
-  const Metadata &getHSAMetadata() const {
-    return HSAMetadata;
-  }
+    const Metadata &getHSAMetadata() const {
+        return HSAMetadata;
+    }
 
 public:
-  MetadataStreamerV2() = default;
-  ~MetadataStreamerV2() = default;
+    MetadataStreamerV2() = default;
+    ~MetadataStreamerV2() = default;
 
-  bool emitTo(AMDGPUTargetStreamer &TargetStreamer) override;
+    bool emitTo(AMDGPUTargetStreamer &TargetStreamer) override;
 
-  void begin(const Module &Mod) override;
+    void begin(const Module &Mod) override;
 
-  void end() override;
+    void end() override;
 
-  void emitKernel(const MachineFunction &MF,
-                  const SIProgramInfo &ProgramInfo) override;
+    void emitKernel(const MachineFunction &MF,
+                    const SIProgramInfo &ProgramInfo) override;
 };
 
 } // end namespace HSAMD

@@ -34,7 +34,7 @@ namespace tooling {
 /// source range is passed to the specific refactoring action rule
 /// constructor (provided all other requirements are satisfied).
 class RefactoringActionRuleRequirement {
-  // Expected<T> evaluate(RefactoringRuleContext &Context) const;
+    // Expected<T> evaluate(RefactoringRuleContext &Context) const;
 };
 
 /// A base class for any requirement that expects some part of the source to be
@@ -45,11 +45,11 @@ class SourceSelectionRequirement : public RefactoringActionRuleRequirement {};
 /// text is selected.
 class SourceRangeSelectionRequirement : public SourceSelectionRequirement {
 public:
-  Expected<SourceRange> evaluate(RefactoringRuleContext &Context) const {
-    if (Context.getSelectionRange().isValid())
-      return Context.getSelectionRange();
-    return Context.createDiagnosticError(diag::err_refactor_no_selection);
-  }
+    Expected<SourceRange> evaluate(RefactoringRuleContext &Context) const {
+        if (Context.getSelectionRange().isValid())
+            return Context.getSelectionRange();
+        return Context.createDiagnosticError(diag::err_refactor_no_selection);
+    }
 };
 
 /// An AST selection requirement is satisfied when any portion of the AST
@@ -59,7 +59,7 @@ public:
 /// search of matching refactoring action rules.
 class ASTSelectionRequirement : public SourceRangeSelectionRequirement {
 public:
-  Expected<SelectedASTNode> evaluate(RefactoringRuleContext &Context) const;
+    Expected<SelectedASTNode> evaluate(RefactoringRuleContext &Context) const;
 };
 
 /// A selection requirement that is satisfied when the selection range overlaps
@@ -73,19 +73,19 @@ public:
 /// \see CodeRangeASTSelection
 class CodeRangeASTSelectionRequirement : public ASTSelectionRequirement {
 public:
-  Expected<CodeRangeASTSelection>
-  evaluate(RefactoringRuleContext &Context) const;
+    Expected<CodeRangeASTSelection>
+    evaluate(RefactoringRuleContext &Context) const;
 };
 
 /// A base class for any requirement that requires some refactoring options.
 class RefactoringOptionsRequirement : public RefactoringActionRuleRequirement {
 public:
-  virtual ~RefactoringOptionsRequirement() {}
+    virtual ~RefactoringOptionsRequirement() {}
 
-  /// Returns the set of refactoring options that are used when evaluating this
-  /// requirement.
-  virtual ArrayRef<std::shared_ptr<RefactoringOption>>
-  getRefactoringOptions() const = 0;
+    /// Returns the set of refactoring options that are used when evaluating this
+    /// requirement.
+    virtual ArrayRef<std::shared_ptr<RefactoringOption>>
+            getRefactoringOptions() const = 0;
 };
 
 /// A requirement that evaluates to the value of the given \c OptionType when
@@ -95,25 +95,25 @@ public:
 template <typename OptionType>
 class OptionRequirement : public RefactoringOptionsRequirement {
 public:
-  OptionRequirement() : Opt(createRefactoringOption<OptionType>()) {}
+    OptionRequirement() : Opt(createRefactoringOption<OptionType>()) {}
 
-  ArrayRef<std::shared_ptr<RefactoringOption>>
-  getRefactoringOptions() const final override {
-    return Opt;
-  }
+    ArrayRef<std::shared_ptr<RefactoringOption>>
+    getRefactoringOptions() const final override {
+        return Opt;
+    }
 
-  Expected<typename OptionType::ValueType>
-  evaluate(RefactoringRuleContext &) const {
-    return static_cast<OptionType *>(Opt.get())->getValue();
-  }
+    Expected<typename OptionType::ValueType>
+    evaluate(RefactoringRuleContext &) const {
+        return static_cast<OptionType *>(Opt.get())->getValue();
+    }
 
 private:
-  /// The partially-owned option.
-  ///
-  /// The ownership of the option is shared among the different requirements
-  /// because the same option can be used by multiple rules in one refactoring
-  /// action.
-  std::shared_ptr<RefactoringOption> Opt;
+    /// The partially-owned option.
+    ///
+    /// The ownership of the option is shared among the different requirements
+    /// because the same option can be used by multiple rules in one refactoring
+    /// action.
+    std::shared_ptr<RefactoringOption> Opt;
 };
 
 } // end namespace tooling

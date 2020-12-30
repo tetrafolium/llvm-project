@@ -38,161 +38,163 @@ namespace llvm {
 template<>
 struct DOTGraphTraits<RegionNode*> : public DefaultDOTGraphTraits {
 
-  DOTGraphTraits (bool isSimple=false)
-    : DefaultDOTGraphTraits(isSimple) {}
+    DOTGraphTraits (bool isSimple=false)
+        : DefaultDOTGraphTraits(isSimple) {}
 
-  std::string getNodeLabel(RegionNode *Node, RegionNode *Graph) {
+    std::string getNodeLabel(RegionNode *Node, RegionNode *Graph) {
 
-    if (!Node->isSubRegion()) {
-      BasicBlock *BB = Node->getNodeAs<BasicBlock>();
+        if (!Node->isSubRegion()) {
+            BasicBlock *BB = Node->getNodeAs<BasicBlock>();
 
-      if (isSimple())
-        return DOTGraphTraits<DOTFuncInfo *>
-          ::getSimpleNodeLabel(BB, nullptr);
-      else
-        return DOTGraphTraits<DOTFuncInfo *>
-          ::getCompleteNodeLabel(BB, nullptr);
+            if (isSimple())
+                return DOTGraphTraits<DOTFuncInfo *>
+                       ::getSimpleNodeLabel(BB, nullptr);
+            else
+                return DOTGraphTraits<DOTFuncInfo *>
+                       ::getCompleteNodeLabel(BB, nullptr);
+        }
+
+        return "Not implemented";
     }
-
-    return "Not implemented";
-  }
 };
 
 template <>
 struct DOTGraphTraits<RegionInfo *> : public DOTGraphTraits<RegionNode *> {
 
-  DOTGraphTraits (bool isSimple = false)
-    : DOTGraphTraits<RegionNode*>(isSimple) {}
+    DOTGraphTraits (bool isSimple = false)
+        : DOTGraphTraits<RegionNode*>(isSimple) {}
 
-  static std::string getGraphName(const RegionInfo *) { return "Region Graph"; }
-
-  std::string getNodeLabel(RegionNode *Node, RegionInfo *G) {
-    return DOTGraphTraits<RegionNode *>::getNodeLabel(
-        Node, reinterpret_cast<RegionNode *>(G->getTopLevelRegion()));
-  }
-
-  std::string getEdgeAttributes(RegionNode *srcNode,
-                                GraphTraits<RegionInfo *>::ChildIteratorType CI,
-                                RegionInfo *G) {
-    RegionNode *destNode = *CI;
-
-    if (srcNode->isSubRegion() || destNode->isSubRegion())
-      return "";
-
-    // In case of a backedge, do not use it to define the layout of the nodes.
-    BasicBlock *srcBB = srcNode->getNodeAs<BasicBlock>();
-    BasicBlock *destBB = destNode->getNodeAs<BasicBlock>();
-
-    Region *R = G->getRegionFor(destBB);
-
-    while (R && R->getParent())
-      if (R->getParent()->getEntry() == destBB)
-        R = R->getParent();
-      else
-        break;
-
-    if (R && R->getEntry() == destBB && R->contains(srcBB))
-      return "constraint=false";
-
-    return "";
-  }
-
-  // Print the cluster of the subregions. This groups the single basic blocks
-  // and adds a different background color for each group.
-  static void printRegionCluster(const Region &R, GraphWriter<RegionInfo *> &GW,
-                                 unsigned depth = 0) {
-    raw_ostream &O = GW.getOStream();
-    O.indent(2 * depth) << "subgraph cluster_" << static_cast<const void*>(&R)
-      << " {\n";
-    O.indent(2 * (depth + 1)) << "label = \"\";\n";
-
-    if (!onlySimpleRegions || R.isSimple()) {
-      O.indent(2 * (depth + 1)) << "style = filled;\n";
-      O.indent(2 * (depth + 1)) << "color = "
-        << ((R.getDepth() * 2 % 12) + 1) << "\n";
-
-    } else {
-      O.indent(2 * (depth + 1)) << "style = solid;\n";
-      O.indent(2 * (depth + 1)) << "color = "
-        << ((R.getDepth() * 2 % 12) + 2) << "\n";
+    static std::string getGraphName(const RegionInfo *) {
+        return "Region Graph";
     }
 
-    for (const auto &RI : R)
-      printRegionCluster(*RI, GW, depth + 1);
+    std::string getNodeLabel(RegionNode *Node, RegionInfo *G) {
+        return DOTGraphTraits<RegionNode *>::getNodeLabel(
+                   Node, reinterpret_cast<RegionNode *>(G->getTopLevelRegion()));
+    }
 
-    const RegionInfo &RI = *static_cast<const RegionInfo*>(R.getRegionInfo());
+    std::string getEdgeAttributes(RegionNode *srcNode,
+                                  GraphTraits<RegionInfo *>::ChildIteratorType CI,
+                                  RegionInfo *G) {
+        RegionNode *destNode = *CI;
 
-    for (auto *BB : R.blocks())
-      if (RI.getRegionFor(BB) == &R)
-        O.indent(2 * (depth + 1)) << "Node"
-          << static_cast<const void*>(RI.getTopLevelRegion()->getBBNode(BB))
-          << ";\n";
+        if (srcNode->isSubRegion() || destNode->isSubRegion())
+            return "";
 
-    O.indent(2 * depth) << "}\n";
-  }
+        // In case of a backedge, do not use it to define the layout of the nodes.
+        BasicBlock *srcBB = srcNode->getNodeAs<BasicBlock>();
+        BasicBlock *destBB = destNode->getNodeAs<BasicBlock>();
 
-  static void addCustomGraphFeatures(const RegionInfo *G,
-                                     GraphWriter<RegionInfo *> &GW) {
-    raw_ostream &O = GW.getOStream();
-    O << "\tcolorscheme = \"paired12\"\n";
-    printRegionCluster(*G->getTopLevelRegion(), GW, 4);
-  }
+        Region *R = G->getRegionFor(destBB);
+
+        while (R && R->getParent())
+            if (R->getParent()->getEntry() == destBB)
+                R = R->getParent();
+            else
+                break;
+
+        if (R && R->getEntry() == destBB && R->contains(srcBB))
+            return "constraint=false";
+
+        return "";
+    }
+
+    // Print the cluster of the subregions. This groups the single basic blocks
+    // and adds a different background color for each group.
+    static void printRegionCluster(const Region &R, GraphWriter<RegionInfo *> &GW,
+                                   unsigned depth = 0) {
+        raw_ostream &O = GW.getOStream();
+        O.indent(2 * depth) << "subgraph cluster_" << static_cast<const void*>(&R)
+                            << " {\n";
+        O.indent(2 * (depth + 1)) << "label = \"\";\n";
+
+        if (!onlySimpleRegions || R.isSimple()) {
+            O.indent(2 * (depth + 1)) << "style = filled;\n";
+            O.indent(2 * (depth + 1)) << "color = "
+                                      << ((R.getDepth() * 2 % 12) + 1) << "\n";
+
+        } else {
+            O.indent(2 * (depth + 1)) << "style = solid;\n";
+            O.indent(2 * (depth + 1)) << "color = "
+                                      << ((R.getDepth() * 2 % 12) + 2) << "\n";
+        }
+
+        for (const auto &RI : R)
+            printRegionCluster(*RI, GW, depth + 1);
+
+        const RegionInfo &RI = *static_cast<const RegionInfo*>(R.getRegionInfo());
+
+        for (auto *BB : R.blocks())
+            if (RI.getRegionFor(BB) == &R)
+                O.indent(2 * (depth + 1)) << "Node"
+                                          << static_cast<const void*>(RI.getTopLevelRegion()->getBBNode(BB))
+                                          << ";\n";
+
+        O.indent(2 * depth) << "}\n";
+    }
+
+    static void addCustomGraphFeatures(const RegionInfo *G,
+                                       GraphWriter<RegionInfo *> &GW) {
+        raw_ostream &O = GW.getOStream();
+        O << "\tcolorscheme = \"paired12\"\n";
+        printRegionCluster(*G->getTopLevelRegion(), GW, 4);
+    }
 };
 } //end namespace llvm
 
 namespace {
 
 struct RegionInfoPassGraphTraits {
-  static RegionInfo *getGraph(RegionInfoPass *RIP) {
-    return &RIP->getRegionInfo();
-  }
+    static RegionInfo *getGraph(RegionInfoPass *RIP) {
+        return &RIP->getRegionInfo();
+    }
 };
 
 struct RegionPrinter
     : public DOTGraphTraitsPrinter<RegionInfoPass, false, RegionInfo *,
-                                   RegionInfoPassGraphTraits> {
-  static char ID;
-  RegionPrinter()
-      : DOTGraphTraitsPrinter<RegionInfoPass, false, RegionInfo *,
-                              RegionInfoPassGraphTraits>("reg", ID) {
-    initializeRegionPrinterPass(*PassRegistry::getPassRegistry());
-  }
+      RegionInfoPassGraphTraits> {
+    static char ID;
+    RegionPrinter()
+        : DOTGraphTraitsPrinter<RegionInfoPass, false, RegionInfo *,
+          RegionInfoPassGraphTraits>("reg", ID) {
+        initializeRegionPrinterPass(*PassRegistry::getPassRegistry());
+    }
 };
 char RegionPrinter::ID = 0;
 
 struct RegionOnlyPrinter
     : public DOTGraphTraitsPrinter<RegionInfoPass, true, RegionInfo *,
-                                   RegionInfoPassGraphTraits> {
-  static char ID;
-  RegionOnlyPrinter()
-      : DOTGraphTraitsPrinter<RegionInfoPass, true, RegionInfo *,
-                              RegionInfoPassGraphTraits>("reg", ID) {
-    initializeRegionOnlyPrinterPass(*PassRegistry::getPassRegistry());
-  }
+      RegionInfoPassGraphTraits> {
+    static char ID;
+    RegionOnlyPrinter()
+        : DOTGraphTraitsPrinter<RegionInfoPass, true, RegionInfo *,
+          RegionInfoPassGraphTraits>("reg", ID) {
+        initializeRegionOnlyPrinterPass(*PassRegistry::getPassRegistry());
+    }
 };
 char RegionOnlyPrinter::ID = 0;
 
 struct RegionViewer
     : public DOTGraphTraitsViewer<RegionInfoPass, false, RegionInfo *,
-                                  RegionInfoPassGraphTraits> {
-  static char ID;
-  RegionViewer()
-      : DOTGraphTraitsViewer<RegionInfoPass, false, RegionInfo *,
-                             RegionInfoPassGraphTraits>("reg", ID) {
-    initializeRegionViewerPass(*PassRegistry::getPassRegistry());
-  }
+      RegionInfoPassGraphTraits> {
+    static char ID;
+    RegionViewer()
+        : DOTGraphTraitsViewer<RegionInfoPass, false, RegionInfo *,
+          RegionInfoPassGraphTraits>("reg", ID) {
+        initializeRegionViewerPass(*PassRegistry::getPassRegistry());
+    }
 };
 char RegionViewer::ID = 0;
 
 struct RegionOnlyViewer
     : public DOTGraphTraitsViewer<RegionInfoPass, true, RegionInfo *,
-                                  RegionInfoPassGraphTraits> {
-  static char ID;
-  RegionOnlyViewer()
-      : DOTGraphTraitsViewer<RegionInfoPass, true, RegionInfo *,
-                             RegionInfoPassGraphTraits>("regonly", ID) {
-    initializeRegionOnlyViewerPass(*PassRegistry::getPassRegistry());
-  }
+      RegionInfoPassGraphTraits> {
+    static char ID;
+    RegionOnlyViewer()
+        : DOTGraphTraitsViewer<RegionInfoPass, true, RegionInfo *,
+          RegionInfoPassGraphTraits>("regonly", ID) {
+        initializeRegionOnlyViewerPass(*PassRegistry::getPassRegistry());
+    }
 };
 char RegionOnlyViewer::ID = 0;
 
@@ -213,55 +215,61 @@ INITIALIZE_PASS(RegionOnlyViewer, "view-regions-only",
                 "View regions of function (with no function bodies)",
                 true, true)
 
-FunctionPass *llvm::createRegionPrinterPass() { return new RegionPrinter(); }
+FunctionPass *llvm::createRegionPrinterPass() {
+    return new RegionPrinter();
+}
 
 FunctionPass *llvm::createRegionOnlyPrinterPass() {
-  return new RegionOnlyPrinter();
+    return new RegionOnlyPrinter();
 }
 
 FunctionPass* llvm::createRegionViewerPass() {
-  return new RegionViewer();
+    return new RegionViewer();
 }
 
 FunctionPass* llvm::createRegionOnlyViewerPass() {
-  return new RegionOnlyViewer();
+    return new RegionOnlyViewer();
 }
 
 #ifndef NDEBUG
 static void viewRegionInfo(RegionInfo *RI, bool ShortNames) {
-  assert(RI && "Argument must be non-null");
+    assert(RI && "Argument must be non-null");
 
-  llvm::Function *F = RI->getTopLevelRegion()->getEntry()->getParent();
-  std::string GraphName = DOTGraphTraits<RegionInfo *>::getGraphName(RI);
+    llvm::Function *F = RI->getTopLevelRegion()->getEntry()->getParent();
+    std::string GraphName = DOTGraphTraits<RegionInfo *>::getGraphName(RI);
 
-  llvm::ViewGraph(RI, "reg", ShortNames,
-                  Twine(GraphName) + " for '" + F->getName() + "' function");
+    llvm::ViewGraph(RI, "reg", ShortNames,
+                    Twine(GraphName) + " for '" + F->getName() + "' function");
 }
 
 static void invokeFunctionPass(const Function *F, FunctionPass *ViewerPass) {
-  assert(F && "Argument must be non-null");
-  assert(!F->isDeclaration() && "Function must have an implementation");
+    assert(F && "Argument must be non-null");
+    assert(!F->isDeclaration() && "Function must have an implementation");
 
-  // The viewer and analysis passes do not modify anything, so we can safely
-  // remove the const qualifier
-  auto NonConstF = const_cast<Function *>(F);
+    // The viewer and analysis passes do not modify anything, so we can safely
+    // remove the const qualifier
+    auto NonConstF = const_cast<Function *>(F);
 
-  llvm::legacy::FunctionPassManager FPM(NonConstF->getParent());
-  FPM.add(ViewerPass);
-  FPM.doInitialization();
-  FPM.run(*NonConstF);
-  FPM.doFinalization();
+    llvm::legacy::FunctionPassManager FPM(NonConstF->getParent());
+    FPM.add(ViewerPass);
+    FPM.doInitialization();
+    FPM.run(*NonConstF);
+    FPM.doFinalization();
 }
 
-void llvm::viewRegion(RegionInfo *RI) { viewRegionInfo(RI, false); }
+void llvm::viewRegion(RegionInfo *RI) {
+    viewRegionInfo(RI, false);
+}
 
 void llvm::viewRegion(const Function *F) {
-  invokeFunctionPass(F, createRegionViewerPass());
+    invokeFunctionPass(F, createRegionViewerPass());
 }
 
-void llvm::viewRegionOnly(RegionInfo *RI) { viewRegionInfo(RI, true); }
+void llvm::viewRegionOnly(RegionInfo *RI) {
+    viewRegionInfo(RI, true);
+}
 
 void llvm::viewRegionOnly(const Function *F) {
-  invokeFunctionPass(F, createRegionOnlyViewerPass());
+    invokeFunctionPass(F, createRegionOnlyViewerPass());
 }
 #endif

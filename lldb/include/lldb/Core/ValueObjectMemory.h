@@ -28,52 +28,52 @@ class ExecutionContextScope;
 // set lldb type.
 class ValueObjectMemory : public ValueObject {
 public:
-  ~ValueObjectMemory() override;
+    ~ValueObjectMemory() override;
 
-  static lldb::ValueObjectSP Create(ExecutionContextScope *exe_scope,
-                                    llvm::StringRef name,
-                                    const Address &address,
-                                    lldb::TypeSP &type_sp);
+    static lldb::ValueObjectSP Create(ExecutionContextScope *exe_scope,
+                                      llvm::StringRef name,
+                                      const Address &address,
+                                      lldb::TypeSP &type_sp);
 
-  static lldb::ValueObjectSP Create(ExecutionContextScope *exe_scope,
-                                    llvm::StringRef name,
-                                    const Address &address,
-                                    const CompilerType &ast_type);
+    static lldb::ValueObjectSP Create(ExecutionContextScope *exe_scope,
+                                      llvm::StringRef name,
+                                      const Address &address,
+                                      const CompilerType &ast_type);
 
-  llvm::Optional<uint64_t> GetByteSize() override;
+    llvm::Optional<uint64_t> GetByteSize() override;
 
-  ConstString GetTypeName() override;
+    ConstString GetTypeName() override;
 
-  ConstString GetDisplayTypeName() override;
+    ConstString GetDisplayTypeName() override;
 
-  size_t CalculateNumChildren(uint32_t max) override;
+    size_t CalculateNumChildren(uint32_t max) override;
 
-  lldb::ValueType GetValueType() const override;
+    lldb::ValueType GetValueType() const override;
 
-  bool IsInScope() override;
+    bool IsInScope() override;
 
-  lldb::ModuleSP GetModule() override;
+    lldb::ModuleSP GetModule() override;
 
 protected:
-  bool UpdateValue() override;
+    bool UpdateValue() override;
 
-  CompilerType GetCompilerTypeImpl() override;
+    CompilerType GetCompilerTypeImpl() override;
 
-  Address m_address; ///< The variable that this value object is based upon
-  lldb::TypeSP m_type_sp;
-  CompilerType m_compiler_type;
+    Address m_address; ///< The variable that this value object is based upon
+    lldb::TypeSP m_type_sp;
+    CompilerType m_compiler_type;
 
 private:
-  ValueObjectMemory(ExecutionContextScope *exe_scope,
-                    ValueObjectManager &manager, llvm::StringRef name,
-                    const Address &address, lldb::TypeSP &type_sp);
+    ValueObjectMemory(ExecutionContextScope *exe_scope,
+                      ValueObjectManager &manager, llvm::StringRef name,
+                      const Address &address, lldb::TypeSP &type_sp);
 
-  ValueObjectMemory(ExecutionContextScope *exe_scope,
-                    ValueObjectManager &manager, llvm::StringRef name,
-                    const Address &address, const CompilerType &ast_type);
-  // For ValueObject only
-  ValueObjectMemory(const ValueObjectMemory &) = delete;
-  const ValueObjectMemory &operator=(const ValueObjectMemory &) = delete;
+    ValueObjectMemory(ExecutionContextScope *exe_scope,
+                      ValueObjectManager &manager, llvm::StringRef name,
+                      const Address &address, const CompilerType &ast_type);
+    // For ValueObject only
+    ValueObjectMemory(const ValueObjectMemory &) = delete;
+    const ValueObjectMemory &operator=(const ValueObjectMemory &) = delete;
 };
 
 } // namespace lldb_private

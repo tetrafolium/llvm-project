@@ -32,37 +32,37 @@ typedef int SOCKET;
 // treat them identically.
 namespace lldb_vscode {
 struct StreamDescriptor {
-  StreamDescriptor();
-  ~StreamDescriptor();
-  StreamDescriptor(StreamDescriptor &&other);
+    StreamDescriptor();
+    ~StreamDescriptor();
+    StreamDescriptor(StreamDescriptor &&other);
 
-  StreamDescriptor &operator=(StreamDescriptor &&other);
+    StreamDescriptor &operator=(StreamDescriptor &&other);
 
-  static StreamDescriptor from_socket(SOCKET s, bool close);
-  static StreamDescriptor from_file(int fd, bool close);
+    static StreamDescriptor from_socket(SOCKET s, bool close);
+    static StreamDescriptor from_file(int fd, bool close);
 
-  bool m_is_socket = false;
-  bool m_close = false;
-  union {
-    int m_fd;
-    SOCKET m_socket;
-  };
+    bool m_is_socket = false;
+    bool m_close = false;
+    union {
+        int m_fd;
+        SOCKET m_socket;
+    };
 };
 
 struct InputStream {
-  StreamDescriptor descriptor;
+    StreamDescriptor descriptor;
 
-  bool read_full(std::ofstream *log, size_t length, std::string &text);
+    bool read_full(std::ofstream *log, size_t length, std::string &text);
 
-  bool read_line(std::ofstream *log, std::string &line);
+    bool read_line(std::ofstream *log, std::string &line);
 
-  bool read_expected(std::ofstream *log, llvm::StringRef expected);
+    bool read_expected(std::ofstream *log, llvm::StringRef expected);
 };
 
 struct OutputStream {
-  StreamDescriptor descriptor;
+    StreamDescriptor descriptor;
 
-  bool write_full(llvm::StringRef str);
+    bool write_full(llvm::StringRef str);
 };
 } // namespace lldb_vscode
 

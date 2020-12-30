@@ -17,25 +17,25 @@ namespace tidy {
 namespace cert {
 
 void CommandProcessorCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(
-      callExpr(
-          callee(functionDecl(hasAnyName("::system", "::popen", "::_popen"))
-                     .bind("func")),
-          // Do not diagnose when the call expression passes a null pointer
-          // constant to system(); that only checks for the presence of a
-          // command processor, which is not a security risk by itself.
-          unless(callExpr(callee(functionDecl(hasName("::system"))),
-                          argumentCountIs(1),
-                          hasArgument(0, nullPointerConstant()))))
-          .bind("expr"),
-      this);
+    Finder->addMatcher(
+        callExpr(
+            callee(functionDecl(hasAnyName("::system", "::popen", "::_popen"))
+                   .bind("func")),
+            // Do not diagnose when the call expression passes a null pointer
+            // constant to system(); that only checks for the presence of a
+            // command processor, which is not a security risk by itself.
+            unless(callExpr(callee(functionDecl(hasName("::system"))),
+                            argumentCountIs(1),
+                            hasArgument(0, nullPointerConstant()))))
+        .bind("expr"),
+        this);
 }
 
 void CommandProcessorCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *Fn = Result.Nodes.getNodeAs<FunctionDecl>("func");
-  const auto *E = Result.Nodes.getNodeAs<CallExpr>("expr");
+    const auto *Fn = Result.Nodes.getNodeAs<FunctionDecl>("func");
+    const auto *E = Result.Nodes.getNodeAs<CallExpr>("expr");
 
-  diag(E->getExprLoc(), "calling %0 uses a command processor") << Fn;
+    diag(E->getExprLoc(), "calling %0 uses a command processor") << Fn;
 }
 
 } // namespace cert

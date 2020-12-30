@@ -22,13 +22,13 @@ namespace cert {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cert-err58-cpp.html
 class StaticObjectExceptionCheck : public ClangTidyCheck {
 public:
-  StaticObjectExceptionCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return getLangOpts().CPlusPlus && getLangOpts().CXXExceptions;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    StaticObjectExceptionCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return getLangOpts().CPlusPlus && getLangOpts().CXXExceptions;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace cert

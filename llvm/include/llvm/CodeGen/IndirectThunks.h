@@ -22,87 +22,89 @@
 namespace llvm {
 
 template <typename Derived> class ThunkInserter {
-  Derived &getDerived() { return *static_cast<Derived *>(this); }
+    Derived &getDerived() {
+        return *static_cast<Derived *>(this);
+    }
 
 protected:
-  bool InsertedThunks;
-  void doInitialization(Module &M) {}
-  void createThunkFunction(MachineModuleInfo &MMI, StringRef Name);
+    bool InsertedThunks;
+    void doInitialization(Module &M) {}
+    void createThunkFunction(MachineModuleInfo &MMI, StringRef Name);
 
 public:
-  void init(Module &M) {
-    InsertedThunks = false;
-    getDerived().doInitialization(M);
-  }
-  // return `true` if `MMI` or `MF` was modified
-  bool run(MachineModuleInfo &MMI, MachineFunction &MF);
+    void init(Module &M) {
+        InsertedThunks = false;
+        getDerived().doInitialization(M);
+    }
+    // return `true` if `MMI` or `MF` was modified
+    bool run(MachineModuleInfo &MMI, MachineFunction &MF);
 };
 
 template <typename Derived>
 void ThunkInserter<Derived>::createThunkFunction(MachineModuleInfo &MMI,
-                                                 StringRef Name) {
-  assert(Name.startswith(getDerived().getThunkPrefix()) &&
-         "Created a thunk with an unexpected prefix!");
+        StringRef Name) {
+    assert(Name.startswith(getDerived().getThunkPrefix()) &&
+           "Created a thunk with an unexpected prefix!");
 
-  Module &M = const_cast<Module &>(*MMI.getModule());
-  LLVMContext &Ctx = M.getContext();
-  auto Type = FunctionType::get(Type::getVoidTy(Ctx), false);
-  Function *F =
-      Function::Create(Type, GlobalValue::LinkOnceODRLinkage, Name, &M);
-  F->setVisibility(GlobalValue::HiddenVisibility);
-  F->setComdat(M.getOrInsertComdat(Name));
+    Module &M = const_cast<Module &>(*MMI.getModule());
+    LLVMContext &Ctx = M.getContext();
+    auto Type = FunctionType::get(Type::getVoidTy(Ctx), false);
+    Function *F =
+        Function::Create(Type, GlobalValue::LinkOnceODRLinkage, Name, &M);
+    F->setVisibility(GlobalValue::HiddenVisibility);
+    F->setComdat(M.getOrInsertComdat(Name));
 
-  // Add Attributes so that we don't create a frame, unwind information, or
-  // inline.
-  AttrBuilder B;
-  B.addAttribute(llvm::Attribute::NoUnwind);
-  B.addAttribute(llvm::Attribute::Naked);
-  F->addAttributes(llvm::AttributeList::FunctionIndex, B);
+    // Add Attributes so that we don't create a frame, unwind information, or
+    // inline.
+    AttrBuilder B;
+    B.addAttribute(llvm::Attribute::NoUnwind);
+    B.addAttribute(llvm::Attribute::Naked);
+    F->addAttributes(llvm::AttributeList::FunctionIndex, B);
 
-  // Populate our function a bit so that we can verify.
-  BasicBlock *Entry = BasicBlock::Create(Ctx, "entry", F);
-  IRBuilder<> Builder(Entry);
+    // Populate our function a bit so that we can verify.
+    BasicBlock *Entry = BasicBlock::Create(Ctx, "entry", F);
+    IRBuilder<> Builder(Entry);
 
-  Builder.CreateRetVoid();
+    Builder.CreateRetVoid();
 
-  // MachineFunctions aren't created automatically for the IR-level constructs
-  // we already made. Create them and insert them into the module.
-  MachineFunction &MF = MMI.getOrCreateMachineFunction(*F);
-  // A MachineBasicBlock must not be created for the Entry block; code
-  // generation from an empty naked function in C source code also does not
-  // generate one.  At least GlobalISel asserts if this invariant isn't
-  // respected.
+    // MachineFunctions aren't created automatically for the IR-level constructs
+    // we already made. Create them and insert them into the module.
+    MachineFunction &MF = MMI.getOrCreateMachineFunction(*F);
+    // A MachineBasicBlock must not be created for the Entry block; code
+    // generation from an empty naked function in C source code also does not
+    // generate one.  At least GlobalISel asserts if this invariant isn't
+    // respected.
 
-  // Set MF properties. We never use vregs...
-  MF.getProperties().set(MachineFunctionProperties::Property::NoVRegs);
+    // Set MF properties. We never use vregs...
+    MF.getProperties().set(MachineFunctionProperties::Property::NoVRegs);
 }
 
 template <typename Derived>
 bool ThunkInserter<Derived>::run(MachineModuleInfo &MMI, MachineFunction &MF) {
-  // If MF is not a thunk, check to see if we need to insert a thunk.
-  if (!MF.getName().startswith(getDerived().getThunkPrefix())) {
-    // If we've already inserted a thunk, nothing else to do.
-    if (InsertedThunks)
-      return false;
+    // If MF is not a thunk, check to see if we need to insert a thunk.
+    if (!MF.getName().startswith(getDerived().getThunkPrefix())) {
+        // If we've already inserted a thunk, nothing else to do.
+        if (InsertedThunks)
+            return false;
 
-    // Only add a thunk if one of the functions has the corresponding feature
-    // enabled in its subtarget, and doesn't enable external thunks.
-    // FIXME: Conditionalize on indirect calls so we don't emit a thunk when
-    // nothing will end up calling it.
-    // FIXME: It's a little silly to look at every function just to enumerate
-    // the subtargets, but eventually we'll want to look at them for indirect
-    // calls, so maybe this is OK.
-    if (!getDerived().mayUseThunk(MF))
-      return false;
+        // Only add a thunk if one of the functions has the corresponding feature
+        // enabled in its subtarget, and doesn't enable external thunks.
+        // FIXME: Conditionalize on indirect calls so we don't emit a thunk when
+        // nothing will end up calling it.
+        // FIXME: It's a little silly to look at every function just to enumerate
+        // the subtargets, but eventually we'll want to look at them for indirect
+        // calls, so maybe this is OK.
+        if (!getDerived().mayUseThunk(MF))
+            return false;
 
-    getDerived().insertThunks(MMI);
-    InsertedThunks = true;
+        getDerived().insertThunks(MMI);
+        InsertedThunks = true;
+        return true;
+    }
+
+    // If this *is* a thunk function, we need to populate it with the correct MI.
+    getDerived().populateThunk(MF);
     return true;
-  }
-
-  // If this *is* a thunk function, we need to populate it with the correct MI.
-  getDerived().populateThunk(MF);
-  return true;
 }
 
 } // namespace llvm

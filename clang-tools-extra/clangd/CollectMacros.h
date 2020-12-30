@@ -22,16 +22,16 @@ namespace clang {
 namespace clangd {
 
 struct MainFileMacros {
-  llvm::StringSet<> Names;
-  // Instead of storing SourceLocation, we have to store the token range because
-  // SourceManager from preamble is not available when we build the AST.
-  llvm::DenseMap<SymbolID, std::vector<Range>> MacroRefs;
-  // Somtimes it is not possible to compute the SymbolID for the Macro, e.g. a
-  // reference to an undefined macro. Store them separately, e.g. for semantic
-  // highlighting.
-  std::vector<Range> UnknownMacros;
-  // Ranges skipped by the preprocessor due to being inactive.
-  std::vector<Range> SkippedRanges;
+    llvm::StringSet<> Names;
+    // Instead of storing SourceLocation, we have to store the token range because
+    // SourceManager from preamble is not available when we build the AST.
+    llvm::DenseMap<SymbolID, std::vector<Range>> MacroRefs;
+    // Somtimes it is not possible to compute the SymbolID for the Macro, e.g. a
+    // reference to an undefined macro. Store them separately, e.g. for semantic
+    // highlighting.
+    std::vector<Range> UnknownMacros;
+    // Ranges skipped by the preprocessor due to being inactive.
+    std::vector<Range> SkippedRanges;
 };
 
 /// Collects macro references (e.g. definitions, expansions) in the main file.
@@ -40,57 +40,57 @@ struct MainFileMacros {
 ///  - collect macros after the preamble of the main file (in ParsedAST.cpp)
 class CollectMainFileMacros : public PPCallbacks {
 public:
-  explicit CollectMainFileMacros(const SourceManager &SM, MainFileMacros &Out)
-      : SM(SM), Out(Out) {}
+    explicit CollectMainFileMacros(const SourceManager &SM, MainFileMacros &Out)
+        : SM(SM), Out(Out) {}
 
-  void FileChanged(SourceLocation Loc, FileChangeReason,
-                   SrcMgr::CharacteristicKind, FileID) override {
-    InMainFile = isInsideMainFile(Loc, SM);
-  }
+    void FileChanged(SourceLocation Loc, FileChangeReason,
+                     SrcMgr::CharacteristicKind, FileID) override {
+        InMainFile = isInsideMainFile(Loc, SM);
+    }
 
-  void MacroDefined(const Token &MacroName, const MacroDirective *MD) override {
-    add(MacroName, MD->getMacroInfo());
-  }
+    void MacroDefined(const Token &MacroName, const MacroDirective *MD) override {
+        add(MacroName, MD->getMacroInfo());
+    }
 
-  void MacroExpands(const Token &MacroName, const MacroDefinition &MD,
-                    SourceRange Range, const MacroArgs *Args) override {
-    add(MacroName, MD.getMacroInfo());
-  }
+    void MacroExpands(const Token &MacroName, const MacroDefinition &MD,
+                      SourceRange Range, const MacroArgs *Args) override {
+        add(MacroName, MD.getMacroInfo());
+    }
 
-  void MacroUndefined(const clang::Token &MacroName,
-                      const clang::MacroDefinition &MD,
-                      const clang::MacroDirective *Undef) override {
-    add(MacroName, MD.getMacroInfo());
-  }
+    void MacroUndefined(const clang::Token &MacroName,
+                        const clang::MacroDefinition &MD,
+                        const clang::MacroDirective *Undef) override {
+        add(MacroName, MD.getMacroInfo());
+    }
 
-  void Ifdef(SourceLocation Loc, const Token &MacroName,
-             const MacroDefinition &MD) override {
-    add(MacroName, MD.getMacroInfo());
-  }
+    void Ifdef(SourceLocation Loc, const Token &MacroName,
+               const MacroDefinition &MD) override {
+        add(MacroName, MD.getMacroInfo());
+    }
 
-  void Ifndef(SourceLocation Loc, const Token &MacroName,
-              const MacroDefinition &MD) override {
-    add(MacroName, MD.getMacroInfo());
-  }
+    void Ifndef(SourceLocation Loc, const Token &MacroName,
+                const MacroDefinition &MD) override {
+        add(MacroName, MD.getMacroInfo());
+    }
 
-  void Defined(const Token &MacroName, const MacroDefinition &MD,
-               SourceRange Range) override {
-    add(MacroName, MD.getMacroInfo());
-  }
+    void Defined(const Token &MacroName, const MacroDefinition &MD,
+                 SourceRange Range) override {
+        add(MacroName, MD.getMacroInfo());
+    }
 
-  void SourceRangeSkipped(SourceRange R, SourceLocation EndifLoc) override {
-    if (!InMainFile)
-      return;
-    Position Begin = sourceLocToPosition(SM, R.getBegin());
-    Position End = sourceLocToPosition(SM, R.getEnd());
-    Out.SkippedRanges.push_back(Range{Begin, End});
-  }
+    void SourceRangeSkipped(SourceRange R, SourceLocation EndifLoc) override {
+        if (!InMainFile)
+            return;
+        Position Begin = sourceLocToPosition(SM, R.getBegin());
+        Position End = sourceLocToPosition(SM, R.getEnd());
+        Out.SkippedRanges.push_back(Range{Begin, End});
+    }
 
 private:
-  void add(const Token &MacroNameTok, const MacroInfo *MI);
-  const SourceManager &SM;
-  bool InMainFile = true;
-  MainFileMacros &Out;
+    void add(const Token &MacroNameTok, const MacroInfo *MI);
+    const SourceManager &SM;
+    bool InMainFile = true;
+    MainFileMacros &Out;
 };
 
 } // namespace clangd

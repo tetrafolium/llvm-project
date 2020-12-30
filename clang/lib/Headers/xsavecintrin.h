@@ -19,13 +19,13 @@
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _xsavec(void *__p, unsigned long long __m) {
-  __builtin_ia32_xsavec(__p, __m);
+    __builtin_ia32_xsavec(__p, __m);
 }
 
 #ifdef __x86_64__
 static __inline__ void __DEFAULT_FN_ATTRS
 _xsavec64(void *__p, unsigned long long __m) {
-  __builtin_ia32_xsavec64(__p, __m);
+    __builtin_ia32_xsavec64(__p, __m);
 }
 #endif
 

@@ -42,42 +42,46 @@ namespace llvm {
 namespace mca {
 
 class DispatchStatistics : public View {
-  unsigned NumDispatched;
-  unsigned NumCycles;
+    unsigned NumDispatched;
+    unsigned NumCycles;
 
-  // Counts dispatch stall events caused by unavailability of resources.  There
-  // is one counter for every generic stall kind (see class HWStallEvent).
-  llvm::SmallVector<unsigned, 8> HWStalls;
+    // Counts dispatch stall events caused by unavailability of resources.  There
+    // is one counter for every generic stall kind (see class HWStallEvent).
+    llvm::SmallVector<unsigned, 8> HWStalls;
 
-  using Histogram = std::map<unsigned, unsigned>;
-  Histogram DispatchGroupSizePerCycle;
+    using Histogram = std::map<unsigned, unsigned>;
+    Histogram DispatchGroupSizePerCycle;
 
-  void updateHistograms() {
-    DispatchGroupSizePerCycle[NumDispatched]++;
-    NumDispatched = 0;
-  }
+    void updateHistograms() {
+        DispatchGroupSizePerCycle[NumDispatched]++;
+        NumDispatched = 0;
+    }
 
-  void printDispatchHistogram(llvm::raw_ostream &OS) const;
+    void printDispatchHistogram(llvm::raw_ostream &OS) const;
 
-  void printDispatchStalls(llvm::raw_ostream &OS) const;
+    void printDispatchStalls(llvm::raw_ostream &OS) const;
 
 public:
-  DispatchStatistics()
-      : NumDispatched(0), NumCycles(0),
-        HWStalls(HWStallEvent::LastGenericEvent) {}
+    DispatchStatistics()
+        : NumDispatched(0), NumCycles(0),
+          HWStalls(HWStallEvent::LastGenericEvent) {}
 
-  void onEvent(const HWStallEvent &Event) override;
+    void onEvent(const HWStallEvent &Event) override;
 
-  void onEvent(const HWInstructionEvent &Event) override;
+    void onEvent(const HWInstructionEvent &Event) override;
 
-  void onCycleBegin() override { NumCycles++; }
+    void onCycleBegin() override {
+        NumCycles++;
+    }
 
-  void onCycleEnd() override { updateHistograms(); }
+    void onCycleEnd() override {
+        updateHistograms();
+    }
 
-  void printView(llvm::raw_ostream &OS) const override {
-    printDispatchStalls(OS);
-    printDispatchHistogram(OS);
-  }
+    void printView(llvm::raw_ostream &OS) const override {
+        printDispatchStalls(OS);
+        printDispatchHistogram(OS);
+    }
 };
 } // namespace mca
 } // namespace llvm

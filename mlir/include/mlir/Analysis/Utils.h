@@ -59,34 +59,36 @@ void getSequentialLoops(AffineForOp forOp,
 /// set of loops surrounding a store operation). Loop bound AffineMaps which
 /// are non-null represent slices of that loop's iteration space.
 struct ComputationSliceState {
-  // List of sliced loop IVs (ordered from outermost to innermost).
-  // EX: 'ivs[i]' has lower bound 'lbs[i]' and upper bound 'ubs[i]'.
-  SmallVector<Value, 4> ivs;
-  // List of lower bound AffineMaps.
-  SmallVector<AffineMap, 4> lbs;
-  // List of upper bound AffineMaps.
-  SmallVector<AffineMap, 4> ubs;
-  // List of lower bound operands (lbOperands[i] are used by 'lbs[i]').
-  std::vector<SmallVector<Value, 4>> lbOperands;
-  // List of upper bound operands (ubOperands[i] are used by 'ubs[i]').
-  std::vector<SmallVector<Value, 4>> ubOperands;
-  // Slice loop nest insertion point in target loop nest.
-  Block::iterator insertPoint;
-  // Adds to 'cst' with constraints which represent the slice bounds on 'ivs'
-  // in 'this'. Specifically, the values in 'ivs' are added to 'cst' as dim
-  // identifiers and the values in 'lb/ubOperands' are added as symbols.
-  // Constraints are added for all loop IV bounds (dim or symbol), and
-  // constraints are added for slice bounds in 'lbs'/'ubs'.
-  // Returns failure if we cannot add loop bounds because of unsupported cases.
-  LogicalResult getAsConstraints(FlatAffineConstraints *cst);
+    // List of sliced loop IVs (ordered from outermost to innermost).
+    // EX: 'ivs[i]' has lower bound 'lbs[i]' and upper bound 'ubs[i]'.
+    SmallVector<Value, 4> ivs;
+    // List of lower bound AffineMaps.
+    SmallVector<AffineMap, 4> lbs;
+    // List of upper bound AffineMaps.
+    SmallVector<AffineMap, 4> ubs;
+    // List of lower bound operands (lbOperands[i] are used by 'lbs[i]').
+    std::vector<SmallVector<Value, 4>> lbOperands;
+    // List of upper bound operands (ubOperands[i] are used by 'ubs[i]').
+    std::vector<SmallVector<Value, 4>> ubOperands;
+    // Slice loop nest insertion point in target loop nest.
+    Block::iterator insertPoint;
+    // Adds to 'cst' with constraints which represent the slice bounds on 'ivs'
+    // in 'this'. Specifically, the values in 'ivs' are added to 'cst' as dim
+    // identifiers and the values in 'lb/ubOperands' are added as symbols.
+    // Constraints are added for all loop IV bounds (dim or symbol), and
+    // constraints are added for slice bounds in 'lbs'/'ubs'.
+    // Returns failure if we cannot add loop bounds because of unsupported cases.
+    LogicalResult getAsConstraints(FlatAffineConstraints *cst);
 
-  // Clears all bounds and operands in slice state.
-  void clearBounds();
+    // Clears all bounds and operands in slice state.
+    void clearBounds();
 
-  /// Return true if the computation slice is empty.
-  bool isEmpty() const { return ivs.empty(); }
+    /// Return true if the computation slice is empty.
+    bool isEmpty() const {
+        return ivs.empty();
+    }
 
-  void dump() const;
+    void dump() const;
 };
 
 /// Computes the computation slice loop bounds for one loop nest as affine maps
@@ -163,9 +165,9 @@ LogicalResult computeSliceUnion(ArrayRef<Operation *> opsA,
 // storage and redundant computation in several cases.
 // TODO: Support computation slices with common surrounding loops.
 AffineForOp insertBackwardComputationSlice(Operation *srcOpInst,
-                                           Operation *dstOpInst,
-                                           unsigned dstLoopDepth,
-                                           ComputationSliceState *sliceState);
+        Operation *dstOpInst,
+        unsigned dstLoopDepth,
+        ComputationSliceState *sliceState);
 
 /// A region of a memref's data space; this is typically constructed by
 /// analyzing load/store op's on this memref and the index space of loops
@@ -182,108 +184,116 @@ AffineForOp insertBackwardComputationSlice(Operation *srcOpInst,
 // The last field is a 2-d FlatAffineConstraints symbolic in %i.
 //
 struct MemRefRegion {
-  explicit MemRefRegion(Location loc) : loc(loc) {}
+    explicit MemRefRegion(Location loc) : loc(loc) {}
 
-  /// Computes the memory region accessed by this memref with the region
-  /// represented as constraints symbolic/parametric in 'loopDepth' loops
-  /// surrounding opInst. The computed region's 'cst' field has exactly as many
-  /// dimensional identifiers as the rank of the memref, and *potentially*
-  /// additional symbolic identifiers which could include any of the loop IVs
-  /// surrounding opInst up until 'loopDepth' and another additional Function
-  /// symbols involved with the access (for eg., those appear in affine.apply's,
-  /// loop bounds, etc.). If 'sliceState' is non-null, operands from
-  /// 'sliceState' are added as symbols, and the following constraints are added
-  /// to the system:
-  /// *) Inequality constraints which represent loop bounds for 'sliceState'
-  ///    operands which are loop IVS (these represent the destination loop IVs
-  ///    of the slice, and are added as symbols to MemRefRegion's constraint
-  ///    system).
-  /// *) Inequality constraints for the slice bounds in 'sliceState', which
-  ///    represent the bounds on the loop IVs in this constraint system w.r.t
-  ///    to slice operands (which correspond to symbols).
-  /// If 'addMemRefDimBounds' is true, constant upper/lower bounds
-  /// [0, memref.getDimSize(i)) are added for each MemRef dimension 'i'.
-  ///
-  ///  For example, the memref region for this operation at loopDepth = 1 will
-  ///  be:
-  ///
-  ///    affine.for %i = 0 to 32 {
-  ///      affine.for %ii = %i to (d0) -> (d0 + 8) (%i) {
-  ///        load %A[%ii]
-  ///      }
-  ///    }
-  ///
-  ///   {memref = %A, write = false, {%i <= m0 <= %i + 7} }
-  /// The last field is a 2-d FlatAffineConstraints symbolic in %i.
-  ///
-  LogicalResult compute(Operation *op, unsigned loopDepth,
-                        const ComputationSliceState *sliceState = nullptr,
-                        bool addMemRefDimBounds = true);
+    /// Computes the memory region accessed by this memref with the region
+    /// represented as constraints symbolic/parametric in 'loopDepth' loops
+    /// surrounding opInst. The computed region's 'cst' field has exactly as many
+    /// dimensional identifiers as the rank of the memref, and *potentially*
+    /// additional symbolic identifiers which could include any of the loop IVs
+    /// surrounding opInst up until 'loopDepth' and another additional Function
+    /// symbols involved with the access (for eg., those appear in affine.apply's,
+    /// loop bounds, etc.). If 'sliceState' is non-null, operands from
+    /// 'sliceState' are added as symbols, and the following constraints are added
+    /// to the system:
+    /// *) Inequality constraints which represent loop bounds for 'sliceState'
+    ///    operands which are loop IVS (these represent the destination loop IVs
+    ///    of the slice, and are added as symbols to MemRefRegion's constraint
+    ///    system).
+    /// *) Inequality constraints for the slice bounds in 'sliceState', which
+    ///    represent the bounds on the loop IVs in this constraint system w.r.t
+    ///    to slice operands (which correspond to symbols).
+    /// If 'addMemRefDimBounds' is true, constant upper/lower bounds
+    /// [0, memref.getDimSize(i)) are added for each MemRef dimension 'i'.
+    ///
+    ///  For example, the memref region for this operation at loopDepth = 1 will
+    ///  be:
+    ///
+    ///    affine.for %i = 0 to 32 {
+    ///      affine.for %ii = %i to (d0) -> (d0 + 8) (%i) {
+    ///        load %A[%ii]
+    ///      }
+    ///    }
+    ///
+    ///   {memref = %A, write = false, {%i <= m0 <= %i + 7} }
+    /// The last field is a 2-d FlatAffineConstraints symbolic in %i.
+    ///
+    LogicalResult compute(Operation *op, unsigned loopDepth,
+                          const ComputationSliceState *sliceState = nullptr,
+                          bool addMemRefDimBounds = true);
 
-  FlatAffineConstraints *getConstraints() { return &cst; }
-  const FlatAffineConstraints *getConstraints() const { return &cst; }
-  bool isWrite() const { return write; }
-  void setWrite(bool flag) { write = flag; }
+    FlatAffineConstraints *getConstraints() {
+        return &cst;
+    }
+    const FlatAffineConstraints *getConstraints() const {
+        return &cst;
+    }
+    bool isWrite() const {
+        return write;
+    }
+    void setWrite(bool flag) {
+        write = flag;
+    }
 
-  /// Returns a constant upper bound on the number of elements in this region if
-  /// bounded by a known constant (always possible for static shapes), None
-  /// otherwise. Note that the symbols of the region are treated specially,
-  /// i.e., the returned bounding constant holds for *any given* value of the
-  /// symbol identifiers. The 'shape' vector is set to the corresponding
-  /// dimension-wise bounds major to minor. We use int64_t instead of uint64_t
-  /// since index types can be at most int64_t. `lbs` are set to the lower
-  /// bounds for each of the rank dimensions, and lbDivisors contains the
-  /// corresponding denominators for floorDivs.
-  Optional<int64_t> getConstantBoundingSizeAndShape(
-      SmallVectorImpl<int64_t> *shape = nullptr,
-      std::vector<SmallVector<int64_t, 4>> *lbs = nullptr,
-      SmallVectorImpl<int64_t> *lbDivisors = nullptr) const;
+    /// Returns a constant upper bound on the number of elements in this region if
+    /// bounded by a known constant (always possible for static shapes), None
+    /// otherwise. Note that the symbols of the region are treated specially,
+    /// i.e., the returned bounding constant holds for *any given* value of the
+    /// symbol identifiers. The 'shape' vector is set to the corresponding
+    /// dimension-wise bounds major to minor. We use int64_t instead of uint64_t
+    /// since index types can be at most int64_t. `lbs` are set to the lower
+    /// bounds for each of the rank dimensions, and lbDivisors contains the
+    /// corresponding denominators for floorDivs.
+    Optional<int64_t> getConstantBoundingSizeAndShape(
+        SmallVectorImpl<int64_t> *shape = nullptr,
+        std::vector<SmallVector<int64_t, 4>> *lbs = nullptr,
+        SmallVectorImpl<int64_t> *lbDivisors = nullptr) const;
 
-  /// Gets the lower and upper bound map for the dimensional identifier at
-  /// `pos`.
-  void getLowerAndUpperBound(unsigned pos, AffineMap &lbMap,
-                             AffineMap &ubMap) const;
+    /// Gets the lower and upper bound map for the dimensional identifier at
+    /// `pos`.
+    void getLowerAndUpperBound(unsigned pos, AffineMap &lbMap,
+                               AffineMap &ubMap) const;
 
-  /// A wrapper around FlatAffineConstraints::getConstantBoundOnDimSize(). 'pos'
-  /// corresponds to the position of the memref shape's dimension (major to
-  /// minor) which matches 1:1 with the dimensional identifier positions in
-  //'cst'.
-  Optional<int64_t>
-  getConstantBoundOnDimSize(unsigned pos,
-                            SmallVectorImpl<int64_t> *lb = nullptr,
-                            int64_t *lbFloorDivisor = nullptr) const {
-    assert(pos < getRank() && "invalid position");
-    return cst.getConstantBoundOnDimSize(pos, lb);
-  }
+    /// A wrapper around FlatAffineConstraints::getConstantBoundOnDimSize(). 'pos'
+    /// corresponds to the position of the memref shape's dimension (major to
+    /// minor) which matches 1:1 with the dimensional identifier positions in
+    //'cst'.
+    Optional<int64_t>
+    getConstantBoundOnDimSize(unsigned pos,
+                              SmallVectorImpl<int64_t> *lb = nullptr,
+                              int64_t *lbFloorDivisor = nullptr) const {
+        assert(pos < getRank() && "invalid position");
+        return cst.getConstantBoundOnDimSize(pos, lb);
+    }
 
-  /// Returns the size of this MemRefRegion in bytes.
-  Optional<int64_t> getRegionSize();
+    /// Returns the size of this MemRefRegion in bytes.
+    Optional<int64_t> getRegionSize();
 
-  // Wrapper around FlatAffineConstraints::unionBoundingBox.
-  LogicalResult unionBoundingBox(const MemRefRegion &other);
+    // Wrapper around FlatAffineConstraints::unionBoundingBox.
+    LogicalResult unionBoundingBox(const MemRefRegion &other);
 
-  /// Returns the rank of the memref that this region corresponds to.
-  unsigned getRank() const;
+    /// Returns the rank of the memref that this region corresponds to.
+    unsigned getRank() const;
 
-  /// Memref that this region corresponds to.
-  Value memref;
+    /// Memref that this region corresponds to.
+    Value memref;
 
-  /// Read or write.
-  bool write;
+    /// Read or write.
+    bool write;
 
-  /// If there is more than one load/store op associated with the region, the
-  /// location information would correspond to one of those op's.
-  Location loc;
+    /// If there is more than one load/store op associated with the region, the
+    /// location information would correspond to one of those op's.
+    Location loc;
 
-  /// Region (data space) of the memref accessed. This set will thus have at
-  /// least as many dimensional identifiers as the shape dimensionality of the
-  /// memref, and these are the leading dimensions of the set appearing in that
-  /// order (major to minor / outermost to innermost). There may be additional
-  /// identifiers since getMemRefRegion() is called with a specific loop depth,
-  /// and thus the region is symbolic in the outer surrounding loops at that
-  /// depth.
-  // TODO: Replace this to exploit HyperRectangularSet.
-  FlatAffineConstraints cst;
+    /// Region (data space) of the memref accessed. This set will thus have at
+    /// least as many dimensional identifiers as the shape dimensionality of the
+    /// memref, and these are the leading dimensions of the set appearing in that
+    /// order (major to minor / outermost to innermost). There may be additional
+    /// identifiers since getMemRefRegion() is called with a specific loop depth,
+    /// and thus the region is symbolic in the outer surrounding loops at that
+    /// depth.
+    // TODO: Replace this to exploit HyperRectangularSet.
+    FlatAffineConstraints cst;
 };
 
 /// Returns the size of memref data in bytes if it's statically shaped, None
@@ -303,7 +313,7 @@ unsigned getNumCommonSurroundingLoops(Operation &A, Operation &B);
 /// Gets the memory footprint of all data touched in the specified memory space
 /// in bytes; if the memory space is unspecified, considers all memory spaces.
 Optional<int64_t> getMemoryFootprintBytes(AffineForOp forOp,
-                                          int memorySpace = -1);
+        int memorySpace = -1);
 
 /// Returns true if `forOp' is a parallel loop.
 bool isLoopParallel(AffineForOp forOp);

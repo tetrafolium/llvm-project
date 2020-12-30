@@ -33,67 +33,83 @@ class Preprocessor;
 // Defines a macro
 class Definition {
 public:
-  Definition(const TokenSequence &, std::size_t firstToken, std::size_t tokens);
-  Definition(const std::vector<std::string> &argNames, const TokenSequence &,
-      std::size_t firstToken, std::size_t tokens, bool isVariadic = false);
-  Definition(const std::string &predefined, AllSources &);
+    Definition(const TokenSequence &, std::size_t firstToken, std::size_t tokens);
+    Definition(const std::vector<std::string> &argNames, const TokenSequence &,
+               std::size_t firstToken, std::size_t tokens, bool isVariadic = false);
+    Definition(const std::string &predefined, AllSources &);
 
-  bool isFunctionLike() const { return isFunctionLike_; }
-  std::size_t argumentCount() const { return argumentCount_; }
-  bool isVariadic() const { return isVariadic_; }
-  bool isDisabled() const { return isDisabled_; }
-  bool isPredefined() const { return isPredefined_; }
-  const TokenSequence &replacement() const { return replacement_; }
+    bool isFunctionLike() const {
+        return isFunctionLike_;
+    }
+    std::size_t argumentCount() const {
+        return argumentCount_;
+    }
+    bool isVariadic() const {
+        return isVariadic_;
+    }
+    bool isDisabled() const {
+        return isDisabled_;
+    }
+    bool isPredefined() const {
+        return isPredefined_;
+    }
+    const TokenSequence &replacement() const {
+        return replacement_;
+    }
 
-  bool set_isDisabled(bool disable);
+    bool set_isDisabled(bool disable);
 
-  TokenSequence Apply(const std::vector<TokenSequence> &args, Prescanner &);
+    TokenSequence Apply(const std::vector<TokenSequence> &args, Prescanner &);
 
 private:
-  static TokenSequence Tokenize(const std::vector<std::string> &argNames,
-      const TokenSequence &token, std::size_t firstToken, std::size_t tokens);
+    static TokenSequence Tokenize(const std::vector<std::string> &argNames,
+                                  const TokenSequence &token, std::size_t firstToken, std::size_t tokens);
 
-  bool isFunctionLike_{false};
-  std::size_t argumentCount_{0};
-  bool isVariadic_{false};
-  bool isDisabled_{false};
-  bool isPredefined_{false};
-  TokenSequence replacement_;
+    bool isFunctionLike_{false};
+    std::size_t argumentCount_{0};
+    bool isVariadic_{false};
+    bool isDisabled_{false};
+    bool isPredefined_{false};
+    TokenSequence replacement_;
 };
 
 // Preprocessing state
 class Preprocessor {
 public:
-  explicit Preprocessor(AllSources &);
+    explicit Preprocessor(AllSources &);
 
-  const AllSources &allSources() const { return allSources_; }
-  AllSources &allSources() { return allSources_; }
+    const AllSources &allSources() const {
+        return allSources_;
+    }
+    AllSources &allSources() {
+        return allSources_;
+    }
 
-  void Define(std::string macro, std::string value);
-  void Undefine(std::string macro);
-  bool IsNameDefined(const CharBlock &);
+    void Define(std::string macro, std::string value);
+    void Undefine(std::string macro);
+    bool IsNameDefined(const CharBlock &);
 
-  std::optional<TokenSequence> MacroReplacement(
-      const TokenSequence &, Prescanner &);
+    std::optional<TokenSequence> MacroReplacement(
+        const TokenSequence &, Prescanner &);
 
-  // Implements a preprocessor directive.
-  void Directive(const TokenSequence &, Prescanner *);
+    // Implements a preprocessor directive.
+    void Directive(const TokenSequence &, Prescanner *);
 
 private:
-  enum class IsElseActive { No, Yes };
-  enum class CanDeadElseAppear { No, Yes };
+    enum class IsElseActive { No, Yes };
+    enum class CanDeadElseAppear { No, Yes };
 
-  CharBlock SaveTokenAsName(const CharBlock &);
-  TokenSequence ReplaceMacros(const TokenSequence &, Prescanner &);
-  void SkipDisabledConditionalCode(
-      const std::string &, IsElseActive, Prescanner *, ProvenanceRange);
-  bool IsIfPredicateTrue(const TokenSequence &expr, std::size_t first,
-      std::size_t exprTokens, Prescanner *);
+    CharBlock SaveTokenAsName(const CharBlock &);
+    TokenSequence ReplaceMacros(const TokenSequence &, Prescanner &);
+    void SkipDisabledConditionalCode(
+        const std::string &, IsElseActive, Prescanner *, ProvenanceRange);
+    bool IsIfPredicateTrue(const TokenSequence &expr, std::size_t first,
+                           std::size_t exprTokens, Prescanner *);
 
-  AllSources &allSources_;
-  std::list<std::string> names_;
-  std::unordered_map<CharBlock, Definition> definitions_;
-  std::stack<CanDeadElseAppear> ifStack_;
+    AllSources &allSources_;
+    std::list<std::string> names_;
+    std::unordered_map<CharBlock, Definition> definitions_;
+    std::stack<CanDeadElseAppear> ifStack_;
 };
 } // namespace Fortran::parser
 #endif // FORTRAN_PARSER_PREPROCESSOR_H_

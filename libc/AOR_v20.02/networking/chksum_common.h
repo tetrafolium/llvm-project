@@ -86,18 +86,18 @@ slurp_small(const void *ptr, uint32_t nbytes)
     uint64_t sum = 0;
     while (nbytes >= 4)
     {
-	sum += load32(cptr);
-	cptr += 4;
-	nbytes -= 4;
+        sum += load32(cptr);
+        cptr += 4;
+        nbytes -= 4;
     }
     if (nbytes & 2)
     {
-	sum += load16(cptr);
-	cptr += 2;
+        sum += load16(cptr);
+        cptr += 2;
     }
     if (nbytes & 1)
     {
-	sum += (uint8_t) *cptr;
+        sum += (uint8_t) *cptr;
     }
     return sum;
 }
@@ -124,7 +124,7 @@ fold_and_swap(uint64_t sum, bool swap)
 
     if (unlikely(swap)) /* Odd base pointer is unexpected */
     {
-	sum = bswap16(sum);
+        sum = bswap16(sum);
     }
 
     return (uint16_t) sum;

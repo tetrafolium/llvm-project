@@ -13610,67 +13610,67 @@ ulong __ovld atomic_exchange_explicit(volatile atomic_ulong *object, ulong desir
 
 bool __ovld atomic_compare_exchange_strong(volatile atomic_int *object, int *expected, int desired);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_int *object, int *expected,
-                                                                                 int desired, memory_order success, memory_order failure);
+        int desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_int *object, int *expected,
-                                                                                 int desired, memory_order success, memory_order failure, memory_scope scope);
+        int desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_strong(volatile atomic_uint *object, uint *expected, uint desired);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_uint *object, uint *expected,
-                                                                                 uint desired, memory_order success, memory_order failure);
+        uint desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_uint *object, uint *expected,
-                                                                                 uint desired, memory_order success, memory_order failure, memory_scope scope);
+        uint desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_weak(volatile atomic_int *object, int *expected, int desired);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_int *object, int *expected,
-                                                                                 int desired, memory_order success, memory_order failure);
+        int desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_int *object, int *expected,
-                                                                                 int desired, memory_order success, memory_order failure, memory_scope scope);
+        int desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_weak(volatile atomic_uint *object, uint *expected, uint desired);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_uint *object, uint *expected,
-                                                                                 uint desired, memory_order success, memory_order failure);
+        uint desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_uint *object, uint *expected,
-                                                                                 uint desired, memory_order success, memory_order failure, memory_scope scope);
+        uint desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_strong(volatile atomic_float *object, float *expected, float desired);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_float *object, float *expected,
-                                                                                 float desired, memory_order success, memory_order failure);
+        float desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_float *object, float *expected,
-                                                                                 float desired, memory_order success, memory_order failure, memory_scope scope);
+        float desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_weak(volatile atomic_float *object, float *expected, float desired);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_float *object, float *expected,
-                                                                                 float desired, memory_order success, memory_order failure);
+        float desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_float *object, float *expected,
-                                                                                 float desired, memory_order success, memory_order failure, memory_scope scope);
+        float desired, memory_order success, memory_order failure, memory_scope scope);
 #if defined(cl_khr_int64_base_atomics) && defined(cl_khr_int64_extended_atomics)
 #ifdef cl_khr_fp64
 bool __ovld atomic_compare_exchange_strong(volatile atomic_double *object, double *expected, double desired);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_double *object, double *expected,
-                                                                                 double desired, memory_order success, memory_order failure);
+        double desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_double *object, double *expected,
-                                                                                 double desired, memory_order success, memory_order failure, memory_scope scope);
+        double desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_weak(volatile atomic_double *object, double *expected, double desired);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_double *object, double *expected,
-                                                                                 double desired, memory_order success, memory_order failure);
+        double desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_double *object, double *expected,
-                                                                                 double desired, memory_order success, memory_order failure, memory_scope scope);
+        double desired, memory_order success, memory_order failure, memory_scope scope);
 #endif //cl_khr_fp64
 bool __ovld atomic_compare_exchange_strong(volatile atomic_long *object, long *expected, long desired);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_long *object, long *expected,
-                                                                                 long desired, memory_order success, memory_order failure);
+        long desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_long *object, long *expected,
-                                                                                 long desired, memory_order success, memory_order failure, memory_scope scope);
+        long desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_weak(volatile atomic_long *object, long *expected, long desired);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_long *object, long *expected,
-                                                                                 long desired, memory_order success, memory_order failure);
+        long desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_long *object, long *expected,
-                                                                                 long desired, memory_order success, memory_order failure, memory_scope scope);
+        long desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_strong(volatile atomic_ulong *object, ulong *expected, ulong desired);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_ulong *object, ulong *expected,
-                                                                                 ulong desired, memory_order success, memory_order failure);
+        ulong desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_strong_explicit(volatile atomic_ulong *object, ulong *expected,
-                                                                                 ulong desired, memory_order success, memory_order failure, memory_scope scope);
+        ulong desired, memory_order success, memory_order failure, memory_scope scope);
 bool __ovld atomic_compare_exchange_weak(volatile atomic_ulong *object, ulong *expected, ulong desired);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_ulong *object, ulong *expected,
-                                                                                 ulong desired, memory_order success, memory_order failure);
+        ulong desired, memory_order success, memory_order failure);
 bool __ovld atomic_compare_exchange_weak_explicit(volatile atomic_ulong *object, ulong *expected,
-                                                                                 ulong desired, memory_order success, memory_order failure, memory_scope scope);
+        ulong desired, memory_order success, memory_order failure, memory_scope scope);
 #endif
 
 // atomic_flag_test_and_set() and atomic_flag_clear()

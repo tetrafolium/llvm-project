@@ -36,178 +36,178 @@ using XRayRecordStorage =
 Error loadNaiveFormatLog(StringRef Data, bool IsLittleEndian,
                          XRayFileHeader &FileHeader,
                          std::vector<XRayRecord> &Records) {
-  if (Data.size() < 32)
-    return make_error<StringError>(
-        "Not enough bytes for an XRay log.",
-        std::make_error_code(std::errc::invalid_argument));
+    if (Data.size() < 32)
+        return make_error<StringError>(
+                   "Not enough bytes for an XRay log.",
+                   std::make_error_code(std::errc::invalid_argument));
 
-  if (Data.size() - 32 == 0 || Data.size() % 32 != 0)
-    return make_error<StringError>(
-        "Invalid-sized XRay data.",
-        std::make_error_code(std::errc::invalid_argument));
+    if (Data.size() - 32 == 0 || Data.size() % 32 != 0)
+        return make_error<StringError>(
+                   "Invalid-sized XRay data.",
+                   std::make_error_code(std::errc::invalid_argument));
 
-  DataExtractor Reader(Data, IsLittleEndian, 8);
-  uint64_t OffsetPtr = 0;
-  auto FileHeaderOrError = readBinaryFormatHeader(Reader, OffsetPtr);
-  if (!FileHeaderOrError)
-    return FileHeaderOrError.takeError();
-  FileHeader = std::move(FileHeaderOrError.get());
+    DataExtractor Reader(Data, IsLittleEndian, 8);
+    uint64_t OffsetPtr = 0;
+    auto FileHeaderOrError = readBinaryFormatHeader(Reader, OffsetPtr);
+    if (!FileHeaderOrError)
+        return FileHeaderOrError.takeError();
+    FileHeader = std::move(FileHeaderOrError.get());
 
-  // Each record after the header will be 32 bytes, in the following format:
-  //
-  //   (2)   uint16 : record type
-  //   (1)   uint8  : cpu id
-  //   (1)   uint8  : type
-  //   (4)   sint32 : function id
-  //   (8)   uint64 : tsc
-  //   (4)   uint32 : thread id
-  //   (4)   uint32 : process id
-  //   (8)   -      : padding
-  while (Reader.isValidOffset(OffsetPtr)) {
-    if (!Reader.isValidOffsetForDataOfSize(OffsetPtr, 32))
-      return createStringError(
-          std::make_error_code(std::errc::executable_format_error),
-          "Not enough bytes to read a full record at offset %" PRId64 ".",
-          OffsetPtr);
-    auto PreReadOffset = OffsetPtr;
-    auto RecordType = Reader.getU16(&OffsetPtr);
-    if (OffsetPtr == PreReadOffset)
-      return createStringError(
-          std::make_error_code(std::errc::executable_format_error),
-          "Failed reading record type at offset %" PRId64 ".", OffsetPtr);
+    // Each record after the header will be 32 bytes, in the following format:
+    //
+    //   (2)   uint16 : record type
+    //   (1)   uint8  : cpu id
+    //   (1)   uint8  : type
+    //   (4)   sint32 : function id
+    //   (8)   uint64 : tsc
+    //   (4)   uint32 : thread id
+    //   (4)   uint32 : process id
+    //   (8)   -      : padding
+    while (Reader.isValidOffset(OffsetPtr)) {
+        if (!Reader.isValidOffsetForDataOfSize(OffsetPtr, 32))
+            return createStringError(
+                       std::make_error_code(std::errc::executable_format_error),
+                       "Not enough bytes to read a full record at offset %" PRId64 ".",
+                       OffsetPtr);
+        auto PreReadOffset = OffsetPtr;
+        auto RecordType = Reader.getU16(&OffsetPtr);
+        if (OffsetPtr == PreReadOffset)
+            return createStringError(
+                       std::make_error_code(std::errc::executable_format_error),
+                       "Failed reading record type at offset %" PRId64 ".", OffsetPtr);
 
-    switch (RecordType) {
-    case 0: { // Normal records.
-      Records.emplace_back();
-      auto &Record = Records.back();
-      Record.RecordType = RecordType;
+        switch (RecordType) {
+        case 0: { // Normal records.
+            Records.emplace_back();
+            auto &Record = Records.back();
+            Record.RecordType = RecordType;
 
-      PreReadOffset = OffsetPtr;
-      Record.CPU = Reader.getU8(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading CPU field at offset %" PRId64 ".", OffsetPtr);
+            PreReadOffset = OffsetPtr;
+            Record.CPU = Reader.getU8(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading CPU field at offset %" PRId64 ".", OffsetPtr);
 
-      PreReadOffset = OffsetPtr;
-      auto Type = Reader.getU8(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading record type field at offset %" PRId64 ".",
-            OffsetPtr);
+            PreReadOffset = OffsetPtr;
+            auto Type = Reader.getU8(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading record type field at offset %" PRId64 ".",
+                           OffsetPtr);
 
-      switch (Type) {
-      case 0:
-        Record.Type = RecordTypes::ENTER;
-        break;
-      case 1:
-        Record.Type = RecordTypes::EXIT;
-        break;
-      case 2:
-        Record.Type = RecordTypes::TAIL_EXIT;
-        break;
-      case 3:
-        Record.Type = RecordTypes::ENTER_ARG;
-        break;
-      default:
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Unknown record type '%d' at offset %" PRId64 ".", Type, OffsetPtr);
-      }
+            switch (Type) {
+            case 0:
+                Record.Type = RecordTypes::ENTER;
+                break;
+            case 1:
+                Record.Type = RecordTypes::EXIT;
+                break;
+            case 2:
+                Record.Type = RecordTypes::TAIL_EXIT;
+                break;
+            case 3:
+                Record.Type = RecordTypes::ENTER_ARG;
+                break;
+            default:
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Unknown record type '%d' at offset %" PRId64 ".", Type, OffsetPtr);
+            }
 
-      PreReadOffset = OffsetPtr;
-      Record.FuncId = Reader.getSigned(&OffsetPtr, sizeof(int32_t));
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading function id field at offset %" PRId64 ".",
-            OffsetPtr);
+            PreReadOffset = OffsetPtr;
+            Record.FuncId = Reader.getSigned(&OffsetPtr, sizeof(int32_t));
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading function id field at offset %" PRId64 ".",
+                           OffsetPtr);
 
-      PreReadOffset = OffsetPtr;
-      Record.TSC = Reader.getU64(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading TSC field at offset %" PRId64 ".", OffsetPtr);
+            PreReadOffset = OffsetPtr;
+            Record.TSC = Reader.getU64(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading TSC field at offset %" PRId64 ".", OffsetPtr);
 
-      PreReadOffset = OffsetPtr;
-      Record.TId = Reader.getU32(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading thread id field at offset %" PRId64 ".", OffsetPtr);
+            PreReadOffset = OffsetPtr;
+            Record.TId = Reader.getU32(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading thread id field at offset %" PRId64 ".", OffsetPtr);
 
-      PreReadOffset = OffsetPtr;
-      Record.PId = Reader.getU32(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading process id at offset %" PRId64 ".", OffsetPtr);
+            PreReadOffset = OffsetPtr;
+            Record.PId = Reader.getU32(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading process id at offset %" PRId64 ".", OffsetPtr);
 
-      break;
+            break;
+        }
+        case 1: { // Arg payload record.
+            auto &Record = Records.back();
+
+            // We skip the next two bytes of the record, because we don't need the
+            // type and the CPU record for arg payloads.
+            OffsetPtr += 2;
+            PreReadOffset = OffsetPtr;
+            int32_t FuncId = Reader.getSigned(&OffsetPtr, sizeof(int32_t));
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading function id field at offset %" PRId64 ".",
+                           OffsetPtr);
+
+            PreReadOffset = OffsetPtr;
+            auto TId = Reader.getU32(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading thread id field at offset %" PRId64 ".", OffsetPtr);
+
+            PreReadOffset = OffsetPtr;
+            auto PId = Reader.getU32(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading process id field at offset %" PRId64 ".",
+                           OffsetPtr);
+
+            // Make a check for versions above 3 for the Pid field
+            if (Record.FuncId != FuncId || Record.TId != TId ||
+                    (FileHeader.Version >= 3 ? Record.PId != PId : false))
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Corrupted log, found arg payload following non-matching "
+                           "function+thread record. Record for function %d != %d at offset "
+                           "%" PRId64 ".",
+                           Record.FuncId, FuncId, OffsetPtr);
+
+            PreReadOffset = OffsetPtr;
+            auto Arg = Reader.getU64(&OffsetPtr);
+            if (OffsetPtr == PreReadOffset)
+                return createStringError(
+                           std::make_error_code(std::errc::executable_format_error),
+                           "Failed reading argument payload at offset %" PRId64 ".",
+                           OffsetPtr);
+
+            Record.CallArgs.push_back(Arg);
+            break;
+        }
+        default:
+            return createStringError(
+                       std::make_error_code(std::errc::executable_format_error),
+                       "Unknown record type '%d' at offset %" PRId64 ".", RecordType,
+                       OffsetPtr);
+        }
+        // Advance the offset pointer enough bytes to align to 32-byte records for
+        // basic mode logs.
+        OffsetPtr += 8;
     }
-    case 1: { // Arg payload record.
-      auto &Record = Records.back();
-
-      // We skip the next two bytes of the record, because we don't need the
-      // type and the CPU record for arg payloads.
-      OffsetPtr += 2;
-      PreReadOffset = OffsetPtr;
-      int32_t FuncId = Reader.getSigned(&OffsetPtr, sizeof(int32_t));
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading function id field at offset %" PRId64 ".",
-            OffsetPtr);
-
-      PreReadOffset = OffsetPtr;
-      auto TId = Reader.getU32(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading thread id field at offset %" PRId64 ".", OffsetPtr);
-
-      PreReadOffset = OffsetPtr;
-      auto PId = Reader.getU32(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading process id field at offset %" PRId64 ".",
-            OffsetPtr);
-
-      // Make a check for versions above 3 for the Pid field
-      if (Record.FuncId != FuncId || Record.TId != TId ||
-          (FileHeader.Version >= 3 ? Record.PId != PId : false))
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Corrupted log, found arg payload following non-matching "
-            "function+thread record. Record for function %d != %d at offset "
-            "%" PRId64 ".",
-            Record.FuncId, FuncId, OffsetPtr);
-
-      PreReadOffset = OffsetPtr;
-      auto Arg = Reader.getU64(&OffsetPtr);
-      if (OffsetPtr == PreReadOffset)
-        return createStringError(
-            std::make_error_code(std::errc::executable_format_error),
-            "Failed reading argument payload at offset %" PRId64 ".",
-            OffsetPtr);
-
-      Record.CallArgs.push_back(Arg);
-      break;
-    }
-    default:
-      return createStringError(
-          std::make_error_code(std::errc::executable_format_error),
-          "Unknown record type '%d' at offset %" PRId64 ".", RecordType,
-          OffsetPtr);
-    }
-    // Advance the offset pointer enough bytes to align to 32-byte records for
-    // basic mode logs.
-    OffsetPtr += 8;
-  }
-  return Error::success();
+    return Error::success();
 }
 
 /// Reads a log in FDR mode for version 1 of this binary format. FDR mode is
@@ -267,211 +267,213 @@ Error loadNaiveFormatLog(StringRef Data, bool IsLittleEndian,
 Error loadFDRLog(StringRef Data, bool IsLittleEndian,
                  XRayFileHeader &FileHeader, std::vector<XRayRecord> &Records) {
 
-  if (Data.size() < 32)
-    return createStringError(std::make_error_code(std::errc::invalid_argument),
-                             "Not enough bytes for an XRay FDR log.");
-  DataExtractor DE(Data, IsLittleEndian, 8);
+    if (Data.size() < 32)
+        return createStringError(std::make_error_code(std::errc::invalid_argument),
+                                 "Not enough bytes for an XRay FDR log.");
+    DataExtractor DE(Data, IsLittleEndian, 8);
 
-  uint64_t OffsetPtr = 0;
-  auto FileHeaderOrError = readBinaryFormatHeader(DE, OffsetPtr);
-  if (!FileHeaderOrError)
-    return FileHeaderOrError.takeError();
-  FileHeader = std::move(FileHeaderOrError.get());
+    uint64_t OffsetPtr = 0;
+    auto FileHeaderOrError = readBinaryFormatHeader(DE, OffsetPtr);
+    if (!FileHeaderOrError)
+        return FileHeaderOrError.takeError();
+    FileHeader = std::move(FileHeaderOrError.get());
 
-  // First we load the records into memory.
-  std::vector<std::unique_ptr<Record>> FDRRecords;
+    // First we load the records into memory.
+    std::vector<std::unique_ptr<Record>> FDRRecords;
 
-  {
-    FileBasedRecordProducer P(FileHeader, DE, OffsetPtr);
-    LogBuilderConsumer C(FDRRecords);
-    while (DE.isValidOffsetForDataOfSize(OffsetPtr, 1)) {
-      auto R = P.produce();
-      if (!R)
-        return R.takeError();
-      if (auto E = C.consume(std::move(R.get())))
-        return E;
+    {
+        FileBasedRecordProducer P(FileHeader, DE, OffsetPtr);
+        LogBuilderConsumer C(FDRRecords);
+        while (DE.isValidOffsetForDataOfSize(OffsetPtr, 1)) {
+            auto R = P.produce();
+            if (!R)
+                return R.takeError();
+            if (auto E = C.consume(std::move(R.get())))
+                return E;
+        }
     }
-  }
 
-  // Next we index the records into blocks.
-  BlockIndexer::Index Index;
-  {
-    BlockIndexer Indexer(Index);
-    for (auto &R : FDRRecords)
-      if (auto E = R->apply(Indexer))
-        return E;
-    if (auto E = Indexer.flush())
-      return E;
-  }
-
-  // Then we verify the consistency of the blocks.
-  {
-    for (auto &PTB : Index) {
-      auto &Blocks = PTB.second;
-      for (auto &B : Blocks) {
-        BlockVerifier Verifier;
-        for (auto *R : B.Records)
-          if (auto E = R->apply(Verifier))
+    // Next we index the records into blocks.
+    BlockIndexer::Index Index;
+    {
+        BlockIndexer Indexer(Index);
+        for (auto &R : FDRRecords)
+            if (auto E = R->apply(Indexer))
+                return E;
+        if (auto E = Indexer.flush())
             return E;
-        if (auto E = Verifier.verify())
-          return E;
-      }
     }
-  }
 
-  // This is now the meat of the algorithm. Here we sort the blocks according to
-  // the Walltime record in each of the blocks for the same thread. This allows
-  // us to more consistently recreate the execution trace in temporal order.
-  // After the sort, we then reconstitute `Trace` records using a stateful
-  // visitor associated with a single process+thread pair.
-  {
-    for (auto &PTB : Index) {
-      auto &Blocks = PTB.second;
-      llvm::sort(Blocks, [](const BlockIndexer::Block &L,
-                            const BlockIndexer::Block &R) {
-        return (L.WallclockTime->seconds() < R.WallclockTime->seconds() &&
-                L.WallclockTime->nanos() < R.WallclockTime->nanos());
-      });
-      auto Adder = [&](const XRayRecord &R) { Records.push_back(R); };
-      TraceExpander Expander(Adder, FileHeader.Version);
-      for (auto &B : Blocks) {
-        for (auto *R : B.Records)
-          if (auto E = R->apply(Expander))
-            return E;
-      }
-      if (auto E = Expander.flush())
-        return E;
+    // Then we verify the consistency of the blocks.
+    {
+        for (auto &PTB : Index) {
+            auto &Blocks = PTB.second;
+            for (auto &B : Blocks) {
+                BlockVerifier Verifier;
+                for (auto *R : B.Records)
+                    if (auto E = R->apply(Verifier))
+                        return E;
+                if (auto E = Verifier.verify())
+                    return E;
+            }
+        }
     }
-  }
 
-  return Error::success();
+    // This is now the meat of the algorithm. Here we sort the blocks according to
+    // the Walltime record in each of the blocks for the same thread. This allows
+    // us to more consistently recreate the execution trace in temporal order.
+    // After the sort, we then reconstitute `Trace` records using a stateful
+    // visitor associated with a single process+thread pair.
+    {
+        for (auto &PTB : Index) {
+            auto &Blocks = PTB.second;
+            llvm::sort(Blocks, [](const BlockIndexer::Block &L,
+            const BlockIndexer::Block &R) {
+                return (L.WallclockTime->seconds() < R.WallclockTime->seconds() &&
+                        L.WallclockTime->nanos() < R.WallclockTime->nanos());
+            });
+            auto Adder = [&](const XRayRecord &R) {
+                Records.push_back(R);
+            };
+            TraceExpander Expander(Adder, FileHeader.Version);
+            for (auto &B : Blocks) {
+                for (auto *R : B.Records)
+                    if (auto E = R->apply(Expander))
+                        return E;
+            }
+            if (auto E = Expander.flush())
+                return E;
+        }
+    }
+
+    return Error::success();
 }
 
 Error loadYAMLLog(StringRef Data, XRayFileHeader &FileHeader,
                   std::vector<XRayRecord> &Records) {
-  YAMLXRayTrace Trace;
-  Input In(Data);
-  In >> Trace;
-  if (In.error())
-    return make_error<StringError>("Failed loading YAML Data.", In.error());
+    YAMLXRayTrace Trace;
+    Input In(Data);
+    In >> Trace;
+    if (In.error())
+        return make_error<StringError>("Failed loading YAML Data.", In.error());
 
-  FileHeader.Version = Trace.Header.Version;
-  FileHeader.Type = Trace.Header.Type;
-  FileHeader.ConstantTSC = Trace.Header.ConstantTSC;
-  FileHeader.NonstopTSC = Trace.Header.NonstopTSC;
-  FileHeader.CycleFrequency = Trace.Header.CycleFrequency;
+    FileHeader.Version = Trace.Header.Version;
+    FileHeader.Type = Trace.Header.Type;
+    FileHeader.ConstantTSC = Trace.Header.ConstantTSC;
+    FileHeader.NonstopTSC = Trace.Header.NonstopTSC;
+    FileHeader.CycleFrequency = Trace.Header.CycleFrequency;
 
-  if (FileHeader.Version != 1)
-    return make_error<StringError>(
-        Twine("Unsupported XRay file version: ") + Twine(FileHeader.Version),
-        std::make_error_code(std::errc::invalid_argument));
+    if (FileHeader.Version != 1)
+        return make_error<StringError>(
+                   Twine("Unsupported XRay file version: ") + Twine(FileHeader.Version),
+                   std::make_error_code(std::errc::invalid_argument));
 
-  Records.clear();
-  std::transform(Trace.Records.begin(), Trace.Records.end(),
-                 std::back_inserter(Records), [&](const YAMLXRayRecord &R) {
-                   return XRayRecord{R.RecordType, R.CPU,      R.Type,
-                                     R.FuncId,     R.TSC,      R.TId,
-                                     R.PId,        R.CallArgs, R.Data};
-                 });
-  return Error::success();
+    Records.clear();
+    std::transform(Trace.Records.begin(), Trace.Records.end(),
+    std::back_inserter(Records), [&](const YAMLXRayRecord &R) {
+        return XRayRecord{R.RecordType, R.CPU,      R.Type,
+                          R.FuncId,     R.TSC,      R.TId,
+                          R.PId,        R.CallArgs, R.Data};
+    });
+    return Error::success();
 }
 } // namespace
 
 Expected<Trace> llvm::xray::loadTraceFile(StringRef Filename, bool Sort) {
-  Expected<sys::fs::file_t> FdOrErr = sys::fs::openNativeFileForRead(Filename);
-  if (!FdOrErr)
-    return FdOrErr.takeError();
+    Expected<sys::fs::file_t> FdOrErr = sys::fs::openNativeFileForRead(Filename);
+    if (!FdOrErr)
+        return FdOrErr.takeError();
 
-  uint64_t FileSize;
-  if (auto EC = sys::fs::file_size(Filename, FileSize)) {
-    return make_error<StringError>(
-        Twine("Cannot read log from '") + Filename + "'", EC);
-  }
-  if (FileSize < 4) {
-    return make_error<StringError>(
-        Twine("File '") + Filename + "' too small for XRay.",
-        std::make_error_code(std::errc::executable_format_error));
-  }
+    uint64_t FileSize;
+    if (auto EC = sys::fs::file_size(Filename, FileSize)) {
+        return make_error<StringError>(
+                   Twine("Cannot read log from '") + Filename + "'", EC);
+    }
+    if (FileSize < 4) {
+        return make_error<StringError>(
+                   Twine("File '") + Filename + "' too small for XRay.",
+                   std::make_error_code(std::errc::executable_format_error));
+    }
 
-  // Map the opened file into memory and use a StringRef to access it later.
-  std::error_code EC;
-  sys::fs::mapped_file_region MappedFile(
-      *FdOrErr, sys::fs::mapped_file_region::mapmode::readonly, FileSize, 0,
-      EC);
-  sys::fs::closeFile(*FdOrErr);
-  if (EC) {
-    return make_error<StringError>(
-        Twine("Cannot read log from '") + Filename + "'", EC);
-  }
-  auto Data = StringRef(MappedFile.data(), MappedFile.size());
+    // Map the opened file into memory and use a StringRef to access it later.
+    std::error_code EC;
+    sys::fs::mapped_file_region MappedFile(
+        *FdOrErr, sys::fs::mapped_file_region::mapmode::readonly, FileSize, 0,
+        EC);
+    sys::fs::closeFile(*FdOrErr);
+    if (EC) {
+        return make_error<StringError>(
+                   Twine("Cannot read log from '") + Filename + "'", EC);
+    }
+    auto Data = StringRef(MappedFile.data(), MappedFile.size());
 
-  // TODO: Lift the endianness and implementation selection here.
-  DataExtractor LittleEndianDE(Data, true, 8);
-  auto TraceOrError = loadTrace(LittleEndianDE, Sort);
-  if (!TraceOrError) {
-    DataExtractor BigEndianDE(Data, false, 8);
-    consumeError(TraceOrError.takeError());
-    TraceOrError = loadTrace(BigEndianDE, Sort);
-  }
-  return TraceOrError;
+    // TODO: Lift the endianness and implementation selection here.
+    DataExtractor LittleEndianDE(Data, true, 8);
+    auto TraceOrError = loadTrace(LittleEndianDE, Sort);
+    if (!TraceOrError) {
+        DataExtractor BigEndianDE(Data, false, 8);
+        consumeError(TraceOrError.takeError());
+        TraceOrError = loadTrace(BigEndianDE, Sort);
+    }
+    return TraceOrError;
 }
 
 Expected<Trace> llvm::xray::loadTrace(const DataExtractor &DE, bool Sort) {
-  // Attempt to detect the file type using file magic. We have a slight bias
-  // towards the binary format, and we do this by making sure that the first 4
-  // bytes of the binary file is some combination of the following byte
-  // patterns: (observe the code loading them assumes they're little endian)
-  //
-  //   0x01 0x00 0x00 0x00 - version 1, "naive" format
-  //   0x01 0x00 0x01 0x00 - version 1, "flight data recorder" format
-  //   0x02 0x00 0x01 0x00 - version 2, "flight data recorder" format
-  //
-  // YAML files don't typically have those first four bytes as valid text so we
-  // try loading assuming YAML if we don't find these bytes.
-  //
-  // Only if we can't load either the binary or the YAML format will we yield an
-  // error.
-  DataExtractor HeaderExtractor(DE.getData(), DE.isLittleEndian(), 8);
-  uint64_t OffsetPtr = 0;
-  uint16_t Version = HeaderExtractor.getU16(&OffsetPtr);
-  uint16_t Type = HeaderExtractor.getU16(&OffsetPtr);
+    // Attempt to detect the file type using file magic. We have a slight bias
+    // towards the binary format, and we do this by making sure that the first 4
+    // bytes of the binary file is some combination of the following byte
+    // patterns: (observe the code loading them assumes they're little endian)
+    //
+    //   0x01 0x00 0x00 0x00 - version 1, "naive" format
+    //   0x01 0x00 0x01 0x00 - version 1, "flight data recorder" format
+    //   0x02 0x00 0x01 0x00 - version 2, "flight data recorder" format
+    //
+    // YAML files don't typically have those first four bytes as valid text so we
+    // try loading assuming YAML if we don't find these bytes.
+    //
+    // Only if we can't load either the binary or the YAML format will we yield an
+    // error.
+    DataExtractor HeaderExtractor(DE.getData(), DE.isLittleEndian(), 8);
+    uint64_t OffsetPtr = 0;
+    uint16_t Version = HeaderExtractor.getU16(&OffsetPtr);
+    uint16_t Type = HeaderExtractor.getU16(&OffsetPtr);
 
-  enum BinaryFormatType { NAIVE_FORMAT = 0, FLIGHT_DATA_RECORDER_FORMAT = 1 };
+    enum BinaryFormatType { NAIVE_FORMAT = 0, FLIGHT_DATA_RECORDER_FORMAT = 1 };
 
-  Trace T;
-  switch (Type) {
-  case NAIVE_FORMAT:
-    if (Version == 1 || Version == 2 || Version == 3) {
-      if (auto E = loadNaiveFormatLog(DE.getData(), DE.isLittleEndian(),
-                                      T.FileHeader, T.Records))
-        return std::move(E);
-    } else {
-      return make_error<StringError>(
-          Twine("Unsupported version for Basic/Naive Mode logging: ") +
-              Twine(Version),
-          std::make_error_code(std::errc::executable_format_error));
+    Trace T;
+    switch (Type) {
+    case NAIVE_FORMAT:
+        if (Version == 1 || Version == 2 || Version == 3) {
+            if (auto E = loadNaiveFormatLog(DE.getData(), DE.isLittleEndian(),
+                                            T.FileHeader, T.Records))
+                return std::move(E);
+        } else {
+            return make_error<StringError>(
+                       Twine("Unsupported version for Basic/Naive Mode logging: ") +
+                       Twine(Version),
+                       std::make_error_code(std::errc::executable_format_error));
+        }
+        break;
+    case FLIGHT_DATA_RECORDER_FORMAT:
+        if (Version >= 1 && Version <= 5) {
+            if (auto E = loadFDRLog(DE.getData(), DE.isLittleEndian(), T.FileHeader,
+                                    T.Records))
+                return std::move(E);
+        } else {
+            return make_error<StringError>(
+                       Twine("Unsupported version for FDR Mode logging: ") + Twine(Version),
+                       std::make_error_code(std::errc::executable_format_error));
+        }
+        break;
+    default:
+        if (auto E = loadYAMLLog(DE.getData(), T.FileHeader, T.Records))
+            return std::move(E);
     }
-    break;
-  case FLIGHT_DATA_RECORDER_FORMAT:
-    if (Version >= 1 && Version <= 5) {
-      if (auto E = loadFDRLog(DE.getData(), DE.isLittleEndian(), T.FileHeader,
-                              T.Records))
-        return std::move(E);
-    } else {
-      return make_error<StringError>(
-          Twine("Unsupported version for FDR Mode logging: ") + Twine(Version),
-          std::make_error_code(std::errc::executable_format_error));
-    }
-    break;
-  default:
-    if (auto E = loadYAMLLog(DE.getData(), T.FileHeader, T.Records))
-      return std::move(E);
-  }
 
-  if (Sort)
-    llvm::stable_sort(T.Records, [&](const XRayRecord &L, const XRayRecord &R) {
-      return L.TSC < R.TSC;
+    if (Sort)
+        llvm::stable_sort(T.Records, [&](const XRayRecord &L, const XRayRecord &R) {
+        return L.TSC < R.TSC;
     });
 
-  return std::move(T);
+    return std::move(T);
 }

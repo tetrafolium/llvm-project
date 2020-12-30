@@ -20,7 +20,7 @@ static const DiagnosticRecord BuiltinDiagnosticsByName[] = {
 };
 
 llvm::ArrayRef<DiagnosticRecord> diagtool::getBuiltinDiagnosticsByName() {
-  return llvm::makeArrayRef(BuiltinDiagnosticsByName);
+    return llvm::makeArrayRef(BuiltinDiagnosticsByName);
 }
 
 
@@ -47,16 +47,16 @@ static const DiagnosticRecord BuiltinDiagnosticsByID[] = {
 
 static bool orderByID(const DiagnosticRecord &Left,
                       const DiagnosticRecord &Right) {
-  return Left.DiagID < Right.DiagID;
+    return Left.DiagID < Right.DiagID;
 }
 
 const DiagnosticRecord &diagtool::getDiagnosticForID(short DiagID) {
-  DiagnosticRecord Key = {nullptr, DiagID, 0};
+    DiagnosticRecord Key = {nullptr, DiagID, 0};
 
-  const DiagnosticRecord *Result =
-      llvm::lower_bound(BuiltinDiagnosticsByID, Key, orderByID);
-  assert(Result && "diagnostic not found; table may be out of date");
-  return *Result;
+    const DiagnosticRecord *Result =
+        llvm::lower_bound(BuiltinDiagnosticsByID, Key, orderByID);
+    assert(Result && "diagnostic not found; table may be out of date");
+    return *Result;
 }
 
 
@@ -72,35 +72,35 @@ static const GroupRecord OptionTable[] = {
 };
 
 llvm::StringRef GroupRecord::getName() const {
-  return StringRef(DiagGroupNames + NameOffset + 1, DiagGroupNames[NameOffset]);
+    return StringRef(DiagGroupNames + NameOffset + 1, DiagGroupNames[NameOffset]);
 }
 
 GroupRecord::subgroup_iterator GroupRecord::subgroup_begin() const {
-  return DiagSubGroups + SubGroups;
+    return DiagSubGroups + SubGroups;
 }
 
 GroupRecord::subgroup_iterator GroupRecord::subgroup_end() const {
-  return nullptr;
+    return nullptr;
 }
 
 llvm::iterator_range<diagtool::GroupRecord::subgroup_iterator>
 GroupRecord::subgroups() const {
-  return llvm::make_range(subgroup_begin(), subgroup_end());
+    return llvm::make_range(subgroup_begin(), subgroup_end());
 }
 
 GroupRecord::diagnostics_iterator GroupRecord::diagnostics_begin() const {
-  return DiagArrays + Members;
+    return DiagArrays + Members;
 }
 
 GroupRecord::diagnostics_iterator GroupRecord::diagnostics_end() const {
-  return nullptr;
+    return nullptr;
 }
 
 llvm::iterator_range<diagtool::GroupRecord::diagnostics_iterator>
 GroupRecord::diagnostics() const {
-  return llvm::make_range(diagnostics_begin(), diagnostics_end());
+    return llvm::make_range(diagnostics_begin(), diagnostics_end());
 }
 
 llvm::ArrayRef<GroupRecord> diagtool::getDiagnosticGroups() {
-  return llvm::makeArrayRef(OptionTable);
+    return llvm::makeArrayRef(OptionTable);
 }

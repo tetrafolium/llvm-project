@@ -54,11 +54,11 @@ typedef uint32_t           mp_word;
 #endif
 
 typedef struct mpz {
-  mp_digit    single;
-  mp_digit   *digits;
-  mp_size     alloc;
-  mp_size     used;
-  mp_sign     sign;
+    mp_digit    single;
+    mp_digit   *digits;
+    mp_size     alloc;
+    mp_size     used;
+    mp_sign     sign;
 } mpz_t, *mp_int;
 
 #define MP_DIGITS(Z) ((Z)->digits)
@@ -95,7 +95,7 @@ extern const mp_result MP_MINERR;
 #define MP_MAX_RADIX    36
 
 /* Values with fewer than this many significant digits use the standard
-   multiplication algorithm; otherwise, a recursive algorithm is used.  
+   multiplication algorithm; otherwise, a recursive algorithm is used.
    Choose a value to suit your platform.
  */
 #define MP_MULT_THRESH  22
@@ -133,11 +133,11 @@ mp_result mp_int_mul_value(mp_int a, mp_small value, mp_int c);
 mp_result mp_int_mul_pow2(mp_int a, mp_small p2, mp_int c);
 mp_result mp_int_sqr(mp_int a, mp_int c);            /* c = a * a */
 mp_result mp_int_div(mp_int a, mp_int b,             /* q = a / b */
-		     mp_int q, mp_int r);            /* r = a % b */
+                     mp_int q, mp_int r);            /* r = a % b */
 mp_result mp_int_div_value(mp_int a, mp_small value, /* q = a / value */
-			   mp_int q, mp_small *r);   /* r = a % value */
+                           mp_int q, mp_small *r);   /* r = a % value */
 mp_result mp_int_div_pow2(mp_int a, mp_small p2,     /* q = a / 2^p2  */
-			  mp_int q, mp_int r);       /* r = q % 2^p2  */
+                          mp_int q, mp_int r);       /* r = q % 2^p2  */
 mp_result mp_int_mod(mp_int a, mp_int m, mp_int c);  /* c = a % m */
 #define   mp_int_mod_value(A, V, R) mp_int_div_value((A), (V), 0, (R))
 mp_result mp_int_expt(mp_int a, mp_small b, mp_int c);         /* c = a^b */
@@ -157,14 +157,14 @@ int       mp_int_divisible_value(mp_int a, mp_small v);
 int       mp_int_is_pow2(mp_int z);
 
 mp_result mp_int_exptmod(mp_int a, mp_int b, mp_int m,
-			 mp_int c);                    /* c = a^b (mod m) */
+                         mp_int c);                    /* c = a^b (mod m) */
 mp_result mp_int_exptmod_evalue(mp_int a, mp_small value,
-				mp_int m, mp_int c);   /* c = a^v (mod m) */
+                                mp_int m, mp_int c);   /* c = a^v (mod m) */
 mp_result mp_int_exptmod_bvalue(mp_small value, mp_int b,
-				mp_int m, mp_int c);   /* c = v^b (mod m) */
+                                mp_int m, mp_int c);   /* c = v^b (mod m) */
 mp_result mp_int_exptmod_known(mp_int a, mp_int b,
-			       mp_int m, mp_int mu,
-			       mp_int c);              /* c = a^b (mod m) */
+                               mp_int m, mp_int mu,
+                               mp_int c);              /* c = a^b (mod m) */
 mp_result mp_int_redux_const(mp_int m, mp_int c);
 
 mp_result mp_int_invmod(mp_int a, mp_int m, mp_int c); /* c = 1/a (mod m) */
@@ -172,7 +172,7 @@ mp_result mp_int_invmod(mp_int a, mp_int m, mp_int c); /* c = 1/a (mod m) */
 mp_result mp_int_gcd(mp_int a, mp_int b, mp_int c);    /* c = gcd(a, b)   */
 
 mp_result mp_int_egcd(mp_int a, mp_int b, mp_int c,    /* c = gcd(a, b)   */
-		      mp_int x, mp_int y);             /* c = ax + by     */
+                      mp_int x, mp_int y);             /* c = ax + by     */
 
 mp_result mp_int_lcm(mp_int a, mp_int b, mp_int c);    /* c = lcm(a, b)   */
 
@@ -186,7 +186,7 @@ mp_result mp_int_to_uint(mp_int z, mp_usmall *out);
 /* Convert to nul-terminated string with the specified radix, writing at
    most limit characters including the nul terminator  */
 mp_result mp_int_to_string(mp_int z, mp_size radix,
-			   char *str, int limit);
+                           char *str, int limit);
 
 /* Return the number of characters required to represent
    z in the given radix.  May over-estimate. */
@@ -195,7 +195,7 @@ mp_result mp_int_string_len(mp_int z, mp_size radix);
 /* Read zero-terminated string into z */
 mp_result mp_int_read_string(mp_int z, mp_size radix, const char *str);
 mp_result mp_int_read_cstring(mp_int z, mp_size radix, const char *str,
-			      char **end);
+                              char **end);
 
 /* Return the number of significant bits in z */
 mp_result mp_int_count_bits(mp_int z);

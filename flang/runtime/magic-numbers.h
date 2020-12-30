@@ -13,16 +13,16 @@ This file defines various code values that need to be exported
 to predefined Fortran standard modules as well as to C/C++
 code in the compiler and runtime library.
 These include:
- - the error/end code values that can be returned
-   to an IOSTAT= or STAT= specifier on a Fortran I/O statement
-   or coindexed data reference (see Fortran 2018 12.11.5,
-   16.10.2, and 16.10.2.33)
-Codes from <errno.h>, e.g. ENOENT, are assumed to be positive
-and are used "raw" as IOSTAT values.
+- the error/end code values that can be returned
+    to an IOSTAT= or STAT= specifier on a Fortran I/O statement
+                           or coindexed data reference (see Fortran 2018 12.11.5,
+                           16.10.2, and 16.10.2.33)
+                           Codes from <errno.h>, e.g. ENOENT, are assumed to be positive
+                           and are used "raw" as IOSTAT values.
 
-CFI_ERROR_xxx and CFI_INVALID_xxx macros from ISO_Fortran_binding.h
-have small positive values.  The FORTRAN_RUNTIME_STAT_xxx macros here
-start at 100 so as to never conflict with those codes.
+                           CFI_ERROR_xxx and CFI_INVALID_xxx macros from ISO_Fortran_binding.h
+                           have small positive values.  The FORTRAN_RUNTIME_STAT_xxx macros here
+                           start at 100 so as to never conflict with those codes.
 #endif
 #ifndef FORTRAN_RUNTIME_MAGIC_NUMBERS_H_
 #define FORTRAN_RUNTIME_MAGIC_NUMBERS_H_

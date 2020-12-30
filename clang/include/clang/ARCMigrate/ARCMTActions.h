@@ -18,56 +18,56 @@ namespace arcmt {
 
 class CheckAction : public WrapperFrontendAction {
 protected:
-  bool BeginInvocation(CompilerInstance &CI) override;
+    bool BeginInvocation(CompilerInstance &CI) override;
 
 public:
-  CheckAction(std::unique_ptr<FrontendAction> WrappedAction);
+    CheckAction(std::unique_ptr<FrontendAction> WrappedAction);
 };
 
 class ModifyAction : public WrapperFrontendAction {
 protected:
-  bool BeginInvocation(CompilerInstance &CI) override;
+    bool BeginInvocation(CompilerInstance &CI) override;
 
 public:
-  ModifyAction(std::unique_ptr<FrontendAction> WrappedAction);
+    ModifyAction(std::unique_ptr<FrontendAction> WrappedAction);
 };
 
 class MigrateSourceAction : public ASTFrontendAction {
-  FileRemapper Remapper;
+    FileRemapper Remapper;
 protected:
-  bool BeginInvocation(CompilerInstance &CI) override;
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
-                                                 StringRef InFile) override;
+    bool BeginInvocation(CompilerInstance &CI) override;
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
+            StringRef InFile) override;
 };
 
 class MigrateAction : public WrapperFrontendAction {
-  std::string MigrateDir;
-  std::string PlistOut;
-  bool EmitPremigrationARCErros;
+    std::string MigrateDir;
+    std::string PlistOut;
+    bool EmitPremigrationARCErros;
 protected:
-  bool BeginInvocation(CompilerInstance &CI) override;
+    bool BeginInvocation(CompilerInstance &CI) override;
 
 public:
-  MigrateAction(std::unique_ptr<FrontendAction> WrappedAction,
-                StringRef migrateDir,
-                StringRef plistOut,
-                bool emitPremigrationARCErrors);
+    MigrateAction(std::unique_ptr<FrontendAction> WrappedAction,
+                  StringRef migrateDir,
+                  StringRef plistOut,
+                  bool emitPremigrationARCErrors);
 };
 
 /// Migrates to modern ObjC syntax.
 class ObjCMigrateAction : public WrapperFrontendAction {
-  std::string MigrateDir;
-  unsigned    ObjCMigAction;
-  FileRemapper Remapper;
-  CompilerInstance *CompInst;
+    std::string MigrateDir;
+    unsigned    ObjCMigAction;
+    FileRemapper Remapper;
+    CompilerInstance *CompInst;
 public:
-  ObjCMigrateAction(std::unique_ptr<FrontendAction> WrappedAction,
-                    StringRef migrateDir, unsigned migrateAction);
+    ObjCMigrateAction(std::unique_ptr<FrontendAction> WrappedAction,
+                      StringRef migrateDir, unsigned migrateAction);
 
 protected:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
-                                                 StringRef InFile) override;
-  bool BeginInvocation(CompilerInstance &CI) override;
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
+            StringRef InFile) override;
+    bool BeginInvocation(CompilerInstance &CI) override;
 };
 
 }

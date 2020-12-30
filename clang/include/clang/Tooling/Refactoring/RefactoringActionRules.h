@@ -51,18 +51,18 @@ using RefactoringActionRules =
 /// source in a single AST unit.
 class SourceChangeRefactoringRule : public RefactoringActionRuleBase {
 public:
-  void invoke(RefactoringResultConsumer &Consumer,
-              RefactoringRuleContext &Context) final override {
-    Expected<AtomicChanges> Changes = createSourceReplacements(Context);
-    if (!Changes)
-      Consumer.handleError(Changes.takeError());
-    else
-      Consumer.handle(std::move(*Changes));
-  }
+    void invoke(RefactoringResultConsumer &Consumer,
+                RefactoringRuleContext &Context) final override {
+        Expected<AtomicChanges> Changes = createSourceReplacements(Context);
+        if (!Changes)
+            Consumer.handleError(Changes.takeError());
+        else
+            Consumer.handle(std::move(*Changes));
+    }
 
 private:
-  virtual Expected<AtomicChanges>
-  createSourceReplacements(RefactoringRuleContext &Context) = 0;
+    virtual Expected<AtomicChanges>
+    createSourceReplacements(RefactoringRuleContext &Context) = 0;
 };
 
 /// A type of refactoring action rule that finds a set of symbol occurrences
@@ -73,18 +73,18 @@ private:
 /// the refactoring.
 class FindSymbolOccurrencesRefactoringRule : public RefactoringActionRuleBase {
 public:
-  void invoke(RefactoringResultConsumer &Consumer,
-              RefactoringRuleContext &Context) final override {
-    Expected<SymbolOccurrences> Occurrences = findSymbolOccurrences(Context);
-    if (!Occurrences)
-      Consumer.handleError(Occurrences.takeError());
-    else
-      Consumer.handle(std::move(*Occurrences));
-  }
+    void invoke(RefactoringResultConsumer &Consumer,
+                RefactoringRuleContext &Context) final override {
+        Expected<SymbolOccurrences> Occurrences = findSymbolOccurrences(Context);
+        if (!Occurrences)
+            Consumer.handleError(Occurrences.takeError());
+        else
+            Consumer.handle(std::move(*Occurrences));
+    }
 
 private:
-  virtual Expected<SymbolOccurrences>
-  findSymbolOccurrences(RefactoringRuleContext &Context) = 0;
+    virtual Expected<SymbolOccurrences>
+    findSymbolOccurrences(RefactoringRuleContext &Context) = 0;
 };
 
 } // end namespace tooling

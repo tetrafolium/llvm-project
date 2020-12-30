@@ -37,53 +37,61 @@ static const uptr kProtectionShared = 8;
 struct MemoryMappedSegmentData;
 
 class MemoryMappedSegment {
- public:
-  explicit MemoryMappedSegment(char *buff = nullptr, uptr size = 0)
-      : filename(buff), filename_size(size), data_(nullptr) {}
-  ~MemoryMappedSegment() {}
+public:
+    explicit MemoryMappedSegment(char *buff = nullptr, uptr size = 0)
+        : filename(buff), filename_size(size), data_(nullptr) {}
+    ~MemoryMappedSegment() {}
 
-  bool IsReadable() const { return protection & kProtectionRead; }
-  bool IsWritable() const { return protection & kProtectionWrite; }
-  bool IsExecutable() const { return protection & kProtectionExecute; }
-  bool IsShared() const { return protection & kProtectionShared; }
+    bool IsReadable() const {
+        return protection & kProtectionRead;
+    }
+    bool IsWritable() const {
+        return protection & kProtectionWrite;
+    }
+    bool IsExecutable() const {
+        return protection & kProtectionExecute;
+    }
+    bool IsShared() const {
+        return protection & kProtectionShared;
+    }
 
-  void AddAddressRanges(LoadedModule *module);
+    void AddAddressRanges(LoadedModule *module);
 
-  uptr start;
-  uptr end;
-  uptr offset;
-  char *filename;  // owned by caller
-  uptr filename_size;
-  uptr protection;
-  ModuleArch arch;
-  u8 uuid[kModuleUUIDSize];
+    uptr start;
+    uptr end;
+    uptr offset;
+    char *filename;  // owned by caller
+    uptr filename_size;
+    uptr protection;
+    ModuleArch arch;
+    u8 uuid[kModuleUUIDSize];
 
- private:
-  friend class MemoryMappingLayout;
+private:
+    friend class MemoryMappingLayout;
 
-  // This field is assigned and owned by MemoryMappingLayout if needed
-  MemoryMappedSegmentData *data_;
+    // This field is assigned and owned by MemoryMappingLayout if needed
+    MemoryMappedSegmentData *data_;
 };
 
 class MemoryMappingLayout {
- public:
-  explicit MemoryMappingLayout(bool cache_enabled);
-  ~MemoryMappingLayout();
-  bool Next(MemoryMappedSegment *segment);
-  bool Error() const;
-  void Reset();
-  // In some cases, e.g. when running under a sandbox on Linux, ASan is unable
-  // to obtain the memory mappings. It should fall back to pre-cached data
-  // instead of aborting.
-  static void CacheMemoryMappings();
+public:
+    explicit MemoryMappingLayout(bool cache_enabled);
+    ~MemoryMappingLayout();
+    bool Next(MemoryMappedSegment *segment);
+    bool Error() const;
+    void Reset();
+    // In some cases, e.g. when running under a sandbox on Linux, ASan is unable
+    // to obtain the memory mappings. It should fall back to pre-cached data
+    // instead of aborting.
+    static void CacheMemoryMappings();
 
-  // Adds all mapped objects into a vector.
-  void DumpListOfModules(InternalMmapVectorNoCtor<LoadedModule> *modules);
+    // Adds all mapped objects into a vector.
+    void DumpListOfModules(InternalMmapVectorNoCtor<LoadedModule> *modules);
 
- private:
-  void LoadFromCache();
+private:
+    void LoadFromCache();
 
-  MemoryMappingLayoutData data_;
+    MemoryMappingLayoutData data_;
 };
 
 // Returns code range for the specified module.

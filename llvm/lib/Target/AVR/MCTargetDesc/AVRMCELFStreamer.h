@@ -23,27 +23,27 @@ const int SIZE_LONG = 4;
 const int SIZE_WORD = 2;
 
 class AVRMCELFStreamer : public MCELFStreamer {
-  std::unique_ptr<MCInstrInfo> MCII;
+    std::unique_ptr<MCInstrInfo> MCII;
 
 public:
-  AVRMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
-                   std::unique_ptr<MCObjectWriter> OW,
-                   std::unique_ptr<MCCodeEmitter> Emitter)
-      : MCELFStreamer(Context, std::move(TAB), std::move(OW),
-                      std::move(Emitter)),
-        MCII(createAVRMCInstrInfo()) {}
+    AVRMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
+                     std::unique_ptr<MCObjectWriter> OW,
+                     std::unique_ptr<MCCodeEmitter> Emitter)
+        : MCELFStreamer(Context, std::move(TAB), std::move(OW),
+                        std::move(Emitter)),
+          MCII(createAVRMCInstrInfo()) {}
 
-  AVRMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
-                   std::unique_ptr<MCObjectWriter> OW,
-                   std::unique_ptr<MCCodeEmitter> Emitter,
-                   MCAssembler *Assembler)
-      : MCELFStreamer(Context, std::move(TAB), std::move(OW),
-                      std::move(Emitter)),
-        MCII(createAVRMCInstrInfo()) {}
+    AVRMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
+                     std::unique_ptr<MCObjectWriter> OW,
+                     std::unique_ptr<MCCodeEmitter> Emitter,
+                     MCAssembler *Assembler)
+        : MCELFStreamer(Context, std::move(TAB), std::move(OW),
+                        std::move(Emitter)),
+          MCII(createAVRMCInstrInfo()) {}
 
-  void emitValueForModiferKind(
-      const MCSymbol *Sym, unsigned SizeInBytes, SMLoc Loc = SMLoc(),
-      AVRMCExpr::VariantKind ModifierKind = AVRMCExpr::VK_AVR_None);
+    void emitValueForModiferKind(
+        const MCSymbol *Sym, unsigned SizeInBytes, SMLoc Loc = SMLoc(),
+        AVRMCExpr::VariantKind ModifierKind = AVRMCExpr::VK_AVR_None);
 };
 
 MCStreamer *createAVRELFStreamer(Triple const &TT, MCContext &Context,

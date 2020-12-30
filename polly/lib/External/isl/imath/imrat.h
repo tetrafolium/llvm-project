@@ -34,8 +34,8 @@ extern "C" {
 #endif
 
 typedef struct mpq {
-  mpz_t   num;    /* Numerator         */
-  mpz_t   den;    /* Denominator, <> 0 */
+    mpz_t   num;    /* Numerator         */
+    mpz_t   den;    /* Denominator, <> 0 */
 } mpq_t, *mp_rat;
 
 #define MP_NUMER_P(Q)  (&((Q)->num)) /* Pointer to numerator   */
@@ -43,10 +43,10 @@ typedef struct mpq {
 
 /* Rounding constants */
 typedef enum {
-  MP_ROUND_DOWN,
-  MP_ROUND_HALF_UP,
-  MP_ROUND_UP,
-  MP_ROUND_HALF_DOWN
+    MP_ROUND_DOWN,
+    MP_ROUND_HALF_UP,
+    MP_ROUND_UP,
+    MP_ROUND_HALF_DOWN
 } mp_round_mode;
 
 mp_result mp_rat_init(mp_rat r);
@@ -109,14 +109,14 @@ mp_result mp_rat_decimal_len(mp_rat r, mp_size radix, mp_size prec);
 /* Read zero-terminated string into r */
 mp_result mp_rat_read_string(mp_rat r, mp_size radix, const char *str);
 mp_result mp_rat_read_cstring(mp_rat r, mp_size radix, const char *str,
-			      char **end);
+                              char **end);
 mp_result mp_rat_read_ustring(mp_rat r, mp_size radix, const char *str,
-			      char **end);
+                              char **end);
 
 /* Read zero-terminated string in decimal format into r */
 mp_result mp_rat_read_decimal(mp_rat r, mp_size radix, const char *str);
 mp_result mp_rat_read_cdecimal(mp_rat r, mp_size radix, const char *str,
-			       char **end);
+                               char **end);
 
 #ifdef __cplusplus
 }

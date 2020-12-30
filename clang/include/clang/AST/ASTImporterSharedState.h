@@ -29,52 +29,54 @@ class TranslationUnitDecl;
 /// objects.
 class ASTImporterSharedState {
 
-  /// Pointer to the import specific lookup table.
-  std::unique_ptr<ASTImporterLookupTable> LookupTable;
+    /// Pointer to the import specific lookup table.
+    std::unique_ptr<ASTImporterLookupTable> LookupTable;
 
-  /// Mapping from the already-imported declarations in the "to"
-  /// context to the error status of the import of that declaration.
-  /// This map contains only the declarations that were not correctly
-  /// imported. The same declaration may or may not be included in
-  /// ImportedFromDecls. This map is updated continuously during imports and
-  /// never cleared (like ImportedFromDecls).
-  llvm::DenseMap<Decl *, ImportError> ImportErrors;
+    /// Mapping from the already-imported declarations in the "to"
+    /// context to the error status of the import of that declaration.
+    /// This map contains only the declarations that were not correctly
+    /// imported. The same declaration may or may not be included in
+    /// ImportedFromDecls. This map is updated continuously during imports and
+    /// never cleared (like ImportedFromDecls).
+    llvm::DenseMap<Decl *, ImportError> ImportErrors;
 
-  // FIXME put ImportedFromDecls here!
-  // And from that point we can better encapsulate the lookup table.
+    // FIXME put ImportedFromDecls here!
+    // And from that point we can better encapsulate the lookup table.
 
 public:
-  ASTImporterSharedState() = default;
+    ASTImporterSharedState() = default;
 
-  ASTImporterSharedState(TranslationUnitDecl &ToTU) {
-    LookupTable = std::make_unique<ASTImporterLookupTable>(ToTU);
-  }
+    ASTImporterSharedState(TranslationUnitDecl &ToTU) {
+        LookupTable = std::make_unique<ASTImporterLookupTable>(ToTU);
+    }
 
-  ASTImporterLookupTable *getLookupTable() { return LookupTable.get(); }
+    ASTImporterLookupTable *getLookupTable() {
+        return LookupTable.get();
+    }
 
-  void addDeclToLookup(Decl *D) {
-    if (LookupTable)
-      if (auto *ND = dyn_cast<NamedDecl>(D))
-        LookupTable->add(ND);
-  }
+    void addDeclToLookup(Decl *D) {
+        if (LookupTable)
+            if (auto *ND = dyn_cast<NamedDecl>(D))
+                LookupTable->add(ND);
+    }
 
-  void removeDeclFromLookup(Decl *D) {
-    if (LookupTable)
-      if (auto *ND = dyn_cast<NamedDecl>(D))
-        LookupTable->remove(ND);
-  }
+    void removeDeclFromLookup(Decl *D) {
+        if (LookupTable)
+            if (auto *ND = dyn_cast<NamedDecl>(D))
+                LookupTable->remove(ND);
+    }
 
-  llvm::Optional<ImportError> getImportDeclErrorIfAny(Decl *ToD) const {
-    auto Pos = ImportErrors.find(ToD);
-    if (Pos != ImportErrors.end())
-      return Pos->second;
-    else
-      return Optional<ImportError>();
-  }
+    llvm::Optional<ImportError> getImportDeclErrorIfAny(Decl *ToD) const {
+        auto Pos = ImportErrors.find(ToD);
+        if (Pos != ImportErrors.end())
+            return Pos->second;
+        else
+            return Optional<ImportError>();
+    }
 
-  void setImportDeclError(Decl *To, ImportError Error) {
-    ImportErrors[To] = Error;
-  }
+    void setImportDeclError(Decl *To, ImportError Error) {
+        ImportErrors[To] = Error;
+    }
 };
 
 } // namespace clang

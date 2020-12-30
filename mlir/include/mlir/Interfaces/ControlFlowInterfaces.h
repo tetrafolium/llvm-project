@@ -34,7 +34,7 @@ getBranchSuccessorArgument(Optional<OperandRange> operands,
 
 /// Verify that the given operands match those of the given successor block.
 LogicalResult verifyBranchSuccessorOperands(Operation *op, unsigned succNo,
-                                            Optional<OperandRange> operands);
+        Optional<OperandRange> operands);
 } // namespace detail
 
 //===----------------------------------------------------------------------===//
@@ -61,29 +61,35 @@ LogicalResult verifyTypesAlongControlFlowEdges(Operation *op);
 /// terminator operations in the blocks within this region.
 class RegionSuccessor {
 public:
-  /// Initialize a successor that branches to another region of the parent
-  /// operation.
-  RegionSuccessor(Region *region, Block::BlockArgListType regionInputs = {})
-      : region(region), inputs(regionInputs) {}
-  /// Initialize a successor that branches back to/out of the parent operation.
-  RegionSuccessor(Optional<Operation::result_range> results = {})
-      : region(nullptr), inputs(results ? ValueRange(*results) : ValueRange()) {
-  }
+    /// Initialize a successor that branches to another region of the parent
+    /// operation.
+    RegionSuccessor(Region *region, Block::BlockArgListType regionInputs = {})
+        : region(region), inputs(regionInputs) {}
+    /// Initialize a successor that branches back to/out of the parent operation.
+    RegionSuccessor(Optional<Operation::result_range> results = {})
+        : region(nullptr), inputs(results ? ValueRange(*results) : ValueRange()) {
+    }
 
-  /// Return the given region successor. Returns nullptr if the successor is the
-  /// parent operation.
-  Region *getSuccessor() const { return region; }
+    /// Return the given region successor. Returns nullptr if the successor is the
+    /// parent operation.
+    Region *getSuccessor() const {
+        return region;
+    }
 
-  /// Return true if the successor is the parent operation.
-  bool isParent() const { return region == nullptr; }
+    /// Return true if the successor is the parent operation.
+    bool isParent() const {
+        return region == nullptr;
+    }
 
-  /// Return the inputs to the successor that are remapped by the exit values of
-  /// the current region.
-  ValueRange getSuccessorInputs() const { return inputs; }
+    /// Return the inputs to the successor that are remapped by the exit values of
+    /// the current region.
+    ValueRange getSuccessorInputs() const {
+        return inputs;
+    }
 
 private:
-  Region *region;
-  ValueRange inputs;
+    Region *region;
+    ValueRange inputs;
 };
 
 //===----------------------------------------------------------------------===//
@@ -97,15 +103,15 @@ namespace OpTrait {
 /// contain successors or produce results.
 template <typename ConcreteType>
 struct ReturnLike : public TraitBase<ConcreteType, ReturnLike> {
-  static LogicalResult verifyTrait(Operation *op) {
-    static_assert(ConcreteType::template hasTrait<IsTerminator>(),
-                  "expected operation to be a terminator");
-    static_assert(ConcreteType::template hasTrait<ZeroResult>(),
-                  "expected operation to have zero results");
-    static_assert(ConcreteType::template hasTrait<ZeroSuccessor>(),
-                  "expected operation to have zero successors");
-    return success();
-  }
+    static LogicalResult verifyTrait(Operation *op) {
+        static_assert(ConcreteType::template hasTrait<IsTerminator>(),
+                      "expected operation to be a terminator");
+        static_assert(ConcreteType::template hasTrait<ZeroResult>(),
+                      "expected operation to have zero results");
+        static_assert(ConcreteType::template hasTrait<ZeroSuccessor>(),
+                      "expected operation to have zero successors");
+        return success();
+    }
 };
 } // namespace OpTrait
 

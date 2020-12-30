@@ -20,9 +20,9 @@ namespace llvm {
 
 class MCAsmInfoDarwin : public MCAsmInfo {
 public:
-  explicit MCAsmInfoDarwin();
+    explicit MCAsmInfoDarwin();
 
-  bool isSectionAtomizableBySymbols(const MCSection &Section) const override;
+    bool isSectionAtomizableBySymbols(const MCSection &Section) const override;
 };
 
 } // end namespace llvm

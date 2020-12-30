@@ -31,21 +31,21 @@ class Block;
 /// terminator that contains it, and its parent block is the predecessor.
 class PredecessorIterator final
     : public llvm::mapped_iterator<ValueUseIterator<BlockOperand>,
-                                   Block *(*)(BlockOperand &)> {
-  static Block *unwrap(BlockOperand &value);
+      Block *(*)(BlockOperand &)> {
+    static Block *unwrap(BlockOperand &value);
 
 public:
-  using reference = Block *;
+    using reference = Block *;
 
-  /// Initializes the operand type iterator to the specified operand iterator.
-  PredecessorIterator(ValueUseIterator<BlockOperand> it)
-      : llvm::mapped_iterator<ValueUseIterator<BlockOperand>,
-                              Block *(*)(BlockOperand &)>(it, &unwrap) {}
-  explicit PredecessorIterator(BlockOperand *operand)
-      : PredecessorIterator(ValueUseIterator<BlockOperand>(operand)) {}
+    /// Initializes the operand type iterator to the specified operand iterator.
+    PredecessorIterator(ValueUseIterator<BlockOperand> it)
+        : llvm::mapped_iterator<ValueUseIterator<BlockOperand>,
+          Block *(*)(BlockOperand &)>(it, &unwrap) {}
+    explicit PredecessorIterator(BlockOperand *operand)
+        : PredecessorIterator(ValueUseIterator<BlockOperand>(operand)) {}
 
-  /// Get the successor number in the predecessor terminator.
-  unsigned getSuccessorIndex() const;
+    /// Get the successor number in the predecessor terminator.
+    unsigned getSuccessorIndex() const;
 };
 
 //===----------------------------------------------------------------------===//
@@ -55,25 +55,25 @@ public:
 /// This class implements the successor iterators for Block.
 class SuccessorRange final
     : public llvm::detail::indexed_accessor_range_base<
-          SuccessorRange, BlockOperand *, Block *, Block *, Block *> {
+      SuccessorRange, BlockOperand *, Block *, Block *, Block *> {
 public:
-  using RangeBaseT::RangeBaseT;
-  SuccessorRange();
-  SuccessorRange(Block *block);
-  SuccessorRange(Operation *term);
+    using RangeBaseT::RangeBaseT;
+    SuccessorRange();
+    SuccessorRange(Block *block);
+    SuccessorRange(Operation *term);
 
 private:
-  /// See `llvm::detail::indexed_accessor_range_base` for details.
-  static BlockOperand *offset_base(BlockOperand *object, ptrdiff_t index) {
-    return object + index;
-  }
-  /// See `llvm::detail::indexed_accessor_range_base` for details.
-  static Block *dereference_iterator(BlockOperand *object, ptrdiff_t index) {
-    return object[index].get();
-  }
+    /// See `llvm::detail::indexed_accessor_range_base` for details.
+    static BlockOperand *offset_base(BlockOperand *object, ptrdiff_t index) {
+        return object + index;
+    }
+    /// See `llvm::detail::indexed_accessor_range_base` for details.
+    static Block *dereference_iterator(BlockOperand *object, ptrdiff_t index) {
+        return object[index].get();
+    }
 
-  /// Allow access to `offset_base` and `dereference_iterator`.
-  friend RangeBaseT;
+    /// Allow access to `offset_base` and `dereference_iterator`.
+    friend RangeBaseT;
 };
 
 //===----------------------------------------------------------------------===//
@@ -87,34 +87,34 @@ private:
 /// parameter.
 class BlockRange final
     : public llvm::detail::indexed_accessor_range_base<
-          BlockRange, llvm::PointerUnion<BlockOperand *, Block *const *>,
-          Block *, Block *, Block *> {
+      BlockRange, llvm::PointerUnion<BlockOperand *, Block *const *>,
+      Block *, Block *, Block *> {
 public:
-  using RangeBaseT::RangeBaseT;
-  BlockRange(ArrayRef<Block *> blocks = llvm::None);
-  BlockRange(SuccessorRange successors);
-  template <typename Arg,
-            typename = typename std::enable_if_t<
-                std::is_constructible<ArrayRef<Block *>, Arg>::value>>
-  BlockRange(Arg &&arg)
-      : BlockRange(ArrayRef<Block *>(std::forward<Arg>(arg))) {}
-  BlockRange(std::initializer_list<Block *> blocks)
-      : BlockRange(ArrayRef<Block *>(blocks)) {}
+    using RangeBaseT::RangeBaseT;
+    BlockRange(ArrayRef<Block *> blocks = llvm::None);
+    BlockRange(SuccessorRange successors);
+    template <typename Arg,
+              typename = typename std::enable_if_t<
+                  std::is_constructible<ArrayRef<Block *>, Arg>::value>>
+    BlockRange(Arg &&arg)
+        : BlockRange(ArrayRef<Block *>(std::forward<Arg>(arg))) {}
+    BlockRange(std::initializer_list<Block *> blocks)
+        : BlockRange(ArrayRef<Block *>(blocks)) {}
 
 private:
-  /// The owner of the range is either:
-  /// * A pointer to the first element of an array of block operands.
-  /// * A pointer to the first element of an array of Block *.
-  using OwnerT = llvm::PointerUnion<BlockOperand *, Block *const *>;
+    /// The owner of the range is either:
+    /// * A pointer to the first element of an array of block operands.
+    /// * A pointer to the first element of an array of Block *.
+    using OwnerT = llvm::PointerUnion<BlockOperand *, Block *const *>;
 
-  /// See `llvm::detail::indexed_accessor_range_base` for details.
-  static OwnerT offset_base(OwnerT object, ptrdiff_t index);
+    /// See `llvm::detail::indexed_accessor_range_base` for details.
+    static OwnerT offset_base(OwnerT object, ptrdiff_t index);
 
-  /// See `llvm::detail::indexed_accessor_range_base` for details.
-  static Block *dereference_iterator(OwnerT object, ptrdiff_t index);
+    /// See `llvm::detail::indexed_accessor_range_base` for details.
+    static Block *dereference_iterator(OwnerT object, ptrdiff_t index);
 
-  /// Allow access to `offset_base` and `dereference_iterator`.
-  friend RangeBaseT;
+    /// Allow access to `offset_base` and `dereference_iterator`.
+    friend RangeBaseT;
 };
 
 //===----------------------------------------------------------------------===//
@@ -126,15 +126,19 @@ namespace detail {
 template <typename OpT, typename IteratorT>
 class op_filter_iterator
     : public llvm::filter_iterator<IteratorT, bool (*)(Operation &)> {
-  static bool filter(Operation &op) { return llvm::isa<OpT>(op); }
+    static bool filter(Operation &op) {
+        return llvm::isa<OpT>(op);
+    }
 
 public:
-  op_filter_iterator(IteratorT it, IteratorT end)
-      : llvm::filter_iterator<IteratorT, bool (*)(Operation &)>(it, end,
-                                                                &filter) {}
+    op_filter_iterator(IteratorT it, IteratorT end)
+        : llvm::filter_iterator<IteratorT, bool (*)(Operation &)>(it, end,
+                &filter) {}
 
-  /// Allow implicit conversion to the underlying iterator.
-  operator IteratorT() const { return this->wrapped(); }
+    /// Allow implicit conversion to the underlying iterator.
+    operator IteratorT() const {
+        return this->wrapped();
+    }
 };
 
 /// This class provides iteration over the held operations of a block for a
@@ -142,19 +146,23 @@ public:
 template <typename OpT, typename IteratorT>
 class op_iterator
     : public llvm::mapped_iterator<op_filter_iterator<OpT, IteratorT>,
-                                   OpT (*)(Operation &)> {
-  static OpT unwrap(Operation &op) { return cast<OpT>(op); }
+      OpT (*)(Operation &)> {
+    static OpT unwrap(Operation &op) {
+        return cast<OpT>(op);
+    }
 
 public:
-  using reference = OpT;
+    using reference = OpT;
 
-  /// Initializes the iterator to the specified filter iterator.
-  op_iterator(op_filter_iterator<OpT, IteratorT> it)
-      : llvm::mapped_iterator<op_filter_iterator<OpT, IteratorT>,
-                              OpT (*)(Operation &)>(it, &unwrap) {}
+    /// Initializes the iterator to the specified filter iterator.
+    op_iterator(op_filter_iterator<OpT, IteratorT> it)
+        : llvm::mapped_iterator<op_filter_iterator<OpT, IteratorT>,
+          OpT (*)(Operation &)>(it, &unwrap) {}
 
-  /// Allow implicit conversion to the underlying block iterator.
-  operator IteratorT() const { return this->wrapped(); }
+    /// Allow implicit conversion to the underlying block iterator.
+    operator IteratorT() const {
+        return this->wrapped();
+    }
 };
 } // end namespace detail
 } // end namespace mlir
@@ -164,24 +172,24 @@ namespace llvm {
 /// Provide support for hashing successor ranges.
 template <>
 struct DenseMapInfo<mlir::SuccessorRange> {
-  static mlir::SuccessorRange getEmptyKey() {
-    auto *pointer = llvm::DenseMapInfo<mlir::BlockOperand *>::getEmptyKey();
-    return mlir::SuccessorRange(pointer, 0);
-  }
-  static mlir::SuccessorRange getTombstoneKey() {
-    auto *pointer = llvm::DenseMapInfo<mlir::BlockOperand *>::getTombstoneKey();
-    return mlir::SuccessorRange(pointer, 0);
-  }
-  static unsigned getHashValue(mlir::SuccessorRange value) {
-    return llvm::hash_combine_range(value.begin(), value.end());
-  }
-  static bool isEqual(mlir::SuccessorRange lhs, mlir::SuccessorRange rhs) {
-    if (rhs.getBase() == getEmptyKey().getBase())
-      return lhs.getBase() == getEmptyKey().getBase();
-    if (rhs.getBase() == getTombstoneKey().getBase())
-      return lhs.getBase() == getTombstoneKey().getBase();
-    return lhs == rhs;
-  }
+    static mlir::SuccessorRange getEmptyKey() {
+        auto *pointer = llvm::DenseMapInfo<mlir::BlockOperand *>::getEmptyKey();
+        return mlir::SuccessorRange(pointer, 0);
+    }
+    static mlir::SuccessorRange getTombstoneKey() {
+        auto *pointer = llvm::DenseMapInfo<mlir::BlockOperand *>::getTombstoneKey();
+        return mlir::SuccessorRange(pointer, 0);
+    }
+    static unsigned getHashValue(mlir::SuccessorRange value) {
+        return llvm::hash_combine_range(value.begin(), value.end());
+    }
+    static bool isEqual(mlir::SuccessorRange lhs, mlir::SuccessorRange rhs) {
+        if (rhs.getBase() == getEmptyKey().getBase())
+            return lhs.getBase() == getEmptyKey().getBase();
+        if (rhs.getBase() == getTombstoneKey().getBase())
+            return lhs.getBase() == getTombstoneKey().getBase();
+        return lhs == rhs;
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -197,31 +205,31 @@ template <>
 struct SpecificNodeAccess<
     typename compute_node_options<::mlir::Operation>::type> : NodeAccess {
 protected:
-  using OptionsT = typename compute_node_options<mlir::Operation>::type;
-  using pointer = typename OptionsT::pointer;
-  using const_pointer = typename OptionsT::const_pointer;
-  using node_type = ilist_node_impl<OptionsT>;
+    using OptionsT = typename compute_node_options<mlir::Operation>::type;
+    using pointer = typename OptionsT::pointer;
+    using const_pointer = typename OptionsT::const_pointer;
+    using node_type = ilist_node_impl<OptionsT>;
 
-  static node_type *getNodePtr(pointer N);
-  static const node_type *getNodePtr(const_pointer N);
+    static node_type *getNodePtr(pointer N);
+    static const node_type *getNodePtr(const_pointer N);
 
-  static pointer getValuePtr(node_type *N);
-  static const_pointer getValuePtr(const node_type *N);
+    static pointer getValuePtr(node_type *N);
+    static const_pointer getValuePtr(const node_type *N);
 };
 } // end namespace ilist_detail
 
 template <> struct ilist_traits<::mlir::Operation> {
-  using Operation = ::mlir::Operation;
-  using op_iterator = simple_ilist<Operation>::iterator;
+    using Operation = ::mlir::Operation;
+    using op_iterator = simple_ilist<Operation>::iterator;
 
-  static void deleteNode(Operation *op);
-  void addNodeToList(Operation *op);
-  void removeNodeFromList(Operation *op);
-  void transferNodesFromList(ilist_traits<Operation> &otherList,
-                             op_iterator first, op_iterator last);
+    static void deleteNode(Operation *op);
+    void addNodeToList(Operation *op);
+    void removeNodeFromList(Operation *op);
+    void transferNodesFromList(ilist_traits<Operation> &otherList,
+                               op_iterator first, op_iterator last);
 
 private:
-  mlir::Block *getContainingBlock();
+    mlir::Block *getContainingBlock();
 };
 
 //===----------------------------------------------------------------------===//
@@ -230,16 +238,16 @@ private:
 
 template <>
 struct ilist_traits<::mlir::Block> : public ilist_alloc_traits<::mlir::Block> {
-  using Block = ::mlir::Block;
-  using block_iterator = simple_ilist<::mlir::Block>::iterator;
+    using Block = ::mlir::Block;
+    using block_iterator = simple_ilist<::mlir::Block>::iterator;
 
-  void addNodeToList(Block *block);
-  void removeNodeFromList(Block *block);
-  void transferNodesFromList(ilist_traits<Block> &otherList,
-                             block_iterator first, block_iterator last);
+    void addNodeToList(Block *block);
+    void removeNodeFromList(Block *block);
+    void transferNodesFromList(ilist_traits<Block> &otherList,
+                               block_iterator first, block_iterator last);
 
 private:
-  mlir::Region *getParentRegion();
+    mlir::Region *getParentRegion();
 };
 
 } // end namespace llvm

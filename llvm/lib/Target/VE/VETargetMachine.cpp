@@ -24,57 +24,57 @@ using namespace llvm;
 #define DEBUG_TYPE "ve"
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeVETarget() {
-  // Register the target.
-  RegisterTargetMachine<VETargetMachine> X(getTheVETarget());
+    // Register the target.
+    RegisterTargetMachine<VETargetMachine> X(getTheVETarget());
 }
 
 static std::string computeDataLayout(const Triple &T) {
-  // Aurora VE is little endian
-  std::string Ret = "e";
+    // Aurora VE is little endian
+    std::string Ret = "e";
 
-  // Use ELF mangling
-  Ret += "-m:e";
+    // Use ELF mangling
+    Ret += "-m:e";
 
-  // Alignments for 64 bit integers.
-  Ret += "-i64:64";
+    // Alignments for 64 bit integers.
+    Ret += "-i64:64";
 
-  // VE supports 32 bit and 64 bits integer on registers
-  Ret += "-n32:64";
+    // VE supports 32 bit and 64 bits integer on registers
+    Ret += "-n32:64";
 
-  // Stack alignment is 128 bits
-  Ret += "-S128";
+    // Stack alignment is 128 bits
+    Ret += "-S128";
 
-  // Vector alignments are 64 bits
-  // Need to define all of them.  Otherwise, each alignment becomes
-  // the size of each data by default.
-  Ret += "-v64:64:64"; // for v2f32
-  Ret += "-v128:64:64";
-  Ret += "-v256:64:64";
-  Ret += "-v512:64:64";
-  Ret += "-v1024:64:64";
-  Ret += "-v2048:64:64";
-  Ret += "-v4096:64:64";
-  Ret += "-v8192:64:64";
-  Ret += "-v16384:64:64"; // for v256f64
+    // Vector alignments are 64 bits
+    // Need to define all of them.  Otherwise, each alignment becomes
+    // the size of each data by default.
+    Ret += "-v64:64:64"; // for v2f32
+    Ret += "-v128:64:64";
+    Ret += "-v256:64:64";
+    Ret += "-v512:64:64";
+    Ret += "-v1024:64:64";
+    Ret += "-v2048:64:64";
+    Ret += "-v4096:64:64";
+    Ret += "-v8192:64:64";
+    Ret += "-v16384:64:64"; // for v256f64
 
-  return Ret;
+    return Ret;
 }
 
 static Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
-  if (!RM.hasValue())
-    return Reloc::Static;
-  return *RM;
+    if (!RM.hasValue())
+        return Reloc::Static;
+    return *RM;
 }
 
 class VEELFTargetObjectFile : public TargetLoweringObjectFileELF {
-  void Initialize(MCContext &Ctx, const TargetMachine &TM) override {
-    TargetLoweringObjectFileELF::Initialize(Ctx, TM);
-    InitializeELF(TM.Options.UseInitArray);
-  }
+    void Initialize(MCContext &Ctx, const TargetMachine &TM) override {
+        TargetLoweringObjectFileELF::Initialize(Ctx, TM);
+        InitializeELF(TM.Options.UseInitArray);
+    }
 };
 
 static std::unique_ptr<TargetLoweringObjectFile> createTLOF() {
-  return std::make_unique<VEELFTargetObjectFile>();
+    return std::make_unique<VEELFTargetObjectFile>();
 }
 
 /// Create an Aurora VE architecture model
@@ -89,48 +89,48 @@ VETargetMachine::VETargetMachine(const Target &T, const Triple &TT,
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
       TLOF(createTLOF()),
       Subtarget(TT, std::string(CPU), std::string(FS), *this) {
-  initAsmInfo();
+    initAsmInfo();
 }
 
 VETargetMachine::~VETargetMachine() {}
 
 TargetTransformInfo VETargetMachine::getTargetTransformInfo(const Function &F) {
-  return TargetTransformInfo(VETTIImpl(this, F));
+    return TargetTransformInfo(VETTIImpl(this, F));
 }
 
 namespace {
 /// VE Code Generator Pass Configuration Options.
 class VEPassConfig : public TargetPassConfig {
 public:
-  VEPassConfig(VETargetMachine &TM, PassManagerBase &PM)
-      : TargetPassConfig(TM, PM) {}
+    VEPassConfig(VETargetMachine &TM, PassManagerBase &PM)
+        : TargetPassConfig(TM, PM) {}
 
-  VETargetMachine &getVETargetMachine() const {
-    return getTM<VETargetMachine>();
-  }
+    VETargetMachine &getVETargetMachine() const {
+        return getTM<VETargetMachine>();
+    }
 
-  void addIRPasses() override;
-  bool addInstSelector() override;
-  void addPreEmitPass() override;
+    void addIRPasses() override;
+    bool addInstSelector() override;
+    void addPreEmitPass() override;
 };
 } // namespace
 
 TargetPassConfig *VETargetMachine::createPassConfig(PassManagerBase &PM) {
-  return new VEPassConfig(*this, PM);
+    return new VEPassConfig(*this, PM);
 }
 
 void VEPassConfig::addIRPasses() {
-  // VE requires atomic expand pass.
-  addPass(createAtomicExpandPass());
-  TargetPassConfig::addIRPasses();
+    // VE requires atomic expand pass.
+    addPass(createAtomicExpandPass());
+    TargetPassConfig::addIRPasses();
 }
 
 bool VEPassConfig::addInstSelector() {
-  addPass(createVEISelDag(getVETargetMachine()));
-  return false;
+    addPass(createVEISelDag(getVETargetMachine()));
+    return false;
 }
 
 void VEPassConfig::addPreEmitPass() {
-  // LVLGen should be called after scheduling and register allocation
-  addPass(createLVLGenPass());
+    // LVLGen should be called after scheduling and register allocation
+    addPass(createLVLGenPass());
 }

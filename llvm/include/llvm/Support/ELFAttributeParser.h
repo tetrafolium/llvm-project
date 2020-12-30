@@ -21,51 +21,53 @@ namespace llvm {
 class StringRef;
 
 class ELFAttributeParser {
-  StringRef vendor;
-  std::unordered_map<unsigned, unsigned> attributes;
-  std::unordered_map<unsigned, StringRef> attributesStr;
+    StringRef vendor;
+    std::unordered_map<unsigned, unsigned> attributes;
+    std::unordered_map<unsigned, StringRef> attributesStr;
 
-  virtual Error handler(uint64_t tag, bool &handled) = 0;
+    virtual Error handler(uint64_t tag, bool &handled) = 0;
 
 protected:
-  ScopedPrinter *sw;
-  TagNameMap tagToStringMap;
-  DataExtractor de{ArrayRef<uint8_t>{}, true, 0};
-  DataExtractor::Cursor cursor{0};
+    ScopedPrinter *sw;
+    TagNameMap tagToStringMap;
+    DataExtractor de{ArrayRef<uint8_t>{}, true, 0};
+    DataExtractor::Cursor cursor{0};
 
-  void printAttribute(unsigned tag, unsigned value, StringRef valueDesc);
+    void printAttribute(unsigned tag, unsigned value, StringRef valueDesc);
 
-  Error parseStringAttribute(const char *name, unsigned tag,
-                             ArrayRef<const char *> strings);
-  Error parseAttributeList(uint32_t length);
-  void parseIndexList(SmallVectorImpl<uint8_t> &indexList);
-  Error parseSubsection(uint32_t length);
+    Error parseStringAttribute(const char *name, unsigned tag,
+                               ArrayRef<const char *> strings);
+    Error parseAttributeList(uint32_t length);
+    void parseIndexList(SmallVectorImpl<uint8_t> &indexList);
+    Error parseSubsection(uint32_t length);
 
 public:
-  virtual ~ELFAttributeParser() { static_cast<void>(!cursor.takeError()); }
-  Error integerAttribute(unsigned tag);
-  Error stringAttribute(unsigned tag);
+    virtual ~ELFAttributeParser() {
+        static_cast<void>(!cursor.takeError());
+    }
+    Error integerAttribute(unsigned tag);
+    Error stringAttribute(unsigned tag);
 
-  ELFAttributeParser(ScopedPrinter *sw, TagNameMap tagNameMap, StringRef vendor)
-      : vendor(vendor), sw(sw), tagToStringMap(tagNameMap) {}
+    ELFAttributeParser(ScopedPrinter *sw, TagNameMap tagNameMap, StringRef vendor)
+        : vendor(vendor), sw(sw), tagToStringMap(tagNameMap) {}
 
-  ELFAttributeParser(TagNameMap tagNameMap, StringRef vendor)
-      : vendor(vendor), sw(nullptr), tagToStringMap(tagNameMap) {}
+    ELFAttributeParser(TagNameMap tagNameMap, StringRef vendor)
+        : vendor(vendor), sw(nullptr), tagToStringMap(tagNameMap) {}
 
-  Error parse(ArrayRef<uint8_t> section, support::endianness endian);
+    Error parse(ArrayRef<uint8_t> section, support::endianness endian);
 
-  Optional<unsigned> getAttributeValue(unsigned tag) const {
-    auto I = attributes.find(tag);
-    if (I == attributes.end())
-      return None;
-    return I->second;
-  }
-  Optional<StringRef> getAttributeString(unsigned tag) const {
-    auto I = attributesStr.find(tag);
-    if (I == attributesStr.end())
-      return None;
-    return I->second;
-  }
+    Optional<unsigned> getAttributeValue(unsigned tag) const {
+        auto I = attributes.find(tag);
+        if (I == attributes.end())
+            return None;
+        return I->second;
+    }
+    Optional<StringRef> getAttributeString(unsigned tag) const {
+        auto I = attributesStr.find(tag);
+        if (I == attributesStr.end())
+            return None;
+        return I->second;
+    }
 };
 
 } // namespace llvm

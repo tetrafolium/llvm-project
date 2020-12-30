@@ -64,58 +64,58 @@
  * a zero-column matrix is returned.
  */
 static __isl_give isl_mat *particular_solution(__isl_keep isl_mat *B,
-	__isl_keep isl_vec *d)
+        __isl_keep isl_vec *d)
 {
-	int i, j;
-	struct isl_mat *M = NULL;
-	struct isl_mat *C = NULL;
-	struct isl_mat *U = NULL;
-	struct isl_mat *H = NULL;
-	struct isl_mat *cst = NULL;
-	struct isl_mat *T = NULL;
+    int i, j;
+    struct isl_mat *M = NULL;
+    struct isl_mat *C = NULL;
+    struct isl_mat *U = NULL;
+    struct isl_mat *H = NULL;
+    struct isl_mat *cst = NULL;
+    struct isl_mat *T = NULL;
 
-	M = isl_mat_alloc(B->ctx, B->n_row, B->n_row + B->n_col - 1);
-	C = isl_mat_alloc(B->ctx, 1 + B->n_row, 1);
-	if (!M || !C)
-		goto error;
-	isl_int_set_si(C->row[0][0], 1);
-	for (i = 0; i < B->n_row; ++i) {
-		isl_seq_clr(M->row[i], B->n_row);
-		isl_int_set(M->row[i][i], d->block.data[i]);
-		isl_int_neg(C->row[1 + i][0], B->row[i][0]);
-		isl_int_fdiv_r(C->row[1+i][0], C->row[1+i][0], M->row[i][i]);
-		for (j = 0; j < B->n_col - 1; ++j)
-			isl_int_fdiv_r(M->row[i][B->n_row + j],
-					B->row[i][1 + j], M->row[i][i]);
-	}
-	M = isl_mat_left_hermite(M, 0, &U, NULL);
-	if (!M || !U)
-		goto error;
-	H = isl_mat_sub_alloc(M, 0, B->n_row, 0, B->n_row);
-	H = isl_mat_lin_to_aff(H);
-	C = isl_mat_inverse_product(H, C);
-	if (!C)
-		goto error;
-	for (i = 0; i < B->n_row; ++i) {
-		if (!isl_int_is_divisible_by(C->row[1+i][0], C->row[0][0]))
-			break;
-		isl_int_divexact(C->row[1+i][0], C->row[1+i][0], C->row[0][0]);
-	}
-	if (i < B->n_row)
-		cst = isl_mat_alloc(B->ctx, B->n_row, 0);
-	else
-		cst = isl_mat_sub_alloc(C, 1, B->n_row, 0, 1);
-	T = isl_mat_sub_alloc(U, B->n_row, B->n_col - 1, 0, B->n_row);
-	cst = isl_mat_product(T, cst);
-	isl_mat_free(M);
-	isl_mat_free(C);
-	isl_mat_free(U);
-	return cst;
+    M = isl_mat_alloc(B->ctx, B->n_row, B->n_row + B->n_col - 1);
+    C = isl_mat_alloc(B->ctx, 1 + B->n_row, 1);
+    if (!M || !C)
+        goto error;
+    isl_int_set_si(C->row[0][0], 1);
+    for (i = 0; i < B->n_row; ++i) {
+        isl_seq_clr(M->row[i], B->n_row);
+        isl_int_set(M->row[i][i], d->block.data[i]);
+        isl_int_neg(C->row[1 + i][0], B->row[i][0]);
+        isl_int_fdiv_r(C->row[1+i][0], C->row[1+i][0], M->row[i][i]);
+        for (j = 0; j < B->n_col - 1; ++j)
+            isl_int_fdiv_r(M->row[i][B->n_row + j],
+                           B->row[i][1 + j], M->row[i][i]);
+    }
+    M = isl_mat_left_hermite(M, 0, &U, NULL);
+    if (!M || !U)
+        goto error;
+    H = isl_mat_sub_alloc(M, 0, B->n_row, 0, B->n_row);
+    H = isl_mat_lin_to_aff(H);
+    C = isl_mat_inverse_product(H, C);
+    if (!C)
+        goto error;
+    for (i = 0; i < B->n_row; ++i) {
+        if (!isl_int_is_divisible_by(C->row[1+i][0], C->row[0][0]))
+            break;
+        isl_int_divexact(C->row[1+i][0], C->row[1+i][0], C->row[0][0]);
+    }
+    if (i < B->n_row)
+        cst = isl_mat_alloc(B->ctx, B->n_row, 0);
+    else
+        cst = isl_mat_sub_alloc(C, 1, B->n_row, 0, 1);
+    T = isl_mat_sub_alloc(U, B->n_row, B->n_col - 1, 0, B->n_row);
+    cst = isl_mat_product(T, cst);
+    isl_mat_free(M);
+    isl_mat_free(C);
+    isl_mat_free(U);
+    return cst;
 error:
-	isl_mat_free(M);
-	isl_mat_free(C);
-	isl_mat_free(U);
-	return NULL;
+    isl_mat_free(M);
+    isl_mat_free(C);
+    isl_mat_free(U);
+    return NULL;
 }
 
 /* Compute and return the matrix
@@ -127,28 +127,28 @@ error:
  * the single (linear) modulo constraint.
  */
 static __isl_take isl_mat *parameter_compression_1(__isl_keep isl_mat *B,
-	__isl_keep isl_vec *d)
+        __isl_keep isl_vec *d)
 {
-	struct isl_mat *U;
+    struct isl_mat *U;
 
-	U = isl_mat_alloc(B->ctx, B->n_col - 1, B->n_col - 1);
-	if (!U)
-		return NULL;
-	isl_seq_cpy(U->row[0], B->row[0] + 1, B->n_col - 1);
-	U = isl_mat_unimodular_complete(U, 1);
-	U = isl_mat_right_inverse(U);
-	if (!U)
-		return NULL;
-	isl_mat_col_mul(U, 0, d->block.data[0], 0);
-	U = isl_mat_lin_to_aff(U);
-	return U;
+    U = isl_mat_alloc(B->ctx, B->n_col - 1, B->n_col - 1);
+    if (!U)
+        return NULL;
+    isl_seq_cpy(U->row[0], B->row[0] + 1, B->n_col - 1);
+    U = isl_mat_unimodular_complete(U, 1);
+    U = isl_mat_right_inverse(U);
+    if (!U)
+        return NULL;
+    isl_mat_col_mul(U, 0, d->block.data[0], 0);
+    U = isl_mat_lin_to_aff(U);
+    return U;
 }
 
 /* Compute a common lattice of solutions to the linear modulo
  * constraints specified by B and d.
  * See also the documentation of isl_mat_parameter_compression.
  * We put the matrix
- * 
+ *
  *		A = [ L_1^{-T} L_2^{-T} ... L_k^{-T} ]
  *
  * on a common denominator.  This denominator D is the lcm of modulos d.
@@ -158,58 +158,58 @@ static __isl_take isl_mat *parameter_compression_1(__isl_keep isl_mat *B,
  * D * L_i^{-T} = U_i^T diag(D/d_i, D, ..., D).
  */
 static __isl_give isl_mat *parameter_compression_multi(__isl_keep isl_mat *B,
-	__isl_keep isl_vec *d)
+        __isl_keep isl_vec *d)
 {
-	int i, j, k;
-	isl_int D;
-	struct isl_mat *A = NULL, *U = NULL;
-	struct isl_mat *T;
-	unsigned size;
+    int i, j, k;
+    isl_int D;
+    struct isl_mat *A = NULL, *U = NULL;
+    struct isl_mat *T;
+    unsigned size;
 
-	isl_int_init(D);
+    isl_int_init(D);
 
-	isl_vec_lcm(d, &D);
+    isl_vec_lcm(d, &D);
 
-	size = B->n_col - 1;
-	A = isl_mat_alloc(B->ctx, size, B->n_row * size);
-	U = isl_mat_alloc(B->ctx, size, size);
-	if (!U || !A)
-		goto error;
-	for (i = 0; i < B->n_row; ++i) {
-		isl_seq_cpy(U->row[0], B->row[i] + 1, size);
-		U = isl_mat_unimodular_complete(U, 1);
-		if (!U)
-			goto error;
-		isl_int_divexact(D, D, d->block.data[i]);
-		for (k = 0; k < U->n_col; ++k)
-			isl_int_mul(A->row[k][i*size+0], D, U->row[0][k]);
-		isl_int_mul(D, D, d->block.data[i]);
-		for (j = 1; j < U->n_row; ++j)
-			for (k = 0; k < U->n_col; ++k)
-				isl_int_mul(A->row[k][i*size+j],
-						D, U->row[j][k]);
-	}
-	A = isl_mat_left_hermite(A, 0, NULL, NULL);
-	T = isl_mat_sub_alloc(A, 0, A->n_row, 0, A->n_row);
-	T = isl_mat_lin_to_aff(T);
-	if (!T)
-		goto error;
-	isl_int_set(T->row[0][0], D);
-	T = isl_mat_right_inverse(T);
-	if (!T)
-		goto error;
-	isl_assert(T->ctx, isl_int_is_one(T->row[0][0]), goto error);
-	T = isl_mat_transpose(T);
-	isl_mat_free(A);
-	isl_mat_free(U);
+    size = B->n_col - 1;
+    A = isl_mat_alloc(B->ctx, size, B->n_row * size);
+    U = isl_mat_alloc(B->ctx, size, size);
+    if (!U || !A)
+        goto error;
+    for (i = 0; i < B->n_row; ++i) {
+        isl_seq_cpy(U->row[0], B->row[i] + 1, size);
+        U = isl_mat_unimodular_complete(U, 1);
+        if (!U)
+            goto error;
+        isl_int_divexact(D, D, d->block.data[i]);
+        for (k = 0; k < U->n_col; ++k)
+            isl_int_mul(A->row[k][i*size+0], D, U->row[0][k]);
+        isl_int_mul(D, D, d->block.data[i]);
+        for (j = 1; j < U->n_row; ++j)
+            for (k = 0; k < U->n_col; ++k)
+                isl_int_mul(A->row[k][i*size+j],
+                            D, U->row[j][k]);
+    }
+    A = isl_mat_left_hermite(A, 0, NULL, NULL);
+    T = isl_mat_sub_alloc(A, 0, A->n_row, 0, A->n_row);
+    T = isl_mat_lin_to_aff(T);
+    if (!T)
+        goto error;
+    isl_int_set(T->row[0][0], D);
+    T = isl_mat_right_inverse(T);
+    if (!T)
+        goto error;
+    isl_assert(T->ctx, isl_int_is_one(T->row[0][0]), goto error);
+    T = isl_mat_transpose(T);
+    isl_mat_free(A);
+    isl_mat_free(U);
 
-	isl_int_clear(D);
-	return T;
+    isl_int_clear(D);
+    return T;
 error:
-	isl_mat_free(A);
-	isl_mat_free(U);
-	isl_int_clear(D);
-	return NULL;
+    isl_mat_free(A);
+    isl_mat_free(U);
+    isl_int_clear(D);
+    return NULL;
 }
 
 /* Given a set of modulo constraints
@@ -307,75 +307,75 @@ error:
  * modulo constraints.
  */
 __isl_give isl_mat *isl_mat_parameter_compression(__isl_take isl_mat *B,
-	__isl_take isl_vec *d)
+        __isl_take isl_vec *d)
 {
-	int i;
-	struct isl_mat *cst = NULL;
-	struct isl_mat *T = NULL;
-	isl_int D;
+    int i;
+    struct isl_mat *cst = NULL;
+    struct isl_mat *T = NULL;
+    isl_int D;
 
-	if (!B || !d)
-		goto error;
-	isl_assert(B->ctx, B->n_row == d->size, goto error);
-	cst = particular_solution(B, d);
-	if (!cst)
-		goto error;
-	if (cst->n_col == 0) {
-		T = isl_mat_alloc(B->ctx, B->n_col, 0);
-		isl_mat_free(cst);
-		isl_mat_free(B);
-		isl_vec_free(d);
-		return T;
-	}
-	isl_int_init(D);
-	/* Replace a*g*row = 0 mod g*m by row = 0 mod m */
-	for (i = 0; i < B->n_row; ++i) {
-		isl_seq_gcd(B->row[i] + 1, B->n_col - 1, &D);
-		if (isl_int_is_one(D))
-			continue;
-		if (isl_int_is_zero(D)) {
-			B = isl_mat_drop_rows(B, i, 1);
-			d = isl_vec_cow(d);
-			if (!B || !d)
-				goto error2;
-			isl_seq_cpy(d->block.data+i, d->block.data+i+1,
-							d->size - (i+1));
-			d->size--;
-			i--;
-			continue;
-		}
-		B = isl_mat_cow(B);
-		if (!B)
-			goto error2;
-		isl_seq_scale_down(B->row[i] + 1, B->row[i] + 1, D, B->n_col-1);
-		isl_int_gcd(D, D, d->block.data[i]);
-		d = isl_vec_cow(d);
-		if (!d)
-			goto error2;
-		isl_int_divexact(d->block.data[i], d->block.data[i], D);
-	}
-	isl_int_clear(D);
-	if (B->n_row == 0)
-		T = isl_mat_identity(B->ctx, B->n_col);
-	else if (B->n_row == 1)
-		T = parameter_compression_1(B, d);
-	else
-		T = parameter_compression_multi(B, d);
-	T = isl_mat_left_hermite(T, 0, NULL, NULL);
-	if (!T)
-		goto error;
-	isl_mat_sub_copy(T->ctx, T->row + 1, cst->row, cst->n_row, 0, 0, 1);
-	isl_mat_free(cst);
-	isl_mat_free(B);
-	isl_vec_free(d);
-	return T;
+    if (!B || !d)
+        goto error;
+    isl_assert(B->ctx, B->n_row == d->size, goto error);
+    cst = particular_solution(B, d);
+    if (!cst)
+        goto error;
+    if (cst->n_col == 0) {
+        T = isl_mat_alloc(B->ctx, B->n_col, 0);
+        isl_mat_free(cst);
+        isl_mat_free(B);
+        isl_vec_free(d);
+        return T;
+    }
+    isl_int_init(D);
+    /* Replace a*g*row = 0 mod g*m by row = 0 mod m */
+    for (i = 0; i < B->n_row; ++i) {
+        isl_seq_gcd(B->row[i] + 1, B->n_col - 1, &D);
+        if (isl_int_is_one(D))
+            continue;
+        if (isl_int_is_zero(D)) {
+            B = isl_mat_drop_rows(B, i, 1);
+            d = isl_vec_cow(d);
+            if (!B || !d)
+                goto error2;
+            isl_seq_cpy(d->block.data+i, d->block.data+i+1,
+                        d->size - (i+1));
+            d->size--;
+            i--;
+            continue;
+        }
+        B = isl_mat_cow(B);
+        if (!B)
+            goto error2;
+        isl_seq_scale_down(B->row[i] + 1, B->row[i] + 1, D, B->n_col-1);
+        isl_int_gcd(D, D, d->block.data[i]);
+        d = isl_vec_cow(d);
+        if (!d)
+            goto error2;
+        isl_int_divexact(d->block.data[i], d->block.data[i], D);
+    }
+    isl_int_clear(D);
+    if (B->n_row == 0)
+        T = isl_mat_identity(B->ctx, B->n_col);
+    else if (B->n_row == 1)
+        T = parameter_compression_1(B, d);
+    else
+        T = parameter_compression_multi(B, d);
+    T = isl_mat_left_hermite(T, 0, NULL, NULL);
+    if (!T)
+        goto error;
+    isl_mat_sub_copy(T->ctx, T->row + 1, cst->row, cst->n_row, 0, 0, 1);
+    isl_mat_free(cst);
+    isl_mat_free(B);
+    isl_vec_free(d);
+    return T;
 error2:
-	isl_int_clear(D);
+    isl_int_clear(D);
 error:
-	isl_mat_free(cst);
-	isl_mat_free(B);
-	isl_vec_free(d);
-	return NULL;
+    isl_mat_free(cst);
+    isl_mat_free(B);
+    isl_vec_free(d);
+    return NULL;
 }
 
 /* Given a set of equalities
@@ -405,30 +405,30 @@ error:
  * and compute the solution using isl_mat_parameter_compression.
  */
 __isl_give isl_mat *isl_mat_parameter_compression_ext(__isl_take isl_mat *B,
-	__isl_take isl_mat *A)
+        __isl_take isl_mat *A)
 {
-	isl_ctx *ctx;
-	isl_vec *d;
-	int n_row, n_col;
+    isl_ctx *ctx;
+    isl_vec *d;
+    int n_row, n_col;
 
-	if (!A)
-		return isl_mat_free(B);
+    if (!A)
+        return isl_mat_free(B);
 
-	ctx = isl_mat_get_ctx(A);
-	n_row = A->n_row;
-	n_col = A->n_col;
-	A = isl_mat_left_hermite(A, 0, NULL, NULL);
-	A = isl_mat_drop_cols(A, n_row, n_col - n_row);
-	A = isl_mat_lin_to_aff(A);
-	A = isl_mat_right_inverse(A);
-	d = isl_vec_alloc(ctx, n_row);
-	if (A)
-		d = isl_vec_set(d, A->row[0][0]);
-	A = isl_mat_drop_rows(A, 0, 1);
-	A = isl_mat_drop_cols(A, 0, 1);
-	B = isl_mat_product(A, B);
+    ctx = isl_mat_get_ctx(A);
+    n_row = A->n_row;
+    n_col = A->n_col;
+    A = isl_mat_left_hermite(A, 0, NULL, NULL);
+    A = isl_mat_drop_cols(A, n_row, n_col - n_row);
+    A = isl_mat_lin_to_aff(A);
+    A = isl_mat_right_inverse(A);
+    d = isl_vec_alloc(ctx, n_row);
+    if (A)
+        d = isl_vec_set(d, A->row[0][0]);
+    A = isl_mat_drop_rows(A, 0, 1);
+    A = isl_mat_drop_cols(A, 0, 1);
+    B = isl_mat_product(A, B);
 
-	return isl_mat_parameter_compression(B, d);
+    return isl_mat_parameter_compression(B, d);
 }
 
 /* Return a compression matrix that indicates that there are no solutions
@@ -441,17 +441,17 @@ __isl_give isl_mat *isl_mat_parameter_compression_ext(__isl_take isl_mat *B,
  * simply freed.
  */
 static __isl_give isl_mat *empty_compression(isl_ctx *ctx, unsigned dim,
-	__isl_give isl_mat **T2, __isl_take isl_mat *free1,
-	__isl_take isl_mat *free2, __isl_take isl_mat *free3)
+        __isl_give isl_mat **T2, __isl_take isl_mat *free1,
+        __isl_take isl_mat *free2, __isl_take isl_mat *free3)
 {
-	isl_mat_free(free1);
-	isl_mat_free(free2);
-	isl_mat_free(free3);
-	if (T2) {
-		isl_mat_free(*T2);
-		*T2 = isl_mat_alloc(ctx, 0, 1 + dim);
-	}
-	return isl_mat_alloc(ctx, 1 + dim, 0);
+    isl_mat_free(free1);
+    isl_mat_free(free2);
+    isl_mat_free(free3);
+    if (T2) {
+        isl_mat_free(*T2);
+        *T2 = isl_mat_alloc(ctx, 0, 1 + dim);
+    }
+    return isl_mat_alloc(ctx, 1 + dim, 0);
 }
 
 /* Given a matrix that maps a (possibly) parametric domain to
@@ -459,25 +459,25 @@ static __isl_give isl_mat *empty_compression(isl_ctx *ctx, unsigned dim,
  * themselves.
  */
 static __isl_give isl_mat *insert_parameter_rows(__isl_take isl_mat *mat,
-	unsigned nparam)
+        unsigned nparam)
 {
-	int i;
+    int i;
 
-	if (nparam == 0)
-		return mat;
-	if (!mat)
-		return NULL;
+    if (nparam == 0)
+        return mat;
+    if (!mat)
+        return NULL;
 
-	mat = isl_mat_insert_rows(mat, 1, nparam);
-	if (!mat)
-		return NULL;
+    mat = isl_mat_insert_rows(mat, 1, nparam);
+    if (!mat)
+        return NULL;
 
-	for (i = 0; i < nparam; ++i) {
-		isl_seq_clr(mat->row[1 + i], mat->n_col);
-		isl_int_set(mat->row[1 + i][1 + i], mat->row[0][0]);
-	}
+    for (i = 0; i < nparam; ++i) {
+        isl_seq_clr(mat->row[1 + i], mat->n_col);
+        isl_int_set(mat->row[1 + i][1 + i], mat->row[0][0]);
+    }
 
-	return mat;
+    return mat;
 }
 
 /* Given a set of equalities
@@ -528,83 +528,83 @@ static __isl_give isl_mat *insert_parameter_rows(__isl_take isl_mat *mat,
  *		x2' = Q2 x
  */
 __isl_give isl_mat *isl_mat_final_variable_compression(__isl_take isl_mat *B,
-	int first, __isl_give isl_mat **T2)
+        int first, __isl_give isl_mat **T2)
 {
-	int i, n;
-	isl_ctx *ctx;
-	isl_mat *H = NULL, *C, *H1, *U = NULL, *U1, *U2;
-	unsigned dim;
+    int i, n;
+    isl_ctx *ctx;
+    isl_mat *H = NULL, *C, *H1, *U = NULL, *U1, *U2;
+    unsigned dim;
 
-	if (T2)
-		*T2 = NULL;
-	if (!B)
-		goto error;
+    if (T2)
+        *T2 = NULL;
+    if (!B)
+        goto error;
 
-	ctx = isl_mat_get_ctx(B);
-	dim = B->n_col - 1;
-	n = dim - first;
-	if (n < B->n_row)
-		isl_die(ctx, isl_error_invalid, "too many equality constraints",
-			goto error);
-	H = isl_mat_sub_alloc(B, 0, B->n_row, 1 + first, n);
-	H = isl_mat_left_hermite(H, 0, &U, T2);
-	if (!H || !U || (T2 && !*T2))
-		goto error;
-	if (T2) {
-		*T2 = isl_mat_drop_rows(*T2, 0, B->n_row);
-		*T2 = isl_mat_diagonal(isl_mat_identity(ctx, 1 + first), *T2);
-		if (!*T2)
-			goto error;
-	}
-	C = isl_mat_alloc(ctx, 1 + B->n_row, 1 + first);
-	if (!C)
-		goto error;
-	isl_int_set_si(C->row[0][0], 1);
-	isl_seq_clr(C->row[0] + 1, first);
-	isl_mat_sub_neg(ctx, C->row + 1, B->row, B->n_row, 0, 0, 1 + first);
-	H1 = isl_mat_sub_alloc(H, 0, H->n_row, 0, H->n_row);
-	H1 = isl_mat_lin_to_aff(H1);
-	C = isl_mat_inverse_product(H1, C);
-	if (!C)
-		goto error;
-	isl_mat_free(H);
-	if (!isl_int_is_one(C->row[0][0])) {
-		isl_int g;
+    ctx = isl_mat_get_ctx(B);
+    dim = B->n_col - 1;
+    n = dim - first;
+    if (n < B->n_row)
+        isl_die(ctx, isl_error_invalid, "too many equality constraints",
+                goto error);
+    H = isl_mat_sub_alloc(B, 0, B->n_row, 1 + first, n);
+    H = isl_mat_left_hermite(H, 0, &U, T2);
+    if (!H || !U || (T2 && !*T2))
+        goto error;
+    if (T2) {
+        *T2 = isl_mat_drop_rows(*T2, 0, B->n_row);
+        *T2 = isl_mat_diagonal(isl_mat_identity(ctx, 1 + first), *T2);
+        if (!*T2)
+            goto error;
+    }
+    C = isl_mat_alloc(ctx, 1 + B->n_row, 1 + first);
+    if (!C)
+        goto error;
+    isl_int_set_si(C->row[0][0], 1);
+    isl_seq_clr(C->row[0] + 1, first);
+    isl_mat_sub_neg(ctx, C->row + 1, B->row, B->n_row, 0, 0, 1 + first);
+    H1 = isl_mat_sub_alloc(H, 0, H->n_row, 0, H->n_row);
+    H1 = isl_mat_lin_to_aff(H1);
+    C = isl_mat_inverse_product(H1, C);
+    if (!C)
+        goto error;
+    isl_mat_free(H);
+    if (!isl_int_is_one(C->row[0][0])) {
+        isl_int g;
 
-		isl_int_init(g);
-		for (i = 0; i < B->n_row; ++i) {
-			isl_seq_gcd(C->row[1 + i] + 1, first, &g);
-			isl_int_gcd(g, g, C->row[0][0]);
-			if (!isl_int_is_divisible_by(C->row[1 + i][0], g))
-				break;
-		}
-		isl_int_clear(g);
+        isl_int_init(g);
+        for (i = 0; i < B->n_row; ++i) {
+            isl_seq_gcd(C->row[1 + i] + 1, first, &g);
+            isl_int_gcd(g, g, C->row[0][0]);
+            if (!isl_int_is_divisible_by(C->row[1 + i][0], g))
+                break;
+        }
+        isl_int_clear(g);
 
-		if (i < B->n_row)
-			return empty_compression(ctx, dim, T2, B, C, U);
-		C = isl_mat_normalize(C);
-	}
-	U1 = isl_mat_sub_alloc(U, 0, U->n_row, 0, B->n_row);
-	U1 = isl_mat_lin_to_aff(U1);
-	U2 = isl_mat_sub_alloc(U, 0, U->n_row, B->n_row, U->n_row - B->n_row);
-	U2 = isl_mat_lin_to_aff(U2);
-	isl_mat_free(U);
-	C = isl_mat_product(U1, C);
-	C = isl_mat_aff_direct_sum(C, U2);
-	C = insert_parameter_rows(C, first);
+        if (i < B->n_row)
+            return empty_compression(ctx, dim, T2, B, C, U);
+        C = isl_mat_normalize(C);
+    }
+    U1 = isl_mat_sub_alloc(U, 0, U->n_row, 0, B->n_row);
+    U1 = isl_mat_lin_to_aff(U1);
+    U2 = isl_mat_sub_alloc(U, 0, U->n_row, B->n_row, U->n_row - B->n_row);
+    U2 = isl_mat_lin_to_aff(U2);
+    isl_mat_free(U);
+    C = isl_mat_product(U1, C);
+    C = isl_mat_aff_direct_sum(C, U2);
+    C = insert_parameter_rows(C, first);
 
-	isl_mat_free(B);
+    isl_mat_free(B);
 
-	return C;
+    return C;
 error:
-	isl_mat_free(B);
-	isl_mat_free(H);
-	isl_mat_free(U);
-	if (T2) {
-		isl_mat_free(*T2);
-		*T2 = NULL;
-	}
-	return NULL;
+    isl_mat_free(B);
+    isl_mat_free(H);
+    isl_mat_free(U);
+    if (T2) {
+        isl_mat_free(*T2);
+        *T2 = NULL;
+    }
+    return NULL;
 }
 
 /* Given a set of equalities
@@ -623,35 +623,35 @@ error:
  * If T2 is not NULL, then *T2 is set to a matrix mapping [1 x] to [1 x'].
  */
 __isl_give isl_mat *isl_mat_variable_compression(__isl_take isl_mat *B,
-	__isl_give isl_mat **T2)
+        __isl_give isl_mat **T2)
 {
-	return isl_mat_final_variable_compression(B, 0, T2);
+    return isl_mat_final_variable_compression(B, 0, T2);
 }
 
 /* Return "bset" and set *T and *T2 to the identity transformation
  * on "bset" (provided T and T2 are not NULL).
  */
 static __isl_give isl_basic_set *return_with_identity(
-	__isl_take isl_basic_set *bset, __isl_give isl_mat **T,
-	__isl_give isl_mat **T2)
+    __isl_take isl_basic_set *bset, __isl_give isl_mat **T,
+    __isl_give isl_mat **T2)
 {
-	isl_size dim;
-	isl_mat *id;
+    isl_size dim;
+    isl_mat *id;
 
-	dim = isl_basic_set_dim(bset, isl_dim_set);
-	if (dim < 0)
-		return isl_basic_set_free(bset);
-	if (!T && !T2)
-		return bset;
+    dim = isl_basic_set_dim(bset, isl_dim_set);
+    if (dim < 0)
+        return isl_basic_set_free(bset);
+    if (!T && !T2)
+        return bset;
 
-	id = isl_mat_identity(isl_basic_map_get_ctx(bset), 1 + dim);
-	if (T)
-		*T = isl_mat_copy(id);
-	if (T2)
-		*T2 = isl_mat_copy(id);
-	isl_mat_free(id);
+    id = isl_mat_identity(isl_basic_map_get_ctx(bset), 1 + dim);
+    if (T)
+        *T = isl_mat_copy(id);
+    if (T2)
+        *T2 = isl_mat_copy(id);
+    isl_mat_free(id);
 
-	return bset;
+    return bset;
 }
 
 /* Use the n equalities of bset to unimodularly transform the
@@ -662,64 +662,64 @@ static __isl_give isl_basic_set *return_with_identity(
  * maps the original variables to the new variables.
  */
 static __isl_give isl_basic_set *compress_variables(
-	__isl_take isl_basic_set *bset,
-	__isl_give isl_mat **T, __isl_give isl_mat **T2)
+    __isl_take isl_basic_set *bset,
+    __isl_give isl_mat **T, __isl_give isl_mat **T2)
 {
-	struct isl_mat *B, *TC;
-	isl_size dim;
+    struct isl_mat *B, *TC;
+    isl_size dim;
 
-	if (T)
-		*T = NULL;
-	if (T2)
-		*T2 = NULL;
-	if (isl_basic_set_check_no_params(bset) < 0 ||
-	    isl_basic_set_check_no_locals(bset) < 0)
-		return isl_basic_set_free(bset);
-	dim = isl_basic_set_dim(bset, isl_dim_set);
-	if (dim < 0)
-		return isl_basic_set_free(bset);
-	isl_assert(bset->ctx, bset->n_eq <= dim, goto error);
-	if (bset->n_eq == 0)
-		return return_with_identity(bset, T, T2);
+    if (T)
+        *T = NULL;
+    if (T2)
+        *T2 = NULL;
+    if (isl_basic_set_check_no_params(bset) < 0 ||
+            isl_basic_set_check_no_locals(bset) < 0)
+        return isl_basic_set_free(bset);
+    dim = isl_basic_set_dim(bset, isl_dim_set);
+    if (dim < 0)
+        return isl_basic_set_free(bset);
+    isl_assert(bset->ctx, bset->n_eq <= dim, goto error);
+    if (bset->n_eq == 0)
+        return return_with_identity(bset, T, T2);
 
-	B = isl_mat_sub_alloc6(bset->ctx, bset->eq, 0, bset->n_eq, 0, 1 + dim);
-	TC = isl_mat_variable_compression(B, T2);
-	if (!TC)
-		goto error;
-	if (TC->n_col == 0) {
-		isl_mat_free(TC);
-		if (T2) {
-			isl_mat_free(*T2);
-			*T2 = NULL;
-		}
-		bset = isl_basic_set_set_to_empty(bset);
-		return return_with_identity(bset, T, T2);
-	}
+    B = isl_mat_sub_alloc6(bset->ctx, bset->eq, 0, bset->n_eq, 0, 1 + dim);
+    TC = isl_mat_variable_compression(B, T2);
+    if (!TC)
+        goto error;
+    if (TC->n_col == 0) {
+        isl_mat_free(TC);
+        if (T2) {
+            isl_mat_free(*T2);
+            *T2 = NULL;
+        }
+        bset = isl_basic_set_set_to_empty(bset);
+        return return_with_identity(bset, T, T2);
+    }
 
-	bset = isl_basic_set_preimage(bset, T ? isl_mat_copy(TC) : TC);
-	if (T)
-		*T = TC;
-	return bset;
+    bset = isl_basic_set_preimage(bset, T ? isl_mat_copy(TC) : TC);
+    if (T)
+        *T = TC;
+    return bset;
 error:
-	isl_basic_set_free(bset);
-	return NULL;
+    isl_basic_set_free(bset);
+    return NULL;
 }
 
 __isl_give isl_basic_set *isl_basic_set_remove_equalities(
-	__isl_take isl_basic_set *bset, __isl_give isl_mat **T,
-	__isl_give isl_mat **T2)
+    __isl_take isl_basic_set *bset, __isl_give isl_mat **T,
+    __isl_give isl_mat **T2)
 {
-	if (T)
-		*T = NULL;
-	if (T2)
-		*T2 = NULL;
-	if (isl_basic_set_check_no_params(bset) < 0)
-		return isl_basic_set_free(bset);
-	bset = isl_basic_set_gauss(bset, NULL);
-	if (ISL_F_ISSET(bset, ISL_BASIC_SET_EMPTY))
-		return return_with_identity(bset, T, T2);
-	bset = compress_variables(bset, T, T2);
-	return bset;
+    if (T)
+        *T = NULL;
+    if (T2)
+        *T2 = NULL;
+    if (isl_basic_set_check_no_params(bset) < 0)
+        return isl_basic_set_free(bset);
+    bset = isl_basic_set_gauss(bset, NULL);
+    if (ISL_F_ISSET(bset, ISL_BASIC_SET_EMPTY))
+        return return_with_identity(bset, T, T2);
+    bset = compress_variables(bset, T, T2);
+    return bset;
 }
 
 /* Check if dimension dim belongs to a residue class
@@ -732,77 +732,77 @@ __isl_give isl_basic_set *isl_basic_set_remove_equalities(
  * is set to 1 and *residue is set to 0.
  */
 isl_stat isl_basic_set_dim_residue_class(__isl_keep isl_basic_set *bset,
-	int pos, isl_int *modulo, isl_int *residue)
+        int pos, isl_int *modulo, isl_int *residue)
 {
-	isl_bool fixed;
-	struct isl_ctx *ctx;
-	struct isl_mat *H = NULL, *U = NULL, *C, *H1, *U1;
-	isl_size total;
-	isl_size nparam;
+    isl_bool fixed;
+    struct isl_ctx *ctx;
+    struct isl_mat *H = NULL, *U = NULL, *C, *H1, *U1;
+    isl_size total;
+    isl_size nparam;
 
-	if (!bset || !modulo || !residue)
-		return isl_stat_error;
+    if (!bset || !modulo || !residue)
+        return isl_stat_error;
 
-	fixed = isl_basic_set_plain_dim_is_fixed(bset, pos, residue);
-	if (fixed < 0)
-		return isl_stat_error;
-	if (fixed) {
-		isl_int_set_si(*modulo, 0);
-		return isl_stat_ok;
-	}
+    fixed = isl_basic_set_plain_dim_is_fixed(bset, pos, residue);
+    if (fixed < 0)
+        return isl_stat_error;
+    if (fixed) {
+        isl_int_set_si(*modulo, 0);
+        return isl_stat_ok;
+    }
 
-	ctx = isl_basic_set_get_ctx(bset);
-	total = isl_basic_set_dim(bset, isl_dim_all);
-	nparam = isl_basic_set_dim(bset, isl_dim_param);
-	if (total < 0 || nparam < 0)
-		return isl_stat_error;
-	H = isl_mat_sub_alloc6(ctx, bset->eq, 0, bset->n_eq, 1, total);
-	H = isl_mat_left_hermite(H, 0, &U, NULL);
-	if (!H)
-		return isl_stat_error;
+    ctx = isl_basic_set_get_ctx(bset);
+    total = isl_basic_set_dim(bset, isl_dim_all);
+    nparam = isl_basic_set_dim(bset, isl_dim_param);
+    if (total < 0 || nparam < 0)
+        return isl_stat_error;
+    H = isl_mat_sub_alloc6(ctx, bset->eq, 0, bset->n_eq, 1, total);
+    H = isl_mat_left_hermite(H, 0, &U, NULL);
+    if (!H)
+        return isl_stat_error;
 
-	isl_seq_gcd(U->row[nparam + pos]+bset->n_eq,
-			total-bset->n_eq, modulo);
-	if (isl_int_is_zero(*modulo))
-		isl_int_set_si(*modulo, 1);
-	if (isl_int_is_one(*modulo)) {
-		isl_int_set_si(*residue, 0);
-		isl_mat_free(H);
-		isl_mat_free(U);
-		return isl_stat_ok;
-	}
+    isl_seq_gcd(U->row[nparam + pos]+bset->n_eq,
+                total-bset->n_eq, modulo);
+    if (isl_int_is_zero(*modulo))
+        isl_int_set_si(*modulo, 1);
+    if (isl_int_is_one(*modulo)) {
+        isl_int_set_si(*residue, 0);
+        isl_mat_free(H);
+        isl_mat_free(U);
+        return isl_stat_ok;
+    }
 
-	C = isl_mat_alloc(ctx, 1 + bset->n_eq, 1);
-	if (!C)
-		goto error;
-	isl_int_set_si(C->row[0][0], 1);
-	isl_mat_sub_neg(ctx, C->row + 1, bset->eq, bset->n_eq, 0, 0, 1);
-	H1 = isl_mat_sub_alloc(H, 0, H->n_row, 0, H->n_row);
-	H1 = isl_mat_lin_to_aff(H1);
-	C = isl_mat_inverse_product(H1, C);
-	isl_mat_free(H);
-	U1 = isl_mat_sub_alloc(U, nparam+pos, 1, 0, bset->n_eq);
-	U1 = isl_mat_lin_to_aff(U1);
-	isl_mat_free(U);
-	C = isl_mat_product(U1, C);
-	if (!C)
-		return isl_stat_error;
-	if (!isl_int_is_divisible_by(C->row[1][0], C->row[0][0])) {
-		bset = isl_basic_set_copy(bset);
-		bset = isl_basic_set_set_to_empty(bset);
-		isl_basic_set_free(bset);
-		isl_int_set_si(*modulo, 1);
-		isl_int_set_si(*residue, 0);
-		return isl_stat_ok;
-	}
-	isl_int_divexact(*residue, C->row[1][0], C->row[0][0]);
-	isl_int_fdiv_r(*residue, *residue, *modulo);
-	isl_mat_free(C);
-	return isl_stat_ok;
+    C = isl_mat_alloc(ctx, 1 + bset->n_eq, 1);
+    if (!C)
+        goto error;
+    isl_int_set_si(C->row[0][0], 1);
+    isl_mat_sub_neg(ctx, C->row + 1, bset->eq, bset->n_eq, 0, 0, 1);
+    H1 = isl_mat_sub_alloc(H, 0, H->n_row, 0, H->n_row);
+    H1 = isl_mat_lin_to_aff(H1);
+    C = isl_mat_inverse_product(H1, C);
+    isl_mat_free(H);
+    U1 = isl_mat_sub_alloc(U, nparam+pos, 1, 0, bset->n_eq);
+    U1 = isl_mat_lin_to_aff(U1);
+    isl_mat_free(U);
+    C = isl_mat_product(U1, C);
+    if (!C)
+        return isl_stat_error;
+    if (!isl_int_is_divisible_by(C->row[1][0], C->row[0][0])) {
+        bset = isl_basic_set_copy(bset);
+        bset = isl_basic_set_set_to_empty(bset);
+        isl_basic_set_free(bset);
+        isl_int_set_si(*modulo, 1);
+        isl_int_set_si(*residue, 0);
+        return isl_stat_ok;
+    }
+    isl_int_divexact(*residue, C->row[1][0], C->row[0][0]);
+    isl_int_fdiv_r(*residue, *residue, *modulo);
+    isl_mat_free(C);
+    return isl_stat_ok;
 error:
-	isl_mat_free(H);
-	isl_mat_free(U);
-	return isl_stat_error;
+    isl_mat_free(H);
+    isl_mat_free(U);
+    return isl_stat_error;
 }
 
 /* Check if dimension dim belongs to a residue class
@@ -815,53 +815,53 @@ error:
  * is set to 1 and *residue is set to 0.
  */
 isl_stat isl_set_dim_residue_class(__isl_keep isl_set *set,
-	int pos, isl_int *modulo, isl_int *residue)
+                                   int pos, isl_int *modulo, isl_int *residue)
 {
-	isl_int m;
-	isl_int r;
-	int i;
+    isl_int m;
+    isl_int r;
+    int i;
 
-	if (!set || !modulo || !residue)
-		return isl_stat_error;
+    if (!set || !modulo || !residue)
+        return isl_stat_error;
 
-	if (set->n == 0) {
-		isl_int_set_si(*modulo, 0);
-		isl_int_set_si(*residue, 0);
-		return isl_stat_ok;
-	}
+    if (set->n == 0) {
+        isl_int_set_si(*modulo, 0);
+        isl_int_set_si(*residue, 0);
+        return isl_stat_ok;
+    }
 
-	if (isl_basic_set_dim_residue_class(set->p[0], pos, modulo, residue)<0)
-		return isl_stat_error;
+    if (isl_basic_set_dim_residue_class(set->p[0], pos, modulo, residue)<0)
+        return isl_stat_error;
 
-	if (set->n == 1)
-		return isl_stat_ok;
+    if (set->n == 1)
+        return isl_stat_ok;
 
-	if (isl_int_is_one(*modulo))
-		return isl_stat_ok;
+    if (isl_int_is_one(*modulo))
+        return isl_stat_ok;
 
-	isl_int_init(m);
-	isl_int_init(r);
+    isl_int_init(m);
+    isl_int_init(r);
 
-	for (i = 1; i < set->n; ++i) {
-		if (isl_basic_set_dim_residue_class(set->p[i], pos, &m, &r) < 0)
-			goto error;
-		isl_int_gcd(*modulo, *modulo, m);
-		isl_int_sub(m, *residue, r);
-		isl_int_gcd(*modulo, *modulo, m);
-		if (!isl_int_is_zero(*modulo))
-			isl_int_fdiv_r(*residue, *residue, *modulo);
-		if (isl_int_is_one(*modulo))
-			break;
-	}
+    for (i = 1; i < set->n; ++i) {
+        if (isl_basic_set_dim_residue_class(set->p[i], pos, &m, &r) < 0)
+            goto error;
+        isl_int_gcd(*modulo, *modulo, m);
+        isl_int_sub(m, *residue, r);
+        isl_int_gcd(*modulo, *modulo, m);
+        if (!isl_int_is_zero(*modulo))
+            isl_int_fdiv_r(*residue, *residue, *modulo);
+        if (isl_int_is_one(*modulo))
+            break;
+    }
 
-	isl_int_clear(m);
-	isl_int_clear(r);
+    isl_int_clear(m);
+    isl_int_clear(r);
 
-	return isl_stat_ok;
+    return isl_stat_ok;
 error:
-	isl_int_clear(m);
-	isl_int_clear(r);
-	return isl_stat_error;
+    isl_int_clear(m);
+    isl_int_clear(r);
+    return isl_stat_error;
 }
 
 /* Check if dimension "dim" belongs to a residue class
@@ -874,24 +874,24 @@ error:
  * is set to 1 and *residue is set to 0.
  */
 isl_stat isl_set_dim_residue_class_val(__isl_keep isl_set *set,
-	int pos, __isl_give isl_val **modulo, __isl_give isl_val **residue)
+                                       int pos, __isl_give isl_val **modulo, __isl_give isl_val **residue)
 {
-	*modulo = NULL;
-	*residue = NULL;
-	if (!set)
-		return isl_stat_error;
-	*modulo = isl_val_alloc(isl_set_get_ctx(set));
-	*residue = isl_val_alloc(isl_set_get_ctx(set));
-	if (!*modulo || !*residue)
-		goto error;
-	if (isl_set_dim_residue_class(set, pos,
-					&(*modulo)->n, &(*residue)->n) < 0)
-		goto error;
-	isl_int_set_si((*modulo)->d, 1);
-	isl_int_set_si((*residue)->d, 1);
-	return isl_stat_ok;
+    *modulo = NULL;
+    *residue = NULL;
+    if (!set)
+        return isl_stat_error;
+    *modulo = isl_val_alloc(isl_set_get_ctx(set));
+    *residue = isl_val_alloc(isl_set_get_ctx(set));
+    if (!*modulo || !*residue)
+        goto error;
+    if (isl_set_dim_residue_class(set, pos,
+                                  &(*modulo)->n, &(*residue)->n) < 0)
+        goto error;
+    isl_int_set_si((*modulo)->d, 1);
+    isl_int_set_si((*residue)->d, 1);
+    return isl_stat_ok;
 error:
-	isl_val_free(*modulo);
-	isl_val_free(*residue);
-	return isl_stat_error;
+    isl_val_free(*modulo);
+    isl_val_free(*residue);
+    return isl_stat_error;
 }

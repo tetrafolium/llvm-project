@@ -43,27 +43,33 @@ class CodeGenInstruction;
 /// when generating the matcher. When the pointers differ, the contents can be
 /// inspected instead.
 class GIMatchDagOperand {
-  unsigned Idx;
-  StringRef Name;
-  bool IsDef;
+    unsigned Idx;
+    StringRef Name;
+    bool IsDef;
 
 public:
-  GIMatchDagOperand(unsigned Idx, StringRef Name, bool IsDef)
-      : Idx(Idx), Name(Name), IsDef(IsDef) {}
+    GIMatchDagOperand(unsigned Idx, StringRef Name, bool IsDef)
+        : Idx(Idx), Name(Name), IsDef(IsDef) {}
 
-  unsigned getIdx() const { return Idx; }
-  StringRef getName() const { return Name; }
-  bool isDef() const { return IsDef; }
+    unsigned getIdx() const {
+        return Idx;
+    }
+    StringRef getName() const {
+        return Name;
+    }
+    bool isDef() const {
+        return IsDef;
+    }
 
-  /// This object isn't a FoldingSetNode but it's part of one. See FoldingSet
-  /// for details on the Profile function.
-  void Profile(FoldingSetNodeID &ID) const;
+    /// This object isn't a FoldingSetNode but it's part of one. See FoldingSet
+    /// for details on the Profile function.
+    void Profile(FoldingSetNodeID &ID) const;
 
-  /// A helper that behaves like Profile() but is also usable without the object.
-  /// We use size_t here to match enumerate<...>::index(). If we don't match
-  /// that the hashes won't be equal.
-  static void Profile(FoldingSetNodeID &ID, size_t Idx, StringRef Name,
-                      bool IsDef);
+    /// A helper that behaves like Profile() but is also usable without the object.
+    /// We use size_t here to match enumerate<...>::index(). If we don't match
+    /// that the hashes won't be equal.
+    static void Profile(FoldingSetNodeID &ID, size_t Idx, StringRef Name,
+                        bool IsDef);
 };
 
 /// A list of GIMatchDagOperands for an instruction without any association with
@@ -78,54 +84,68 @@ public:
 /// See GIMatchDagOperandList::Profile() for the details on how they are folded.
 class GIMatchDagOperandList : public FoldingSetNode {
 public:
-  using value_type = GIMatchDagOperand;
+    using value_type = GIMatchDagOperand;
 
 protected:
-  using vector_type = SmallVector<GIMatchDagOperand, 3>;
+    using vector_type = SmallVector<GIMatchDagOperand, 3>;
 
 public:
-  using iterator = vector_type::iterator;
-  using const_iterator = vector_type::const_iterator;
+    using iterator = vector_type::iterator;
+    using const_iterator = vector_type::const_iterator;
 
 protected:
-  vector_type Operands;
-  StringMap<unsigned> OperandsByName;
+    vector_type Operands;
+    StringMap<unsigned> OperandsByName;
 
 public:
-  void add(StringRef Name, unsigned Idx, bool IsDef);
+    void add(StringRef Name, unsigned Idx, bool IsDef);
 
-  /// See FoldingSet for details.
-  void Profile(FoldingSetNodeID &ID) const;
+    /// See FoldingSet for details.
+    void Profile(FoldingSetNodeID &ID) const;
 
-  iterator begin() { return Operands.begin(); }
-  const_iterator begin() const { return Operands.begin(); }
-  iterator end() { return Operands.end(); }
-  const_iterator end() const { return Operands.end(); }
+    iterator begin() {
+        return Operands.begin();
+    }
+    const_iterator begin() const {
+        return Operands.begin();
+    }
+    iterator end() {
+        return Operands.end();
+    }
+    const_iterator end() const {
+        return Operands.end();
+    }
 
-  const value_type &operator[](unsigned I) const { return Operands[I]; }
-  const value_type &operator[](StringRef K) const;
+    const value_type &operator[](unsigned I) const {
+        return Operands[I];
+    }
+    const value_type &operator[](StringRef K) const;
 
-  void print(raw_ostream &OS) const;
+    void print(raw_ostream &OS) const;
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-  LLVM_DUMP_METHOD void dump() const { print(errs()); }
+    LLVM_DUMP_METHOD void dump() const {
+        print(errs());
+    }
 #endif // if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 };
 
 /// This is the portion of GIMatchDagContext that directly relates to
 /// GIMatchDagOperandList and GIMatchDagOperandList.
 class GIMatchDagOperandListContext {
-  FoldingSet<GIMatchDagOperandList> OperandLists;
-  std::vector<std::unique_ptr<GIMatchDagOperandList>> OperandListsOwner;
+    FoldingSet<GIMatchDagOperandList> OperandLists;
+    std::vector<std::unique_ptr<GIMatchDagOperandList>> OperandListsOwner;
 
 public:
-  const GIMatchDagOperandList &makeEmptyOperandList();
-  const GIMatchDagOperandList &makeOperandList(const CodeGenInstruction &I);
-  const GIMatchDagOperandList &makeMIPredicateOperandList();
-  const GIMatchDagOperandList &makeTwoMOPredicateOperandList();
+    const GIMatchDagOperandList &makeEmptyOperandList();
+    const GIMatchDagOperandList &makeOperandList(const CodeGenInstruction &I);
+    const GIMatchDagOperandList &makeMIPredicateOperandList();
+    const GIMatchDagOperandList &makeTwoMOPredicateOperandList();
 
-  void print(raw_ostream &OS) const;
+    void print(raw_ostream &OS) const;
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-  LLVM_DUMP_METHOD void dump() const { print(errs()); }
+    LLVM_DUMP_METHOD void dump() const {
+        print(errs());
+    }
 #endif // if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 };
 

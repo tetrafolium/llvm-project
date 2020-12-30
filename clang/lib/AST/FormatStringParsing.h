@@ -24,15 +24,15 @@ class LangOptions;
 
 template <typename T>
 class UpdateOnReturn {
-  T &ValueToUpdate;
-  const T &ValueToCopy;
+    T &ValueToUpdate;
+    const T &ValueToCopy;
 public:
-  UpdateOnReturn(T &valueToUpdate, const T &valueToCopy)
-    : ValueToUpdate(valueToUpdate), ValueToCopy(valueToCopy) {}
+    UpdateOnReturn(T &valueToUpdate, const T &valueToCopy)
+        : ValueToUpdate(valueToUpdate), ValueToCopy(valueToCopy) {}
 
-  ~UpdateOnReturn() {
-    ValueToUpdate = ValueToCopy;
-  }
+    ~UpdateOnReturn() {
+        ValueToUpdate = ValueToCopy;
+    }
 };
 
 namespace analyze_format_string {
@@ -70,24 +70,32 @@ bool ParseUTF8InvalidSpecifier(const char *SpecifierBegin,
                                const char *FmtStrEnd, unsigned &Len);
 
 template <typename T> class SpecifierResult {
-  T FS;
-  const char *Start;
-  bool Stop;
+    T FS;
+    const char *Start;
+    bool Stop;
 public:
-  SpecifierResult(bool stop = false)
-  : Start(nullptr), Stop(stop) {}
-  SpecifierResult(const char *start,
-                  const T &fs)
-  : FS(fs), Start(start), Stop(false) {}
+    SpecifierResult(bool stop = false)
+        : Start(nullptr), Stop(stop) {}
+    SpecifierResult(const char *start,
+                    const T &fs)
+        : FS(fs), Start(start), Stop(false) {}
 
-  const char *getStart() const { return Start; }
-  bool shouldStop() const { return Stop; }
-  bool hasValue() const { return Start != nullptr; }
-  const T &getValue() const {
-    assert(hasValue());
-    return FS;
-  }
-  const T &getValue() { return FS; }
+    const char *getStart() const {
+        return Start;
+    }
+    bool shouldStop() const {
+        return Stop;
+    }
+    bool hasValue() const {
+        return Start != nullptr;
+    }
+    const T &getValue() const {
+        assert(hasValue());
+        return FS;
+    }
+    const T &getValue() {
+        return FS;
+    }
 };
 
 } // end analyze_format_string namespace

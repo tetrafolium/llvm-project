@@ -27,74 +27,76 @@ using namespace diagtool;
 
 namespace {
 struct Entry {
-  llvm::StringRef DiagName;
-  llvm::StringRef Flag;
+    llvm::StringRef DiagName;
+    llvm::StringRef Flag;
 
-  Entry(llvm::StringRef diagN, llvm::StringRef flag)
-    : DiagName(diagN), Flag(flag) {}
+    Entry(llvm::StringRef diagN, llvm::StringRef flag)
+        : DiagName(diagN), Flag(flag) {}
 
-  bool operator<(const Entry &x) const { return DiagName < x.DiagName; }
+    bool operator<(const Entry &x) const {
+        return DiagName < x.DiagName;
+    }
 };
 }
 
 static void printEntries(std::vector<Entry> &entries, llvm::raw_ostream &out) {
-  for (const Entry &E : entries) {
-    out << "  " << E.DiagName;
-    if (!E.Flag.empty())
-      out << " [-W" << E.Flag << "]";
-    out << '\n';
-  }
+    for (const Entry &E : entries) {
+        out << "  " << E.DiagName;
+        if (!E.Flag.empty())
+            out << " [-W" << E.Flag << "]";
+        out << '\n';
+    }
 }
 
 int ListWarnings::run(unsigned int argc, char **argv, llvm::raw_ostream &out) {
-  std::vector<Entry> Flagged, Unflagged;
-  llvm::StringMap<std::vector<unsigned> > flagHistogram;
+    std::vector<Entry> Flagged, Unflagged;
+    llvm::StringMap<std::vector<unsigned> > flagHistogram;
 
-  for (const DiagnosticRecord &DR : getBuiltinDiagnosticsByName()) {
-    const unsigned diagID = DR.DiagID;
+    for (const DiagnosticRecord &DR : getBuiltinDiagnosticsByName()) {
+        const unsigned diagID = DR.DiagID;
 
-    if (DiagnosticIDs::isBuiltinNote(diagID))
-      continue;
+        if (DiagnosticIDs::isBuiltinNote(diagID))
+            continue;
 
-    if (!DiagnosticIDs::isBuiltinWarningOrExtension(diagID))
-      continue;
+        if (!DiagnosticIDs::isBuiltinWarningOrExtension(diagID))
+            continue;
 
-    Entry entry(DR.getName(), DiagnosticIDs::getWarningOptionForDiag(diagID));
+        Entry entry(DR.getName(), DiagnosticIDs::getWarningOptionForDiag(diagID));
 
-    if (entry.Flag.empty())
-      Unflagged.push_back(entry);
-    else {
-      Flagged.push_back(entry);
-      flagHistogram[entry.Flag].push_back(diagID);
+        if (entry.Flag.empty())
+            Unflagged.push_back(entry);
+        else {
+            Flagged.push_back(entry);
+            flagHistogram[entry.Flag].push_back(diagID);
+        }
     }
-  }
 
-  out << "Warnings with flags (" << Flagged.size() << "):\n";
-  printEntries(Flagged, out);
+    out << "Warnings with flags (" << Flagged.size() << "):\n";
+    printEntries(Flagged, out);
 
-  out << "Warnings without flags (" << Unflagged.size() << "):\n";
-  printEntries(Unflagged, out);
+    out << "Warnings without flags (" << Unflagged.size() << "):\n";
+    printEntries(Unflagged, out);
 
-  out << "\nSTATISTICS:\n\n";
+    out << "\nSTATISTICS:\n\n";
 
-  double percentFlagged =
-      ((double)Flagged.size()) / (Flagged.size() + Unflagged.size()) * 100.0;
+    double percentFlagged =
+        ((double)Flagged.size()) / (Flagged.size() + Unflagged.size()) * 100.0;
 
-  out << "  Percentage of warnings with flags: "
-      << llvm::format("%.4g", percentFlagged) << "%\n";
+    out << "  Percentage of warnings with flags: "
+        << llvm::format("%.4g", percentFlagged) << "%\n";
 
-  out << "  Number of unique flags: "
-      << flagHistogram.size() << '\n';
+    out << "  Number of unique flags: "
+        << flagHistogram.size() << '\n';
 
-  double avgDiagsPerFlag = (double) Flagged.size() / flagHistogram.size();
-  out << "  Average number of diagnostics per flag: "
-      << llvm::format("%.4g", avgDiagsPerFlag) << '\n';
+    double avgDiagsPerFlag = (double) Flagged.size() / flagHistogram.size();
+    out << "  Average number of diagnostics per flag: "
+        << llvm::format("%.4g", avgDiagsPerFlag) << '\n';
 
-  out << "  Number in -Wpedantic (not covered by other -W flags): "
-      << flagHistogram["pedantic"].size() << '\n';
+    out << "  Number in -Wpedantic (not covered by other -W flags): "
+        << flagHistogram["pedantic"].size() << '\n';
 
-  out << '\n';
+    out << '\n';
 
-  return 0;
+    return 0;
 }
 

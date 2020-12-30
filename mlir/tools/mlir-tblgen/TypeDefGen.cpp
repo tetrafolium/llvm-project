@@ -27,43 +27,45 @@ using namespace mlir::tblgen;
 
 static llvm::cl::OptionCategory typedefGenCat("Options for -gen-typedef-*");
 static llvm::cl::opt<std::string>
-    selectedDialect("typedefs-dialect",
-                    llvm::cl::desc("Gen types for this dialect"),
-                    llvm::cl::cat(typedefGenCat), llvm::cl::CommaSeparated);
+selectedDialect("typedefs-dialect",
+                llvm::cl::desc("Gen types for this dialect"),
+                llvm::cl::cat(typedefGenCat), llvm::cl::CommaSeparated);
 
 /// Find all the TypeDefs for the specified dialect. If no dialect specified and
 /// can only find one dialect's types, use that.
 static void findAllTypeDefs(const llvm::RecordKeeper &recordKeeper,
                             SmallVectorImpl<TypeDef> &typeDefs) {
-  auto recDefs = recordKeeper.getAllDerivedDefinitions("TypeDef");
-  auto defs = llvm::map_range(
-      recDefs, [&](const llvm::Record *rec) { return TypeDef(rec); });
-  if (defs.empty())
-    return;
-
-  StringRef dialectName;
-  if (selectedDialect.getNumOccurrences() == 0) {
+    auto recDefs = recordKeeper.getAllDerivedDefinitions("TypeDef");
+    auto defs = llvm::map_range(
+    recDefs, [&](const llvm::Record *rec) {
+        return TypeDef(rec);
+    });
     if (defs.empty())
-      return;
+        return;
 
-    llvm::SmallSet<Dialect, 4> dialects;
+    StringRef dialectName;
+    if (selectedDialect.getNumOccurrences() == 0) {
+        if (defs.empty())
+            return;
+
+        llvm::SmallSet<Dialect, 4> dialects;
+        for (const TypeDef &typeDef : defs)
+            dialects.insert(typeDef.getDialect());
+        if (dialects.size() != 1)
+            llvm::PrintFatalError("TypeDefs belonging to more than one dialect. Must "
+                                  "select one via '--typedefs-dialect'");
+
+        dialectName = (*dialects.begin()).getName();
+    } else if (selectedDialect.getNumOccurrences() == 1) {
+        dialectName = selectedDialect.getValue();
+    } else {
+        llvm::PrintFatalError("Cannot select multiple dialects for which to "
+                              "generate types via '--typedefs-dialect'.");
+    }
+
     for (const TypeDef &typeDef : defs)
-      dialects.insert(typeDef.getDialect());
-    if (dialects.size() != 1)
-      llvm::PrintFatalError("TypeDefs belonging to more than one dialect. Must "
-                            "select one via '--typedefs-dialect'");
-
-    dialectName = (*dialects.begin()).getName();
-  } else if (selectedDialect.getNumOccurrences() == 1) {
-    dialectName = selectedDialect.getValue();
-  } else {
-    llvm::PrintFatalError("Cannot select multiple dialects for which to "
-                          "generate types via '--typedefs-dialect'.");
-  }
-
-  for (const TypeDef &typeDef : defs)
-    if (typeDef.getDialect().getName().equals(dialectName))
-      typeDefs.push_back(typeDef);
+        if (typeDef.getDialect().getName().equals(dialectName))
+            typeDefs.push_back(typeDef);
 }
 
 namespace {
@@ -72,59 +74,63 @@ namespace {
 /// list of parameters in the format by 'EmitFormat'.
 class TypeParamCommaFormatter : public llvm::detail::format_adapter {
 public:
-  /// Choose the output format
-  enum EmitFormat {
-    /// Emit "parameter1Type parameter1Name, parameter2Type parameter2Name,
-    /// [...]".
-    TypeNamePairs,
+    /// Choose the output format
+    enum EmitFormat {
+        /// Emit "parameter1Type parameter1Name, parameter2Type parameter2Name,
+        /// [...]".
+        TypeNamePairs,
 
-    /// Emit "parameter1(parameter1), parameter2(parameter2), [...]".
-    TypeNameInitializer,
+        /// Emit "parameter1(parameter1), parameter2(parameter2), [...]".
+        TypeNameInitializer,
 
-    /// Emit "param1Name, param2Name, [...]".
-    JustParams,
-  };
+        /// Emit "param1Name, param2Name, [...]".
+        JustParams,
+    };
 
-  TypeParamCommaFormatter(EmitFormat emitFormat, ArrayRef<TypeParameter> params,
-                          bool prependComma = true)
-      : emitFormat(emitFormat), params(params), prependComma(prependComma) {}
+    TypeParamCommaFormatter(EmitFormat emitFormat, ArrayRef<TypeParameter> params,
+                            bool prependComma = true)
+        : emitFormat(emitFormat), params(params), prependComma(prependComma) {}
 
-  /// llvm::formatv will call this function when using an instance as a
-  /// replacement value.
-  void format(raw_ostream &os, StringRef options) override {
-    if (!params.empty() && prependComma)
-      os << ", ";
+    /// llvm::formatv will call this function when using an instance as a
+    /// replacement value.
+    void format(raw_ostream &os, StringRef options) override {
+        if (!params.empty() && prependComma)
+            os << ", ";
 
-    switch (emitFormat) {
-    case EmitFormat::TypeNamePairs:
-      interleaveComma(params, os,
-                      [&](const TypeParameter &p) { emitTypeNamePair(p, os); });
-      break;
-    case EmitFormat::TypeNameInitializer:
-      interleaveComma(params, os, [&](const TypeParameter &p) {
-        emitTypeNameInitializer(p, os);
-      });
-      break;
-    case EmitFormat::JustParams:
-      interleaveComma(params, os,
-                      [&](const TypeParameter &p) { os << p.getName(); });
-      break;
+        switch (emitFormat) {
+        case EmitFormat::TypeNamePairs:
+            interleaveComma(params, os,
+            [&](const TypeParameter &p) {
+                emitTypeNamePair(p, os);
+            });
+            break;
+        case EmitFormat::TypeNameInitializer:
+            interleaveComma(params, os, [&](const TypeParameter &p) {
+                emitTypeNameInitializer(p, os);
+            });
+            break;
+        case EmitFormat::JustParams:
+            interleaveComma(params, os,
+            [&](const TypeParameter &p) {
+                os << p.getName();
+            });
+            break;
+        }
     }
-  }
 
 private:
-  // Emit "paramType paramName".
-  static void emitTypeNamePair(const TypeParameter &param, raw_ostream &os) {
-    os << param.getCppType() << " " << param.getName();
-  }
-  // Emit "paramName(paramName)"
-  void emitTypeNameInitializer(const TypeParameter &param, raw_ostream &os) {
-    os << param.getName() << "(" << param.getName() << ")";
-  }
+    // Emit "paramType paramName".
+    static void emitTypeNamePair(const TypeParameter &param, raw_ostream &os) {
+        os << param.getCppType() << " " << param.getName();
+    }
+    // Emit "paramName(paramName)"
+    void emitTypeNameInitializer(const TypeParameter &param, raw_ostream &os) {
+        os << param.getName() << "(" << param.getName() << ")";
+    }
 
-  EmitFormat emitFormat;
-  ArrayRef<TypeParameter> params;
-  bool prependComma;
+    EmitFormat emitFormat;
+    ArrayRef<TypeParameter> params;
+    bool prependComma;
 };
 
 } // end anonymous namespace

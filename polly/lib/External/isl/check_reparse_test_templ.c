@@ -14,15 +14,15 @@
  */
 static isl_stat FN(check,TESTS)(isl_ctx *ctx)
 {
-	int i;
+    int i;
 
-	for (i = 0; i < ARRAY_SIZE(TESTS); ++i) {
-		TYPE *obj;
+    for (i = 0; i < ARRAY_SIZE(TESTS); ++i) {
+        TYPE *obj;
 
-		obj = FN(TYPE,read_from_str)(ctx, TESTS[i]);
-		if (FN(check_reparse,BASE)(ctx, obj) < 0)
-			return isl_stat_error;
-	}
+        obj = FN(TYPE,read_from_str)(ctx, TESTS[i]);
+        if (FN(check_reparse,BASE)(ctx, obj) < 0)
+            return isl_stat_error;
+    }
 
-	return isl_stat_ok;
+    return isl_stat_ok;
 }

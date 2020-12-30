@@ -21,10 +21,10 @@ namespace fuchsia {
 /// http://clang.llvm.org/extra/clang-tidy/checks/fuchsia-default-parameters.html
 class DefaultArgumentsDeclarationsCheck : public ClangTidyCheck {
 public:
-  DefaultArgumentsDeclarationsCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    DefaultArgumentsDeclarationsCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace fuchsia

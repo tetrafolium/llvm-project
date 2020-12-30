@@ -16,38 +16,40 @@ namespace codeview {
 
 class FunctionId {
 public:
-  FunctionId() : Index(0) {}
+    FunctionId() : Index(0) {}
 
-  explicit FunctionId(uint32_t Index) : Index(Index) {}
+    explicit FunctionId(uint32_t Index) : Index(Index) {}
 
-  uint32_t getIndex() const { return Index; }
+    uint32_t getIndex() const {
+        return Index;
+    }
 
 private:
-  uint32_t Index;
+    uint32_t Index;
 };
 
 inline bool operator==(const FunctionId &A, const FunctionId &B) {
-  return A.getIndex() == B.getIndex();
+    return A.getIndex() == B.getIndex();
 }
 
 inline bool operator!=(const FunctionId &A, const FunctionId &B) {
-  return A.getIndex() != B.getIndex();
+    return A.getIndex() != B.getIndex();
 }
 
 inline bool operator<(const FunctionId &A, const FunctionId &B) {
-  return A.getIndex() < B.getIndex();
+    return A.getIndex() < B.getIndex();
 }
 
 inline bool operator<=(const FunctionId &A, const FunctionId &B) {
-  return A.getIndex() <= B.getIndex();
+    return A.getIndex() <= B.getIndex();
 }
 
 inline bool operator>(const FunctionId &A, const FunctionId &B) {
-  return A.getIndex() > B.getIndex();
+    return A.getIndex() > B.getIndex();
 }
 
 inline bool operator>=(const FunctionId &A, const FunctionId &B) {
-  return A.getIndex() >= B.getIndex();
+    return A.getIndex() >= B.getIndex();
 }
 }
 }

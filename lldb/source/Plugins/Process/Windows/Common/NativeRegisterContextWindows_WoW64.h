@@ -21,54 +21,54 @@ class NativeThreadWindows;
 
 class NativeRegisterContextWindows_WoW64 : public NativeRegisterContextWindows {
 public:
-  NativeRegisterContextWindows_WoW64(const ArchSpec &target_arch,
-                                     NativeThreadProtocol &native_thread);
+    NativeRegisterContextWindows_WoW64(const ArchSpec &target_arch,
+                                       NativeThreadProtocol &native_thread);
 
-  uint32_t GetRegisterSetCount() const override;
+    uint32_t GetRegisterSetCount() const override;
 
-  const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
+    const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
 
-  Status ReadRegister(const RegisterInfo *reg_info,
-                      RegisterValue &reg_value) override;
+    Status ReadRegister(const RegisterInfo *reg_info,
+                        RegisterValue &reg_value) override;
 
-  Status WriteRegister(const RegisterInfo *reg_info,
-                       const RegisterValue &reg_value) override;
+    Status WriteRegister(const RegisterInfo *reg_info,
+                         const RegisterValue &reg_value) override;
 
-  Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+    Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-  Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+    Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-  Status IsWatchpointHit(uint32_t wp_index, bool &is_hit) override;
+    Status IsWatchpointHit(uint32_t wp_index, bool &is_hit) override;
 
-  Status GetWatchpointHitIndex(uint32_t &wp_index,
-                               lldb::addr_t trap_addr) override;
+    Status GetWatchpointHitIndex(uint32_t &wp_index,
+                                 lldb::addr_t trap_addr) override;
 
-  Status IsWatchpointVacant(uint32_t wp_index, bool &is_vacant) override;
+    Status IsWatchpointVacant(uint32_t wp_index, bool &is_vacant) override;
 
-  bool ClearHardwareWatchpoint(uint32_t wp_index) override;
+    bool ClearHardwareWatchpoint(uint32_t wp_index) override;
 
-  Status ClearAllHardwareWatchpoints() override;
+    Status ClearAllHardwareWatchpoints() override;
 
-  uint32_t SetHardwareWatchpoint(lldb::addr_t addr, size_t size,
-                                 uint32_t watch_flags) override;
+    uint32_t SetHardwareWatchpoint(lldb::addr_t addr, size_t size,
+                                   uint32_t watch_flags) override;
 
-  lldb::addr_t GetWatchpointAddress(uint32_t wp_index) override;
+    lldb::addr_t GetWatchpointAddress(uint32_t wp_index) override;
 
-  uint32_t NumSupportedHardwareWatchpoints() override;
+    uint32_t NumSupportedHardwareWatchpoints() override;
 
 protected:
-  Status GPRRead(const uint32_t reg, RegisterValue &reg_value);
-  Status GPRWrite(const uint32_t reg, const RegisterValue &reg_value);
+    Status GPRRead(const uint32_t reg, RegisterValue &reg_value);
+    Status GPRWrite(const uint32_t reg, const RegisterValue &reg_value);
 
-  Status DRRead(const uint32_t reg, RegisterValue &reg_value);
-  Status DRWrite(const uint32_t reg, const RegisterValue &reg_value);
+    Status DRRead(const uint32_t reg, RegisterValue &reg_value);
+    Status DRWrite(const uint32_t reg, const RegisterValue &reg_value);
 
 private:
-  Status ApplyHardwareBreakpoint(uint32_t wp_index, lldb::addr_t addr,
-                                 size_t size, uint32_t flags);
+    Status ApplyHardwareBreakpoint(uint32_t wp_index, lldb::addr_t addr,
+                                   size_t size, uint32_t flags);
 
-  bool IsGPR(uint32_t reg_index) const;
-  bool IsDR(uint32_t reg_index) const;
+    bool IsGPR(uint32_t reg_index) const;
+    bool IsDR(uint32_t reg_index) const;
 };
 
 } // namespace lldb_private

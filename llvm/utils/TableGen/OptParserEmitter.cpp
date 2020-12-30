@@ -21,68 +21,68 @@
 using namespace llvm;
 
 static const std::string getOptionName(const Record &R) {
-  // Use the record name unless EnumName is defined.
-  if (isa<UnsetInit>(R.getValueInit("EnumName")))
-    return std::string(R.getName());
+    // Use the record name unless EnumName is defined.
+    if (isa<UnsetInit>(R.getValueInit("EnumName")))
+        return std::string(R.getName());
 
-  return std::string(R.getValueAsString("EnumName"));
+    return std::string(R.getValueAsString("EnumName"));
 }
 
 static raw_ostream &write_cstring(raw_ostream &OS, llvm::StringRef Str) {
-  OS << '"';
-  OS.write_escaped(Str);
-  OS << '"';
-  return OS;
+    OS << '"';
+    OS.write_escaped(Str);
+    OS << '"';
+    return OS;
 }
 
 static const std::string getOptionSpelling(const Record &R,
-                                           size_t &PrefixLength) {
-  std::vector<StringRef> Prefixes = R.getValueAsListOfStrings("Prefixes");
-  StringRef Name = R.getValueAsString("Name");
+        size_t &PrefixLength) {
+    std::vector<StringRef> Prefixes = R.getValueAsListOfStrings("Prefixes");
+    StringRef Name = R.getValueAsString("Name");
 
-  if (Prefixes.empty()) {
-    PrefixLength = 0;
-    return Name.str();
-  }
+    if (Prefixes.empty()) {
+        PrefixLength = 0;
+        return Name.str();
+    }
 
-  PrefixLength = Prefixes[0].size();
-  return (Twine(Prefixes[0]) + Twine(Name)).str();
+    PrefixLength = Prefixes[0].size();
+    return (Twine(Prefixes[0]) + Twine(Name)).str();
 }
 
 static const std::string getOptionSpelling(const Record &R) {
-  size_t PrefixLength;
-  return getOptionSpelling(R, PrefixLength);
+    size_t PrefixLength;
+    return getOptionSpelling(R, PrefixLength);
 }
 
 static void emitNameUsingSpelling(raw_ostream &OS, const Record &R) {
-  size_t PrefixLength;
-  OS << "&";
-  write_cstring(OS, StringRef(getOptionSpelling(R, PrefixLength)));
-  OS << "[" << PrefixLength << "]";
+    size_t PrefixLength;
+    OS << "&";
+    write_cstring(OS, StringRef(getOptionSpelling(R, PrefixLength)));
+    OS << "[" << PrefixLength << "]";
 }
 
 class MarshallingInfo {
 public:
-  static constexpr const char *MacroName = "OPTION_WITH_MARSHALLING";
-  const Record &R;
-  bool ShouldAlwaysEmit;
-  StringRef KeyPath;
-  StringRef DefaultValue;
-  StringRef NormalizedValuesScope;
-  StringRef ImpliedCheck;
-  StringRef ImpliedValue;
-  StringRef Normalizer;
-  StringRef Denormalizer;
-  StringRef ValueMerger;
-  StringRef ValueExtractor;
-  int TableIndex = -1;
-  std::vector<StringRef> Values;
-  std::vector<StringRef> NormalizedValues;
-  std::string ValueTableName;
+    static constexpr const char *MacroName = "OPTION_WITH_MARSHALLING";
+    const Record &R;
+    bool ShouldAlwaysEmit;
+    StringRef KeyPath;
+    StringRef DefaultValue;
+    StringRef NormalizedValuesScope;
+    StringRef ImpliedCheck;
+    StringRef ImpliedValue;
+    StringRef Normalizer;
+    StringRef Denormalizer;
+    StringRef ValueMerger;
+    StringRef ValueExtractor;
+    int TableIndex = -1;
+    std::vector<StringRef> Values;
+    std::vector<StringRef> NormalizedValues;
+    std::string ValueTableName;
 
-  static size_t NextTableIndex;
+    static size_t NextTableIndex;
 
-  static constexpr const char *ValueTablePreamble = R"(
+    static constexpr const char *ValueTablePreamble = R"(
 struct SimpleEnumValue {
   const char *Name;
   unsigned Value;
@@ -442,38 +442,38 @@ void EmitOptParser(RecordKeeper &Records, raw_ostream &OS) {
   for (auto ValueTableName : ValueTableNames)
     OS << "{" << ValueTableName << ", sizeof(" << ValueTableName
        << ") / sizeof(SimpleEnumValue)"
-       << "},\n";
-  OS << "};\n";
-  OS << "static const unsigned SimpleEnumValueTablesSize = "
-        "sizeof(SimpleEnumValueTables) / sizeof(SimpleEnumValueTable);\n";
+            << "},\n";
+    OS << "};\n";
+    OS << "static const unsigned SimpleEnumValueTablesSize = "
+       "sizeof(SimpleEnumValueTables) / sizeof(SimpleEnumValueTable);\n";
 
-  OS << "#endif // SIMPLE_ENUM_VALUE_TABLE\n";
-  OS << "\n";
-
-  OS << "\n";
-  OS << "#ifdef OPTTABLE_ARG_INIT\n";
-  OS << "//////////\n";
-  OS << "// Option Values\n\n";
-  for (const Record &R : llvm::make_pointee_range(Opts)) {
-    if (isa<UnsetInit>(R.getValueInit("ValuesCode")))
-      continue;
-    OS << "{\n";
-    OS << "bool ValuesWereAdded;\n";
-    OS << R.getValueAsString("ValuesCode");
+    OS << "#endif // SIMPLE_ENUM_VALUE_TABLE\n";
     OS << "\n";
-    for (StringRef Prefix : R.getValueAsListOfStrings("Prefixes")) {
-      OS << "ValuesWereAdded = Opt.addValues(";
-      std::string S(Prefix);
-      S += R.getValueAsString("Name");
-      write_cstring(OS, S);
-      OS << ", Values);\n";
-      OS << "(void)ValuesWereAdded;\n";
-      OS << "assert(ValuesWereAdded && \"Couldn't add values to "
-            "OptTable!\");\n";
+
+    OS << "\n";
+    OS << "#ifdef OPTTABLE_ARG_INIT\n";
+    OS << "//////////\n";
+    OS << "// Option Values\n\n";
+    for (const Record &R : llvm::make_pointee_range(Opts)) {
+        if (isa<UnsetInit>(R.getValueInit("ValuesCode")))
+            continue;
+        OS << "{\n";
+        OS << "bool ValuesWereAdded;\n";
+        OS << R.getValueAsString("ValuesCode");
+        OS << "\n";
+        for (StringRef Prefix : R.getValueAsListOfStrings("Prefixes")) {
+            OS << "ValuesWereAdded = Opt.addValues(";
+            std::string S(Prefix);
+            S += R.getValueAsString("Name");
+            write_cstring(OS, S);
+            OS << ", Values);\n";
+            OS << "(void)ValuesWereAdded;\n";
+            OS << "assert(ValuesWereAdded && \"Couldn't add values to "
+               "OptTable!\");\n";
+        }
+        OS << "}\n";
     }
-    OS << "}\n";
-  }
-  OS << "\n";
-  OS << "#endif // OPTTABLE_ARG_INIT\n";
+    OS << "\n";
+    OS << "#endif // OPTTABLE_ARG_INIT\n";
 }
 } // end namespace llvm

@@ -63,12 +63,12 @@ using namespace llvm;
   FMA3GROUP_SCALAR(Name, Attrs)
 
 static const X86InstrFMA3Group Groups[] = {
-  FMA3GROUP_FULL(VFMADD, 0)
-  FMA3GROUP_PACKED(VFMADDSUB, 0)
-  FMA3GROUP_FULL(VFMSUB, 0)
-  FMA3GROUP_PACKED(VFMSUBADD, 0)
-  FMA3GROUP_FULL(VFNMADD, 0)
-  FMA3GROUP_FULL(VFNMSUB, 0)
+    FMA3GROUP_FULL(VFMADD, 0)
+    FMA3GROUP_PACKED(VFMADDSUB, 0)
+    FMA3GROUP_FULL(VFMSUB, 0)
+    FMA3GROUP_PACKED(VFMSUBADD, 0)
+    FMA3GROUP_FULL(VFNMADD, 0)
+    FMA3GROUP_FULL(VFNMSUB, 0)
 };
 
 #define FMA3GROUP_PACKED_AVX512_WIDTHS(Name, Type, Suf, Attrs) \
@@ -91,35 +91,35 @@ static const X86InstrFMA3Group Groups[] = {
   FMA3GROUP_MASKED(Name, SSZ##Suf##_Int, Attrs)
 
 static const X86InstrFMA3Group BroadcastGroups[] = {
-  FMA3GROUP_PACKED_AVX512(VFMADD, mb, 0)
-  FMA3GROUP_PACKED_AVX512(VFMADDSUB, mb, 0)
-  FMA3GROUP_PACKED_AVX512(VFMSUB, mb, 0)
-  FMA3GROUP_PACKED_AVX512(VFMSUBADD, mb, 0)
-  FMA3GROUP_PACKED_AVX512(VFNMADD, mb, 0)
-  FMA3GROUP_PACKED_AVX512(VFNMSUB, mb, 0)
+    FMA3GROUP_PACKED_AVX512(VFMADD, mb, 0)
+    FMA3GROUP_PACKED_AVX512(VFMADDSUB, mb, 0)
+    FMA3GROUP_PACKED_AVX512(VFMSUB, mb, 0)
+    FMA3GROUP_PACKED_AVX512(VFMSUBADD, mb, 0)
+    FMA3GROUP_PACKED_AVX512(VFNMADD, mb, 0)
+    FMA3GROUP_PACKED_AVX512(VFNMSUB, mb, 0)
 };
 
 static const X86InstrFMA3Group RoundGroups[] = {
-  FMA3GROUP_PACKED_AVX512_ROUND(VFMADD, rb, 0)
-  FMA3GROUP_SCALAR_AVX512_ROUND(VFMADD, rb, X86InstrFMA3Group::Intrinsic)
-  FMA3GROUP_PACKED_AVX512_ROUND(VFMADDSUB, rb, 0)
-  FMA3GROUP_PACKED_AVX512_ROUND(VFMSUB, rb, 0)
-  FMA3GROUP_SCALAR_AVX512_ROUND(VFMSUB, rb, X86InstrFMA3Group::Intrinsic)
-  FMA3GROUP_PACKED_AVX512_ROUND(VFMSUBADD, rb, 0)
-  FMA3GROUP_PACKED_AVX512_ROUND(VFNMADD, rb, 0)
-  FMA3GROUP_SCALAR_AVX512_ROUND(VFNMADD, rb, X86InstrFMA3Group::Intrinsic)
-  FMA3GROUP_PACKED_AVX512_ROUND(VFNMSUB, rb, 0)
-  FMA3GROUP_SCALAR_AVX512_ROUND(VFNMSUB, rb, X86InstrFMA3Group::Intrinsic)
+    FMA3GROUP_PACKED_AVX512_ROUND(VFMADD, rb, 0)
+    FMA3GROUP_SCALAR_AVX512_ROUND(VFMADD, rb, X86InstrFMA3Group::Intrinsic)
+    FMA3GROUP_PACKED_AVX512_ROUND(VFMADDSUB, rb, 0)
+    FMA3GROUP_PACKED_AVX512_ROUND(VFMSUB, rb, 0)
+    FMA3GROUP_SCALAR_AVX512_ROUND(VFMSUB, rb, X86InstrFMA3Group::Intrinsic)
+    FMA3GROUP_PACKED_AVX512_ROUND(VFMSUBADD, rb, 0)
+    FMA3GROUP_PACKED_AVX512_ROUND(VFNMADD, rb, 0)
+    FMA3GROUP_SCALAR_AVX512_ROUND(VFNMADD, rb, X86InstrFMA3Group::Intrinsic)
+    FMA3GROUP_PACKED_AVX512_ROUND(VFNMSUB, rb, 0)
+    FMA3GROUP_SCALAR_AVX512_ROUND(VFNMSUB, rb, X86InstrFMA3Group::Intrinsic)
 };
 
 static void verifyTables() {
 #ifndef NDEBUG
-  static std::atomic<bool> TableChecked(false);
-  if (!TableChecked.load(std::memory_order_relaxed)) {
-    assert(llvm::is_sorted(Groups) && llvm::is_sorted(RoundGroups) &&
-           llvm::is_sorted(BroadcastGroups) && "FMA3 tables not sorted!");
-    TableChecked.store(true, std::memory_order_relaxed);
-  }
+    static std::atomic<bool> TableChecked(false);
+    if (!TableChecked.load(std::memory_order_relaxed)) {
+        assert(llvm::is_sorted(Groups) && llvm::is_sorted(RoundGroups) &&
+               llvm::is_sorted(BroadcastGroups) && "FMA3 tables not sorted!");
+        TableChecked.store(true, std::memory_order_relaxed);
+    }
 #endif
 }
 
@@ -128,37 +128,37 @@ static void verifyTables() {
 /// and not included into any FMA3 group, then nullptr is returned.
 const X86InstrFMA3Group *llvm::getFMA3Group(unsigned Opcode, uint64_t TSFlags) {
 
-  // FMA3 instructions have a well defined encoding pattern we can exploit.
-  uint8_t BaseOpcode = X86II::getBaseOpcodeFor(TSFlags);
-  bool IsFMA3 = ((TSFlags & X86II::EncodingMask) == X86II::VEX ||
-                 (TSFlags & X86II::EncodingMask) == X86II::EVEX) &&
-                (TSFlags & X86II::OpMapMask) == X86II::T8 &&
-                (TSFlags & X86II::OpPrefixMask) == X86II::PD &&
-                ((BaseOpcode >= 0x96 && BaseOpcode <= 0x9F) ||
-                 (BaseOpcode >= 0xA6 && BaseOpcode <= 0xAF) ||
-                 (BaseOpcode >= 0xB6 && BaseOpcode <= 0xBF));
-  if (!IsFMA3)
-    return nullptr;
+    // FMA3 instructions have a well defined encoding pattern we can exploit.
+    uint8_t BaseOpcode = X86II::getBaseOpcodeFor(TSFlags);
+    bool IsFMA3 = ((TSFlags & X86II::EncodingMask) == X86II::VEX ||
+                   (TSFlags & X86II::EncodingMask) == X86II::EVEX) &&
+                  (TSFlags & X86II::OpMapMask) == X86II::T8 &&
+                  (TSFlags & X86II::OpPrefixMask) == X86II::PD &&
+                  ((BaseOpcode >= 0x96 && BaseOpcode <= 0x9F) ||
+                   (BaseOpcode >= 0xA6 && BaseOpcode <= 0xAF) ||
+                   (BaseOpcode >= 0xB6 && BaseOpcode <= 0xBF));
+    if (!IsFMA3)
+        return nullptr;
 
-  verifyTables();
+    verifyTables();
 
-  ArrayRef<X86InstrFMA3Group> Table;
-  if (TSFlags & X86II::EVEX_RC)
-    Table = makeArrayRef(RoundGroups);
-  else if (TSFlags & X86II::EVEX_B)
-    Table = makeArrayRef(BroadcastGroups);
-  else
-    Table = makeArrayRef(Groups);
+    ArrayRef<X86InstrFMA3Group> Table;
+    if (TSFlags & X86II::EVEX_RC)
+        Table = makeArrayRef(RoundGroups);
+    else if (TSFlags & X86II::EVEX_B)
+        Table = makeArrayRef(BroadcastGroups);
+    else
+        Table = makeArrayRef(Groups);
 
-  // FMA 132 instructions have an opcode of 0x96-0x9F
-  // FMA 213 instructions have an opcode of 0xA6-0xAF
-  // FMA 231 instructions have an opcode of 0xB6-0xBF
-  unsigned FormIndex = ((BaseOpcode - 0x90) >> 4) & 0x3;
+    // FMA 132 instructions have an opcode of 0x96-0x9F
+    // FMA 213 instructions have an opcode of 0xA6-0xAF
+    // FMA 231 instructions have an opcode of 0xB6-0xBF
+    unsigned FormIndex = ((BaseOpcode - 0x90) >> 4) & 0x3;
 
-  auto I = partition_point(Table, [=](const X86InstrFMA3Group &Group) {
-    return Group.Opcodes[FormIndex] < Opcode;
-  });
-  assert(I != Table.end() && I->Opcodes[FormIndex] == Opcode &&
-         "Couldn't find FMA3 opcode!");
-  return I;
+    auto I = partition_point(Table, [=](const X86InstrFMA3Group &Group) {
+        return Group.Opcodes[FormIndex] < Opcode;
+    });
+    assert(I != Table.end() && I->Opcodes[FormIndex] == Opcode &&
+           "Couldn't find FMA3 opcode!");
+    return I;
 }

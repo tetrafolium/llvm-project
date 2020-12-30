@@ -13,8 +13,8 @@ _CLC_DEFINE_RELATIONAL_BINARY(int, isunordered, __builtin_isunordered, float, fl
 // The scalar version of isunordered(double, double) returns an int, but the vector versions
 // return long.
 
-_CLC_DEF _CLC_OVERLOAD int isunordered(double x, double y){
-	return __builtin_isunordered(x, y);
+_CLC_DEF _CLC_OVERLOAD int isunordered(double x, double y) {
+    return __builtin_isunordered(x, y);
 }
 
 _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(long, isunordered, double, double)
@@ -27,8 +27,8 @@ _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(long, isunordered, double, double)
 // The scalar version of isunordered(half, half) returns an int, but the vector versions
 // return short.
 
-_CLC_DEF _CLC_OVERLOAD int isunordered(half x, half y){
-	return __builtin_isunordered(x, y);
+_CLC_DEF _CLC_OVERLOAD int isunordered(half x, half y) {
+    return __builtin_isunordered(x, y);
 }
 
 _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(short, isunordered, half, half)

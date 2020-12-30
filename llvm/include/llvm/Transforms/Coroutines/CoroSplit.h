@@ -22,13 +22,15 @@
 namespace llvm {
 
 struct CoroSplitPass : PassInfoMixin<CoroSplitPass> {
-  CoroSplitPass(bool ReuseFrameSlot = false) : ReuseFrameSlot(ReuseFrameSlot) {}
+    CoroSplitPass(bool ReuseFrameSlot = false) : ReuseFrameSlot(ReuseFrameSlot) {}
 
-  PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
-                        LazyCallGraph &CG, CGSCCUpdateResult &UR);
-  static bool isRequired() { return true; }
+    PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
+                          LazyCallGraph &CG, CGSCCUpdateResult &UR);
+    static bool isRequired() {
+        return true;
+    }
 
-  bool ReuseFrameSlot;
+    bool ReuseFrameSlot;
 };
 } // end namespace llvm
 

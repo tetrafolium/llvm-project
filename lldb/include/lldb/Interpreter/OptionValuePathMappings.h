@@ -16,43 +16,51 @@ namespace lldb_private {
 
 class OptionValuePathMappings : public OptionValue {
 public:
-  OptionValuePathMappings(bool notify_changes)
-      : OptionValue(), m_path_mappings(), m_notify_changes(notify_changes) {}
+    OptionValuePathMappings(bool notify_changes)
+        : OptionValue(), m_path_mappings(), m_notify_changes(notify_changes) {}
 
-  ~OptionValuePathMappings() override {}
+    ~OptionValuePathMappings() override {}
 
-  // Virtual subclass pure virtual overrides
+    // Virtual subclass pure virtual overrides
 
-  OptionValue::Type GetType() const override { return eTypePathMap; }
+    OptionValue::Type GetType() const override {
+        return eTypePathMap;
+    }
 
-  void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
-                 uint32_t dump_mask) override;
+    void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
+                   uint32_t dump_mask) override;
 
-  Status
-  SetValueFromString(llvm::StringRef value,
-                     VarSetOperationType op = eVarSetOperationAssign) override;
-  Status
-  SetValueFromString(const char *,
-                     VarSetOperationType = eVarSetOperationAssign) = delete;
+    Status
+    SetValueFromString(llvm::StringRef value,
+                       VarSetOperationType op = eVarSetOperationAssign) override;
+    Status
+    SetValueFromString(const char *,
+                       VarSetOperationType = eVarSetOperationAssign) = delete;
 
-  void Clear() override {
-    m_path_mappings.Clear(m_notify_changes);
-    m_value_was_set = false;
-  }
+    void Clear() override {
+        m_path_mappings.Clear(m_notify_changes);
+        m_value_was_set = false;
+    }
 
-  lldb::OptionValueSP DeepCopy() const override;
+    lldb::OptionValueSP DeepCopy() const override;
 
-  bool IsAggregateValue() const override { return true; }
+    bool IsAggregateValue() const override {
+        return true;
+    }
 
-  // Subclass specific functions
+    // Subclass specific functions
 
-  PathMappingList &GetCurrentValue() { return m_path_mappings; }
+    PathMappingList &GetCurrentValue() {
+        return m_path_mappings;
+    }
 
-  const PathMappingList &GetCurrentValue() const { return m_path_mappings; }
+    const PathMappingList &GetCurrentValue() const {
+        return m_path_mappings;
+    }
 
 protected:
-  PathMappingList m_path_mappings;
-  bool m_notify_changes;
+    PathMappingList m_path_mappings;
+    bool m_notify_changes;
 };
 
 } // namespace lldb_private

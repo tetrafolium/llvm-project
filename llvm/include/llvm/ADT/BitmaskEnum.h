@@ -71,51 +71,51 @@ struct is_bitmask_enum : std::false_type {};
 
 template <typename E>
 struct is_bitmask_enum<
-    E, std::enable_if_t<sizeof(E::LLVM_BITMASK_LARGEST_ENUMERATOR) >= 0>>
-    : std::true_type {};
+E, std::enable_if_t<sizeof(E::LLVM_BITMASK_LARGEST_ENUMERATOR) >= 0>>
+: std::true_type {};
 namespace BitmaskEnumDetail {
 
 /// Get a bitmask with 1s in all places up to the high-order bit of E's largest
 /// value.
 template <typename E> std::underlying_type_t<E> Mask() {
-  // On overflow, NextPowerOf2 returns zero with the type uint64_t, so
-  // subtracting 1 gives us the mask with all bits set, like we want.
-  return NextPowerOf2(static_cast<std::underlying_type_t<E>>(
-             E::LLVM_BITMASK_LARGEST_ENUMERATOR)) -
-         1;
+    // On overflow, NextPowerOf2 returns zero with the type uint64_t, so
+    // subtracting 1 gives us the mask with all bits set, like we want.
+    return NextPowerOf2(static_cast<std::underlying_type_t<E>>(
+                            E::LLVM_BITMASK_LARGEST_ENUMERATOR)) -
+           1;
 }
 
 /// Check that Val is in range for E, and return Val cast to E's underlying
 /// type.
 template <typename E> std::underlying_type_t<E> Underlying(E Val) {
-  auto U = static_cast<std::underlying_type_t<E>>(Val);
-  assert(U >= 0 && "Negative enum values are not allowed.");
-  assert(U <= Mask<E>() && "Enum value too large (or largest val too small?)");
-  return U;
+    auto U = static_cast<std::underlying_type_t<E>>(Val);
+    assert(U >= 0 && "Negative enum values are not allowed.");
+    assert(U <= Mask<E>() && "Enum value too large (or largest val too small?)");
+    return U;
 }
 
 constexpr unsigned bitWidth(uint64_t Value) {
-  return Value ? 1 + bitWidth(Value >> 1) : 0;
+    return Value ? 1 + bitWidth(Value >> 1) : 0;
 }
 
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 E operator~(E Val) {
-  return static_cast<E>(~Underlying(Val) & Mask<E>());
+    return static_cast<E>(~Underlying(Val) & Mask<E>());
 }
 
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 E operator|(E LHS, E RHS) {
-  return static_cast<E>(Underlying(LHS) | Underlying(RHS));
+    return static_cast<E>(Underlying(LHS) | Underlying(RHS));
 }
 
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 E operator&(E LHS, E RHS) {
-  return static_cast<E>(Underlying(LHS) & Underlying(RHS));
+    return static_cast<E>(Underlying(LHS) & Underlying(RHS));
 }
 
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 E operator^(E LHS, E RHS) {
-  return static_cast<E>(Underlying(LHS) ^ Underlying(RHS));
+    return static_cast<E>(Underlying(LHS) ^ Underlying(RHS));
 }
 
 // |=, &=, and ^= return a reference to LHS, to match the behavior of the
@@ -123,20 +123,20 @@ E operator^(E LHS, E RHS) {
 
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 E &operator|=(E &LHS, E RHS) {
-  LHS = LHS | RHS;
-  return LHS;
+    LHS = LHS | RHS;
+    return LHS;
 }
 
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 E &operator&=(E &LHS, E RHS) {
-  LHS = LHS & RHS;
-  return LHS;
+    LHS = LHS & RHS;
+    return LHS;
 }
 
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 E &operator^=(E &LHS, E RHS) {
-  LHS = LHS ^ RHS;
-  return LHS;
+    LHS = LHS ^ RHS;
+    return LHS;
 }
 
 } // namespace BitmaskEnumDetail
@@ -146,7 +146,7 @@ LLVM_ENABLE_BITMASK_ENUMS_IN_NAMESPACE();
 template <typename E, typename = std::enable_if_t<is_bitmask_enum<E>::value>>
 constexpr unsigned BitWidth = BitmaskEnumDetail::bitWidth(uint64_t{
     static_cast<std::underlying_type_t<E>>(
-        E::LLVM_BITMASK_LARGEST_ENUMERATOR)});
+                                            E::LLVM_BITMASK_LARGEST_ENUMERATOR)});
 
 } // namespace llvm
 

@@ -4,13 +4,13 @@
 #define LIST(EL) xLIST(EL)
 
 struct LIST(EL) {
-	int ref;
-	isl_ctx *ctx;
+    int ref;
+    isl_ctx *ctx;
 
-	int n;
+    int n;
 
-	size_t size;
-	struct EL *p[1];
+    size_t size;
+    struct EL *p[1];
 };
 
 __isl_give LIST(EL) *FN(LIST(EL),dup)(__isl_keep LIST(EL) *list);

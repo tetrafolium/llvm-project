@@ -43,33 +43,33 @@ uint32_t isl_hash_mem(uint32_t hash, const void *p, size_t len);
 
 struct isl_hash_table_entry
 {
-	uint32_t  hash;
-	void     *data;
+    uint32_t  hash;
+    void     *data;
 };
 
 struct isl_hash_table {
-	int    bits;
-	int    n;
-	struct isl_hash_table_entry *entries;
+    int    bits;
+    int    n;
+    struct isl_hash_table_entry *entries;
 };
 
 struct isl_hash_table *isl_hash_table_alloc(struct isl_ctx *ctx, int min_size);
 void isl_hash_table_free(struct isl_ctx *ctx, struct isl_hash_table *table);
 
 int isl_hash_table_init(struct isl_ctx *ctx, struct isl_hash_table *table,
-			int min_size);
+                        int min_size);
 void isl_hash_table_clear(struct isl_hash_table *table);
 extern struct isl_hash_table_entry *isl_hash_table_entry_none;
 struct isl_hash_table_entry *isl_hash_table_find(struct isl_ctx *ctx,
-			    struct isl_hash_table *table,
-			    uint32_t key_hash,
-			    isl_bool (*eq)(const void *entry, const void *val),
-			    const void *val, int reserve);
+        struct isl_hash_table *table,
+        uint32_t key_hash,
+        isl_bool (*eq)(const void *entry, const void *val),
+        const void *val, int reserve);
 isl_stat isl_hash_table_foreach(isl_ctx *ctx, struct isl_hash_table *table,
-	isl_stat (*fn)(void **entry, void *user), void *user);
+                                isl_stat (*fn)(void **entry, void *user), void *user);
 void isl_hash_table_remove(struct isl_ctx *ctx,
-				struct isl_hash_table *table,
-				struct isl_hash_table_entry *entry);
+                           struct isl_hash_table *table,
+                           struct isl_hash_table_entry *entry);
 
 #if defined(__cplusplus)
 }

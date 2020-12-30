@@ -52,7 +52,7 @@
 ///    A pointer point to 8-bit mask
 static __inline__ void __DEFAULT_FN_ATTRS256
 _mm256_2intersect_epi32(__m256i __a, __m256i __b, __mmask8 *__m0, __mmask8 *__m1) {
-  __builtin_ia32_vp2intersect_d_256((__v8si)__a, (__v8si)__b, __m0, __m1);
+    __builtin_ia32_vp2intersect_d_256((__v8si)__a, (__v8si)__b, __m0, __m1);
 }
 
 /// Store, in an even/odd pair of mask registers, the indicators of the
@@ -72,7 +72,7 @@ _mm256_2intersect_epi32(__m256i __a, __m256i __b, __mmask8 *__m0, __mmask8 *__m1
 ///    A pointer point to 8-bit mask
 static __inline__ void __DEFAULT_FN_ATTRS256
 _mm256_2intersect_epi64(__m256i __a, __m256i __b, __mmask8 *__m0, __mmask8 *__m1) {
-  __builtin_ia32_vp2intersect_q_256((__v4di)__a, (__v4di)__b, __m0, __m1);
+    __builtin_ia32_vp2intersect_q_256((__v4di)__a, (__v4di)__b, __m0, __m1);
 }
 
 /// Store, in an even/odd pair of mask registers, the indicators of the
@@ -92,7 +92,7 @@ _mm256_2intersect_epi64(__m256i __a, __m256i __b, __mmask8 *__m0, __mmask8 *__m1
 ///    A pointer point to 8-bit mask
 static __inline__ void __DEFAULT_FN_ATTRS128
 _mm_2intersect_epi32(__m128i __a, __m128i __b, __mmask8 *__m0, __mmask8 *__m1) {
-  __builtin_ia32_vp2intersect_d_128((__v4si)__a, (__v4si)__b, __m0, __m1);
+    __builtin_ia32_vp2intersect_d_128((__v4si)__a, (__v4si)__b, __m0, __m1);
 }
 
 /// Store, in an even/odd pair of mask registers, the indicators of the
@@ -112,7 +112,7 @@ _mm_2intersect_epi32(__m128i __a, __m128i __b, __mmask8 *__m0, __mmask8 *__m1) {
 ///    A pointer point to 8-bit mask
 static __inline__ void __DEFAULT_FN_ATTRS128
 _mm_2intersect_epi64(__m128i __a, __m128i __b, __mmask8 *__m0, __mmask8 *__m1) {
-  __builtin_ia32_vp2intersect_q_128((__v2di)__a, (__v2di)__b, __m0, __m1);
+    __builtin_ia32_vp2intersect_q_128((__v2di)__a, (__v2di)__b, __m0, __m1);
 }
 
 #undef __DEFAULT_FN_ATTRS128

@@ -34,157 +34,169 @@ class FullComment;
 /// parts of diagnostic messages.  Audit diagnostics before changing or adding
 /// a new value.
 enum CommandMarkerKind {
-  /// Command started with a backslash character:
-  /// \code
-  ///   \foo
-  /// \endcode
-  CMK_Backslash = 0,
+    /// Command started with a backslash character:
+    /// \code
+    ///   \foo
+    /// \endcode
+    CMK_Backslash = 0,
 
-  /// Command started with an 'at' character:
-  /// \code
-  ///   @foo
-  /// \endcode
-  CMK_At = 1
+    /// Command started with an 'at' character:
+    /// \code
+    ///   @foo
+    /// \endcode
+    CMK_At = 1
 };
 
 /// Any part of the comment.
 /// Abstract class.
 class Comment {
 protected:
-  /// Preferred location to show caret.
-  SourceLocation Loc;
+    /// Preferred location to show caret.
+    SourceLocation Loc;
 
-  /// Source range of this AST node.
-  SourceRange Range;
+    /// Source range of this AST node.
+    SourceRange Range;
 
-  class CommentBitfields {
-    friend class Comment;
+    class CommentBitfields {
+        friend class Comment;
 
-    /// Type of this AST node.
-    unsigned Kind : 8;
-  };
-  enum { NumCommentBits = 8 };
+        /// Type of this AST node.
+        unsigned Kind : 8;
+    };
+    enum { NumCommentBits = 8 };
 
-  class InlineContentCommentBitfields {
-    friend class InlineContentComment;
+    class InlineContentCommentBitfields {
+        friend class InlineContentComment;
 
-    unsigned : NumCommentBits;
+    unsigned :
+        NumCommentBits;
 
-    /// True if there is a newline after this inline content node.
-    /// (There is no separate AST node for a newline.)
-    unsigned HasTrailingNewline : 1;
-  };
-  enum { NumInlineContentCommentBits = NumCommentBits + 1 };
+        /// True if there is a newline after this inline content node.
+        /// (There is no separate AST node for a newline.)
+        unsigned HasTrailingNewline : 1;
+    };
+    enum { NumInlineContentCommentBits = NumCommentBits + 1 };
 
-  class TextCommentBitfields {
-    friend class TextComment;
+    class TextCommentBitfields {
+        friend class TextComment;
 
-    unsigned : NumInlineContentCommentBits;
+    unsigned :
+        NumInlineContentCommentBits;
 
-    /// True if \c IsWhitespace field contains a valid value.
-    mutable unsigned IsWhitespaceValid : 1;
+        /// True if \c IsWhitespace field contains a valid value.
+        mutable unsigned IsWhitespaceValid : 1;
 
-    /// True if this comment AST node contains only whitespace.
-    mutable unsigned IsWhitespace : 1;
-  };
-  enum { NumTextCommentBits = NumInlineContentCommentBits + 2 };
+        /// True if this comment AST node contains only whitespace.
+        mutable unsigned IsWhitespace : 1;
+    };
+    enum { NumTextCommentBits = NumInlineContentCommentBits + 2 };
 
-  class InlineCommandCommentBitfields {
-    friend class InlineCommandComment;
+    class InlineCommandCommentBitfields {
+        friend class InlineCommandComment;
 
-    unsigned : NumInlineContentCommentBits;
+    unsigned :
+        NumInlineContentCommentBits;
 
-    unsigned RenderKind : 3;
+        unsigned RenderKind : 3;
 
-    unsigned CommandID : CommandInfo::NumCommandIDBits;
-  };
-  enum { NumInlineCommandCommentBits = NumInlineContentCommentBits + 3 +
-                                       CommandInfo::NumCommandIDBits };
+    unsigned CommandID :
+        CommandInfo::NumCommandIDBits;
+    };
+    enum { NumInlineCommandCommentBits = NumInlineContentCommentBits + 3 +
+                                         CommandInfo::NumCommandIDBits
+         };
 
-  class HTMLTagCommentBitfields {
-    friend class HTMLTagComment;
+    class HTMLTagCommentBitfields {
+        friend class HTMLTagComment;
 
-    unsigned : NumInlineContentCommentBits;
+    unsigned :
+        NumInlineContentCommentBits;
 
-    /// True if we found that this tag is malformed in some way.
-    unsigned IsMalformed : 1;
-  };
-  enum { NumHTMLTagCommentBits = NumInlineContentCommentBits + 1 };
+        /// True if we found that this tag is malformed in some way.
+        unsigned IsMalformed : 1;
+    };
+    enum { NumHTMLTagCommentBits = NumInlineContentCommentBits + 1 };
 
-  class HTMLStartTagCommentBitfields {
-    friend class HTMLStartTagComment;
+    class HTMLStartTagCommentBitfields {
+        friend class HTMLStartTagComment;
 
-    unsigned : NumHTMLTagCommentBits;
+    unsigned :
+        NumHTMLTagCommentBits;
 
-    /// True if this tag is self-closing (e. g., <br />).  This is based on tag
-    /// spelling in comment (plain <br> would not set this flag).
-    unsigned IsSelfClosing : 1;
-  };
-  enum { NumHTMLStartTagCommentBits = NumHTMLTagCommentBits + 1 };
+        /// True if this tag is self-closing (e. g., <br />).  This is based on tag
+        /// spelling in comment (plain <br> would not set this flag).
+        unsigned IsSelfClosing : 1;
+    };
+    enum { NumHTMLStartTagCommentBits = NumHTMLTagCommentBits + 1 };
 
-  class ParagraphCommentBitfields {
-    friend class ParagraphComment;
+    class ParagraphCommentBitfields {
+        friend class ParagraphComment;
 
-    unsigned : NumCommentBits;
+    unsigned :
+        NumCommentBits;
 
-    /// True if \c IsWhitespace field contains a valid value.
-    mutable unsigned IsWhitespaceValid : 1;
+        /// True if \c IsWhitespace field contains a valid value.
+        mutable unsigned IsWhitespaceValid : 1;
 
-    /// True if this comment AST node contains only whitespace.
-    mutable unsigned IsWhitespace : 1;
-  };
-  enum { NumParagraphCommentBits = NumCommentBits + 2 };
+        /// True if this comment AST node contains only whitespace.
+        mutable unsigned IsWhitespace : 1;
+    };
+    enum { NumParagraphCommentBits = NumCommentBits + 2 };
 
-  class BlockCommandCommentBitfields {
-    friend class BlockCommandComment;
+    class BlockCommandCommentBitfields {
+        friend class BlockCommandComment;
 
-    unsigned : NumCommentBits;
+    unsigned :
+        NumCommentBits;
 
-    unsigned CommandID : CommandInfo::NumCommandIDBits;
+    unsigned CommandID :
+        CommandInfo::NumCommandIDBits;
 
-    /// Describes the syntax that was used in a documentation command.
-    /// Contains values from CommandMarkerKind enum.
-    unsigned CommandMarker : 1;
-  };
-  enum { NumBlockCommandCommentBits = NumCommentBits +
-                                      CommandInfo::NumCommandIDBits + 1 };
+        /// Describes the syntax that was used in a documentation command.
+        /// Contains values from CommandMarkerKind enum.
+        unsigned CommandMarker : 1;
+    };
+    enum { NumBlockCommandCommentBits = NumCommentBits +
+                                        CommandInfo::NumCommandIDBits + 1
+         };
 
-  class ParamCommandCommentBitfields {
-    friend class ParamCommandComment;
+    class ParamCommandCommentBitfields {
+        friend class ParamCommandComment;
 
-    unsigned : NumBlockCommandCommentBits;
+    unsigned :
+        NumBlockCommandCommentBits;
 
-    /// Parameter passing direction, see ParamCommandComment::PassDirection.
-    unsigned Direction : 2;
+        /// Parameter passing direction, see ParamCommandComment::PassDirection.
+        unsigned Direction : 2;
 
-    /// True if direction was specified explicitly in the comment.
-    unsigned IsDirectionExplicit : 1;
-  };
-  enum { NumParamCommandCommentBits = NumBlockCommandCommentBits + 3 };
+        /// True if direction was specified explicitly in the comment.
+        unsigned IsDirectionExplicit : 1;
+    };
+    enum { NumParamCommandCommentBits = NumBlockCommandCommentBits + 3 };
 
-  union {
-    CommentBitfields CommentBits;
-    InlineContentCommentBitfields InlineContentCommentBits;
-    TextCommentBitfields TextCommentBits;
-    InlineCommandCommentBitfields InlineCommandCommentBits;
-    HTMLTagCommentBitfields HTMLTagCommentBits;
-    HTMLStartTagCommentBitfields HTMLStartTagCommentBits;
-    ParagraphCommentBitfields ParagraphCommentBits;
-    BlockCommandCommentBitfields BlockCommandCommentBits;
-    ParamCommandCommentBitfields ParamCommandCommentBits;
-  };
+    union {
+        CommentBitfields CommentBits;
+        InlineContentCommentBitfields InlineContentCommentBits;
+        TextCommentBitfields TextCommentBits;
+        InlineCommandCommentBitfields InlineCommandCommentBits;
+        HTMLTagCommentBitfields HTMLTagCommentBits;
+        HTMLStartTagCommentBitfields HTMLStartTagCommentBits;
+        ParagraphCommentBitfields ParagraphCommentBits;
+        BlockCommandCommentBitfields BlockCommandCommentBits;
+        ParamCommandCommentBitfields ParamCommandCommentBits;
+    };
 
-  void setSourceRange(SourceRange SR) {
-    Range = SR;
-  }
+    void setSourceRange(SourceRange SR) {
+        Range = SR;
+    }
 
-  void setLocation(SourceLocation L) {
-    Loc = L;
-  }
+    void setLocation(SourceLocation L) {
+        Loc = L;
+    }
 
 public:
-  enum CommentKind {
-    NoCommentKind = 0,
+    enum CommentKind {
+        NoCommentKind = 0,
 #define COMMENT(CLASS, PARENT) CLASS##Kind,
 #define COMMENT_RANGE(BASE, FIRST, LAST) \
     First##BASE##Constant=FIRST##Kind, Last##BASE##Constant=LAST##Kind,
@@ -192,402 +204,430 @@ public:
     First##BASE##Constant=FIRST##Kind, Last##BASE##Constant=LAST##Kind
 #define ABSTRACT_COMMENT(COMMENT)
 #include "clang/AST/CommentNodes.inc"
-  };
+    };
 
-  Comment(CommentKind K,
-          SourceLocation LocBegin,
-          SourceLocation LocEnd) :
-      Loc(LocBegin), Range(SourceRange(LocBegin, LocEnd)) {
-    CommentBits.Kind = K;
-  }
+    Comment(CommentKind K,
+            SourceLocation LocBegin,
+            SourceLocation LocEnd) :
+        Loc(LocBegin), Range(SourceRange(LocBegin, LocEnd)) {
+        CommentBits.Kind = K;
+    }
 
-  CommentKind getCommentKind() const {
-    return static_cast<CommentKind>(CommentBits.Kind);
-  }
+    CommentKind getCommentKind() const {
+        return static_cast<CommentKind>(CommentBits.Kind);
+    }
 
-  const char *getCommentKindName() const;
+    const char *getCommentKindName() const;
 
-  void dump() const;
-  void dumpColor() const;
-  void dump(raw_ostream &OS, const ASTContext &Context) const;
+    void dump() const;
+    void dumpColor() const;
+    void dump(raw_ostream &OS, const ASTContext &Context) const;
 
-  SourceRange getSourceRange() const LLVM_READONLY { return Range; }
+    SourceRange getSourceRange() const LLVM_READONLY {
+        return Range;
+    }
 
-  SourceLocation getBeginLoc() const LLVM_READONLY { return Range.getBegin(); }
+    SourceLocation getBeginLoc() const LLVM_READONLY {
+        return Range.getBegin();
+    }
 
-  SourceLocation getEndLoc() const LLVM_READONLY { return Range.getEnd(); }
+    SourceLocation getEndLoc() const LLVM_READONLY {
+        return Range.getEnd();
+    }
 
-  SourceLocation getLocation() const LLVM_READONLY { return Loc; }
+    SourceLocation getLocation() const LLVM_READONLY {
+        return Loc;
+    }
 
-  typedef Comment * const *child_iterator;
+    typedef Comment * const *child_iterator;
 
-  child_iterator child_begin() const;
-  child_iterator child_end() const;
+    child_iterator child_begin() const;
+    child_iterator child_end() const;
 
-  // TODO: const child iterator
+    // TODO: const child iterator
 
-  unsigned child_count() const {
-    return child_end() - child_begin();
-  }
+    unsigned child_count() const {
+        return child_end() - child_begin();
+    }
 };
 
 /// Inline content (contained within a block).
 /// Abstract class.
 class InlineContentComment : public Comment {
 protected:
-  InlineContentComment(CommentKind K,
-                       SourceLocation LocBegin,
-                       SourceLocation LocEnd) :
-      Comment(K, LocBegin, LocEnd) {
-    InlineContentCommentBits.HasTrailingNewline = 0;
-  }
+    InlineContentComment(CommentKind K,
+                         SourceLocation LocBegin,
+                         SourceLocation LocEnd) :
+        Comment(K, LocBegin, LocEnd) {
+        InlineContentCommentBits.HasTrailingNewline = 0;
+    }
 
 public:
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() >= FirstInlineContentCommentConstant &&
-           C->getCommentKind() <= LastInlineContentCommentConstant;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() >= FirstInlineContentCommentConstant &&
+               C->getCommentKind() <= LastInlineContentCommentConstant;
+    }
 
-  void addTrailingNewline() {
-    InlineContentCommentBits.HasTrailingNewline = 1;
-  }
+    void addTrailingNewline() {
+        InlineContentCommentBits.HasTrailingNewline = 1;
+    }
 
-  bool hasTrailingNewline() const {
-    return InlineContentCommentBits.HasTrailingNewline;
-  }
+    bool hasTrailingNewline() const {
+        return InlineContentCommentBits.HasTrailingNewline;
+    }
 };
 
 /// Plain text.
 class TextComment : public InlineContentComment {
-  StringRef Text;
+    StringRef Text;
 
 public:
-  TextComment(SourceLocation LocBegin,
-              SourceLocation LocEnd,
-              StringRef Text) :
-      InlineContentComment(TextCommentKind, LocBegin, LocEnd),
-      Text(Text) {
-    TextCommentBits.IsWhitespaceValid = false;
-  }
+    TextComment(SourceLocation LocBegin,
+                SourceLocation LocEnd,
+                StringRef Text) :
+        InlineContentComment(TextCommentKind, LocBegin, LocEnd),
+        Text(Text) {
+        TextCommentBits.IsWhitespaceValid = false;
+    }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == TextCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == TextCommentKind;
+    }
 
-  child_iterator child_begin() const { return nullptr; }
+    child_iterator child_begin() const {
+        return nullptr;
+    }
 
-  child_iterator child_end() const { return nullptr; }
+    child_iterator child_end() const {
+        return nullptr;
+    }
 
-  StringRef getText() const LLVM_READONLY { return Text; }
+    StringRef getText() const LLVM_READONLY {
+        return Text;
+    }
 
-  bool isWhitespace() const {
-    if (TextCommentBits.IsWhitespaceValid)
-      return TextCommentBits.IsWhitespace;
+    bool isWhitespace() const {
+        if (TextCommentBits.IsWhitespaceValid)
+            return TextCommentBits.IsWhitespace;
 
-    TextCommentBits.IsWhitespace = isWhitespaceNoCache();
-    TextCommentBits.IsWhitespaceValid = true;
-    return TextCommentBits.IsWhitespace;
-  }
+        TextCommentBits.IsWhitespace = isWhitespaceNoCache();
+        TextCommentBits.IsWhitespaceValid = true;
+        return TextCommentBits.IsWhitespace;
+    }
 
 private:
-  bool isWhitespaceNoCache() const;
+    bool isWhitespaceNoCache() const;
 };
 
 /// A command with word-like arguments that is considered inline content.
 class InlineCommandComment : public InlineContentComment {
 public:
-  struct Argument {
-    SourceRange Range;
-    StringRef Text;
+    struct Argument {
+        SourceRange Range;
+        StringRef Text;
 
-    Argument(SourceRange Range, StringRef Text) : Range(Range), Text(Text) { }
-  };
+        Argument(SourceRange Range, StringRef Text) : Range(Range), Text(Text) { }
+    };
 
-  /// The most appropriate rendering mode for this command, chosen on command
-  /// semantics in Doxygen.
-  enum RenderKind {
-    RenderNormal,
-    RenderBold,
-    RenderMonospaced,
-    RenderEmphasized,
-    RenderAnchor
-  };
+    /// The most appropriate rendering mode for this command, chosen on command
+    /// semantics in Doxygen.
+    enum RenderKind {
+        RenderNormal,
+        RenderBold,
+        RenderMonospaced,
+        RenderEmphasized,
+        RenderAnchor
+    };
 
 protected:
-  /// Command arguments.
-  ArrayRef<Argument> Args;
+    /// Command arguments.
+    ArrayRef<Argument> Args;
 
 public:
-  InlineCommandComment(SourceLocation LocBegin,
-                       SourceLocation LocEnd,
-                       unsigned CommandID,
-                       RenderKind RK,
-                       ArrayRef<Argument> Args) :
-      InlineContentComment(InlineCommandCommentKind, LocBegin, LocEnd),
-      Args(Args) {
-    InlineCommandCommentBits.RenderKind = RK;
-    InlineCommandCommentBits.CommandID = CommandID;
-  }
+    InlineCommandComment(SourceLocation LocBegin,
+                         SourceLocation LocEnd,
+                         unsigned CommandID,
+                         RenderKind RK,
+                         ArrayRef<Argument> Args) :
+        InlineContentComment(InlineCommandCommentKind, LocBegin, LocEnd),
+        Args(Args) {
+        InlineCommandCommentBits.RenderKind = RK;
+        InlineCommandCommentBits.CommandID = CommandID;
+    }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == InlineCommandCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == InlineCommandCommentKind;
+    }
 
-  child_iterator child_begin() const { return nullptr; }
+    child_iterator child_begin() const {
+        return nullptr;
+    }
 
-  child_iterator child_end() const { return nullptr; }
+    child_iterator child_end() const {
+        return nullptr;
+    }
 
-  unsigned getCommandID() const {
-    return InlineCommandCommentBits.CommandID;
-  }
+    unsigned getCommandID() const {
+        return InlineCommandCommentBits.CommandID;
+    }
 
-  StringRef getCommandName(const CommandTraits &Traits) const {
-    return Traits.getCommandInfo(getCommandID())->Name;
-  }
+    StringRef getCommandName(const CommandTraits &Traits) const {
+        return Traits.getCommandInfo(getCommandID())->Name;
+    }
 
-  SourceRange getCommandNameRange() const {
-    return SourceRange(getBeginLoc().getLocWithOffset(-1), getEndLoc());
-  }
+    SourceRange getCommandNameRange() const {
+        return SourceRange(getBeginLoc().getLocWithOffset(-1), getEndLoc());
+    }
 
-  RenderKind getRenderKind() const {
-    return static_cast<RenderKind>(InlineCommandCommentBits.RenderKind);
-  }
+    RenderKind getRenderKind() const {
+        return static_cast<RenderKind>(InlineCommandCommentBits.RenderKind);
+    }
 
-  unsigned getNumArgs() const {
-    return Args.size();
-  }
+    unsigned getNumArgs() const {
+        return Args.size();
+    }
 
-  StringRef getArgText(unsigned Idx) const {
-    return Args[Idx].Text;
-  }
+    StringRef getArgText(unsigned Idx) const {
+        return Args[Idx].Text;
+    }
 
-  SourceRange getArgRange(unsigned Idx) const {
-    return Args[Idx].Range;
-  }
+    SourceRange getArgRange(unsigned Idx) const {
+        return Args[Idx].Range;
+    }
 };
 
 /// Abstract class for opening and closing HTML tags.  HTML tags are always
 /// treated as inline content (regardless HTML semantics).
 class HTMLTagComment : public InlineContentComment {
 protected:
-  StringRef TagName;
-  SourceRange TagNameRange;
+    StringRef TagName;
+    SourceRange TagNameRange;
 
-  HTMLTagComment(CommentKind K,
-                 SourceLocation LocBegin,
-                 SourceLocation LocEnd,
-                 StringRef TagName,
-                 SourceLocation TagNameBegin,
-                 SourceLocation TagNameEnd) :
-      InlineContentComment(K, LocBegin, LocEnd),
-      TagName(TagName),
-      TagNameRange(TagNameBegin, TagNameEnd) {
-    setLocation(TagNameBegin);
-    HTMLTagCommentBits.IsMalformed = 0;
-  }
+    HTMLTagComment(CommentKind K,
+                   SourceLocation LocBegin,
+                   SourceLocation LocEnd,
+                   StringRef TagName,
+                   SourceLocation TagNameBegin,
+                   SourceLocation TagNameEnd) :
+        InlineContentComment(K, LocBegin, LocEnd),
+        TagName(TagName),
+        TagNameRange(TagNameBegin, TagNameEnd) {
+        setLocation(TagNameBegin);
+        HTMLTagCommentBits.IsMalformed = 0;
+    }
 
 public:
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() >= FirstHTMLTagCommentConstant &&
-           C->getCommentKind() <= LastHTMLTagCommentConstant;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() >= FirstHTMLTagCommentConstant &&
+               C->getCommentKind() <= LastHTMLTagCommentConstant;
+    }
 
-  StringRef getTagName() const LLVM_READONLY { return TagName; }
+    StringRef getTagName() const LLVM_READONLY {
+        return TagName;
+    }
 
-  SourceRange getTagNameSourceRange() const LLVM_READONLY {
-    SourceLocation L = getLocation();
-    return SourceRange(L.getLocWithOffset(1),
-                       L.getLocWithOffset(1 + TagName.size()));
-  }
+    SourceRange getTagNameSourceRange() const LLVM_READONLY {
+        SourceLocation L = getLocation();
+        return SourceRange(L.getLocWithOffset(1),
+                           L.getLocWithOffset(1 + TagName.size()));
+    }
 
-  bool isMalformed() const {
-    return HTMLTagCommentBits.IsMalformed;
-  }
+    bool isMalformed() const {
+        return HTMLTagCommentBits.IsMalformed;
+    }
 
-  void setIsMalformed() {
-    HTMLTagCommentBits.IsMalformed = 1;
-  }
+    void setIsMalformed() {
+        HTMLTagCommentBits.IsMalformed = 1;
+    }
 };
 
 /// An opening HTML tag with attributes.
 class HTMLStartTagComment : public HTMLTagComment {
 public:
-  class Attribute {
-  public:
-    SourceLocation NameLocBegin;
-    StringRef Name;
+    class Attribute {
+    public:
+        SourceLocation NameLocBegin;
+        StringRef Name;
 
-    SourceLocation EqualsLoc;
+        SourceLocation EqualsLoc;
 
-    SourceRange ValueRange;
-    StringRef Value;
+        SourceRange ValueRange;
+        StringRef Value;
 
-    Attribute() { }
+        Attribute() { }
 
-    Attribute(SourceLocation NameLocBegin, StringRef Name) :
-        NameLocBegin(NameLocBegin), Name(Name),
-        EqualsLoc(SourceLocation()),
-        ValueRange(SourceRange()), Value(StringRef())
-    { }
+        Attribute(SourceLocation NameLocBegin, StringRef Name) :
+            NameLocBegin(NameLocBegin), Name(Name),
+            EqualsLoc(SourceLocation()),
+            ValueRange(SourceRange()), Value(StringRef())
+        { }
 
-    Attribute(SourceLocation NameLocBegin, StringRef Name,
-              SourceLocation EqualsLoc,
-              SourceRange ValueRange, StringRef Value) :
-        NameLocBegin(NameLocBegin), Name(Name),
-        EqualsLoc(EqualsLoc),
-        ValueRange(ValueRange), Value(Value)
-    { }
+        Attribute(SourceLocation NameLocBegin, StringRef Name,
+                  SourceLocation EqualsLoc,
+                  SourceRange ValueRange, StringRef Value) :
+            NameLocBegin(NameLocBegin), Name(Name),
+            EqualsLoc(EqualsLoc),
+            ValueRange(ValueRange), Value(Value)
+        { }
 
-    SourceLocation getNameLocEnd() const {
-      return NameLocBegin.getLocWithOffset(Name.size());
-    }
+        SourceLocation getNameLocEnd() const {
+            return NameLocBegin.getLocWithOffset(Name.size());
+        }
 
-    SourceRange getNameRange() const {
-      return SourceRange(NameLocBegin, getNameLocEnd());
-    }
-  };
+        SourceRange getNameRange() const {
+            return SourceRange(NameLocBegin, getNameLocEnd());
+        }
+    };
 
 private:
-  ArrayRef<Attribute> Attributes;
+    ArrayRef<Attribute> Attributes;
 
 public:
-  HTMLStartTagComment(SourceLocation LocBegin,
-                      StringRef TagName) :
-      HTMLTagComment(HTMLStartTagCommentKind,
-                     LocBegin, LocBegin.getLocWithOffset(1 + TagName.size()),
-                     TagName,
-                     LocBegin.getLocWithOffset(1),
-                     LocBegin.getLocWithOffset(1 + TagName.size())) {
-    HTMLStartTagCommentBits.IsSelfClosing = false;
-  }
-
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == HTMLStartTagCommentKind;
-  }
-
-  child_iterator child_begin() const { return nullptr; }
-
-  child_iterator child_end() const { return nullptr; }
-
-  unsigned getNumAttrs() const {
-    return Attributes.size();
-  }
-
-  const Attribute &getAttr(unsigned Idx) const {
-    return Attributes[Idx];
-  }
-
-  void setAttrs(ArrayRef<Attribute> Attrs) {
-    Attributes = Attrs;
-    if (!Attrs.empty()) {
-      const Attribute &Attr = Attrs.back();
-      SourceLocation L = Attr.ValueRange.getEnd();
-      if (L.isValid())
-        Range.setEnd(L);
-      else {
-        Range.setEnd(Attr.getNameLocEnd());
-      }
+    HTMLStartTagComment(SourceLocation LocBegin,
+                        StringRef TagName) :
+        HTMLTagComment(HTMLStartTagCommentKind,
+                       LocBegin, LocBegin.getLocWithOffset(1 + TagName.size()),
+                       TagName,
+                       LocBegin.getLocWithOffset(1),
+                       LocBegin.getLocWithOffset(1 + TagName.size())) {
+        HTMLStartTagCommentBits.IsSelfClosing = false;
     }
-  }
 
-  void setGreaterLoc(SourceLocation GreaterLoc) {
-    Range.setEnd(GreaterLoc);
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == HTMLStartTagCommentKind;
+    }
 
-  bool isSelfClosing() const {
-    return HTMLStartTagCommentBits.IsSelfClosing;
-  }
+    child_iterator child_begin() const {
+        return nullptr;
+    }
 
-  void setSelfClosing() {
-    HTMLStartTagCommentBits.IsSelfClosing = true;
-  }
+    child_iterator child_end() const {
+        return nullptr;
+    }
+
+    unsigned getNumAttrs() const {
+        return Attributes.size();
+    }
+
+    const Attribute &getAttr(unsigned Idx) const {
+        return Attributes[Idx];
+    }
+
+    void setAttrs(ArrayRef<Attribute> Attrs) {
+        Attributes = Attrs;
+        if (!Attrs.empty()) {
+            const Attribute &Attr = Attrs.back();
+            SourceLocation L = Attr.ValueRange.getEnd();
+            if (L.isValid())
+                Range.setEnd(L);
+            else {
+                Range.setEnd(Attr.getNameLocEnd());
+            }
+        }
+    }
+
+    void setGreaterLoc(SourceLocation GreaterLoc) {
+        Range.setEnd(GreaterLoc);
+    }
+
+    bool isSelfClosing() const {
+        return HTMLStartTagCommentBits.IsSelfClosing;
+    }
+
+    void setSelfClosing() {
+        HTMLStartTagCommentBits.IsSelfClosing = true;
+    }
 };
 
 /// A closing HTML tag.
 class HTMLEndTagComment : public HTMLTagComment {
 public:
-  HTMLEndTagComment(SourceLocation LocBegin,
-                    SourceLocation LocEnd,
-                    StringRef TagName) :
-      HTMLTagComment(HTMLEndTagCommentKind,
-                     LocBegin, LocEnd,
-                     TagName,
-                     LocBegin.getLocWithOffset(2),
-                     LocBegin.getLocWithOffset(2 + TagName.size()))
-  { }
+    HTMLEndTagComment(SourceLocation LocBegin,
+                      SourceLocation LocEnd,
+                      StringRef TagName) :
+        HTMLTagComment(HTMLEndTagCommentKind,
+                       LocBegin, LocEnd,
+                       TagName,
+                       LocBegin.getLocWithOffset(2),
+                       LocBegin.getLocWithOffset(2 + TagName.size()))
+    { }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == HTMLEndTagCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == HTMLEndTagCommentKind;
+    }
 
-  child_iterator child_begin() const { return nullptr; }
+    child_iterator child_begin() const {
+        return nullptr;
+    }
 
-  child_iterator child_end() const { return nullptr; }
+    child_iterator child_end() const {
+        return nullptr;
+    }
 };
 
 /// Block content (contains inline content).
 /// Abstract class.
 class BlockContentComment : public Comment {
 protected:
-  BlockContentComment(CommentKind K,
-                      SourceLocation LocBegin,
-                      SourceLocation LocEnd) :
-      Comment(K, LocBegin, LocEnd)
-  { }
+    BlockContentComment(CommentKind K,
+                        SourceLocation LocBegin,
+                        SourceLocation LocEnd) :
+        Comment(K, LocBegin, LocEnd)
+    { }
 
 public:
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() >= FirstBlockContentCommentConstant &&
-           C->getCommentKind() <= LastBlockContentCommentConstant;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() >= FirstBlockContentCommentConstant &&
+               C->getCommentKind() <= LastBlockContentCommentConstant;
+    }
 };
 
 /// A single paragraph that contains inline content.
 class ParagraphComment : public BlockContentComment {
-  ArrayRef<InlineContentComment *> Content;
+    ArrayRef<InlineContentComment *> Content;
 
 public:
-  ParagraphComment(ArrayRef<InlineContentComment *> Content) :
-      BlockContentComment(ParagraphCommentKind,
-                          SourceLocation(),
-                          SourceLocation()),
-      Content(Content) {
-    if (Content.empty()) {
-      ParagraphCommentBits.IsWhitespace = true;
-      ParagraphCommentBits.IsWhitespaceValid = true;
-      return;
+    ParagraphComment(ArrayRef<InlineContentComment *> Content) :
+        BlockContentComment(ParagraphCommentKind,
+                            SourceLocation(),
+                            SourceLocation()),
+        Content(Content) {
+        if (Content.empty()) {
+            ParagraphCommentBits.IsWhitespace = true;
+            ParagraphCommentBits.IsWhitespaceValid = true;
+            return;
+        }
+
+        ParagraphCommentBits.IsWhitespaceValid = false;
+
+        setSourceRange(SourceRange(Content.front()->getBeginLoc(),
+                                   Content.back()->getEndLoc()));
+        setLocation(Content.front()->getBeginLoc());
     }
 
-    ParagraphCommentBits.IsWhitespaceValid = false;
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == ParagraphCommentKind;
+    }
 
-    setSourceRange(SourceRange(Content.front()->getBeginLoc(),
-                               Content.back()->getEndLoc()));
-    setLocation(Content.front()->getBeginLoc());
-  }
+    child_iterator child_begin() const {
+        return reinterpret_cast<child_iterator>(Content.begin());
+    }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == ParagraphCommentKind;
-  }
+    child_iterator child_end() const {
+        return reinterpret_cast<child_iterator>(Content.end());
+    }
 
-  child_iterator child_begin() const {
-    return reinterpret_cast<child_iterator>(Content.begin());
-  }
+    bool isWhitespace() const {
+        if (ParagraphCommentBits.IsWhitespaceValid)
+            return ParagraphCommentBits.IsWhitespace;
 
-  child_iterator child_end() const {
-    return reinterpret_cast<child_iterator>(Content.end());
-  }
-
-  bool isWhitespace() const {
-    if (ParagraphCommentBits.IsWhitespaceValid)
-      return ParagraphCommentBits.IsWhitespace;
-
-    ParagraphCommentBits.IsWhitespace = isWhitespaceNoCache();
-    ParagraphCommentBits.IsWhitespaceValid = true;
-    return ParagraphCommentBits.IsWhitespace;
-  }
+        ParagraphCommentBits.IsWhitespace = isWhitespaceNoCache();
+        ParagraphCommentBits.IsWhitespaceValid = true;
+        return ParagraphCommentBits.IsWhitespace;
+    }
 
 private:
-  bool isWhitespaceNoCache() const;
+    bool isWhitespaceNoCache() const;
 };
 
 /// A command that has zero or more word-like arguments (number of word-like
@@ -595,294 +635,298 @@ private:
 /// (e. g., \\brief).
 class BlockCommandComment : public BlockContentComment {
 public:
-  struct Argument {
-    SourceRange Range;
-    StringRef Text;
+    struct Argument {
+        SourceRange Range;
+        StringRef Text;
 
-    Argument() { }
-    Argument(SourceRange Range, StringRef Text) : Range(Range), Text(Text) { }
-  };
+        Argument() { }
+        Argument(SourceRange Range, StringRef Text) : Range(Range), Text(Text) { }
+    };
 
 protected:
-  /// Word-like arguments.
-  ArrayRef<Argument> Args;
+    /// Word-like arguments.
+    ArrayRef<Argument> Args;
 
-  /// Paragraph argument.
-  ParagraphComment *Paragraph;
+    /// Paragraph argument.
+    ParagraphComment *Paragraph;
 
-  BlockCommandComment(CommentKind K,
-                      SourceLocation LocBegin,
-                      SourceLocation LocEnd,
-                      unsigned CommandID,
-                      CommandMarkerKind CommandMarker) :
-      BlockContentComment(K, LocBegin, LocEnd),
-      Paragraph(nullptr) {
-    setLocation(getCommandNameBeginLoc());
-    BlockCommandCommentBits.CommandID = CommandID;
-    BlockCommandCommentBits.CommandMarker = CommandMarker;
-  }
+    BlockCommandComment(CommentKind K,
+                        SourceLocation LocBegin,
+                        SourceLocation LocEnd,
+                        unsigned CommandID,
+                        CommandMarkerKind CommandMarker) :
+        BlockContentComment(K, LocBegin, LocEnd),
+        Paragraph(nullptr) {
+        setLocation(getCommandNameBeginLoc());
+        BlockCommandCommentBits.CommandID = CommandID;
+        BlockCommandCommentBits.CommandMarker = CommandMarker;
+    }
 
 public:
-  BlockCommandComment(SourceLocation LocBegin,
-                      SourceLocation LocEnd,
-                      unsigned CommandID,
-                      CommandMarkerKind CommandMarker) :
-      BlockContentComment(BlockCommandCommentKind, LocBegin, LocEnd),
-      Paragraph(nullptr) {
-    setLocation(getCommandNameBeginLoc());
-    BlockCommandCommentBits.CommandID = CommandID;
-    BlockCommandCommentBits.CommandMarker = CommandMarker;
-  }
-
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() >= FirstBlockCommandCommentConstant &&
-           C->getCommentKind() <= LastBlockCommandCommentConstant;
-  }
-
-  child_iterator child_begin() const {
-    return reinterpret_cast<child_iterator>(&Paragraph);
-  }
-
-  child_iterator child_end() const {
-    return reinterpret_cast<child_iterator>(&Paragraph + 1);
-  }
-
-  unsigned getCommandID() const {
-    return BlockCommandCommentBits.CommandID;
-  }
-
-  StringRef getCommandName(const CommandTraits &Traits) const {
-    return Traits.getCommandInfo(getCommandID())->Name;
-  }
-
-  SourceLocation getCommandNameBeginLoc() const {
-    return getBeginLoc().getLocWithOffset(1);
-  }
-
-  SourceRange getCommandNameRange(const CommandTraits &Traits) const {
-    StringRef Name = getCommandName(Traits);
-    return SourceRange(getCommandNameBeginLoc(),
-                       getBeginLoc().getLocWithOffset(1 + Name.size()));
-  }
-
-  unsigned getNumArgs() const {
-    return Args.size();
-  }
-
-  StringRef getArgText(unsigned Idx) const {
-    return Args[Idx].Text;
-  }
-
-  SourceRange getArgRange(unsigned Idx) const {
-    return Args[Idx].Range;
-  }
-
-  void setArgs(ArrayRef<Argument> A) {
-    Args = A;
-    if (Args.size() > 0) {
-      SourceLocation NewLocEnd = Args.back().Range.getEnd();
-      if (NewLocEnd.isValid())
-        setSourceRange(SourceRange(getBeginLoc(), NewLocEnd));
+    BlockCommandComment(SourceLocation LocBegin,
+                        SourceLocation LocEnd,
+                        unsigned CommandID,
+                        CommandMarkerKind CommandMarker) :
+        BlockContentComment(BlockCommandCommentKind, LocBegin, LocEnd),
+        Paragraph(nullptr) {
+        setLocation(getCommandNameBeginLoc());
+        BlockCommandCommentBits.CommandID = CommandID;
+        BlockCommandCommentBits.CommandMarker = CommandMarker;
     }
-  }
 
-  ParagraphComment *getParagraph() const LLVM_READONLY {
-    return Paragraph;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() >= FirstBlockCommandCommentConstant &&
+               C->getCommentKind() <= LastBlockCommandCommentConstant;
+    }
 
-  bool hasNonWhitespaceParagraph() const {
-    return Paragraph && !Paragraph->isWhitespace();
-  }
+    child_iterator child_begin() const {
+        return reinterpret_cast<child_iterator>(&Paragraph);
+    }
 
-  void setParagraph(ParagraphComment *PC) {
-    Paragraph = PC;
-    SourceLocation NewLocEnd = PC->getEndLoc();
-    if (NewLocEnd.isValid())
-      setSourceRange(SourceRange(getBeginLoc(), NewLocEnd));
-  }
+    child_iterator child_end() const {
+        return reinterpret_cast<child_iterator>(&Paragraph + 1);
+    }
 
-  CommandMarkerKind getCommandMarker() const LLVM_READONLY {
-    return static_cast<CommandMarkerKind>(
-        BlockCommandCommentBits.CommandMarker);
-  }
+    unsigned getCommandID() const {
+        return BlockCommandCommentBits.CommandID;
+    }
+
+    StringRef getCommandName(const CommandTraits &Traits) const {
+        return Traits.getCommandInfo(getCommandID())->Name;
+    }
+
+    SourceLocation getCommandNameBeginLoc() const {
+        return getBeginLoc().getLocWithOffset(1);
+    }
+
+    SourceRange getCommandNameRange(const CommandTraits &Traits) const {
+        StringRef Name = getCommandName(Traits);
+        return SourceRange(getCommandNameBeginLoc(),
+                           getBeginLoc().getLocWithOffset(1 + Name.size()));
+    }
+
+    unsigned getNumArgs() const {
+        return Args.size();
+    }
+
+    StringRef getArgText(unsigned Idx) const {
+        return Args[Idx].Text;
+    }
+
+    SourceRange getArgRange(unsigned Idx) const {
+        return Args[Idx].Range;
+    }
+
+    void setArgs(ArrayRef<Argument> A) {
+        Args = A;
+        if (Args.size() > 0) {
+            SourceLocation NewLocEnd = Args.back().Range.getEnd();
+            if (NewLocEnd.isValid())
+                setSourceRange(SourceRange(getBeginLoc(), NewLocEnd));
+        }
+    }
+
+    ParagraphComment *getParagraph() const LLVM_READONLY {
+        return Paragraph;
+    }
+
+    bool hasNonWhitespaceParagraph() const {
+        return Paragraph && !Paragraph->isWhitespace();
+    }
+
+    void setParagraph(ParagraphComment *PC) {
+        Paragraph = PC;
+        SourceLocation NewLocEnd = PC->getEndLoc();
+        if (NewLocEnd.isValid())
+            setSourceRange(SourceRange(getBeginLoc(), NewLocEnd));
+    }
+
+    CommandMarkerKind getCommandMarker() const LLVM_READONLY {
+        return static_cast<CommandMarkerKind>(
+                   BlockCommandCommentBits.CommandMarker);
+    }
 };
 
 /// Doxygen \\param command.
 class ParamCommandComment : public BlockCommandComment {
 private:
-  /// Parameter index in the function declaration.
-  unsigned ParamIndex;
+    /// Parameter index in the function declaration.
+    unsigned ParamIndex;
 
 public:
-  enum : unsigned {
-    InvalidParamIndex = ~0U,
-    VarArgParamIndex = ~0U/*InvalidParamIndex*/ - 1U
-  };
+    enum : unsigned {
+        InvalidParamIndex = ~0U,
+        VarArgParamIndex = ~0U/*InvalidParamIndex*/ - 1U
+    };
 
-  ParamCommandComment(SourceLocation LocBegin,
-                      SourceLocation LocEnd,
-                      unsigned CommandID,
-                      CommandMarkerKind CommandMarker) :
-      BlockCommandComment(ParamCommandCommentKind, LocBegin, LocEnd,
-                          CommandID, CommandMarker),
-      ParamIndex(InvalidParamIndex) {
-    ParamCommandCommentBits.Direction = In;
-    ParamCommandCommentBits.IsDirectionExplicit = false;
-  }
+    ParamCommandComment(SourceLocation LocBegin,
+                        SourceLocation LocEnd,
+                        unsigned CommandID,
+                        CommandMarkerKind CommandMarker) :
+        BlockCommandComment(ParamCommandCommentKind, LocBegin, LocEnd,
+                            CommandID, CommandMarker),
+        ParamIndex(InvalidParamIndex) {
+        ParamCommandCommentBits.Direction = In;
+        ParamCommandCommentBits.IsDirectionExplicit = false;
+    }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == ParamCommandCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == ParamCommandCommentKind;
+    }
 
-  enum PassDirection {
-    In,
-    Out,
-    InOut
-  };
+    enum PassDirection {
+        In,
+        Out,
+        InOut
+    };
 
-  static const char *getDirectionAsString(PassDirection D);
+    static const char *getDirectionAsString(PassDirection D);
 
-  PassDirection getDirection() const LLVM_READONLY {
-    return static_cast<PassDirection>(ParamCommandCommentBits.Direction);
-  }
+    PassDirection getDirection() const LLVM_READONLY {
+        return static_cast<PassDirection>(ParamCommandCommentBits.Direction);
+    }
 
-  bool isDirectionExplicit() const LLVM_READONLY {
-    return ParamCommandCommentBits.IsDirectionExplicit;
-  }
+    bool isDirectionExplicit() const LLVM_READONLY {
+        return ParamCommandCommentBits.IsDirectionExplicit;
+    }
 
-  void setDirection(PassDirection Direction, bool Explicit) {
-    ParamCommandCommentBits.Direction = Direction;
-    ParamCommandCommentBits.IsDirectionExplicit = Explicit;
-  }
+    void setDirection(PassDirection Direction, bool Explicit) {
+        ParamCommandCommentBits.Direction = Direction;
+        ParamCommandCommentBits.IsDirectionExplicit = Explicit;
+    }
 
-  bool hasParamName() const {
-    return getNumArgs() > 0;
-  }
+    bool hasParamName() const {
+        return getNumArgs() > 0;
+    }
 
-  StringRef getParamName(const FullComment *FC) const;
+    StringRef getParamName(const FullComment *FC) const;
 
-  StringRef getParamNameAsWritten() const {
-    return Args[0].Text;
-  }
+    StringRef getParamNameAsWritten() const {
+        return Args[0].Text;
+    }
 
-  SourceRange getParamNameRange() const {
-    return Args[0].Range;
-  }
+    SourceRange getParamNameRange() const {
+        return Args[0].Range;
+    }
 
-  bool isParamIndexValid() const LLVM_READONLY {
-    return ParamIndex != InvalidParamIndex;
-  }
+    bool isParamIndexValid() const LLVM_READONLY {
+        return ParamIndex != InvalidParamIndex;
+    }
 
-  bool isVarArgParam() const LLVM_READONLY {
-    return ParamIndex == VarArgParamIndex;
-  }
+    bool isVarArgParam() const LLVM_READONLY {
+        return ParamIndex == VarArgParamIndex;
+    }
 
-  void setIsVarArgParam() {
-    ParamIndex = VarArgParamIndex;
-    assert(isParamIndexValid());
-  }
+    void setIsVarArgParam() {
+        ParamIndex = VarArgParamIndex;
+        assert(isParamIndexValid());
+    }
 
-  unsigned getParamIndex() const LLVM_READONLY {
-    assert(isParamIndexValid());
-    assert(!isVarArgParam());
-    return ParamIndex;
-  }
+    unsigned getParamIndex() const LLVM_READONLY {
+        assert(isParamIndexValid());
+        assert(!isVarArgParam());
+        return ParamIndex;
+    }
 
-  void setParamIndex(unsigned Index) {
-    ParamIndex = Index;
-    assert(isParamIndexValid());
-    assert(!isVarArgParam());
-  }
+    void setParamIndex(unsigned Index) {
+        ParamIndex = Index;
+        assert(isParamIndexValid());
+        assert(!isVarArgParam());
+    }
 };
 
 /// Doxygen \\tparam command, describes a template parameter.
 class TParamCommandComment : public BlockCommandComment {
 private:
-  /// If this template parameter name was resolved (found in template parameter
-  /// list), then this stores a list of position indexes in all template
-  /// parameter lists.
-  ///
-  /// For example:
-  /// \verbatim
-  ///     template<typename C, template<typename T> class TT>
-  ///     void test(TT<int> aaa);
-  /// \endverbatim
-  /// For C:  Position = { 0 }
-  /// For TT: Position = { 1 }
-  /// For T:  Position = { 1, 0 }
-  ArrayRef<unsigned> Position;
+    /// If this template parameter name was resolved (found in template parameter
+    /// list), then this stores a list of position indexes in all template
+    /// parameter lists.
+    ///
+    /// For example:
+    /// \verbatim
+    ///     template<typename C, template<typename T> class TT>
+    ///     void test(TT<int> aaa);
+    /// \endverbatim
+    /// For C:  Position = { 0 }
+    /// For TT: Position = { 1 }
+    /// For T:  Position = { 1, 0 }
+    ArrayRef<unsigned> Position;
 
 public:
-  TParamCommandComment(SourceLocation LocBegin,
-                       SourceLocation LocEnd,
-                       unsigned CommandID,
-                       CommandMarkerKind CommandMarker) :
-      BlockCommandComment(TParamCommandCommentKind, LocBegin, LocEnd, CommandID,
-                          CommandMarker)
-  { }
+    TParamCommandComment(SourceLocation LocBegin,
+                         SourceLocation LocEnd,
+                         unsigned CommandID,
+                         CommandMarkerKind CommandMarker) :
+        BlockCommandComment(TParamCommandCommentKind, LocBegin, LocEnd, CommandID,
+                            CommandMarker)
+    { }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == TParamCommandCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == TParamCommandCommentKind;
+    }
 
-  bool hasParamName() const {
-    return getNumArgs() > 0;
-  }
+    bool hasParamName() const {
+        return getNumArgs() > 0;
+    }
 
-  StringRef getParamName(const FullComment *FC) const;
+    StringRef getParamName(const FullComment *FC) const;
 
-  StringRef getParamNameAsWritten() const {
-    return Args[0].Text;
-  }
+    StringRef getParamNameAsWritten() const {
+        return Args[0].Text;
+    }
 
-  SourceRange getParamNameRange() const {
-    return Args[0].Range;
-  }
+    SourceRange getParamNameRange() const {
+        return Args[0].Range;
+    }
 
-  bool isPositionValid() const LLVM_READONLY {
-    return !Position.empty();
-  }
+    bool isPositionValid() const LLVM_READONLY {
+        return !Position.empty();
+    }
 
-  unsigned getDepth() const {
-    assert(isPositionValid());
-    return Position.size();
-  }
+    unsigned getDepth() const {
+        assert(isPositionValid());
+        return Position.size();
+    }
 
-  unsigned getIndex(unsigned Depth) const {
-    assert(isPositionValid());
-    return Position[Depth];
-  }
+    unsigned getIndex(unsigned Depth) const {
+        assert(isPositionValid());
+        return Position[Depth];
+    }
 
-  void setPosition(ArrayRef<unsigned> NewPosition) {
-    Position = NewPosition;
-    assert(isPositionValid());
-  }
+    void setPosition(ArrayRef<unsigned> NewPosition) {
+        Position = NewPosition;
+        assert(isPositionValid());
+    }
 };
 
 /// A line of text contained in a verbatim block.
 class VerbatimBlockLineComment : public Comment {
-  StringRef Text;
+    StringRef Text;
 
 public:
-  VerbatimBlockLineComment(SourceLocation LocBegin,
-                           StringRef Text) :
-      Comment(VerbatimBlockLineCommentKind,
-              LocBegin,
-              LocBegin.getLocWithOffset(Text.size())),
-      Text(Text)
-  { }
+    VerbatimBlockLineComment(SourceLocation LocBegin,
+                             StringRef Text) :
+        Comment(VerbatimBlockLineCommentKind,
+                LocBegin,
+                LocBegin.getLocWithOffset(Text.size())),
+        Text(Text)
+    { }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == VerbatimBlockLineCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == VerbatimBlockLineCommentKind;
+    }
 
-  child_iterator child_begin() const { return nullptr; }
+    child_iterator child_begin() const {
+        return nullptr;
+    }
 
-  child_iterator child_end() const { return nullptr; }
+    child_iterator child_end() const {
+        return nullptr;
+    }
 
-  StringRef getText() const LLVM_READONLY {
-    return Text;
-  }
+    StringRef getText() const LLVM_READONLY {
+        return Text;
+    }
 };
 
 /// A verbatim block command (e. g., preformatted code).  Verbatim block has an
@@ -890,51 +934,51 @@ public:
 /// (VerbatimBlockLineComment nodes).
 class VerbatimBlockComment : public BlockCommandComment {
 protected:
-  StringRef CloseName;
-  SourceLocation CloseNameLocBegin;
-  ArrayRef<VerbatimBlockLineComment *> Lines;
+    StringRef CloseName;
+    SourceLocation CloseNameLocBegin;
+    ArrayRef<VerbatimBlockLineComment *> Lines;
 
 public:
-  VerbatimBlockComment(SourceLocation LocBegin,
-                       SourceLocation LocEnd,
-                       unsigned CommandID) :
-      BlockCommandComment(VerbatimBlockCommentKind,
-                          LocBegin, LocEnd, CommandID,
-                          CMK_At) // FIXME: improve source fidelity.
-  { }
+    VerbatimBlockComment(SourceLocation LocBegin,
+                         SourceLocation LocEnd,
+                         unsigned CommandID) :
+        BlockCommandComment(VerbatimBlockCommentKind,
+                            LocBegin, LocEnd, CommandID,
+                            CMK_At) // FIXME: improve source fidelity.
+    { }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == VerbatimBlockCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == VerbatimBlockCommentKind;
+    }
 
-  child_iterator child_begin() const {
-    return reinterpret_cast<child_iterator>(Lines.begin());
-  }
+    child_iterator child_begin() const {
+        return reinterpret_cast<child_iterator>(Lines.begin());
+    }
 
-  child_iterator child_end() const {
-    return reinterpret_cast<child_iterator>(Lines.end());
-  }
+    child_iterator child_end() const {
+        return reinterpret_cast<child_iterator>(Lines.end());
+    }
 
-  void setCloseName(StringRef Name, SourceLocation LocBegin) {
-    CloseName = Name;
-    CloseNameLocBegin = LocBegin;
-  }
+    void setCloseName(StringRef Name, SourceLocation LocBegin) {
+        CloseName = Name;
+        CloseNameLocBegin = LocBegin;
+    }
 
-  void setLines(ArrayRef<VerbatimBlockLineComment *> L) {
-    Lines = L;
-  }
+    void setLines(ArrayRef<VerbatimBlockLineComment *> L) {
+        Lines = L;
+    }
 
-  StringRef getCloseName() const {
-    return CloseName;
-  }
+    StringRef getCloseName() const {
+        return CloseName;
+    }
 
-  unsigned getNumLines() const {
-    return Lines.size();
-  }
+    unsigned getNumLines() const {
+        return Lines.size();
+    }
 
-  StringRef getText(unsigned LineIdx) const {
-    return Lines[LineIdx]->getText();
-  }
+    StringRef getText(unsigned LineIdx) const {
+        return Lines[LineIdx]->getText();
+    }
 };
 
 /// A verbatim line command.  Verbatim line has an opening command, a single
@@ -942,191 +986,197 @@ public:
 /// closing command.
 class VerbatimLineComment : public BlockCommandComment {
 protected:
-  StringRef Text;
-  SourceLocation TextBegin;
+    StringRef Text;
+    SourceLocation TextBegin;
 
 public:
-  VerbatimLineComment(SourceLocation LocBegin,
-                      SourceLocation LocEnd,
-                      unsigned CommandID,
-                      SourceLocation TextBegin,
-                      StringRef Text) :
-      BlockCommandComment(VerbatimLineCommentKind,
-                          LocBegin, LocEnd,
-                          CommandID,
-                          CMK_At), // FIXME: improve source fidelity.
-      Text(Text),
-      TextBegin(TextBegin)
-  { }
+    VerbatimLineComment(SourceLocation LocBegin,
+                        SourceLocation LocEnd,
+                        unsigned CommandID,
+                        SourceLocation TextBegin,
+                        StringRef Text) :
+        BlockCommandComment(VerbatimLineCommentKind,
+                            LocBegin, LocEnd,
+                            CommandID,
+                            CMK_At), // FIXME: improve source fidelity.
+        Text(Text),
+        TextBegin(TextBegin)
+    { }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == VerbatimLineCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == VerbatimLineCommentKind;
+    }
 
-  child_iterator child_begin() const { return nullptr; }
+    child_iterator child_begin() const {
+        return nullptr;
+    }
 
-  child_iterator child_end() const { return nullptr; }
+    child_iterator child_end() const {
+        return nullptr;
+    }
 
-  StringRef getText() const {
-    return Text;
-  }
+    StringRef getText() const {
+        return Text;
+    }
 
-  SourceRange getTextRange() const {
-    return SourceRange(TextBegin, getEndLoc());
-  }
+    SourceRange getTextRange() const {
+        return SourceRange(TextBegin, getEndLoc());
+    }
 };
 
 /// Information about the declaration, useful to clients of FullComment.
 struct DeclInfo {
-  /// Declaration the comment is actually attached to (in the source).
-  /// Should not be NULL.
-  const Decl *CommentDecl;
+    /// Declaration the comment is actually attached to (in the source).
+    /// Should not be NULL.
+    const Decl *CommentDecl;
 
-  /// CurrentDecl is the declaration with which the FullComment is associated.
-  ///
-  /// It can be different from \c CommentDecl.  It happens when we decide
-  /// that the comment originally attached to \c CommentDecl is fine for
-  /// \c CurrentDecl too (for example, for a redeclaration or an overrider of
-  /// \c CommentDecl).
-  ///
-  /// The information in the DeclInfo corresponds to CurrentDecl.
-  const Decl *CurrentDecl;
+    /// CurrentDecl is the declaration with which the FullComment is associated.
+    ///
+    /// It can be different from \c CommentDecl.  It happens when we decide
+    /// that the comment originally attached to \c CommentDecl is fine for
+    /// \c CurrentDecl too (for example, for a redeclaration or an overrider of
+    /// \c CommentDecl).
+    ///
+    /// The information in the DeclInfo corresponds to CurrentDecl.
+    const Decl *CurrentDecl;
 
-  /// Parameters that can be referenced by \\param if \c CommentDecl is something
-  /// that we consider a "function".
-  ArrayRef<const ParmVarDecl *> ParamVars;
+    /// Parameters that can be referenced by \\param if \c CommentDecl is something
+    /// that we consider a "function".
+    ArrayRef<const ParmVarDecl *> ParamVars;
 
-  /// Function return type if \c CommentDecl is something that we consider
-  /// a "function".
-  QualType ReturnType;
+    /// Function return type if \c CommentDecl is something that we consider
+    /// a "function".
+    QualType ReturnType;
 
-  /// Template parameters that can be referenced by \\tparam if \c CommentDecl is
-  /// a template (\c IsTemplateDecl or \c IsTemplatePartialSpecialization is
-  /// true).
-  const TemplateParameterList *TemplateParameters;
+    /// Template parameters that can be referenced by \\tparam if \c CommentDecl is
+    /// a template (\c IsTemplateDecl or \c IsTemplatePartialSpecialization is
+    /// true).
+    const TemplateParameterList *TemplateParameters;
 
-  /// A simplified description of \c CommentDecl kind that should be good enough
-  /// for documentation rendering purposes.
-  enum DeclKind {
-    /// Everything else not explicitly mentioned below.
-    OtherKind,
+    /// A simplified description of \c CommentDecl kind that should be good enough
+    /// for documentation rendering purposes.
+    enum DeclKind {
+        /// Everything else not explicitly mentioned below.
+        OtherKind,
 
-    /// Something that we consider a "function":
-    /// \li function,
-    /// \li function template,
-    /// \li function template specialization,
-    /// \li member function,
-    /// \li member function template,
-    /// \li member function template specialization,
-    /// \li ObjC method,
-    /// \li a typedef for a function pointer, member function pointer,
-    ///     ObjC block.
-    FunctionKind,
+        /// Something that we consider a "function":
+        /// \li function,
+        /// \li function template,
+        /// \li function template specialization,
+        /// \li member function,
+        /// \li member function template,
+        /// \li member function template specialization,
+        /// \li ObjC method,
+        /// \li a typedef for a function pointer, member function pointer,
+        ///     ObjC block.
+        FunctionKind,
 
-    /// Something that we consider a "class":
-    /// \li class/struct,
-    /// \li class template,
-    /// \li class template (partial) specialization.
-    ClassKind,
+        /// Something that we consider a "class":
+        /// \li class/struct,
+        /// \li class template,
+        /// \li class template (partial) specialization.
+        ClassKind,
 
-    /// Something that we consider a "variable":
-    /// \li namespace scope variables;
-    /// \li static and non-static class data members;
-    /// \li enumerators.
-    VariableKind,
+        /// Something that we consider a "variable":
+        /// \li namespace scope variables;
+        /// \li static and non-static class data members;
+        /// \li enumerators.
+        VariableKind,
 
-    /// A C++ namespace.
-    NamespaceKind,
+        /// A C++ namespace.
+        NamespaceKind,
 
-    /// A C++ typedef-name (a 'typedef' decl specifier or alias-declaration),
-    /// see \c TypedefNameDecl.
-    TypedefKind,
+        /// A C++ typedef-name (a 'typedef' decl specifier or alias-declaration),
+        /// see \c TypedefNameDecl.
+        TypedefKind,
 
-    /// An enumeration or scoped enumeration.
-    EnumKind
-  };
+        /// An enumeration or scoped enumeration.
+        EnumKind
+    };
 
-  /// What kind of template specialization \c CommentDecl is.
-  enum TemplateDeclKind {
-    NotTemplate,
-    Template,
-    TemplateSpecialization,
-    TemplatePartialSpecialization
-  };
+    /// What kind of template specialization \c CommentDecl is.
+    enum TemplateDeclKind {
+        NotTemplate,
+        Template,
+        TemplateSpecialization,
+        TemplatePartialSpecialization
+    };
 
-  /// If false, only \c CommentDecl is valid.
-  unsigned IsFilled : 1;
+    /// If false, only \c CommentDecl is valid.
+    unsigned IsFilled : 1;
 
-  /// Simplified kind of \c CommentDecl, see \c DeclKind enum.
-  unsigned Kind : 3;
+    /// Simplified kind of \c CommentDecl, see \c DeclKind enum.
+    unsigned Kind : 3;
 
-  /// Is \c CommentDecl a template declaration.
-  unsigned TemplateKind : 2;
+    /// Is \c CommentDecl a template declaration.
+    unsigned TemplateKind : 2;
 
-  /// Is \c CommentDecl an ObjCMethodDecl.
-  unsigned IsObjCMethod : 1;
+    /// Is \c CommentDecl an ObjCMethodDecl.
+    unsigned IsObjCMethod : 1;
 
-  /// Is \c CommentDecl a non-static member function of C++ class or
-  /// instance method of ObjC class.
-  /// Can be true only if \c IsFunctionDecl is true.
-  unsigned IsInstanceMethod : 1;
+    /// Is \c CommentDecl a non-static member function of C++ class or
+    /// instance method of ObjC class.
+    /// Can be true only if \c IsFunctionDecl is true.
+    unsigned IsInstanceMethod : 1;
 
-  /// Is \c CommentDecl a static member function of C++ class or
-  /// class method of ObjC class.
-  /// Can be true only if \c IsFunctionDecl is true.
-  unsigned IsClassMethod : 1;
+    /// Is \c CommentDecl a static member function of C++ class or
+    /// class method of ObjC class.
+    /// Can be true only if \c IsFunctionDecl is true.
+    unsigned IsClassMethod : 1;
 
-  void fill();
+    void fill();
 
-  DeclKind getKind() const LLVM_READONLY {
-    return static_cast<DeclKind>(Kind);
-  }
+    DeclKind getKind() const LLVM_READONLY {
+        return static_cast<DeclKind>(Kind);
+    }
 
-  TemplateDeclKind getTemplateKind() const LLVM_READONLY {
-    return static_cast<TemplateDeclKind>(TemplateKind);
-  }
+    TemplateDeclKind getTemplateKind() const LLVM_READONLY {
+        return static_cast<TemplateDeclKind>(TemplateKind);
+    }
 };
 
 /// A full comment attached to a declaration, contains block content.
 class FullComment : public Comment {
-  ArrayRef<BlockContentComment *> Blocks;
-  DeclInfo *ThisDeclInfo;
+    ArrayRef<BlockContentComment *> Blocks;
+    DeclInfo *ThisDeclInfo;
 
 public:
-  FullComment(ArrayRef<BlockContentComment *> Blocks, DeclInfo *D) :
-      Comment(FullCommentKind, SourceLocation(), SourceLocation()),
-      Blocks(Blocks), ThisDeclInfo(D) {
-    if (Blocks.empty())
-      return;
+    FullComment(ArrayRef<BlockContentComment *> Blocks, DeclInfo *D) :
+        Comment(FullCommentKind, SourceLocation(), SourceLocation()),
+        Blocks(Blocks), ThisDeclInfo(D) {
+        if (Blocks.empty())
+            return;
 
-    setSourceRange(
-        SourceRange(Blocks.front()->getBeginLoc(), Blocks.back()->getEndLoc()));
-    setLocation(Blocks.front()->getBeginLoc());
-  }
+        setSourceRange(
+            SourceRange(Blocks.front()->getBeginLoc(), Blocks.back()->getEndLoc()));
+        setLocation(Blocks.front()->getBeginLoc());
+    }
 
-  static bool classof(const Comment *C) {
-    return C->getCommentKind() == FullCommentKind;
-  }
+    static bool classof(const Comment *C) {
+        return C->getCommentKind() == FullCommentKind;
+    }
 
-  child_iterator child_begin() const {
-    return reinterpret_cast<child_iterator>(Blocks.begin());
-  }
+    child_iterator child_begin() const {
+        return reinterpret_cast<child_iterator>(Blocks.begin());
+    }
 
-  child_iterator child_end() const {
-    return reinterpret_cast<child_iterator>(Blocks.end());
-  }
+    child_iterator child_end() const {
+        return reinterpret_cast<child_iterator>(Blocks.end());
+    }
 
-  const Decl *getDecl() const LLVM_READONLY {
-    return ThisDeclInfo->CommentDecl;
-  }
+    const Decl *getDecl() const LLVM_READONLY {
+        return ThisDeclInfo->CommentDecl;
+    }
 
-  const DeclInfo *getDeclInfo() const LLVM_READONLY {
-    if (!ThisDeclInfo->IsFilled)
-      ThisDeclInfo->fill();
-    return ThisDeclInfo;
-  }
+    const DeclInfo *getDeclInfo() const LLVM_READONLY {
+        if (!ThisDeclInfo->IsFilled)
+            ThisDeclInfo->fill();
+        return ThisDeclInfo;
+    }
 
-  ArrayRef<BlockContentComment *> getBlocks() const { return Blocks; }
+    ArrayRef<BlockContentComment *> getBlocks() const {
+        return Blocks;
+    }
 
 };
 } // end namespace comments

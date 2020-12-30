@@ -31,23 +31,23 @@ namespace bugprone {
 /// For the user-facing documentation see:
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-reserved-identifier.html
 class ReservedIdentifierCheck final : public RenamerClangTidyCheck {
-  const bool Invert;
-  const std::vector<std::string> AllowedIdentifiers;
+    const bool Invert;
+    const std::vector<std::string> AllowedIdentifiers;
 
 public:
-  ReservedIdentifierCheck(StringRef Name, ClangTidyContext *Context);
+    ReservedIdentifierCheck(StringRef Name, ClangTidyContext *Context);
 
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-  llvm::Optional<FailureInfo>
-  GetDeclFailureInfo(const NamedDecl *Decl,
-                     const SourceManager &SM) const override;
-  llvm::Optional<FailureInfo>
-  GetMacroFailureInfo(const Token &MacroNameTok,
-                      const SourceManager &SM) const override;
-  DiagInfo GetDiagInfo(const NamingCheckId &ID,
-                       const NamingCheckFailure &Failure) const override;
+    llvm::Optional<FailureInfo>
+    GetDeclFailureInfo(const NamedDecl *Decl,
+                       const SourceManager &SM) const override;
+    llvm::Optional<FailureInfo>
+    GetMacroFailureInfo(const Token &MacroNameTok,
+                        const SourceManager &SM) const override;
+    DiagInfo GetDiagInfo(const NamingCheckId &ID,
+                         const NamingCheckFailure &Failure) const override;
 };
 
 } // namespace bugprone

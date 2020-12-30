@@ -44,16 +44,16 @@ class TargetInstrInfo;
 class TargetRegisterClass;
 class TargetRegisterInfo;
 
-  /// Scheduling dependency. This represents one direction of an edge in the
-  /// scheduling DAG.
-  class SDep {
-  public:
+/// Scheduling dependency. This represents one direction of an edge in the
+/// scheduling DAG.
+class SDep {
+public:
     /// These are the different kinds of scheduling dependencies.
     enum Kind {
-      Data,        ///< Regular data dependence (aka true-dependence).
-      Anti,        ///< A register anti-dependence (aka WAR).
-      Output,      ///< A register output-dependence (aka WAW).
-      Order        ///< Any other ordering dependency.
+        Data,        ///< Regular data dependence (aka true-dependence).
+        Anti,        ///< A register anti-dependence (aka WAR).
+        Output,      ///< A register output-dependence (aka WAW).
+        Order        ///< Any other ordering dependency.
     };
 
     // Strong dependencies must be respected by the scheduler. Artificial
@@ -66,28 +66,28 @@ class TargetRegisterInfo;
     // Strong OrderKinds must occur before "Weak".
     // Weak OrderKinds must occur after "Weak".
     enum OrderKind {
-      Barrier,      ///< An unknown scheduling barrier.
-      MayAliasMem,  ///< Nonvolatile load/Store instructions that may alias.
-      MustAliasMem, ///< Nonvolatile load/Store instructions that must alias.
-      Artificial,   ///< Arbitrary strong DAG edge (no real dependence).
-      Weak,         ///< Arbitrary weak DAG edge.
-      Cluster       ///< Weak DAG edge linking a chain of clustered instrs.
+        Barrier,      ///< An unknown scheduling barrier.
+        MayAliasMem,  ///< Nonvolatile load/Store instructions that may alias.
+        MustAliasMem, ///< Nonvolatile load/Store instructions that must alias.
+        Artificial,   ///< Arbitrary strong DAG edge (no real dependence).
+        Weak,         ///< Arbitrary weak DAG edge.
+        Cluster       ///< Weak DAG edge linking a chain of clustered instrs.
     };
 
-  private:
+private:
     /// A pointer to the depending/depended-on SUnit, and an enum
     /// indicating the kind of the dependency.
     PointerIntPair<SUnit *, 2, Kind> Dep;
 
     /// A union discriminated by the dependence kind.
     union {
-      /// For Data, Anti, and Output dependencies, the associated register. For
-      /// Data dependencies that don't currently have a register/ assigned, this
-      /// is set to zero.
-      unsigned Reg;
+        /// For Data, Anti, and Output dependencies, the associated register. For
+        /// Data dependencies that don't currently have a register/ assigned, this
+        /// is set to zero.
+        unsigned Reg;
 
-      /// Additional information about Order dependencies.
-      unsigned OrdKind; // enum OrderKind
+        /// Additional information about Order dependencies.
+        unsigned OrdKind; // enum OrderKind
     } Contents;
 
     /// The time associated with this edge. Often this is just the value of the
@@ -95,57 +95,57 @@ class TargetRegisterInfo;
     /// additional information about specific edges.
     unsigned Latency;
 
-  public:
+public:
     /// Constructs a null SDep. This is only for use by container classes which
     /// require default constructors. SUnits may not/ have null SDep edges.
     SDep() : Dep(nullptr, Data) {}
 
     /// Constructs an SDep with the specified values.
     SDep(SUnit *S, Kind kind, unsigned Reg)
-      : Dep(S, kind), Contents() {
-      switch (kind) {
-      default:
-        llvm_unreachable("Reg given for non-register dependence!");
-      case Anti:
-      case Output:
-        assert(Reg != 0 &&
-               "SDep::Anti and SDep::Output must use a non-zero Reg!");
-        Contents.Reg = Reg;
-        Latency = 0;
-        break;
-      case Data:
-        Contents.Reg = Reg;
-        Latency = 1;
-        break;
-      }
+        : Dep(S, kind), Contents() {
+        switch (kind) {
+        default:
+            llvm_unreachable("Reg given for non-register dependence!");
+        case Anti:
+        case Output:
+            assert(Reg != 0 &&
+                   "SDep::Anti and SDep::Output must use a non-zero Reg!");
+            Contents.Reg = Reg;
+            Latency = 0;
+            break;
+        case Data:
+            Contents.Reg = Reg;
+            Latency = 1;
+            break;
+        }
     }
 
     SDep(SUnit *S, OrderKind kind)
-      : Dep(S, Order), Contents(), Latency(0) {
-      Contents.OrdKind = kind;
+        : Dep(S, Order), Contents(), Latency(0) {
+        Contents.OrdKind = kind;
     }
 
     /// Returns true if the specified SDep is equivalent except for latency.
     bool overlaps(const SDep &Other) const;
 
     bool operator==(const SDep &Other) const {
-      return overlaps(Other) && Latency == Other.Latency;
+        return overlaps(Other) && Latency == Other.Latency;
     }
 
     bool operator!=(const SDep &Other) const {
-      return !operator==(Other);
+        return !operator==(Other);
     }
 
     /// Returns the latency value for this edge, which roughly means the
     /// minimum number of cycles that must elapse between the predecessor and
     /// the successor, given that they have this edge between them.
     unsigned getLatency() const {
-      return Latency;
+        return Latency;
     }
 
     /// Sets the latency for this edge.
     void setLatency(unsigned Lat) {
-      Latency = Lat;
+        Latency = Lat;
     }
 
     //// Returns the SUnit to which this edge points.
@@ -159,32 +159,32 @@ class TargetRegisterInfo;
 
     /// Shorthand for getKind() != SDep::Data.
     bool isCtrl() const {
-      return getKind() != Data;
+        return getKind() != Data;
     }
 
     /// Tests if this is an Order dependence between two memory accesses
     /// where both sides of the dependence access memory in non-volatile and
     /// fully modeled ways.
     bool isNormalMemory() const {
-      return getKind() == Order && (Contents.OrdKind == MayAliasMem
-                                    || Contents.OrdKind == MustAliasMem);
+        return getKind() == Order && (Contents.OrdKind == MayAliasMem
+                                      || Contents.OrdKind == MustAliasMem);
     }
 
     /// Tests if this is an Order dependence that is marked as a barrier.
     bool isBarrier() const {
-      return getKind() == Order && Contents.OrdKind == Barrier;
+        return getKind() == Order && Contents.OrdKind == Barrier;
     }
 
     /// Tests if this is could be any kind of memory dependence.
     bool isNormalMemoryOrBarrier() const {
-      return (isNormalMemory() || isBarrier());
+        return (isNormalMemory() || isBarrier());
     }
 
     /// Tests if this is an Order dependence that is marked as
     /// "must alias", meaning that the SUnits at either end of the edge have a
     /// memory dependence on a known memory location.
     bool isMustAlias() const {
-      return getKind() == Order && Contents.OrdKind == MustAliasMem;
+        return getKind() == Order && Contents.OrdKind == MustAliasMem;
     }
 
     /// Tests if this a weak dependence. Weak dependencies are considered DAG
@@ -192,33 +192,33 @@ class TargetRegisterInfo;
     /// ordering. Breaking a weak edge may require the scheduler to compensate,
     /// for example by inserting a copy.
     bool isWeak() const {
-      return getKind() == Order && Contents.OrdKind >= Weak;
+        return getKind() == Order && Contents.OrdKind >= Weak;
     }
 
     /// Tests if this is an Order dependence that is marked as
     /// "artificial", meaning it isn't necessary for correctness.
     bool isArtificial() const {
-      return getKind() == Order && Contents.OrdKind == Artificial;
+        return getKind() == Order && Contents.OrdKind == Artificial;
     }
 
     /// Tests if this is an Order dependence that is marked as "cluster",
     /// meaning it is artificial and wants to be adjacent.
     bool isCluster() const {
-      return getKind() == Order && Contents.OrdKind == Cluster;
+        return getKind() == Order && Contents.OrdKind == Cluster;
     }
 
     /// Tests if this is a Data dependence that is associated with a register.
     bool isAssignedRegDep() const {
-      return getKind() == Data && Contents.Reg != 0;
+        return getKind() == Data && Contents.Reg != 0;
     }
 
     /// Returns the register associated with this edge. This is only valid on
     /// Data, Anti, and Output edges. On Data edges, this value may be zero,
     /// meaning there is no associated register.
     unsigned getReg() const {
-      assert((getKind() == Data || getKind() == Anti || getKind() == Output) &&
-             "getReg called on non-register dependence edge!");
-      return Contents.Reg;
+        assert((getKind() == Data || getKind() == Anti || getKind() == Output) &&
+               "getReg called on non-register dependence edge!");
+        return Contents.Reg;
     }
 
     /// Assigns the associated register for this edge. This is only valid on
@@ -226,29 +226,29 @@ class TargetRegisterInfo;
     /// not be zero. On Data edges, the value may be zero, which would mean that
     /// no specific register is associated with this edge.
     void setReg(unsigned Reg) {
-      assert((getKind() == Data || getKind() == Anti || getKind() == Output) &&
-             "setReg called on non-register dependence edge!");
-      assert((getKind() != Anti || Reg != 0) &&
-             "SDep::Anti edge cannot use the zero register!");
-      assert((getKind() != Output || Reg != 0) &&
-             "SDep::Output edge cannot use the zero register!");
-      Contents.Reg = Reg;
+        assert((getKind() == Data || getKind() == Anti || getKind() == Output) &&
+               "setReg called on non-register dependence edge!");
+        assert((getKind() != Anti || Reg != 0) &&
+               "SDep::Anti edge cannot use the zero register!");
+        assert((getKind() != Output || Reg != 0) &&
+               "SDep::Output edge cannot use the zero register!");
+        Contents.Reg = Reg;
     }
 
     void dump(const TargetRegisterInfo *TRI = nullptr) const;
-  };
+};
 
-  /// Scheduling unit. This is a node in the scheduling DAG.
-  class SUnit {
-  private:
+/// Scheduling unit. This is a node in the scheduling DAG.
+class SUnit {
+private:
     enum : unsigned { BoundaryID = ~0u };
 
     SDNode *Node = nullptr;        ///< Representative node.
     MachineInstr *Instr = nullptr; ///< Alternatively, a MachineInstr.
 
-  public:
+public:
     SUnit *OrigNode = nullptr; ///< If not this, the node from which this node
-                               /// was cloned. (SD scheduling only)
+    /// was cloned. (SD scheduling only)
 
     const MCSchedClassDesc *SchedClass =
         nullptr; ///< nullptr or resolved SchedClass.
@@ -289,13 +289,13 @@ class TargetRegisterInfo;
     bool hasReservedResource : 1;      ///< Uses a reserved resource.
     Sched::Preference SchedulingPref = Sched::None; ///< Scheduling preference.
 
-  private:
+private:
     bool isDepthCurrent   : 1;         ///< True if Depth is current.
     bool isHeightCurrent  : 1;         ///< True if Height is current.
     unsigned Depth = 0;                ///< Node depth.
     unsigned Height = 0;               ///< Node height.
 
-  public:
+public:
     unsigned TopReadyCycle = 0; ///< Cycle relative to start when node is ready.
     unsigned BotReadyCycle = 0; ///< Cycle relative to end when node is ready.
 
@@ -306,33 +306,33 @@ class TargetRegisterInfo;
     /// Constructs an SUnit for pre-regalloc scheduling to represent an
     /// SDNode and any nodes flagged to it.
     SUnit(SDNode *node, unsigned nodenum)
-      : Node(node), NodeNum(nodenum), isVRegCycle(false), isCall(false),
-        isCallOp(false), isTwoAddress(false), isCommutable(false),
-        hasPhysRegUses(false), hasPhysRegDefs(false), hasPhysRegClobbers(false),
-        isPending(false), isAvailable(false), isScheduled(false),
-        isScheduleHigh(false), isScheduleLow(false), isCloned(false),
-        isUnbuffered(false), hasReservedResource(false), isDepthCurrent(false),
-        isHeightCurrent(false) {}
+        : Node(node), NodeNum(nodenum), isVRegCycle(false), isCall(false),
+          isCallOp(false), isTwoAddress(false), isCommutable(false),
+          hasPhysRegUses(false), hasPhysRegDefs(false), hasPhysRegClobbers(false),
+          isPending(false), isAvailable(false), isScheduled(false),
+          isScheduleHigh(false), isScheduleLow(false), isCloned(false),
+          isUnbuffered(false), hasReservedResource(false), isDepthCurrent(false),
+          isHeightCurrent(false) {}
 
     /// Constructs an SUnit for post-regalloc scheduling to represent a
     /// MachineInstr.
     SUnit(MachineInstr *instr, unsigned nodenum)
-      : Instr(instr), NodeNum(nodenum), isVRegCycle(false), isCall(false),
-        isCallOp(false), isTwoAddress(false), isCommutable(false),
-        hasPhysRegUses(false), hasPhysRegDefs(false), hasPhysRegClobbers(false),
-        isPending(false), isAvailable(false), isScheduled(false),
-        isScheduleHigh(false), isScheduleLow(false), isCloned(false),
-        isUnbuffered(false), hasReservedResource(false), isDepthCurrent(false),
-        isHeightCurrent(false) {}
+        : Instr(instr), NodeNum(nodenum), isVRegCycle(false), isCall(false),
+          isCallOp(false), isTwoAddress(false), isCommutable(false),
+          hasPhysRegUses(false), hasPhysRegDefs(false), hasPhysRegClobbers(false),
+          isPending(false), isAvailable(false), isScheduled(false),
+          isScheduleHigh(false), isScheduleLow(false), isCloned(false),
+          isUnbuffered(false), hasReservedResource(false), isDepthCurrent(false),
+          isHeightCurrent(false) {}
 
     /// Constructs a placeholder SUnit.
     SUnit()
-      : isVRegCycle(false), isCall(false), isCallOp(false), isTwoAddress(false),
-        isCommutable(false), hasPhysRegUses(false), hasPhysRegDefs(false),
-        hasPhysRegClobbers(false), isPending(false), isAvailable(false),
-        isScheduled(false), isScheduleHigh(false), isScheduleLow(false),
-        isCloned(false), isUnbuffered(false), hasReservedResource(false),
-        isDepthCurrent(false), isHeightCurrent(false) {}
+        : isVRegCycle(false), isCall(false), isCallOp(false), isTwoAddress(false),
+          isCommutable(false), hasPhysRegUses(false), hasPhysRegDefs(false),
+          hasPhysRegClobbers(false), isPending(false), isAvailable(false),
+          isScheduled(false), isScheduleHigh(false), isScheduleLow(false),
+          isCloned(false), isUnbuffered(false), hasReservedResource(false),
+          isDepthCurrent(false), isHeightCurrent(false) {}
 
     /// Boundary nodes are placeholders for the boundary of the
     /// scheduling region.
@@ -341,38 +341,42 @@ class TargetRegisterInfo;
     /// correspond to schedulable entities (e.g. instructions) and do not have a
     /// valid ID. Consequently, always check for boundary nodes before accessing
     /// an associative data structure keyed on node ID.
-    bool isBoundaryNode() const { return NodeNum == BoundaryID; }
+    bool isBoundaryNode() const {
+        return NodeNum == BoundaryID;
+    }
 
     /// Assigns the representative SDNode for this SUnit. This may be used
     /// during pre-regalloc scheduling.
     void setNode(SDNode *N) {
-      assert(!Instr && "Setting SDNode of SUnit with MachineInstr!");
-      Node = N;
+        assert(!Instr && "Setting SDNode of SUnit with MachineInstr!");
+        Node = N;
     }
 
     /// Returns the representative SDNode for this SUnit. This may be used
     /// during pre-regalloc scheduling.
     SDNode *getNode() const {
-      assert(!Instr && "Reading SDNode of SUnit with MachineInstr!");
-      return Node;
+        assert(!Instr && "Reading SDNode of SUnit with MachineInstr!");
+        return Node;
     }
 
     /// Returns true if this SUnit refers to a machine instruction as
     /// opposed to an SDNode.
-    bool isInstr() const { return Instr; }
+    bool isInstr() const {
+        return Instr;
+    }
 
     /// Assigns the instruction for the SUnit. This may be used during
     /// post-regalloc scheduling.
     void setInstr(MachineInstr *MI) {
-      assert(!Node && "Setting MachineInstr of SUnit with SDNode!");
-      Instr = MI;
+        assert(!Node && "Setting MachineInstr of SUnit with SDNode!");
+        Instr = MI;
     }
 
     /// Returns the representative MachineInstr for this SUnit. This may be used
     /// during post-regalloc scheduling.
     MachineInstr *getInstr() const {
-      assert(!Node && "Reading MachineInstr of SUnit with SDNode!");
-      return Instr;
+        assert(!Node && "Reading MachineInstr of SUnit with SDNode!");
+        return Instr;
     }
 
     /// Adds the specified edge as a pred of the current node if not already.
@@ -382,11 +386,11 @@ class TargetRegisterInfo;
     /// Adds a barrier edge to SU by calling addPred(), with latency 0
     /// generally or latency 1 for a store followed by a load.
     bool addPredBarrier(SUnit *SU) {
-      SDep Dep(SU, SDep::Barrier);
-      unsigned TrueMemOrderLatency =
-        ((SU->getInstr()->mayStore() && this->getInstr()->mayLoad()) ? 1 : 0);
-      Dep.setLatency(TrueMemOrderLatency);
-      return addPred(Dep);
+        SDep Dep(SU, SDep::Barrier);
+        unsigned TrueMemOrderLatency =
+            ((SU->getInstr()->mayStore() && this->getInstr()->mayLoad()) ? 1 : 0);
+        Dep.setLatency(TrueMemOrderLatency);
+        return addPred(Dep);
     }
 
     /// Removes the specified edge as a pred of the current node if it exists.
@@ -396,17 +400,17 @@ class TargetRegisterInfo;
     /// Returns the depth of this node, which is the length of the maximum path
     /// up to any node which has no predecessors.
     unsigned getDepth() const {
-      if (!isDepthCurrent)
-        const_cast<SUnit *>(this)->ComputeDepth();
-      return Depth;
+        if (!isDepthCurrent)
+            const_cast<SUnit *>(this)->ComputeDepth();
+        return Depth;
     }
 
     /// Returns the height of this node, which is the length of the
     /// maximum path down to any node which has no successors.
     unsigned getHeight() const {
-      if (!isHeightCurrent)
-        const_cast<SUnit *>(this)->ComputeHeight();
-      return Height;
+        if (!isHeightCurrent)
+            const_cast<SUnit *>(this)->ComputeHeight();
+        return Height;
     }
 
     /// If NewDepth is greater than this node's depth value, sets it to
@@ -429,25 +433,25 @@ class TargetRegisterInfo;
 
     /// Tests if node N is a predecessor of this node.
     bool isPred(const SUnit *N) const {
-      for (const SDep &Pred : Preds)
-        if (Pred.getSUnit() == N)
-          return true;
-      return false;
+        for (const SDep &Pred : Preds)
+            if (Pred.getSUnit() == N)
+                return true;
+        return false;
     }
 
     /// Tests if node N is a successor of this node.
     bool isSucc(const SUnit *N) const {
-      for (const SDep &Succ : Succs)
-        if (Succ.getSUnit() == N)
-          return true;
-      return false;
+        for (const SDep &Succ : Succs)
+            if (Succ.getSUnit() == N)
+                return true;
+        return false;
     }
 
     bool isTopReady() const {
-      return NumPredsLeft == 0;
+        return NumPredsLeft == 0;
     }
     bool isBottomReady() const {
-      return NumSuccsLeft == 0;
+        return NumSuccsLeft == 0;
     }
 
     /// Orders this node's predecessor edges such that the critical path
@@ -456,50 +460,56 @@ class TargetRegisterInfo;
 
     void dumpAttributes() const;
 
-  private:
+private:
     void ComputeDepth();
     void ComputeHeight();
-  };
+};
 
-  /// Returns true if the specified SDep is equivalent except for latency.
-  inline bool SDep::overlaps(const SDep &Other) const {
+/// Returns true if the specified SDep is equivalent except for latency.
+inline bool SDep::overlaps(const SDep &Other) const {
     if (Dep != Other.Dep)
-      return false;
+        return false;
     switch (Dep.getInt()) {
     case Data:
     case Anti:
     case Output:
-      return Contents.Reg == Other.Contents.Reg;
+        return Contents.Reg == Other.Contents.Reg;
     case Order:
-      return Contents.OrdKind == Other.Contents.OrdKind;
+        return Contents.OrdKind == Other.Contents.OrdKind;
     }
     llvm_unreachable("Invalid dependency kind!");
-  }
+}
 
-  //// Returns the SUnit to which this edge points.
-  inline SUnit *SDep::getSUnit() const { return Dep.getPointer(); }
+//// Returns the SUnit to which this edge points.
+inline SUnit *SDep::getSUnit() const {
+    return Dep.getPointer();
+}
 
-  //// Assigns the SUnit to which this edge points.
-  inline void SDep::setSUnit(SUnit *SU) { Dep.setPointer(SU); }
+//// Assigns the SUnit to which this edge points.
+inline void SDep::setSUnit(SUnit *SU) {
+    Dep.setPointer(SU);
+}
 
-  /// Returns an enum value representing the kind of the dependence.
-  inline SDep::Kind SDep::getKind() const { return Dep.getInt(); }
+/// Returns an enum value representing the kind of the dependence.
+inline SDep::Kind SDep::getKind() const {
+    return Dep.getInt();
+}
 
-  //===--------------------------------------------------------------------===//
+//===--------------------------------------------------------------------===//
 
-  /// This interface is used to plug different priorities computation
-  /// algorithms into the list scheduler. It implements the interface of a
-  /// standard priority queue, where nodes are inserted in arbitrary order and
-  /// returned in priority order.  The computation of the priority and the
-  /// representation of the queue are totally up to the implementation to
-  /// decide.
-  class SchedulingPriorityQueue {
+/// This interface is used to plug different priorities computation
+/// algorithms into the list scheduler. It implements the interface of a
+/// standard priority queue, where nodes are inserted in arbitrary order and
+/// returned in priority order.  The computation of the priority and the
+/// representation of the queue are totally up to the implementation to
+/// decide.
+class SchedulingPriorityQueue {
     virtual void anchor();
 
     unsigned CurCycle = 0;
     bool HasReadyFilter;
 
-  public:
+public:
     SchedulingPriorityQueue(bool rf = false) :  HasReadyFilter(rf) {}
 
     virtual ~SchedulingPriorityQueue() = default;
@@ -513,21 +523,25 @@ class TargetRegisterInfo;
 
     virtual bool empty() const = 0;
 
-    bool hasReadyFilter() const { return HasReadyFilter; }
+    bool hasReadyFilter() const {
+        return HasReadyFilter;
+    }
 
-    virtual bool tracksRegPressure() const { return false; }
+    virtual bool tracksRegPressure() const {
+        return false;
+    }
 
     virtual bool isReady(SUnit *) const {
-      assert(!HasReadyFilter && "The ready filter must override isReady()");
-      return true;
+        assert(!HasReadyFilter && "The ready filter must override isReady()");
+        return true;
     }
 
     virtual void push(SUnit *U) = 0;
 
     void push_all(const std::vector<SUnit *> &Nodes) {
-      for (std::vector<SUnit *>::const_iterator I = Nodes.begin(),
-           E = Nodes.end(); I != E; ++I)
-        push(*I);
+        for (std::vector<SUnit *>::const_iterator I = Nodes.begin(),
+                E = Nodes.end(); I != E; ++I)
+            push(*I);
     }
 
     virtual SUnit *pop() = 0;
@@ -544,16 +558,16 @@ class TargetRegisterInfo;
     virtual void unscheduledNode(SUnit *) {}
 
     void setCurCycle(unsigned Cycle) {
-      CurCycle = Cycle;
+        CurCycle = Cycle;
     }
 
     unsigned getCurCycle() const {
-      return CurCycle;
+        return CurCycle;
     }
-  };
+};
 
-  class ScheduleDAG {
-  public:
+class ScheduleDAG {
+public:
     const LLVMTargetMachine &TM;        ///< Target processor
     const TargetInstrInfo *TII;         ///< Target instruction information
     const TargetRegisterInfo *TRI;      ///< Target processor register info
@@ -579,8 +593,8 @@ class TargetRegisterInfo;
     /// Returns the MCInstrDesc of this SUnit.
     /// Returns NULL for SDNodes without a machine opcode.
     const MCInstrDesc *getInstrDesc(const SUnit *SU) const {
-      if (SU->isInstr()) return &SU->getInstr()->getDesc();
-      return getNodeDesc(SU->getNode());
+        if (SU->isInstr()) return &SU->getInstr()->getDesc();
+        return getNodeDesc(SU->getNode());
     }
 
     /// Pops up a GraphViz/gv window with the ScheduleDAG rendered using 'dot'.
@@ -606,87 +620,101 @@ class TargetRegisterInfo;
     unsigned VerifyScheduledDAG(bool isBottomUp);
 #endif
 
-  protected:
+protected:
     void dumpNodeAll(const SUnit &SU) const;
 
-  private:
+private:
     /// Returns the MCInstrDesc of this SDNode or NULL.
     const MCInstrDesc *getNodeDesc(const SDNode *Node) const;
-  };
+};
 
-  class SUnitIterator : public std::iterator<std::forward_iterator_tag,
-                                             SUnit, ptrdiff_t> {
+class SUnitIterator : public std::iterator<std::forward_iterator_tag,
+    SUnit, ptrdiff_t> {
     SUnit *Node;
     unsigned Operand;
 
     SUnitIterator(SUnit *N, unsigned Op) : Node(N), Operand(Op) {}
 
-  public:
+public:
     bool operator==(const SUnitIterator& x) const {
-      return Operand == x.Operand;
+        return Operand == x.Operand;
     }
-    bool operator!=(const SUnitIterator& x) const { return !operator==(x); }
+    bool operator!=(const SUnitIterator& x) const {
+        return !operator==(x);
+    }
 
     pointer operator*() const {
-      return Node->Preds[Operand].getSUnit();
+        return Node->Preds[Operand].getSUnit();
     }
-    pointer operator->() const { return operator*(); }
+    pointer operator->() const {
+        return operator*();
+    }
 
     SUnitIterator& operator++() {                // Preincrement
-      ++Operand;
-      return *this;
+        ++Operand;
+        return *this;
     }
     SUnitIterator operator++(int) { // Postincrement
-      SUnitIterator tmp = *this; ++*this; return tmp;
+        SUnitIterator tmp = *this;
+        ++*this;
+        return tmp;
     }
 
-    static SUnitIterator begin(SUnit *N) { return SUnitIterator(N, 0); }
+    static SUnitIterator begin(SUnit *N) {
+        return SUnitIterator(N, 0);
+    }
     static SUnitIterator end  (SUnit *N) {
-      return SUnitIterator(N, (unsigned)N->Preds.size());
+        return SUnitIterator(N, (unsigned)N->Preds.size());
     }
 
-    unsigned getOperand() const { return Operand; }
-    const SUnit *getNode() const { return Node; }
+    unsigned getOperand() const {
+        return Operand;
+    }
+    const SUnit *getNode() const {
+        return Node;
+    }
 
     /// Tests if this is not an SDep::Data dependence.
     bool isCtrlDep() const {
-      return getSDep().isCtrl();
+        return getSDep().isCtrl();
     }
     bool isArtificialDep() const {
-      return getSDep().isArtificial();
+        return getSDep().isArtificial();
     }
     const SDep &getSDep() const {
-      return Node->Preds[Operand];
+        return Node->Preds[Operand];
     }
-  };
+};
 
-  template <> struct GraphTraits<SUnit*> {
+template <> struct GraphTraits<SUnit*> {
     typedef SUnit *NodeRef;
     typedef SUnitIterator ChildIteratorType;
-    static NodeRef getEntryNode(SUnit *N) { return N; }
+    static NodeRef getEntryNode(SUnit *N) {
+        return N;
+    }
     static ChildIteratorType child_begin(NodeRef N) {
-      return SUnitIterator::begin(N);
+        return SUnitIterator::begin(N);
     }
     static ChildIteratorType child_end(NodeRef N) {
-      return SUnitIterator::end(N);
+        return SUnitIterator::end(N);
     }
-  };
+};
 
-  template <> struct GraphTraits<ScheduleDAG*> : public GraphTraits<SUnit*> {
+template <> struct GraphTraits<ScheduleDAG*> : public GraphTraits<SUnit*> {
     typedef pointer_iterator<std::vector<SUnit>::iterator> nodes_iterator;
     static nodes_iterator nodes_begin(ScheduleDAG *G) {
-      return nodes_iterator(G->SUnits.begin());
+        return nodes_iterator(G->SUnits.begin());
     }
     static nodes_iterator nodes_end(ScheduleDAG *G) {
-      return nodes_iterator(G->SUnits.end());
+        return nodes_iterator(G->SUnits.end());
     }
-  };
+};
 
-  /// This class can compute a topological ordering for SUnits and provides
-  /// methods for dynamically updating the ordering as new edges are added.
-  ///
-  /// This allows a very fast implementation of IsReachable, for example.
-  class ScheduleDAGTopologicalSort {
+/// This class can compute a topological ordering for SUnits and provides
+/// methods for dynamically updating the ordering as new edges are added.
+///
+/// This allows a very fast implementation of IsReachable, for example.
+class ScheduleDAGTopologicalSort {
     /// A reference to the ScheduleDAG's SUnits.
     std::vector<SUnit> &SUnits;
     SUnit *ExitSU;
@@ -721,7 +749,7 @@ class TargetRegisterInfo;
     /// cheaper.
     void FixOrder();
 
-  public:
+public:
     ScheduleDAGTopologicalSort(std::vector<SUnit> &SUnits, SUnit *ExitSU);
 
     /// Add a SUnit without predecessors to the end of the topological order. It
@@ -760,22 +788,40 @@ class TargetRegisterInfo;
 
     /// Mark the ordering as temporarily broken, after a new node has been
     /// added.
-    void MarkDirty() { Dirty = true; }
+    void MarkDirty() {
+        Dirty = true;
+    }
 
     typedef std::vector<int>::iterator iterator;
     typedef std::vector<int>::const_iterator const_iterator;
-    iterator begin() { return Index2Node.begin(); }
-    const_iterator begin() const { return Index2Node.begin(); }
-    iterator end() { return Index2Node.end(); }
-    const_iterator end() const { return Index2Node.end(); }
+    iterator begin() {
+        return Index2Node.begin();
+    }
+    const_iterator begin() const {
+        return Index2Node.begin();
+    }
+    iterator end() {
+        return Index2Node.end();
+    }
+    const_iterator end() const {
+        return Index2Node.end();
+    }
 
     typedef std::vector<int>::reverse_iterator reverse_iterator;
     typedef std::vector<int>::const_reverse_iterator const_reverse_iterator;
-    reverse_iterator rbegin() { return Index2Node.rbegin(); }
-    const_reverse_iterator rbegin() const { return Index2Node.rbegin(); }
-    reverse_iterator rend() { return Index2Node.rend(); }
-    const_reverse_iterator rend() const { return Index2Node.rend(); }
-  };
+    reverse_iterator rbegin() {
+        return Index2Node.rbegin();
+    }
+    const_reverse_iterator rbegin() const {
+        return Index2Node.rbegin();
+    }
+    reverse_iterator rend() {
+        return Index2Node.rend();
+    }
+    const_reverse_iterator rend() const {
+        return Index2Node.rend();
+    }
+};
 
 } // end namespace llvm
 

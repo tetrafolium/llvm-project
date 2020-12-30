@@ -26,18 +26,18 @@ using namespace llvm;
 #define DEBUG_TYPE "finalize-isel"
 
 namespace {
-  class FinalizeISel : public MachineFunctionPass {
-  public:
+class FinalizeISel : public MachineFunctionPass {
+public:
     static char ID; // Pass identification, replacement for typeid
     FinalizeISel() : MachineFunctionPass(ID) {}
 
-  private:
+private:
     bool runOnMachineFunction(MachineFunction &MF) override;
 
     void getAnalysisUsage(AnalysisUsage &AU) const override {
-      MachineFunctionPass::getAnalysisUsage(AU);
+        MachineFunctionPass::getAnalysisUsage(AU);
     }
-  };
+};
 } // end anonymous namespace
 
 char FinalizeISel::ID = 0;
@@ -46,32 +46,32 @@ INITIALIZE_PASS(FinalizeISel, DEBUG_TYPE,
                 "Finalize ISel and expand pseudo-instructions", false, false)
 
 bool FinalizeISel::runOnMachineFunction(MachineFunction &MF) {
-  bool Changed = false;
-  const TargetLowering *TLI = MF.getSubtarget().getTargetLowering();
+    bool Changed = false;
+    const TargetLowering *TLI = MF.getSubtarget().getTargetLowering();
 
-  // Iterate through each instruction in the function, looking for pseudos.
-  for (MachineFunction::iterator I = MF.begin(), E = MF.end(); I != E; ++I) {
-    MachineBasicBlock *MBB = &*I;
-    for (MachineBasicBlock::iterator MBBI = MBB->begin(), MBBE = MBB->end();
-         MBBI != MBBE; ) {
-      MachineInstr &MI = *MBBI++;
+    // Iterate through each instruction in the function, looking for pseudos.
+    for (MachineFunction::iterator I = MF.begin(), E = MF.end(); I != E; ++I) {
+        MachineBasicBlock *MBB = &*I;
+        for (MachineBasicBlock::iterator MBBI = MBB->begin(), MBBE = MBB->end();
+                MBBI != MBBE; ) {
+            MachineInstr &MI = *MBBI++;
 
-      // If MI is a pseudo, expand it.
-      if (MI.usesCustomInsertionHook()) {
-        Changed = true;
-        MachineBasicBlock *NewMBB = TLI->EmitInstrWithCustomInserter(MI, MBB);
-        // The expansion may involve new basic blocks.
-        if (NewMBB != MBB) {
-          MBB = NewMBB;
-          I = NewMBB->getIterator();
-          MBBI = NewMBB->begin();
-          MBBE = NewMBB->end();
+            // If MI is a pseudo, expand it.
+            if (MI.usesCustomInsertionHook()) {
+                Changed = true;
+                MachineBasicBlock *NewMBB = TLI->EmitInstrWithCustomInserter(MI, MBB);
+                // The expansion may involve new basic blocks.
+                if (NewMBB != MBB) {
+                    MBB = NewMBB;
+                    I = NewMBB->getIterator();
+                    MBBI = NewMBB->begin();
+                    MBBE = NewMBB->end();
+                }
+            }
         }
-      }
     }
-  }
 
-  TLI->finalizeLowering(MF);
+    TLI->finalizeLowering(MF);
 
-  return Changed;
+    return Changed;
 }

@@ -21,10 +21,10 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-suspicious-memset-usage.html
 class SuspiciousMemsetUsageCheck : public ClangTidyCheck {
 public:
-  SuspiciousMemsetUsageCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    SuspiciousMemsetUsageCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace bugprone

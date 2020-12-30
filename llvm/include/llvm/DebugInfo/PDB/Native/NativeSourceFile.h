@@ -20,20 +20,20 @@ class NativeSession;
 
 class NativeSourceFile : public IPDBSourceFile {
 public:
-  explicit NativeSourceFile(NativeSession &Session, uint32_t FileId,
-                            const codeview::FileChecksumEntry &Checksum);
+    explicit NativeSourceFile(NativeSession &Session, uint32_t FileId,
+                              const codeview::FileChecksumEntry &Checksum);
 
-  std::string getFileName() const override;
-  uint32_t getUniqueId() const override;
-  std::string getChecksum() const override;
-  PDB_Checksum getChecksumType() const override;
-  std::unique_ptr<IPDBEnumChildren<PDBSymbolCompiland>>
-  getCompilands() const override;
+    std::string getFileName() const override;
+    uint32_t getUniqueId() const override;
+    std::string getChecksum() const override;
+    PDB_Checksum getChecksumType() const override;
+    std::unique_ptr<IPDBEnumChildren<PDBSymbolCompiland>>
+            getCompilands() const override;
 
 private:
-  NativeSession &Session;
-  uint32_t FileId;
-  const codeview::FileChecksumEntry Checksum;
+    NativeSession &Session;
+    uint32_t FileId;
+    const codeview::FileChecksumEntry Checksum;
 };
 } // namespace pdb
 } // namespace llvm

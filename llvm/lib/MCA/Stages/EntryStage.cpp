@@ -19,58 +19,58 @@ namespace llvm {
 namespace mca {
 
 bool EntryStage::hasWorkToComplete() const {
-  return static_cast<bool>(CurrentInstruction);
+    return static_cast<bool>(CurrentInstruction);
 }
 
 bool EntryStage::isAvailable(const InstRef & /* unused */) const {
-  if (CurrentInstruction)
-    return checkNextStage(CurrentInstruction);
-  return false;
+    if (CurrentInstruction)
+        return checkNextStage(CurrentInstruction);
+    return false;
 }
 
 void EntryStage::getNextInstruction() {
-  assert(!CurrentInstruction && "There is already an instruction to process!");
-  if (!SM.hasNext())
-    return;
-  SourceRef SR = SM.peekNext();
-  std::unique_ptr<Instruction> Inst = std::make_unique<Instruction>(SR.second);
-  CurrentInstruction = InstRef(SR.first, Inst.get());
-  Instructions.emplace_back(std::move(Inst));
-  SM.updateNext();
+    assert(!CurrentInstruction && "There is already an instruction to process!");
+    if (!SM.hasNext())
+        return;
+    SourceRef SR = SM.peekNext();
+    std::unique_ptr<Instruction> Inst = std::make_unique<Instruction>(SR.second);
+    CurrentInstruction = InstRef(SR.first, Inst.get());
+    Instructions.emplace_back(std::move(Inst));
+    SM.updateNext();
 }
 
 llvm::Error EntryStage::execute(InstRef & /*unused */) {
-  assert(CurrentInstruction && "There is no instruction to process!");
-  if (llvm::Error Val = moveToTheNextStage(CurrentInstruction))
-    return Val;
+    assert(CurrentInstruction && "There is no instruction to process!");
+    if (llvm::Error Val = moveToTheNextStage(CurrentInstruction))
+        return Val;
 
-  // Move the program counter.
-  CurrentInstruction.invalidate();
-  getNextInstruction();
-  return llvm::ErrorSuccess();
+    // Move the program counter.
+    CurrentInstruction.invalidate();
+    getNextInstruction();
+    return llvm::ErrorSuccess();
 }
 
 llvm::Error EntryStage::cycleStart() {
-  if (!CurrentInstruction)
-    getNextInstruction();
-  return llvm::ErrorSuccess();
+    if (!CurrentInstruction)
+        getNextInstruction();
+    return llvm::ErrorSuccess();
 }
 
 llvm::Error EntryStage::cycleEnd() {
-  // Find the first instruction which hasn't been retired.
-  auto Range = make_range(&Instructions[NumRetired], Instructions.end());
-  auto It = find_if(Range, [](const std::unique_ptr<Instruction> &I) {
-    return !I->isRetired();
-  });
+    // Find the first instruction which hasn't been retired.
+    auto Range = make_range(&Instructions[NumRetired], Instructions.end());
+    auto It = find_if(Range, [](const std::unique_ptr<Instruction> &I) {
+        return !I->isRetired();
+    });
 
-  NumRetired = std::distance(Instructions.begin(), It);
-  // Erase instructions up to the first that hasn't been retired.
-  if ((NumRetired * 2) >= Instructions.size()) {
-    Instructions.erase(Instructions.begin(), It);
-    NumRetired = 0;
-  }
+    NumRetired = std::distance(Instructions.begin(), It);
+    // Erase instructions up to the first that hasn't been retired.
+    if ((NumRetired * 2) >= Instructions.size()) {
+        Instructions.erase(Instructions.begin(), It);
+        NumRetired = 0;
+    }
 
-  return llvm::ErrorSuccess();
+    return llvm::ErrorSuccess();
 }
 
 } // namespace mca

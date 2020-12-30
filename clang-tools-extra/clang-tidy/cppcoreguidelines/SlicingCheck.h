@@ -26,15 +26,15 @@ namespace cppcoreguidelines {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines-slicing.html
 class SlicingCheck : public ClangTidyCheck {
 public:
-  SlicingCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    SlicingCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void DiagnoseSlicedOverriddenMethods(const Expr &call,
-                                       const CXXRecordDecl &DerivedDecl,
-                                       const CXXRecordDecl &BaseDecl);
+    void DiagnoseSlicedOverriddenMethods(const Expr &call,
+                                         const CXXRecordDecl &DerivedDecl,
+                                         const CXXRecordDecl &BaseDecl);
 };
 
 } // namespace cppcoreguidelines

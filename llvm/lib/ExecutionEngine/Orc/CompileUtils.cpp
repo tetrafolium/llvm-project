@@ -26,68 +26,68 @@ namespace orc {
 
 IRSymbolMapper::ManglingOptions
 irManglingOptionsFromTargetOptions(const TargetOptions &Opts) {
-  IRSymbolMapper::ManglingOptions MO;
+    IRSymbolMapper::ManglingOptions MO;
 
-  MO.EmulatedTLS = Opts.EmulatedTLS;
+    MO.EmulatedTLS = Opts.EmulatedTLS;
 
-  return MO;
+    return MO;
 }
 
 /// Compile a Module to an ObjectFile.
 Expected<SimpleCompiler::CompileResult> SimpleCompiler::operator()(Module &M) {
-  CompileResult CachedObject = tryToLoadFromObjectCache(M);
-  if (CachedObject)
-    return std::move(CachedObject);
+    CompileResult CachedObject = tryToLoadFromObjectCache(M);
+    if (CachedObject)
+        return std::move(CachedObject);
 
-  SmallVector<char, 0> ObjBufferSV;
+    SmallVector<char, 0> ObjBufferSV;
 
-  {
-    raw_svector_ostream ObjStream(ObjBufferSV);
+    {
+        raw_svector_ostream ObjStream(ObjBufferSV);
 
-    legacy::PassManager PM;
-    MCContext *Ctx;
-    if (TM.addPassesToEmitMC(PM, Ctx, ObjStream))
-      return make_error<StringError>("Target does not support MC emission",
-                                     inconvertibleErrorCode());
-    PM.run(M);
-  }
+        legacy::PassManager PM;
+        MCContext *Ctx;
+        if (TM.addPassesToEmitMC(PM, Ctx, ObjStream))
+            return make_error<StringError>("Target does not support MC emission",
+                                           inconvertibleErrorCode());
+        PM.run(M);
+    }
 
-  auto ObjBuffer = std::make_unique<SmallVectorMemoryBuffer>(
-      std::move(ObjBufferSV), M.getModuleIdentifier() + "-jitted-objectbuffer");
+    auto ObjBuffer = std::make_unique<SmallVectorMemoryBuffer>(
+                         std::move(ObjBufferSV), M.getModuleIdentifier() + "-jitted-objectbuffer");
 
-  auto Obj = object::ObjectFile::createObjectFile(ObjBuffer->getMemBufferRef());
+    auto Obj = object::ObjectFile::createObjectFile(ObjBuffer->getMemBufferRef());
 
-  if (!Obj)
-    return Obj.takeError();
+    if (!Obj)
+        return Obj.takeError();
 
-  notifyObjectCompiled(M, *ObjBuffer);
-  return std::move(ObjBuffer);
+    notifyObjectCompiled(M, *ObjBuffer);
+    return std::move(ObjBuffer);
 }
 
 SimpleCompiler::CompileResult
 SimpleCompiler::tryToLoadFromObjectCache(const Module &M) {
-  if (!ObjCache)
-    return CompileResult();
+    if (!ObjCache)
+        return CompileResult();
 
-  return ObjCache->getObject(&M);
+    return ObjCache->getObject(&M);
 }
 
 void SimpleCompiler::notifyObjectCompiled(const Module &M,
-                                          const MemoryBuffer &ObjBuffer) {
-  if (ObjCache)
-    ObjCache->notifyObjectCompiled(&M, ObjBuffer.getMemBufferRef());
+        const MemoryBuffer &ObjBuffer) {
+    if (ObjCache)
+        ObjCache->notifyObjectCompiled(&M, ObjBuffer.getMemBufferRef());
 }
 
 ConcurrentIRCompiler::ConcurrentIRCompiler(JITTargetMachineBuilder JTMB,
-                                           ObjectCache *ObjCache)
+        ObjectCache *ObjCache)
     : IRCompiler(irManglingOptionsFromTargetOptions(JTMB.getOptions())),
       JTMB(std::move(JTMB)), ObjCache(ObjCache) {}
 
 Expected<std::unique_ptr<MemoryBuffer>>
 ConcurrentIRCompiler::operator()(Module &M) {
-  auto TM = cantFail(JTMB.createTargetMachine());
-  SimpleCompiler C(*TM, ObjCache);
-  return C(M);
+    auto TM = cantFail(JTMB.createTargetMachine());
+    SimpleCompiler C(*TM, ObjCache);
+    return C(M);
 }
 
 } // end namespace orc

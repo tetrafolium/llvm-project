@@ -26,14 +26,14 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-function-cognitive-complexity.html
 class FunctionCognitiveComplexityCheck : public ClangTidyCheck {
 public:
-  FunctionCognitiveComplexityCheck(StringRef Name, ClangTidyContext *Context);
+    FunctionCognitiveComplexityCheck(StringRef Name, ClangTidyContext *Context);
 
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  const unsigned Threshold;
+    const unsigned Threshold;
 };
 
 } // namespace readability

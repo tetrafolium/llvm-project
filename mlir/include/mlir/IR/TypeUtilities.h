@@ -62,16 +62,16 @@ LogicalResult verifyCompatibleShape(Type type1, Type type2);
 // An iterator for the element types of an op's operands of shaped types.
 class OperandElementTypeIterator final
     : public llvm::mapped_iterator<Operation::operand_iterator,
-                                   Type (*)(Value)> {
+      Type (*)(Value)> {
 public:
-  using reference = Type;
+    using reference = Type;
 
-  /// Initializes the result element type iterator to the specified operand
-  /// iterator.
-  explicit OperandElementTypeIterator(Operation::operand_iterator it);
+    /// Initializes the result element type iterator to the specified operand
+    /// iterator.
+    explicit OperandElementTypeIterator(Operation::operand_iterator it);
 
 private:
-  static Type unwrap(Value value);
+    static Type unwrap(Value value);
 };
 
 using OperandElementTypeRange = iterator_range<OperandElementTypeIterator>;
@@ -79,16 +79,16 @@ using OperandElementTypeRange = iterator_range<OperandElementTypeIterator>;
 // An iterator for the tensor element types of an op's results of shaped types.
 class ResultElementTypeIterator final
     : public llvm::mapped_iterator<Operation::result_iterator,
-                                   Type (*)(Value)> {
+      Type (*)(Value)> {
 public:
-  using reference = Type;
+    using reference = Type;
 
-  /// Initializes the result element type iterator to the specified result
-  /// iterator.
-  explicit ResultElementTypeIterator(Operation::result_iterator it);
+    /// Initializes the result element type iterator to the specified result
+    /// iterator.
+    explicit ResultElementTypeIterator(Operation::result_iterator it);
 
 private:
-  static Type unwrap(Value value);
+    static Type unwrap(Value value);
 };
 
 using ResultElementTypeRange = iterator_range<ResultElementTypeIterator>;

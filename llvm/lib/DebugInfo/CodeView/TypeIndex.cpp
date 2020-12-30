@@ -16,8 +16,8 @@ using namespace llvm::codeview;
 
 namespace {
 struct SimpleTypeEntry {
-  StringRef Name;
-  SimpleTypeKind Kind;
+    StringRef Name;
+    SimpleTypeKind Kind;
 };
 
 /// The names here all end in "*". If the simple type is a pointer type, we
@@ -68,39 +68,39 @@ static const SimpleTypeEntry SimpleTypeNames[] = {
 } // namespace
 
 StringRef TypeIndex::simpleTypeName(TypeIndex TI) {
-  assert(TI.isNoneType() || TI.isSimple());
+    assert(TI.isNoneType() || TI.isSimple());
 
-  if (TI.isNoneType())
-    return "<no type>";
+    if (TI.isNoneType())
+        return "<no type>";
 
-  if (TI == TypeIndex::NullptrT())
-    return "std::nullptr_t";
+    if (TI == TypeIndex::NullptrT())
+        return "std::nullptr_t";
 
-  // This is a simple type.
-  for (const auto &SimpleTypeName : SimpleTypeNames) {
-    if (SimpleTypeName.Kind == TI.getSimpleKind()) {
-      if (TI.getSimpleMode() == SimpleTypeMode::Direct)
-        return SimpleTypeName.Name.drop_back(1);
-      // Otherwise, this is a pointer type. We gloss over the distinction
-      // between near, far, 64, 32, etc, and just give a pointer type.
-      return SimpleTypeName.Name;
+    // This is a simple type.
+    for (const auto &SimpleTypeName : SimpleTypeNames) {
+        if (SimpleTypeName.Kind == TI.getSimpleKind()) {
+            if (TI.getSimpleMode() == SimpleTypeMode::Direct)
+                return SimpleTypeName.Name.drop_back(1);
+            // Otherwise, this is a pointer type. We gloss over the distinction
+            // between near, far, 64, 32, etc, and just give a pointer type.
+            return SimpleTypeName.Name;
+        }
     }
-  }
-  return "<unknown simple type>";
+    return "<unknown simple type>";
 }
 
 void llvm::codeview::printTypeIndex(ScopedPrinter &Printer, StringRef FieldName,
                                     TypeIndex TI, TypeCollection &Types) {
-  StringRef TypeName;
-  if (!TI.isNoneType()) {
-    if (TI.isSimple())
-      TypeName = TypeIndex::simpleTypeName(TI);
-    else
-      TypeName = Types.getTypeName(TI);
-  }
+    StringRef TypeName;
+    if (!TI.isNoneType()) {
+        if (TI.isSimple())
+            TypeName = TypeIndex::simpleTypeName(TI);
+        else
+            TypeName = Types.getTypeName(TI);
+    }
 
-  if (!TypeName.empty())
-    Printer.printHex(FieldName, TypeName, TI.getIndex());
-  else
-    Printer.printHex(FieldName, TI.getIndex());
+    if (!TypeName.empty())
+        Printer.printHex(FieldName, TypeName, TI.getIndex());
+    else
+        Printer.printHex(FieldName, TI.getIndex());
 }

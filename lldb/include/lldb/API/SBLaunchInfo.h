@@ -22,163 +22,163 @@ class SBTarget;
 
 class LLDB_API SBLaunchInfo {
 public:
-  SBLaunchInfo(const char **argv);
+    SBLaunchInfo(const char **argv);
 
-  ~SBLaunchInfo();
+    ~SBLaunchInfo();
 
-  SBLaunchInfo(const SBLaunchInfo &rhs);
+    SBLaunchInfo(const SBLaunchInfo &rhs);
 
-  SBLaunchInfo &operator=(const SBLaunchInfo &rhs);
+    SBLaunchInfo &operator=(const SBLaunchInfo &rhs);
 
-  lldb::pid_t GetProcessID();
+    lldb::pid_t GetProcessID();
 
-  uint32_t GetUserID();
+    uint32_t GetUserID();
 
-  uint32_t GetGroupID();
+    uint32_t GetGroupID();
 
-  bool UserIDIsValid();
+    bool UserIDIsValid();
 
-  bool GroupIDIsValid();
+    bool GroupIDIsValid();
 
-  void SetUserID(uint32_t uid);
+    void SetUserID(uint32_t uid);
 
-  void SetGroupID(uint32_t gid);
+    void SetGroupID(uint32_t gid);
 
-  SBFileSpec GetExecutableFile();
+    SBFileSpec GetExecutableFile();
 
-  /// Set the executable file that will be used to launch the process and
-  /// optionally set it as the first argument in the argument vector.
-  ///
-  /// This only needs to be specified if clients wish to carefully control
-  /// the exact path will be used to launch a binary. If you create a
-  /// target with a symlink, that symlink will get resolved in the target
-  /// and the resolved path will get used to launch the process. Calling
-  /// this function can help you still launch your process using the
-  /// path of your choice.
-  ///
-  /// If this function is not called prior to launching with
-  /// SBTarget::Launch(...), the target will use the resolved executable
-  /// path that was used to create the target.
-  ///
-  /// \param[in] exe_file
-  ///     The override path to use when launching the executable.
-  ///
-  /// \param[in] add_as_first_arg
-  ///     If true, then the path will be inserted into the argument vector
-  ///     prior to launching. Otherwise the argument vector will be left
-  ///     alone.
-  void SetExecutableFile(SBFileSpec exe_file, bool add_as_first_arg);
+    /// Set the executable file that will be used to launch the process and
+    /// optionally set it as the first argument in the argument vector.
+    ///
+    /// This only needs to be specified if clients wish to carefully control
+    /// the exact path will be used to launch a binary. If you create a
+    /// target with a symlink, that symlink will get resolved in the target
+    /// and the resolved path will get used to launch the process. Calling
+    /// this function can help you still launch your process using the
+    /// path of your choice.
+    ///
+    /// If this function is not called prior to launching with
+    /// SBTarget::Launch(...), the target will use the resolved executable
+    /// path that was used to create the target.
+    ///
+    /// \param[in] exe_file
+    ///     The override path to use when launching the executable.
+    ///
+    /// \param[in] add_as_first_arg
+    ///     If true, then the path will be inserted into the argument vector
+    ///     prior to launching. Otherwise the argument vector will be left
+    ///     alone.
+    void SetExecutableFile(SBFileSpec exe_file, bool add_as_first_arg);
 
-  /// Get the listener that will be used to receive process events.
-  ///
-  /// If no listener has been set via a call to
-  /// SBLaunchInfo::SetListener(), then an invalid SBListener will be
-  /// returned (SBListener::IsValid() will return false). If a listener
-  /// has been set, then the valid listener object will be returned.
-  SBListener GetListener();
+    /// Get the listener that will be used to receive process events.
+    ///
+    /// If no listener has been set via a call to
+    /// SBLaunchInfo::SetListener(), then an invalid SBListener will be
+    /// returned (SBListener::IsValid() will return false). If a listener
+    /// has been set, then the valid listener object will be returned.
+    SBListener GetListener();
 
-  /// Set the listener that will be used to receive process events.
-  ///
-  /// By default the SBDebugger, which has a listener, that the SBTarget
-  /// belongs to will listen for the process events. Calling this function
-  /// allows a different listener to be used to listen for process events.
-  void SetListener(SBListener &listener);
+    /// Set the listener that will be used to receive process events.
+    ///
+    /// By default the SBDebugger, which has a listener, that the SBTarget
+    /// belongs to will listen for the process events. Calling this function
+    /// allows a different listener to be used to listen for process events.
+    void SetListener(SBListener &listener);
 
-  uint32_t GetNumArguments();
+    uint32_t GetNumArguments();
 
-  const char *GetArgumentAtIndex(uint32_t idx);
+    const char *GetArgumentAtIndex(uint32_t idx);
 
-  void SetArguments(const char **argv, bool append);
+    void SetArguments(const char **argv, bool append);
 
-  uint32_t GetNumEnvironmentEntries();
+    uint32_t GetNumEnvironmentEntries();
 
-  const char *GetEnvironmentEntryAtIndex(uint32_t idx);
+    const char *GetEnvironmentEntryAtIndex(uint32_t idx);
 
-  /// Update this object with the given environment variables.
-  ///
-  /// If append is false, the provided environment will replace the existing
-  /// environment. Otherwise, existing values will be updated of left untouched
-  /// accordingly.
-  ///
-  /// \param [in] envp
-  ///     The new environment variables as a list of strings with the following
-  ///     format
-  ///         name=value
-  ///
-  /// \param [in] append
-  ///     Flag that controls whether to replace the existing environment.
-  void SetEnvironmentEntries(const char **envp, bool append);
+    /// Update this object with the given environment variables.
+    ///
+    /// If append is false, the provided environment will replace the existing
+    /// environment. Otherwise, existing values will be updated of left untouched
+    /// accordingly.
+    ///
+    /// \param [in] envp
+    ///     The new environment variables as a list of strings with the following
+    ///     format
+    ///         name=value
+    ///
+    /// \param [in] append
+    ///     Flag that controls whether to replace the existing environment.
+    void SetEnvironmentEntries(const char **envp, bool append);
 
-  /// Update this object with the given environment variables.
-  ///
-  /// If append is false, the provided environment will replace the existing
-  /// environment. Otherwise, existing values will be updated of left untouched
-  /// accordingly.
-  ///
-  /// \param [in] env
-  ///     The new environment variables.
-  ///
-  /// \param [in] append
-  ///     Flag that controls whether to replace the existing environment.
-  void SetEnvironment(const SBEnvironment &env, bool append);
+    /// Update this object with the given environment variables.
+    ///
+    /// If append is false, the provided environment will replace the existing
+    /// environment. Otherwise, existing values will be updated of left untouched
+    /// accordingly.
+    ///
+    /// \param [in] env
+    ///     The new environment variables.
+    ///
+    /// \param [in] append
+    ///     Flag that controls whether to replace the existing environment.
+    void SetEnvironment(const SBEnvironment &env, bool append);
 
-  /// Return the environment variables of this object.
-  ///
-  /// \return
-  ///     An lldb::SBEnvironment object which is a copy of the SBLaunchInfo's
-  ///     environment.
-  SBEnvironment GetEnvironment();
+    /// Return the environment variables of this object.
+    ///
+    /// \return
+    ///     An lldb::SBEnvironment object which is a copy of the SBLaunchInfo's
+    ///     environment.
+    SBEnvironment GetEnvironment();
 
-  void Clear();
+    void Clear();
 
-  const char *GetWorkingDirectory() const;
+    const char *GetWorkingDirectory() const;
 
-  void SetWorkingDirectory(const char *working_dir);
+    void SetWorkingDirectory(const char *working_dir);
 
-  uint32_t GetLaunchFlags();
+    uint32_t GetLaunchFlags();
 
-  void SetLaunchFlags(uint32_t flags);
+    void SetLaunchFlags(uint32_t flags);
 
-  const char *GetProcessPluginName();
+    const char *GetProcessPluginName();
 
-  void SetProcessPluginName(const char *plugin_name);
+    void SetProcessPluginName(const char *plugin_name);
 
-  const char *GetShell();
+    const char *GetShell();
 
-  void SetShell(const char *path);
+    void SetShell(const char *path);
 
-  bool GetShellExpandArguments();
+    bool GetShellExpandArguments();
 
-  void SetShellExpandArguments(bool expand);
+    void SetShellExpandArguments(bool expand);
 
-  uint32_t GetResumeCount();
+    uint32_t GetResumeCount();
 
-  void SetResumeCount(uint32_t c);
+    void SetResumeCount(uint32_t c);
 
-  bool AddCloseFileAction(int fd);
+    bool AddCloseFileAction(int fd);
 
-  bool AddDuplicateFileAction(int fd, int dup_fd);
+    bool AddDuplicateFileAction(int fd, int dup_fd);
 
-  bool AddOpenFileAction(int fd, const char *path, bool read, bool write);
+    bool AddOpenFileAction(int fd, const char *path, bool read, bool write);
 
-  bool AddSuppressFileAction(int fd, bool read, bool write);
+    bool AddSuppressFileAction(int fd, bool read, bool write);
 
-  void SetLaunchEventData(const char *data);
+    void SetLaunchEventData(const char *data);
 
-  const char *GetLaunchEventData() const;
+    const char *GetLaunchEventData() const;
 
-  bool GetDetachOnError() const;
+    bool GetDetachOnError() const;
 
-  void SetDetachOnError(bool enable);
+    void SetDetachOnError(bool enable);
 
 protected:
-  friend class SBPlatform;
-  friend class SBTarget;
+    friend class SBPlatform;
+    friend class SBTarget;
 
-  const lldb_private::ProcessLaunchInfo &ref() const;
-  void set_ref(const lldb_private::ProcessLaunchInfo &info);
+    const lldb_private::ProcessLaunchInfo &ref() const;
+    void set_ref(const lldb_private::ProcessLaunchInfo &info);
 
-  std::shared_ptr<lldb_private::SBLaunchInfoImpl> m_opaque_sp;
+    std::shared_ptr<lldb_private::SBLaunchInfoImpl> m_opaque_sp;
 };
 
 } // namespace lldb

@@ -19,53 +19,53 @@ namespace tidy {
 namespace abseil {
 
 void DurationAdditionCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(
-      binaryOperator(hasOperatorName("+"),
-                     hasEitherOperand(expr(ignoringParenImpCasts(
-                         callExpr(callee(functionDecl(TimeConversionFunction())
-                                             .bind("function_decl")))
-                             .bind("call")))))
-          .bind("binop"),
-      this);
+    Finder->addMatcher(
+        binaryOperator(hasOperatorName("+"),
+                       hasEitherOperand(expr(ignoringParenImpCasts(
+                                            callExpr(callee(functionDecl(TimeConversionFunction())
+                                                    .bind("function_decl")))
+                                            .bind("call")))))
+        .bind("binop"),
+        this);
 }
 
 void DurationAdditionCheck::check(const MatchFinder::MatchResult &Result) {
-  const BinaryOperator *Binop =
-      Result.Nodes.getNodeAs<clang::BinaryOperator>("binop");
-  const CallExpr *Call = Result.Nodes.getNodeAs<clang::CallExpr>("call");
+    const BinaryOperator *Binop =
+        Result.Nodes.getNodeAs<clang::BinaryOperator>("binop");
+    const CallExpr *Call = Result.Nodes.getNodeAs<clang::CallExpr>("call");
 
-  // Don't try to replace things inside of macro definitions.
-  if (Binop->getExprLoc().isMacroID() || Binop->getExprLoc().isInvalid())
-    return;
+    // Don't try to replace things inside of macro definitions.
+    if (Binop->getExprLoc().isMacroID() || Binop->getExprLoc().isInvalid())
+        return;
 
-  llvm::Optional<DurationScale> Scale = getScaleForTimeInverse(
-      Result.Nodes.getNodeAs<clang::FunctionDecl>("function_decl")->getName());
-  if (!Scale)
-    return;
+    llvm::Optional<DurationScale> Scale = getScaleForTimeInverse(
+            Result.Nodes.getNodeAs<clang::FunctionDecl>("function_decl")->getName());
+    if (!Scale)
+        return;
 
-  llvm::StringRef TimeFactory = getTimeInverseForScale(*Scale);
+    llvm::StringRef TimeFactory = getTimeInverseForScale(*Scale);
 
-  FixItHint Hint;
-  if (Call == Binop->getLHS()->IgnoreParenImpCasts()) {
-    Hint = FixItHint::CreateReplacement(
-        Binop->getSourceRange(),
-        (llvm::Twine(TimeFactory) + "(" +
-         tooling::fixit::getText(*Call->getArg(0), *Result.Context) + " + " +
-         rewriteExprFromNumberToDuration(Result, *Scale, Binop->getRHS()) + ")")
-            .str());
-  } else {
-    assert(Call == Binop->getRHS()->IgnoreParenImpCasts() &&
-           "Call should be found on the RHS");
-    Hint = FixItHint::CreateReplacement(
-        Binop->getSourceRange(),
-        (llvm::Twine(TimeFactory) + "(" +
-         rewriteExprFromNumberToDuration(Result, *Scale, Binop->getLHS()) +
-         " + " + tooling::fixit::getText(*Call->getArg(0), *Result.Context) +
-         ")")
-            .str());
-  }
+    FixItHint Hint;
+    if (Call == Binop->getLHS()->IgnoreParenImpCasts()) {
+        Hint = FixItHint::CreateReplacement(
+                   Binop->getSourceRange(),
+                   (llvm::Twine(TimeFactory) + "(" +
+                    tooling::fixit::getText(*Call->getArg(0), *Result.Context) + " + " +
+                    rewriteExprFromNumberToDuration(Result, *Scale, Binop->getRHS()) + ")")
+                   .str());
+    } else {
+        assert(Call == Binop->getRHS()->IgnoreParenImpCasts() &&
+               "Call should be found on the RHS");
+        Hint = FixItHint::CreateReplacement(
+                   Binop->getSourceRange(),
+                   (llvm::Twine(TimeFactory) + "(" +
+                    rewriteExprFromNumberToDuration(Result, *Scale, Binop->getLHS()) +
+                    " + " + tooling::fixit::getText(*Call->getArg(0), *Result.Context) +
+                    ")")
+                   .str());
+    }
 
-  diag(Binop->getBeginLoc(), "perform addition in the duration domain") << Hint;
+    diag(Binop->getBeginLoc(), "perform addition in the duration domain") << Hint;
 }
 
 } // namespace abseil

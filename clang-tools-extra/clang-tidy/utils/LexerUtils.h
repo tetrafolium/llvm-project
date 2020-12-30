@@ -39,23 +39,23 @@ SourceLocation findPreviousAnyTokenKind(SourceLocation Start,
                                         const SourceManager &SM,
                                         const LangOptions &LangOpts,
                                         TokenKind TK, TokenKinds... TKs) {
-  if (Start.isInvalid() || Start.isMacroID())
-    return SourceLocation();
-  while (true) {
-    SourceLocation L = findPreviousTokenStart(Start, SM, LangOpts);
-    if (L.isInvalid() || L.isMacroID())
-      return SourceLocation();
+    if (Start.isInvalid() || Start.isMacroID())
+        return SourceLocation();
+    while (true) {
+        SourceLocation L = findPreviousTokenStart(Start, SM, LangOpts);
+        if (L.isInvalid() || L.isMacroID())
+            return SourceLocation();
 
-    Token T;
-    // Returning 'true' is used to signal failure to retrieve the token.
-    if (Lexer::getRawToken(L, T, SM, LangOpts, /*IgnoreWhiteSpace=*/true))
-      return SourceLocation();
+        Token T;
+        // Returning 'true' is used to signal failure to retrieve the token.
+        if (Lexer::getRawToken(L, T, SM, LangOpts, /*IgnoreWhiteSpace=*/true))
+            return SourceLocation();
 
-    if (T.isOneOf(TK, TKs...))
-      return T.getLocation();
+        if (T.isOneOf(TK, TKs...))
+            return T.getLocation();
 
-    Start = L;
-  }
+        Start = L;
+    }
 }
 
 template <typename TokenKind, typename... TokenKinds>
@@ -63,36 +63,36 @@ SourceLocation findNextAnyTokenKind(SourceLocation Start,
                                     const SourceManager &SM,
                                     const LangOptions &LangOpts, TokenKind TK,
                                     TokenKinds... TKs) {
-  while (true) {
-    Optional<Token> CurrentToken = Lexer::findNextToken(Start, SM, LangOpts);
+    while (true) {
+        Optional<Token> CurrentToken = Lexer::findNextToken(Start, SM, LangOpts);
 
-    if (!CurrentToken)
-      return SourceLocation();
+        if (!CurrentToken)
+            return SourceLocation();
 
-    Token PotentialMatch = *CurrentToken;
-    if (PotentialMatch.isOneOf(TK, TKs...))
-      return PotentialMatch.getLocation();
+        Token PotentialMatch = *CurrentToken;
+        if (PotentialMatch.isOneOf(TK, TKs...))
+            return PotentialMatch.getLocation();
 
-    // If we reach the end of the file, and eof is not the target token, we stop
-    // the loop, otherwise we will get infinite loop (findNextToken will return
-    // eof on eof).
-    if (PotentialMatch.is(tok::eof))
-      return SourceLocation();
-    Start = PotentialMatch.getLastLoc();
-  }
+        // If we reach the end of the file, and eof is not the target token, we stop
+        // the loop, otherwise we will get infinite loop (findNextToken will return
+        // eof on eof).
+        if (PotentialMatch.is(tok::eof))
+            return SourceLocation();
+        Start = PotentialMatch.getLastLoc();
+    }
 }
 
 // Finds next token that's not a comment.
 Optional<Token> findNextTokenSkippingComments(SourceLocation Start,
-                                              const SourceManager &SM,
-                                              const LangOptions &LangOpts);
+        const SourceManager &SM,
+        const LangOptions &LangOpts);
 
 /// Re-lex the provide \p Range and return \c false if either a macro spans
 /// multiple tokens, a pre-processor directive or failure to retrieve the
 /// next token is found, otherwise \c true.
 bool rangeContainsExpansionsOrDirectives(SourceRange Range,
-                                         const SourceManager &SM,
-                                         const LangOptions &LangOpts);
+        const SourceManager &SM,
+        const LangOptions &LangOpts);
 
 /// Assuming that ``Range`` spans a CVR-qualified type, returns the
 /// token in ``Range`` that is responsible for the qualification. ``Range``
@@ -100,9 +100,9 @@ bool rangeContainsExpansionsOrDirectives(SourceRange Range,
 /// tokens are found.
 /// \note: doesn't support member function qualifiers.
 llvm::Optional<Token> getQualifyingToken(tok::TokenKind TK,
-                                         CharSourceRange Range,
-                                         const ASTContext &Context,
-                                         const SourceManager &SM);
+        CharSourceRange Range,
+        const ASTContext &Context,
+        const SourceManager &SM);
 
 } // namespace lexer
 } // namespace utils

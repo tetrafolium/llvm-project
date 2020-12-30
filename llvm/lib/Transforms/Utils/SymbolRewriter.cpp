@@ -89,22 +89,22 @@ using namespace SymbolRewriter;
 #define DEBUG_TYPE "symbol-rewriter"
 
 static cl::list<std::string> RewriteMapFiles("rewrite-map-file",
-                                             cl::desc("Symbol Rewrite Map"),
-                                             cl::value_desc("filename"),
-                                             cl::Hidden);
+        cl::desc("Symbol Rewrite Map"),
+        cl::value_desc("filename"),
+        cl::Hidden);
 
 static void rewriteComdat(Module &M, GlobalObject *GO,
                           const std::string &Source,
                           const std::string &Target) {
-  if (Comdat *CD = GO->getComdat()) {
-    auto &Comdats = M.getComdatSymbolTable();
+    if (Comdat *CD = GO->getComdat()) {
+        auto &Comdats = M.getComdatSymbolTable();
 
-    Comdat *C = M.getOrInsertComdat(Target);
-    C->setSelectionKind(CD->getSelectionKind());
-    GO->setComdat(C);
+        Comdat *C = M.getOrInsertComdat(Target);
+        C->setSelectionKind(CD->getSelectionKind());
+        GO->setComdat(C);
 
-    Comdats.erase(Comdats.find(Source));
-  }
+        Comdats.erase(Comdats.find(Source));
+    }
 }
 
 namespace {
@@ -113,19 +113,19 @@ template <RewriteDescriptor::Type DT, typename ValueType,
           ValueType *(Module::*Get)(StringRef) const>
 class ExplicitRewriteDescriptor : public RewriteDescriptor {
 public:
-  const std::string Source;
-  const std::string Target;
+    const std::string Source;
+    const std::string Target;
 
-  ExplicitRewriteDescriptor(StringRef S, StringRef T, const bool Naked)
-      : RewriteDescriptor(DT),
-        Source(std::string(Naked ? StringRef("\01" + S.str()) : S)),
-        Target(std::string(T)) {}
+    ExplicitRewriteDescriptor(StringRef S, StringRef T, const bool Naked)
+        : RewriteDescriptor(DT),
+          Source(std::string(Naked ? StringRef("\01" + S.str()) : S)),
+          Target(std::string(T)) {}
 
-  bool performOnModule(Module &M) override;
+    bool performOnModule(Module &M) override;
 
-  static bool classof(const RewriteDescriptor *RD) {
-    return RD->getType() == DT;
-  }
+    static bool classof(const RewriteDescriptor *RD) {
+        return RD->getType() == DT;
+    }
 };
 
 } // end anonymous namespace
@@ -133,19 +133,19 @@ public:
 template <RewriteDescriptor::Type DT, typename ValueType,
           ValueType *(Module::*Get)(StringRef) const>
 bool ExplicitRewriteDescriptor<DT, ValueType, Get>::performOnModule(Module &M) {
-  bool Changed = false;
-  if (ValueType *S = (M.*Get)(Source)) {
-    if (GlobalObject *GO = dyn_cast<GlobalObject>(S))
-      rewriteComdat(M, GO, Source, Target);
+    bool Changed = false;
+    if (ValueType *S = (M.*Get)(Source)) {
+        if (GlobalObject *GO = dyn_cast<GlobalObject>(S))
+            rewriteComdat(M, GO, Source, Target);
 
-    if (Value *T = (M.*Get)(Target))
-      S->setValueName(T->getValueName());
-    else
-      S->setName(Target);
+        if (Value *T = (M.*Get)(Target))
+            S->setValueName(T->getValueName());
+        else
+            S->setName(Target);
 
-    Changed = true;
-  }
-  return Changed;
+        Changed = true;
+    }
+    return Changed;
 }
 
 namespace {
@@ -156,18 +156,18 @@ template <RewriteDescriptor::Type DT, typename ValueType,
           (Module::*Iterator)()>
 class PatternRewriteDescriptor : public RewriteDescriptor {
 public:
-  const std::string Pattern;
-  const std::string Transform;
+    const std::string Pattern;
+    const std::string Transform;
 
-  PatternRewriteDescriptor(StringRef P, StringRef T)
-      : RewriteDescriptor(DT), Pattern(std::string(P)),
-        Transform(std::string(T)) {}
+    PatternRewriteDescriptor(StringRef P, StringRef T)
+        : RewriteDescriptor(DT), Pattern(std::string(P)),
+          Transform(std::string(T)) {}
 
-  bool performOnModule(Module &M) override;
+    bool performOnModule(Module &M) override;
 
-  static bool classof(const RewriteDescriptor *RD) {
-    return RD->getType() == DT;
-  }
+    static bool classof(const RewriteDescriptor *RD) {
+        return RD->getType() == DT;
+    }
 };
 
 } // end anonymous namespace
@@ -178,29 +178,29 @@ template <RewriteDescriptor::Type DT, typename ValueType,
           (Module::*Iterator)()>
 bool PatternRewriteDescriptor<DT, ValueType, Get, Iterator>::
 performOnModule(Module &M) {
-  bool Changed = false;
-  for (auto &C : (M.*Iterator)()) {
-    std::string Error;
+    bool Changed = false;
+    for (auto &C : (M.*Iterator)()) {
+        std::string Error;
 
-    std::string Name = Regex(Pattern).sub(Transform, C.getName(), &Error);
-    if (!Error.empty())
-      report_fatal_error("unable to transforn " + C.getName() + " in " +
-                         M.getModuleIdentifier() + ": " + Error);
+        std::string Name = Regex(Pattern).sub(Transform, C.getName(), &Error);
+        if (!Error.empty())
+            report_fatal_error("unable to transforn " + C.getName() + " in " +
+                               M.getModuleIdentifier() + ": " + Error);
 
-    if (C.getName() == Name)
-      continue;
+        if (C.getName() == Name)
+            continue;
 
-    if (GlobalObject *GO = dyn_cast<GlobalObject>(&C))
-      rewriteComdat(M, GO, std::string(C.getName()), Name);
+        if (GlobalObject *GO = dyn_cast<GlobalObject>(&C))
+            rewriteComdat(M, GO, std::string(C.getName()), Name);
 
-    if (Value *V = (M.*Get)(Name))
-      C.setValueName(V->getValueName());
-    else
-      C.setName(Name);
+        if (Value *V = (M.*Get)(Name))
+            C.setValueName(V->getValueName());
+        else
+            C.setName(Name);
 
-    Changed = true;
-  }
-  return Changed;
+        Changed = true;
+    }
+    return Changed;
 }
 
 namespace {
@@ -210,27 +210,27 @@ namespace {
 /// explicitly spelt out.
 using ExplicitRewriteFunctionDescriptor =
     ExplicitRewriteDescriptor<RewriteDescriptor::Type::Function, Function,
-                              &Module::getFunction>;
+    &Module::getFunction>;
 
 /// Represents a rewrite for an explicitly named (global variable) symbol.  Both
 /// the source variable name and target variable name are spelt out.  This
 /// applies only to module level variables.
 using ExplicitRewriteGlobalVariableDescriptor =
     ExplicitRewriteDescriptor<RewriteDescriptor::Type::GlobalVariable,
-                              GlobalVariable, &Module::getGlobalVariable>;
+    GlobalVariable, &Module::getGlobalVariable>;
 
 /// Represents a rewrite for an explicitly named global alias.  Both the source
 /// and target name are explicitly spelt out.
 using ExplicitRewriteNamedAliasDescriptor =
     ExplicitRewriteDescriptor<RewriteDescriptor::Type::NamedAlias, GlobalAlias,
-                              &Module::getNamedAlias>;
+    &Module::getNamedAlias>;
 
 /// Represents a rewrite for a regular expression based pattern for functions.
 /// A pattern for the function name is provided and a transformation for that
 /// pattern to determine the target function name create the rewrite rule.
 using PatternRewriteFunctionDescriptor =
     PatternRewriteDescriptor<RewriteDescriptor::Type::Function, Function,
-                             &Module::getFunction, &Module::functions>;
+    &Module::getFunction, &Module::functions>;
 
 /// Represents a rewrite for a global variable based upon a matching pattern.
 /// Each global variable matching the provided pattern will be transformed as
@@ -238,299 +238,299 @@ using PatternRewriteFunctionDescriptor =
 /// module level variables.
 using PatternRewriteGlobalVariableDescriptor =
     PatternRewriteDescriptor<RewriteDescriptor::Type::GlobalVariable,
-                             GlobalVariable, &Module::getGlobalVariable,
-                             &Module::globals>;
+    GlobalVariable, &Module::getGlobalVariable,
+    &Module::globals>;
 
 /// PatternRewriteNamedAliasDescriptor - represents a rewrite for global
 /// aliases which match a given pattern.  The provided transformation will be
 /// applied to each of the matching names.
 using PatternRewriteNamedAliasDescriptor =
     PatternRewriteDescriptor<RewriteDescriptor::Type::NamedAlias, GlobalAlias,
-                             &Module::getNamedAlias, &Module::aliases>;
+    &Module::getNamedAlias, &Module::aliases>;
 
 } // end anonymous namespace
 
 bool RewriteMapParser::parse(const std::string &MapFile,
                              RewriteDescriptorList *DL) {
-  ErrorOr<std::unique_ptr<MemoryBuffer>> Mapping =
-      MemoryBuffer::getFile(MapFile);
+    ErrorOr<std::unique_ptr<MemoryBuffer>> Mapping =
+                                            MemoryBuffer::getFile(MapFile);
 
-  if (!Mapping)
-    report_fatal_error("unable to read rewrite map '" + MapFile + "': " +
-                       Mapping.getError().message());
+    if (!Mapping)
+        report_fatal_error("unable to read rewrite map '" + MapFile + "': " +
+                           Mapping.getError().message());
 
-  if (!parse(*Mapping, DL))
-    report_fatal_error("unable to parse rewrite map '" + MapFile + "'");
+    if (!parse(*Mapping, DL))
+        report_fatal_error("unable to parse rewrite map '" + MapFile + "'");
 
-  return true;
+    return true;
 }
 
 bool RewriteMapParser::parse(std::unique_ptr<MemoryBuffer> &MapFile,
                              RewriteDescriptorList *DL) {
-  SourceMgr SM;
-  yaml::Stream YS(MapFile->getBuffer(), SM);
+    SourceMgr SM;
+    yaml::Stream YS(MapFile->getBuffer(), SM);
 
-  for (auto &Document : YS) {
-    yaml::MappingNode *DescriptorList;
+    for (auto &Document : YS) {
+        yaml::MappingNode *DescriptorList;
 
-    // ignore empty documents
-    if (isa<yaml::NullNode>(Document.getRoot()))
-      continue;
+        // ignore empty documents
+        if (isa<yaml::NullNode>(Document.getRoot()))
+            continue;
 
-    DescriptorList = dyn_cast<yaml::MappingNode>(Document.getRoot());
-    if (!DescriptorList) {
-      YS.printError(Document.getRoot(), "DescriptorList node must be a map");
-      return false;
+        DescriptorList = dyn_cast<yaml::MappingNode>(Document.getRoot());
+        if (!DescriptorList) {
+            YS.printError(Document.getRoot(), "DescriptorList node must be a map");
+            return false;
+        }
+
+        for (auto &Descriptor : *DescriptorList)
+            if (!parseEntry(YS, Descriptor, DL))
+                return false;
     }
 
-    for (auto &Descriptor : *DescriptorList)
-      if (!parseEntry(YS, Descriptor, DL))
-        return false;
-  }
-
-  return true;
+    return true;
 }
 
 bool RewriteMapParser::parseEntry(yaml::Stream &YS, yaml::KeyValueNode &Entry,
                                   RewriteDescriptorList *DL) {
-  yaml::ScalarNode *Key;
-  yaml::MappingNode *Value;
-  SmallString<32> KeyStorage;
-  StringRef RewriteType;
+    yaml::ScalarNode *Key;
+    yaml::MappingNode *Value;
+    SmallString<32> KeyStorage;
+    StringRef RewriteType;
 
-  Key = dyn_cast<yaml::ScalarNode>(Entry.getKey());
-  if (!Key) {
-    YS.printError(Entry.getKey(), "rewrite type must be a scalar");
+    Key = dyn_cast<yaml::ScalarNode>(Entry.getKey());
+    if (!Key) {
+        YS.printError(Entry.getKey(), "rewrite type must be a scalar");
+        return false;
+    }
+
+    Value = dyn_cast<yaml::MappingNode>(Entry.getValue());
+    if (!Value) {
+        YS.printError(Entry.getValue(), "rewrite descriptor must be a map");
+        return false;
+    }
+
+    RewriteType = Key->getValue(KeyStorage);
+    if (RewriteType.equals("function"))
+        return parseRewriteFunctionDescriptor(YS, Key, Value, DL);
+    else if (RewriteType.equals("global variable"))
+        return parseRewriteGlobalVariableDescriptor(YS, Key, Value, DL);
+    else if (RewriteType.equals("global alias"))
+        return parseRewriteGlobalAliasDescriptor(YS, Key, Value, DL);
+
+    YS.printError(Entry.getKey(), "unknown rewrite type");
     return false;
-  }
-
-  Value = dyn_cast<yaml::MappingNode>(Entry.getValue());
-  if (!Value) {
-    YS.printError(Entry.getValue(), "rewrite descriptor must be a map");
-    return false;
-  }
-
-  RewriteType = Key->getValue(KeyStorage);
-  if (RewriteType.equals("function"))
-    return parseRewriteFunctionDescriptor(YS, Key, Value, DL);
-  else if (RewriteType.equals("global variable"))
-    return parseRewriteGlobalVariableDescriptor(YS, Key, Value, DL);
-  else if (RewriteType.equals("global alias"))
-    return parseRewriteGlobalAliasDescriptor(YS, Key, Value, DL);
-
-  YS.printError(Entry.getKey(), "unknown rewrite type");
-  return false;
 }
 
 bool RewriteMapParser::
 parseRewriteFunctionDescriptor(yaml::Stream &YS, yaml::ScalarNode *K,
                                yaml::MappingNode *Descriptor,
                                RewriteDescriptorList *DL) {
-  bool Naked = false;
-  std::string Source;
-  std::string Target;
-  std::string Transform;
+    bool Naked = false;
+    std::string Source;
+    std::string Target;
+    std::string Transform;
 
-  for (auto &Field : *Descriptor) {
-    yaml::ScalarNode *Key;
-    yaml::ScalarNode *Value;
-    SmallString<32> KeyStorage;
-    SmallString<32> ValueStorage;
-    StringRef KeyValue;
+    for (auto &Field : *Descriptor) {
+        yaml::ScalarNode *Key;
+        yaml::ScalarNode *Value;
+        SmallString<32> KeyStorage;
+        SmallString<32> ValueStorage;
+        StringRef KeyValue;
 
-    Key = dyn_cast<yaml::ScalarNode>(Field.getKey());
-    if (!Key) {
-      YS.printError(Field.getKey(), "descriptor key must be a scalar");
-      return false;
+        Key = dyn_cast<yaml::ScalarNode>(Field.getKey());
+        if (!Key) {
+            YS.printError(Field.getKey(), "descriptor key must be a scalar");
+            return false;
+        }
+
+        Value = dyn_cast<yaml::ScalarNode>(Field.getValue());
+        if (!Value) {
+            YS.printError(Field.getValue(), "descriptor value must be a scalar");
+            return false;
+        }
+
+        KeyValue = Key->getValue(KeyStorage);
+        if (KeyValue.equals("source")) {
+            std::string Error;
+
+            Source = std::string(Value->getValue(ValueStorage));
+            if (!Regex(Source).isValid(Error)) {
+                YS.printError(Field.getKey(), "invalid regex: " + Error);
+                return false;
+            }
+        } else if (KeyValue.equals("target")) {
+            Target = std::string(Value->getValue(ValueStorage));
+        } else if (KeyValue.equals("transform")) {
+            Transform = std::string(Value->getValue(ValueStorage));
+        } else if (KeyValue.equals("naked")) {
+            std::string Undecorated;
+
+            Undecorated = std::string(Value->getValue(ValueStorage));
+            Naked = StringRef(Undecorated).lower() == "true" || Undecorated == "1";
+        } else {
+            YS.printError(Field.getKey(), "unknown key for function");
+            return false;
+        }
     }
 
-    Value = dyn_cast<yaml::ScalarNode>(Field.getValue());
-    if (!Value) {
-      YS.printError(Field.getValue(), "descriptor value must be a scalar");
-      return false;
-    }
-
-    KeyValue = Key->getValue(KeyStorage);
-    if (KeyValue.equals("source")) {
-      std::string Error;
-
-      Source = std::string(Value->getValue(ValueStorage));
-      if (!Regex(Source).isValid(Error)) {
-        YS.printError(Field.getKey(), "invalid regex: " + Error);
+    if (Transform.empty() == Target.empty()) {
+        YS.printError(Descriptor,
+                      "exactly one of transform or target must be specified");
         return false;
-      }
-    } else if (KeyValue.equals("target")) {
-      Target = std::string(Value->getValue(ValueStorage));
-    } else if (KeyValue.equals("transform")) {
-      Transform = std::string(Value->getValue(ValueStorage));
-    } else if (KeyValue.equals("naked")) {
-      std::string Undecorated;
-
-      Undecorated = std::string(Value->getValue(ValueStorage));
-      Naked = StringRef(Undecorated).lower() == "true" || Undecorated == "1";
-    } else {
-      YS.printError(Field.getKey(), "unknown key for function");
-      return false;
     }
-  }
 
-  if (Transform.empty() == Target.empty()) {
-    YS.printError(Descriptor,
-                  "exactly one of transform or target must be specified");
-    return false;
-  }
+    // TODO see if there is a more elegant solution to selecting the rewrite
+    // descriptor type
+    if (!Target.empty())
+        DL->push_back(std::make_unique<ExplicitRewriteFunctionDescriptor>(
+                          Source, Target, Naked));
+    else
+        DL->push_back(
+            std::make_unique<PatternRewriteFunctionDescriptor>(Source, Transform));
 
-  // TODO see if there is a more elegant solution to selecting the rewrite
-  // descriptor type
-  if (!Target.empty())
-    DL->push_back(std::make_unique<ExplicitRewriteFunctionDescriptor>(
-        Source, Target, Naked));
-  else
-    DL->push_back(
-        std::make_unique<PatternRewriteFunctionDescriptor>(Source, Transform));
-
-  return true;
+    return true;
 }
 
 bool RewriteMapParser::
 parseRewriteGlobalVariableDescriptor(yaml::Stream &YS, yaml::ScalarNode *K,
                                      yaml::MappingNode *Descriptor,
                                      RewriteDescriptorList *DL) {
-  std::string Source;
-  std::string Target;
-  std::string Transform;
+    std::string Source;
+    std::string Target;
+    std::string Transform;
 
-  for (auto &Field : *Descriptor) {
-    yaml::ScalarNode *Key;
-    yaml::ScalarNode *Value;
-    SmallString<32> KeyStorage;
-    SmallString<32> ValueStorage;
-    StringRef KeyValue;
+    for (auto &Field : *Descriptor) {
+        yaml::ScalarNode *Key;
+        yaml::ScalarNode *Value;
+        SmallString<32> KeyStorage;
+        SmallString<32> ValueStorage;
+        StringRef KeyValue;
 
-    Key = dyn_cast<yaml::ScalarNode>(Field.getKey());
-    if (!Key) {
-      YS.printError(Field.getKey(), "descriptor Key must be a scalar");
-      return false;
+        Key = dyn_cast<yaml::ScalarNode>(Field.getKey());
+        if (!Key) {
+            YS.printError(Field.getKey(), "descriptor Key must be a scalar");
+            return false;
+        }
+
+        Value = dyn_cast<yaml::ScalarNode>(Field.getValue());
+        if (!Value) {
+            YS.printError(Field.getValue(), "descriptor value must be a scalar");
+            return false;
+        }
+
+        KeyValue = Key->getValue(KeyStorage);
+        if (KeyValue.equals("source")) {
+            std::string Error;
+
+            Source = std::string(Value->getValue(ValueStorage));
+            if (!Regex(Source).isValid(Error)) {
+                YS.printError(Field.getKey(), "invalid regex: " + Error);
+                return false;
+            }
+        } else if (KeyValue.equals("target")) {
+            Target = std::string(Value->getValue(ValueStorage));
+        } else if (KeyValue.equals("transform")) {
+            Transform = std::string(Value->getValue(ValueStorage));
+        } else {
+            YS.printError(Field.getKey(), "unknown Key for Global Variable");
+            return false;
+        }
     }
 
-    Value = dyn_cast<yaml::ScalarNode>(Field.getValue());
-    if (!Value) {
-      YS.printError(Field.getValue(), "descriptor value must be a scalar");
-      return false;
-    }
-
-    KeyValue = Key->getValue(KeyStorage);
-    if (KeyValue.equals("source")) {
-      std::string Error;
-
-      Source = std::string(Value->getValue(ValueStorage));
-      if (!Regex(Source).isValid(Error)) {
-        YS.printError(Field.getKey(), "invalid regex: " + Error);
+    if (Transform.empty() == Target.empty()) {
+        YS.printError(Descriptor,
+                      "exactly one of transform or target must be specified");
         return false;
-      }
-    } else if (KeyValue.equals("target")) {
-      Target = std::string(Value->getValue(ValueStorage));
-    } else if (KeyValue.equals("transform")) {
-      Transform = std::string(Value->getValue(ValueStorage));
-    } else {
-      YS.printError(Field.getKey(), "unknown Key for Global Variable");
-      return false;
     }
-  }
 
-  if (Transform.empty() == Target.empty()) {
-    YS.printError(Descriptor,
-                  "exactly one of transform or target must be specified");
-    return false;
-  }
+    if (!Target.empty())
+        DL->push_back(std::make_unique<ExplicitRewriteGlobalVariableDescriptor>(
+                          Source, Target,
+                          /*Naked*/ false));
+    else
+        DL->push_back(std::make_unique<PatternRewriteGlobalVariableDescriptor>(
+                          Source, Transform));
 
-  if (!Target.empty())
-    DL->push_back(std::make_unique<ExplicitRewriteGlobalVariableDescriptor>(
-        Source, Target,
-        /*Naked*/ false));
-  else
-    DL->push_back(std::make_unique<PatternRewriteGlobalVariableDescriptor>(
-        Source, Transform));
-
-  return true;
+    return true;
 }
 
 bool RewriteMapParser::
 parseRewriteGlobalAliasDescriptor(yaml::Stream &YS, yaml::ScalarNode *K,
                                   yaml::MappingNode *Descriptor,
                                   RewriteDescriptorList *DL) {
-  std::string Source;
-  std::string Target;
-  std::string Transform;
+    std::string Source;
+    std::string Target;
+    std::string Transform;
 
-  for (auto &Field : *Descriptor) {
-    yaml::ScalarNode *Key;
-    yaml::ScalarNode *Value;
-    SmallString<32> KeyStorage;
-    SmallString<32> ValueStorage;
-    StringRef KeyValue;
+    for (auto &Field : *Descriptor) {
+        yaml::ScalarNode *Key;
+        yaml::ScalarNode *Value;
+        SmallString<32> KeyStorage;
+        SmallString<32> ValueStorage;
+        StringRef KeyValue;
 
-    Key = dyn_cast<yaml::ScalarNode>(Field.getKey());
-    if (!Key) {
-      YS.printError(Field.getKey(), "descriptor key must be a scalar");
-      return false;
+        Key = dyn_cast<yaml::ScalarNode>(Field.getKey());
+        if (!Key) {
+            YS.printError(Field.getKey(), "descriptor key must be a scalar");
+            return false;
+        }
+
+        Value = dyn_cast<yaml::ScalarNode>(Field.getValue());
+        if (!Value) {
+            YS.printError(Field.getValue(), "descriptor value must be a scalar");
+            return false;
+        }
+
+        KeyValue = Key->getValue(KeyStorage);
+        if (KeyValue.equals("source")) {
+            std::string Error;
+
+            Source = std::string(Value->getValue(ValueStorage));
+            if (!Regex(Source).isValid(Error)) {
+                YS.printError(Field.getKey(), "invalid regex: " + Error);
+                return false;
+            }
+        } else if (KeyValue.equals("target")) {
+            Target = std::string(Value->getValue(ValueStorage));
+        } else if (KeyValue.equals("transform")) {
+            Transform = std::string(Value->getValue(ValueStorage));
+        } else {
+            YS.printError(Field.getKey(), "unknown key for Global Alias");
+            return false;
+        }
     }
 
-    Value = dyn_cast<yaml::ScalarNode>(Field.getValue());
-    if (!Value) {
-      YS.printError(Field.getValue(), "descriptor value must be a scalar");
-      return false;
-    }
-
-    KeyValue = Key->getValue(KeyStorage);
-    if (KeyValue.equals("source")) {
-      std::string Error;
-
-      Source = std::string(Value->getValue(ValueStorage));
-      if (!Regex(Source).isValid(Error)) {
-        YS.printError(Field.getKey(), "invalid regex: " + Error);
+    if (Transform.empty() == Target.empty()) {
+        YS.printError(Descriptor,
+                      "exactly one of transform or target must be specified");
         return false;
-      }
-    } else if (KeyValue.equals("target")) {
-      Target = std::string(Value->getValue(ValueStorage));
-    } else if (KeyValue.equals("transform")) {
-      Transform = std::string(Value->getValue(ValueStorage));
-    } else {
-      YS.printError(Field.getKey(), "unknown key for Global Alias");
-      return false;
     }
-  }
 
-  if (Transform.empty() == Target.empty()) {
-    YS.printError(Descriptor,
-                  "exactly one of transform or target must be specified");
-    return false;
-  }
+    if (!Target.empty())
+        DL->push_back(std::make_unique<ExplicitRewriteNamedAliasDescriptor>(
+                          Source, Target,
+                          /*Naked*/ false));
+    else
+        DL->push_back(std::make_unique<PatternRewriteNamedAliasDescriptor>(
+                          Source, Transform));
 
-  if (!Target.empty())
-    DL->push_back(std::make_unique<ExplicitRewriteNamedAliasDescriptor>(
-        Source, Target,
-        /*Naked*/ false));
-  else
-    DL->push_back(std::make_unique<PatternRewriteNamedAliasDescriptor>(
-        Source, Transform));
-
-  return true;
+    return true;
 }
 
 namespace {
 
 class RewriteSymbolsLegacyPass : public ModulePass {
 public:
-  static char ID; // Pass identification, replacement for typeid
+    static char ID; // Pass identification, replacement for typeid
 
-  RewriteSymbolsLegacyPass();
-  RewriteSymbolsLegacyPass(SymbolRewriter::RewriteDescriptorList &DL);
+    RewriteSymbolsLegacyPass();
+    RewriteSymbolsLegacyPass(SymbolRewriter::RewriteDescriptorList &DL);
 
-  bool runOnModule(Module &M) override;
+    bool runOnModule(Module &M) override;
 
 private:
-  RewriteSymbolPass Impl;
+    RewriteSymbolPass Impl;
 };
 
 } // end anonymous namespace
@@ -538,7 +538,7 @@ private:
 char RewriteSymbolsLegacyPass::ID = 0;
 
 RewriteSymbolsLegacyPass::RewriteSymbolsLegacyPass() : ModulePass(ID) {
-  initializeRewriteSymbolsLegacyPassPass(*PassRegistry::getPassRegistry());
+    initializeRewriteSymbolsLegacyPassPass(*PassRegistry::getPassRegistry());
 }
 
 RewriteSymbolsLegacyPass::RewriteSymbolsLegacyPass(
@@ -546,42 +546,42 @@ RewriteSymbolsLegacyPass::RewriteSymbolsLegacyPass(
     : ModulePass(ID), Impl(DL) {}
 
 bool RewriteSymbolsLegacyPass::runOnModule(Module &M) {
-  return Impl.runImpl(M);
+    return Impl.runImpl(M);
 }
 
 PreservedAnalyses RewriteSymbolPass::run(Module &M, ModuleAnalysisManager &AM) {
-  if (!runImpl(M))
-    return PreservedAnalyses::all();
+    if (!runImpl(M))
+        return PreservedAnalyses::all();
 
-  return PreservedAnalyses::none();
+    return PreservedAnalyses::none();
 }
 
 bool RewriteSymbolPass::runImpl(Module &M) {
-  bool Changed;
+    bool Changed;
 
-  Changed = false;
-  for (auto &Descriptor : Descriptors)
-    Changed |= Descriptor->performOnModule(M);
+    Changed = false;
+    for (auto &Descriptor : Descriptors)
+        Changed |= Descriptor->performOnModule(M);
 
-  return Changed;
+    return Changed;
 }
 
 void RewriteSymbolPass::loadAndParseMapFiles() {
-  const std::vector<std::string> MapFiles(RewriteMapFiles);
-  SymbolRewriter::RewriteMapParser Parser;
+    const std::vector<std::string> MapFiles(RewriteMapFiles);
+    SymbolRewriter::RewriteMapParser Parser;
 
-  for (const auto &MapFile : MapFiles)
-    Parser.parse(MapFile, &Descriptors);
+    for (const auto &MapFile : MapFiles)
+        Parser.parse(MapFile, &Descriptors);
 }
 
 INITIALIZE_PASS(RewriteSymbolsLegacyPass, "rewrite-symbols", "Rewrite Symbols",
                 false, false)
 
 ModulePass *llvm::createRewriteSymbolsPass() {
-  return new RewriteSymbolsLegacyPass();
+    return new RewriteSymbolsLegacyPass();
 }
 
 ModulePass *
 llvm::createRewriteSymbolsPass(SymbolRewriter::RewriteDescriptorList &DL) {
-  return new RewriteSymbolsLegacyPass(DL);
+    return new RewriteSymbolsLegacyPass(DL);
 }

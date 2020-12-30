@@ -28,11 +28,11 @@ namespace XRayInstrKind {
 
 // TODO: Auto-generate these as we add more instrumentation kinds.
 enum XRayInstrOrdinal : XRayInstrMask {
-  XRIO_FunctionEntry,
-  XRIO_FunctionExit,
-  XRIO_Custom,
-  XRIO_Typed,
-  XRIO_Count
+    XRIO_FunctionEntry,
+    XRIO_FunctionExit,
+    XRIO_Custom,
+    XRIO_Typed,
+    XRIO_Count
 };
 
 constexpr XRayInstrMask None = 0;
@@ -45,24 +45,32 @@ constexpr XRayInstrMask All = FunctionEntry | FunctionExit | Custom | Typed;
 } // namespace XRayInstrKind
 
 struct XRayInstrSet {
-  bool has(XRayInstrMask K) const {
-    assert(llvm::isPowerOf2_32(K));
-    return Mask & K;
-  }
+    bool has(XRayInstrMask K) const {
+        assert(llvm::isPowerOf2_32(K));
+        return Mask & K;
+    }
 
-  bool hasOneOf(XRayInstrMask K) const { return Mask & K; }
+    bool hasOneOf(XRayInstrMask K) const {
+        return Mask & K;
+    }
 
-  void set(XRayInstrMask K, bool Value) {
-    Mask = Value ? (Mask | K) : (Mask & ~K);
-  }
+    void set(XRayInstrMask K, bool Value) {
+        Mask = Value ? (Mask | K) : (Mask & ~K);
+    }
 
-  void clear(XRayInstrMask K = XRayInstrKind::All) { Mask &= ~K; }
+    void clear(XRayInstrMask K = XRayInstrKind::All) {
+        Mask &= ~K;
+    }
 
-  bool empty() const { return Mask == 0; }
+    bool empty() const {
+        return Mask == 0;
+    }
 
-  bool full() const { return Mask == XRayInstrKind::All; }
+    bool full() const {
+        return Mask == XRayInstrKind::All;
+    }
 
-  XRayInstrMask Mask = 0;
+    XRayInstrMask Mask = 0;
 };
 
 XRayInstrMask parseXRayInstrValue(StringRef Value);

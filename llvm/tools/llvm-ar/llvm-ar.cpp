@@ -1062,15 +1062,15 @@ static void runMRIScript() {
 
     switch (Command) {
     case MRICommand::AddLib: {
-      object::Archive &Lib = readLibrary(Rest);
-      {
-        Error Err = Error::success();
-        for (auto &Member : Lib.children(Err))
-          addChildMember(NewMembers, Member, /*FlattenArchive=*/Thin);
-        failIfError(std::move(Err));
-      }
-      break;
-    }
+  object::Archive &Lib = readLibrary(Rest);
+  {
+    Error Err = Error::success();
+    for (auto &Member : Lib.children(Err))
+      addChildMember(NewMembers, Member, /*FlattenArchive=*/Thin);
+    failIfError(std::move(Err));
+  }
+  break;
+}
     case MRICommand::AddMod:
       addMember(NewMembers, Rest);
       break;
@@ -1086,11 +1086,11 @@ static void runMRIScript() {
       ArchiveName = std::string(Rest);
       break;
     case MRICommand::Delete: {
-      llvm::erase_if(NewMembers, [=](NewArchiveMember &M) {
-        return comparePaths(M.MemberName, Rest);
-      });
-      break;
-    }
+  llvm::erase_if(NewMembers, [=](NewArchiveMember &M) {
+    return comparePaths(M.MemberName, Rest);
+  });
+  break;
+}
     case MRICommand::Save:
       Saved = true;
       break;

@@ -27,24 +27,24 @@ class AMDGPUFixFunctionBitcasts final
     : public ModulePass,
       public InstVisitor<AMDGPUFixFunctionBitcasts> {
 
-  bool runOnModule(Module &M) override;
+    bool runOnModule(Module &M) override;
 
-  bool Modified;
+    bool Modified;
 
 public:
-  void visitCallBase(CallBase &CB) {
-    if (CB.getCalledFunction())
-      return;
-    auto *Callee =
-        dyn_cast<Function>(CB.getCalledOperand()->stripPointerCasts());
-    if (Callee && isLegalToPromote(CB, Callee)) {
-      promoteCall(CB, Callee);
-      Modified = true;
+    void visitCallBase(CallBase &CB) {
+        if (CB.getCalledFunction())
+            return;
+        auto *Callee =
+            dyn_cast<Function>(CB.getCalledOperand()->stripPointerCasts());
+        if (Callee && isLegalToPromote(CB, Callee)) {
+            promoteCall(CB, Callee);
+            Modified = true;
+        }
     }
-  }
 
-  static char ID;
-  AMDGPUFixFunctionBitcasts() : ModulePass(ID) {}
+    static char ID;
+    AMDGPUFixFunctionBitcasts() : ModulePass(ID) {}
 };
 } // End anonymous namespace
 
@@ -54,11 +54,11 @@ INITIALIZE_PASS(AMDGPUFixFunctionBitcasts, DEBUG_TYPE,
                 "Fix function bitcasts for AMDGPU", false, false)
 
 ModulePass *llvm::createAMDGPUFixFunctionBitcastsPass() {
-  return new AMDGPUFixFunctionBitcasts();
+    return new AMDGPUFixFunctionBitcasts();
 }
 
 bool AMDGPUFixFunctionBitcasts::runOnModule(Module &M) {
-  Modified = false;
-  visit(M);
-  return Modified;
+    Modified = false;
+    visit(M);
+    return Modified;
 }

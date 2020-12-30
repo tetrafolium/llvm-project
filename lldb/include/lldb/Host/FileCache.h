@@ -21,26 +21,26 @@
 namespace lldb_private {
 class FileCache {
 private:
-  FileCache() {}
+    FileCache() {}
 
-  typedef std::map<lldb::user_id_t, lldb::FileUP> FDToFileMap;
+    typedef std::map<lldb::user_id_t, lldb::FileUP> FDToFileMap;
 
 public:
-  static FileCache &GetInstance();
+    static FileCache &GetInstance();
 
-  lldb::user_id_t OpenFile(const FileSpec &file_spec, File::OpenOptions flags,
-                           uint32_t mode, Status &error);
-  bool CloseFile(lldb::user_id_t fd, Status &error);
+    lldb::user_id_t OpenFile(const FileSpec &file_spec, File::OpenOptions flags,
+                             uint32_t mode, Status &error);
+    bool CloseFile(lldb::user_id_t fd, Status &error);
 
-  uint64_t WriteFile(lldb::user_id_t fd, uint64_t offset, const void *src,
-                     uint64_t src_len, Status &error);
-  uint64_t ReadFile(lldb::user_id_t fd, uint64_t offset, void *dst,
-                    uint64_t dst_len, Status &error);
+    uint64_t WriteFile(lldb::user_id_t fd, uint64_t offset, const void *src,
+                       uint64_t src_len, Status &error);
+    uint64_t ReadFile(lldb::user_id_t fd, uint64_t offset, void *dst,
+                      uint64_t dst_len, Status &error);
 
 private:
-  static FileCache *m_instance;
+    static FileCache *m_instance;
 
-  FDToFileMap m_cache;
+    FDToFileMap m_cache;
 };
 }
 

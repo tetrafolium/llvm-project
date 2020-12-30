@@ -81,7 +81,7 @@ class DeclRelationSet;
 ///
 /// FIXME: some AST nodes cannot be DynTypedNodes, these cannot be specified.
 llvm::SmallVector<const NamedDecl *, 1> targetDecl(const DynTypedNode &,
-                                                   DeclRelationSet Mask);
+        DeclRelationSet Mask);
 
 /// Similar to targetDecl(), however instead of applying a filter, all possible
 /// decls are returned along with their DeclRelationSets.
@@ -91,32 +91,32 @@ llvm::SmallVector<std::pair<const NamedDecl *, DeclRelationSet>, 1>
 allTargetDecls(const DynTypedNode &);
 
 enum class DeclRelation : unsigned {
-  // Template options apply when the declaration is an instantiated template.
-  // e.g. [[vector<int>]] vec;
+    // Template options apply when the declaration is an instantiated template.
+    // e.g. [[vector<int>]] vec;
 
-  /// This is the template instantiation that was referred to.
-  /// e.g. template<> class vector<int> (the implicit specialization)
-  TemplateInstantiation,
-  /// This is the pattern the template specialization was instantiated from.
-  /// e.g. class vector<T> (the pattern within the primary template)
-  TemplatePattern,
+    /// This is the template instantiation that was referred to.
+    /// e.g. template<> class vector<int> (the implicit specialization)
+    TemplateInstantiation,
+    /// This is the pattern the template specialization was instantiated from.
+    /// e.g. class vector<T> (the pattern within the primary template)
+    TemplatePattern,
 
-  // Alias options apply when the declaration is an alias.
-  // e.g. namespace client { [[X]] x; }
+    // Alias options apply when the declaration is an alias.
+    // e.g. namespace client { [[X]] x; }
 
-  /// This declaration is an alias that was referred to.
-  /// e.g. using ns::X (the UsingDecl directly referenced),
-  ///      using Z = ns::Y (the TypeAliasDecl directly referenced)
-  Alias,
-  /// This is the underlying declaration for a renaming-alias, decltype etc.
-  /// e.g. class ns::Y (the underlying declaration referenced).
-  ///
-  /// Note that we don't treat `using ns::X` as a first-class declaration like
-  /// `using Z = ns::Y`. Therefore reference to X that goes through this
-  /// using-decl is considered a direct reference (without the Underlying bit).
-  /// Nevertheless, we report `using ns::X` as an Alias, so that some features
-  /// like go-to-definition can still target it.
-  Underlying,
+    /// This declaration is an alias that was referred to.
+    /// e.g. using ns::X (the UsingDecl directly referenced),
+    ///      using Z = ns::Y (the TypeAliasDecl directly referenced)
+    Alias,
+    /// This is the underlying declaration for a renaming-alias, decltype etc.
+    /// e.g. class ns::Y (the underlying declaration referenced).
+    ///
+    /// Note that we don't treat `using ns::X` as a first-class declaration like
+    /// `using Z = ns::Y`. Therefore reference to X that goes through this
+    /// using-decl is considered a direct reference (without the Underlying bit).
+    /// Nevertheless, we report `using ns::X` as an Alias, so that some features
+    /// like go-to-definition can still target it.
+    Underlying,
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &, DeclRelation);
 
@@ -124,18 +124,18 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &, DeclRelation);
 /// actual AST node that this reference lives in.
 /// Useful for tools that are source-aware, e.g. refactorings.
 struct ReferenceLoc {
-  /// Contains qualifier written in the code, if any, e.g. 'ns::' for 'ns::foo'.
-  NestedNameSpecifierLoc Qualifier;
-  /// Start location of the last name part, i.e. 'foo' in 'ns::foo<int>'.
-  SourceLocation NameLoc;
-  /// True if the reference is a declaration or definition;
-  bool IsDecl = false;
-  // FIXME: add info about template arguments.
-  /// A list of targets referenced by this name. Normally this has a single
-  /// element, but multiple is also possible, e.g. in case of using declarations
-  /// or unresolved overloaded functions.
-  /// For dependent and unresolved references, Targets can also be empty.
-  llvm::SmallVector<const NamedDecl *, 1> Targets;
+    /// Contains qualifier written in the code, if any, e.g. 'ns::' for 'ns::foo'.
+    NestedNameSpecifierLoc Qualifier;
+    /// Start location of the last name part, i.e. 'foo' in 'ns::foo<int>'.
+    SourceLocation NameLoc;
+    /// True if the reference is a declaration or definition;
+    bool IsDecl = false;
+    // FIXME: add info about template arguments.
+    /// A list of targets referenced by this name. Normally this has a single
+    /// element, but multiple is also possible, e.g. in case of using declarations
+    /// or unresolved overloaded functions.
+    /// For dependent and unresolved references, Targets can also be empty.
+    llvm::SmallVector<const NamedDecl *, 1> Targets;
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, ReferenceLoc R);
 
@@ -167,44 +167,52 @@ explicitReferenceTargets(DynTypedNode N, DeclRelationSet Mask);
 // Boring implementation details of bitfield.
 
 class DeclRelationSet {
-  using Set = std::bitset<static_cast<unsigned>(DeclRelation::Underlying) + 1>;
-  Set S;
-  DeclRelationSet(Set S) : S(S) {}
+    using Set = std::bitset<static_cast<unsigned>(DeclRelation::Underlying) + 1>;
+    Set S;
+    DeclRelationSet(Set S) : S(S) {}
 
 public:
-  DeclRelationSet() = default;
-  DeclRelationSet(DeclRelation R) { S.set(static_cast<unsigned>(R)); }
+    DeclRelationSet() = default;
+    DeclRelationSet(DeclRelation R) {
+        S.set(static_cast<unsigned>(R));
+    }
 
-  explicit operator bool() const { return S.any(); }
-  friend DeclRelationSet operator&(DeclRelationSet L, DeclRelationSet R) {
-    return L.S & R.S;
-  }
-  friend DeclRelationSet operator|(DeclRelationSet L, DeclRelationSet R) {
-    return L.S | R.S;
-  }
-  friend bool operator==(DeclRelationSet L, DeclRelationSet R) {
-    return L.S == R.S;
-  }
-  friend DeclRelationSet operator~(DeclRelationSet R) { return ~R.S; }
-  DeclRelationSet &operator|=(DeclRelationSet Other) {
-    S |= Other.S;
-    return *this;
-  }
-  DeclRelationSet &operator&=(DeclRelationSet Other) {
-    S &= Other.S;
-    return *this;
-  }
-  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &, DeclRelationSet);
+    explicit operator bool() const {
+        return S.any();
+    }
+    friend DeclRelationSet operator&(DeclRelationSet L, DeclRelationSet R) {
+        return L.S & R.S;
+    }
+    friend DeclRelationSet operator|(DeclRelationSet L, DeclRelationSet R) {
+        return L.S | R.S;
+    }
+    friend bool operator==(DeclRelationSet L, DeclRelationSet R) {
+        return L.S == R.S;
+    }
+    friend DeclRelationSet operator~(DeclRelationSet R) {
+        return ~R.S;
+    }
+    DeclRelationSet &operator|=(DeclRelationSet Other) {
+        S |= Other.S;
+        return *this;
+    }
+    DeclRelationSet &operator&=(DeclRelationSet Other) {
+        S &= Other.S;
+        return *this;
+    }
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &, DeclRelationSet);
 };
 // The above operators can't be looked up if both sides are enums.
 // over.match.oper.html#3.2
 inline DeclRelationSet operator|(DeclRelation L, DeclRelation R) {
-  return DeclRelationSet(L) | DeclRelationSet(R);
+    return DeclRelationSet(L) | DeclRelationSet(R);
 }
 inline DeclRelationSet operator&(DeclRelation L, DeclRelation R) {
-  return DeclRelationSet(L) & DeclRelationSet(R);
+    return DeclRelationSet(L) & DeclRelationSet(R);
 }
-inline DeclRelationSet operator~(DeclRelation R) { return ~DeclRelationSet(R); }
+inline DeclRelationSet operator~(DeclRelation R) {
+    return ~DeclRelationSet(R);
+}
 llvm::raw_ostream &operator<<(llvm::raw_ostream &, DeclRelationSet);
 
 } // namespace clangd

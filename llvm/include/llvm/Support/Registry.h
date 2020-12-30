@@ -21,52 +21,58 @@
 #include <memory>
 
 namespace llvm {
-  /// A simple registry entry which provides only a name, description, and
-  /// no-argument constructor.
-  template <typename T>
-  class SimpleRegistryEntry {
+/// A simple registry entry which provides only a name, description, and
+/// no-argument constructor.
+template <typename T>
+class SimpleRegistryEntry {
     StringRef Name, Desc;
     std::unique_ptr<T> (*Ctor)();
 
-  public:
+public:
     SimpleRegistryEntry(StringRef N, StringRef D, std::unique_ptr<T> (*C)())
         : Name(N), Desc(D), Ctor(C) {}
 
-    StringRef getName() const { return Name; }
-    StringRef getDesc() const { return Desc; }
-    std::unique_ptr<T> instantiate() const { return Ctor(); }
-  };
+    StringRef getName() const {
+        return Name;
+    }
+    StringRef getDesc() const {
+        return Desc;
+    }
+    std::unique_ptr<T> instantiate() const {
+        return Ctor();
+    }
+};
 
-  /// A global registry used in conjunction with static constructors to make
-  /// pluggable components (like targets or garbage collectors) "just work" when
-  /// linked with an executable.
-  template <typename T>
-  class Registry {
-  public:
+/// A global registry used in conjunction with static constructors to make
+/// pluggable components (like targets or garbage collectors) "just work" when
+/// linked with an executable.
+template <typename T>
+class Registry {
+public:
     typedef T type;
     typedef SimpleRegistryEntry<T> entry;
 
     class node;
     class iterator;
 
-  private:
+private:
     Registry() = delete;
 
     friend class node;
     static node *Head, *Tail;
 
-  public:
+public:
     /// Node in linked list of entries.
     ///
     class node {
-      friend class iterator;
-      friend Registry<T>;
+        friend class iterator;
+        friend Registry<T>;
 
-      node *Next;
-      const entry& Val;
+        node *Next;
+        const entry& Val;
 
     public:
-      node(const entry &V) : Next(nullptr), Val(V) {}
+        node(const entry &V) : Next(nullptr), Val(V) {}
     };
 
     /// Add a node to the Registry: this is the interface between the plugin and
@@ -82,24 +88,33 @@ namespace llvm {
     ///
     class iterator
         : public llvm::iterator_facade_base<iterator, std::forward_iterator_tag,
-                                            const entry> {
-      const node *Cur;
+          const entry> {
+        const node *Cur;
 
     public:
-      explicit iterator(const node *N) : Cur(N) {}
+        explicit iterator(const node *N) : Cur(N) {}
 
-      bool operator==(const iterator &That) const { return Cur == That.Cur; }
-      iterator &operator++() { Cur = Cur->Next; return *this; }
-      const entry &operator*() const { return Cur->Val; }
+        bool operator==(const iterator &That) const {
+            return Cur == That.Cur;
+        }
+        iterator &operator++() {
+            Cur = Cur->Next;
+            return *this;
+        }
+        const entry &operator*() const {
+            return Cur->Val;
+        }
     };
 
     // begin is not defined here in order to avoid usage of an undefined static
     // data member, instead it's instantiated by LLVM_INSTANTIATE_REGISTRY.
     static iterator begin();
-    static iterator end()   { return iterator(nullptr); }
+    static iterator end()   {
+        return iterator(nullptr);
+    }
 
     static iterator_range<iterator> entries() {
-      return make_range(begin(), end());
+        return make_range(begin(), end());
     }
 
     /// A static registration template. Use like such:
@@ -112,18 +127,20 @@ namespace llvm {
     ///  1. The registered subclass has a default constructor.
     template <typename V>
     class Add {
-      entry Entry;
-      node Node;
+        entry Entry;
+        node Node;
 
-      static std::unique_ptr<T> CtorFn() { return std::make_unique<V>(); }
+        static std::unique_ptr<T> CtorFn() {
+            return std::make_unique<V>();
+        }
 
     public:
-      Add(StringRef Name, StringRef Desc)
-          : Entry(Name, Desc, CtorFn), Node(Entry) {
-        add_node(&Node);
-      }
+        Add(StringRef Name, StringRef Desc)
+            : Entry(Name, Desc, CtorFn), Node(Entry) {
+            add_node(&Node);
+        }
     };
-  };
+};
 } // end namespace llvm
 
 /// Instantiate a registry class.

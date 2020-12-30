@@ -19,6 +19,10 @@ Stoppoint::Stoppoint() : m_bid(LLDB_INVALID_BREAK_ID) {}
 // Destructor
 Stoppoint::~Stoppoint() {}
 
-break_id_t Stoppoint::GetID() const { return m_bid; }
+break_id_t Stoppoint::GetID() const {
+    return m_bid;
+}
 
-void Stoppoint::SetID(break_id_t bid) { m_bid = bid; }
+void Stoppoint::SetID(break_id_t bid) {
+    m_bid = bid;
+}

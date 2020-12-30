@@ -60,78 +60,82 @@ namespace orc {
 class ExtractingIRMaterializationUnit;
 
 class CompileOnDemandLayer : public IRLayer {
-  friend class PartitioningIRMaterializationUnit;
+    friend class PartitioningIRMaterializationUnit;
 
 public:
-  /// Builder for IndirectStubsManagers.
-  using IndirectStubsManagerBuilder =
-      std::function<std::unique_ptr<IndirectStubsManager>()>;
+    /// Builder for IndirectStubsManagers.
+    using IndirectStubsManagerBuilder =
+        std::function<std::unique_ptr<IndirectStubsManager>()>;
 
-  using GlobalValueSet = std::set<const GlobalValue *>;
+    using GlobalValueSet = std::set<const GlobalValue *>;
 
-  /// Partitioning function.
-  using PartitionFunction =
-      std::function<Optional<GlobalValueSet>(GlobalValueSet Requested)>;
+    /// Partitioning function.
+    using PartitionFunction =
+        std::function<Optional<GlobalValueSet>(GlobalValueSet Requested)>;
 
-  /// Off-the-shelf partitioning which compiles all requested symbols (usually
-  /// a single function at a time).
-  static Optional<GlobalValueSet> compileRequested(GlobalValueSet Requested);
+    /// Off-the-shelf partitioning which compiles all requested symbols (usually
+    /// a single function at a time).
+    static Optional<GlobalValueSet> compileRequested(GlobalValueSet Requested);
 
-  /// Off-the-shelf partitioning which compiles whole modules whenever any
-  /// symbol in them is requested.
-  static Optional<GlobalValueSet> compileWholeModule(GlobalValueSet Requested);
+    /// Off-the-shelf partitioning which compiles whole modules whenever any
+    /// symbol in them is requested.
+    static Optional<GlobalValueSet> compileWholeModule(GlobalValueSet Requested);
 
-  /// Construct a CompileOnDemandLayer.
-  CompileOnDemandLayer(ExecutionSession &ES, IRLayer &BaseLayer,
-                        LazyCallThroughManager &LCTMgr,
-                        IndirectStubsManagerBuilder BuildIndirectStubsManager);
+    /// Construct a CompileOnDemandLayer.
+    CompileOnDemandLayer(ExecutionSession &ES, IRLayer &BaseLayer,
+                         LazyCallThroughManager &LCTMgr,
+                         IndirectStubsManagerBuilder BuildIndirectStubsManager);
 
-  /// Sets the partition function.
-  void setPartitionFunction(PartitionFunction Partition);
+    /// Sets the partition function.
+    void setPartitionFunction(PartitionFunction Partition);
 
-  /// Sets the ImplSymbolMap
-  void setImplMap(ImplSymbolMap *Imp);
+    /// Sets the ImplSymbolMap
+    void setImplMap(ImplSymbolMap *Imp);
 
-  /// Emits the given module. This should not be called by clients: it will be
-  /// called by the JIT when a definition added via the add method is requested.
-  void emit(std::unique_ptr<MaterializationResponsibility> R,
-            ThreadSafeModule TSM) override;
+    /// Emits the given module. This should not be called by clients: it will be
+    /// called by the JIT when a definition added via the add method is requested.
+    void emit(std::unique_ptr<MaterializationResponsibility> R,
+              ThreadSafeModule TSM) override;
 
 private:
-  struct PerDylibResources {
-  public:
-    PerDylibResources(JITDylib &ImplD,
-                      std::unique_ptr<IndirectStubsManager> ISMgr)
-        : ImplD(ImplD), ISMgr(std::move(ISMgr)) {}
-    JITDylib &getImplDylib() { return ImplD; }
-    IndirectStubsManager &getISManager() { return *ISMgr; }
+    struct PerDylibResources {
+    public:
+        PerDylibResources(JITDylib &ImplD,
+                          std::unique_ptr<IndirectStubsManager> ISMgr)
+            : ImplD(ImplD), ISMgr(std::move(ISMgr)) {}
+        JITDylib &getImplDylib() {
+            return ImplD;
+        }
+        IndirectStubsManager &getISManager() {
+            return *ISMgr;
+        }
 
-  private:
-    JITDylib &ImplD;
-    std::unique_ptr<IndirectStubsManager> ISMgr;
-  };
+    private:
+        JITDylib &ImplD;
+        std::unique_ptr<IndirectStubsManager> ISMgr;
+    };
 
-  using PerDylibResourcesMap = std::map<const JITDylib *, PerDylibResources>;
+    using PerDylibResourcesMap = std::map<const JITDylib *, PerDylibResources>;
 
-  PerDylibResources &getPerDylibResources(JITDylib &TargetD);
+    PerDylibResources &getPerDylibResources(JITDylib &TargetD);
 
-  void cleanUpModule(Module &M);
+    void cleanUpModule(Module &M);
 
-  void expandPartition(GlobalValueSet &Partition);
+    void expandPartition(GlobalValueSet &Partition);
 
-  void emitPartition(std::unique_ptr<MaterializationResponsibility> R,
-                     ThreadSafeModule TSM,
-                     IRMaterializationUnit::SymbolNameToDefinitionMap Defs);
+    void emitPartition(std::unique_ptr<MaterializationResponsibility> R,
+                       ThreadSafeModule TSM,
+                       IRMaterializationUnit::SymbolNameToDefinitionMap Defs);
 
-  mutable std::mutex CODLayerMutex;
+    mutable std::mutex CODLayerMutex;
 
-  IRLayer &BaseLayer;
-  LazyCallThroughManager &LCTMgr;
-  IndirectStubsManagerBuilder BuildIndirectStubsManager;
-  PerDylibResourcesMap DylibResources;
-  PartitionFunction Partition = compileRequested;
-  SymbolLinkagePromoter PromoteSymbols;
-  ImplSymbolMap *AliaseeImpls = nullptr;
+    IRLayer &BaseLayer;
+    LazyCallThroughManager &LCTMgr;
+    IndirectStubsManagerBuilder BuildIndirectStubsManager;
+    PerDylibResourcesMap DylibResources;
+    PartitionFunction Partition = compileRequested;
+    SymbolLinkagePromoter PromoteSymbols;
+    ImplSymbolMap *AliaseeImpls = nullptr;
 };
 
 } // end namespace orc

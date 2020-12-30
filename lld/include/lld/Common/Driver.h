@@ -14,8 +14,8 @@
 
 namespace lld {
 struct SafeReturn {
-  int ret;
-  bool canRunAgain;
+    int ret;
+    bool canRunAgain;
 };
 
 // Generic entry point when using LLD as a library, safe for re-entry, supports

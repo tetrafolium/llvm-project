@@ -21,6 +21,8 @@
 #define ASSIGN_UMOD(res, a, b) __udivmodti4((a), (b), &(res))
 #include "int_div_impl.inc"
 
-COMPILER_RT_ABI ti_int __modti3(ti_int a, ti_int b) { return __modXi3(a, b); }
+COMPILER_RT_ABI ti_int __modti3(ti_int a, ti_int b) {
+    return __modXi3(a, b);
+}
 
 #endif // CRT_HAS_128BIT

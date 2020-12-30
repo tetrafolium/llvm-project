@@ -29,13 +29,13 @@ MakeEnregisteredLocationExpression(llvm::codeview::RegisterId reg,
                                    lldb::ModuleSP module);
 
 DWARFExpression MakeRegRelLocationExpression(llvm::codeview::RegisterId reg,
-                                             int32_t offset,
-                                             lldb::ModuleSP module);
+        int32_t offset,
+        lldb::ModuleSP module);
 DWARFExpression MakeVFrameRelLocationExpression(llvm::StringRef fpo_program,
-                                                int32_t offset,
-                                                lldb::ModuleSP module);
+        int32_t offset,
+        lldb::ModuleSP module);
 DWARFExpression MakeGlobalLocationExpression(uint16_t section, uint32_t offset,
-                                             lldb::ModuleSP module);
+        lldb::ModuleSP module);
 DWARFExpression MakeConstantLocationExpression(
     llvm::codeview::TypeIndex underlying_ti, llvm::pdb::TpiStream &tpi,
     const llvm::APSInt &constant, lldb::ModuleSP module);

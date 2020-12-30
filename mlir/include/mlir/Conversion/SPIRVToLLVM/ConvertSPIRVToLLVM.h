@@ -23,13 +23,13 @@ class ModuleOp;
 template <typename SPIRVOp>
 class SPIRVToLLVMConversion : public OpConversionPattern<SPIRVOp> {
 public:
-  SPIRVToLLVMConversion(MLIRContext *context, LLVMTypeConverter &typeConverter,
-                        PatternBenefit benefit = 1)
-      : OpConversionPattern<SPIRVOp>(context, benefit),
-        typeConverter(typeConverter) {}
+    SPIRVToLLVMConversion(MLIRContext *context, LLVMTypeConverter &typeConverter,
+                          PatternBenefit benefit = 1)
+        : OpConversionPattern<SPIRVOp>(context, benefit),
+          typeConverter(typeConverter) {}
 
 protected:
-  LLVMTypeConverter &typeConverter;
+    LLVMTypeConverter &typeConverter;
 };
 
 /// Encodes global variable's descriptor set and binding into its name if they
@@ -41,8 +41,8 @@ void populateSPIRVToLLVMTypeConversion(LLVMTypeConverter &typeConverter);
 
 /// Populates the given list with patterns that convert from SPIR-V to LLVM.
 void populateSPIRVToLLVMConversionPatterns(MLIRContext *context,
-                                           LLVMTypeConverter &typeConverter,
-                                           OwningRewritePatternList &patterns);
+        LLVMTypeConverter &typeConverter,
+        OwningRewritePatternList &patterns);
 
 /// Populates the given list with patterns for function conversion from SPIR-V
 /// to LLVM.

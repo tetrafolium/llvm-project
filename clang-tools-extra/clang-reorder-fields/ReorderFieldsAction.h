@@ -23,22 +23,22 @@ class ASTConsumer;
 namespace reorder_fields {
 
 class ReorderFieldsAction {
-  llvm::StringRef RecordName;
-  llvm::ArrayRef<std::string> DesiredFieldsOrder;
-  std::map<std::string, tooling::Replacements> &Replacements;
+    llvm::StringRef RecordName;
+    llvm::ArrayRef<std::string> DesiredFieldsOrder;
+    std::map<std::string, tooling::Replacements> &Replacements;
 
 public:
-  ReorderFieldsAction(
-      llvm::StringRef RecordName,
-      llvm::ArrayRef<std::string> DesiredFieldsOrder,
-      std::map<std::string, tooling::Replacements> &Replacements)
-      : RecordName(RecordName), DesiredFieldsOrder(DesiredFieldsOrder),
-        Replacements(Replacements) {}
+    ReorderFieldsAction(
+        llvm::StringRef RecordName,
+        llvm::ArrayRef<std::string> DesiredFieldsOrder,
+        std::map<std::string, tooling::Replacements> &Replacements)
+        : RecordName(RecordName), DesiredFieldsOrder(DesiredFieldsOrder),
+          Replacements(Replacements) {}
 
-  ReorderFieldsAction(const ReorderFieldsAction &) = delete;
-  ReorderFieldsAction &operator=(const ReorderFieldsAction &) = delete;
+    ReorderFieldsAction(const ReorderFieldsAction &) = delete;
+    ReorderFieldsAction &operator=(const ReorderFieldsAction &) = delete;
 
-  std::unique_ptr<ASTConsumer> newASTConsumer();
+    std::unique_ptr<ASTConsumer> newASTConsumer();
 };
 } // namespace reorder_fields
 } // namespace clang

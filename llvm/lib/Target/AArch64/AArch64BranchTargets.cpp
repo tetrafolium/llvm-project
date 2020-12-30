@@ -32,14 +32,16 @@ using namespace llvm;
 namespace {
 class AArch64BranchTargets : public MachineFunctionPass {
 public:
-  static char ID;
-  AArch64BranchTargets() : MachineFunctionPass(ID) {}
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
-  bool runOnMachineFunction(MachineFunction &MF) override;
-  StringRef getPassName() const override { return AARCH64_BRANCH_TARGETS_NAME; }
+    static char ID;
+    AArch64BranchTargets() : MachineFunctionPass(ID) {}
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
+    StringRef getPassName() const override {
+        return AARCH64_BRANCH_TARGETS_NAME;
+    }
 
 private:
-  void addBTI(MachineBasicBlock &MBB, bool CouldCall, bool CouldJump);
+    void addBTI(MachineBasicBlock &MBB, bool CouldCall, bool CouldJump);
 };
 } // end anonymous namespace
 
@@ -49,88 +51,88 @@ INITIALIZE_PASS(AArch64BranchTargets, "aarch64-branch-targets",
                 AARCH64_BRANCH_TARGETS_NAME, false, false)
 
 void AArch64BranchTargets::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesCFG();
-  MachineFunctionPass::getAnalysisUsage(AU);
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 FunctionPass *llvm::createAArch64BranchTargetsPass() {
-  return new AArch64BranchTargets();
+    return new AArch64BranchTargets();
 }
 
 bool AArch64BranchTargets::runOnMachineFunction(MachineFunction &MF) {
-  if (!MF.getInfo<AArch64FunctionInfo>()->branchTargetEnforcement())
-    return false;
+    if (!MF.getInfo<AArch64FunctionInfo>()->branchTargetEnforcement())
+        return false;
 
-  LLVM_DEBUG(
-      dbgs() << "********** AArch64 Branch Targets  **********\n"
-             << "********** Function: " << MF.getName() << '\n');
-  const Function &F = MF.getFunction();
+    LLVM_DEBUG(
+        dbgs() << "********** AArch64 Branch Targets  **********\n"
+        << "********** Function: " << MF.getName() << '\n');
+    const Function &F = MF.getFunction();
 
-  // LLVM does not consider basic blocks which are the targets of jump tables
-  // to be address-taken (the address can't escape anywhere else), but they are
-  // used for indirect branches, so need BTI instructions.
-  SmallPtrSet<MachineBasicBlock *, 8> JumpTableTargets;
-  if (auto *JTI = MF.getJumpTableInfo())
-    for (auto &JTE : JTI->getJumpTables())
-      for (auto *MBB : JTE.MBBs)
-        JumpTableTargets.insert(MBB);
+    // LLVM does not consider basic blocks which are the targets of jump tables
+    // to be address-taken (the address can't escape anywhere else), but they are
+    // used for indirect branches, so need BTI instructions.
+    SmallPtrSet<MachineBasicBlock *, 8> JumpTableTargets;
+    if (auto *JTI = MF.getJumpTableInfo())
+        for (auto &JTE : JTI->getJumpTables())
+            for (auto *MBB : JTE.MBBs)
+                JumpTableTargets.insert(MBB);
 
-  bool MadeChange = false;
-  for (MachineBasicBlock &MBB : MF) {
-    bool CouldCall = false, CouldJump = false;
-    // If the function is address-taken or externally-visible, it could be
-    // indirectly called. PLT entries and tail-calls use BR, but when they are
-    // are in guarded pages should all use x16 or x17 to hold the called
-    // address, so we don't need to set CouldJump here. BR instructions in
-    // non-guarded pages (which might be non-BTI-aware code) are allowed to
-    // branch to a "BTI c" using any register.
-    if (&MBB == &*MF.begin() && (F.hasAddressTaken() || !F.hasLocalLinkage()))
-      CouldCall = true;
+    bool MadeChange = false;
+    for (MachineBasicBlock &MBB : MF) {
+        bool CouldCall = false, CouldJump = false;
+        // If the function is address-taken or externally-visible, it could be
+        // indirectly called. PLT entries and tail-calls use BR, but when they are
+        // are in guarded pages should all use x16 or x17 to hold the called
+        // address, so we don't need to set CouldJump here. BR instructions in
+        // non-guarded pages (which might be non-BTI-aware code) are allowed to
+        // branch to a "BTI c" using any register.
+        if (&MBB == &*MF.begin() && (F.hasAddressTaken() || !F.hasLocalLinkage()))
+            CouldCall = true;
 
-    // If the block itself is address-taken, it could be indirectly branched
-    // to, but not called.
-    if (MBB.hasAddressTaken() || JumpTableTargets.count(&MBB))
-      CouldJump = true;
+        // If the block itself is address-taken, it could be indirectly branched
+        // to, but not called.
+        if (MBB.hasAddressTaken() || JumpTableTargets.count(&MBB))
+            CouldJump = true;
 
-    if (CouldCall || CouldJump) {
-      addBTI(MBB, CouldCall, CouldJump);
-      MadeChange = true;
+        if (CouldCall || CouldJump) {
+            addBTI(MBB, CouldCall, CouldJump);
+            MadeChange = true;
+        }
     }
-  }
 
-  return MadeChange;
+    return MadeChange;
 }
 
 void AArch64BranchTargets::addBTI(MachineBasicBlock &MBB, bool CouldCall,
                                   bool CouldJump) {
-  LLVM_DEBUG(dbgs() << "Adding BTI " << (CouldJump ? "j" : "")
-                    << (CouldCall ? "c" : "") << " to " << MBB.getName()
-                    << "\n");
+    LLVM_DEBUG(dbgs() << "Adding BTI " << (CouldJump ? "j" : "")
+               << (CouldCall ? "c" : "") << " to " << MBB.getName()
+               << "\n");
 
-  const AArch64InstrInfo *TII = static_cast<const AArch64InstrInfo *>(
-      MBB.getParent()->getSubtarget().getInstrInfo());
+    const AArch64InstrInfo *TII = static_cast<const AArch64InstrInfo *>(
+                                      MBB.getParent()->getSubtarget().getInstrInfo());
 
-  unsigned HintNum = 32;
-  if (CouldCall)
-    HintNum |= 2;
-  if (CouldJump)
-    HintNum |= 4;
-  assert(HintNum != 32 && "No target kinds!");
+    unsigned HintNum = 32;
+    if (CouldCall)
+        HintNum |= 2;
+    if (CouldJump)
+        HintNum |= 4;
+    assert(HintNum != 32 && "No target kinds!");
 
-  auto MBBI = MBB.begin();
+    auto MBBI = MBB.begin();
 
-  // Skip the meta instuctions, those will be removed anyway.
-  for (; MBBI != MBB.end() && MBBI->isMetaInstruction(); ++MBBI)
-    ;
+    // Skip the meta instuctions, those will be removed anyway.
+    for (; MBBI != MBB.end() && MBBI->isMetaInstruction(); ++MBBI)
+        ;
 
-  // SCTLR_EL1.BT[01] is set to 0 by default which means
-  // PACI[AB]SP are implicitly BTI C so no BTI C instruction is needed there.
-  if (MBBI != MBB.end() && HintNum == 34 &&
-      (MBBI->getOpcode() == AArch64::PACIASP ||
-       MBBI->getOpcode() == AArch64::PACIBSP))
-    return;
+    // SCTLR_EL1.BT[01] is set to 0 by default which means
+    // PACI[AB]SP are implicitly BTI C so no BTI C instruction is needed there.
+    if (MBBI != MBB.end() && HintNum == 34 &&
+            (MBBI->getOpcode() == AArch64::PACIASP ||
+             MBBI->getOpcode() == AArch64::PACIBSP))
+        return;
 
-  BuildMI(MBB, MBB.begin(), MBB.findDebugLoc(MBB.begin()),
-          TII->get(AArch64::HINT))
-      .addImm(HintNum);
+    BuildMI(MBB, MBB.begin(), MBB.findDebugLoc(MBB.begin()),
+            TII->get(AArch64::HINT))
+    .addImm(HintNum);
 }

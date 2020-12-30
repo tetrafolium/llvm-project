@@ -21,8 +21,8 @@ LLVM_C_EXTERN_C_BEGIN
 
 /* This enum is provided for backwards-compatibility only. It has no effect. */
 typedef enum {
-  LLVMLinkerDestroySource = 0, /* This is the default behavior. */
-  LLVMLinkerPreserveSource_Removed = 1 /* This option has been deprecated and
+    LLVMLinkerDestroySource = 0, /* This is the default behavior. */
+    LLVMLinkerPreserveSource_Removed = 1 /* This option has been deprecated and
                                           should not be used. */
 } LLVMLinkerMode;
 

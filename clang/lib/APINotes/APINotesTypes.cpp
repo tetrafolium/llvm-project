@@ -12,96 +12,96 @@
 namespace clang {
 namespace api_notes {
 void CommonEntityInfo::dump(llvm::raw_ostream &OS) const {
-  if (Unavailable)
-    OS << "[Unavailable] (" << UnavailableMsg << ")" << ' ';
-  if (UnavailableInSwift)
-    OS << "[UnavailableInSwift] ";
-  if (SwiftPrivateSpecified)
-    OS << (SwiftPrivate ? "[SwiftPrivate] " : "");
-  if (!SwiftName.empty())
-    OS << "Swift Name: " << SwiftName << ' ';
-  OS << '\n';
+    if (Unavailable)
+        OS << "[Unavailable] (" << UnavailableMsg << ")" << ' ';
+    if (UnavailableInSwift)
+        OS << "[UnavailableInSwift] ";
+    if (SwiftPrivateSpecified)
+        OS << (SwiftPrivate ? "[SwiftPrivate] " : "");
+    if (!SwiftName.empty())
+        OS << "Swift Name: " << SwiftName << ' ';
+    OS << '\n';
 }
 
 void CommonTypeInfo::dump(llvm::raw_ostream &OS) const {
-  static_cast<const CommonEntityInfo &>(*this).dump(OS);
-  if (SwiftBridge)
-    OS << "Swift Briged Type: " << *SwiftBridge << ' ';
-  if (NSErrorDomain)
-    OS << "NSError Domain: " << *NSErrorDomain << ' ';
-  OS << '\n';
+    static_cast<const CommonEntityInfo &>(*this).dump(OS);
+    if (SwiftBridge)
+        OS << "Swift Briged Type: " << *SwiftBridge << ' ';
+    if (NSErrorDomain)
+        OS << "NSError Domain: " << *NSErrorDomain << ' ';
+    OS << '\n';
 }
 
 void ObjCContextInfo::dump(llvm::raw_ostream &OS) {
-  static_cast<CommonTypeInfo &>(*this).dump(OS);
-  if (HasDefaultNullability)
-    OS << "DefaultNullability: " << DefaultNullability << ' ';
-  if (HasDesignatedInits)
-    OS << "[HasDesignatedInits] ";
-  if (SwiftImportAsNonGenericSpecified)
-    OS << (SwiftImportAsNonGeneric ? "[SwiftImportAsNonGeneric] " : "");
-  if (SwiftObjCMembersSpecified)
-    OS << (SwiftObjCMembers ? "[SwiftObjCMembers] " : "");
-  OS << '\n';
+    static_cast<CommonTypeInfo &>(*this).dump(OS);
+    if (HasDefaultNullability)
+        OS << "DefaultNullability: " << DefaultNullability << ' ';
+    if (HasDesignatedInits)
+        OS << "[HasDesignatedInits] ";
+    if (SwiftImportAsNonGenericSpecified)
+        OS << (SwiftImportAsNonGeneric ? "[SwiftImportAsNonGeneric] " : "");
+    if (SwiftObjCMembersSpecified)
+        OS << (SwiftObjCMembers ? "[SwiftObjCMembers] " : "");
+    OS << '\n';
 }
 
 void VariableInfo::dump(llvm::raw_ostream &OS) const {
-  static_cast<const CommonEntityInfo &>(*this).dump(OS);
-  if (NullabilityAudited)
-    OS << "Audited Nullability: " << Nullable << ' ';
-  if (!Type.empty())
-    OS << "C Type: " << Type << ' ';
-  OS << '\n';
+    static_cast<const CommonEntityInfo &>(*this).dump(OS);
+    if (NullabilityAudited)
+        OS << "Audited Nullability: " << Nullable << ' ';
+    if (!Type.empty())
+        OS << "C Type: " << Type << ' ';
+    OS << '\n';
 }
 
 void ObjCPropertyInfo::dump(llvm::raw_ostream &OS) const {
-  static_cast<const VariableInfo &>(*this).dump(OS);
-  if (SwiftImportAsAccessorsSpecified)
-    OS << (SwiftImportAsAccessors ? "[SwiftImportAsAccessors] " : "");
-  OS << '\n';
+    static_cast<const VariableInfo &>(*this).dump(OS);
+    if (SwiftImportAsAccessorsSpecified)
+        OS << (SwiftImportAsAccessors ? "[SwiftImportAsAccessors] " : "");
+    OS << '\n';
 }
 
 void ParamInfo::dump(llvm::raw_ostream &OS) const {
-  static_cast<const VariableInfo &>(*this).dump(OS);
-  if (NoEscapeSpecified)
-    OS << (NoEscape ? "[NoEscape] " : "");
-  OS << "RawRetainCountConvention: " << RawRetainCountConvention << ' ';
-  OS << '\n';
+    static_cast<const VariableInfo &>(*this).dump(OS);
+    if (NoEscapeSpecified)
+        OS << (NoEscape ? "[NoEscape] " : "");
+    OS << "RawRetainCountConvention: " << RawRetainCountConvention << ' ';
+    OS << '\n';
 }
 
 void FunctionInfo::dump(llvm::raw_ostream &OS) const {
-  static_cast<const CommonEntityInfo &>(*this).dump(OS);
-  OS << (NullabilityAudited ? "[NullabilityAudited] " : "")
-     << "RawRetainCountConvention: " << RawRetainCountConvention << ' ';
-  if (!ResultType.empty())
-    OS << "Result Type: " << ResultType << ' ';
-  if (!Params.empty())
-    OS << '\n';
-  for (auto &PI : Params)
-    PI.dump(OS);
+    static_cast<const CommonEntityInfo &>(*this).dump(OS);
+    OS << (NullabilityAudited ? "[NullabilityAudited] " : "")
+       << "RawRetainCountConvention: " << RawRetainCountConvention << ' ';
+    if (!ResultType.empty())
+        OS << "Result Type: " << ResultType << ' ';
+    if (!Params.empty())
+        OS << '\n';
+    for (auto &PI : Params)
+        PI.dump(OS);
 }
 
 void ObjCMethodInfo::dump(llvm::raw_ostream &OS) {
-  static_cast<FunctionInfo &>(*this).dump(OS);
-  OS << (DesignatedInit ? "[DesignatedInit] " : "")
-     << (RequiredInit ? "[RequiredInit] " : "") << '\n';
+    static_cast<FunctionInfo &>(*this).dump(OS);
+    OS << (DesignatedInit ? "[DesignatedInit] " : "")
+       << (RequiredInit ? "[RequiredInit] " : "") << '\n';
 }
 
 void TagInfo::dump(llvm::raw_ostream &OS) {
-  static_cast<CommonTypeInfo &>(*this).dump(OS);
-  if (HasFlagEnum)
-    OS << (IsFlagEnum ? "[FlagEnum] " : "");
-  if (EnumExtensibility)
-    OS << "Enum Extensibility: " << static_cast<long>(*EnumExtensibility)
-       << ' ';
-  OS << '\n';
+    static_cast<CommonTypeInfo &>(*this).dump(OS);
+    if (HasFlagEnum)
+        OS << (IsFlagEnum ? "[FlagEnum] " : "");
+    if (EnumExtensibility)
+        OS << "Enum Extensibility: " << static_cast<long>(*EnumExtensibility)
+           << ' ';
+    OS << '\n';
 }
 
 void TypedefInfo::dump(llvm::raw_ostream &OS) const {
-  static_cast<const CommonTypeInfo &>(*this).dump(OS);
-  if (SwiftWrapper)
-    OS << "Swift Type: " << static_cast<long>(*SwiftWrapper) << ' ';
-  OS << '\n';
+    static_cast<const CommonTypeInfo &>(*this).dump(OS);
+    if (SwiftWrapper)
+        OS << "Swift Type: " << static_cast<long>(*SwiftWrapper) << ' ';
+    OS << '\n';
 }
 } // namespace api_notes
 } // namespace clang

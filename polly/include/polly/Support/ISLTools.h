@@ -26,44 +26,46 @@ using list_element_type = decltype(std::declval<ListT>().get_at(0));
 template <typename ListT>
 struct isl_iterator
     : public llvm::iterator_facade_base<isl_iterator<ListT>,
-                                        std::forward_iterator_tag,
-                                        list_element_type<ListT>> {
+      std::forward_iterator_tag,
+      list_element_type<ListT>> {
 
-  using ElementT = list_element_type<ListT>;
+    using ElementT = list_element_type<ListT>;
 
-  explicit isl_iterator(const ListT &List)
-      : List(&List), Position(std::max(List.size(), 0)) {}
-  isl_iterator(const ListT &List, int Position)
-      : List(&List), Position(Position) {}
-  isl_iterator &operator=(const isl_iterator &R) = default;
+    explicit isl_iterator(const ListT &List)
+        : List(&List), Position(std::max(List.size(), 0)) {}
+    isl_iterator(const ListT &List, int Position)
+        : List(&List), Position(Position) {}
+    isl_iterator &operator=(const isl_iterator &R) = default;
 
-  bool operator==(const isl_iterator &O) const {
-    return List == O.List && Position == O.Position;
-  }
+    bool operator==(const isl_iterator &O) const {
+        return List == O.List && Position == O.Position;
+    }
 
-  isl_iterator &operator++() {
-    ++Position;
-    return *this;
-  }
+    isl_iterator &operator++() {
+        ++Position;
+        return *this;
+    }
 
-  isl_iterator operator++(int) {
-    isl_iterator Copy{*this};
-    ++Position;
-    return Copy;
-  }
+    isl_iterator operator++(int) {
+        isl_iterator Copy{*this};
+        ++Position;
+        return Copy;
+    }
 
-  ElementT operator*() const { return List->get_at(this->Position); }
+    ElementT operator*() const {
+        return List->get_at(this->Position);
+    }
 
 protected:
-  const ListT *List;
-  int Position = 0;
+    const ListT *List;
+    int Position = 0;
 };
 
 template <typename T> isl_iterator<T> begin(const T &t) {
-  return isl_iterator<T>(t, 0);
+    return isl_iterator<T>(t, 0);
 }
 template <typename T> isl_iterator<T> end(const T &t) {
-  return isl_iterator<T>(t);
+    return isl_iterator<T>(t);
 }
 
 } // namespace noexceptions

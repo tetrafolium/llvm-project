@@ -21,11 +21,11 @@ namespace lldb_private {
 typedef std::vector<lldb::ThreadSP> HistoryThreads;
 
 class MemoryHistory : public std::enable_shared_from_this<MemoryHistory>,
-                      public PluginInterface {
+    public PluginInterface {
 public:
-  static lldb::MemoryHistorySP FindPlugin(const lldb::ProcessSP process);
+    static lldb::MemoryHistorySP FindPlugin(const lldb::ProcessSP process);
 
-  virtual HistoryThreads GetHistoryThreads(lldb::addr_t address) = 0;
+    virtual HistoryThreads GetHistoryThreads(lldb::addr_t address) = 0;
 };
 
 } // namespace lldb_private

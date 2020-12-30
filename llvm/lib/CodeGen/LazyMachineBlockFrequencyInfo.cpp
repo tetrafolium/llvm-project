@@ -31,67 +31,67 @@ char LazyMachineBlockFrequencyInfoPass::ID = 0;
 
 LazyMachineBlockFrequencyInfoPass::LazyMachineBlockFrequencyInfoPass()
     : MachineFunctionPass(ID) {
-  initializeLazyMachineBlockFrequencyInfoPassPass(
-      *PassRegistry::getPassRegistry());
+    initializeLazyMachineBlockFrequencyInfoPassPass(
+        *PassRegistry::getPassRegistry());
 }
 
 void LazyMachineBlockFrequencyInfoPass::print(raw_ostream &OS,
-                                              const Module *M) const {
-  getBFI().print(OS, M);
+        const Module *M) const {
+    getBFI().print(OS, M);
 }
 
 void LazyMachineBlockFrequencyInfoPass::getAnalysisUsage(
     AnalysisUsage &AU) const {
-  AU.addRequired<MachineBranchProbabilityInfo>();
-  AU.setPreservesAll();
-  MachineFunctionPass::getAnalysisUsage(AU);
+    AU.addRequired<MachineBranchProbabilityInfo>();
+    AU.setPreservesAll();
+    MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 void LazyMachineBlockFrequencyInfoPass::releaseMemory() {
-  OwnedMBFI.reset();
-  OwnedMLI.reset();
-  OwnedMDT.reset();
+    OwnedMBFI.reset();
+    OwnedMLI.reset();
+    OwnedMDT.reset();
 }
 
 MachineBlockFrequencyInfo &
 LazyMachineBlockFrequencyInfoPass::calculateIfNotAvailable() const {
-  auto *MBFI = getAnalysisIfAvailable<MachineBlockFrequencyInfo>();
-  if (MBFI) {
-    LLVM_DEBUG(dbgs() << "MachineBlockFrequencyInfo is available\n");
-    return *MBFI;
-  }
-
-  auto &MBPI = getAnalysis<MachineBranchProbabilityInfo>();
-  auto *MLI = getAnalysisIfAvailable<MachineLoopInfo>();
-  auto *MDT = getAnalysisIfAvailable<MachineDominatorTree>();
-  LLVM_DEBUG(dbgs() << "Building MachineBlockFrequencyInfo on the fly\n");
-  LLVM_DEBUG(if (MLI) dbgs() << "LoopInfo is available\n");
-
-  if (!MLI) {
-    LLVM_DEBUG(dbgs() << "Building LoopInfo on the fly\n");
-    // First create a dominator tree.
-    LLVM_DEBUG(if (MDT) dbgs() << "DominatorTree is available\n");
-
-    if (!MDT) {
-      LLVM_DEBUG(dbgs() << "Building DominatorTree on the fly\n");
-      OwnedMDT = std::make_unique<MachineDominatorTree>();
-      OwnedMDT->getBase().recalculate(*MF);
-      MDT = OwnedMDT.get();
+    auto *MBFI = getAnalysisIfAvailable<MachineBlockFrequencyInfo>();
+    if (MBFI) {
+        LLVM_DEBUG(dbgs() << "MachineBlockFrequencyInfo is available\n");
+        return *MBFI;
     }
 
-    // Generate LoopInfo from it.
-    OwnedMLI = std::make_unique<MachineLoopInfo>();
-    OwnedMLI->getBase().analyze(MDT->getBase());
-    MLI = OwnedMLI.get();
-  }
+    auto &MBPI = getAnalysis<MachineBranchProbabilityInfo>();
+    auto *MLI = getAnalysisIfAvailable<MachineLoopInfo>();
+    auto *MDT = getAnalysisIfAvailable<MachineDominatorTree>();
+    LLVM_DEBUG(dbgs() << "Building MachineBlockFrequencyInfo on the fly\n");
+    LLVM_DEBUG(if (MLI) dbgs() << "LoopInfo is available\n");
 
-  OwnedMBFI = std::make_unique<MachineBlockFrequencyInfo>();
-  OwnedMBFI->calculate(*MF, MBPI, *MLI);
-  return *OwnedMBFI.get();
+    if (!MLI) {
+        LLVM_DEBUG(dbgs() << "Building LoopInfo on the fly\n");
+        // First create a dominator tree.
+        LLVM_DEBUG(if (MDT) dbgs() << "DominatorTree is available\n");
+
+        if (!MDT) {
+            LLVM_DEBUG(dbgs() << "Building DominatorTree on the fly\n");
+            OwnedMDT = std::make_unique<MachineDominatorTree>();
+            OwnedMDT->getBase().recalculate(*MF);
+            MDT = OwnedMDT.get();
+        }
+
+        // Generate LoopInfo from it.
+        OwnedMLI = std::make_unique<MachineLoopInfo>();
+        OwnedMLI->getBase().analyze(MDT->getBase());
+        MLI = OwnedMLI.get();
+    }
+
+    OwnedMBFI = std::make_unique<MachineBlockFrequencyInfo>();
+    OwnedMBFI->calculate(*MF, MBPI, *MLI);
+    return *OwnedMBFI.get();
 }
 
 bool LazyMachineBlockFrequencyInfoPass::runOnMachineFunction(
     MachineFunction &F) {
-  MF = &F;
-  return false;
+    MF = &F;
+    return false;
 }

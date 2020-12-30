@@ -56,26 +56,26 @@ class Value;
 /// all the information needed for each value profile site.
 class ValueProfileCollector {
 public:
-  struct CandidateInfo {
-    Value *V;                   // The value to profile.
-    Instruction *InsertPt;      // Insert the VP lib call before this instr.
-    Instruction *AnnotatedInst; // Where metadata is attached.
-  };
+    struct CandidateInfo {
+        Value *V;                   // The value to profile.
+        Instruction *InsertPt;      // Insert the VP lib call before this instr.
+        Instruction *AnnotatedInst; // Where metadata is attached.
+    };
 
-  ValueProfileCollector(Function &Fn, TargetLibraryInfo &TLI);
-  ValueProfileCollector(ValueProfileCollector &&) = delete;
-  ValueProfileCollector &operator=(ValueProfileCollector &&) = delete;
+    ValueProfileCollector(Function &Fn, TargetLibraryInfo &TLI);
+    ValueProfileCollector(ValueProfileCollector &&) = delete;
+    ValueProfileCollector &operator=(ValueProfileCollector &&) = delete;
 
-  ValueProfileCollector(const ValueProfileCollector &) = delete;
-  ValueProfileCollector &operator=(const ValueProfileCollector &) = delete;
-  ~ValueProfileCollector();
+    ValueProfileCollector(const ValueProfileCollector &) = delete;
+    ValueProfileCollector &operator=(const ValueProfileCollector &) = delete;
+    ~ValueProfileCollector();
 
-  /// returns a list of value profiling candidates of the given kind
-  std::vector<CandidateInfo> get(InstrProfValueKind Kind) const;
+    /// returns a list of value profiling candidates of the given kind
+    std::vector<CandidateInfo> get(InstrProfValueKind Kind) const;
 
 private:
-  class ValueProfileCollectorImpl;
-  std::unique_ptr<ValueProfileCollectorImpl> PImpl;
+    class ValueProfileCollectorImpl;
+    std::unique_ptr<ValueProfileCollectorImpl> PImpl;
 };
 
 } // namespace llvm

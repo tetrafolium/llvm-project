@@ -15,18 +15,18 @@ uptr PageSizeCached;
 uptr getPageSize();
 
 uptr getPageSizeSlow() {
-  PageSizeCached = getPageSize();
-  CHECK_NE(PageSizeCached, 0);
-  return PageSizeCached;
+    PageSizeCached = getPageSize();
+    CHECK_NE(PageSizeCached, 0);
+    return PageSizeCached;
 }
 
 // Fatal internal map() or unmap() error (potentially OOM related).
 void NORETURN dieOnMapUnmapError(bool OutOfMemory) {
-  outputRaw("Scudo ERROR: internal map or unmap failure");
-  if (OutOfMemory)
-    outputRaw(" (OOM)");
-  outputRaw("\n");
-  die();
+    outputRaw("Scudo ERROR: internal map or unmap failure");
+    if (OutOfMemory)
+        outputRaw(" (OOM)");
+    outputRaw("\n");
+    die();
 }
 
 } // namespace scudo

@@ -34,7 +34,8 @@
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
-namespace __refstring_imp { namespace {
+namespace __refstring_imp {
+namespace {
 typedef int count_t;
 
 struct _Rep_base {
@@ -75,7 +76,8 @@ get_gcc_empty_string_storage() _NOEXCEPT
 }
 #endif
 
-}} // namespace __refstring_imp
+}
+} // namespace __refstring_imp
 
 using namespace __refstring_imp;
 
@@ -93,7 +95,8 @@ __libcpp_refstring::__libcpp_refstring(const char* msg) {
 
 inline
 __libcpp_refstring::__libcpp_refstring(const __libcpp_refstring &s) _NOEXCEPT
-    : __imp_(s.__imp_)
+:
+__imp_(s.__imp_)
 {
     if (__uses_refcount())
         __libcpp_atomic_add(&rep_from_data(__imp_)->count, 1);

@@ -30,36 +30,37 @@
 using namespace mlir;
 
 static LogicalResult runMLIRPasses(ModuleOp module) {
-  PassManager passManager(module.getContext());
-  applyPassManagerCLOptions(passManager);
+    PassManager passManager(module.getContext());
+    applyPassManagerCLOptions(passManager);
 
-  passManager.addPass(createGpuKernelOutliningPass());
-  passManager.addPass(createLegalizeStdOpsForSPIRVLoweringPass());
-  passManager.addPass(createConvertGPUToSPIRVPass());
-  OpPassManager &modulePM = passManager.nest<spirv::ModuleOp>();
-  modulePM.addPass(spirv::createLowerABIAttributesPass());
-  modulePM.addPass(spirv::createUpdateVersionCapabilityExtensionPass());
-  passManager.addPass(createConvertGpuLaunchFuncToVulkanLaunchFuncPass());
-  LowerToLLVMOptions llvmOptions = {
-      /*useBarePtrCallConv =*/false,
-      /*emitCWrappers = */ true,
-      /*indexBitwidth =*/kDeriveIndexBitwidthFromDataLayout};
-  passManager.addPass(createLowerToLLVMPass(llvmOptions));
-  passManager.addPass(createConvertVulkanLaunchFuncToVulkanCallsPass());
-  return passManager.run(module);
+    passManager.addPass(createGpuKernelOutliningPass());
+    passManager.addPass(createLegalizeStdOpsForSPIRVLoweringPass());
+    passManager.addPass(createConvertGPUToSPIRVPass());
+    OpPassManager &modulePM = passManager.nest<spirv::ModuleOp>();
+    modulePM.addPass(spirv::createLowerABIAttributesPass());
+    modulePM.addPass(spirv::createUpdateVersionCapabilityExtensionPass());
+    passManager.addPass(createConvertGpuLaunchFuncToVulkanLaunchFuncPass());
+    LowerToLLVMOptions llvmOptions = {
+        /*useBarePtrCallConv =*/false,
+        /*emitCWrappers = */ true,
+        /*indexBitwidth =*/kDeriveIndexBitwidthFromDataLayout
+    };
+    passManager.addPass(createLowerToLLVMPass(llvmOptions));
+    passManager.addPass(createConvertVulkanLaunchFuncToVulkanCallsPass());
+    return passManager.run(module);
 }
 
 int main(int argc, char **argv) {
-  llvm::llvm_shutdown_obj x;
-  registerPassManagerCLOptions();
+    llvm::llvm_shutdown_obj x;
+    registerPassManagerCLOptions();
 
-  llvm::InitLLVM y(argc, argv);
-  llvm::InitializeNativeTarget();
-  llvm::InitializeNativeTargetAsmPrinter();
-  mlir::initializeLLVMPasses();
+    llvm::InitLLVM y(argc, argv);
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+    mlir::initializeLLVMPasses();
 
-  mlir::JitRunnerConfig jitRunnerConfig;
-  jitRunnerConfig.mlirTransformer = runMLIRPasses;
+    mlir::JitRunnerConfig jitRunnerConfig;
+    jitRunnerConfig.mlirTransformer = runMLIRPasses;
 
-  return mlir::JitRunnerMain(argc, argv, jitRunnerConfig);
+    return mlir::JitRunnerMain(argc, argv, jitRunnerConfig);
 }

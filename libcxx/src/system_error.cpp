@@ -65,11 +65,11 @@ string do_strerror_r(int ev);
 
 #if defined(_LIBCPP_MSVCRT_LIKE)
 string do_strerror_r(int ev) {
-  char buffer[strerror_buff_size];
-  if (::strerror_s(buffer, strerror_buff_size, ev) == 0)
+    char buffer[strerror_buff_size];
+    if (::strerror_s(buffer, strerror_buff_size, ev) == 0)
+        return string(buffer);
+    std::snprintf(buffer, strerror_buff_size, "unknown error %d", ev);
     return string(buffer);
-  std::snprintf(buffer, strerror_buff_size, "unknown error %d", ev);
-  return string(buffer);
 }
 #else
 
@@ -79,31 +79,31 @@ string do_strerror_r(int ev) {
 // For the GNU variant, a char* return value:
 __attribute__((unused)) const char *
 handle_strerror_r_return(char *strerror_return, char *buffer) {
-  // GNU always returns a string pointer in its return value. The
-  // string might point to either the input buffer, or a static
-  // buffer, but we don't care which.
-  return strerror_return;
+    // GNU always returns a string pointer in its return value. The
+    // string might point to either the input buffer, or a static
+    // buffer, but we don't care which.
+    return strerror_return;
 }
 
 // For the POSIX variant: an int return value.
 __attribute__((unused)) const char *
 handle_strerror_r_return(int strerror_return, char *buffer) {
-  // The POSIX variant either:
-  // - fills in the provided buffer and returns 0
-  // - returns a positive error value, or
-  // - returns -1 and fills in errno with an error value.
-  if (strerror_return == 0)
-    return buffer;
+    // The POSIX variant either:
+    // - fills in the provided buffer and returns 0
+    // - returns a positive error value, or
+    // - returns -1 and fills in errno with an error value.
+    if (strerror_return == 0)
+        return buffer;
 
-  // Only handle EINVAL. Other errors abort.
-  int new_errno = strerror_return == -1 ? errno : strerror_return;
-  if (new_errno == EINVAL)
-    return "";
+    // Only handle EINVAL. Other errors abort.
+    int new_errno = strerror_return == -1 ? errno : strerror_return;
+    if (new_errno == EINVAL)
+        return "";
 
-  _LIBCPP_ASSERT(new_errno == ERANGE, "unexpected error from ::strerror_r");
-  // FIXME maybe? 'strerror_buff_size' is likely to exceed the
-  // maximum error size so ERANGE shouldn't be returned.
-  std::abort();
+    _LIBCPP_ASSERT(new_errno == ERANGE, "unexpected error from ::strerror_r");
+    // FIXME maybe? 'strerror_buff_size' is likely to exceed the
+    // maximum error size so ERANGE shouldn't be returned.
+    std::abort();
 }
 
 // This function handles both GNU and POSIX variants, dispatching to
@@ -114,11 +114,11 @@ string do_strerror_r(int ev) {
     // system_error functions not modify errno).
     const int old_errno = errno;
     const char *error_message = handle_strerror_r_return(
-        ::strerror_r(ev, buffer, strerror_buff_size), buffer);
+                                    ::strerror_r(ev, buffer, strerror_buff_size), buffer);
     // If we didn't get any message, print one now.
     if (!error_message[0]) {
-      std::snprintf(buffer, strerror_buff_size, "Unknown error %d", ev);
-      error_message = buffer;
+        std::snprintf(buffer, strerror_buff_size, "Unknown error %d", ev);
+        error_message = buffer;
     }
     errno = old_errno;
     return string(error_message);
@@ -156,7 +156,7 @@ __generic_error_category::message(int ev) const
 {
 #ifdef _LIBCPP_ELAST
     if (ev > _LIBCPP_ELAST)
-      return string("unspecified generic_category error");
+        return string("unspecified generic_category error");
 #endif  // _LIBCPP_ELAST
     return __do_message::message(ev);
 }
@@ -188,7 +188,7 @@ __system_error_category::message(int ev) const
 {
 #ifdef _LIBCPP_ELAST
     if (ev > _LIBCPP_ELAST)
-      return string("unspecified system_category error");
+        return string("unspecified system_category error");
 #endif  // _LIBCPP_ELAST
     return __do_message::message(ev);
 }
@@ -198,7 +198,7 @@ __system_error_category::default_error_condition(int ev) const _NOEXCEPT
 {
 #ifdef _LIBCPP_ELAST
     if (ev > _LIBCPP_ELAST)
-      return error_condition(ev, system_category());
+        return error_condition(ev, system_category());
 #endif  // _LIBCPP_ELAST
     return error_condition(ev, generic_category());
 }

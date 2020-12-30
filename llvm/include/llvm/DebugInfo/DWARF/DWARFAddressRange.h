@@ -20,61 +20,63 @@ class raw_ostream;
 class DWARFObject;
 
 struct DWARFAddressRange {
-  uint64_t LowPC;
-  uint64_t HighPC;
-  uint64_t SectionIndex;
+    uint64_t LowPC;
+    uint64_t HighPC;
+    uint64_t SectionIndex;
 
-  DWARFAddressRange() = default;
+    DWARFAddressRange() = default;
 
-  /// Used for unit testing.
-  DWARFAddressRange(
-      uint64_t LowPC, uint64_t HighPC,
-      uint64_t SectionIndex = object::SectionedAddress::UndefSection)
-      : LowPC(LowPC), HighPC(HighPC), SectionIndex(SectionIndex) {}
+    /// Used for unit testing.
+    DWARFAddressRange(
+        uint64_t LowPC, uint64_t HighPC,
+        uint64_t SectionIndex = object::SectionedAddress::UndefSection)
+        : LowPC(LowPC), HighPC(HighPC), SectionIndex(SectionIndex) {}
 
-  /// Returns true if LowPC is smaller or equal to HighPC. This accounts for
-  /// dead-stripped ranges.
-  bool valid() const { return LowPC <= HighPC; }
+    /// Returns true if LowPC is smaller or equal to HighPC. This accounts for
+    /// dead-stripped ranges.
+    bool valid() const {
+        return LowPC <= HighPC;
+    }
 
-  /// Returns true if [LowPC, HighPC) intersects with [RHS.LowPC, RHS.HighPC).
-  bool intersects(const DWARFAddressRange &RHS) const {
-    assert(valid() && RHS.valid());
-    // Empty ranges can't intersect.
-    if (LowPC == HighPC || RHS.LowPC == RHS.HighPC)
-      return false;
-    return LowPC < RHS.HighPC && RHS.LowPC < HighPC;
-  }
+    /// Returns true if [LowPC, HighPC) intersects with [RHS.LowPC, RHS.HighPC).
+    bool intersects(const DWARFAddressRange &RHS) const {
+        assert(valid() && RHS.valid());
+        // Empty ranges can't intersect.
+        if (LowPC == HighPC || RHS.LowPC == RHS.HighPC)
+            return false;
+        return LowPC < RHS.HighPC && RHS.LowPC < HighPC;
+    }
 
-  /// Union two address ranges if they intersect.
-  ///
-  /// This function will union two address ranges if they intersect by
-  /// modifying this range to be the union of both ranges. If the two ranges
-  /// don't intersect this range will be left alone.
-  ///
-  /// \param RHS Another address range to combine with.
-  ///
-  /// \returns false if the ranges don't intersect, true if they do and the
-  /// ranges were combined.
-  bool merge(const DWARFAddressRange &RHS) {
-    if (!intersects(RHS))
-      return false;
-    LowPC = std::min<uint64_t>(LowPC, RHS.LowPC);
-    HighPC = std::max<uint64_t>(HighPC, RHS.HighPC);
-    return true;
-  }
+    /// Union two address ranges if they intersect.
+    ///
+    /// This function will union two address ranges if they intersect by
+    /// modifying this range to be the union of both ranges. If the two ranges
+    /// don't intersect this range will be left alone.
+    ///
+    /// \param RHS Another address range to combine with.
+    ///
+    /// \returns false if the ranges don't intersect, true if they do and the
+    /// ranges were combined.
+    bool merge(const DWARFAddressRange &RHS) {
+        if (!intersects(RHS))
+            return false;
+        LowPC = std::min<uint64_t>(LowPC, RHS.LowPC);
+        HighPC = std::max<uint64_t>(HighPC, RHS.HighPC);
+        return true;
+    }
 
-  void dump(raw_ostream &OS, uint32_t AddressSize, DIDumpOptions DumpOpts = {},
-            const DWARFObject *Obj = nullptr) const;
+    void dump(raw_ostream &OS, uint32_t AddressSize, DIDumpOptions DumpOpts = {},
+              const DWARFObject *Obj = nullptr) const;
 };
 
 inline bool operator<(const DWARFAddressRange &LHS,
                       const DWARFAddressRange &RHS) {
-  return std::tie(LHS.LowPC, LHS.HighPC) < std::tie(RHS.LowPC, RHS.HighPC);
+    return std::tie(LHS.LowPC, LHS.HighPC) < std::tie(RHS.LowPC, RHS.HighPC);
 }
 
 inline bool operator==(const DWARFAddressRange &LHS,
                        const DWARFAddressRange &RHS) {
-  return std::tie(LHS.LowPC, LHS.HighPC) == std::tie(RHS.LowPC, RHS.HighPC);
+    return std::tie(LHS.LowPC, LHS.HighPC) == std::tie(RHS.LowPC, RHS.HighPC);
 }
 
 raw_ostream &operator<<(raw_ostream &OS, const DWARFAddressRange &R);

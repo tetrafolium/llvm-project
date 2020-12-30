@@ -23,19 +23,19 @@ namespace tblgen {
 // exhibited.
 class SideEffect : public Operator::VariableDecorator {
 public:
-  // Return the name of the C++ effect.
-  StringRef getName() const;
+    // Return the name of the C++ effect.
+    StringRef getName() const;
 
-  // Return the name of the base C++ effect.
-  StringRef getBaseEffectName() const;
+    // Return the name of the base C++ effect.
+    StringRef getBaseEffectName() const;
 
-  // Return the name of the Interface that the effect belongs to.
-  std::string getInterfaceTrait() const;
+    // Return the name of the Interface that the effect belongs to.
+    std::string getInterfaceTrait() const;
 
-  // Return the name of the resource class.
-  StringRef getResource() const;
+    // Return the name of the resource class.
+    StringRef getResource() const;
 
-  static bool classof(const Operator::VariableDecorator *var);
+    static bool classof(const Operator::VariableDecorator *var);
 };
 
 // This class represents an instance of a side effect interface applied to an
@@ -43,13 +43,13 @@ public:
 // the effects that are applied.
 class SideEffectTrait : public InterfaceOpTrait {
 public:
-  // Return the effects that are attached to the side effect interface.
-  Operator::var_decorator_range getEffects() const;
+    // Return the effects that are attached to the side effect interface.
+    Operator::var_decorator_range getEffects() const;
 
-  // Return the name of the base C++ effect.
-  StringRef getBaseEffectName() const;
+    // Return the name of the base C++ effect.
+    StringRef getBaseEffectName() const;
 
-  static bool classof(const OpTrait *t);
+    static bool classof(const OpTrait *t);
 };
 
 } // end namespace tblgen

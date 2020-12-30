@@ -13,10 +13,10 @@
 
 namespace llvm {
 class MCAsmInfoWasm : public MCAsmInfo {
-  virtual void anchor();
+    virtual void anchor();
 
 protected:
-  MCAsmInfoWasm();
+    MCAsmInfoWasm();
 };
 } // namespace llvm
 

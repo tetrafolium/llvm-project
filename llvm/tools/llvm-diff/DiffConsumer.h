@@ -22,14 +22,14 @@
 
 namespace llvm {
 class StringRef;
-  class Module;
-  class Value;
-  class Function;
+class Module;
+class Value;
+class Function;
 
-  /// The interface for consumers of difference data.
-  class Consumer {
+/// The interface for consumers of difference data.
+class Consumer {
     virtual void anchor();
-  public:
+public:
     /// Record that a local context has been entered.  Left and
     /// Right are IR "containers" of some sort which are being
     /// considered for structural equivalence: global variables,
@@ -48,21 +48,21 @@ class StringRef;
     /// Record a line-by-line instruction diff.
     virtual void logd(const DiffLogBuilder &Log) = 0;
 
-  protected:
+protected:
     virtual ~Consumer() {}
-  };
+};
 
-  class DiffConsumer : public Consumer {
-  private:
+class DiffConsumer : public Consumer {
+private:
     struct DiffContext {
-      DiffContext(Value *L, Value *R)
-        : L(L), R(R), Differences(false), IsFunction(isa<Function>(L)) {}
-      Value *L;
-      Value *R;
-      bool Differences;
-      bool IsFunction;
-      DenseMap<Value*,unsigned> LNumbering;
-      DenseMap<Value*,unsigned> RNumbering;
+        DiffContext(Value *L, Value *R)
+            : L(L), R(R), Differences(false), IsFunction(isa<Function>(L)) {}
+        Value *L;
+        Value *R;
+        bool Differences;
+        bool IsFunction;
+        DenseMap<Value*,unsigned> LNumbering;
+        DenseMap<Value*,unsigned> RNumbering;
     };
 
     raw_ostream &out;
@@ -74,9 +74,9 @@ class StringRef;
     void header();
     void indent();
 
-  public:
+public:
     DiffConsumer()
-      : out(errs()), Differences(false), Indent(0) {}
+        : out(errs()), Differences(false), Indent(0) {}
 
     bool hadDifferences() const;
     void enterContext(Value *L, Value *R) override;
@@ -84,7 +84,7 @@ class StringRef;
     void log(StringRef text) override;
     void logf(const LogBuilder &Log) override;
     void logd(const DiffLogBuilder &Log) override;
-  };
+};
 }
 
 #endif

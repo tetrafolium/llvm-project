@@ -68,26 +68,32 @@ namespace llvm {
 
 class SymbolRemappingParseError : public ErrorInfo<SymbolRemappingParseError> {
 public:
-  SymbolRemappingParseError(StringRef File, int64_t Line, const Twine &Message)
-      : File(File), Line(Line), Message(Message.str()) {}
+    SymbolRemappingParseError(StringRef File, int64_t Line, const Twine &Message)
+        : File(File), Line(Line), Message(Message.str()) {}
 
-  void log(llvm::raw_ostream &OS) const override {
-    OS << File << ':' << Line << ": " << Message;
-  }
-  std::error_code convertToErrorCode() const override {
-    return llvm::inconvertibleErrorCode();
-  }
+    void log(llvm::raw_ostream &OS) const override {
+        OS << File << ':' << Line << ": " << Message;
+    }
+    std::error_code convertToErrorCode() const override {
+        return llvm::inconvertibleErrorCode();
+    }
 
-  StringRef getFileName() const { return File; }
-  int64_t getLineNum() const { return Line; }
-  StringRef getMessage() const { return Message; }
+    StringRef getFileName() const {
+        return File;
+    }
+    int64_t getLineNum() const {
+        return Line;
+    }
+    StringRef getMessage() const {
+        return Message;
+    }
 
-  static char ID;
+    static char ID;
 
 private:
-  std::string File;
-  int64_t Line;
-  std::string Message;
+    std::string File;
+    int64_t Line;
+    std::string Message;
 };
 
 /// Reader for symbol remapping files.
@@ -96,35 +102,35 @@ private:
 /// according to a set of rules specified in a given file.
 class SymbolRemappingReader {
 public:
-  /// Read remappings from the given buffer, which must live as long as
-  /// the remapper.
-  Error read(MemoryBuffer &B);
+    /// Read remappings from the given buffer, which must live as long as
+    /// the remapper.
+    Error read(MemoryBuffer &B);
 
-  /// A Key represents an equivalence class of symbol names.
-  using Key = uintptr_t;
+    /// A Key represents an equivalence class of symbol names.
+    using Key = uintptr_t;
 
-  /// Construct a key for the given symbol, or return an existing one if an
-  /// equivalent name has already been inserted. The symbol name must live
-  /// as long as the remapper.
-  ///
-  /// The result will be Key() if the name cannot be remapped (typically
-  /// because it is not a valid mangled name).
-  Key insert(StringRef FunctionName) {
-    return Canonicalizer.canonicalize(FunctionName);
-  }
+    /// Construct a key for the given symbol, or return an existing one if an
+    /// equivalent name has already been inserted. The symbol name must live
+    /// as long as the remapper.
+    ///
+    /// The result will be Key() if the name cannot be remapped (typically
+    /// because it is not a valid mangled name).
+    Key insert(StringRef FunctionName) {
+        return Canonicalizer.canonicalize(FunctionName);
+    }
 
-  /// Map the given symbol name into the key for the corresponding equivalence
-  /// class.
-  ///
-  /// The result will typically be Key() if no equivalent symbol has been
-  /// inserted, but this is not guaranteed: a Key different from all keys ever
-  /// returned by \c insert may be returned instead.
-  Key lookup(StringRef FunctionName) {
-    return Canonicalizer.lookup(FunctionName);
-  }
+    /// Map the given symbol name into the key for the corresponding equivalence
+    /// class.
+    ///
+    /// The result will typically be Key() if no equivalent symbol has been
+    /// inserted, but this is not guaranteed: a Key different from all keys ever
+    /// returned by \c insert may be returned instead.
+    Key lookup(StringRef FunctionName) {
+        return Canonicalizer.lookup(FunctionName);
+    }
 
 private:
-  ItaniumManglingCanonicalizer Canonicalizer;
+    ItaniumManglingCanonicalizer Canonicalizer;
 };
 
 } // end namespace llvm

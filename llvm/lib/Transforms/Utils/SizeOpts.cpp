@@ -59,53 +59,53 @@ cl::opt<int> PgsoCutoffSampleProf(
 
 namespace {
 struct BasicBlockBFIAdapter {
-  static bool isFunctionColdInCallGraph(const Function *F,
+    static bool isFunctionColdInCallGraph(const Function *F,
+                                          ProfileSummaryInfo *PSI,
+                                          BlockFrequencyInfo &BFI) {
+        return PSI->isFunctionColdInCallGraph(F, BFI);
+    }
+    static bool isFunctionHotInCallGraphNthPercentile(int CutOff,
+            const Function *F,
+            ProfileSummaryInfo *PSI,
+            BlockFrequencyInfo &BFI) {
+        return PSI->isFunctionHotInCallGraphNthPercentile(CutOff, F, BFI);
+    }
+    static bool isFunctionColdInCallGraphNthPercentile(int CutOff,
+            const Function *F,
+            ProfileSummaryInfo *PSI,
+            BlockFrequencyInfo &BFI) {
+        return PSI->isFunctionColdInCallGraphNthPercentile(CutOff, F, BFI);
+    }
+    static bool isColdBlock(const BasicBlock *BB,
+                            ProfileSummaryInfo *PSI,
+                            BlockFrequencyInfo *BFI) {
+        return PSI->isColdBlock(BB, BFI);
+    }
+    static bool isHotBlockNthPercentile(int CutOff,
+                                        const BasicBlock *BB,
                                         ProfileSummaryInfo *PSI,
-                                        BlockFrequencyInfo &BFI) {
-    return PSI->isFunctionColdInCallGraph(F, BFI);
-  }
-  static bool isFunctionHotInCallGraphNthPercentile(int CutOff,
-                                                    const Function *F,
-                                                    ProfileSummaryInfo *PSI,
-                                                    BlockFrequencyInfo &BFI) {
-    return PSI->isFunctionHotInCallGraphNthPercentile(CutOff, F, BFI);
-  }
-  static bool isFunctionColdInCallGraphNthPercentile(int CutOff,
-                                                     const Function *F,
-                                                     ProfileSummaryInfo *PSI,
-                                                     BlockFrequencyInfo &BFI) {
-    return PSI->isFunctionColdInCallGraphNthPercentile(CutOff, F, BFI);
-  }
-  static bool isColdBlock(const BasicBlock *BB,
-                          ProfileSummaryInfo *PSI,
-                          BlockFrequencyInfo *BFI) {
-    return PSI->isColdBlock(BB, BFI);
-  }
-  static bool isHotBlockNthPercentile(int CutOff,
-                                      const BasicBlock *BB,
-                                      ProfileSummaryInfo *PSI,
-                                      BlockFrequencyInfo *BFI) {
-    return PSI->isHotBlockNthPercentile(CutOff, BB, BFI);
-  }
-  static bool isColdBlockNthPercentile(int CutOff, const BasicBlock *BB,
-                                       ProfileSummaryInfo *PSI,
-                                       BlockFrequencyInfo *BFI) {
-    return PSI->isColdBlockNthPercentile(CutOff, BB, BFI);
-  }
+                                        BlockFrequencyInfo *BFI) {
+        return PSI->isHotBlockNthPercentile(CutOff, BB, BFI);
+    }
+    static bool isColdBlockNthPercentile(int CutOff, const BasicBlock *BB,
+                                         ProfileSummaryInfo *PSI,
+                                         BlockFrequencyInfo *BFI) {
+        return PSI->isColdBlockNthPercentile(CutOff, BB, BFI);
+    }
 };
 } // end anonymous namespace
 
 bool llvm::shouldOptimizeForSize(const Function *F, ProfileSummaryInfo *PSI,
                                  BlockFrequencyInfo *BFI,
                                  PGSOQueryType QueryType) {
-  return shouldFuncOptimizeForSizeImpl<BasicBlockBFIAdapter>(F, PSI, BFI,
-                                                             QueryType);
+    return shouldFuncOptimizeForSizeImpl<BasicBlockBFIAdapter>(F, PSI, BFI,
+            QueryType);
 }
 
 bool llvm::shouldOptimizeForSize(const BasicBlock *BB, ProfileSummaryInfo *PSI,
                                  BlockFrequencyInfo *BFI,
                                  PGSOQueryType QueryType) {
-  assert(BB);
-  return shouldOptimizeForSizeImpl<BasicBlockBFIAdapter>(BB, PSI, BFI,
-                                                         QueryType);
+    assert(BB);
+    return shouldOptimizeForSizeImpl<BasicBlockBFIAdapter>(BB, PSI, BFI,
+            QueryType);
 }

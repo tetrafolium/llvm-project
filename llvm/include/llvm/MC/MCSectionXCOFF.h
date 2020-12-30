@@ -30,55 +30,65 @@ namespace llvm {
 //    contained in another XCOFF object file. External reference csects are not
 //    implemented yet.
 class MCSectionXCOFF final : public MCSection {
-  friend class MCContext;
+    friend class MCContext;
 
-  XCOFF::StorageMappingClass MappingClass;
-  XCOFF::SymbolType Type;
-  MCSymbolXCOFF *const QualName;
-  StringRef SymbolTableName;
-  bool MultiSymbolsAllowed;
-  static constexpr unsigned DefaultAlignVal = 4;
+    XCOFF::StorageMappingClass MappingClass;
+    XCOFF::SymbolType Type;
+    MCSymbolXCOFF *const QualName;
+    StringRef SymbolTableName;
+    bool MultiSymbolsAllowed;
+    static constexpr unsigned DefaultAlignVal = 4;
 
-  MCSectionXCOFF(StringRef Name, XCOFF::StorageMappingClass SMC,
-                 XCOFF::SymbolType ST, SectionKind K, MCSymbolXCOFF *QualName,
-                 MCSymbol *Begin, StringRef SymbolTableName,
-                 bool MultiSymbolsAllowed)
-      : MCSection(SV_XCOFF, Name, K, Begin), MappingClass(SMC), Type(ST),
-        QualName(QualName), SymbolTableName(SymbolTableName),
-        MultiSymbolsAllowed(MultiSymbolsAllowed) {
-    assert((ST == XCOFF::XTY_SD || ST == XCOFF::XTY_CM || ST == XCOFF::XTY_ER) &&
-           "Invalid or unhandled type for csect.");
-    assert(QualName != nullptr && "QualName is needed.");
-    QualName->setRepresentedCsect(this);
-    QualName->setStorageClass(XCOFF::C_HIDEXT);
-    // A csect is 4 byte aligned by default, except for undefined symbol csects.
-    if (Type != XCOFF::XTY_ER)
-      setAlignment(Align(DefaultAlignVal));
-  }
+    MCSectionXCOFF(StringRef Name, XCOFF::StorageMappingClass SMC,
+                   XCOFF::SymbolType ST, SectionKind K, MCSymbolXCOFF *QualName,
+                   MCSymbol *Begin, StringRef SymbolTableName,
+                   bool MultiSymbolsAllowed)
+        : MCSection(SV_XCOFF, Name, K, Begin), MappingClass(SMC), Type(ST),
+          QualName(QualName), SymbolTableName(SymbolTableName),
+          MultiSymbolsAllowed(MultiSymbolsAllowed) {
+        assert((ST == XCOFF::XTY_SD || ST == XCOFF::XTY_CM || ST == XCOFF::XTY_ER) &&
+               "Invalid or unhandled type for csect.");
+        assert(QualName != nullptr && "QualName is needed.");
+        QualName->setRepresentedCsect(this);
+        QualName->setStorageClass(XCOFF::C_HIDEXT);
+        // A csect is 4 byte aligned by default, except for undefined symbol csects.
+        if (Type != XCOFF::XTY_ER)
+            setAlignment(Align(DefaultAlignVal));
+    }
 
-  void printCsectDirective(raw_ostream &OS) const;
+    void printCsectDirective(raw_ostream &OS) const;
 
 public:
-  ~MCSectionXCOFF();
+    ~MCSectionXCOFF();
 
-  static bool classof(const MCSection *S) {
-    return S->getVariant() == SV_XCOFF;
-  }
+    static bool classof(const MCSection *S) {
+        return S->getVariant() == SV_XCOFF;
+    }
 
-  XCOFF::StorageMappingClass getMappingClass() const { return MappingClass; }
-  XCOFF::StorageClass getStorageClass() const {
-    return QualName->getStorageClass();
-  }
-  XCOFF::SymbolType getCSectType() const { return Type; }
-  MCSymbolXCOFF *getQualNameSymbol() const { return QualName; }
+    XCOFF::StorageMappingClass getMappingClass() const {
+        return MappingClass;
+    }
+    XCOFF::StorageClass getStorageClass() const {
+        return QualName->getStorageClass();
+    }
+    XCOFF::SymbolType getCSectType() const {
+        return Type;
+    }
+    MCSymbolXCOFF *getQualNameSymbol() const {
+        return QualName;
+    }
 
-  void PrintSwitchToSection(const MCAsmInfo &MAI, const Triple &T,
-                            raw_ostream &OS,
-                            const MCExpr *Subsection) const override;
-  bool UseCodeAlign() const override;
-  bool isVirtualSection() const override;
-  StringRef getSymbolTableName() const { return SymbolTableName; }
-  bool isMultiSymbolsAllowed() const { return MultiSymbolsAllowed; }
+    void PrintSwitchToSection(const MCAsmInfo &MAI, const Triple &T,
+                              raw_ostream &OS,
+                              const MCExpr *Subsection) const override;
+    bool UseCodeAlign() const override;
+    bool isVirtualSection() const override;
+    StringRef getSymbolTableName() const {
+        return SymbolTableName;
+    }
+    bool isMultiSymbolsAllowed() const {
+        return MultiSymbolsAllowed;
+    }
 };
 
 } // end namespace llvm

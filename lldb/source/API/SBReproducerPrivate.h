@@ -28,46 +28,54 @@ namespace repro {
 
 class SBRegistry : public Registry {
 public:
-  SBRegistry();
+    SBRegistry();
 };
 
 class SBProvider : public Provider<SBProvider> {
 public:
-  struct Info {
-    static const char *name;
-    static const char *file;
-  };
+    struct Info {
+        static const char *name;
+        static const char *file;
+    };
 
-  SBProvider(const FileSpec &directory)
-      : Provider(directory),
-        m_stream(directory.CopyByAppendingPathComponent("sbapi.bin").GetPath(),
-                 m_ec, llvm::sys::fs::OpenFlags::OF_None),
-        m_serializer(m_stream) {}
+    SBProvider(const FileSpec &directory)
+        : Provider(directory),
+          m_stream(directory.CopyByAppendingPathComponent("sbapi.bin").GetPath(),
+                   m_ec, llvm::sys::fs::OpenFlags::OF_None),
+          m_serializer(m_stream) {}
 
-  Serializer &GetSerializer() { return m_serializer; }
-  Registry &GetRegistry() { return m_registry; }
+    Serializer &GetSerializer() {
+        return m_serializer;
+    }
+    Registry &GetRegistry() {
+        return m_registry;
+    }
 
-  static char ID;
+    static char ID;
 
 private:
-  std::error_code m_ec;
-  llvm::raw_fd_ostream m_stream;
-  Serializer m_serializer;
-  SBRegistry m_registry;
+    std::error_code m_ec;
+    llvm::raw_fd_ostream m_stream;
+    Serializer m_serializer;
+    SBRegistry m_registry;
 };
 
 class ReplayData {
 public:
-  ReplayData(std::unique_ptr<llvm::MemoryBuffer> memory_buffer)
-      : m_memory_buffer(std::move(memory_buffer)), m_registry(),
-        m_deserializer(m_memory_buffer->getBuffer()) {}
-  Deserializer &GetDeserializer() { return m_deserializer; }
-  Registry &GetRegistry() { return m_registry; }
+    ReplayData(std::unique_ptr<llvm::MemoryBuffer> memory_buffer)
+        : m_memory_buffer(std::move(memory_buffer)), m_registry(),
+          m_deserializer(m_memory_buffer->getBuffer()) {}
+    Deserializer &GetDeserializer() {
+        return m_deserializer;
+    }
+    Registry &GetRegistry() {
+        return m_registry;
+    }
 
 private:
-  std::unique_ptr<llvm::MemoryBuffer> m_memory_buffer;
-  SBRegistry m_registry;
-  Deserializer m_deserializer;
+    std::unique_ptr<llvm::MemoryBuffer> m_memory_buffer;
+    SBRegistry m_registry;
+    Deserializer m_deserializer;
 };
 
 template <typename T> void RegisterMethods(Registry &R);

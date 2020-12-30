@@ -18,41 +18,41 @@
 #include "llvm/CodeGen/TargetLowering.h"
 
 namespace llvm {
-  class SparcSubtarget;
+class SparcSubtarget;
 
-  namespace SPISD {
-    enum NodeType : unsigned {
-      FIRST_NUMBER = ISD::BUILTIN_OP_END,
-      CMPICC,      // Compare two GPR operands, set icc+xcc.
-      CMPFCC,      // Compare two FP operands, set fcc.
-      BRICC,       // Branch to dest on icc condition
-      BRXCC,       // Branch to dest on xcc condition (64-bit only).
-      BRFCC,       // Branch to dest on fcc condition
-      SELECT_ICC,  // Select between two values using the current ICC flags.
-      SELECT_XCC,  // Select between two values using the current XCC flags.
-      SELECT_FCC,  // Select between two values using the current FCC flags.
+namespace SPISD {
+enum NodeType : unsigned {
+    FIRST_NUMBER = ISD::BUILTIN_OP_END,
+    CMPICC,      // Compare two GPR operands, set icc+xcc.
+    CMPFCC,      // Compare two FP operands, set fcc.
+    BRICC,       // Branch to dest on icc condition
+    BRXCC,       // Branch to dest on xcc condition (64-bit only).
+    BRFCC,       // Branch to dest on fcc condition
+    SELECT_ICC,  // Select between two values using the current ICC flags.
+    SELECT_XCC,  // Select between two values using the current XCC flags.
+    SELECT_FCC,  // Select between two values using the current FCC flags.
 
-      Hi, Lo,      // Hi/Lo operations, typically on a global address.
+    Hi, Lo,      // Hi/Lo operations, typically on a global address.
 
-      FTOI,        // FP to Int within a FP register.
-      ITOF,        // Int to FP within a FP register.
-      FTOX,        // FP to Int64 within a FP register.
-      XTOF,        // Int64 to FP within a FP register.
+    FTOI,        // FP to Int within a FP register.
+    ITOF,        // Int to FP within a FP register.
+    FTOX,        // FP to Int64 within a FP register.
+    XTOF,        // Int64 to FP within a FP register.
 
-      CALL,        // A call instruction.
-      RET_FLAG,    // Return with a flag operand.
-      GLOBAL_BASE_REG, // Global base reg for PIC.
-      FLUSHW,      // FLUSH register windows to stack.
+    CALL,        // A call instruction.
+    RET_FLAG,    // Return with a flag operand.
+    GLOBAL_BASE_REG, // Global base reg for PIC.
+    FLUSHW,      // FLUSH register windows to stack.
 
-      TLS_ADD,     // For Thread Local Storage (TLS).
-      TLS_LD,
-      TLS_CALL
-    };
-  }
+    TLS_ADD,     // For Thread Local Storage (TLS).
+    TLS_LD,
+    TLS_CALL
+};
+}
 
-  class SparcTargetLowering : public TargetLowering {
+class SparcTargetLowering : public TargetLowering {
     const SparcSubtarget *Subtarget;
-  public:
+public:
     SparcTargetLowering(const TargetMachine &TM, const SparcSubtarget &STI);
     SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
 
@@ -84,9 +84,9 @@ namespace llvm {
 
     unsigned
     getInlineAsmMemConstraint(StringRef ConstraintCode) const override {
-      if (ConstraintCode == "o")
-        return InlineAsm::Constraint_o;
-      return TargetLowering::getInlineAsmMemConstraint(ConstraintCode);
+        if (ConstraintCode == "o")
+            return InlineAsm::Constraint_o;
+        return TargetLowering::getInlineAsmMemConstraint(ConstraintCode);
     }
 
     std::pair<unsigned, const TargetRegisterClass *>
@@ -95,7 +95,7 @@ namespace llvm {
 
     bool isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const override;
     MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override {
-      return MVT::i32;
+        return MVT::i32;
     }
 
     Register getRegisterByName(const char* RegName, LLT VT,
@@ -105,14 +105,14 @@ namespace llvm {
     /// exception address on entry to an EH pad.
     Register
     getExceptionPointerRegister(const Constant *PersonalityFn) const override {
-      return SP::I0;
+        return SP::I0;
     }
 
     /// If a physical register, this returns the register that receives the
     /// exception typeid on entry to a landing pad.
     Register
     getExceptionSelectorRegister(const Constant *PersonalityFn) const override {
-      return SP::I1;
+        return SP::I1;
     }
 
     /// Override to support customized stack guard loading.
@@ -140,8 +140,8 @@ namespace llvm {
                                     SmallVectorImpl<SDValue> &InVals) const;
 
     SDValue
-      LowerCall(TargetLowering::CallLoweringInfo &CLI,
-                SmallVectorImpl<SDValue> &InVals) const override;
+    LowerCall(TargetLowering::CallLoweringInfo &CLI,
+              SmallVectorImpl<SDValue> &InVals) const override;
     SDValue LowerCall_32(TargetLowering::CallLoweringInfo &CLI,
                          SmallVectorImpl<SDValue> &InVals) const;
     SDValue LowerCall_64(TargetLowering::CallLoweringInfo &CLI,
@@ -190,16 +190,16 @@ namespace llvm {
     SDValue PerformDAGCombine(SDNode *N, DAGCombinerInfo &DCI) const override;
 
     bool ShouldShrinkFPConstant(EVT VT) const override {
-      // Do not shrink FP constpool if VT == MVT::f128.
-      // (ldd, call _Q_fdtoq) is more expensive than two ldds.
-      return VT != MVT::f128;
+        // Do not shrink FP constpool if VT == MVT::f128.
+        // (ldd, call _Q_fdtoq) is more expensive than two ldds.
+        return VT != MVT::f128;
     }
 
     bool shouldInsertFencesForAtomic(const Instruction *I) const override {
-      // FIXME: We insert fences for each atomics and generate
-      // sub-optimal code for PSO/TSO. (Approximately nobody uses any
-      // mode but TSO, which makes this even more silly)
-      return true;
+        // FIXME: We insert fences for each atomics and generate
+        // sub-optimal code for PSO/TSO. (Approximately nobody uses any
+        // mode but TSO, which makes this even more silly)
+        return true;
     }
 
     AtomicExpansionKind shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const override;
@@ -210,7 +210,7 @@ namespace llvm {
 
     MachineBasicBlock *expandSelectCC(MachineInstr &MI, MachineBasicBlock *BB,
                                       unsigned BROpcode) const;
-  };
+};
 } // end namespace llvm
 
 #endif    // SPARC_ISELLOWERING_H

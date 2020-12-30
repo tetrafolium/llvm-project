@@ -60,13 +60,13 @@ namespace llvm {
 /// in practice and significantly complicates the implementation, this pass does
 /// not currently implement that in any mode.
 class SimpleLoopUnswitchPass : public PassInfoMixin<SimpleLoopUnswitchPass> {
-  bool NonTrivial;
+    bool NonTrivial;
 
 public:
-  SimpleLoopUnswitchPass(bool NonTrivial = false) : NonTrivial(NonTrivial) {}
+    SimpleLoopUnswitchPass(bool NonTrivial = false) : NonTrivial(NonTrivial) {}
 
-  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
+    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
 /// Create the legacy pass object for the simple loop unswitcher.

@@ -151,7 +151,7 @@ MergeSort (void *base, size_t nmemb, size_t size,
 }
 
 int isl_sort(void *const pbase, size_t total_elems, size_t size,
-	int (*cmp)(const void *, const void *, void *arg), void *arg)
+             int (*cmp)(const void *, const void *, void *arg), void *arg)
 {
     return MergeSort (pbase, total_elems, size, cmp, arg);
 }

@@ -31,10 +31,10 @@ namespace llvm {
 static inline const MachineInstrBuilder&
 addFrameReference(const MachineInstrBuilder &MIB, int FI, int Offset = 0,
                   bool mem = true) {
-  if (mem)
-    return MIB.addImm(Offset).addFrameIndex(FI);
-  else
-    return MIB.addFrameIndex(FI).addImm(Offset);
+    if (mem)
+        return MIB.addImm(Offset).addFrameIndex(FI);
+    else
+        return MIB.addFrameIndex(FI).addImm(Offset);
 }
 
 } // End llvm namespace

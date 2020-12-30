@@ -40,106 +40,112 @@ class SymbolStream;
 class TpiStream;
 
 class PDBFile : public msf::IMSFFile {
-  friend PDBFileBuilder;
+    friend PDBFileBuilder;
 
 public:
-  PDBFile(StringRef Path, std::unique_ptr<BinaryStream> PdbFileBuffer,
-          BumpPtrAllocator &Allocator);
-  ~PDBFile() override;
+    PDBFile(StringRef Path, std::unique_ptr<BinaryStream> PdbFileBuffer,
+            BumpPtrAllocator &Allocator);
+    ~PDBFile() override;
 
-  StringRef getFileDirectory() const;
-  StringRef getFilePath() const;
+    StringRef getFileDirectory() const;
+    StringRef getFilePath() const;
 
-  uint32_t getFreeBlockMapBlock() const;
-  uint32_t getUnknown1() const;
+    uint32_t getFreeBlockMapBlock() const;
+    uint32_t getUnknown1() const;
 
-  uint32_t getBlockSize() const override;
-  uint32_t getBlockCount() const override;
-  uint32_t getNumDirectoryBytes() const;
-  uint32_t getBlockMapIndex() const;
-  uint32_t getNumDirectoryBlocks() const;
-  uint64_t getBlockMapOffset() const;
+    uint32_t getBlockSize() const override;
+    uint32_t getBlockCount() const override;
+    uint32_t getNumDirectoryBytes() const;
+    uint32_t getBlockMapIndex() const;
+    uint32_t getNumDirectoryBlocks() const;
+    uint64_t getBlockMapOffset() const;
 
-  uint32_t getNumStreams() const override;
-  uint32_t getMaxStreamSize() const;
-  uint32_t getStreamByteSize(uint32_t StreamIndex) const override;
-  ArrayRef<support::ulittle32_t>
-  getStreamBlockList(uint32_t StreamIndex) const override;
-  uint32_t getFileSize() const;
+    uint32_t getNumStreams() const override;
+    uint32_t getMaxStreamSize() const;
+    uint32_t getStreamByteSize(uint32_t StreamIndex) const override;
+    ArrayRef<support::ulittle32_t>
+    getStreamBlockList(uint32_t StreamIndex) const override;
+    uint32_t getFileSize() const;
 
-  Expected<ArrayRef<uint8_t>> getBlockData(uint32_t BlockIndex,
-                                           uint32_t NumBytes) const override;
-  Error setBlockData(uint32_t BlockIndex, uint32_t Offset,
-                     ArrayRef<uint8_t> Data) const override;
+    Expected<ArrayRef<uint8_t>> getBlockData(uint32_t BlockIndex,
+                             uint32_t NumBytes) const override;
+    Error setBlockData(uint32_t BlockIndex, uint32_t Offset,
+                       ArrayRef<uint8_t> Data) const override;
 
-  ArrayRef<support::ulittle32_t> getStreamSizes() const {
-    return ContainerLayout.StreamSizes;
-  }
-  ArrayRef<ArrayRef<support::ulittle32_t>> getStreamMap() const {
-    return ContainerLayout.StreamMap;
-  }
+    ArrayRef<support::ulittle32_t> getStreamSizes() const {
+        return ContainerLayout.StreamSizes;
+    }
+    ArrayRef<ArrayRef<support::ulittle32_t>> getStreamMap() const {
+        return ContainerLayout.StreamMap;
+    }
 
-  const msf::MSFLayout &getMsfLayout() const { return ContainerLayout; }
-  BinaryStreamRef getMsfBuffer() const { return *Buffer; }
+    const msf::MSFLayout &getMsfLayout() const {
+        return ContainerLayout;
+    }
+    BinaryStreamRef getMsfBuffer() const {
+        return *Buffer;
+    }
 
-  ArrayRef<support::ulittle32_t> getDirectoryBlockArray() const;
+    ArrayRef<support::ulittle32_t> getDirectoryBlockArray() const;
 
-  std::unique_ptr<msf::MappedBlockStream>
-  createIndexedStream(uint16_t SN) const;
-  Expected<std::unique_ptr<msf::MappedBlockStream>>
-  safelyCreateIndexedStream(uint32_t StreamIndex) const;
-  Expected<std::unique_ptr<msf::MappedBlockStream>>
-  safelyCreateNamedStream(StringRef Name);
+    std::unique_ptr<msf::MappedBlockStream>
+    createIndexedStream(uint16_t SN) const;
+    Expected<std::unique_ptr<msf::MappedBlockStream>>
+            safelyCreateIndexedStream(uint32_t StreamIndex) const;
+    Expected<std::unique_ptr<msf::MappedBlockStream>>
+            safelyCreateNamedStream(StringRef Name);
 
-  msf::MSFStreamLayout getStreamLayout(uint32_t StreamIdx) const;
-  msf::MSFStreamLayout getFpmStreamLayout() const;
+    msf::MSFStreamLayout getStreamLayout(uint32_t StreamIdx) const;
+    msf::MSFStreamLayout getFpmStreamLayout() const;
 
-  Error parseFileHeaders();
-  Error parseStreamData();
+    Error parseFileHeaders();
+    Error parseStreamData();
 
-  Expected<InfoStream &> getPDBInfoStream();
-  Expected<DbiStream &> getPDBDbiStream();
-  Expected<GlobalsStream &> getPDBGlobalsStream();
-  Expected<TpiStream &> getPDBTpiStream();
-  Expected<TpiStream &> getPDBIpiStream();
-  Expected<PublicsStream &> getPDBPublicsStream();
-  Expected<SymbolStream &> getPDBSymbolStream();
-  Expected<PDBStringTable &> getStringTable();
-  Expected<InjectedSourceStream &> getInjectedSourceStream();
+    Expected<InfoStream &> getPDBInfoStream();
+    Expected<DbiStream &> getPDBDbiStream();
+    Expected<GlobalsStream &> getPDBGlobalsStream();
+    Expected<TpiStream &> getPDBTpiStream();
+    Expected<TpiStream &> getPDBIpiStream();
+    Expected<PublicsStream &> getPDBPublicsStream();
+    Expected<SymbolStream &> getPDBSymbolStream();
+    Expected<PDBStringTable &> getStringTable();
+    Expected<InjectedSourceStream &> getInjectedSourceStream();
 
-  BumpPtrAllocator &getAllocator() { return Allocator; }
+    BumpPtrAllocator &getAllocator() {
+        return Allocator;
+    }
 
-  bool hasPDBDbiStream() const;
-  bool hasPDBGlobalsStream();
-  bool hasPDBInfoStream() const;
-  bool hasPDBIpiStream() const;
-  bool hasPDBPublicsStream();
-  bool hasPDBSymbolStream();
-  bool hasPDBTpiStream() const;
-  bool hasPDBStringTable();
-  bool hasPDBInjectedSourceStream();
+    bool hasPDBDbiStream() const;
+    bool hasPDBGlobalsStream();
+    bool hasPDBInfoStream() const;
+    bool hasPDBIpiStream() const;
+    bool hasPDBPublicsStream();
+    bool hasPDBSymbolStream();
+    bool hasPDBTpiStream() const;
+    bool hasPDBStringTable();
+    bool hasPDBInjectedSourceStream();
 
-  uint32_t getPointerSize();
+    uint32_t getPointerSize();
 
 private:
-  std::string FilePath;
-  BumpPtrAllocator &Allocator;
+    std::string FilePath;
+    BumpPtrAllocator &Allocator;
 
-  std::unique_ptr<BinaryStream> Buffer;
+    std::unique_ptr<BinaryStream> Buffer;
 
-  msf::MSFLayout ContainerLayout;
+    msf::MSFLayout ContainerLayout;
 
-  std::unique_ptr<GlobalsStream> Globals;
-  std::unique_ptr<InfoStream> Info;
-  std::unique_ptr<DbiStream> Dbi;
-  std::unique_ptr<TpiStream> Tpi;
-  std::unique_ptr<TpiStream> Ipi;
-  std::unique_ptr<PublicsStream> Publics;
-  std::unique_ptr<SymbolStream> Symbols;
-  std::unique_ptr<msf::MappedBlockStream> DirectoryStream;
-  std::unique_ptr<msf::MappedBlockStream> StringTableStream;
-  std::unique_ptr<InjectedSourceStream> InjectedSources;
-  std::unique_ptr<PDBStringTable> Strings;
+    std::unique_ptr<GlobalsStream> Globals;
+    std::unique_ptr<InfoStream> Info;
+    std::unique_ptr<DbiStream> Dbi;
+    std::unique_ptr<TpiStream> Tpi;
+    std::unique_ptr<TpiStream> Ipi;
+    std::unique_ptr<PublicsStream> Publics;
+    std::unique_ptr<SymbolStream> Symbols;
+    std::unique_ptr<msf::MappedBlockStream> DirectoryStream;
+    std::unique_ptr<msf::MappedBlockStream> StringTableStream;
+    std::unique_ptr<InjectedSourceStream> InjectedSources;
+    std::unique_ptr<PDBStringTable> Strings;
 };
 }
 }

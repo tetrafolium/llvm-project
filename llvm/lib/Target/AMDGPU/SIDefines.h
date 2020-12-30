@@ -17,116 +17,116 @@ namespace llvm {
 namespace SIInstrFlags {
 // This needs to be kept in sync with the field bits in InstSI.
 enum : uint64_t {
-  // Low bits - basic encoding information.
-  SALU = 1 << 0,
-  VALU = 1 << 1,
+    // Low bits - basic encoding information.
+    SALU = 1 << 0,
+    VALU = 1 << 1,
 
-  // SALU instruction formats.
-  SOP1 = 1 << 2,
-  SOP2 = 1 << 3,
-  SOPC = 1 << 4,
-  SOPK = 1 << 5,
-  SOPP = 1 << 6,
+    // SALU instruction formats.
+    SOP1 = 1 << 2,
+    SOP2 = 1 << 3,
+    SOPC = 1 << 4,
+    SOPK = 1 << 5,
+    SOPP = 1 << 6,
 
-  // VALU instruction formats.
-  VOP1 = 1 << 7,
-  VOP2 = 1 << 8,
-  VOPC = 1 << 9,
+    // VALU instruction formats.
+    VOP1 = 1 << 7,
+    VOP2 = 1 << 8,
+    VOPC = 1 << 9,
 
-  // TODO: Should this be spilt into VOP3 a and b?
-  VOP3 = 1 << 10,
-  VOP3P = 1 << 12,
+    // TODO: Should this be spilt into VOP3 a and b?
+    VOP3 = 1 << 10,
+    VOP3P = 1 << 12,
 
-  VINTRP = 1 << 13,
-  SDWA = 1 << 14,
-  DPP = 1 << 15,
-  TRANS = 1 << 16,
+    VINTRP = 1 << 13,
+    SDWA = 1 << 14,
+    DPP = 1 << 15,
+    TRANS = 1 << 16,
 
-  // Memory instruction formats.
-  MUBUF = 1 << 17,
-  MTBUF = 1 << 18,
-  SMRD = 1 << 19,
-  MIMG = 1 << 20,
-  EXP = 1 << 21,
-  FLAT = 1 << 22,
-  DS = 1 << 23,
+    // Memory instruction formats.
+    MUBUF = 1 << 17,
+    MTBUF = 1 << 18,
+    SMRD = 1 << 19,
+    MIMG = 1 << 20,
+    EXP = 1 << 21,
+    FLAT = 1 << 22,
+    DS = 1 << 23,
 
-  // Pseudo instruction formats.
-  VGPRSpill = 1 << 24,
-  SGPRSpill = 1 << 25,
+    // Pseudo instruction formats.
+    VGPRSpill = 1 << 24,
+    SGPRSpill = 1 << 25,
 
-  // High bits - other information.
-  VM_CNT = UINT64_C(1) << 32,
-  EXP_CNT = UINT64_C(1) << 33,
-  LGKM_CNT = UINT64_C(1) << 34,
+    // High bits - other information.
+    VM_CNT = UINT64_C(1) << 32,
+    EXP_CNT = UINT64_C(1) << 33,
+    LGKM_CNT = UINT64_C(1) << 34,
 
-  WQM = UINT64_C(1) << 35,
-  DisableWQM = UINT64_C(1) << 36,
-  Gather4 = UINT64_C(1) << 37,
-  SOPK_ZEXT = UINT64_C(1) << 38,
-  SCALAR_STORE = UINT64_C(1) << 39,
-  FIXED_SIZE = UINT64_C(1) << 40,
-  VOPAsmPrefer32Bit = UINT64_C(1) << 41,
-  VOP3_OPSEL = UINT64_C(1) << 42,
-  maybeAtomic = UINT64_C(1) << 43,
-  renamedInGFX9 = UINT64_C(1) << 44,
+    WQM = UINT64_C(1) << 35,
+    DisableWQM = UINT64_C(1) << 36,
+    Gather4 = UINT64_C(1) << 37,
+    SOPK_ZEXT = UINT64_C(1) << 38,
+    SCALAR_STORE = UINT64_C(1) << 39,
+    FIXED_SIZE = UINT64_C(1) << 40,
+    VOPAsmPrefer32Bit = UINT64_C(1) << 41,
+    VOP3_OPSEL = UINT64_C(1) << 42,
+    maybeAtomic = UINT64_C(1) << 43,
+    renamedInGFX9 = UINT64_C(1) << 44,
 
-  // Is a clamp on FP type.
-  FPClamp = UINT64_C(1) << 45,
+    // Is a clamp on FP type.
+    FPClamp = UINT64_C(1) << 45,
 
-  // Is an integer clamp
-  IntClamp = UINT64_C(1) << 46,
+    // Is an integer clamp
+    IntClamp = UINT64_C(1) << 46,
 
-  // Clamps lo component of register.
-  ClampLo = UINT64_C(1) << 47,
+    // Clamps lo component of register.
+    ClampLo = UINT64_C(1) << 47,
 
-  // Clamps hi component of register.
-  // ClampLo and ClampHi set for packed clamp.
-  ClampHi = UINT64_C(1) << 48,
+    // Clamps hi component of register.
+    // ClampLo and ClampHi set for packed clamp.
+    ClampHi = UINT64_C(1) << 48,
 
-  // Is a packed VOP3P instruction.
-  IsPacked = UINT64_C(1) << 49,
+    // Is a packed VOP3P instruction.
+    IsPacked = UINT64_C(1) << 49,
 
-  // Is a D16 buffer instruction.
-  D16Buf = UINT64_C(1) << 50,
+    // Is a D16 buffer instruction.
+    D16Buf = UINT64_C(1) << 50,
 
-  // FLAT instruction accesses FLAT_GLBL segment.
-  IsFlatGlobal = UINT64_C(1) << 51,
+    // FLAT instruction accesses FLAT_GLBL segment.
+    IsFlatGlobal = UINT64_C(1) << 51,
 
-  // Uses floating point double precision rounding mode
-  FPDPRounding = UINT64_C(1) << 52,
+    // Uses floating point double precision rounding mode
+    FPDPRounding = UINT64_C(1) << 52,
 
-  // Instruction is FP atomic.
-  FPAtomic = UINT64_C(1) << 53,
+    // Instruction is FP atomic.
+    FPAtomic = UINT64_C(1) << 53,
 
-  // Is a MFMA instruction.
-  IsMAI = UINT64_C(1) << 54,
+    // Is a MFMA instruction.
+    IsMAI = UINT64_C(1) << 54,
 
-  // Is a DOT instruction.
-  IsDOT = UINT64_C(1) << 55,
+    // Is a DOT instruction.
+    IsDOT = UINT64_C(1) << 55,
 
-  // FLAT instruction accesses FLAT_SCRATCH segment.
-  IsFlatScratch = UINT64_C(1) << 56
+    // FLAT instruction accesses FLAT_SCRATCH segment.
+    IsFlatScratch = UINT64_C(1) << 56
 };
 
 // v_cmp_class_* etc. use a 10-bit mask for what operation is checked.
 // The result is true if any of these tests are true.
 enum ClassFlags : unsigned {
-  S_NAN = 1 << 0,        // Signaling NaN
-  Q_NAN = 1 << 1,        // Quiet NaN
-  N_INFINITY = 1 << 2,   // Negative infinity
-  N_NORMAL = 1 << 3,     // Negative normal
-  N_SUBNORMAL = 1 << 4,  // Negative subnormal
-  N_ZERO = 1 << 5,       // Negative zero
-  P_ZERO = 1 << 6,       // Positive zero
-  P_SUBNORMAL = 1 << 7,  // Positive subnormal
-  P_NORMAL = 1 << 8,     // Positive normal
-  P_INFINITY = 1 << 9    // Positive infinity
+    S_NAN = 1 << 0,        // Signaling NaN
+    Q_NAN = 1 << 1,        // Quiet NaN
+    N_INFINITY = 1 << 2,   // Negative infinity
+    N_NORMAL = 1 << 3,     // Negative normal
+    N_SUBNORMAL = 1 << 4,  // Negative subnormal
+    N_ZERO = 1 << 5,       // Negative zero
+    P_ZERO = 1 << 6,       // Positive zero
+    P_SUBNORMAL = 1 << 7,  // Positive subnormal
+    P_NORMAL = 1 << 8,     // Positive normal
+    P_INFINITY = 1 << 9    // Positive infinity
 };
 }
 
 namespace AMDGPU {
-  enum OperandType : unsigned {
+enum OperandType : unsigned {
     /// Operands with register or 32-bit immediate
     OPERAND_REG_IMM_INT32 = MCOI::OPERAND_FIRST_TARGET,
     OPERAND_REG_IMM_INT64,
@@ -176,87 +176,87 @@ namespace AMDGPU {
     /// Operand with 32-bit immediate that uses the constant bus.
     OPERAND_KIMM32,
     OPERAND_KIMM16
-  };
+};
 }
 
 // Input operand modifiers bit-masks
 // NEG and SEXT share same bit-mask because they can't be set simultaneously.
 namespace SISrcMods {
-  enum : unsigned {
-   NEG = 1 << 0,   // Floating-point negate modifier
-   ABS = 1 << 1,   // Floating-point absolute modifier
-   SEXT = 1 << 0,  // Integer sign-extend modifier
-   NEG_HI = ABS,   // Floating-point negate high packed component modifier.
-   OP_SEL_0 = 1 << 2,
-   OP_SEL_1 = 1 << 3,
-   DST_OP_SEL = 1 << 3 // VOP3 dst op_sel (share mask with OP_SEL_1)
-  };
+enum : unsigned {
+    NEG = 1 << 0,   // Floating-point negate modifier
+    ABS = 1 << 1,   // Floating-point absolute modifier
+    SEXT = 1 << 0,  // Integer sign-extend modifier
+    NEG_HI = ABS,   // Floating-point negate high packed component modifier.
+    OP_SEL_0 = 1 << 2,
+    OP_SEL_1 = 1 << 3,
+    DST_OP_SEL = 1 << 3 // VOP3 dst op_sel (share mask with OP_SEL_1)
+};
 }
 
 namespace SIOutMods {
-  enum : unsigned {
+enum : unsigned {
     NONE = 0,
     MUL2 = 1,
     MUL4 = 2,
     DIV2 = 3
-  };
+};
 }
 
 namespace AMDGPU {
 namespace VGPRIndexMode {
 
 enum Id : unsigned { // id of symbolic names
-  ID_SRC0 = 0,
-  ID_SRC1,
-  ID_SRC2,
-  ID_DST,
+    ID_SRC0 = 0,
+    ID_SRC1,
+    ID_SRC2,
+    ID_DST,
 
-  ID_MIN = ID_SRC0,
-  ID_MAX = ID_DST
+    ID_MIN = ID_SRC0,
+    ID_MAX = ID_DST
 };
 
 enum EncBits : unsigned {
-  OFF = 0,
-  SRC0_ENABLE = 1 << ID_SRC0,
-  SRC1_ENABLE = 1 << ID_SRC1,
-  SRC2_ENABLE = 1 << ID_SRC2,
-  DST_ENABLE = 1 << ID_DST,
-  ENABLE_MASK = SRC0_ENABLE | SRC1_ENABLE | SRC2_ENABLE | DST_ENABLE,
-  UNDEF = 0xFFFF
+    OFF = 0,
+    SRC0_ENABLE = 1 << ID_SRC0,
+    SRC1_ENABLE = 1 << ID_SRC1,
+    SRC2_ENABLE = 1 << ID_SRC2,
+    DST_ENABLE = 1 << ID_DST,
+    ENABLE_MASK = SRC0_ENABLE | SRC1_ENABLE | SRC2_ENABLE | DST_ENABLE,
+    UNDEF = 0xFFFF
 };
 
 } // namespace VGPRIndexMode
 } // namespace AMDGPU
 
 namespace AMDGPUAsmVariants {
-  enum : unsigned {
+enum : unsigned {
     DEFAULT = 0,
     VOP3 = 1,
     SDWA = 2,
     SDWA9 = 3,
     DPP = 4
-  };
+};
 }
 
 namespace AMDGPU {
 namespace EncValues { // Encoding values of enum9/8/7 operands
 
 enum : unsigned {
-  SGPR_MIN = 0,
-  SGPR_MAX_SI = 101,
-  SGPR_MAX_GFX10 = 105,
-  TTMP_VI_MIN = 112,
-  TTMP_VI_MAX = 123,
-  TTMP_GFX9_GFX10_MIN = 108,
-  TTMP_GFX9_GFX10_MAX = 123,
-  INLINE_INTEGER_C_MIN = 128,
-  INLINE_INTEGER_C_POSITIVE_MAX = 192, // 64
-  INLINE_INTEGER_C_MAX = 208,
-  INLINE_FLOATING_C_MIN = 240,
-  INLINE_FLOATING_C_MAX = 248,
-  LITERAL_CONST = 255,
-  VGPR_MIN = 256,
-  VGPR_MAX = 511
+    SGPR_MIN = 0,
+    SGPR_MAX_SI = 101,
+    SGPR_MAX_GFX10 = 105,
+    TTMP_VI_MIN = 112,
+    TTMP_VI_MAX = 123,
+    TTMP_GFX9_GFX10_MIN = 108,
+    TTMP_GFX9_GFX10_MAX = 123,
+    INLINE_INTEGER_C_MIN = 128,
+    INLINE_INTEGER_C_POSITIVE_MAX = 192, // 64
+    INLINE_INTEGER_C_MAX = 208,
+    INLINE_FLOATING_C_MIN = 240,
+    INLINE_FLOATING_C_MAX = 248,
+    LITERAL_CONST = 255,
+    VGPR_MIN = 256,
+    VGPR_MAX = 511
 };
 
 } // namespace EncValues
@@ -266,51 +266,51 @@ namespace AMDGPU {
 namespace SendMsg { // Encoding of SIMM16 used in s_sendmsg* insns.
 
 enum Id { // Message ID, width(4) [3:0].
-  ID_UNKNOWN_ = -1,
-  ID_INTERRUPT = 1,
-  ID_GS,
-  ID_GS_DONE,
-  ID_GS_ALLOC_REQ = 9,
-  ID_GET_DOORBELL = 10,
-  ID_SYSMSG = 15,
-  ID_GAPS_LAST_, // Indicate that sequence has gaps.
-  ID_GAPS_FIRST_ = ID_INTERRUPT,
-  ID_SHIFT_ = 0,
-  ID_WIDTH_ = 4,
-  ID_MASK_ = (((1 << ID_WIDTH_) - 1) << ID_SHIFT_)
+    ID_UNKNOWN_ = -1,
+    ID_INTERRUPT = 1,
+    ID_GS,
+    ID_GS_DONE,
+    ID_GS_ALLOC_REQ = 9,
+    ID_GET_DOORBELL = 10,
+    ID_SYSMSG = 15,
+    ID_GAPS_LAST_, // Indicate that sequence has gaps.
+    ID_GAPS_FIRST_ = ID_INTERRUPT,
+    ID_SHIFT_ = 0,
+    ID_WIDTH_ = 4,
+    ID_MASK_ = (((1 << ID_WIDTH_) - 1) << ID_SHIFT_)
 };
 
 enum Op { // Both GS and SYS operation IDs.
-  OP_UNKNOWN_ = -1,
-  OP_SHIFT_ = 4,
-  OP_NONE_ = 0,
-  // Bits used for operation encoding
-  OP_WIDTH_ = 3,
-  OP_MASK_ = (((1 << OP_WIDTH_) - 1) << OP_SHIFT_),
-  // GS operations are encoded in bits 5:4
-  OP_GS_NOP = 0,
-  OP_GS_CUT,
-  OP_GS_EMIT,
-  OP_GS_EMIT_CUT,
-  OP_GS_LAST_,
-  OP_GS_FIRST_ = OP_GS_NOP,
-  // SYS operations are encoded in bits 6:4
-  OP_SYS_ECC_ERR_INTERRUPT = 1,
-  OP_SYS_REG_RD,
-  OP_SYS_HOST_TRAP_ACK,
-  OP_SYS_TTRACE_PC,
-  OP_SYS_LAST_,
-  OP_SYS_FIRST_ = OP_SYS_ECC_ERR_INTERRUPT,
+    OP_UNKNOWN_ = -1,
+    OP_SHIFT_ = 4,
+    OP_NONE_ = 0,
+    // Bits used for operation encoding
+    OP_WIDTH_ = 3,
+    OP_MASK_ = (((1 << OP_WIDTH_) - 1) << OP_SHIFT_),
+    // GS operations are encoded in bits 5:4
+    OP_GS_NOP = 0,
+    OP_GS_CUT,
+    OP_GS_EMIT,
+    OP_GS_EMIT_CUT,
+    OP_GS_LAST_,
+    OP_GS_FIRST_ = OP_GS_NOP,
+    // SYS operations are encoded in bits 6:4
+    OP_SYS_ECC_ERR_INTERRUPT = 1,
+    OP_SYS_REG_RD,
+    OP_SYS_HOST_TRAP_ACK,
+    OP_SYS_TTRACE_PC,
+    OP_SYS_LAST_,
+    OP_SYS_FIRST_ = OP_SYS_ECC_ERR_INTERRUPT,
 };
 
 enum StreamId : unsigned { // Stream ID, (2) [9:8].
-  STREAM_ID_NONE_ = 0,
-  STREAM_ID_DEFAULT_ = 0,
-  STREAM_ID_LAST_ = 4,
-  STREAM_ID_FIRST_ = STREAM_ID_DEFAULT_,
-  STREAM_ID_SHIFT_ = 8,
-  STREAM_ID_WIDTH_=  2,
-  STREAM_ID_MASK_ = (((1 << STREAM_ID_WIDTH_) - 1) << STREAM_ID_SHIFT_)
+    STREAM_ID_NONE_ = 0,
+    STREAM_ID_DEFAULT_ = 0,
+    STREAM_ID_LAST_ = 4,
+    STREAM_ID_FIRST_ = STREAM_ID_DEFAULT_,
+    STREAM_ID_SHIFT_ = 8,
+    STREAM_ID_WIDTH_=  2,
+    STREAM_ID_MASK_ = (((1 << STREAM_ID_WIDTH_) - 1) << STREAM_ID_SHIFT_)
 };
 
 } // namespace SendMsg
@@ -318,81 +318,81 @@ enum StreamId : unsigned { // Stream ID, (2) [9:8].
 namespace Hwreg { // Encoding of SIMM16 used in s_setreg/getreg* insns.
 
 enum Id { // HwRegCode, (6) [5:0]
-  ID_UNKNOWN_ = -1,
-  ID_SYMBOLIC_FIRST_ = 1, // There are corresponding symbolic names defined.
-  ID_MODE = 1,
-  ID_STATUS = 2,
-  ID_TRAPSTS = 3,
-  ID_HW_ID = 4,
-  ID_GPR_ALLOC = 5,
-  ID_LDS_ALLOC = 6,
-  ID_IB_STS = 7,
-  ID_MEM_BASES = 15,
-  ID_SYMBOLIC_FIRST_GFX9_ = ID_MEM_BASES,
-  ID_TBA_LO = 16,
-  ID_SYMBOLIC_FIRST_GFX10_ = ID_TBA_LO,
-  ID_TBA_HI = 17,
-  ID_TMA_LO = 18,
-  ID_TMA_HI = 19,
-  ID_FLAT_SCR_LO = 20,
-  ID_FLAT_SCR_HI = 21,
-  ID_XNACK_MASK = 22,
-  ID_POPS_PACKER = 25,
-  ID_SHADER_CYCLES = 29,
-  ID_SYMBOLIC_FIRST_GFX1030_ = ID_SHADER_CYCLES,
-  ID_SYMBOLIC_LAST_ = 30,
-  ID_SHIFT_ = 0,
-  ID_WIDTH_ = 6,
-  ID_MASK_ = (((1 << ID_WIDTH_) - 1) << ID_SHIFT_)
+    ID_UNKNOWN_ = -1,
+    ID_SYMBOLIC_FIRST_ = 1, // There are corresponding symbolic names defined.
+    ID_MODE = 1,
+    ID_STATUS = 2,
+    ID_TRAPSTS = 3,
+    ID_HW_ID = 4,
+    ID_GPR_ALLOC = 5,
+    ID_LDS_ALLOC = 6,
+    ID_IB_STS = 7,
+    ID_MEM_BASES = 15,
+    ID_SYMBOLIC_FIRST_GFX9_ = ID_MEM_BASES,
+    ID_TBA_LO = 16,
+    ID_SYMBOLIC_FIRST_GFX10_ = ID_TBA_LO,
+    ID_TBA_HI = 17,
+    ID_TMA_LO = 18,
+    ID_TMA_HI = 19,
+    ID_FLAT_SCR_LO = 20,
+    ID_FLAT_SCR_HI = 21,
+    ID_XNACK_MASK = 22,
+    ID_POPS_PACKER = 25,
+    ID_SHADER_CYCLES = 29,
+    ID_SYMBOLIC_FIRST_GFX1030_ = ID_SHADER_CYCLES,
+    ID_SYMBOLIC_LAST_ = 30,
+    ID_SHIFT_ = 0,
+    ID_WIDTH_ = 6,
+    ID_MASK_ = (((1 << ID_WIDTH_) - 1) << ID_SHIFT_)
 };
 
 enum Offset : unsigned { // Offset, (5) [10:6]
-  OFFSET_DEFAULT_ = 0,
-  OFFSET_SHIFT_ = 6,
-  OFFSET_WIDTH_ = 5,
-  OFFSET_MASK_ = (((1 << OFFSET_WIDTH_) - 1) << OFFSET_SHIFT_),
+    OFFSET_DEFAULT_ = 0,
+    OFFSET_SHIFT_ = 6,
+    OFFSET_WIDTH_ = 5,
+    OFFSET_MASK_ = (((1 << OFFSET_WIDTH_) - 1) << OFFSET_SHIFT_),
 
-  OFFSET_MEM_VIOL = 8,
+    OFFSET_MEM_VIOL = 8,
 
-  OFFSET_SRC_SHARED_BASE = 16,
-  OFFSET_SRC_PRIVATE_BASE = 0
+    OFFSET_SRC_SHARED_BASE = 16,
+    OFFSET_SRC_PRIVATE_BASE = 0
 };
 
 enum WidthMinusOne : unsigned { // WidthMinusOne, (5) [15:11]
-  WIDTH_M1_DEFAULT_ = 31,
-  WIDTH_M1_SHIFT_ = 11,
-  WIDTH_M1_WIDTH_ = 5,
-  WIDTH_M1_MASK_ = (((1 << WIDTH_M1_WIDTH_) - 1) << WIDTH_M1_SHIFT_),
+    WIDTH_M1_DEFAULT_ = 31,
+    WIDTH_M1_SHIFT_ = 11,
+    WIDTH_M1_WIDTH_ = 5,
+    WIDTH_M1_MASK_ = (((1 << WIDTH_M1_WIDTH_) - 1) << WIDTH_M1_SHIFT_),
 
-  WIDTH_M1_SRC_SHARED_BASE = 15,
-  WIDTH_M1_SRC_PRIVATE_BASE = 15
+    WIDTH_M1_SRC_SHARED_BASE = 15,
+    WIDTH_M1_SRC_PRIVATE_BASE = 15
 };
 
 // Some values from WidthMinusOne mapped into Width domain.
 enum Width : unsigned {
-  WIDTH_DEFAULT_ = WIDTH_M1_DEFAULT_ + 1,
+    WIDTH_DEFAULT_ = WIDTH_M1_DEFAULT_ + 1,
 };
 
 enum ModeRegisterMasks : uint32_t {
-  FP_ROUND_MASK = 0xf << 0,  // Bits 0..3
-  FP_DENORM_MASK = 0xf << 4, // Bits 4..7
-  DX10_CLAMP_MASK = 1 << 8,
-  IEEE_MODE_MASK = 1 << 9,
-  LOD_CLAMP_MASK = 1 << 10,
-  DEBUG_MASK = 1 << 11,
+    FP_ROUND_MASK = 0xf << 0,  // Bits 0..3
+    FP_DENORM_MASK = 0xf << 4, // Bits 4..7
+    DX10_CLAMP_MASK = 1 << 8,
+    IEEE_MODE_MASK = 1 << 9,
+    LOD_CLAMP_MASK = 1 << 10,
+    DEBUG_MASK = 1 << 11,
 
-  // EXCP_EN fields.
-  EXCP_EN_INVALID_MASK = 1 << 12,
-  EXCP_EN_INPUT_DENORMAL_MASK = 1 << 13,
-  EXCP_EN_FLOAT_DIV0_MASK = 1 << 14,
-  EXCP_EN_OVERFLOW_MASK = 1 << 15,
-  EXCP_EN_UNDERFLOW_MASK = 1 << 16,
-  EXCP_EN_INEXACT_MASK = 1 << 17,
-  EXCP_EN_INT_DIV0_MASK = 1 << 18,
+    // EXCP_EN fields.
+    EXCP_EN_INVALID_MASK = 1 << 12,
+    EXCP_EN_INPUT_DENORMAL_MASK = 1 << 13,
+    EXCP_EN_FLOAT_DIV0_MASK = 1 << 14,
+    EXCP_EN_OVERFLOW_MASK = 1 << 15,
+    EXCP_EN_UNDERFLOW_MASK = 1 << 16,
+    EXCP_EN_INEXACT_MASK = 1 << 17,
+    EXCP_EN_INT_DIV0_MASK = 1 << 18,
 
-  GPR_IDX_EN_MASK = 1 << 27,
-  VSKIP_MASK = 1 << 28,
-  CSP_MASK = 0x7u << 29 // Bits 29..31
+    GPR_IDX_EN_MASK = 1 << 27,
+    VSKIP_MASK = 1 << 28,
+    CSP_MASK = 0x7u << 29 // Bits 29..31
 };
 
 } // namespace Hwreg
@@ -400,165 +400,165 @@ enum ModeRegisterMasks : uint32_t {
 namespace MTBUFFormat {
 
 enum DataFormat : int64_t {
-  DFMT_INVALID = 0,
-  DFMT_8,
-  DFMT_16,
-  DFMT_8_8,
-  DFMT_32,
-  DFMT_16_16,
-  DFMT_10_11_11,
-  DFMT_11_11_10,
-  DFMT_10_10_10_2,
-  DFMT_2_10_10_10,
-  DFMT_8_8_8_8,
-  DFMT_32_32,
-  DFMT_16_16_16_16,
-  DFMT_32_32_32,
-  DFMT_32_32_32_32,
-  DFMT_RESERVED_15,
+    DFMT_INVALID = 0,
+    DFMT_8,
+    DFMT_16,
+    DFMT_8_8,
+    DFMT_32,
+    DFMT_16_16,
+    DFMT_10_11_11,
+    DFMT_11_11_10,
+    DFMT_10_10_10_2,
+    DFMT_2_10_10_10,
+    DFMT_8_8_8_8,
+    DFMT_32_32,
+    DFMT_16_16_16_16,
+    DFMT_32_32_32,
+    DFMT_32_32_32_32,
+    DFMT_RESERVED_15,
 
-  DFMT_MIN = DFMT_INVALID,
-  DFMT_MAX = DFMT_RESERVED_15,
+    DFMT_MIN = DFMT_INVALID,
+    DFMT_MAX = DFMT_RESERVED_15,
 
-  DFMT_UNDEF = -1,
-  DFMT_DEFAULT = DFMT_8,
+    DFMT_UNDEF = -1,
+    DFMT_DEFAULT = DFMT_8,
 
-  DFMT_SHIFT = 0,
-  DFMT_MASK = 0xF
+    DFMT_SHIFT = 0,
+    DFMT_MASK = 0xF
 };
 
 enum NumFormat : int64_t {
-  NFMT_UNORM = 0,
-  NFMT_SNORM,
-  NFMT_USCALED,
-  NFMT_SSCALED,
-  NFMT_UINT,
-  NFMT_SINT,
-  NFMT_RESERVED_6,                    // VI and GFX9
-  NFMT_SNORM_OGL = NFMT_RESERVED_6,   // SI and CI only
-  NFMT_FLOAT,
+    NFMT_UNORM = 0,
+    NFMT_SNORM,
+    NFMT_USCALED,
+    NFMT_SSCALED,
+    NFMT_UINT,
+    NFMT_SINT,
+    NFMT_RESERVED_6,                    // VI and GFX9
+    NFMT_SNORM_OGL = NFMT_RESERVED_6,   // SI and CI only
+    NFMT_FLOAT,
 
-  NFMT_MIN = NFMT_UNORM,
-  NFMT_MAX = NFMT_FLOAT,
+    NFMT_MIN = NFMT_UNORM,
+    NFMT_MAX = NFMT_FLOAT,
 
-  NFMT_UNDEF = -1,
-  NFMT_DEFAULT = NFMT_UNORM,
+    NFMT_UNDEF = -1,
+    NFMT_DEFAULT = NFMT_UNORM,
 
-  NFMT_SHIFT = 4,
-  NFMT_MASK = 7
+    NFMT_SHIFT = 4,
+    NFMT_MASK = 7
 };
 
 enum MergedFormat : int64_t {
-  DFMT_NFMT_UNDEF = -1,
-  DFMT_NFMT_DEFAULT = ((DFMT_DEFAULT & DFMT_MASK) << DFMT_SHIFT) |
-                      ((NFMT_DEFAULT & NFMT_MASK) << NFMT_SHIFT),
+    DFMT_NFMT_UNDEF = -1,
+    DFMT_NFMT_DEFAULT = ((DFMT_DEFAULT & DFMT_MASK) << DFMT_SHIFT) |
+                        ((NFMT_DEFAULT & NFMT_MASK) << NFMT_SHIFT),
 
 
-  DFMT_NFMT_MASK = (DFMT_MASK << DFMT_SHIFT) | (NFMT_MASK << NFMT_SHIFT),
+    DFMT_NFMT_MASK = (DFMT_MASK << DFMT_SHIFT) | (NFMT_MASK << NFMT_SHIFT),
 
-  DFMT_NFMT_MAX = DFMT_NFMT_MASK
+    DFMT_NFMT_MAX = DFMT_NFMT_MASK
 };
 
 enum UnifiedFormat : int64_t {
-  UFMT_INVALID = 0,
+    UFMT_INVALID = 0,
 
-  UFMT_8_UNORM,
-  UFMT_8_SNORM,
-  UFMT_8_USCALED,
-  UFMT_8_SSCALED,
-  UFMT_8_UINT,
-  UFMT_8_SINT,
+    UFMT_8_UNORM,
+    UFMT_8_SNORM,
+    UFMT_8_USCALED,
+    UFMT_8_SSCALED,
+    UFMT_8_UINT,
+    UFMT_8_SINT,
 
-  UFMT_16_UNORM,
-  UFMT_16_SNORM,
-  UFMT_16_USCALED,
-  UFMT_16_SSCALED,
-  UFMT_16_UINT,
-  UFMT_16_SINT,
-  UFMT_16_FLOAT,
+    UFMT_16_UNORM,
+    UFMT_16_SNORM,
+    UFMT_16_USCALED,
+    UFMT_16_SSCALED,
+    UFMT_16_UINT,
+    UFMT_16_SINT,
+    UFMT_16_FLOAT,
 
-  UFMT_8_8_UNORM,
-  UFMT_8_8_SNORM,
-  UFMT_8_8_USCALED,
-  UFMT_8_8_SSCALED,
-  UFMT_8_8_UINT,
-  UFMT_8_8_SINT,
+    UFMT_8_8_UNORM,
+    UFMT_8_8_SNORM,
+    UFMT_8_8_USCALED,
+    UFMT_8_8_SSCALED,
+    UFMT_8_8_UINT,
+    UFMT_8_8_SINT,
 
-  UFMT_32_UINT,
-  UFMT_32_SINT,
-  UFMT_32_FLOAT,
+    UFMT_32_UINT,
+    UFMT_32_SINT,
+    UFMT_32_FLOAT,
 
-  UFMT_16_16_UNORM,
-  UFMT_16_16_SNORM,
-  UFMT_16_16_USCALED,
-  UFMT_16_16_SSCALED,
-  UFMT_16_16_UINT,
-  UFMT_16_16_SINT,
-  UFMT_16_16_FLOAT,
+    UFMT_16_16_UNORM,
+    UFMT_16_16_SNORM,
+    UFMT_16_16_USCALED,
+    UFMT_16_16_SSCALED,
+    UFMT_16_16_UINT,
+    UFMT_16_16_SINT,
+    UFMT_16_16_FLOAT,
 
-  UFMT_10_11_11_UNORM,
-  UFMT_10_11_11_SNORM,
-  UFMT_10_11_11_USCALED,
-  UFMT_10_11_11_SSCALED,
-  UFMT_10_11_11_UINT,
-  UFMT_10_11_11_SINT,
-  UFMT_10_11_11_FLOAT,
+    UFMT_10_11_11_UNORM,
+    UFMT_10_11_11_SNORM,
+    UFMT_10_11_11_USCALED,
+    UFMT_10_11_11_SSCALED,
+    UFMT_10_11_11_UINT,
+    UFMT_10_11_11_SINT,
+    UFMT_10_11_11_FLOAT,
 
-  UFMT_11_11_10_UNORM,
-  UFMT_11_11_10_SNORM,
-  UFMT_11_11_10_USCALED,
-  UFMT_11_11_10_SSCALED,
-  UFMT_11_11_10_UINT,
-  UFMT_11_11_10_SINT,
-  UFMT_11_11_10_FLOAT,
+    UFMT_11_11_10_UNORM,
+    UFMT_11_11_10_SNORM,
+    UFMT_11_11_10_USCALED,
+    UFMT_11_11_10_SSCALED,
+    UFMT_11_11_10_UINT,
+    UFMT_11_11_10_SINT,
+    UFMT_11_11_10_FLOAT,
 
-  UFMT_10_10_10_2_UNORM,
-  UFMT_10_10_10_2_SNORM,
-  UFMT_10_10_10_2_USCALED,
-  UFMT_10_10_10_2_SSCALED,
-  UFMT_10_10_10_2_UINT,
-  UFMT_10_10_10_2_SINT,
+    UFMT_10_10_10_2_UNORM,
+    UFMT_10_10_10_2_SNORM,
+    UFMT_10_10_10_2_USCALED,
+    UFMT_10_10_10_2_SSCALED,
+    UFMT_10_10_10_2_UINT,
+    UFMT_10_10_10_2_SINT,
 
-  UFMT_2_10_10_10_UNORM,
-  UFMT_2_10_10_10_SNORM,
-  UFMT_2_10_10_10_USCALED,
-  UFMT_2_10_10_10_SSCALED,
-  UFMT_2_10_10_10_UINT,
-  UFMT_2_10_10_10_SINT,
+    UFMT_2_10_10_10_UNORM,
+    UFMT_2_10_10_10_SNORM,
+    UFMT_2_10_10_10_USCALED,
+    UFMT_2_10_10_10_SSCALED,
+    UFMT_2_10_10_10_UINT,
+    UFMT_2_10_10_10_SINT,
 
-  UFMT_8_8_8_8_UNORM,
-  UFMT_8_8_8_8_SNORM,
-  UFMT_8_8_8_8_USCALED,
-  UFMT_8_8_8_8_SSCALED,
-  UFMT_8_8_8_8_UINT,
-  UFMT_8_8_8_8_SINT,
+    UFMT_8_8_8_8_UNORM,
+    UFMT_8_8_8_8_SNORM,
+    UFMT_8_8_8_8_USCALED,
+    UFMT_8_8_8_8_SSCALED,
+    UFMT_8_8_8_8_UINT,
+    UFMT_8_8_8_8_SINT,
 
-  UFMT_32_32_UINT,
-  UFMT_32_32_SINT,
-  UFMT_32_32_FLOAT,
+    UFMT_32_32_UINT,
+    UFMT_32_32_SINT,
+    UFMT_32_32_FLOAT,
 
-  UFMT_16_16_16_16_UNORM,
-  UFMT_16_16_16_16_SNORM,
-  UFMT_16_16_16_16_USCALED,
-  UFMT_16_16_16_16_SSCALED,
-  UFMT_16_16_16_16_UINT,
-  UFMT_16_16_16_16_SINT,
-  UFMT_16_16_16_16_FLOAT,
+    UFMT_16_16_16_16_UNORM,
+    UFMT_16_16_16_16_SNORM,
+    UFMT_16_16_16_16_USCALED,
+    UFMT_16_16_16_16_SSCALED,
+    UFMT_16_16_16_16_UINT,
+    UFMT_16_16_16_16_SINT,
+    UFMT_16_16_16_16_FLOAT,
 
-  UFMT_32_32_32_UINT,
-  UFMT_32_32_32_SINT,
-  UFMT_32_32_32_FLOAT,
-  UFMT_32_32_32_32_UINT,
-  UFMT_32_32_32_32_SINT,
-  UFMT_32_32_32_32_FLOAT,
+    UFMT_32_32_32_UINT,
+    UFMT_32_32_32_SINT,
+    UFMT_32_32_32_FLOAT,
+    UFMT_32_32_32_32_UINT,
+    UFMT_32_32_32_32_SINT,
+    UFMT_32_32_32_32_FLOAT,
 
-  UFMT_FIRST = UFMT_INVALID,
-  UFMT_LAST = UFMT_32_32_32_32_FLOAT,
+    UFMT_FIRST = UFMT_INVALID,
+    UFMT_LAST = UFMT_32_32_32_32_FLOAT,
 
-  UFMT_MAX = 127,
+    UFMT_MAX = 127,
 
-  UFMT_UNDEF = -1,
-  UFMT_DEFAULT = UFMT_8_UNORM
+    UFMT_UNDEF = -1,
+    UFMT_DEFAULT = UFMT_8_UNORM
 };
 
 } // namespace MTBUFFormat
@@ -566,39 +566,39 @@ enum UnifiedFormat : int64_t {
 namespace Swizzle { // Encoding of swizzle macro used in ds_swizzle_b32.
 
 enum Id : unsigned { // id of symbolic names
-  ID_QUAD_PERM = 0,
-  ID_BITMASK_PERM,
-  ID_SWAP,
-  ID_REVERSE,
-  ID_BROADCAST
+    ID_QUAD_PERM = 0,
+    ID_BITMASK_PERM,
+    ID_SWAP,
+    ID_REVERSE,
+    ID_BROADCAST
 };
 
 enum EncBits : unsigned {
 
-  // swizzle mode encodings
+    // swizzle mode encodings
 
-  QUAD_PERM_ENC         = 0x8000,
-  QUAD_PERM_ENC_MASK    = 0xFF00,
+    QUAD_PERM_ENC         = 0x8000,
+    QUAD_PERM_ENC_MASK    = 0xFF00,
 
-  BITMASK_PERM_ENC      = 0x0000,
-  BITMASK_PERM_ENC_MASK = 0x8000,
+    BITMASK_PERM_ENC      = 0x0000,
+    BITMASK_PERM_ENC_MASK = 0x8000,
 
-  // QUAD_PERM encodings
+    // QUAD_PERM encodings
 
-  LANE_MASK             = 0x3,
-  LANE_MAX              = LANE_MASK,
-  LANE_SHIFT            = 2,
-  LANE_NUM              = 4,
+    LANE_MASK             = 0x3,
+    LANE_MAX              = LANE_MASK,
+    LANE_SHIFT            = 2,
+    LANE_NUM              = 4,
 
-  // BITMASK_PERM encodings
+    // BITMASK_PERM encodings
 
-  BITMASK_MASK          = 0x1F,
-  BITMASK_MAX           = BITMASK_MASK,
-  BITMASK_WIDTH         = 5,
+    BITMASK_MASK          = 0x1F,
+    BITMASK_MAX           = BITMASK_MASK,
+    BITMASK_WIDTH         = 5,
 
-  BITMASK_AND_SHIFT     = 0,
-  BITMASK_OR_SHIFT      = 5,
-  BITMASK_XOR_SHIFT     = 10
+    BITMASK_AND_SHIFT     = 0,
+    BITMASK_OR_SHIFT      = 5,
+    BITMASK_XOR_SHIFT     = 10
 };
 
 } // namespace Swizzle
@@ -606,34 +606,34 @@ enum EncBits : unsigned {
 namespace SDWA {
 
 enum SdwaSel : unsigned {
-  BYTE_0 = 0,
-  BYTE_1 = 1,
-  BYTE_2 = 2,
-  BYTE_3 = 3,
-  WORD_0 = 4,
-  WORD_1 = 5,
-  DWORD = 6,
+    BYTE_0 = 0,
+    BYTE_1 = 1,
+    BYTE_2 = 2,
+    BYTE_3 = 3,
+    WORD_0 = 4,
+    WORD_1 = 5,
+    DWORD = 6,
 };
 
 enum DstUnused : unsigned {
-  UNUSED_PAD = 0,
-  UNUSED_SEXT = 1,
-  UNUSED_PRESERVE = 2,
+    UNUSED_PAD = 0,
+    UNUSED_SEXT = 1,
+    UNUSED_PRESERVE = 2,
 };
 
 enum SDWA9EncValues : unsigned {
-  SRC_SGPR_MASK = 0x100,
-  SRC_VGPR_MASK = 0xFF,
-  VOPC_DST_VCC_MASK = 0x80,
-  VOPC_DST_SGPR_MASK = 0x7F,
+    SRC_SGPR_MASK = 0x100,
+    SRC_VGPR_MASK = 0xFF,
+    VOPC_DST_VCC_MASK = 0x80,
+    VOPC_DST_SGPR_MASK = 0x7F,
 
-  SRC_VGPR_MIN = 0,
-  SRC_VGPR_MAX = 255,
-  SRC_SGPR_MIN = 256,
-  SRC_SGPR_MAX_SI = 357,
-  SRC_SGPR_MAX_GFX10 = 361,
-  SRC_TTMP_MIN = 364,
-  SRC_TTMP_MAX = 379,
+    SRC_VGPR_MIN = 0,
+    SRC_VGPR_MAX = 255,
+    SRC_SGPR_MIN = 256,
+    SRC_SGPR_MAX_SI = 357,
+    SRC_SGPR_MAX_GFX10 = 361,
+    SRC_TTMP_MIN = 364,
+    SRC_TTMP_MAX = 379,
 };
 
 } // namespace SDWA
@@ -641,51 +641,51 @@ enum SDWA9EncValues : unsigned {
 namespace DPP {
 
 enum DppCtrl : unsigned {
-  QUAD_PERM_FIRST   = 0,
-  QUAD_PERM_ID      = 0xE4, // identity permutation
-  QUAD_PERM_LAST    = 0xFF,
-  DPP_UNUSED1       = 0x100,
-  ROW_SHL0          = 0x100,
-  ROW_SHL_FIRST     = 0x101,
-  ROW_SHL_LAST      = 0x10F,
-  DPP_UNUSED2       = 0x110,
-  ROW_SHR0          = 0x110,
-  ROW_SHR_FIRST     = 0x111,
-  ROW_SHR_LAST      = 0x11F,
-  DPP_UNUSED3       = 0x120,
-  ROW_ROR0          = 0x120,
-  ROW_ROR_FIRST     = 0x121,
-  ROW_ROR_LAST      = 0x12F,
-  WAVE_SHL1         = 0x130,
-  DPP_UNUSED4_FIRST = 0x131,
-  DPP_UNUSED4_LAST  = 0x133,
-  WAVE_ROL1         = 0x134,
-  DPP_UNUSED5_FIRST = 0x135,
-  DPP_UNUSED5_LAST  = 0x137,
-  WAVE_SHR1         = 0x138,
-  DPP_UNUSED6_FIRST = 0x139,
-  DPP_UNUSED6_LAST  = 0x13B,
-  WAVE_ROR1         = 0x13C,
-  DPP_UNUSED7_FIRST = 0x13D,
-  DPP_UNUSED7_LAST  = 0x13F,
-  ROW_MIRROR        = 0x140,
-  ROW_HALF_MIRROR   = 0x141,
-  BCAST15           = 0x142,
-  BCAST31           = 0x143,
-  DPP_UNUSED8_FIRST = 0x144,
-  DPP_UNUSED8_LAST  = 0x14F,
-  ROW_SHARE_FIRST   = 0x150,
-  ROW_SHARE_LAST    = 0x15F,
-  ROW_XMASK_FIRST   = 0x160,
-  ROW_XMASK_LAST    = 0x16F,
-  DPP_LAST          = ROW_XMASK_LAST
+    QUAD_PERM_FIRST   = 0,
+    QUAD_PERM_ID      = 0xE4, // identity permutation
+    QUAD_PERM_LAST    = 0xFF,
+    DPP_UNUSED1       = 0x100,
+    ROW_SHL0          = 0x100,
+    ROW_SHL_FIRST     = 0x101,
+    ROW_SHL_LAST      = 0x10F,
+    DPP_UNUSED2       = 0x110,
+    ROW_SHR0          = 0x110,
+    ROW_SHR_FIRST     = 0x111,
+    ROW_SHR_LAST      = 0x11F,
+    DPP_UNUSED3       = 0x120,
+    ROW_ROR0          = 0x120,
+    ROW_ROR_FIRST     = 0x121,
+    ROW_ROR_LAST      = 0x12F,
+    WAVE_SHL1         = 0x130,
+    DPP_UNUSED4_FIRST = 0x131,
+    DPP_UNUSED4_LAST  = 0x133,
+    WAVE_ROL1         = 0x134,
+    DPP_UNUSED5_FIRST = 0x135,
+    DPP_UNUSED5_LAST  = 0x137,
+    WAVE_SHR1         = 0x138,
+    DPP_UNUSED6_FIRST = 0x139,
+    DPP_UNUSED6_LAST  = 0x13B,
+    WAVE_ROR1         = 0x13C,
+    DPP_UNUSED7_FIRST = 0x13D,
+    DPP_UNUSED7_LAST  = 0x13F,
+    ROW_MIRROR        = 0x140,
+    ROW_HALF_MIRROR   = 0x141,
+    BCAST15           = 0x142,
+    BCAST31           = 0x143,
+    DPP_UNUSED8_FIRST = 0x144,
+    DPP_UNUSED8_LAST  = 0x14F,
+    ROW_SHARE_FIRST   = 0x150,
+    ROW_SHARE_LAST    = 0x15F,
+    ROW_XMASK_FIRST   = 0x160,
+    ROW_XMASK_LAST    = 0x16F,
+    DPP_LAST          = ROW_XMASK_LAST
 };
 
 enum DppFiMode {
-  DPP_FI_0  = 0,
-  DPP_FI_1  = 1,
-  DPP8_FI_0 = 0xE9,
-  DPP8_FI_1 = 0xEA,
+    DPP_FI_0  = 0,
+    DPP_FI_1  = 1,
+    DPP8_FI_0 = 0xE9,
+    DPP8_FI_1 = 0xEA,
 };
 
 } // namespace DPP
@@ -693,17 +693,17 @@ enum DppFiMode {
 namespace Exp {
 
 enum Target {
-  ET_MRT0 = 0,
-  ET_MRT7 = 7,
-  ET_MRTZ = 8,
-  ET_NULL = 9,
-  ET_POS0 = 12,
-  ET_POS3 = 15,
-  ET_POS4 = 16,          // GFX10+
-  ET_POS_LAST = ET_POS4, // Highest pos used on any subtarget
-  ET_PRIM = 20,          // GFX10+
-  ET_PARAM0 = 32,
-  ET_PARAM31 = 63,
+    ET_MRT0 = 0,
+    ET_MRT7 = 7,
+    ET_MRTZ = 8,
+    ET_NULL = 9,
+    ET_POS0 = 12,
+    ET_POS3 = 15,
+    ET_POS4 = 16,          // GFX10+
+    ET_POS_LAST = ET_POS4, // Highest pos used on any subtarget
+    ET_PRIM = 20,          // GFX10+
+    ET_PARAM0 = 32,
+    ET_PARAM31 = 63,
 };
 
 } // namespace Exp

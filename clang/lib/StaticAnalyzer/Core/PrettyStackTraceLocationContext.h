@@ -26,16 +26,16 @@ namespace ento {
 /// 3.     crash-trace.c:6:3: Error evaluating statement
 /// \endcode
 class PrettyStackTraceLocationContext : public llvm::PrettyStackTraceEntry {
-  const LocationContext *LCtx;
+    const LocationContext *LCtx;
 public:
-  PrettyStackTraceLocationContext(const LocationContext *LC) : LCtx(LC) {
-    assert(LCtx);
-  }
+    PrettyStackTraceLocationContext(const LocationContext *LC) : LCtx(LC) {
+        assert(LCtx);
+    }
 
-  void print(raw_ostream &Out) const override {
-    Out << "While analyzing stack: \n";
-    LCtx->dumpStack(Out);
-  }
+    void print(raw_ostream &Out) const override {
+        Out << "While analyzing stack: \n";
+        LCtx->dumpStack(Out);
+    }
 };
 
 } // end ento namespace

@@ -61,27 +61,27 @@ __kmp_itt_region_joined(int gtid); // Master only, after joining threads.
 // --- Frame reporting ---
 // region=0: no regions, region=1: parallel, region=2: serialized parallel
 __kmp_inline void __kmp_itt_frame_submit(int gtid, __itt_timestamp begin,
-                                         __itt_timestamp end, int imbalance,
-                                         ident_t *loc, int team_size,
-                                         int region = 0);
+        __itt_timestamp end, int imbalance,
+        ident_t *loc, int team_size,
+        int region = 0);
 
 // --- Metadata reporting ---
 // begin/end - begin/end timestamps of a barrier frame, imbalance - aggregated
 // wait time value, reduction -if this is a reduction barrier
 __kmp_inline void __kmp_itt_metadata_imbalance(int gtid, kmp_uint64 begin,
-                                               kmp_uint64 end,
-                                               kmp_uint64 imbalance,
-                                               kmp_uint64 reduction);
+        kmp_uint64 end,
+        kmp_uint64 imbalance,
+        kmp_uint64 reduction);
 // sched_type: 0 - static, 1 - dynamic, 2 - guided, 3 - custom (all others);
 // iterations - loop trip count, chunk - chunk size
 __kmp_inline void __kmp_itt_metadata_loop(ident_t *loc, kmp_uint64 sched_type,
-                                          kmp_uint64 iterations,
-                                          kmp_uint64 chunk);
+        kmp_uint64 iterations,
+        kmp_uint64 chunk);
 __kmp_inline void __kmp_itt_metadata_single(ident_t *loc);
 
 // --- Barrier reporting ---
 __kmp_inline void *__kmp_itt_barrier_object(int gtid, int bt, int set_name = 0,
-                                            int delta = 0);
+        int delta = 0);
 __kmp_inline void __kmp_itt_barrier_starting(int gtid, void *object);
 __kmp_inline void __kmp_itt_barrier_middle(int gtid, void *object);
 __kmp_inline void __kmp_itt_barrier_finished(int gtid, void *object);
@@ -98,7 +98,7 @@ __kmp_inline void __kmp_itt_task_finished(void *object);
 // --- Lock reporting ---
 #if KMP_USE_DYNAMIC_LOCK
 __kmp_inline void __kmp_itt_lock_creating(kmp_user_lock_p lock,
-                                          const ident_t *);
+        const ident_t *);
 #else
 __kmp_inline void __kmp_itt_lock_creating(kmp_user_lock_p lock);
 #endif
@@ -111,7 +111,7 @@ __kmp_inline void __kmp_itt_lock_destroyed(kmp_user_lock_p lock);
 // --- Critical reporting ---
 #if KMP_USE_DYNAMIC_LOCK
 __kmp_inline void __kmp_itt_critical_creating(kmp_user_lock_p lock,
-                                              const ident_t *);
+        const ident_t *);
 #else
 __kmp_inline void __kmp_itt_critical_creating(kmp_user_lock_p lock);
 #endif
@@ -136,7 +136,7 @@ __kmp_inline void __kmp_itt_thread_name(int gtid);
 
 // --- System objects ---
 __kmp_inline void __kmp_itt_system_object_created(void *object,
-                                                  char const *name);
+        char const *name);
 
 // --- Stack stitching ---
 __kmp_inline __itt_caller __kmp_itt_stack_caller_create(void);

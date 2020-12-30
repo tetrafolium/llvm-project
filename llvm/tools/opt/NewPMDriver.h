@@ -35,21 +35,21 @@ extern cl::opt<std::string> DebugifyExport;
 
 namespace opt_tool {
 enum OutputKind {
-  OK_NoOutput,
-  OK_OutputAssembly,
-  OK_OutputBitcode,
-  OK_OutputThinLTOBitcode,
+    OK_NoOutput,
+    OK_OutputAssembly,
+    OK_OutputBitcode,
+    OK_OutputThinLTOBitcode,
 };
 enum VerifierKind {
-  VK_NoVerifier,
-  VK_VerifyInAndOut,
-  VK_VerifyEachPass
+    VK_NoVerifier,
+    VK_VerifyInAndOut,
+    VK_VerifyEachPass
 };
 enum PGOKind {
-  NoPGO,
-  InstrGen,
-  InstrUse,
-  SampleUse
+    NoPGO,
+    InstrGen,
+    InstrUse,
+    SampleUse
 };
 enum CSPGOKind { NoCSPGO, CSInstrGen, CSInstrUse };
 }

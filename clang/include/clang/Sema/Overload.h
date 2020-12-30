@@ -46,9 +46,9 @@ class APValue;
 class ASTContext;
 class Sema;
 
-  /// OverloadingResult - Capture the result of performing overload
-  /// resolution.
-  enum OverloadingResult {
+/// OverloadingResult - Capture the result of performing overload
+/// resolution.
+enum OverloadingResult {
     /// Overload resolution succeeded.
     OR_Success,
 
@@ -60,9 +60,9 @@ class Sema;
 
     /// Succeeded, but refers to a deleted function.
     OR_Deleted
-  };
+};
 
-  enum OverloadCandidateDisplayKind {
+enum OverloadCandidateDisplayKind {
     /// Requests that all candidates be shown.  Viable candidates will
     /// be printed first.
     OCD_AllCandidates,
@@ -72,22 +72,22 @@ class Sema;
 
     /// Requests that only tied-for-best candidates be shown.
     OCD_AmbiguousCandidates
-  };
+};
 
-  /// The parameter ordering that will be used for the candidate. This is
-  /// used to represent C++20 binary operator rewrites that reverse the order
-  /// of the arguments. If the parameter ordering is Reversed, the Args list is
-  /// reversed (but obviously the ParamDecls for the function are not).
-  ///
-  /// After forming an OverloadCandidate with reversed parameters, the list
-  /// of conversions will (as always) be indexed by argument, so will be
-  /// in reverse parameter order.
-  enum class OverloadCandidateParamOrder : char { Normal, Reversed };
+/// The parameter ordering that will be used for the candidate. This is
+/// used to represent C++20 binary operator rewrites that reverse the order
+/// of the arguments. If the parameter ordering is Reversed, the Args list is
+/// reversed (but obviously the ParamDecls for the function are not).
+///
+/// After forming an OverloadCandidate with reversed parameters, the list
+/// of conversions will (as always) be indexed by argument, so will be
+/// in reverse parameter order.
+enum class OverloadCandidateParamOrder : char { Normal, Reversed };
 
-  /// The kinds of rewrite we perform on overload candidates. Note that the
-  /// values here are chosen to serve as both bitflags and as a rank (lower
-  /// values are preferred by overload resolution).
-  enum OverloadCandidateRewriteKind : unsigned {
+/// The kinds of rewrite we perform on overload candidates. Note that the
+/// values here are chosen to serve as both bitflags and as a rank (lower
+/// values are preferred by overload resolution).
+enum OverloadCandidateRewriteKind : unsigned {
     /// Candidate is not a rewritten candidate.
     CRK_None = 0x0,
 
@@ -96,13 +96,13 @@ class Sema;
 
     /// Candidate is a rewritten candidate with a reversed order of parameters.
     CRK_Reversed = 0x2,
-  };
+};
 
-  /// ImplicitConversionKind - The kind of implicit conversion used to
-  /// convert an argument to a parameter's type. The enumerator values
-  /// match with the table titled 'Conversions' in [over.ics.scs] and are listed
-  /// such that better conversion kinds have smaller values.
-  enum ImplicitConversionKind {
+/// ImplicitConversionKind - The kind of implicit conversion used to
+/// convert an argument to a parameter's type. The enumerator values
+/// match with the table titled 'Conversions' in [over.ics.scs] and are listed
+/// such that better conversion kinds have smaller values.
+enum ImplicitConversionKind {
     /// Identity conversion (no conversion)
     ICK_Identity = 0,
 
@@ -192,13 +192,13 @@ class Sema;
 
     /// The number of conversion kinds
     ICK_Num_Conversion_Kinds,
-  };
+};
 
-  /// ImplicitConversionRank - The rank of an implicit conversion
-  /// kind. The enumerator values match with Table 9 of (C++
-  /// 13.3.3.1.1) and are listed such that better conversion ranks
-  /// have smaller values.
-  enum ImplicitConversionRank {
+/// ImplicitConversionRank - The rank of an implicit conversion
+/// kind. The enumerator values match with Table 9 of (C++
+/// 13.3.3.1.1) and are listed such that better conversion ranks
+/// have smaller values.
+enum ImplicitConversionRank {
     /// Exact Match
     ICR_Exact_Match = 0,
 
@@ -223,13 +223,13 @@ class Sema;
     /// Conversion not allowed by the C standard, but that we accept as an
     /// extension anyway.
     ICR_C_Conversion_Extension
-  };
+};
 
-  ImplicitConversionRank GetConversionRank(ImplicitConversionKind Kind);
+ImplicitConversionRank GetConversionRank(ImplicitConversionKind Kind);
 
-  /// NarrowingKind - The kind of narrowing conversion being performed by a
-  /// standard conversion sequence according to C++11 [dcl.init.list]p7.
-  enum NarrowingKind {
+/// NarrowingKind - The kind of narrowing conversion being performed by a
+/// standard conversion sequence according to C++11 [dcl.init.list]p7.
+enum NarrowingKind {
     /// Not a narrowing conversion.
     NK_Not_Narrowing,
 
@@ -246,18 +246,18 @@ class Sema;
     /// Cannot tell whether this is a narrowing conversion because the
     /// expression is value-dependent.
     NK_Dependent_Narrowing,
-  };
+};
 
-  /// StandardConversionSequence - represents a standard conversion
-  /// sequence (C++ 13.3.3.1.1). A standard conversion sequence
-  /// contains between zero and three conversions. If a particular
-  /// conversion is not needed, it will be set to the identity conversion
-  /// (ICK_Identity). Note that the three conversions are
-  /// specified as separate members (rather than in an array) so that
-  /// we can keep the size of a standard conversion sequence to a
-  /// single word.
-  class StandardConversionSequence {
-  public:
+/// StandardConversionSequence - represents a standard conversion
+/// sequence (C++ 13.3.3.1.1). A standard conversion sequence
+/// contains between zero and three conversions. If a particular
+/// conversion is not needed, it will be set to the identity conversion
+/// (ICK_Identity). Note that the three conversions are
+/// specified as separate members (rather than in an array) so that
+/// we can keep the size of a standard conversion sequence to a
+/// single word.
+class StandardConversionSequence {
+public:
     /// First -- The first conversion can be an lvalue-to-rvalue
     /// conversion, array-to-pointer conversion, or
     /// function-to-pointer conversion.
@@ -330,32 +330,34 @@ class Sema;
     CXXConstructorDecl *CopyConstructor;
     DeclAccessPair FoundCopyConstructor;
 
-    void setFromType(QualType T) { FromTypePtr = T.getAsOpaquePtr(); }
+    void setFromType(QualType T) {
+        FromTypePtr = T.getAsOpaquePtr();
+    }
 
     void setToType(unsigned Idx, QualType T) {
-      assert(Idx < 3 && "To type index is out of range");
-      ToTypePtrs[Idx] = T.getAsOpaquePtr();
+        assert(Idx < 3 && "To type index is out of range");
+        ToTypePtrs[Idx] = T.getAsOpaquePtr();
     }
 
     void setAllToTypes(QualType T) {
-      ToTypePtrs[0] = T.getAsOpaquePtr();
-      ToTypePtrs[1] = ToTypePtrs[0];
-      ToTypePtrs[2] = ToTypePtrs[0];
+        ToTypePtrs[0] = T.getAsOpaquePtr();
+        ToTypePtrs[1] = ToTypePtrs[0];
+        ToTypePtrs[2] = ToTypePtrs[0];
     }
 
     QualType getFromType() const {
-      return QualType::getFromOpaquePtr(FromTypePtr);
+        return QualType::getFromOpaquePtr(FromTypePtr);
     }
 
     QualType getToType(unsigned Idx) const {
-      assert(Idx < 3 && "To type index is out of range");
-      return QualType::getFromOpaquePtr(ToTypePtrs[Idx]);
+        assert(Idx < 3 && "To type index is out of range");
+        return QualType::getFromOpaquePtr(ToTypePtrs[Idx]);
     }
 
     void setAsIdentityConversion();
 
     bool isIdentityConversion() const {
-      return Second == ICK_Identity && Third == ICK_Identity;
+        return Second == ICK_Identity && Third == ICK_Identity;
     }
 
     ImplicitConversionRank getRank() const;
@@ -366,11 +368,11 @@ class Sema;
     bool isPointerConversionToBool() const;
     bool isPointerConversionToVoidPointer(ASTContext& Context) const;
     void dump() const;
-  };
+};
 
-  /// UserDefinedConversionSequence - Represents a user-defined
-  /// conversion sequence (C++ 13.3.3.1.2).
-  struct UserDefinedConversionSequence {
+/// UserDefinedConversionSequence - Represents a user-defined
+/// conversion sequence (C++ 13.3.3.1.2).
+struct UserDefinedConversionSequence {
     /// Represents the standard conversion that occurs before
     /// the actual user-defined conversion.
     ///
@@ -412,10 +414,10 @@ class Sema;
     DeclAccessPair FoundConversionFunction;
 
     void dump() const;
-  };
+};
 
-  /// Represents an ambiguous user-defined conversion sequence.
-  struct AmbiguousConversionSequence {
+/// Represents an ambiguous user-defined conversion sequence.
+struct AmbiguousConversionSequence {
     using ConversionSet =
         SmallVector<std::pair<NamedDecl *, FunctionDecl *>, 4>;
 
@@ -424,52 +426,64 @@ class Sema;
     char Buffer[sizeof(ConversionSet)];
 
     QualType getFromType() const {
-      return QualType::getFromOpaquePtr(FromTypePtr);
+        return QualType::getFromOpaquePtr(FromTypePtr);
     }
 
     QualType getToType() const {
-      return QualType::getFromOpaquePtr(ToTypePtr);
+        return QualType::getFromOpaquePtr(ToTypePtr);
     }
 
-    void setFromType(QualType T) { FromTypePtr = T.getAsOpaquePtr(); }
-    void setToType(QualType T) { ToTypePtr = T.getAsOpaquePtr(); }
+    void setFromType(QualType T) {
+        FromTypePtr = T.getAsOpaquePtr();
+    }
+    void setToType(QualType T) {
+        ToTypePtr = T.getAsOpaquePtr();
+    }
 
     ConversionSet &conversions() {
-      return *reinterpret_cast<ConversionSet*>(Buffer);
+        return *reinterpret_cast<ConversionSet*>(Buffer);
     }
 
     const ConversionSet &conversions() const {
-      return *reinterpret_cast<const ConversionSet*>(Buffer);
+        return *reinterpret_cast<const ConversionSet*>(Buffer);
     }
 
     void addConversion(NamedDecl *Found, FunctionDecl *D) {
-      conversions().push_back(std::make_pair(Found, D));
+        conversions().push_back(std::make_pair(Found, D));
     }
 
     using iterator = ConversionSet::iterator;
 
-    iterator begin() { return conversions().begin(); }
-    iterator end() { return conversions().end(); }
+    iterator begin() {
+        return conversions().begin();
+    }
+    iterator end() {
+        return conversions().end();
+    }
 
     using const_iterator = ConversionSet::const_iterator;
 
-    const_iterator begin() const { return conversions().begin(); }
-    const_iterator end() const { return conversions().end(); }
+    const_iterator begin() const {
+        return conversions().begin();
+    }
+    const_iterator end() const {
+        return conversions().end();
+    }
 
     void construct();
     void destruct();
     void copyFrom(const AmbiguousConversionSequence &);
-  };
+};
 
-  /// BadConversionSequence - Records information about an invalid
-  /// conversion sequence.
-  struct BadConversionSequence {
+/// BadConversionSequence - Records information about an invalid
+/// conversion sequence.
+struct BadConversionSequence {
     enum FailureKind {
-      no_conversion,
-      unrelated_class,
-      bad_qualifiers,
-      lvalue_ref_to_rvalue,
-      rvalue_ref_to_lvalue
+        no_conversion,
+        unrelated_class,
+        bad_qualifiers,
+        lvalue_ref_to_rvalue,
+        rvalue_ref_to_lvalue
     };
 
     // This can be null, e.g. for implicit object arguments.
@@ -477,59 +491,67 @@ class Sema;
 
     FailureKind Kind;
 
-  private:
+private:
     // The type we're converting from (an opaque QualType).
     void *FromTy;
 
     // The type we're converting to (an opaque QualType).
     void *ToTy;
 
-  public:
+public:
     void init(FailureKind K, Expr *From, QualType To) {
-      init(K, From->getType(), To);
-      FromExpr = From;
+        init(K, From->getType(), To);
+        FromExpr = From;
     }
 
     void init(FailureKind K, QualType From, QualType To) {
-      Kind = K;
-      FromExpr = nullptr;
-      setFromType(From);
-      setToType(To);
+        Kind = K;
+        FromExpr = nullptr;
+        setFromType(From);
+        setToType(To);
     }
 
-    QualType getFromType() const { return QualType::getFromOpaquePtr(FromTy); }
-    QualType getToType() const { return QualType::getFromOpaquePtr(ToTy); }
+    QualType getFromType() const {
+        return QualType::getFromOpaquePtr(FromTy);
+    }
+    QualType getToType() const {
+        return QualType::getFromOpaquePtr(ToTy);
+    }
 
     void setFromExpr(Expr *E) {
-      FromExpr = E;
-      setFromType(E->getType());
+        FromExpr = E;
+        setFromType(E->getType());
     }
 
-    void setFromType(QualType T) { FromTy = T.getAsOpaquePtr(); }
-    void setToType(QualType T) { ToTy = T.getAsOpaquePtr(); }
-  };
+    void setFromType(QualType T) {
+        FromTy = T.getAsOpaquePtr();
+    }
+    void setToType(QualType T) {
+        ToTy = T.getAsOpaquePtr();
+    }
+};
 
-  /// ImplicitConversionSequence - Represents an implicit conversion
-  /// sequence, which may be a standard conversion sequence
-  /// (C++ 13.3.3.1.1), user-defined conversion sequence (C++ 13.3.3.1.2),
-  /// or an ellipsis conversion sequence (C++ 13.3.3.1.3).
-  class ImplicitConversionSequence {
-  public:
+/// ImplicitConversionSequence - Represents an implicit conversion
+/// sequence, which may be a standard conversion sequence
+/// (C++ 13.3.3.1.1), user-defined conversion sequence (C++ 13.3.3.1.2),
+/// or an ellipsis conversion sequence (C++ 13.3.3.1.3).
+class ImplicitConversionSequence {
+public:
     /// Kind - The kind of implicit conversion sequence. BadConversion
     /// specifies that there is no conversion from the source type to
     /// the target type.  AmbiguousConversion represents the unique
     /// ambiguous conversion (C++0x [over.best.ics]p10).
     enum Kind {
-      StandardConversion = 0,
-      UserDefinedConversion,
-      AmbiguousConversion,
-      EllipsisConversion,
-      BadConversion
+        StandardConversion = 0,
+        UserDefinedConversion,
+        AmbiguousConversion,
+        EllipsisConversion,
+        BadConversion
     };
 
-  private:
+private:
     enum {
-      Uninitialized = BadConversion + 1
+        Uninitialized = BadConversion + 1
     };
 
     /// ConversionKind - The kind of implicit conversion sequence.
@@ -540,65 +562,75 @@ class Sema;
     unsigned StdInitializerListElement : 1;
 
     void setKind(Kind K) {
-      destruct();
-      ConversionKind = K;
+        destruct();
+        ConversionKind = K;
     }
 
     void destruct() {
-      if (ConversionKind == AmbiguousConversion) Ambiguous.destruct();
+        if (ConversionKind == AmbiguousConversion) Ambiguous.destruct();
     }
 
-  public:
+public:
     union {
-      /// When ConversionKind == StandardConversion, provides the
-      /// details of the standard conversion sequence.
-      StandardConversionSequence Standard;
+        /// When ConversionKind == StandardConversion, provides the
+        /// details of the standard conversion sequence.
+        StandardConversionSequence Standard;
 
-      /// When ConversionKind == UserDefinedConversion, provides the
-      /// details of the user-defined conversion sequence.
-      UserDefinedConversionSequence UserDefined;
+        /// When ConversionKind == UserDefinedConversion, provides the
+        /// details of the user-defined conversion sequence.
+        UserDefinedConversionSequence UserDefined;
 
-      /// When ConversionKind == AmbiguousConversion, provides the
-      /// details of the ambiguous conversion.
-      AmbiguousConversionSequence Ambiguous;
+        /// When ConversionKind == AmbiguousConversion, provides the
+        /// details of the ambiguous conversion.
+        AmbiguousConversionSequence Ambiguous;
 
-      /// When ConversionKind == BadConversion, provides the details
-      /// of the bad conversion.
-      BadConversionSequence Bad;
+        /// When ConversionKind == BadConversion, provides the details
+        /// of the bad conversion.
+        BadConversionSequence Bad;
     };
 
     ImplicitConversionSequence()
         : ConversionKind(Uninitialized), StdInitializerListElement(false) {
-      Standard.setAsIdentityConversion();
+        Standard.setAsIdentityConversion();
     }
 
     ImplicitConversionSequence(const ImplicitConversionSequence &Other)
         : ConversionKind(Other.ConversionKind),
           StdInitializerListElement(Other.StdInitializerListElement) {
-      switch (ConversionKind) {
-      case Uninitialized: break;
-      case StandardConversion: Standard = Other.Standard; break;
-      case UserDefinedConversion: UserDefined = Other.UserDefined; break;
-      case AmbiguousConversion: Ambiguous.copyFrom(Other.Ambiguous); break;
-      case EllipsisConversion: break;
-      case BadConversion: Bad = Other.Bad; break;
-      }
+        switch (ConversionKind) {
+        case Uninitialized:
+            break;
+        case StandardConversion:
+            Standard = Other.Standard;
+            break;
+        case UserDefinedConversion:
+            UserDefined = Other.UserDefined;
+            break;
+        case AmbiguousConversion:
+            Ambiguous.copyFrom(Other.Ambiguous);
+            break;
+        case EllipsisConversion:
+            break;
+        case BadConversion:
+            Bad = Other.Bad;
+            break;
+        }
     }
 
     ImplicitConversionSequence &
     operator=(const ImplicitConversionSequence &Other) {
-      destruct();
-      new (this) ImplicitConversionSequence(Other);
-      return *this;
+        destruct();
+        new (this) ImplicitConversionSequence(Other);
+        return *this;
     }
 
     ~ImplicitConversionSequence() {
-      destruct();
+        destruct();
     }
 
     Kind getKind() const {
-      assert(isInitialized() && "querying uninitialized conversion");
-      return Kind(ConversionKind);
+        assert(isInitialized() && "querying uninitialized conversion");
+        return Kind(ConversionKind);
     }
 
     /// Return a ranking of the implicit conversion sequence
@@ -609,102 +641,122 @@ class Sema;
     /// sequences and ambiguous conversion sequences the same rank,
     /// per C++ [over.best.ics]p10.
     unsigned getKindRank() const {
-      switch (getKind()) {
-      case StandardConversion:
-        return 0;
+        switch (getKind()) {
+        case StandardConversion:
+            return 0;
 
-      case UserDefinedConversion:
-      case AmbiguousConversion:
-        return 1;
+        case UserDefinedConversion:
+        case AmbiguousConversion:
+            return 1;
 
-      case EllipsisConversion:
-        return 2;
+        case EllipsisConversion:
+            return 2;
 
-      case BadConversion:
-        return 3;
-      }
+        case BadConversion:
+            return 3;
+        }
 
-      llvm_unreachable("Invalid ImplicitConversionSequence::Kind!");
+        llvm_unreachable("Invalid ImplicitConversionSequence::Kind!");
     }
 
-    bool isBad() const { return getKind() == BadConversion; }
-    bool isStandard() const { return getKind() == StandardConversion; }
-    bool isEllipsis() const { return getKind() == EllipsisConversion; }
-    bool isAmbiguous() const { return getKind() == AmbiguousConversion; }
-    bool isUserDefined() const { return getKind() == UserDefinedConversion; }
-    bool isFailure() const { return isBad() || isAmbiguous(); }
+    bool isBad() const {
+        return getKind() == BadConversion;
+    }
+    bool isStandard() const {
+        return getKind() == StandardConversion;
+    }
+    bool isEllipsis() const {
+        return getKind() == EllipsisConversion;
+    }
+    bool isAmbiguous() const {
+        return getKind() == AmbiguousConversion;
+    }
+    bool isUserDefined() const {
+        return getKind() == UserDefinedConversion;
+    }
+    bool isFailure() const {
+        return isBad() || isAmbiguous();
+    }
 
     /// Determines whether this conversion sequence has been
     /// initialized.  Most operations should never need to query
     /// uninitialized conversions and should assert as above.
-    bool isInitialized() const { return ConversionKind != Uninitialized; }
+    bool isInitialized() const {
+        return ConversionKind != Uninitialized;
+    }
 
     /// Sets this sequence as a bad conversion for an explicit argument.
     void setBad(BadConversionSequence::FailureKind Failure,
                 Expr *FromExpr, QualType ToType) {
-      setKind(BadConversion);
-      Bad.init(Failure, FromExpr, ToType);
+        setKind(BadConversion);
+        Bad.init(Failure, FromExpr, ToType);
     }
 
     /// Sets this sequence as a bad conversion for an implicit argument.
     void setBad(BadConversionSequence::FailureKind Failure,
                 QualType FromType, QualType ToType) {
-      setKind(BadConversion);
-      Bad.init(Failure, FromType, ToType);
+        setKind(BadConversion);
+        Bad.init(Failure, FromType, ToType);
     }
 
-    void setStandard() { setKind(StandardConversion); }
-    void setEllipsis() { setKind(EllipsisConversion); }
-    void setUserDefined() { setKind(UserDefinedConversion); }
+    void setStandard() {
+        setKind(StandardConversion);
+    }
+    void setEllipsis() {
+        setKind(EllipsisConversion);
+    }
+    void setUserDefined() {
+        setKind(UserDefinedConversion);
+    }
 
     void setAmbiguous() {
-      if (ConversionKind == AmbiguousConversion) return;
-      ConversionKind = AmbiguousConversion;
-      Ambiguous.construct();
+        if (ConversionKind == AmbiguousConversion) return;
+        ConversionKind = AmbiguousConversion;
+        Ambiguous.construct();
     }
 
     void setAsIdentityConversion(QualType T) {
-      setStandard();
-      Standard.setAsIdentityConversion();
-      Standard.setFromType(T);
-      Standard.setAllToTypes(T);
+        setStandard();
+        Standard.setAsIdentityConversion();
+        Standard.setFromType(T);
+        Standard.setAllToTypes(T);
     }
 
     /// Whether the target is really a std::initializer_list, and the
     /// sequence only represents the worst element conversion.
     bool isStdInitializerListElement() const {
-      return StdInitializerListElement;
+        return StdInitializerListElement;
     }
 
     void setStdInitializerListElement(bool V = true) {
-      StdInitializerListElement = V;
+        StdInitializerListElement = V;
     }
 
     /// Form an "implicit" conversion sequence from nullptr_t to bool, for a
     /// direct-initialization of a bool object from nullptr_t.
     static ImplicitConversionSequence getNullptrToBool(QualType SourceType,
-                                                       QualType DestType,
-                                                       bool NeedLValToRVal) {
-      ImplicitConversionSequence ICS;
-      ICS.setStandard();
-      ICS.Standard.setAsIdentityConversion();
-      ICS.Standard.setFromType(SourceType);
-      if (NeedLValToRVal)
-        ICS.Standard.First = ICK_Lvalue_To_Rvalue;
-      ICS.Standard.setToType(0, SourceType);
-      ICS.Standard.Second = ICK_Boolean_Conversion;
-      ICS.Standard.setToType(1, DestType);
-      ICS.Standard.setToType(2, DestType);
-      return ICS;
+            QualType DestType,
+            bool NeedLValToRVal) {
+        ImplicitConversionSequence ICS;
+        ICS.setStandard();
+        ICS.Standard.setAsIdentityConversion();
+        ICS.Standard.setFromType(SourceType);
+        if (NeedLValToRVal)
+            ICS.Standard.First = ICK_Lvalue_To_Rvalue;
+        ICS.Standard.setToType(0, SourceType);
+        ICS.Standard.Second = ICK_Boolean_Conversion;
+        ICS.Standard.setToType(1, DestType);
+        ICS.Standard.setToType(2, DestType);
+        return ICS;
     }
 
     // The result of a comparison between implicit conversion
     // sequences. Use Sema::CompareImplicitConversionSequences to
     // actually perform the comparison.
     enum CompareKind {
-      Better = -1,
-      Indistinguishable = 0,
-      Worse = 1
+        Better = -1,
+        Indistinguishable = 0,
+        Worse = 1
     };
 
     void DiagnoseAmbiguousConversion(Sema &S,
@@ -712,9 +764,9 @@ class Sema;
                                      const PartialDiagnostic &PDiag) const;
 
     void dump() const;
-  };
+};
 
-  enum OverloadFailureKind {
+enum OverloadFailureKind {
     ovl_fail_too_many_arguments,
     ovl_fail_too_few_arguments,
     ovl_fail_bad_conversion,
@@ -779,15 +831,15 @@ class Sema;
     /// This candidate was not viable because its associated constraints were
     /// not satisfied.
     ovl_fail_constraints_not_satisfied,
-  };
+};
 
-  /// A list of implicit conversion sequences for the arguments of an
-  /// OverloadCandidate.
-  using ConversionSequenceList =
-      llvm::MutableArrayRef<ImplicitConversionSequence>;
+/// A list of implicit conversion sequences for the arguments of an
+/// OverloadCandidate.
+using ConversionSequenceList =
+    llvm::MutableArrayRef<ImplicitConversionSequence>;
 
-  /// OverloadCandidate - A single candidate in an overload set (C++ 13.3).
-  struct OverloadCandidate {
+/// OverloadCandidate - A single candidate in an overload set (C++ 13.3).
+struct OverloadCandidate {
     /// Function - The actual function that this candidate
     /// represents. When NULL, this is a built-in candidate
     /// (C++ [over.oper]) or a surrogate for a conversion to a
@@ -856,154 +908,156 @@ class Sema;
     unsigned ExplicitCallArguments;
 
     union {
-      DeductionFailureInfo DeductionFailure;
+        DeductionFailureInfo DeductionFailure;
 
-      /// FinalConversion - For a conversion function (where Function is
-      /// a CXXConversionDecl), the standard conversion that occurs
-      /// after the call to the overload candidate to convert the result
-      /// of calling the conversion function to the required type.
-      StandardConversionSequence FinalConversion;
+        /// FinalConversion - For a conversion function (where Function is
+        /// a CXXConversionDecl), the standard conversion that occurs
+        /// after the call to the overload candidate to convert the result
+        /// of calling the conversion function to the required type.
+        StandardConversionSequence FinalConversion;
     };
 
     /// Get RewriteKind value in OverloadCandidateRewriteKind type (This
     /// function is to workaround the spurious GCC bitfield enum warning)
     OverloadCandidateRewriteKind getRewriteKind() const {
-      return static_cast<OverloadCandidateRewriteKind>(RewriteKind);
+        return static_cast<OverloadCandidateRewriteKind>(RewriteKind);
     }
 
-    bool isReversed() const { return getRewriteKind() & CRK_Reversed; }
+    bool isReversed() const {
+        return getRewriteKind() & CRK_Reversed;
+    }
 
     /// hasAmbiguousConversion - Returns whether this overload
     /// candidate requires an ambiguous conversion or not.
     bool hasAmbiguousConversion() const {
-      for (auto &C : Conversions) {
-        if (!C.isInitialized()) return false;
-        if (C.isAmbiguous()) return true;
-      }
-      return false;
+        for (auto &C : Conversions) {
+            if (!C.isInitialized()) return false;
+            if (C.isAmbiguous()) return true;
+        }
+        return false;
     }
 
     bool TryToFixBadConversion(unsigned Idx, Sema &S) {
-      bool CanFix = Fix.tryToFixConversion(
-                      Conversions[Idx].Bad.FromExpr,
-                      Conversions[Idx].Bad.getFromType(),
-                      Conversions[Idx].Bad.getToType(), S);
+        bool CanFix = Fix.tryToFixConversion(
+                          Conversions[Idx].Bad.FromExpr,
+                          Conversions[Idx].Bad.getFromType(),
+                          Conversions[Idx].Bad.getToType(), S);
 
-      // If at least one conversion fails, the candidate cannot be fixed.
-      if (!CanFix)
-        Fix.clear();
+        // If at least one conversion fails, the candidate cannot be fixed.
+        if (!CanFix)
+            Fix.clear();
 
-      return CanFix;
+        return CanFix;
     }
 
     unsigned getNumParams() const {
-      if (IsSurrogate) {
-        QualType STy = Surrogate->getConversionType();
-        while (STy->isPointerType() || STy->isReferenceType())
-          STy = STy->getPointeeType();
-        return STy->castAs<FunctionProtoType>()->getNumParams();
-      }
-      if (Function)
-        return Function->getNumParams();
-      return ExplicitCallArguments;
+        if (IsSurrogate) {
+            QualType STy = Surrogate->getConversionType();
+            while (STy->isPointerType() || STy->isReferenceType())
+                STy = STy->getPointeeType();
+            return STy->castAs<FunctionProtoType>()->getNumParams();
+        }
+        if (Function)
+            return Function->getNumParams();
+        return ExplicitCallArguments;
     }
 
-  private:
+private:
     friend class OverloadCandidateSet;
     OverloadCandidate()
         : IsSurrogate(false), IsADLCandidate(CallExpr::NotADL), RewriteKind(CRK_None) {}
-  };
+};
 
-  /// OverloadCandidateSet - A set of overload candidates, used in C++
-  /// overload resolution (C++ 13.3).
-  class OverloadCandidateSet {
-  public:
+/// OverloadCandidateSet - A set of overload candidates, used in C++
+/// overload resolution (C++ 13.3).
+class OverloadCandidateSet {
+public:
     enum CandidateSetKind {
-      /// Normal lookup.
-      CSK_Normal,
+        /// Normal lookup.
+        CSK_Normal,
 
-      /// C++ [over.match.oper]:
-      /// Lookup of operator function candidates in a call using operator
-      /// syntax. Candidates that have no parameters of class type will be
-      /// skipped unless there is a parameter of (reference to) enum type and
-      /// the corresponding argument is of the same enum type.
-      CSK_Operator,
+        /// C++ [over.match.oper]:
+        /// Lookup of operator function candidates in a call using operator
+        /// syntax. Candidates that have no parameters of class type will be
+        /// skipped unless there is a parameter of (reference to) enum type and
+        /// the corresponding argument is of the same enum type.
+        CSK_Operator,
 
-      /// C++ [over.match.copy]:
-      /// Copy-initialization of an object of class type by user-defined
-      /// conversion.
-      CSK_InitByUserDefinedConversion,
+        /// C++ [over.match.copy]:
+        /// Copy-initialization of an object of class type by user-defined
+        /// conversion.
+        CSK_InitByUserDefinedConversion,
 
-      /// C++ [over.match.ctor], [over.match.list]
-      /// Initialization of an object of class type by constructor,
-      /// using either a parenthesized or braced list of arguments.
-      CSK_InitByConstructor,
+        /// C++ [over.match.ctor], [over.match.list]
+        /// Initialization of an object of class type by constructor,
+        /// using either a parenthesized or braced list of arguments.
+        CSK_InitByConstructor,
     };
 
     /// Information about operator rewrites to consider when adding operator
     /// functions to a candidate set.
     struct OperatorRewriteInfo {
-      OperatorRewriteInfo()
-          : OriginalOperator(OO_None), AllowRewrittenCandidates(false) {}
-      OperatorRewriteInfo(OverloadedOperatorKind Op, bool AllowRewritten)
-          : OriginalOperator(Op), AllowRewrittenCandidates(AllowRewritten) {}
+        OperatorRewriteInfo()
+            : OriginalOperator(OO_None), AllowRewrittenCandidates(false) {}
+        OperatorRewriteInfo(OverloadedOperatorKind Op, bool AllowRewritten)
+            : OriginalOperator(Op), AllowRewrittenCandidates(AllowRewritten) {}
 
-      /// The original operator as written in the source.
-      OverloadedOperatorKind OriginalOperator;
-      /// Whether we should include rewritten candidates in the overload set.
-      bool AllowRewrittenCandidates;
+        /// The original operator as written in the source.
+        OverloadedOperatorKind OriginalOperator;
+        /// Whether we should include rewritten candidates in the overload set.
+        bool AllowRewrittenCandidates;
 
-      /// Would use of this function result in a rewrite using a different
-      /// operator?
-      bool isRewrittenOperator(const FunctionDecl *FD) {
-        return OriginalOperator &&
-               FD->getDeclName().getCXXOverloadedOperator() != OriginalOperator;
-      }
+        /// Would use of this function result in a rewrite using a different
+        /// operator?
+        bool isRewrittenOperator(const FunctionDecl *FD) {
+            return OriginalOperator &&
+                   FD->getDeclName().getCXXOverloadedOperator() != OriginalOperator;
+        }
 
-      bool isAcceptableCandidate(const FunctionDecl *FD) {
-        if (!OriginalOperator)
-          return true;
+        bool isAcceptableCandidate(const FunctionDecl *FD) {
+            if (!OriginalOperator)
+                return true;
 
-        // For an overloaded operator, we can have candidates with a different
-        // name in our unqualified lookup set. Make sure we only consider the
-        // ones we're supposed to.
-        OverloadedOperatorKind OO =
-            FD->getDeclName().getCXXOverloadedOperator();
-        return OO && (OO == OriginalOperator ||
-                      (AllowRewrittenCandidates &&
-                       OO == getRewrittenOverloadedOperator(OriginalOperator)));
-      }
+            // For an overloaded operator, we can have candidates with a different
+            // name in our unqualified lookup set. Make sure we only consider the
+            // ones we're supposed to.
+            OverloadedOperatorKind OO =
+                FD->getDeclName().getCXXOverloadedOperator();
+            return OO && (OO == OriginalOperator ||
+                          (AllowRewrittenCandidates &&
+                           OO == getRewrittenOverloadedOperator(OriginalOperator)));
+        }
 
-      /// Determine the kind of rewrite that should be performed for this
-      /// candidate.
-      OverloadCandidateRewriteKind
-      getRewriteKind(const FunctionDecl *FD, OverloadCandidateParamOrder PO) {
-        OverloadCandidateRewriteKind CRK = CRK_None;
-        if (isRewrittenOperator(FD))
-          CRK = OverloadCandidateRewriteKind(CRK | CRK_DifferentOperator);
-        if (PO == OverloadCandidateParamOrder::Reversed)
-          CRK = OverloadCandidateRewriteKind(CRK | CRK_Reversed);
-        return CRK;
-      }
+        /// Determine the kind of rewrite that should be performed for this
+        /// candidate.
+        OverloadCandidateRewriteKind
+        getRewriteKind(const FunctionDecl *FD, OverloadCandidateParamOrder PO) {
+            OverloadCandidateRewriteKind CRK = CRK_None;
+            if (isRewrittenOperator(FD))
+                CRK = OverloadCandidateRewriteKind(CRK | CRK_DifferentOperator);
+            if (PO == OverloadCandidateParamOrder::Reversed)
+                CRK = OverloadCandidateRewriteKind(CRK | CRK_Reversed);
+            return CRK;
+        }
 
-      /// Determines whether this operator could be implemented by a function
-      /// with reversed parameter order.
-      bool isReversible() {
-        return AllowRewrittenCandidates && OriginalOperator &&
-               (getRewrittenOverloadedOperator(OriginalOperator) != OO_None ||
-                shouldAddReversed(OriginalOperator));
-      }
+        /// Determines whether this operator could be implemented by a function
+        /// with reversed parameter order.
+        bool isReversible() {
+            return AllowRewrittenCandidates && OriginalOperator &&
+                   (getRewrittenOverloadedOperator(OriginalOperator) != OO_None ||
+                    shouldAddReversed(OriginalOperator));
+        }
 
-      /// Determine whether we should consider looking for and adding reversed
-      /// candidates for operator Op.
-      bool shouldAddReversed(OverloadedOperatorKind Op);
+        /// Determine whether we should consider looking for and adding reversed
+        /// candidates for operator Op.
+        bool shouldAddReversed(OverloadedOperatorKind Op);
 
-      /// Determine whether we should add a rewritten candidate for \p FD with
-      /// reversed parameter order.
-      bool shouldAddReversed(ASTContext &Ctx, const FunctionDecl *FD);
+        /// Determine whether we should add a rewritten candidate for \p FD with
+        /// reversed parameter order.
+        bool shouldAddReversed(ASTContext &Ctx, const FunctionDecl *FD);
     };
 
-  private:
+private:
     SmallVector<OverloadCandidate, 16> Candidates;
     llvm::SmallPtrSet<uintptr_t, 16> Functions;
 
@@ -1031,22 +1085,22 @@ class Sema;
     /// want to un-generalize this?
     template <typename T>
     T *slabAllocate(unsigned N) {
-      // It's simpler if this doesn't need to consider alignment.
-      static_assert(alignof(T) == alignof(void *),
-                    "Only works for pointer-aligned types.");
-      static_assert(std::is_trivial<T>::value ||
-                        std::is_same<ImplicitConversionSequence, T>::value,
-                    "Add destruction logic to OverloadCandidateSet::clear().");
+        // It's simpler if this doesn't need to consider alignment.
+        static_assert(alignof(T) == alignof(void *),
+                      "Only works for pointer-aligned types.");
+        static_assert(std::is_trivial<T>::value ||
+                      std::is_same<ImplicitConversionSequence, T>::value,
+                      "Add destruction logic to OverloadCandidateSet::clear().");
 
-      unsigned NBytes = sizeof(T) * N;
-      if (NBytes > NumInlineBytes - NumInlineBytesUsed)
-        return SlabAllocator.Allocate<T>(N);
-      char *FreeSpaceStart = InlineSpace + NumInlineBytesUsed;
-      assert(uintptr_t(FreeSpaceStart) % alignof(void *) == 0 &&
-             "Misaligned storage!");
+        unsigned NBytes = sizeof(T) * N;
+        if (NBytes > NumInlineBytes - NumInlineBytesUsed)
+            return SlabAllocator.Allocate<T>(N);
+        char *FreeSpaceStart = InlineSpace + NumInlineBytesUsed;
+        assert(uintptr_t(FreeSpaceStart) % alignof(void *) == 0 &&
+               "Misaligned storage!");
 
-      NumInlineBytesUsed += NBytes;
-      return reinterpret_cast<T *>(FreeSpaceStart);
+        NumInlineBytesUsed += NBytes;
+        return reinterpret_cast<T *>(FreeSpaceStart);
     }
 
     void destroyCandidates();
@@ -1054,31 +1108,39 @@ class Sema;
     /// Whether diagnostics should be deferred.
     bool shouldDeferDiags(Sema &S, ArrayRef<Expr *> Args, SourceLocation OpLoc);
 
-  public:
+public:
     OverloadCandidateSet(SourceLocation Loc, CandidateSetKind CSK,
                          OperatorRewriteInfo RewriteInfo = {})
         : Loc(Loc), Kind(CSK), RewriteInfo(RewriteInfo) {}
     OverloadCandidateSet(const OverloadCandidateSet &) = delete;
     OverloadCandidateSet &operator=(const OverloadCandidateSet &) = delete;
-    ~OverloadCandidateSet() { destroyCandidates(); }
+    ~OverloadCandidateSet() {
+        destroyCandidates();
+    }
 
-    SourceLocation getLocation() const { return Loc; }
-    CandidateSetKind getKind() const { return Kind; }
-    OperatorRewriteInfo getRewriteInfo() const { return RewriteInfo; }
+    SourceLocation getLocation() const {
+        return Loc;
+    }
+    CandidateSetKind getKind() const {
+        return Kind;
+    }
+    OperatorRewriteInfo getRewriteInfo() const {
+        return RewriteInfo;
+    }
 
     /// Determine when this overload candidate will be new to the
     /// overload set.
     bool isNewCandidate(Decl *F, OverloadCandidateParamOrder PO =
-                                     OverloadCandidateParamOrder::Normal) {
-      uintptr_t Key = reinterpret_cast<uintptr_t>(F->getCanonicalDecl());
-      Key |= static_cast<uintptr_t>(PO);
-      return Functions.insert(Key).second;
+                            OverloadCandidateParamOrder::Normal) {
+        uintptr_t Key = reinterpret_cast<uintptr_t>(F->getCanonicalDecl());
+        Key |= static_cast<uintptr_t>(PO);
+        return Functions.insert(Key).second;
     }
 
     /// Exclude a function from being considered by overload resolution.
     void exclude(Decl *F) {
-      isNewCandidate(F, OverloadCandidateParamOrder::Normal);
-      isNewCandidate(F, OverloadCandidateParamOrder::Reversed);
+        isNewCandidate(F, OverloadCandidateParamOrder::Normal);
+        isNewCandidate(F, OverloadCandidateParamOrder::Reversed);
     }
 
     /// Clear out all of the candidates.
@@ -1086,39 +1148,47 @@ class Sema;
 
     using iterator = SmallVectorImpl<OverloadCandidate>::iterator;
 
-    iterator begin() { return Candidates.begin(); }
-    iterator end() { return Candidates.end(); }
+    iterator begin() {
+        return Candidates.begin();
+    }
+    iterator end() {
+        return Candidates.end();
+    }
 
-    size_t size() const { return Candidates.size(); }
-    bool empty() const { return Candidates.empty(); }
+    size_t size() const {
+        return Candidates.size();
+    }
+    bool empty() const {
+        return Candidates.empty();
+    }
 
     /// Allocate storage for conversion sequences for NumConversions
     /// conversions.
     ConversionSequenceList
     allocateConversionSequences(unsigned NumConversions) {
-      ImplicitConversionSequence *Conversions =
-          slabAllocate<ImplicitConversionSequence>(NumConversions);
+        ImplicitConversionSequence *Conversions =
+            slabAllocate<ImplicitConversionSequence>(NumConversions);
 
-      // Construct the new objects.
-      for (unsigned I = 0; I != NumConversions; ++I)
-        new (&Conversions[I]) ImplicitConversionSequence();
+        // Construct the new objects.
+        for (unsigned I = 0; I != NumConversions; ++I)
+            new (&Conversions[I]) ImplicitConversionSequence();
 
-      return ConversionSequenceList(Conversions, NumConversions);
+        return ConversionSequenceList(Conversions, NumConversions);
     }
 
     /// Add a new candidate with NumConversions conversion sequence slots
     /// to the overload set.
     OverloadCandidate &addCandidate(unsigned NumConversions = 0,
                                     ConversionSequenceList Conversions = None) {
-      assert((Conversions.empty() || Conversions.size() == NumConversions) &&
-             "preallocated conversion sequence has wrong length");
+        assert((Conversions.empty() || Conversions.size() == NumConversions) &&
+               "preallocated conversion sequence has wrong length");
 
-      Candidates.push_back(OverloadCandidate());
-      OverloadCandidate &C = Candidates.back();
-      C.Conversions = Conversions.empty()
-                          ? allocateConversionSequences(NumConversions)
-                          : Conversions;
-      return C;
+        Candidates.push_back(OverloadCandidate());
+        OverloadCandidate &C = Candidates.back();
+        C.Conversions = Conversions.empty()
+                        ? allocateConversionSequences(NumConversions)
+                        : Conversions;
+        return C;
     }
 
     /// Find the best viable function on this overload set, if it exists.
@@ -1129,63 +1199,72 @@ class Sema;
         Sema &S, OverloadCandidateDisplayKind OCD, ArrayRef<Expr *> Args,
         SourceLocation OpLoc = SourceLocation(),
         llvm::function_ref<bool(OverloadCandidate &)> Filter =
-            [](OverloadCandidate &) { return true; });
+    [](OverloadCandidate &) {
+        return true;
+    });
 
     void NoteCandidates(
         PartialDiagnosticAt PA, Sema &S, OverloadCandidateDisplayKind OCD,
         ArrayRef<Expr *> Args, StringRef Opc = "",
         SourceLocation Loc = SourceLocation(),
         llvm::function_ref<bool(OverloadCandidate &)> Filter =
-            [](OverloadCandidate &) { return true; });
+    [](OverloadCandidate &) {
+        return true;
+    });
 
     void NoteCandidates(Sema &S, ArrayRef<Expr *> Args,
                         ArrayRef<OverloadCandidate *> Cands,
                         StringRef Opc = "",
                         SourceLocation OpLoc = SourceLocation());
 
-    LangAS getDestAS() { return DestAS; }
-
-    void setDestAS(LangAS AS) {
-      assert((Kind == CSK_InitByConstructor ||
-              Kind == CSK_InitByUserDefinedConversion) &&
-             "can't set the destination address space when not constructing an "
-             "object");
-      DestAS = AS;
+    LangAS getDestAS() {
+        return DestAS;
     }
 
-  };
+    void setDestAS(LangAS AS) {
+        assert((Kind == CSK_InitByConstructor ||
+                Kind == CSK_InitByUserDefinedConversion) &&
+               "can't set the destination address space when not constructing an "
+               "object");
+        DestAS = AS;
+    }
 
-  bool isBetterOverloadCandidate(Sema &S,
-                                 const OverloadCandidate &Cand1,
-                                 const OverloadCandidate &Cand2,
-                                 SourceLocation Loc,
-                                 OverloadCandidateSet::CandidateSetKind Kind);
+};
 
-  struct ConstructorInfo {
+bool isBetterOverloadCandidate(Sema &S,
+                               const OverloadCandidate &Cand1,
+                               const OverloadCandidate &Cand2,
+                               SourceLocation Loc,
+                               OverloadCandidateSet::CandidateSetKind Kind);
+
+struct ConstructorInfo {
     DeclAccessPair FoundDecl;
     CXXConstructorDecl *Constructor;
     FunctionTemplateDecl *ConstructorTmpl;
 
-    explicit operator bool() const { return Constructor; }
-  };
+    explicit operator bool() const {
+        return Constructor;
+    }
+};
 
-  // FIXME: Add an AddOverloadCandidate / AddTemplateOverloadCandidate overload
-  // that takes one of these.
-  inline ConstructorInfo getConstructorInfo(NamedDecl *ND) {
+// FIXME: Add an AddOverloadCandidate / AddTemplateOverloadCandidate overload
+// that takes one of these.
+inline ConstructorInfo getConstructorInfo(NamedDecl *ND) {
     if (isa<UsingDecl>(ND))
-      return ConstructorInfo{};
+        return ConstructorInfo{};
 
     // For constructors, the access check is performed against the underlying
     // declaration, not the found declaration.
     auto *D = ND->getUnderlyingDecl();
     ConstructorInfo Info = {DeclAccessPair::make(ND, D->getAccess()), nullptr,
-                            nullptr};
+                            nullptr
+                           };
     Info.ConstructorTmpl = dyn_cast<FunctionTemplateDecl>(D);
     if (Info.ConstructorTmpl)
-      D = Info.ConstructorTmpl->getTemplatedDecl();
+        D = Info.ConstructorTmpl->getTemplatedDecl();
     Info.Constructor = dyn_cast<CXXConstructorDecl>(D);
     return Info;
-  }
+}
 
 } // namespace clang
 

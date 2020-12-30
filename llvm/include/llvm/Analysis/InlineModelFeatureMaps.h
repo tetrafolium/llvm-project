@@ -50,9 +50,9 @@ namespace llvm {
 
 enum class FeatureIndex : size_t {
 #define POPULATE_INDICES(INDEX_NAME, NAME, COMMENT) INDEX_NAME,
-  INLINE_FEATURE_ITERATOR(POPULATE_INDICES)
+    INLINE_FEATURE_ITERATOR(POPULATE_INDICES)
 #undef POPULATE_INDICES
-      NumberOfFeatures
+    NumberOfFeatures
 };
 
 constexpr size_t NumberOfFeatures =

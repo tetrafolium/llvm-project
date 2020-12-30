@@ -20,7 +20,7 @@ struct Flags {
 #include "scudo_flags.inc"
 #undef SCUDO_FLAG
 
-  void setDefaults();
+    void setDefaults();
 };
 
 Flags *getFlags();

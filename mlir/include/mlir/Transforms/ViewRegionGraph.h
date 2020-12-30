@@ -33,8 +33,8 @@ raw_ostream &writeGraph(raw_ostream &os, Region &region,
 
 /// Creates a pass to print CFG graphs.
 std::unique_ptr<mlir::OperationPass<mlir::FuncOp>>
-createPrintCFGGraphPass(raw_ostream &os = llvm::errs(), bool shortNames = false,
-                        const Twine &title = "");
+        createPrintCFGGraphPass(raw_ostream &os = llvm::errs(), bool shortNames = false,
+                                const Twine &title = "");
 
 } // end namespace mlir
 

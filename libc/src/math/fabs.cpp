@@ -11,6 +11,8 @@
 
 namespace __llvm_libc {
 
-double LLVM_LIBC_ENTRYPOINT(fabs)(double x) { return fputil::abs(x); }
+double LLVM_LIBC_ENTRYPOINT(fabs)(double x) {
+    return fputil::abs(x);
+}
 
 } // namespace __llvm_libc

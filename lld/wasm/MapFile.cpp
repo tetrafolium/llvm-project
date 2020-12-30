@@ -41,31 +41,31 @@ using SymbolMapTy = DenseMap<const InputChunk *, SmallVector<Symbol *, 4>>;
 // Print out the first three columns of a line.
 static void writeHeader(raw_ostream &os, int64_t vma, uint64_t lma,
                         uint64_t size) {
-  // Not all entries in the map has a virtual memory address (e.g. functions)
-  if (vma == -1)
-    os << format("       - %8llx %8llx ", lma, size);
-  else
-    os << format("%8llx %8llx %8llx ", vma, lma, size);
+    // Not all entries in the map has a virtual memory address (e.g. functions)
+    if (vma == -1)
+        os << format("       - %8llx %8llx ", lma, size);
+    else
+        os << format("%8llx %8llx %8llx ", vma, lma, size);
 }
 
 // Returns a list of all symbols that we want to print out.
 static std::vector<Symbol *> getSymbols() {
-  std::vector<Symbol *> v;
-  for (InputFile *file : symtab->objectFiles)
-    for (Symbol *b : file->getSymbols())
-      if (auto *dr = dyn_cast<Symbol>(b))
-        if ((!isa<SectionSymbol>(dr)) && dr->isLive() &&
-            (dr->getFile() == file))
-          v.push_back(dr);
-  return v;
+    std::vector<Symbol *> v;
+    for (InputFile *file : symtab->objectFiles)
+        for (Symbol *b : file->getSymbols())
+            if (auto *dr = dyn_cast<Symbol>(b))
+                if ((!isa<SectionSymbol>(dr)) && dr->isLive() &&
+                        (dr->getFile() == file))
+                    v.push_back(dr);
+    return v;
 }
 
 // Returns a map from sections to their symbols.
 static SymbolMapTy getSectionSyms(ArrayRef<Symbol *> syms) {
-  SymbolMapTy ret;
-  for (Symbol *dr : syms)
-    ret[dr->getChunk()].push_back(dr);
-  return ret;
+    SymbolMapTy ret;
+    for (Symbol *dr : syms)
+        ret[dr->getChunk()].push_back(dr);
+    return ret;
 }
 
 // Construct a map from symbols to their stringified representations.
@@ -73,76 +73,76 @@ static SymbolMapTy getSectionSyms(ArrayRef<Symbol *> syms) {
 // we do that in batch using parallel-for.
 static DenseMap<Symbol *, std::string>
 getSymbolStrings(ArrayRef<Symbol *> syms) {
-  std::vector<std::string> str(syms.size());
-  parallelForEachN(0, syms.size(), [&](size_t i) {
-    raw_string_ostream os(str[i]);
-    auto &chunk = *syms[i]->getChunk();
-    uint64_t fileOffset = chunk.outputSec->getOffset() + chunk.outputOffset;
-    uint64_t vma = -1;
-    uint64_t size = 0;
-    if (auto *DD = dyn_cast<DefinedData>(syms[i])) {
-      vma = DD->getVirtualAddress();
-      size = DD->getSize();
-      fileOffset += DD->offset;
-    }
-    if (auto *DF = dyn_cast<DefinedFunction>(syms[i])) {
-      size = DF->function->getSize();
-    }
-    writeHeader(os, vma, fileOffset, size);
-    os.indent(16) << toString(*syms[i]);
-  });
+    std::vector<std::string> str(syms.size());
+    parallelForEachN(0, syms.size(), [&](size_t i) {
+        raw_string_ostream os(str[i]);
+        auto &chunk = *syms[i]->getChunk();
+        uint64_t fileOffset = chunk.outputSec->getOffset() + chunk.outputOffset;
+        uint64_t vma = -1;
+        uint64_t size = 0;
+        if (auto *DD = dyn_cast<DefinedData>(syms[i])) {
+            vma = DD->getVirtualAddress();
+            size = DD->getSize();
+            fileOffset += DD->offset;
+        }
+        if (auto *DF = dyn_cast<DefinedFunction>(syms[i])) {
+            size = DF->function->getSize();
+        }
+        writeHeader(os, vma, fileOffset, size);
+        os.indent(16) << toString(*syms[i]);
+    });
 
-  DenseMap<Symbol *, std::string> ret;
-  for (size_t i = 0, e = syms.size(); i < e; ++i)
-    ret[syms[i]] = std::move(str[i]);
-  return ret;
+    DenseMap<Symbol *, std::string> ret;
+    for (size_t i = 0, e = syms.size(); i < e; ++i)
+        ret[syms[i]] = std::move(str[i]);
+    return ret;
 }
 
 void lld::wasm::writeMapFile(ArrayRef<OutputSection *> outputSections) {
-  if (config->mapFile.empty())
-    return;
+    if (config->mapFile.empty())
+        return;
 
-  // Open a map file for writing.
-  std::error_code ec;
-  raw_fd_ostream os(config->mapFile, ec, sys::fs::OF_None);
-  if (ec) {
-    error("cannot open " + config->mapFile + ": " + ec.message());
-    return;
-  }
-
-  // Collect symbol info that we want to print out.
-  std::vector<Symbol *> syms = getSymbols();
-  SymbolMapTy sectionSyms = getSectionSyms(syms);
-  DenseMap<Symbol *, std::string> symStr = getSymbolStrings(syms);
-
-  // Print out the header line.
-  os << "    Addr      Off     Size Out     In      Symbol\n";
-
-  for (OutputSection *osec : outputSections) {
-    writeHeader(os, -1, osec->getOffset(), osec->getSize());
-    os << toString(*osec) << '\n';
-    if (auto *code = dyn_cast<CodeSection>(osec)) {
-      for (auto *chunk : code->functions) {
-        writeHeader(os, -1, chunk->outputSec->getOffset() + chunk->outputOffset,
-                    chunk->getSize());
-        os.indent(8) << toString(chunk) << '\n';
-        for (Symbol *sym : sectionSyms[chunk])
-          os << symStr[sym] << '\n';
-      }
-    } else if (auto *data = dyn_cast<DataSection>(osec)) {
-      for (auto *oseg : data->segments) {
-        writeHeader(os, oseg->startVA, data->getOffset() + oseg->sectionOffset,
-                    oseg->size);
-        os << oseg->name << '\n';
-        for (auto *chunk : oseg->inputSegments) {
-          writeHeader(os, oseg->startVA + chunk->outputSegmentOffset,
-                      chunk->outputSec->getOffset() + chunk->outputOffset,
-                      chunk->getSize());
-          os.indent(8) << toString(chunk) << '\n';
-          for (Symbol *sym : sectionSyms[chunk])
-            os << symStr[sym] << '\n';
-        }
-      }
+    // Open a map file for writing.
+    std::error_code ec;
+    raw_fd_ostream os(config->mapFile, ec, sys::fs::OF_None);
+    if (ec) {
+        error("cannot open " + config->mapFile + ": " + ec.message());
+        return;
     }
-  }
+
+    // Collect symbol info that we want to print out.
+    std::vector<Symbol *> syms = getSymbols();
+    SymbolMapTy sectionSyms = getSectionSyms(syms);
+    DenseMap<Symbol *, std::string> symStr = getSymbolStrings(syms);
+
+    // Print out the header line.
+    os << "    Addr      Off     Size Out     In      Symbol\n";
+
+    for (OutputSection *osec : outputSections) {
+        writeHeader(os, -1, osec->getOffset(), osec->getSize());
+        os << toString(*osec) << '\n';
+        if (auto *code = dyn_cast<CodeSection>(osec)) {
+            for (auto *chunk : code->functions) {
+                writeHeader(os, -1, chunk->outputSec->getOffset() + chunk->outputOffset,
+                            chunk->getSize());
+                os.indent(8) << toString(chunk) << '\n';
+                for (Symbol *sym : sectionSyms[chunk])
+                    os << symStr[sym] << '\n';
+            }
+        } else if (auto *data = dyn_cast<DataSection>(osec)) {
+            for (auto *oseg : data->segments) {
+                writeHeader(os, oseg->startVA, data->getOffset() + oseg->sectionOffset,
+                            oseg->size);
+                os << oseg->name << '\n';
+                for (auto *chunk : oseg->inputSegments) {
+                    writeHeader(os, oseg->startVA + chunk->outputSegmentOffset,
+                                chunk->outputSec->getOffset() + chunk->outputOffset,
+                                chunk->getSize());
+                    os.indent(8) << toString(chunk) << '\n';
+                    for (Symbol *sym : sectionSyms[chunk])
+                        os << symStr[sym] << '\n';
+                }
+            }
+        }
+    }
 }

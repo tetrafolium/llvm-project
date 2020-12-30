@@ -19,49 +19,49 @@ namespace lld {
 ///
 class SharedLibraryFile : public File {
 public:
-  static bool classof(const File *f) {
-    return f->kind() == kindSharedLibrary;
-  }
+    static bool classof(const File *f) {
+        return f->kind() == kindSharedLibrary;
+    }
 
-  /// Check if the shared library exports a symbol with the specified name.
-  /// If so, return a SharedLibraryAtom which represents that exported
-  /// symbol.  Otherwise return nullptr.
-  virtual OwningAtomPtr<SharedLibraryAtom> exports(StringRef name) const = 0;
+    /// Check if the shared library exports a symbol with the specified name.
+    /// If so, return a SharedLibraryAtom which represents that exported
+    /// symbol.  Otherwise return nullptr.
+    virtual OwningAtomPtr<SharedLibraryAtom> exports(StringRef name) const = 0;
 
-  // Returns the install name.
-  virtual StringRef getDSOName() const = 0;
+    // Returns the install name.
+    virtual StringRef getDSOName() const = 0;
 
-  const AtomRange<DefinedAtom> defined() const override {
-    return _definedAtoms;
-  }
+    const AtomRange<DefinedAtom> defined() const override {
+        return _definedAtoms;
+    }
 
-  const AtomRange<UndefinedAtom> undefined() const override {
-    return _undefinedAtoms;
-  }
+    const AtomRange<UndefinedAtom> undefined() const override {
+        return _undefinedAtoms;
+    }
 
-  const AtomRange<SharedLibraryAtom> sharedLibrary() const override {
-    return _sharedLibraryAtoms;
-  }
+    const AtomRange<SharedLibraryAtom> sharedLibrary() const override {
+        return _sharedLibraryAtoms;
+    }
 
-  const AtomRange<AbsoluteAtom> absolute() const override {
-    return _absoluteAtoms;
-  }
+    const AtomRange<AbsoluteAtom> absolute() const override {
+        return _absoluteAtoms;
+    }
 
-  void clearAtoms() override {
-    _definedAtoms.clear();
-    _undefinedAtoms.clear();
-    _sharedLibraryAtoms.clear();
-    _absoluteAtoms.clear();
-  }
+    void clearAtoms() override {
+        _definedAtoms.clear();
+        _undefinedAtoms.clear();
+        _sharedLibraryAtoms.clear();
+        _absoluteAtoms.clear();
+    }
 
 protected:
-  /// only subclasses of SharedLibraryFile can be instantiated
-  explicit SharedLibraryFile(StringRef path) : File(path, kindSharedLibrary) {}
+    /// only subclasses of SharedLibraryFile can be instantiated
+    explicit SharedLibraryFile(StringRef path) : File(path, kindSharedLibrary) {}
 
-  AtomVector<DefinedAtom> _definedAtoms;
-  AtomVector<UndefinedAtom> _undefinedAtoms;
-  AtomVector<SharedLibraryAtom> _sharedLibraryAtoms;
-  AtomVector<AbsoluteAtom> _absoluteAtoms;
+    AtomVector<DefinedAtom> _definedAtoms;
+    AtomVector<UndefinedAtom> _undefinedAtoms;
+    AtomVector<SharedLibraryAtom> _sharedLibraryAtoms;
+    AtomVector<AbsoluteAtom> _absoluteAtoms;
 };
 
 } // namespace lld

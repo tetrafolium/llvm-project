@@ -141,7 +141,7 @@
 // ourselves; it's simple enough.
 #ifdef __APPLE__
 inline __host__ double __signbitd(double x) {
-  return std::signbit(x);
+    return std::signbit(x);
 }
 #endif
 
@@ -232,22 +232,40 @@ inline __host__ double __signbitd(double x) {
 // Alas, additional overloads for these functions are hard to get to.
 // Considering that we only need these overloads for a few functions,
 // we can provide them here.
-static inline float rsqrt(float __a) { return rsqrtf(__a); }
-static inline float rcbrt(float __a) { return rcbrtf(__a); }
-static inline float sinpi(float __a) { return sinpif(__a); }
-static inline float cospi(float __a) { return cospif(__a); }
-static inline void sincospi(float __a, float *__b, float *__c) {
-  return sincospif(__a, __b, __c);
+static inline float rsqrt(float __a) {
+    return rsqrtf(__a);
 }
-static inline float erfcinv(float __a) { return erfcinvf(__a); }
-static inline float normcdfinv(float __a) { return normcdfinvf(__a); }
-static inline float normcdf(float __a) { return normcdff(__a); }
-static inline float erfcx(float __a) { return erfcxf(__a); }
+static inline float rcbrt(float __a) {
+    return rcbrtf(__a);
+}
+static inline float sinpi(float __a) {
+    return sinpif(__a);
+}
+static inline float cospi(float __a) {
+    return cospif(__a);
+}
+static inline void sincospi(float __a, float *__b, float *__c) {
+    return sincospif(__a, __b, __c);
+}
+static inline float erfcinv(float __a) {
+    return erfcinvf(__a);
+}
+static inline float normcdfinv(float __a) {
+    return normcdfinvf(__a);
+}
+static inline float normcdf(float __a) {
+    return normcdff(__a);
+}
+static inline float erfcx(float __a) {
+    return erfcxf(__a);
+}
 
 #if CUDA_VERSION < 9000
 // For some reason single-argument variant is not always declared by
 // CUDA headers. Alas, device_functions.hpp included below needs it.
-static inline __device__ void __brkpt(int __c) { __brkpt(); }
+static inline __device__ void __brkpt(int __c) {
+    __brkpt();
+}
 #endif
 
 // Now include *.hpp with definitions of various GPU functions.  Alas,
@@ -346,31 +364,33 @@ extern "C" {
 // We need these declarations and wrappers for device-side
 // malloc/free/printf calls to work without relying on
 // -fcuda-disable-target-call-checks option.
-__device__ int vprintf(const char *, const char *);
-__device__ void free(void *) __attribute((nothrow));
-__device__ void *malloc(size_t) __attribute((nothrow)) __attribute__((malloc));
-__device__ void __assertfail(const char *__message, const char *__file,
-                             unsigned __line, const char *__function,
-                             size_t __charSize) __attribute__((noreturn));
+    __device__ int vprintf(const char *, const char *);
+    __device__ void free(void *) __attribute((nothrow));
+    __device__ void *malloc(size_t) __attribute((nothrow)) __attribute__((malloc));
+    __device__ void __assertfail(const char *__message, const char *__file,
+                                 unsigned __line, const char *__function,
+                                 size_t __charSize) __attribute__((noreturn));
 
 // In order for standard assert() macro on linux to work we need to
 // provide device-side __assert_fail()
-__device__ static inline void __assert_fail(const char *__message,
-                                            const char *__file, unsigned __line,
-                                            const char *__function) {
-  __assertfail(__message, __file, __line, __function, sizeof(char));
-}
+    __device__ static inline void __assert_fail(const char *__message,
+            const char *__file, unsigned __line,
+            const char *__function) {
+        __assertfail(__message, __file, __line, __function, sizeof(char));
+    }
 
 // Clang will convert printf into vprintf, but we still need
 // device-side declaration for it.
-__device__ int printf(const char *, ...);
+    __device__ int printf(const char *, ...);
 } // extern "C"
 
 // We also need device-side std::malloc and std::free.
 namespace std {
-__device__ static inline void free(void *__ptr) { ::free(__ptr); }
+__device__ static inline void free(void *__ptr) {
+    ::free(__ptr);
+}
 __device__ static inline void *malloc(size_t __size) {
-  return ::malloc(__size);
+    return ::malloc(__size);
 }
 } // namespace std
 
@@ -378,35 +398,35 @@ __device__ static inline void *malloc(size_t __size) {
 // come after we've pulled in the definition of uint3 and dim3.
 
 __device__ inline __cuda_builtin_threadIdx_t::operator dim3() const {
-  return dim3(x, y, z);
+    return dim3(x, y, z);
 }
 
 __device__ inline __cuda_builtin_threadIdx_t::operator uint3() const {
-  return {x, y, z};
+    return {x, y, z};
 }
 
 __device__ inline __cuda_builtin_blockIdx_t::operator dim3() const {
-  return dim3(x, y, z);
+    return dim3(x, y, z);
 }
 
 __device__ inline __cuda_builtin_blockIdx_t::operator uint3() const {
-  return {x, y, z};
+    return {x, y, z};
 }
 
 __device__ inline __cuda_builtin_blockDim_t::operator dim3() const {
-  return dim3(x, y, z);
+    return dim3(x, y, z);
 }
 
 __device__ inline __cuda_builtin_blockDim_t::operator uint3() const {
-  return {x, y, z};
+    return {x, y, z};
 }
 
 __device__ inline __cuda_builtin_gridDim_t::operator dim3() const {
-  return dim3(x, y, z);
+    return dim3(x, y, z);
 }
 
 __device__ inline __cuda_builtin_gridDim_t::operator uint3() const {
-  return {x, y, z};
+    return {x, y, z};
 }
 
 #include <__clang_cuda_cmath.h>
@@ -435,8 +455,8 @@ __device__ inline __cuda_builtin_gridDim_t::operator uint3() const {
 // declaration for it here.
 #if CUDA_VERSION >= 9020
 extern "C" unsigned __cudaPushCallConfiguration(dim3 gridDim, dim3 blockDim,
-                                                size_t sharedMem = 0,
-                                                void *stream = 0);
+        size_t sharedMem = 0,
+        void *stream = 0);
 #endif
 
 #endif // __CUDA__

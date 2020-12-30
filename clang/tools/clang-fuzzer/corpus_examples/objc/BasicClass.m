@@ -2,8 +2,8 @@
 @end
 
 @interface BasicClass : RootObject {
-  int _foo;
-  char _boolean;
+    int _foo;
+    char _boolean;
 }
 
 @property(nonatomic, assign) int bar;
@@ -20,10 +20,10 @@
 @synthesize delegate = _delegate;
 
 - (void)someMethod {
-  int value = self.bar;
-  _foo = (_boolean != 0) ? self.bar : [self.objectField bar];
-  [self setBar:value];
-  id obj = self.objectField;
+    int value = self.bar;
+    _foo = (_boolean != 0) ? self.bar : [self.objectField bar];
+    [self setBar:value];
+    id obj = self.objectField;
 }
 @end
 

@@ -16,50 +16,52 @@ namespace {
 
 class QueueFrontEnd : public SyntheticChildrenFrontEnd {
 public:
-  QueueFrontEnd(ValueObject &valobj) : SyntheticChildrenFrontEnd(valobj) {
-    Update();
-  }
+    QueueFrontEnd(ValueObject &valobj) : SyntheticChildrenFrontEnd(valobj) {
+        Update();
+    }
 
-  size_t GetIndexOfChildWithName(ConstString name) override {
-    return m_container_sp ? m_container_sp->GetIndexOfChildWithName(name)
-                          : UINT32_MAX;
-  }
+    size_t GetIndexOfChildWithName(ConstString name) override {
+        return m_container_sp ? m_container_sp->GetIndexOfChildWithName(name)
+               : UINT32_MAX;
+    }
 
-  bool MightHaveChildren() override { return true; }
-  bool Update() override;
+    bool MightHaveChildren() override {
+        return true;
+    }
+    bool Update() override;
 
-  size_t CalculateNumChildren() override {
-    return m_container_sp ? m_container_sp->GetNumChildren() : 0;
-  }
+    size_t CalculateNumChildren() override {
+        return m_container_sp ? m_container_sp->GetNumChildren() : 0;
+    }
 
-  ValueObjectSP GetChildAtIndex(size_t idx) override {
-    return m_container_sp ? m_container_sp->GetChildAtIndex(idx, true)
-                          : nullptr;
-  }
+    ValueObjectSP GetChildAtIndex(size_t idx) override {
+        return m_container_sp ? m_container_sp->GetChildAtIndex(idx, true)
+               : nullptr;
+    }
 
 private:
-  // The lifetime of a ValueObject and all its derivative ValueObjects
-  // (children, clones, etc.) is managed by a ClusterManager. These
-  // objects are only destroyed when every shared pointer to any of them
-  // is destroyed, so we must not store a shared pointer to any ValueObject
-  // derived from our backend ValueObject (since we're in the same cluster).
-  ValueObject* m_container_sp = nullptr;
+    // The lifetime of a ValueObject and all its derivative ValueObjects
+    // (children, clones, etc.) is managed by a ClusterManager. These
+    // objects are only destroyed when every shared pointer to any of them
+    // is destroyed, so we must not store a shared pointer to any ValueObject
+    // derived from our backend ValueObject (since we're in the same cluster).
+    ValueObject* m_container_sp = nullptr;
 };
 } // namespace
 
 bool QueueFrontEnd::Update() {
-  m_container_sp = nullptr;
-  ValueObjectSP c_sp = m_backend.GetChildMemberWithName(ConstString("c"), true);
-  if (!c_sp)
+    m_container_sp = nullptr;
+    ValueObjectSP c_sp = m_backend.GetChildMemberWithName(ConstString("c"), true);
+    if (!c_sp)
+        return false;
+    m_container_sp = c_sp->GetSyntheticValue().get();
     return false;
-  m_container_sp = c_sp->GetSyntheticValue().get();
-  return false;
 }
 
 SyntheticChildrenFrontEnd *
 formatters::LibcxxQueueFrontEndCreator(CXXSyntheticChildren *,
                                        lldb::ValueObjectSP valobj_sp) {
-  if (valobj_sp)
-    return new QueueFrontEnd(*valobj_sp);
-  return nullptr;
+    if (valobj_sp)
+        return new QueueFrontEnd(*valobj_sp);
+    return nullptr;
 }

@@ -37,15 +37,15 @@ const AttributeStorage *generateUnknownStorageLocation(MLIRContext *ctx);
 template <typename ConcreteType, template <typename> class TraitType>
 class StorageUserTraitBase {
 protected:
-  /// Return the derived instance.
-  ConcreteType getInstance() const {
-    // We have to cast up to the trait type, then to the concrete type because
-    // the concrete type will multiply derive from the (content free) TraitBase
-    // class, and we need to be able to disambiguate the path for the C++
-    // compiler.
-    auto *trait = static_cast<const TraitType<ConcreteType> *>(this);
-    return *static_cast<const ConcreteType *>(trait);
-  }
+    /// Return the derived instance.
+    ConcreteType getInstance() const {
+        // We have to cast up to the trait type, then to the concrete type because
+        // the concrete type will multiply derive from the (content free) TraitBase
+        // class, and we need to be able to disambiguate the path for the C++
+        // compiler.
+        auto *trait = static_cast<const TraitType<ConcreteType> *>(this);
+        return *static_cast<const ConcreteType *>(trait);
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -59,73 +59,77 @@ template <typename ConcreteT, typename BaseT, typename StorageT,
           typename UniquerT, template <typename T> class... Traits>
 class StorageUserBase : public BaseT, public Traits<ConcreteT>... {
 public:
-  using BaseT::BaseT;
+    using BaseT::BaseT;
 
-  /// Utility declarations for the concrete attribute class.
-  using Base = StorageUserBase<ConcreteT, BaseT, StorageT, UniquerT, Traits...>;
-  using ImplType = StorageT;
+    /// Utility declarations for the concrete attribute class.
+    using Base = StorageUserBase<ConcreteT, BaseT, StorageT, UniquerT, Traits...>;
+    using ImplType = StorageT;
 
-  /// Return a unique identifier for the concrete type.
-  static TypeID getTypeID() { return TypeID::get<ConcreteT>(); }
+    /// Return a unique identifier for the concrete type.
+    static TypeID getTypeID() {
+        return TypeID::get<ConcreteT>();
+    }
 
-  /// Provide an implementation of 'classof' that compares the type id of the
-  /// provided value with that of the concrete type.
-  template <typename T> static bool classof(T val) {
-    static_assert(std::is_convertible<ConcreteT, T>::value,
-                  "casting from a non-convertible type");
-    return val.getTypeID() == getTypeID();
-  }
+    /// Provide an implementation of 'classof' that compares the type id of the
+    /// provided value with that of the concrete type.
+    template <typename T> static bool classof(T val) {
+        static_assert(std::is_convertible<ConcreteT, T>::value,
+                      "casting from a non-convertible type");
+        return val.getTypeID() == getTypeID();
+    }
 
-  /// Returns an interface map for the interfaces registered to this storage
-  /// user. This should not be used directly.
-  static detail::InterfaceMap getInterfaceMap() {
-    return detail::InterfaceMap::template get<Traits<ConcreteT>...>();
-  }
+    /// Returns an interface map for the interfaces registered to this storage
+    /// user. This should not be used directly.
+    static detail::InterfaceMap getInterfaceMap() {
+        return detail::InterfaceMap::template get<Traits<ConcreteT>...>();
+    }
 
-  /// Get or create a new ConcreteT instance within the ctx. This
-  /// function is guaranteed to return a non null object and will assert if
-  /// the arguments provided are invalid.
-  template <typename... Args>
-  static ConcreteT get(MLIRContext *ctx, Args... args) {
-    // Ensure that the invariants are correct for construction.
-    assert(succeeded(ConcreteT::verifyConstructionInvariants(
-        generateUnknownStorageLocation(ctx), args...)));
-    return UniquerT::template get<ConcreteT>(ctx, args...);
-  }
+    /// Get or create a new ConcreteT instance within the ctx. This
+    /// function is guaranteed to return a non null object and will assert if
+    /// the arguments provided are invalid.
+    template <typename... Args>
+    static ConcreteT get(MLIRContext *ctx, Args... args) {
+        // Ensure that the invariants are correct for construction.
+        assert(succeeded(ConcreteT::verifyConstructionInvariants(
+                             generateUnknownStorageLocation(ctx), args...)));
+        return UniquerT::template get<ConcreteT>(ctx, args...);
+    }
 
-  /// Get or create a new ConcreteT instance within the ctx, defined at
-  /// the given, potentially unknown, location. If the arguments provided are
-  /// invalid then emit errors and return a null object.
-  template <typename LocationT, typename... Args>
-  static ConcreteT getChecked(LocationT loc, Args... args) {
-    // If the construction invariants fail then we return a null attribute.
-    if (failed(ConcreteT::verifyConstructionInvariants(loc, args...)))
-      return ConcreteT();
-    return UniquerT::template get<ConcreteT>(loc.getContext(), args...);
-  }
+    /// Get or create a new ConcreteT instance within the ctx, defined at
+    /// the given, potentially unknown, location. If the arguments provided are
+    /// invalid then emit errors and return a null object.
+    template <typename LocationT, typename... Args>
+    static ConcreteT getChecked(LocationT loc, Args... args) {
+        // If the construction invariants fail then we return a null attribute.
+        if (failed(ConcreteT::verifyConstructionInvariants(loc, args...)))
+            return ConcreteT();
+        return UniquerT::template get<ConcreteT>(loc.getContext(), args...);
+    }
 
-  /// Get an instance of the concrete type from a void pointer.
-  static ConcreteT getFromOpaquePointer(const void *ptr) {
-    return ptr ? BaseT::getFromOpaquePointer(ptr).template cast<ConcreteT>()
+    /// Get an instance of the concrete type from a void pointer.
+    static ConcreteT getFromOpaquePointer(const void *ptr) {
+        return ptr ? BaseT::getFromOpaquePointer(ptr).template cast<ConcreteT>()
                : nullptr;
-  }
+    }
 
 protected:
-  /// Mutate the current storage instance. This will not change the unique key.
-  /// The arguments are forwarded to 'ConcreteT::mutate'.
-  template <typename... Args> LogicalResult mutate(Args &&...args) {
-    return UniquerT::template mutate<ConcreteT>(this->getContext(), getImpl(),
-                                                std::forward<Args>(args)...);
-  }
+    /// Mutate the current storage instance. This will not change the unique key.
+    /// The arguments are forwarded to 'ConcreteT::mutate'.
+    template <typename... Args> LogicalResult mutate(Args &&...args) {
+        return UniquerT::template mutate<ConcreteT>(this->getContext(), getImpl(),
+                std::forward<Args>(args)...);
+    }
 
-  /// Default implementation that just returns success.
-  template <typename... Args>
-  static LogicalResult verifyConstructionInvariants(Args... args) {
-    return success();
-  }
+    /// Default implementation that just returns success.
+    template <typename... Args>
+    static LogicalResult verifyConstructionInvariants(Args... args) {
+        return success();
+    }
 
-  /// Utility for easy access to the storage instance.
-  ImplType *getImpl() const { return static_cast<ImplType *>(this->impl); }
+    /// Utility for easy access to the storage instance.
+    ImplType *getImpl() const {
+        return static_cast<ImplType *>(this->impl);
+    }
 };
 } // namespace detail
 } // namespace mlir

@@ -21,19 +21,19 @@ namespace llvm {
 class R600AsmPrinter final : public AsmPrinter {
 
 public:
-  explicit R600AsmPrinter(TargetMachine &TM,
-                          std::unique_ptr<MCStreamer> Streamer);
-  StringRef getPassName() const override;
-  bool runOnMachineFunction(MachineFunction &MF) override;
-  /// Implemented in AMDGPUMCInstLower.cpp
-  void emitInstruction(const MachineInstr *MI) override;
-  /// Lower the specified LLVM Constant to an MCExpr.
-  /// The AsmPrinter::lowerConstantof does not know how to lower
-  /// addrspacecast, therefore they should be lowered by this function.
-  const MCExpr *lowerConstant(const Constant *CV) override;
+    explicit R600AsmPrinter(TargetMachine &TM,
+                            std::unique_ptr<MCStreamer> Streamer);
+    StringRef getPassName() const override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
+    /// Implemented in AMDGPUMCInstLower.cpp
+    void emitInstruction(const MachineInstr *MI) override;
+    /// Lower the specified LLVM Constant to an MCExpr.
+    /// The AsmPrinter::lowerConstantof does not know how to lower
+    /// addrspacecast, therefore they should be lowered by this function.
+    const MCExpr *lowerConstant(const Constant *CV) override;
 
 private:
-  void EmitProgramInfoR600(const MachineFunction &MF);
+    void EmitProgramInfoR600(const MachineFunction &MF);
 };
 
 AsmPrinter *

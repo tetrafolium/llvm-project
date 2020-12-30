@@ -25,22 +25,22 @@ namespace llvm {
 /// necessary) transforms any call instructions into invokes and sends them to
 /// a landing pad.
 class EscapeEnumerator {
-  Function &F;
-  const char *CleanupBBName;
+    Function &F;
+    const char *CleanupBBName;
 
-  Function::iterator StateBB, StateE;
-  IRBuilder<> Builder;
-  bool Done;
-  bool HandleExceptions;
+    Function::iterator StateBB, StateE;
+    IRBuilder<> Builder;
+    bool Done;
+    bool HandleExceptions;
 
 public:
-  EscapeEnumerator(Function &F, const char *N = "cleanup",
-                   bool HandleExceptions = true)
-      : F(F), CleanupBBName(N), StateBB(F.begin()), StateE(F.end()),
-        Builder(F.getContext()), Done(false),
-        HandleExceptions(HandleExceptions) {}
+    EscapeEnumerator(Function &F, const char *N = "cleanup",
+                     bool HandleExceptions = true)
+        : F(F), CleanupBBName(N), StateBB(F.begin()), StateE(F.end()),
+          Builder(F.getContext()), Done(false),
+          HandleExceptions(HandleExceptions) {}
 
-  IRBuilder<> *Next();
+    IRBuilder<> *Next();
 };
 
 }

@@ -23,14 +23,14 @@ namespace objc {
 /// For the user-facing documentation see:
 /// http://clang.llvm.org/extra/clang-tidy/checks/google-objc-global-variable-declaration.html
 class GlobalVariableDeclarationCheck : public ClangTidyCheck {
- public:
-  GlobalVariableDeclarationCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.ObjC;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+public:
+    GlobalVariableDeclarationCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.ObjC;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 }  // namespace objc

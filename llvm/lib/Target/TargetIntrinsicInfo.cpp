@@ -22,8 +22,8 @@ TargetIntrinsicInfo::~TargetIntrinsicInfo() {
 }
 
 unsigned TargetIntrinsicInfo::getIntrinsicID(const Function *F) const {
-  const ValueName *ValName = F->getValueName();
-  if (!ValName)
-    return 0;
-  return lookupName(ValName->getKeyData(), ValName->getKeyLength());
+    const ValueName *ValName = F->getValueName();
+    if (!ValName)
+        return 0;
+    return lookupName(ValName->getKeyData(), ValName->getKeyLength());
 }

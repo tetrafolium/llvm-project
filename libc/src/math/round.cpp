@@ -11,6 +11,8 @@
 
 namespace __llvm_libc {
 
-double LLVM_LIBC_ENTRYPOINT(round)(double x) { return fputil::round(x); }
+double LLVM_LIBC_ENTRYPOINT(round)(double x) {
+    return fputil::round(x);
+}
 
 } // namespace __llvm_libc

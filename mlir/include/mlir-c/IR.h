@@ -70,8 +70,8 @@ DEFINE_C_API_STRUCT(MlirValue, const void);
  * a string.
  */
 struct MlirNamedAttribute {
-  MlirIdentifier name;
-  MlirAttribute attribute;
+    MlirIdentifier name;
+    MlirAttribute attribute;
 };
 typedef struct MlirNamedAttribute MlirNamedAttribute;
 
@@ -87,7 +87,7 @@ MLIR_CAPI_EXPORTED bool mlirContextEqual(MlirContext ctx1, MlirContext ctx2);
 
 /// Checks whether a context is null.
 static inline bool mlirContextIsNull(MlirContext context) {
-  return !context.ptr;
+    return !context.ptr;
 }
 
 /// Takes an MLIR context owned by the caller and destroys it.
@@ -117,7 +117,7 @@ mlirContextGetNumLoadedDialects(MlirContext context);
  * returns null. Use mlirContextLoad<Name>Dialect to load an unregistered
  * dialect. */
 MLIR_CAPI_EXPORTED MlirDialect mlirContextGetOrLoadDialect(MlirContext context,
-                                                           MlirStringRef name);
+        MlirStringRef name);
 
 //===----------------------------------------------------------------------===//
 // Dialect API.
@@ -128,13 +128,13 @@ MLIR_CAPI_EXPORTED MlirContext mlirDialectGetContext(MlirDialect dialect);
 
 /// Checks if the dialect is null.
 static inline bool mlirDialectIsNull(MlirDialect dialect) {
-  return !dialect.ptr;
+    return !dialect.ptr;
 }
 
 /** Checks if two dialects that belong to the same context are equal. Dialects
  * from different contexts will not compare equal. */
 MLIR_CAPI_EXPORTED bool mlirDialectEqual(MlirDialect dialect1,
-                                         MlirDialect dialect2);
+        MlirDialect dialect2);
 
 /// Returns the namespace of the given dialect.
 MLIR_CAPI_EXPORTED MlirStringRef mlirDialectGetNamespace(MlirDialect dialect);
@@ -149,7 +149,7 @@ MLIR_CAPI_EXPORTED MlirLocation mlirLocationFileLineColGet(
 
 /// Creates a call site location with a callee and a caller.
 MLIR_CAPI_EXPORTED MlirLocation mlirLocationCallSiteGet(MlirLocation callee,
-                                                        MlirLocation caller);
+        MlirLocation caller);
 
 /// Creates a location with unknown position owned by the given context.
 MLIR_CAPI_EXPORTED MlirLocation mlirLocationUnknownGet(MlirContext context);
@@ -159,7 +159,7 @@ MLIR_CAPI_EXPORTED MlirContext mlirLocationGetContext(MlirLocation location);
 
 /// Checks if the location is null.
 static inline bool mlirLocationIsNull(MlirLocation location) {
-  return !location.ptr;
+    return !location.ptr;
 }
 
 /// Checks if two locations are equal.
@@ -169,8 +169,8 @@ MLIR_CAPI_EXPORTED bool mlirLocationEqual(MlirLocation l1, MlirLocation l2);
  * forwarding `userData to `callback`. Note that the callback may be called
  * several times with consecutive chunks of the string. */
 MLIR_CAPI_EXPORTED void mlirLocationPrint(MlirLocation location,
-                                          MlirStringCallback callback,
-                                          void *userData);
+        MlirStringCallback callback,
+        void *userData);
 
 //===----------------------------------------------------------------------===//
 // Module API.
@@ -181,7 +181,7 @@ MLIR_CAPI_EXPORTED MlirModule mlirModuleCreateEmpty(MlirLocation location);
 
 /// Parses a module from the string and transfers ownership to the caller.
 MLIR_CAPI_EXPORTED MlirModule mlirModuleCreateParse(MlirContext context,
-                                                    MlirStringRef module);
+        MlirStringRef module);
 
 /// Gets the context that a module was created with.
 MLIR_CAPI_EXPORTED MlirContext mlirModuleGetContext(MlirModule module);
@@ -190,7 +190,9 @@ MLIR_CAPI_EXPORTED MlirContext mlirModuleGetContext(MlirModule module);
 MLIR_CAPI_EXPORTED MlirBlock mlirModuleGetBody(MlirModule module);
 
 /// Checks whether a module is null.
-static inline bool mlirModuleIsNull(MlirModule module) { return !module.ptr; }
+static inline bool mlirModuleIsNull(MlirModule module) {
+    return !module.ptr;
+}
 
 /// Takes a module owned by the caller and deletes it.
 MLIR_CAPI_EXPORTED void mlirModuleDestroy(MlirModule module);
@@ -213,29 +215,29 @@ MLIR_CAPI_EXPORTED MlirOperation mlirModuleGetOperation(MlirModule module);
  * mlirOperationState* functions instead.
  */
 struct MlirOperationState {
-  MlirStringRef name;
-  MlirLocation location;
-  intptr_t nResults;
-  MlirType *results;
-  intptr_t nOperands;
-  MlirValue *operands;
-  intptr_t nRegions;
-  MlirRegion *regions;
-  intptr_t nSuccessors;
-  MlirBlock *successors;
-  intptr_t nAttributes;
-  MlirNamedAttribute *attributes;
+    MlirStringRef name;
+    MlirLocation location;
+    intptr_t nResults;
+    MlirType *results;
+    intptr_t nOperands;
+    MlirValue *operands;
+    intptr_t nRegions;
+    MlirRegion *regions;
+    intptr_t nSuccessors;
+    MlirBlock *successors;
+    intptr_t nAttributes;
+    MlirNamedAttribute *attributes;
 };
 typedef struct MlirOperationState MlirOperationState;
 
 /// Constructs an operation state from a name and a location.
 MLIR_CAPI_EXPORTED MlirOperationState mlirOperationStateGet(MlirStringRef name,
-                                                            MlirLocation loc);
+        MlirLocation loc);
 
 /// Adds a list of components to the operation state.
 MLIR_CAPI_EXPORTED void mlirOperationStateAddResults(MlirOperationState *state,
-                                                     intptr_t n,
-                                                     MlirType const *results);
+        intptr_t n,
+        MlirType const *results);
 MLIR_CAPI_EXPORTED void
 mlirOperationStateAddOperands(MlirOperationState *state, intptr_t n,
                               MlirValue const *operands);
@@ -269,7 +271,7 @@ MLIR_CAPI_EXPORTED void mlirOpPrintingFlagsDestroy(MlirOpPrintingFlags flags);
  * ElementsAttr by providing an upper limit to the number of elements. */
 MLIR_CAPI_EXPORTED void
 mlirOpPrintingFlagsElideLargeElementsAttrs(MlirOpPrintingFlags flags,
-                                           intptr_t largeElementLimit);
+        intptr_t largeElementLimit);
 
 /** Enable printing of debug information. If 'prettyForm' is set to true,
  * debug information is printed in a more readable 'pretty' form. Note: The
@@ -300,12 +302,14 @@ mlirOperationCreate(const MlirOperationState *state);
 MLIR_CAPI_EXPORTED void mlirOperationDestroy(MlirOperation op);
 
 /// Checks whether the underlying operation is null.
-static inline bool mlirOperationIsNull(MlirOperation op) { return !op.ptr; }
+static inline bool mlirOperationIsNull(MlirOperation op) {
+    return !op.ptr;
+}
 
 /** Checks whether two operation handles point to the same operation. This does
  * not perform deep comparison. */
 MLIR_CAPI_EXPORTED bool mlirOperationEqual(MlirOperation op,
-                                           MlirOperation other);
+        MlirOperation other);
 
 /// Gets the name of the operation as an identifier.
 MLIR_CAPI_EXPORTED MlirIdentifier mlirOperationGetName(MlirOperation op);
@@ -324,7 +328,7 @@ MLIR_CAPI_EXPORTED intptr_t mlirOperationGetNumRegions(MlirOperation op);
 
 /// Returns `pos`-th region attached to the operation.
 MLIR_CAPI_EXPORTED MlirRegion mlirOperationGetRegion(MlirOperation op,
-                                                     intptr_t pos);
+        intptr_t pos);
 
 /** Returns an operation immediately following the given operation it its
  * enclosing block. */
@@ -335,21 +339,21 @@ MLIR_CAPI_EXPORTED intptr_t mlirOperationGetNumOperands(MlirOperation op);
 
 /// Returns `pos`-th operand of the operation.
 MLIR_CAPI_EXPORTED MlirValue mlirOperationGetOperand(MlirOperation op,
-                                                     intptr_t pos);
+        intptr_t pos);
 
 /// Returns the number of results of the operation.
 MLIR_CAPI_EXPORTED intptr_t mlirOperationGetNumResults(MlirOperation op);
 
 /// Returns `pos`-th result of the operation.
 MLIR_CAPI_EXPORTED MlirValue mlirOperationGetResult(MlirOperation op,
-                                                    intptr_t pos);
+        intptr_t pos);
 
 /// Returns the number of successor blocks of the operation.
 MLIR_CAPI_EXPORTED intptr_t mlirOperationGetNumSuccessors(MlirOperation op);
 
 /// Returns `pos`-th successor of the operation.
 MLIR_CAPI_EXPORTED MlirBlock mlirOperationGetSuccessor(MlirOperation op,
-                                                       intptr_t pos);
+        intptr_t pos);
 
 /// Returns the number of attributes attached to the operation.
 MLIR_CAPI_EXPORTED intptr_t mlirOperationGetNumAttributes(MlirOperation op);
@@ -365,27 +369,27 @@ mlirOperationGetAttributeByName(MlirOperation op, MlirStringRef name);
 /** Sets an attribute by name, replacing the existing if it exists or
  * adding a new one otherwise. */
 MLIR_CAPI_EXPORTED void mlirOperationSetAttributeByName(MlirOperation op,
-                                                        MlirStringRef name,
-                                                        MlirAttribute attr);
+        MlirStringRef name,
+        MlirAttribute attr);
 
 /** Removes an attribute by name. Returns false if the attribute was not found
  * and true if removed. */
 MLIR_CAPI_EXPORTED bool mlirOperationRemoveAttributeByName(MlirOperation op,
-                                                           MlirStringRef name);
+        MlirStringRef name);
 
 /** Prints an operation by sending chunks of the string representation and
  * forwarding `userData to `callback`. Note that the callback may be called
  * several times with consecutive chunks of the string. */
 MLIR_CAPI_EXPORTED void mlirOperationPrint(MlirOperation op,
-                                           MlirStringCallback callback,
-                                           void *userData);
+        MlirStringCallback callback,
+        void *userData);
 
 /** Same as mlirOperationPrint but accepts flags controlling the printing
  * behavior. */
 MLIR_CAPI_EXPORTED void mlirOperationPrintWithFlags(MlirOperation op,
-                                                    MlirOpPrintingFlags flags,
-                                                    MlirStringCallback callback,
-                                                    void *userData);
+        MlirOpPrintingFlags flags,
+        MlirStringCallback callback,
+        void *userData);
 
 /// Prints an operation to stderr.
 MLIR_CAPI_EXPORTED void mlirOperationDump(MlirOperation op);
@@ -404,14 +408,16 @@ MLIR_CAPI_EXPORTED MlirRegion mlirRegionCreate();
 MLIR_CAPI_EXPORTED void mlirRegionDestroy(MlirRegion region);
 
 /// Checks whether a region is null.
-static inline bool mlirRegionIsNull(MlirRegion region) { return !region.ptr; }
+static inline bool mlirRegionIsNull(MlirRegion region) {
+    return !region.ptr;
+}
 
 /// Gets the first block in the region.
 MLIR_CAPI_EXPORTED MlirBlock mlirRegionGetFirstBlock(MlirRegion region);
 
 /// Takes a block owned by the caller and appends it to the given region.
 MLIR_CAPI_EXPORTED void mlirRegionAppendOwnedBlock(MlirRegion region,
-                                                   MlirBlock block);
+        MlirBlock block);
 
 /** Takes a block owned by the caller and inserts it at `pos` to the given
  * region. This is an expensive operation that linearly scans the region, prefer
@@ -423,15 +429,15 @@ mlirRegionInsertOwnedBlock(MlirRegion region, intptr_t pos, MlirBlock block);
  * reference block in the given region. The reference block must belong to the
  * region. If the reference block is null, prepends the block to the region. */
 MLIR_CAPI_EXPORTED void mlirRegionInsertOwnedBlockAfter(MlirRegion region,
-                                                        MlirBlock reference,
-                                                        MlirBlock block);
+        MlirBlock reference,
+        MlirBlock block);
 
 /** Takes a block owned by the caller and inserts it before the (non-owned)
  * reference block in the given region. The reference block must belong to the
  * region. If the reference block is null, appends the block to the region. */
 MLIR_CAPI_EXPORTED void mlirRegionInsertOwnedBlockBefore(MlirRegion region,
-                                                         MlirBlock reference,
-                                                         MlirBlock block);
+        MlirBlock reference,
+        MlirBlock block);
 
 //===----------------------------------------------------------------------===//
 // Block API.
@@ -440,13 +446,15 @@ MLIR_CAPI_EXPORTED void mlirRegionInsertOwnedBlockBefore(MlirRegion region,
 /** Creates a new empty block with the given argument types and transfers
  * ownership to the caller. */
 MLIR_CAPI_EXPORTED MlirBlock mlirBlockCreate(intptr_t nArgs,
-                                             MlirType const *args);
+        MlirType const *args);
 
 /// Takes a block owned by the caller and destroys it.
 MLIR_CAPI_EXPORTED void mlirBlockDestroy(MlirBlock block);
 
 /// Checks whether a block is null.
-static inline bool mlirBlockIsNull(MlirBlock block) { return !block.ptr; }
+static inline bool mlirBlockIsNull(MlirBlock block) {
+    return !block.ptr;
+}
 
 /** Checks whether two blocks handles point to the same block. This does not
  * perform deep comparison. */
@@ -464,14 +472,14 @@ MLIR_CAPI_EXPORTED MlirOperation mlirBlockGetTerminator(MlirBlock block);
 
 /// Takes an operation owned by the caller and appends it to the block.
 MLIR_CAPI_EXPORTED void mlirBlockAppendOwnedOperation(MlirBlock block,
-                                                      MlirOperation operation);
+        MlirOperation operation);
 
 /** Takes an operation owned by the caller and inserts it as `pos` to the block.
    This is an expensive operation that scans the block linearly, prefer
    insertBefore/After instead. */
 MLIR_CAPI_EXPORTED void mlirBlockInsertOwnedOperation(MlirBlock block,
-                                                      intptr_t pos,
-                                                      MlirOperation operation);
+        intptr_t pos,
+        MlirOperation operation);
 
 /** Takes an operation owned by the caller and inserts it after the (non-owned)
  * reference operation in the given block. If the reference is null, prepends
@@ -492,7 +500,7 @@ MLIR_CAPI_EXPORTED intptr_t mlirBlockGetNumArguments(MlirBlock block);
 
 /// Returns `pos`-th argument of the block.
 MLIR_CAPI_EXPORTED MlirValue mlirBlockGetArgument(MlirBlock block,
-                                                  intptr_t pos);
+        intptr_t pos);
 
 /** Prints a block by sending chunks of the string representation and
  * forwarding `userData to `callback`. Note that the callback may be called
@@ -505,7 +513,9 @@ mlirBlockPrint(MlirBlock block, MlirStringCallback callback, void *userData);
 //===----------------------------------------------------------------------===//
 
 /// Returns whether the value is null.
-static inline bool mlirValueIsNull(MlirValue value) { return !value.ptr; }
+static inline bool mlirValueIsNull(MlirValue value) {
+    return !value.ptr;
+}
 
 /// Returns 1 if two values are equal, 0 otherwise.
 bool mlirValueEqual(MlirValue value1, MlirValue value2);
@@ -525,7 +535,7 @@ MLIR_CAPI_EXPORTED intptr_t mlirBlockArgumentGetArgNumber(MlirValue value);
 
 /// Sets the type of the block argument to the given type.
 MLIR_CAPI_EXPORTED void mlirBlockArgumentSetType(MlirValue value,
-                                                 MlirType type);
+        MlirType type);
 
 /** Returns an operation that produced this value as its result. Asserts if the
  * value is not an op result. */
@@ -553,13 +563,15 @@ mlirValuePrint(MlirValue value, MlirStringCallback callback, void *userData);
 
 /// Parses a type. The type is owned by the context.
 MLIR_CAPI_EXPORTED MlirType mlirTypeParseGet(MlirContext context,
-                                             MlirStringRef type);
+        MlirStringRef type);
 
 /// Gets the context that a type was created with.
 MLIR_CAPI_EXPORTED MlirContext mlirTypeGetContext(MlirType type);
 
 /// Checks whether a type is null.
-static inline bool mlirTypeIsNull(MlirType type) { return !type.ptr; }
+static inline bool mlirTypeIsNull(MlirType type) {
+    return !type.ptr;
+}
 
 /// Checks if two types are equal.
 MLIR_CAPI_EXPORTED bool mlirTypeEqual(MlirType t1, MlirType t2);
@@ -579,7 +591,7 @@ MLIR_CAPI_EXPORTED void mlirTypeDump(MlirType type);
 
 /// Parses an attribute. The attribute is owned by the context.
 MLIR_CAPI_EXPORTED MlirAttribute mlirAttributeParseGet(MlirContext context,
-                                                       MlirStringRef attr);
+        MlirStringRef attr);
 
 /// Gets the context that an attribute was created with.
 MLIR_CAPI_EXPORTED MlirContext mlirAttributeGetContext(MlirAttribute attribute);
@@ -588,7 +600,9 @@ MLIR_CAPI_EXPORTED MlirContext mlirAttributeGetContext(MlirAttribute attribute);
 MLIR_CAPI_EXPORTED MlirType mlirAttributeGetType(MlirAttribute attribute);
 
 /// Checks whether an attribute is null.
-static inline bool mlirAttributeIsNull(MlirAttribute attr) { return !attr.ptr; }
+static inline bool mlirAttributeIsNull(MlirAttribute attr) {
+    return !attr.ptr;
+}
 
 /// Checks if two attributes are equal.
 MLIR_CAPI_EXPORTED bool mlirAttributeEqual(MlirAttribute a1, MlirAttribute a2);
@@ -597,15 +611,15 @@ MLIR_CAPI_EXPORTED bool mlirAttributeEqual(MlirAttribute a1, MlirAttribute a2);
  * forwarding `userData to `callback`. Note that the callback may be called
  * several times with consecutive chunks of the string. */
 MLIR_CAPI_EXPORTED void mlirAttributePrint(MlirAttribute attr,
-                                           MlirStringCallback callback,
-                                           void *userData);
+        MlirStringCallback callback,
+        void *userData);
 
 /// Prints the attribute to the standard error stream.
 MLIR_CAPI_EXPORTED void mlirAttributeDump(MlirAttribute attr);
 
 /// Associates an attribute with the name. Takes ownership of neither.
 MLIR_CAPI_EXPORTED MlirNamedAttribute mlirNamedAttributeGet(MlirIdentifier name,
-                                                            MlirAttribute attr);
+        MlirAttribute attr);
 
 //===----------------------------------------------------------------------===//
 // Identifier API.
@@ -613,11 +627,11 @@ MLIR_CAPI_EXPORTED MlirNamedAttribute mlirNamedAttributeGet(MlirIdentifier name,
 
 /// Gets an identifier with the given string value.
 MLIR_CAPI_EXPORTED MlirIdentifier mlirIdentifierGet(MlirContext context,
-                                                    MlirStringRef str);
+        MlirStringRef str);
 
 /// Checks whether two identifiers are the same.
 MLIR_CAPI_EXPORTED bool mlirIdentifierEqual(MlirIdentifier ident,
-                                            MlirIdentifier other);
+        MlirIdentifier other);
 
 /// Gets the string value of the identifier.
 MLIR_CAPI_EXPORTED MlirStringRef mlirIdentifierStr(MlirIdentifier ident);

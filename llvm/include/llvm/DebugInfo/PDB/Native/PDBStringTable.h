@@ -32,30 +32,30 @@ struct PDBStringTableHeader;
 
 class PDBStringTable {
 public:
-  Error reload(BinaryStreamReader &Reader);
+    Error reload(BinaryStreamReader &Reader);
 
-  uint32_t getByteSize() const;
-  uint32_t getNameCount() const;
-  uint32_t getHashVersion() const;
-  uint32_t getSignature() const;
+    uint32_t getByteSize() const;
+    uint32_t getNameCount() const;
+    uint32_t getHashVersion() const;
+    uint32_t getSignature() const;
 
-  Expected<StringRef> getStringForID(uint32_t ID) const;
-  Expected<uint32_t> getIDForString(StringRef Str) const;
+    Expected<StringRef> getStringForID(uint32_t ID) const;
+    Expected<uint32_t> getIDForString(StringRef Str) const;
 
-  FixedStreamArray<support::ulittle32_t> name_ids() const;
+    FixedStreamArray<support::ulittle32_t> name_ids() const;
 
-  const codeview::DebugStringTableSubsectionRef &getStringTable() const;
+    const codeview::DebugStringTableSubsectionRef &getStringTable() const;
 
 private:
-  Error readHeader(BinaryStreamReader &Reader);
-  Error readStrings(BinaryStreamReader &Reader);
-  Error readHashTable(BinaryStreamReader &Reader);
-  Error readEpilogue(BinaryStreamReader &Reader);
+    Error readHeader(BinaryStreamReader &Reader);
+    Error readStrings(BinaryStreamReader &Reader);
+    Error readHashTable(BinaryStreamReader &Reader);
+    Error readEpilogue(BinaryStreamReader &Reader);
 
-  const PDBStringTableHeader *Header = nullptr;
-  codeview::DebugStringTableSubsectionRef Strings;
-  FixedStreamArray<support::ulittle32_t> IDs;
-  uint32_t NameCount = 0;
+    const PDBStringTableHeader *Header = nullptr;
+    codeview::DebugStringTableSubsectionRef Strings;
+    FixedStreamArray<support::ulittle32_t> IDs;
+    uint32_t NameCount = 0;
 };
 
 } // end namespace pdb

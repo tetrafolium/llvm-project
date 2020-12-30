@@ -13,8 +13,8 @@ _CLC_DEFINE_RELATIONAL_BINARY(int, isless, __builtin_isless, float, float)
 // The scalar version of isless(double, double) returns an int, but the vector versions
 // return long.
 
-_CLC_DEF _CLC_OVERLOAD int isless(double x, double y){
-	return __builtin_isless(x, y);
+_CLC_DEF _CLC_OVERLOAD int isless(double x, double y) {
+    return __builtin_isless(x, y);
 }
 
 _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(long, isless, double, double)
@@ -27,8 +27,8 @@ _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(long, isless, double, double)
 // The scalar version of isless(half, half) returns an int, but the vector versions
 // return short.
 
-_CLC_DEF _CLC_OVERLOAD int isless(half x, half y){
-	return __builtin_isless(x, y);
+_CLC_DEF _CLC_OVERLOAD int isless(half x, half y) {
+    return __builtin_isless(x, y);
 }
 
 _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(short, isless, half, half)

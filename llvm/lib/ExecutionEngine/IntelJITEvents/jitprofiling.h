@@ -99,7 +99,7 @@ typedef enum _iJIT_ModeFlags
 } iJIT_ModeFlags;
 
 
- /* Flags used by iJIT_IsProfilingActive() */
+/* Flags used by iJIT_IsProfilingActive() */
 typedef enum _iJIT_IsProfilingActiveFlags
 {
     /* No profiler is running. Currently not used */
@@ -110,7 +110,7 @@ typedef enum _iJIT_IsProfilingActiveFlags
      */
     iJIT_SAMPLING_ON               = 0x0001,
 
-      /* Call Graph is running */
+    /* Call Graph is running */
     iJIT_CALLGRAPH_ON              = 0x0002
 
 } iJIT_IsProfilingActiveFlags;
@@ -131,9 +131,9 @@ typedef enum _iJDEnvironmentType
 
 typedef struct _iJIT_Method_Id
 {
-   /* Id of the method (same as the one passed in
-   * the iJIT_Method_Load struct
-   */
+    /* Id of the method (same as the one passed in
+    * the iJIT_Method_Load struct
+    */
     unsigned int       method_id;
 
 } *piJIT_Method_Id, iJIT_Method_Id;
@@ -163,10 +163,10 @@ typedef struct _iJIT_Method_NIDS
 
 typedef struct _LineNumberInfo
 {
-  /* x86 Offset from the beginning of the method*/
-  unsigned int Offset;
+    /* x86 Offset from the beginning of the method*/
+    unsigned int Offset;
 
-  /* source line number from the beginning of the source file */
+    /* source line number from the beginning of the source file */
     unsigned int        LineNumber;
 
 } *pLineNumberInfo, LineNumberInfo;

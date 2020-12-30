@@ -33,24 +33,24 @@ _CLC_VECTOR_VLOAD_PRIM3(a_half, half, float)
 
 #ifdef cl_khr_fp64
 #pragma OPENCL EXTENSION cl_khr_fp64: enable
-  _CLC_VECTOR_VLOAD_PRIM1(double)
+_CLC_VECTOR_VLOAD_PRIM1(double)
 #endif
 #ifdef cl_khr_fp16
 #pragma OPENCL EXTENSION cl_khr_fp16: enable
-  _CLC_VECTOR_VLOAD_PRIM1(half)
+_CLC_VECTOR_VLOAD_PRIM1(half)
 #endif
 
 // Scalar vload_half also needs to be declared
-_CLC_VLOAD_DECL(_half, half, float, , __constant)
-_CLC_VLOAD_DECL(_half, half, float, , __global)
-_CLC_VLOAD_DECL(_half, half, float, , __local)
-_CLC_VLOAD_DECL(_half, half, float, , __private)
+_CLC_VLOAD_DECL(_half, half, float,, __constant)
+_CLC_VLOAD_DECL(_half, half, float,, __global)
+_CLC_VLOAD_DECL(_half, half, float,, __local)
+_CLC_VLOAD_DECL(_half, half, float,, __private)
 
 // Scalar vloada_half is not part of the specs but CTS expects it
-_CLC_VLOAD_DECL(a_half, half, float, , __constant)
-_CLC_VLOAD_DECL(a_half, half, float, , __global)
-_CLC_VLOAD_DECL(a_half, half, float, , __local)
-_CLC_VLOAD_DECL(a_half, half, float, , __private)
+_CLC_VLOAD_DECL(a_half, half, float,, __constant)
+_CLC_VLOAD_DECL(a_half, half, float,, __global)
+_CLC_VLOAD_DECL(a_half, half, float,, __local)
+_CLC_VLOAD_DECL(a_half, half, float,, __private)
 
 #undef _CLC_VLOAD_DECL
 #undef _CLC_VECTOR_VLOAD_DECL

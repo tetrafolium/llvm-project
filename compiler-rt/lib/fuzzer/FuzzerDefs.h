@@ -23,8 +23,12 @@
 
 namespace fuzzer {
 
-template <class T> T Min(T a, T b) { return a < b ? a : b; }
-template <class T> T Max(T a, T b) { return a > b ? a : b; }
+template <class T> T Min(T a, T b) {
+    return a < b ? a : b;
+}
+template <class T> T Max(T a, T b) {
+    return a > b ? a : b;
+}
 
 class Random;
 class Dictionary;
@@ -41,16 +45,18 @@ extern ExternalFunctions *EF;
 // We are using a custom allocator to give a different symbol name to STL
 // containers in order to avoid ODR violations.
 template<typename T>
-  class fuzzer_allocator: public std::allocator<T> {
-    public:
-      fuzzer_allocator() = default;
+class fuzzer_allocator: public std::allocator<T> {
+public:
+    fuzzer_allocator() = default;
 
-      template<class U>
-      fuzzer_allocator(const fuzzer_allocator<U>&) {}
+    template<class U>
+    fuzzer_allocator(const fuzzer_allocator<U>&) {}
 
-      template<class Other>
-      struct rebind { typedef fuzzer_allocator<Other> other;  };
-  };
+    template<class Other>
+    struct rebind {
+        typedef fuzzer_allocator<Other> other;
+    };
+};
 
 template<typename T>
 using Vector = std::vector<T, fuzzer_allocator<T>>;

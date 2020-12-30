@@ -22,7 +22,7 @@ namespace llvm {
 /// Optimize scalar/vector interactions in IR using target cost models.
 struct VectorCombinePass : public PassInfoMixin<VectorCombinePass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 };
 
 }

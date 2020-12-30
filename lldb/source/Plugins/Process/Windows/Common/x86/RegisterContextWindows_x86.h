@@ -20,29 +20,29 @@ class Thread;
 
 class RegisterContextWindows_x86 : public RegisterContextWindows {
 public:
-  // Constructors and Destructors
-  RegisterContextWindows_x86(Thread &thread, uint32_t concrete_frame_idx);
+    // Constructors and Destructors
+    RegisterContextWindows_x86(Thread &thread, uint32_t concrete_frame_idx);
 
-  virtual ~RegisterContextWindows_x86();
+    virtual ~RegisterContextWindows_x86();
 
-  // Subclasses must override these functions
-  size_t GetRegisterCount() override;
+    // Subclasses must override these functions
+    size_t GetRegisterCount() override;
 
-  const RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
+    const RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
 
-  size_t GetRegisterSetCount() override;
+    size_t GetRegisterSetCount() override;
 
-  const RegisterSet *GetRegisterSet(size_t reg_set) override;
+    const RegisterSet *GetRegisterSet(size_t reg_set) override;
 
-  bool ReadRegister(const RegisterInfo *reg_info,
-                    RegisterValue &reg_value) override;
+    bool ReadRegister(const RegisterInfo *reg_info,
+                      RegisterValue &reg_value) override;
 
-  bool WriteRegister(const RegisterInfo *reg_info,
-                     const RegisterValue &reg_value) override;
+    bool WriteRegister(const RegisterInfo *reg_info,
+                       const RegisterValue &reg_value) override;
 
 private:
-  bool ReadRegisterHelper(DWORD flags_required, const char *reg_name,
-                          DWORD value, RegisterValue &reg_value) const;
+    bool ReadRegisterHelper(DWORD flags_required, const char *reg_name,
+                            DWORD value, RegisterValue &reg_value) const;
 };
 }
 

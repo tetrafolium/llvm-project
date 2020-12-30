@@ -18,11 +18,11 @@ struct IfStmt;
 namespace Fortran::semantics {
 class IfStmtChecker : public virtual BaseChecker {
 public:
-  IfStmtChecker(SemanticsContext &context) : context_{context} {}
-  void Leave(const parser::IfStmt &);
+    IfStmtChecker(SemanticsContext &context) : context_{context} {}
+    void Leave(const parser::IfStmt &);
 
 private:
-  SemanticsContext &context_;
+    SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_IF_STMT_H_

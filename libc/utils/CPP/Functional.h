@@ -15,13 +15,15 @@ namespace cpp {
 template <typename Func> class Function;
 
 template <typename Ret, typename... Params> class Function<Ret(Params...)> {
-  Ret (*func)(Params...) = nullptr;
+    Ret (*func)(Params...) = nullptr;
 
 public:
-  constexpr Function() = default;
-  template <typename Func> constexpr Function(Func &&f) : func(f) {}
+    constexpr Function() = default;
+    template <typename Func> constexpr Function(Func &&f) : func(f) {}
 
-  constexpr Ret operator()(Params... params) { return func(params...); }
+    constexpr Ret operator()(Params... params) {
+        return func(params...);
+    }
 };
 
 } // namespace cpp

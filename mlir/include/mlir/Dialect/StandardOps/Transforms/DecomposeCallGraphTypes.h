@@ -44,39 +44,39 @@ namespace mlir {
 /// https://llvm.discourse.group/t/extending-type-conversion-infrastructure/779/2
 class ValueDecomposer {
 public:
-  /// This method tries to decompose a value of a certain type using provided
-  /// decompose callback functions. If it is unable to do so, the original value
-  /// is returned.
-  void decomposeValue(OpBuilder &, Location, Type, Value,
-                      SmallVectorImpl<Value> &);
+    /// This method tries to decompose a value of a certain type using provided
+    /// decompose callback functions. If it is unable to do so, the original value
+    /// is returned.
+    void decomposeValue(OpBuilder &, Location, Type, Value,
+                        SmallVectorImpl<Value> &);
 
-  /// This method registers a callback function that will be called to decompose
-  /// a value of a certain type into 0, 1, or multiple values.
-  template <typename FnT,
-            typename T = typename llvm::function_traits<FnT>::template arg_t<2>>
-  void addDecomposeValueConversion(FnT &&callback) {
-    decomposeValueConversions.emplace_back(
-        wrapDecomposeValueConversionCallback<T>(std::forward<FnT>(callback)));
-  }
+    /// This method registers a callback function that will be called to decompose
+    /// a value of a certain type into 0, 1, or multiple values.
+    template <typename FnT,
+              typename T = typename llvm::function_traits<FnT>::template arg_t<2>>
+    void addDecomposeValueConversion(FnT &&callback) {
+        decomposeValueConversions.emplace_back(
+            wrapDecomposeValueConversionCallback<T>(std::forward<FnT>(callback)));
+    }
 
 private:
-  using DecomposeValueConversionCallFn = std::function<Optional<LogicalResult>(
-      OpBuilder &, Location, Type, Value, SmallVectorImpl<Value> &)>;
+    using DecomposeValueConversionCallFn = std::function<Optional<LogicalResult>(
+            OpBuilder &, Location, Type, Value, SmallVectorImpl<Value> &)>;
 
-  /// Generate a wrapper for the given decompose value conversion callback.
-  template <typename T, typename FnT>
-  DecomposeValueConversionCallFn
-  wrapDecomposeValueConversionCallback(FnT &&callback) {
-    return [callback = std::forward<FnT>(callback)](
-               OpBuilder &builder, Location loc, Type type, Value value,
-               SmallVectorImpl<Value> &newValues) -> Optional<LogicalResult> {
-      if (T derivedType = type.dyn_cast<T>())
-        return callback(builder, loc, derivedType, value, newValues);
-      return llvm::None;
-    };
-  }
+    /// Generate a wrapper for the given decompose value conversion callback.
+    template <typename T, typename FnT>
+    DecomposeValueConversionCallFn
+    wrapDecomposeValueConversionCallback(FnT &&callback) {
+        return [callback = std::forward<FnT>(callback)](
+                   OpBuilder &builder, Location loc, Type type, Value value,
+        SmallVectorImpl<Value> &newValues) -> Optional<LogicalResult> {
+            if (T derivedType = type.dyn_cast<T>())
+                return callback(builder, loc, derivedType, value, newValues);
+            return llvm::None;
+        };
+    }
 
-  SmallVector<DecomposeValueConversionCallFn, 2> decomposeValueConversions;
+    SmallVector<DecomposeValueConversionCallFn, 2> decomposeValueConversions;
 };
 
 /// Populates the patterns needed to drive the conversion process for

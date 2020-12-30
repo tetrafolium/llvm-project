@@ -79,9 +79,11 @@ void IterateDirRecursive(const std::string &Dir,
                          void (*FileCallback)(const std::string &Dir));
 
 struct SizedFile {
-  std::string File;
-  size_t Size;
-  bool operator<(const SizedFile &B) const { return Size < B.Size; }
+    std::string File;
+    size_t Size;
+    bool operator<(const SizedFile &B) const {
+        return Size < B.Size;
+    }
 };
 
 void GetSizedFilesFromDir(const std::string &Dir, Vector<SizedFile> *V);

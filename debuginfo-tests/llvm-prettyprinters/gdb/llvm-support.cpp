@@ -37,31 +37,35 @@ llvm::PointerUnion<Z *, float *> RawPrintingPointerUnion(nullptr);
 using IlistTag = llvm::ilist_tag<struct A>;
 using SimpleIlistTag = llvm::ilist_tag<struct B>;
 struct IlistNode : llvm::ilist_node<IlistNode, IlistTag>,
-                   llvm::ilist_node<IlistNode, SimpleIlistTag> {
-  int Value;
+    llvm::ilist_node<IlistNode, SimpleIlistTag> {
+    int Value;
 };
 auto Ilist = [] {
-  llvm::ilist<IlistNode, IlistTag> Result;
-  for (int I : {13, 14, 15}) {
-    Result.push_back(new IlistNode);
-    Result.back().Value = I;
-  }
-  return Result;
-}();
+    llvm::ilist<IlistNode, IlistTag> Result;
+    for (int I : {
+                13, 14, 15
+            }) {
+        Result.push_back(new IlistNode);
+        Result.back().Value = I;
+    }
+    return Result;
+}
+();
 auto SimpleIlist = []() {
-  llvm::simple_ilist<IlistNode, SimpleIlistTag> Result;
-  for (auto &Node : Ilist)
-    Result.push_front(Node);
-  return Result;
-}();
+    llvm::simple_ilist<IlistNode, SimpleIlistTag> Result;
+    for (auto &Node : Ilist)
+        Result.push_front(Node);
+    return Result;
+}
+();
 
 int main() {
-  // Reference symbols that might otherwise be stripped.
-  ArrayRef[0];
-  MutableArrayRef[0];
-  !ExpectedValue;
-  !ExpectedError;
-  *OptionalValue;
-  *OptionalNone;
-  return 0;
+    // Reference symbols that might otherwise be stripped.
+    ArrayRef[0];
+    MutableArrayRef[0];
+    !ExpectedValue;
+    !ExpectedError;
+    *OptionalValue;
+    *OptionalNone;
+    return 0;
 }

@@ -26,7 +26,7 @@ inline namespace v1
 // 2.4, Sequential execution policy
 class sequenced_policy
 {
-  public:
+public:
     // For internal use only
     static constexpr std::false_type
     __allow_unsequenced()
@@ -48,7 +48,7 @@ class sequenced_policy
 // 2.5, Parallel execution policy
 class parallel_policy
 {
-  public:
+public:
     // For internal use only
     static constexpr std::false_type
     __allow_unsequenced()
@@ -70,7 +70,7 @@ class parallel_policy
 // 2.6, Parallel+Vector execution policy
 class parallel_unsequenced_policy
 {
-  public:
+public:
     // For internal use only
     static constexpr std::true_type
     __allow_unsequenced()
@@ -91,7 +91,7 @@ class parallel_unsequenced_policy
 
 class unsequenced_policy
 {
-  public:
+public:
     // For internal use only
     static constexpr std::true_type
     __allow_unsequenced()
@@ -152,7 +152,7 @@ namespace __internal
 template <class ExecPolicy, class T>
 using __enable_if_execution_policy =
     typename std::enable_if<__pstl::execution::is_execution_policy<typename std::decay<ExecPolicy>::type>::value,
-                            T>::type;
+    T>::type;
 } // namespace __internal
 
 } // namespace __pstl

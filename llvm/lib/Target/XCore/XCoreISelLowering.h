@@ -20,77 +20,77 @@
 
 namespace llvm {
 
-  // Forward delcarations
-  class XCoreSubtarget;
+// Forward delcarations
+class XCoreSubtarget;
 
-  namespace XCoreISD {
-    enum NodeType : unsigned {
-      // Start the numbering where the builtin ops and target ops leave off.
-      FIRST_NUMBER = ISD::BUILTIN_OP_END,
+namespace XCoreISD {
+enum NodeType : unsigned {
+    // Start the numbering where the builtin ops and target ops leave off.
+    FIRST_NUMBER = ISD::BUILTIN_OP_END,
 
-      // Branch and link (call)
-      BL,
+    // Branch and link (call)
+    BL,
 
-      // pc relative address
-      PCRelativeWrapper,
+    // pc relative address
+    PCRelativeWrapper,
 
-      // dp relative address
-      DPRelativeWrapper,
+    // dp relative address
+    DPRelativeWrapper,
 
-      // cp relative address
-      CPRelativeWrapper,
+    // cp relative address
+    CPRelativeWrapper,
 
-      // Load word from stack
-      LDWSP,
+    // Load word from stack
+    LDWSP,
 
-      // Store word to stack
-      STWSP,
+    // Store word to stack
+    STWSP,
 
-      // Corresponds to retsp instruction
-      RETSP,
+    // Corresponds to retsp instruction
+    RETSP,
 
-      // Corresponds to LADD instruction
-      LADD,
+    // Corresponds to LADD instruction
+    LADD,
 
-      // Corresponds to LSUB instruction
-      LSUB,
+    // Corresponds to LSUB instruction
+    LSUB,
 
-      // Corresponds to LMUL instruction
-      LMUL,
+    // Corresponds to LMUL instruction
+    LMUL,
 
-      // Corresponds to MACCU instruction
-      MACCU,
+    // Corresponds to MACCU instruction
+    MACCU,
 
-      // Corresponds to MACCS instruction
-      MACCS,
+    // Corresponds to MACCS instruction
+    MACCS,
 
-      // Corresponds to CRC8 instruction
-      CRC8,
+    // Corresponds to CRC8 instruction
+    CRC8,
 
-      // Jumptable branch.
-      BR_JT,
+    // Jumptable branch.
+    BR_JT,
 
-      // Jumptable branch using long branches for each entry.
-      BR_JT32,
+    // Jumptable branch using long branches for each entry.
+    BR_JT32,
 
-      // Offset from frame pointer to the first (possible) on-stack argument
-      FRAME_TO_ARGS_OFFSET,
+    // Offset from frame pointer to the first (possible) on-stack argument
+    FRAME_TO_ARGS_OFFSET,
 
-      // Exception handler return. The stack is restored to the first
-      // followed by a jump to the second argument.
-      EH_RETURN,
+    // Exception handler return. The stack is restored to the first
+    // followed by a jump to the second argument.
+    EH_RETURN,
 
-      // Memory barrier.
-      MEMBARRIER
-    };
-  }
+    // Memory barrier.
+    MEMBARRIER
+};
+}
 
-  //===--------------------------------------------------------------------===//
-  // TargetLowering Implementation
-  //===--------------------------------------------------------------------===//
-  class XCoreTargetLowering : public TargetLowering
-  {
-  public:
+//===--------------------------------------------------------------------===//
+// TargetLowering Implementation
+//===--------------------------------------------------------------------===//
+class XCoreTargetLowering : public TargetLowering
+{
+public:
     explicit XCoreTargetLowering(const TargetMachine &TM,
                                  const XCoreSubtarget &Subtarget);
 
@@ -100,7 +100,7 @@ namespace llvm {
 
     unsigned getJumpTableEncoding() const override;
     MVT getScalarShiftAmountTy(const DataLayout &DL, EVT) const override {
-      return MVT::i32;
+        return MVT::i32;
     }
 
     /// LowerOperation - Provide custom lowering hooks for some operations.
@@ -128,17 +128,17 @@ namespace llvm {
     /// exception address on entry to an EH pad.
     Register
     getExceptionPointerRegister(const Constant *PersonalityFn) const override {
-      return XCore::R0;
+        return XCore::R0;
     }
 
     /// If a physical register, this returns the register that receives the
     /// exception typeid on entry to a landing pad.
     Register
     getExceptionSelectorRegister(const Constant *PersonalityFn) const override {
-      return XCore::R1;
+        return XCore::R1;
     }
 
-  private:
+private:
     const TargetMachine &TM;
     const XCoreSubtarget &Subtarget;
 
@@ -160,9 +160,9 @@ namespace llvm {
     SDValue getGlobalAddressWrapper(SDValue GA, const GlobalValue *GV,
                                     SelectionDAG &DAG) const;
     SDValue lowerLoadWordFromAlignedBasePlusOffset(const SDLoc &DL,
-                                                   SDValue Chain, SDValue Base,
-                                                   int64_t Offset,
-                                                   SelectionDAG &DAG) const;
+            SDValue Chain, SDValue Base,
+            int64_t Offset,
+            SelectionDAG &DAG) const;
 
     // Lower Operand specifics
     SDValue LowerLOAD(SDValue Op, SelectionDAG &DAG) const;
@@ -188,7 +188,7 @@ namespace llvm {
     SDValue LowerATOMIC_STORE(SDValue Op, SelectionDAG &DAG) const;
 
     MachineMemOperand::Flags getTargetMMOFlags(
-      const Instruction &I) const override;
+        const Instruction &I) const override;
 
     // Inline asm support
     std::pair<unsigned, const TargetRegisterClass *>
@@ -214,8 +214,8 @@ namespace llvm {
                          SmallVectorImpl<SDValue> &InVals) const override;
 
     SDValue
-      LowerCall(TargetLowering::CallLoweringInfo &CLI,
-                SmallVectorImpl<SDValue> &InVals) const override;
+    LowerCall(TargetLowering::CallLoweringInfo &CLI,
+              SmallVectorImpl<SDValue> &InVals) const override;
 
     SDValue LowerReturn(SDValue Chain, CallingConv::ID CallConv, bool isVarArg,
                         const SmallVectorImpl<ISD::OutputArg> &Outs,
@@ -223,14 +223,14 @@ namespace llvm {
                         const SDLoc &dl, SelectionDAG &DAG) const override;
 
     bool
-      CanLowerReturn(CallingConv::ID CallConv, MachineFunction &MF,
-                     bool isVarArg,
-                     const SmallVectorImpl<ISD::OutputArg> &ArgsFlags,
-                     LLVMContext &Context) const override;
+    CanLowerReturn(CallingConv::ID CallConv, MachineFunction &MF,
+                   bool isVarArg,
+                   const SmallVectorImpl<ISD::OutputArg> &ArgsFlags,
+                   LLVMContext &Context) const override;
     bool shouldInsertFencesForAtomic(const Instruction *I) const override {
-      return true;
+        return true;
     }
-  };
+};
 }
 
 #endif

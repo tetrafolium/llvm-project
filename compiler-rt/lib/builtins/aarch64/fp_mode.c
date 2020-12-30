@@ -28,32 +28,32 @@ FE_ROUND_MODE __attribute__((weak)) __aarch64_fe_default_rmode = FE_TONEAREST;
 
 FE_ROUND_MODE __fe_getround() {
 #ifdef __ARM_FP
-  uint64_t fpcr;
-  __asm__ __volatile__("mrs  %0, fpcr" : "=r" (fpcr));
-  fpcr = fpcr >> AARCH64_RMODE_SHIFT & AARCH64_RMODE_MASK;
-  switch (fpcr) {
+    uint64_t fpcr;
+    __asm__ __volatile__("mrs  %0, fpcr" : "=r" (fpcr));
+    fpcr = fpcr >> AARCH64_RMODE_SHIFT & AARCH64_RMODE_MASK;
+    switch (fpcr) {
     case AARCH64_UPWARD:
-      return FE_UPWARD;
+        return FE_UPWARD;
     case AARCH64_DOWNWARD:
-      return FE_DOWNWARD;
+        return FE_DOWNWARD;
     case AARCH64_TOWARDZERO:
-      return FE_TOWARDZERO;
+        return FE_TOWARDZERO;
     case AARCH64_TONEAREST:
     default:
-      return FE_TONEAREST;
-  }
+        return FE_TONEAREST;
+    }
 #else
-  return __aarch64_fe_default_rmode;
+    return __aarch64_fe_default_rmode;
 #endif
 }
 
 int __fe_raise_inexact() {
 #ifdef __ARM_FP
-  uint64_t fpsr;
-  __asm__ __volatile__("mrs  %0, fpsr" : "=r" (fpsr));
-  __asm__ __volatile__("msr  fpsr, %0" : : "ri" (fpsr | AARCH64_INEXACT));
-  return 0;
+    uint64_t fpsr;
+    __asm__ __volatile__("mrs  %0, fpsr" : "=r" (fpsr));
+    __asm__ __volatile__("msr  fpsr, %0" : : "ri" (fpsr | AARCH64_INEXACT));
+    return 0;
 #else
-  return 0;
+    return 0;
 #endif
 }

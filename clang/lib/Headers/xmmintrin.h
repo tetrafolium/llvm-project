@@ -49,8 +49,8 @@ typedef unsigned int __v4su __attribute__((__vector_size__(16)));
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_add_ss(__m128 __a, __m128 __b)
 {
-  __a[0] += __b[0];
-  return __a;
+    __a[0] += __b[0];
+    return __a;
 }
 
 /// Adds two 128-bit vectors of [4 x float], and returns the results of
@@ -69,7 +69,7 @@ _mm_add_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_add_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)((__v4sf)__a + (__v4sf)__b);
+    return (__m128)((__v4sf)__a + (__v4sf)__b);
 }
 
 /// Subtracts the 32-bit float value in the low-order bits of the second
@@ -91,8 +91,8 @@ _mm_add_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_sub_ss(__m128 __a, __m128 __b)
 {
-  __a[0] -= __b[0];
-  return __a;
+    __a[0] -= __b[0];
+    return __a;
 }
 
 /// Subtracts each of the values of the second operand from the first
@@ -112,7 +112,7 @@ _mm_sub_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_sub_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)((__v4sf)__a - (__v4sf)__b);
+    return (__m128)((__v4sf)__a - (__v4sf)__b);
 }
 
 /// Multiplies two 32-bit float values in the low-order bits of the
@@ -134,8 +134,8 @@ _mm_sub_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_mul_ss(__m128 __a, __m128 __b)
 {
-  __a[0] *= __b[0];
-  return __a;
+    __a[0] *= __b[0];
+    return __a;
 }
 
 /// Multiplies two 128-bit vectors of [4 x float] and returns the
@@ -154,7 +154,7 @@ _mm_mul_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_mul_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)((__v4sf)__a * (__v4sf)__b);
+    return (__m128)((__v4sf)__a * (__v4sf)__b);
 }
 
 /// Divides the value in the low-order 32 bits of the first operand by
@@ -176,8 +176,8 @@ _mm_mul_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_div_ss(__m128 __a, __m128 __b)
 {
-  __a[0] /= __b[0];
-  return __a;
+    __a[0] /= __b[0];
+    return __a;
 }
 
 /// Divides two 128-bit vectors of [4 x float].
@@ -195,7 +195,7 @@ _mm_div_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_div_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)((__v4sf)__a / (__v4sf)__b);
+    return (__m128)((__v4sf)__a / (__v4sf)__b);
 }
 
 /// Calculates the square root of the value stored in the low-order bits
@@ -213,7 +213,7 @@ _mm_div_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_sqrt_ss(__m128 __a)
 {
-  return (__m128)__builtin_ia32_sqrtss((__v4sf)__a);
+    return (__m128)__builtin_ia32_sqrtss((__v4sf)__a);
 }
 
 /// Calculates the square roots of the values stored in a 128-bit vector
@@ -230,7 +230,7 @@ _mm_sqrt_ss(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_sqrt_ps(__m128 __a)
 {
-  return __builtin_ia32_sqrtps((__v4sf)__a);
+    return __builtin_ia32_sqrtps((__v4sf)__a);
 }
 
 /// Calculates the approximate reciprocal of the value stored in the
@@ -248,7 +248,7 @@ _mm_sqrt_ps(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_rcp_ss(__m128 __a)
 {
-  return (__m128)__builtin_ia32_rcpss((__v4sf)__a);
+    return (__m128)__builtin_ia32_rcpss((__v4sf)__a);
 }
 
 /// Calculates the approximate reciprocals of the values stored in a
@@ -265,7 +265,7 @@ _mm_rcp_ss(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_rcp_ps(__m128 __a)
 {
-  return (__m128)__builtin_ia32_rcpps((__v4sf)__a);
+    return (__m128)__builtin_ia32_rcpps((__v4sf)__a);
 }
 
 /// Calculates the approximate reciprocal of the square root of the value
@@ -284,7 +284,7 @@ _mm_rcp_ps(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_rsqrt_ss(__m128 __a)
 {
-  return __builtin_ia32_rsqrtss((__v4sf)__a);
+    return __builtin_ia32_rsqrtss((__v4sf)__a);
 }
 
 /// Calculates the approximate reciprocals of the square roots of the
@@ -301,7 +301,7 @@ _mm_rsqrt_ss(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_rsqrt_ps(__m128 __a)
 {
-  return __builtin_ia32_rsqrtps((__v4sf)__a);
+    return __builtin_ia32_rsqrtps((__v4sf)__a);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -324,7 +324,7 @@ _mm_rsqrt_ps(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_min_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_minss((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_minss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 128-bit vectors of [4 x float] and returns the lesser
@@ -343,7 +343,7 @@ _mm_min_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_min_ps(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_minps((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_minps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -366,7 +366,7 @@ _mm_min_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_max_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_maxss((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_maxss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 128-bit vectors of [4 x float] and returns the greater
@@ -385,7 +385,7 @@ _mm_max_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_max_ps(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_maxps((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_maxps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Performs a bitwise AND of two 128-bit vectors of [4 x float].
@@ -403,7 +403,7 @@ _mm_max_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_and_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)((__v4su)__a & (__v4su)__b);
+    return (__m128)((__v4su)__a & (__v4su)__b);
 }
 
 /// Performs a bitwise AND of two 128-bit vectors of [4 x float], using
@@ -425,7 +425,7 @@ _mm_and_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_andnot_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)(~(__v4su)__a & (__v4su)__b);
+    return (__m128)(~(__v4su)__a & (__v4su)__b);
 }
 
 /// Performs a bitwise OR of two 128-bit vectors of [4 x float].
@@ -443,7 +443,7 @@ _mm_andnot_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_or_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)((__v4su)__a | (__v4su)__b);
+    return (__m128)((__v4su)__a | (__v4su)__b);
 }
 
 /// Performs a bitwise exclusive OR of two 128-bit vectors of
@@ -462,7 +462,7 @@ _mm_or_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_xor_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)((__v4su)__a ^ (__v4su)__b);
+    return (__m128)((__v4su)__a ^ (__v4su)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -484,7 +484,7 @@ _mm_xor_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpeq_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpeqss((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpeqss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -502,7 +502,7 @@ _mm_cmpeq_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpeq_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpeqps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpeqps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -525,7 +525,7 @@ _mm_cmpeq_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmplt_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpltss((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpltss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -544,7 +544,7 @@ _mm_cmplt_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmplt_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpltps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpltps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -568,7 +568,7 @@ _mm_cmplt_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmple_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpless((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpless((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -587,7 +587,7 @@ _mm_cmple_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmple_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpleps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpleps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -610,9 +610,9 @@ _mm_cmple_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpgt_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_shufflevector((__v4sf)__a,
-                                         (__v4sf)__builtin_ia32_cmpltss((__v4sf)__b, (__v4sf)__a),
-                                         4, 1, 2, 3);
+    return (__m128)__builtin_shufflevector((__v4sf)__a,
+                                           (__v4sf)__builtin_ia32_cmpltss((__v4sf)__b, (__v4sf)__a),
+                                           4, 1, 2, 3);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -631,7 +631,7 @@ _mm_cmpgt_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpgt_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpltps((__v4sf)__b, (__v4sf)__a);
+    return (__m128)__builtin_ia32_cmpltps((__v4sf)__b, (__v4sf)__a);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -655,9 +655,9 @@ _mm_cmpgt_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpge_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_shufflevector((__v4sf)__a,
-                                         (__v4sf)__builtin_ia32_cmpless((__v4sf)__b, (__v4sf)__a),
-                                         4, 1, 2, 3);
+    return (__m128)__builtin_shufflevector((__v4sf)__a,
+                                           (__v4sf)__builtin_ia32_cmpless((__v4sf)__b, (__v4sf)__a),
+                                           4, 1, 2, 3);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -676,7 +676,7 @@ _mm_cmpge_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpge_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpleps((__v4sf)__b, (__v4sf)__a);
+    return (__m128)__builtin_ia32_cmpleps((__v4sf)__b, (__v4sf)__a);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -699,7 +699,7 @@ _mm_cmpge_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpneq_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpneqss((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpneqss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -718,7 +718,7 @@ _mm_cmpneq_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpneq_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpneqps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpneqps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -742,7 +742,7 @@ _mm_cmpneq_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpnlt_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpnltss((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpnltss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -762,7 +762,7 @@ _mm_cmpnlt_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpnlt_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpnltps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpnltps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -787,7 +787,7 @@ _mm_cmpnlt_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpnle_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpnless((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpnless((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -807,7 +807,7 @@ _mm_cmpnle_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpnle_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpnleps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpnleps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -832,9 +832,9 @@ _mm_cmpnle_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpngt_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_shufflevector((__v4sf)__a,
-                                         (__v4sf)__builtin_ia32_cmpnltss((__v4sf)__b, (__v4sf)__a),
-                                         4, 1, 2, 3);
+    return (__m128)__builtin_shufflevector((__v4sf)__a,
+                                           (__v4sf)__builtin_ia32_cmpnltss((__v4sf)__b, (__v4sf)__a),
+                                           4, 1, 2, 3);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -854,7 +854,7 @@ _mm_cmpngt_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpngt_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpnltps((__v4sf)__b, (__v4sf)__a);
+    return (__m128)__builtin_ia32_cmpnltps((__v4sf)__b, (__v4sf)__a);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -879,9 +879,9 @@ _mm_cmpngt_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpnge_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_shufflevector((__v4sf)__a,
-                                         (__v4sf)__builtin_ia32_cmpnless((__v4sf)__b, (__v4sf)__a),
-                                         4, 1, 2, 3);
+    return (__m128)__builtin_shufflevector((__v4sf)__a,
+                                           (__v4sf)__builtin_ia32_cmpnless((__v4sf)__b, (__v4sf)__a),
+                                           4, 1, 2, 3);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -901,7 +901,7 @@ _mm_cmpnge_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpnge_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpnleps((__v4sf)__b, (__v4sf)__a);
+    return (__m128)__builtin_ia32_cmpnleps((__v4sf)__b, (__v4sf)__a);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -926,7 +926,7 @@ _mm_cmpnge_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpord_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpordss((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpordss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -946,7 +946,7 @@ _mm_cmpord_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpord_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpordps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpordps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -971,7 +971,7 @@ _mm_cmpord_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpunord_ss(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpunordss((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpunordss((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares each of the corresponding 32-bit float values of the
@@ -991,7 +991,7 @@ _mm_cmpunord_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cmpunord_ps(__m128 __a, __m128 __b)
 {
-  return (__m128)__builtin_ia32_cmpunordps((__v4sf)__a, (__v4sf)__b);
+    return (__m128)__builtin_ia32_cmpunordps((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -1015,7 +1015,7 @@ _mm_cmpunord_ps(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_comieq_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_comieq((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_comieq((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -1040,7 +1040,7 @@ _mm_comieq_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_comilt_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_comilt((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_comilt((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -1064,7 +1064,7 @@ _mm_comilt_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_comile_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_comile((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_comile((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -1088,7 +1088,7 @@ _mm_comile_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_comigt_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_comigt((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_comigt((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -1112,7 +1112,7 @@ _mm_comigt_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_comige_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_comige((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_comige((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Compares two 32-bit float values in the low-order bits of both
@@ -1136,7 +1136,7 @@ _mm_comige_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_comineq_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_comineq((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_comineq((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Performs an unordered comparison of two 32-bit float values using
@@ -1160,7 +1160,7 @@ _mm_comineq_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_ucomieq_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_ucomieq((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_ucomieq((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Performs an unordered comparison of two 32-bit float values using
@@ -1184,7 +1184,7 @@ _mm_ucomieq_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_ucomilt_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_ucomilt((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_ucomilt((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Performs an unordered comparison of two 32-bit float values using
@@ -1209,7 +1209,7 @@ _mm_ucomilt_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_ucomile_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_ucomile((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_ucomile((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Performs an unordered comparison of two 32-bit float values using
@@ -1234,7 +1234,7 @@ _mm_ucomile_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_ucomigt_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_ucomigt((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_ucomigt((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Performs an unordered comparison of two 32-bit float values using
@@ -1259,7 +1259,7 @@ _mm_ucomigt_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_ucomige_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_ucomige((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_ucomige((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Performs an unordered comparison of two 32-bit float values using
@@ -1283,7 +1283,7 @@ _mm_ucomige_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_ucomineq_ss(__m128 __a, __m128 __b)
 {
-  return __builtin_ia32_ucomineq((__v4sf)__a, (__v4sf)__b);
+    return __builtin_ia32_ucomineq((__v4sf)__a, (__v4sf)__b);
 }
 
 /// Converts a float value contained in the lower 32 bits of a vector of
@@ -1301,7 +1301,7 @@ _mm_ucomineq_ss(__m128 __a, __m128 __b)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_cvtss_si32(__m128 __a)
 {
-  return __builtin_ia32_cvtss2si((__v4sf)__a);
+    return __builtin_ia32_cvtss2si((__v4sf)__a);
 }
 
 /// Converts a float value contained in the lower 32 bits of a vector of
@@ -1319,7 +1319,7 @@ _mm_cvtss_si32(__m128 __a)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_cvt_ss2si(__m128 __a)
 {
-  return _mm_cvtss_si32(__a);
+    return _mm_cvtss_si32(__a);
 }
 
 #ifdef __x86_64__
@@ -1339,7 +1339,7 @@ _mm_cvt_ss2si(__m128 __a)
 static __inline__ long long __DEFAULT_FN_ATTRS
 _mm_cvtss_si64(__m128 __a)
 {
-  return __builtin_ia32_cvtss2si64((__v4sf)__a);
+    return __builtin_ia32_cvtss2si64((__v4sf)__a);
 }
 
 #endif
@@ -1357,7 +1357,7 @@ _mm_cvtss_si64(__m128 __a)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtps_pi32(__m128 __a)
 {
-  return (__m64)__builtin_ia32_cvtps2pi((__v4sf)__a);
+    return (__m64)__builtin_ia32_cvtps2pi((__v4sf)__a);
 }
 
 /// Converts two low-order float values in a 128-bit vector of
@@ -1373,7 +1373,7 @@ _mm_cvtps_pi32(__m128 __a)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_cvt_ps2pi(__m128 __a)
 {
-  return _mm_cvtps_pi32(__a);
+    return _mm_cvtps_pi32(__a);
 }
 
 /// Converts a float value contained in the lower 32 bits of a vector of
@@ -1392,7 +1392,7 @@ _mm_cvt_ps2pi(__m128 __a)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_cvttss_si32(__m128 __a)
 {
-  return __builtin_ia32_cvttss2si((__v4sf)__a);
+    return __builtin_ia32_cvttss2si((__v4sf)__a);
 }
 
 /// Converts a float value contained in the lower 32 bits of a vector of
@@ -1411,7 +1411,7 @@ _mm_cvttss_si32(__m128 __a)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_cvtt_ss2si(__m128 __a)
 {
-  return _mm_cvttss_si32(__a);
+    return _mm_cvttss_si32(__a);
 }
 
 #ifdef __x86_64__
@@ -1431,7 +1431,7 @@ _mm_cvtt_ss2si(__m128 __a)
 static __inline__ long long __DEFAULT_FN_ATTRS
 _mm_cvttss_si64(__m128 __a)
 {
-  return __builtin_ia32_cvttss2si64((__v4sf)__a);
+    return __builtin_ia32_cvttss2si64((__v4sf)__a);
 }
 #endif
 
@@ -1450,7 +1450,7 @@ _mm_cvttss_si64(__m128 __a)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_cvttps_pi32(__m128 __a)
 {
-  return (__m64)__builtin_ia32_cvttps2pi((__v4sf)__a);
+    return (__m64)__builtin_ia32_cvttps2pi((__v4sf)__a);
 }
 
 /// Converts two low-order float values in a 128-bit vector of [4 x
@@ -1467,7 +1467,7 @@ _mm_cvttps_pi32(__m128 __a)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtt_ps2pi(__m128 __a)
 {
-  return _mm_cvttps_pi32(__a);
+    return _mm_cvttps_pi32(__a);
 }
 
 /// Converts a 32-bit signed integer value into a floating point value
@@ -1489,8 +1489,8 @@ _mm_cvtt_ps2pi(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cvtsi32_ss(__m128 __a, int __b)
 {
-  __a[0] = __b;
-  return __a;
+    __a[0] = __b;
+    return __a;
 }
 
 /// Converts a 32-bit signed integer value into a floating point value
@@ -1512,7 +1512,7 @@ _mm_cvtsi32_ss(__m128 __a, int __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cvt_si2ss(__m128 __a, int __b)
 {
-  return _mm_cvtsi32_ss(__a, __b);
+    return _mm_cvtsi32_ss(__a, __b);
 }
 
 #ifdef __x86_64__
@@ -1536,8 +1536,8 @@ _mm_cvt_si2ss(__m128 __a, int __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_cvtsi64_ss(__m128 __a, long long __b)
 {
-  __a[0] = __b;
-  return __a;
+    __a[0] = __b;
+    return __a;
 }
 
 #endif
@@ -1562,7 +1562,7 @@ _mm_cvtsi64_ss(__m128 __a, long long __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtpi32_ps(__m128 __a, __m64 __b)
 {
-  return __builtin_ia32_cvtpi2ps((__v4sf)__a, (__v2si)__b);
+    return __builtin_ia32_cvtpi2ps((__v4sf)__a, (__v2si)__b);
 }
 
 /// Converts two elements of a 64-bit vector of [2 x i32] into two
@@ -1585,7 +1585,7 @@ _mm_cvtpi32_ps(__m128 __a, __m64 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS_MMX
 _mm_cvt_pi2ps(__m128 __a, __m64 __b)
 {
-  return _mm_cvtpi32_ps(__a, __b);
+    return _mm_cvtpi32_ps(__a, __b);
 }
 
 /// Extracts a float value contained in the lower 32 bits of a vector of
@@ -1602,7 +1602,7 @@ _mm_cvt_pi2ps(__m128 __a, __m64 __b)
 static __inline__ float __DEFAULT_FN_ATTRS
 _mm_cvtss_f32(__m128 __a)
 {
-  return __a[0];
+    return __a[0];
 }
 
 /// Loads two packed float values from the address \a __p into the
@@ -1623,13 +1623,13 @@ _mm_cvtss_f32(__m128 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_loadh_pi(__m128 __a, const __m64 *__p)
 {
-  typedef float __mm_loadh_pi_v2f32 __attribute__((__vector_size__(8)));
-  struct __mm_loadh_pi_struct {
-    __mm_loadh_pi_v2f32 __u;
-  } __attribute__((__packed__, __may_alias__));
-  __mm_loadh_pi_v2f32 __b = ((const struct __mm_loadh_pi_struct*)__p)->__u;
-  __m128 __bb = __builtin_shufflevector(__b, __b, 0, 1, 0, 1);
-  return __builtin_shufflevector(__a, __bb, 0, 1, 4, 5);
+    typedef float __mm_loadh_pi_v2f32 __attribute__((__vector_size__(8)));
+    struct __mm_loadh_pi_struct {
+        __mm_loadh_pi_v2f32 __u;
+    } __attribute__((__packed__, __may_alias__));
+    __mm_loadh_pi_v2f32 __b = ((const struct __mm_loadh_pi_struct*)__p)->__u;
+    __m128 __bb = __builtin_shufflevector(__b, __b, 0, 1, 0, 1);
+    return __builtin_shufflevector(__a, __bb, 0, 1, 4, 5);
 }
 
 /// Loads two packed float values from the address \a __p into the
@@ -1650,13 +1650,13 @@ _mm_loadh_pi(__m128 __a, const __m64 *__p)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_loadl_pi(__m128 __a, const __m64 *__p)
 {
-  typedef float __mm_loadl_pi_v2f32 __attribute__((__vector_size__(8)));
-  struct __mm_loadl_pi_struct {
-    __mm_loadl_pi_v2f32 __u;
-  } __attribute__((__packed__, __may_alias__));
-  __mm_loadl_pi_v2f32 __b = ((const struct __mm_loadl_pi_struct*)__p)->__u;
-  __m128 __bb = __builtin_shufflevector(__b, __b, 0, 1, 0, 1);
-  return __builtin_shufflevector(__a, __bb, 4, 5, 2, 3);
+    typedef float __mm_loadl_pi_v2f32 __attribute__((__vector_size__(8)));
+    struct __mm_loadl_pi_struct {
+        __mm_loadl_pi_v2f32 __u;
+    } __attribute__((__packed__, __may_alias__));
+    __mm_loadl_pi_v2f32 __b = ((const struct __mm_loadl_pi_struct*)__p)->__u;
+    __m128 __bb = __builtin_shufflevector(__b, __b, 0, 1, 0, 1);
+    return __builtin_shufflevector(__a, __bb, 4, 5, 2, 3);
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float]. The lower
@@ -1677,11 +1677,13 @@ _mm_loadl_pi(__m128 __a, const __m64 *__p)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_load_ss(const float *__p)
 {
-  struct __mm_load_ss_struct {
-    float __u;
-  } __attribute__((__packed__, __may_alias__));
-  float __u = ((const struct __mm_load_ss_struct*)__p)->__u;
-  return __extension__ (__m128){ __u, 0, 0, 0 };
+    struct __mm_load_ss_struct {
+        float __u;
+    } __attribute__((__packed__, __may_alias__));
+    float __u = ((const struct __mm_load_ss_struct*)__p)->__u;
+    return __extension__ (__m128) {
+        __u, 0, 0, 0
+    };
 }
 
 /// Loads a 32-bit float value and duplicates it to all four vector
@@ -1699,11 +1701,13 @@ _mm_load_ss(const float *__p)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_load1_ps(const float *__p)
 {
-  struct __mm_load1_ps_struct {
-    float __u;
-  } __attribute__((__packed__, __may_alias__));
-  float __u = ((const struct __mm_load1_ps_struct*)__p)->__u;
-  return __extension__ (__m128){ __u, __u, __u, __u };
+    struct __mm_load1_ps_struct {
+        float __u;
+    } __attribute__((__packed__, __may_alias__));
+    float __u = ((const struct __mm_load1_ps_struct*)__p)->__u;
+    return __extension__ (__m128) {
+        __u, __u, __u, __u
+    };
 }
 
 #define        _mm_load_ps1(p) _mm_load1_ps(p)
@@ -1722,7 +1726,7 @@ _mm_load1_ps(const float *__p)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_load_ps(const float *__p)
 {
-  return *(const __m128*)__p;
+    return *(const __m128*)__p;
 }
 
 /// Loads a 128-bit floating-point vector of [4 x float] from an
@@ -1739,10 +1743,10 @@ _mm_load_ps(const float *__p)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_loadu_ps(const float *__p)
 {
-  struct __loadu_ps {
-    __m128_u __v;
-  } __attribute__((__packed__, __may_alias__));
-  return ((const struct __loadu_ps*)__p)->__v;
+    struct __loadu_ps {
+        __m128_u __v;
+    } __attribute__((__packed__, __may_alias__));
+    return ((const struct __loadu_ps*)__p)->__v;
 }
 
 /// Loads four packed float values, in reverse order, from an aligned
@@ -1761,8 +1765,8 @@ _mm_loadu_ps(const float *__p)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_loadr_ps(const float *__p)
 {
-  __m128 __a = _mm_load_ps(__p);
-  return __builtin_shufflevector((__v4sf)__a, (__v4sf)__a, 3, 2, 1, 0);
+    __m128 __a = _mm_load_ps(__p);
+    return __builtin_shufflevector((__v4sf)__a, (__v4sf)__a, 3, 2, 1, 0);
 }
 
 /// Create a 128-bit vector of [4 x float] with undefined values.
@@ -1775,7 +1779,7 @@ _mm_loadr_ps(const float *__p)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_undefined_ps(void)
 {
-  return (__m128)__builtin_ia32_undef128();
+    return (__m128)__builtin_ia32_undef128();
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float]. The lower
@@ -1795,7 +1799,9 @@ _mm_undefined_ps(void)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_set_ss(float __w)
 {
-  return __extension__ (__m128){ __w, 0, 0, 0 };
+    return __extension__ (__m128) {
+        __w, 0, 0, 0
+    };
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float], with each
@@ -1813,7 +1819,9 @@ _mm_set_ss(float __w)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_set1_ps(float __w)
 {
-  return __extension__ (__m128){ __w, __w, __w, __w };
+    return __extension__ (__m128) {
+        __w, __w, __w, __w
+    };
 }
 
 /* Microsoft specific. */
@@ -1859,7 +1867,9 @@ _mm_set_ps1(float __w)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_set_ps(float __z, float __y, float __x, float __w)
 {
-  return __extension__ (__m128){ __w, __x, __y, __z };
+    return __extension__ (__m128) {
+        __w, __x, __y, __z
+    };
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float],
@@ -1887,7 +1897,9 @@ _mm_set_ps(float __z, float __y, float __x, float __w)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_setr_ps(float __z, float __y, float __x, float __w)
 {
-  return __extension__ (__m128){ __z, __y, __x, __w };
+    return __extension__ (__m128) {
+        __z, __y, __x, __w
+    };
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float] initialized
@@ -1902,7 +1914,9 @@ _mm_setr_ps(float __z, float __y, float __x, float __w)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_setzero_ps(void)
 {
-  return __extension__ (__m128){ 0, 0, 0, 0 };
+    return __extension__ (__m128) {
+        0, 0, 0, 0
+    };
 }
 
 /// Stores the upper 64 bits of a 128-bit vector of [4 x float] to a
@@ -1919,11 +1933,11 @@ _mm_setzero_ps(void)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_storeh_pi(__m64 *__p, __m128 __a)
 {
-  typedef float __mm_storeh_pi_v2f32 __attribute__((__vector_size__(8)));
-  struct __mm_storeh_pi_struct {
-    __mm_storeh_pi_v2f32 __u;
-  } __attribute__((__packed__, __may_alias__));
-  ((struct __mm_storeh_pi_struct*)__p)->__u = __builtin_shufflevector(__a, __a, 2, 3);
+    typedef float __mm_storeh_pi_v2f32 __attribute__((__vector_size__(8)));
+    struct __mm_storeh_pi_struct {
+        __mm_storeh_pi_v2f32 __u;
+    } __attribute__((__packed__, __may_alias__));
+    ((struct __mm_storeh_pi_struct*)__p)->__u = __builtin_shufflevector(__a, __a, 2, 3);
 }
 
 /// Stores the lower 64 bits of a 128-bit vector of [4 x float] to a
@@ -1940,11 +1954,11 @@ _mm_storeh_pi(__m64 *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_storel_pi(__m64 *__p, __m128 __a)
 {
-  typedef float __mm_storeh_pi_v2f32 __attribute__((__vector_size__(8)));
-  struct __mm_storeh_pi_struct {
-    __mm_storeh_pi_v2f32 __u;
-  } __attribute__((__packed__, __may_alias__));
-  ((struct __mm_storeh_pi_struct*)__p)->__u = __builtin_shufflevector(__a, __a, 0, 1);
+    typedef float __mm_storeh_pi_v2f32 __attribute__((__vector_size__(8)));
+    struct __mm_storeh_pi_struct {
+        __mm_storeh_pi_v2f32 __u;
+    } __attribute__((__packed__, __may_alias__));
+    ((struct __mm_storeh_pi_struct*)__p)->__u = __builtin_shufflevector(__a, __a, 0, 1);
 }
 
 /// Stores the lower 32 bits of a 128-bit vector of [4 x float] to a
@@ -1961,10 +1975,10 @@ _mm_storel_pi(__m64 *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_store_ss(float *__p, __m128 __a)
 {
-  struct __mm_store_ss_struct {
-    float __u;
-  } __attribute__((__packed__, __may_alias__));
-  ((struct __mm_store_ss_struct*)__p)->__u = __a[0];
+    struct __mm_store_ss_struct {
+        float __u;
+    } __attribute__((__packed__, __may_alias__));
+    ((struct __mm_store_ss_struct*)__p)->__u = __a[0];
 }
 
 /// Stores a 128-bit vector of [4 x float] to an unaligned memory
@@ -1982,10 +1996,10 @@ _mm_store_ss(float *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_storeu_ps(float *__p, __m128 __a)
 {
-  struct __storeu_ps {
-    __m128_u __v;
-  } __attribute__((__packed__, __may_alias__));
-  ((struct __storeu_ps*)__p)->__v = __a;
+    struct __storeu_ps {
+        __m128_u __v;
+    } __attribute__((__packed__, __may_alias__));
+    ((struct __storeu_ps*)__p)->__v = __a;
 }
 
 /// Stores a 128-bit vector of [4 x float] into an aligned memory
@@ -2003,7 +2017,7 @@ _mm_storeu_ps(float *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_store_ps(float *__p, __m128 __a)
 {
-  *(__m128*)__p = __a;
+    *(__m128*)__p = __a;
 }
 
 /// Stores the lower 32 bits of a 128-bit vector of [4 x float] into
@@ -2022,8 +2036,8 @@ _mm_store_ps(float *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_store1_ps(float *__p, __m128 __a)
 {
-  __a = __builtin_shufflevector((__v4sf)__a, (__v4sf)__a, 0, 0, 0, 0);
-  _mm_store_ps(__p, __a);
+    __a = __builtin_shufflevector((__v4sf)__a, (__v4sf)__a, 0, 0, 0, 0);
+    _mm_store_ps(__p, __a);
 }
 
 /// Stores the lower 32 bits of a 128-bit vector of [4 x float] into
@@ -2042,7 +2056,7 @@ _mm_store1_ps(float *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_store_ps1(float *__p, __m128 __a)
 {
-  _mm_store1_ps(__p, __a);
+    _mm_store1_ps(__p, __a);
 }
 
 /// Stores float values from a 128-bit vector of [4 x float] to an
@@ -2061,8 +2075,8 @@ _mm_store_ps1(float *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_storer_ps(float *__p, __m128 __a)
 {
-  __a = __builtin_shufflevector((__v4sf)__a, (__v4sf)__a, 3, 2, 1, 0);
-  _mm_store_ps(__p, __a);
+    __a = __builtin_shufflevector((__v4sf)__a, (__v4sf)__a, 3, 2, 1, 0);
+    _mm_store_ps(__p, __a);
 }
 
 #define _MM_HINT_ET0 7
@@ -2119,7 +2133,7 @@ _mm_storer_ps(float *__p, __m128 __a)
 static __inline__ void __DEFAULT_FN_ATTRS_MMX
 _mm_stream_pi(__m64 *__p, __m64 __a)
 {
-  __builtin_ia32_movntq(__p, __a);
+    __builtin_ia32_movntq(__p, __a);
 }
 
 /// Moves packed float values from a 128-bit vector of [4 x float] to a
@@ -2138,7 +2152,7 @@ _mm_stream_pi(__m64 *__p, __m64 __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_stream_ps(float *__p, __m128 __a)
 {
-  __builtin_nontemporal_store((__v4sf)__a, (__v4sf*)__p);
+    __builtin_nontemporal_store((__v4sf)__a, (__v4sf*)__p);
 }
 
 #if defined(__cplusplus)
@@ -2230,7 +2244,7 @@ void _mm_sfence(void);
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_max_pi16(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_pmaxsw((__v4hi)__a, (__v4hi)__b);
+    return (__m64)__builtin_ia32_pmaxsw((__v4hi)__a, (__v4hi)__b);
 }
 
 /// Compares each of the corresponding packed 8-bit unsigned integer
@@ -2249,7 +2263,7 @@ _mm_max_pi16(__m64 __a, __m64 __b)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_max_pu8(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_pmaxub((__v8qi)__a, (__v8qi)__b);
+    return (__m64)__builtin_ia32_pmaxub((__v8qi)__a, (__v8qi)__b);
 }
 
 /// Compares each of the corresponding packed 16-bit integer values of
@@ -2268,7 +2282,7 @@ _mm_max_pu8(__m64 __a, __m64 __b)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_min_pi16(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_pminsw((__v4hi)__a, (__v4hi)__b);
+    return (__m64)__builtin_ia32_pminsw((__v4hi)__a, (__v4hi)__b);
 }
 
 /// Compares each of the corresponding packed 8-bit unsigned integer
@@ -2287,7 +2301,7 @@ _mm_min_pi16(__m64 __a, __m64 __b)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_min_pu8(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_pminub((__v8qi)__a, (__v8qi)__b);
+    return (__m64)__builtin_ia32_pminub((__v8qi)__a, (__v8qi)__b);
 }
 
 /// Takes the most significant bit from each 8-bit element in a 64-bit
@@ -2305,7 +2319,7 @@ _mm_min_pu8(__m64 __a, __m64 __b)
 static __inline__ int __DEFAULT_FN_ATTRS_MMX
 _mm_movemask_pi8(__m64 __a)
 {
-  return __builtin_ia32_pmovmskb((__v8qi)__a);
+    return __builtin_ia32_pmovmskb((__v8qi)__a);
 }
 
 /// Multiplies packed 16-bit unsigned integer values and writes the
@@ -2324,7 +2338,7 @@ _mm_movemask_pi8(__m64 __a)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_mulhi_pu16(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_pmulhuw((__v4hi)__a, (__v4hi)__b);
+    return (__m64)__builtin_ia32_pmulhuw((__v4hi)__a, (__v4hi)__b);
 }
 
 /// Shuffles the 4 16-bit integers from a 64-bit integer vector to the
@@ -2387,7 +2401,7 @@ _mm_mulhi_pu16(__m64 __a, __m64 __b)
 static __inline__ void __DEFAULT_FN_ATTRS_MMX
 _mm_maskmove_si64(__m64 __d, __m64 __n, char *__p)
 {
-  __builtin_ia32_maskmovq((__v8qi)__d, (__v8qi)__n, __p);
+    __builtin_ia32_maskmovq((__v8qi)__d, (__v8qi)__n, __p);
 }
 
 /// Computes the rounded averages of the packed unsigned 8-bit integer
@@ -2406,7 +2420,7 @@ _mm_maskmove_si64(__m64 __d, __m64 __n, char *__p)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_avg_pu8(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_pavgb((__v8qi)__a, (__v8qi)__b);
+    return (__m64)__builtin_ia32_pavgb((__v8qi)__a, (__v8qi)__b);
 }
 
 /// Computes the rounded averages of the packed unsigned 16-bit integer
@@ -2425,7 +2439,7 @@ _mm_avg_pu8(__m64 __a, __m64 __b)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_avg_pu16(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_pavgw((__v4hi)__a, (__v4hi)__b);
+    return (__m64)__builtin_ia32_pavgw((__v4hi)__a, (__v4hi)__b);
 }
 
 /// Subtracts the corresponding 8-bit unsigned integer values of the two
@@ -2447,7 +2461,7 @@ _mm_avg_pu16(__m64 __a, __m64 __b)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_sad_pu8(__m64 __a, __m64 __b)
 {
-  return (__m64)__builtin_ia32_psadbw((__v8qi)__a, (__v8qi)__b);
+    return (__m64)__builtin_ia32_psadbw((__v8qi)__a, (__v8qi)__b);
 }
 
 #if defined(__cplusplus)
@@ -2623,7 +2637,7 @@ void _mm_setcsr(unsigned int __i);
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_unpackhi_ps(__m128 __a, __m128 __b)
 {
-  return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 2, 6, 3, 7);
+    return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 2, 6, 3, 7);
 }
 
 /// Unpacks the low-order (index 0,1) values from two 128-bit vectors of
@@ -2645,7 +2659,7 @@ _mm_unpackhi_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_unpacklo_ps(__m128 __a, __m128 __b)
 {
-  return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 0, 4, 1, 5);
+    return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 0, 4, 1, 5);
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float]. The lower
@@ -2667,8 +2681,8 @@ _mm_unpacklo_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_move_ss(__m128 __a, __m128 __b)
 {
-  __a[0] = __b[0];
-  return __a;
+    __a[0] = __b[0];
+    return __a;
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float]. The lower
@@ -2689,7 +2703,7 @@ _mm_move_ss(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_movehl_ps(__m128 __a, __m128 __b)
 {
-  return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 6, 7, 2, 3);
+    return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 6, 7, 2, 3);
 }
 
 /// Constructs a 128-bit floating-point vector of [4 x float]. The lower
@@ -2710,7 +2724,7 @@ _mm_movehl_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_movelh_ps(__m128 __a, __m128 __b)
 {
-  return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 0, 1, 4, 5);
+    return __builtin_shufflevector((__v4sf)__a, (__v4sf)__b, 0, 1, 4, 5);
 }
 
 /// Converts a 64-bit vector of [4 x i16] into a 128-bit vector of [4 x
@@ -2728,19 +2742,19 @@ _mm_movelh_ps(__m128 __a, __m128 __b)
 static __inline__ __m128 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtpi16_ps(__m64 __a)
 {
-  __m64 __b, __c;
-  __m128 __r;
+    __m64 __b, __c;
+    __m128 __r;
 
-  __b = _mm_setzero_si64();
-  __b = _mm_cmpgt_pi16(__b, __a);
-  __c = _mm_unpackhi_pi16(__a, __b);
-  __r = _mm_setzero_ps();
-  __r = _mm_cvtpi32_ps(__r, __c);
-  __r = _mm_movelh_ps(__r, __r);
-  __c = _mm_unpacklo_pi16(__a, __b);
-  __r = _mm_cvtpi32_ps(__r, __c);
+    __b = _mm_setzero_si64();
+    __b = _mm_cmpgt_pi16(__b, __a);
+    __c = _mm_unpackhi_pi16(__a, __b);
+    __r = _mm_setzero_ps();
+    __r = _mm_cvtpi32_ps(__r, __c);
+    __r = _mm_movelh_ps(__r, __r);
+    __c = _mm_unpacklo_pi16(__a, __b);
+    __r = _mm_cvtpi32_ps(__r, __c);
 
-  return __r;
+    return __r;
 }
 
 /// Converts a 64-bit vector of 16-bit unsigned integer values into a
@@ -2758,18 +2772,18 @@ _mm_cvtpi16_ps(__m64 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtpu16_ps(__m64 __a)
 {
-  __m64 __b, __c;
-  __m128 __r;
+    __m64 __b, __c;
+    __m128 __r;
 
-  __b = _mm_setzero_si64();
-  __c = _mm_unpackhi_pi16(__a, __b);
-  __r = _mm_setzero_ps();
-  __r = _mm_cvtpi32_ps(__r, __c);
-  __r = _mm_movelh_ps(__r, __r);
-  __c = _mm_unpacklo_pi16(__a, __b);
-  __r = _mm_cvtpi32_ps(__r, __c);
+    __b = _mm_setzero_si64();
+    __c = _mm_unpackhi_pi16(__a, __b);
+    __r = _mm_setzero_ps();
+    __r = _mm_cvtpi32_ps(__r, __c);
+    __r = _mm_movelh_ps(__r, __r);
+    __c = _mm_unpacklo_pi16(__a, __b);
+    __r = _mm_cvtpi32_ps(__r, __c);
 
-  return __r;
+    return __r;
 }
 
 /// Converts the lower four 8-bit values from a 64-bit vector of [8 x i8]
@@ -2787,13 +2801,13 @@ _mm_cvtpu16_ps(__m64 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtpi8_ps(__m64 __a)
 {
-  __m64 __b;
+    __m64 __b;
 
-  __b = _mm_setzero_si64();
-  __b = _mm_cmpgt_pi8(__b, __a);
-  __b = _mm_unpacklo_pi8(__a, __b);
+    __b = _mm_setzero_si64();
+    __b = _mm_cmpgt_pi8(__b, __a);
+    __b = _mm_unpacklo_pi8(__a, __b);
 
-  return _mm_cvtpi16_ps(__b);
+    return _mm_cvtpi16_ps(__b);
 }
 
 /// Converts the lower four unsigned 8-bit integer values from a 64-bit
@@ -2812,12 +2826,12 @@ _mm_cvtpi8_ps(__m64 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtpu8_ps(__m64 __a)
 {
-  __m64 __b;
+    __m64 __b;
 
-  __b = _mm_setzero_si64();
-  __b = _mm_unpacklo_pi8(__a, __b);
+    __b = _mm_setzero_si64();
+    __b = _mm_unpacklo_pi8(__a, __b);
 
-  return _mm_cvtpi16_ps(__b);
+    return _mm_cvtpi16_ps(__b);
 }
 
 /// Converts the two 32-bit signed integer values from each 64-bit vector
@@ -2839,13 +2853,13 @@ _mm_cvtpu8_ps(__m64 __a)
 static __inline__ __m128 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtpi32x2_ps(__m64 __a, __m64 __b)
 {
-  __m128 __c;
+    __m128 __c;
 
-  __c = _mm_setzero_ps();
-  __c = _mm_cvtpi32_ps(__c, __b);
-  __c = _mm_movelh_ps(__c, __c);
+    __c = _mm_setzero_ps();
+    __c = _mm_cvtpi32_ps(__c, __b);
+    __c = _mm_movelh_ps(__c, __c);
 
-  return _mm_cvtpi32_ps(__c, __a);
+    return _mm_cvtpi32_ps(__c, __a);
 }
 
 /// Converts each single-precision floating-point element of a 128-bit
@@ -2868,13 +2882,13 @@ _mm_cvtpi32x2_ps(__m64 __a, __m64 __b)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtps_pi16(__m128 __a)
 {
-  __m64 __b, __c;
+    __m64 __b, __c;
 
-  __b = _mm_cvtps_pi32(__a);
-  __a = _mm_movehl_ps(__a, __a);
-  __c = _mm_cvtps_pi32(__a);
+    __b = _mm_cvtps_pi32(__a);
+    __a = _mm_movehl_ps(__a, __a);
+    __c = _mm_cvtps_pi32(__a);
 
-  return _mm_packs_pi32(__b, __c);
+    return _mm_packs_pi32(__b, __c);
 }
 
 /// Converts each single-precision floating-point element of a 128-bit
@@ -2898,12 +2912,12 @@ _mm_cvtps_pi16(__m128 __a)
 static __inline__ __m64 __DEFAULT_FN_ATTRS_MMX
 _mm_cvtps_pi8(__m128 __a)
 {
-  __m64 __b, __c;
+    __m64 __b, __c;
 
-  __b = _mm_cvtps_pi16(__a);
-  __c = _mm_setzero_si64();
+    __b = _mm_cvtps_pi16(__a);
+    __c = _mm_setzero_si64();
 
-  return _mm_packs_pi16(__b, __c);
+    return _mm_packs_pi16(__b, __c);
 }
 
 /// Extracts the sign bits from each single-precision floating-point
@@ -2923,7 +2937,7 @@ _mm_cvtps_pi8(__m128 __a)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_movemask_ps(__m128 __a)
 {
-  return __builtin_ia32_movmskps((__v4sf)__a);
+    return __builtin_ia32_movmskps((__v4sf)__a);
 }
 
 

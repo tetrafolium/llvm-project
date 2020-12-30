@@ -28,7 +28,7 @@ using namespace llvm::COFF;
 namespace {
 
 enum {
-  OPT_INVALID = 0,
+    OPT_INVALID = 0,
 #define OPTION(_1, _2, ID, _4, _5, _6, _7, _8, _9, _10, _11, _12) OPT_##ID,
 #include "Options.inc"
 #undef OPTION
@@ -48,137 +48,137 @@ static const llvm::opt::OptTable::Info InfoTable[] = {
 
 class DllOptTable : public llvm::opt::OptTable {
 public:
-  DllOptTable() : OptTable(InfoTable, false) {}
+    DllOptTable() : OptTable(InfoTable, false) {}
 };
 
 } // namespace
 
 // Opens a file. Path has to be resolved already.
 static std::unique_ptr<MemoryBuffer> openFile(const Twine &Path) {
-  ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> MB = MemoryBuffer::getFile(Path);
+    ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> MB = MemoryBuffer::getFile(Path);
 
-  if (std::error_code EC = MB.getError()) {
-    llvm::errs() << "cannot open file " << Path << ": " << EC.message() << "\n";
-    return nullptr;
-  }
+    if (std::error_code EC = MB.getError()) {
+        llvm::errs() << "cannot open file " << Path << ": " << EC.message() << "\n";
+        return nullptr;
+    }
 
-  return std::move(*MB);
+    return std::move(*MB);
 }
 
 static MachineTypes getEmulation(StringRef S) {
-  return StringSwitch<MachineTypes>(S)
-      .Case("i386", IMAGE_FILE_MACHINE_I386)
-      .Case("i386:x86-64", IMAGE_FILE_MACHINE_AMD64)
-      .Case("arm", IMAGE_FILE_MACHINE_ARMNT)
-      .Case("arm64", IMAGE_FILE_MACHINE_ARM64)
-      .Default(IMAGE_FILE_MACHINE_UNKNOWN);
+    return StringSwitch<MachineTypes>(S)
+           .Case("i386", IMAGE_FILE_MACHINE_I386)
+           .Case("i386:x86-64", IMAGE_FILE_MACHINE_AMD64)
+           .Case("arm", IMAGE_FILE_MACHINE_ARMNT)
+           .Case("arm64", IMAGE_FILE_MACHINE_ARM64)
+           .Default(IMAGE_FILE_MACHINE_UNKNOWN);
 }
 
 int llvm::dlltoolDriverMain(llvm::ArrayRef<const char *> ArgsArr) {
-  DllOptTable Table;
-  unsigned MissingIndex;
-  unsigned MissingCount;
-  llvm::opt::InputArgList Args =
-      Table.ParseArgs(ArgsArr.slice(1), MissingIndex, MissingCount);
-  if (MissingCount) {
-    llvm::errs() << Args.getArgString(MissingIndex) << ": missing argument\n";
-    return 1;
-  }
-
-  // Handle when no input or output is specified
-  if (Args.hasArgNoClaim(OPT_INPUT) ||
-      (!Args.hasArgNoClaim(OPT_d) && !Args.hasArgNoClaim(OPT_l))) {
-    Table.PrintHelp(outs(), "llvm-dlltool [options] file...", "llvm-dlltool",
-                    false);
-    llvm::outs() << "\nTARGETS: i386, i386:x86-64, arm, arm64\n";
-    return 1;
-  }
-
-  if (!Args.hasArgNoClaim(OPT_m) && Args.hasArgNoClaim(OPT_d)) {
-    llvm::errs() << "error: no target machine specified\n"
-                 << "supported targets: i386, i386:x86-64, arm, arm64\n";
-    return 1;
-  }
-
-  for (auto *Arg : Args.filtered(OPT_UNKNOWN))
-    llvm::errs() << "ignoring unknown argument: " << Arg->getAsString(Args)
-                 << "\n";
-
-  if (!Args.hasArg(OPT_d)) {
-    llvm::errs() << "no definition file specified\n";
-    return 1;
-  }
-
-  std::unique_ptr<MemoryBuffer> MB =
-      openFile(Args.getLastArg(OPT_d)->getValue());
-  if (!MB)
-    return 1;
-
-  if (!MB->getBufferSize()) {
-    llvm::errs() << "definition file empty\n";
-    return 1;
-  }
-
-  COFF::MachineTypes Machine = IMAGE_FILE_MACHINE_UNKNOWN;
-  if (auto *Arg = Args.getLastArg(OPT_m))
-    Machine = getEmulation(Arg->getValue());
-
-  if (Machine == IMAGE_FILE_MACHINE_UNKNOWN) {
-    llvm::errs() << "unknown target\n";
-    return 1;
-  }
-
-  Expected<COFFModuleDefinition> Def =
-      parseCOFFModuleDefinition(*MB, Machine, true);
-
-  if (!Def) {
-    llvm::errs() << "error parsing definition\n"
-                 << errorToErrorCode(Def.takeError()).message();
-    return 1;
-  }
-
-  // Do this after the parser because parseCOFFModuleDefinition sets OutputFile.
-  if (auto *Arg = Args.getLastArg(OPT_D))
-    Def->OutputFile = Arg->getValue();
-
-  if (Def->OutputFile.empty()) {
-    llvm::errs() << "no DLL name specified\n";
-    return 1;
-  }
-
-  std::string Path = std::string(Args.getLastArgValue(OPT_l));
-
-  // If ExtName is set (if the "ExtName = Name" syntax was used), overwrite
-  // Name with ExtName and clear ExtName. When only creating an import
-  // library and not linking, the internal name is irrelevant. This avoids
-  // cases where writeImportLibrary tries to transplant decoration from
-  // symbol decoration onto ExtName.
-  for (COFFShortExport& E : Def->Exports) {
-    if (!E.ExtName.empty()) {
-      E.Name = E.ExtName;
-      E.ExtName.clear();
+    DllOptTable Table;
+    unsigned MissingIndex;
+    unsigned MissingCount;
+    llvm::opt::InputArgList Args =
+        Table.ParseArgs(ArgsArr.slice(1), MissingIndex, MissingCount);
+    if (MissingCount) {
+        llvm::errs() << Args.getArgString(MissingIndex) << ": missing argument\n";
+        return 1;
     }
-  }
 
-  if (Machine == IMAGE_FILE_MACHINE_I386 && Args.getLastArg(OPT_k)) {
+    // Handle when no input or output is specified
+    if (Args.hasArgNoClaim(OPT_INPUT) ||
+            (!Args.hasArgNoClaim(OPT_d) && !Args.hasArgNoClaim(OPT_l))) {
+        Table.PrintHelp(outs(), "llvm-dlltool [options] file...", "llvm-dlltool",
+                        false);
+        llvm::outs() << "\nTARGETS: i386, i386:x86-64, arm, arm64\n";
+        return 1;
+    }
+
+    if (!Args.hasArgNoClaim(OPT_m) && Args.hasArgNoClaim(OPT_d)) {
+        llvm::errs() << "error: no target machine specified\n"
+                     << "supported targets: i386, i386:x86-64, arm, arm64\n";
+        return 1;
+    }
+
+    for (auto *Arg : Args.filtered(OPT_UNKNOWN))
+        llvm::errs() << "ignoring unknown argument: " << Arg->getAsString(Args)
+                     << "\n";
+
+    if (!Args.hasArg(OPT_d)) {
+        llvm::errs() << "no definition file specified\n";
+        return 1;
+    }
+
+    std::unique_ptr<MemoryBuffer> MB =
+        openFile(Args.getLastArg(OPT_d)->getValue());
+    if (!MB)
+        return 1;
+
+    if (!MB->getBufferSize()) {
+        llvm::errs() << "definition file empty\n";
+        return 1;
+    }
+
+    COFF::MachineTypes Machine = IMAGE_FILE_MACHINE_UNKNOWN;
+    if (auto *Arg = Args.getLastArg(OPT_m))
+        Machine = getEmulation(Arg->getValue());
+
+    if (Machine == IMAGE_FILE_MACHINE_UNKNOWN) {
+        llvm::errs() << "unknown target\n";
+        return 1;
+    }
+
+    Expected<COFFModuleDefinition> Def =
+        parseCOFFModuleDefinition(*MB, Machine, true);
+
+    if (!Def) {
+        llvm::errs() << "error parsing definition\n"
+                     << errorToErrorCode(Def.takeError()).message();
+        return 1;
+    }
+
+    // Do this after the parser because parseCOFFModuleDefinition sets OutputFile.
+    if (auto *Arg = Args.getLastArg(OPT_D))
+        Def->OutputFile = Arg->getValue();
+
+    if (Def->OutputFile.empty()) {
+        llvm::errs() << "no DLL name specified\n";
+        return 1;
+    }
+
+    std::string Path = std::string(Args.getLastArgValue(OPT_l));
+
+    // If ExtName is set (if the "ExtName = Name" syntax was used), overwrite
+    // Name with ExtName and clear ExtName. When only creating an import
+    // library and not linking, the internal name is irrelevant. This avoids
+    // cases where writeImportLibrary tries to transplant decoration from
+    // symbol decoration onto ExtName.
     for (COFFShortExport& E : Def->Exports) {
-      if (!E.AliasTarget.empty() || (!E.Name.empty() && E.Name[0] == '?'))
-        continue;
-      E.SymbolName = E.Name;
-      // Trim off the trailing decoration. Symbols will always have a
-      // starting prefix here (either _ for cdecl/stdcall, @ for fastcall
-      // or ? for C++ functions). Vectorcall functions won't have any
-      // fixed prefix, but the function base name will still be at least
-      // one char.
-      E.Name = E.Name.substr(0, E.Name.find('@', 1));
-      // By making sure E.SymbolName != E.Name for decorated symbols,
-      // writeImportLibrary writes these symbols with the type
-      // IMPORT_NAME_UNDECORATE.
+        if (!E.ExtName.empty()) {
+            E.Name = E.ExtName;
+            E.ExtName.clear();
+        }
     }
-  }
 
-  if (!Path.empty() &&
-      writeImportLibrary(Def->OutputFile, Path, Def->Exports, Machine, true))
-    return 1;
-  return 0;
+    if (Machine == IMAGE_FILE_MACHINE_I386 && Args.getLastArg(OPT_k)) {
+        for (COFFShortExport& E : Def->Exports) {
+            if (!E.AliasTarget.empty() || (!E.Name.empty() && E.Name[0] == '?'))
+                continue;
+            E.SymbolName = E.Name;
+            // Trim off the trailing decoration. Symbols will always have a
+            // starting prefix here (either _ for cdecl/stdcall, @ for fastcall
+            // or ? for C++ functions). Vectorcall functions won't have any
+            // fixed prefix, but the function base name will still be at least
+            // one char.
+            E.Name = E.Name.substr(0, E.Name.find('@', 1));
+            // By making sure E.SymbolName != E.Name for decorated symbols,
+            // writeImportLibrary writes these symbols with the type
+            // IMPORT_NAME_UNDECORATE.
+        }
+    }
+
+    if (!Path.empty() &&
+            writeImportLibrary(Def->OutputFile, Path, Def->Exports, Machine, true))
+        return 1;
+    return 0;
 }

@@ -29,17 +29,17 @@ using namespace Fortran::parser::literals;
 // Note the rvalue reference argument: the rewrites are performed in place
 // for efficiency.
 template <typename T> Expr<T> Fold(FoldingContext &context, Expr<T> &&expr) {
-  return Expr<T>::Rewrite(context, std::move(expr));
+    return Expr<T>::Rewrite(context, std::move(expr));
 }
 
 template <typename T>
 std::optional<Expr<T>> Fold(
-    FoldingContext &context, std::optional<Expr<T>> &&expr) {
-  if (expr) {
-    return Fold(context, std::move(*expr));
-  } else {
-    return std::nullopt;
-  }
+FoldingContext &context, std::optional<Expr<T>> &&expr) {
+    if (expr) {
+        return Fold(context, std::move(*expr));
+    } else {
+        return std::nullopt;
+    }
 }
 
 // UnwrapConstantValue() isolates the known constant value of
@@ -48,27 +48,27 @@ std::optional<Expr<T>> Fold(
 // parenthesized.
 template <typename T, typename EXPR>
 auto UnwrapConstantValue(EXPR &expr) -> common::Constify<Constant<T>, EXPR> * {
-  if (auto *c{UnwrapExpr<Constant<T>>(expr)}) {
-    return c;
-  } else {
-    if constexpr (!std::is_same_v<T, SomeDerived>) {
-      if (auto *parens{UnwrapExpr<Parentheses<T>>(expr)}) {
-        return UnwrapConstantValue<T>(parens->left());
-      }
+    if (auto *c{UnwrapExpr<Constant<T>>(expr)}) {
+        return c;
+    } else {
+        if constexpr (!std::is_same_v<T, SomeDerived>) {
+            if (auto *parens{UnwrapExpr<Parentheses<T>>(expr)}) {
+                return UnwrapConstantValue<T>(parens->left());
+            }
+        }
+        return nullptr;
     }
-    return nullptr;
-  }
 }
 
 // GetScalarConstantValue() extracts the known scalar constant value of
 // an expression, if it has one.  The value can be parenthesized.
 template <typename T, typename EXPR>
 auto GetScalarConstantValue(const EXPR &expr) -> std::optional<Scalar<T>> {
-  if (const Constant<T> *constant{UnwrapConstantValue<T>(expr)}) {
-    return constant->GetScalarValue();
-  } else {
-    return std::nullopt;
-  }
+    if (const Constant<T> *constant{UnwrapConstantValue<T>(expr)}) {
+        return constant->GetScalarValue();
+    } else {
+        return std::nullopt;
+    }
 }
 
 // When an expression is a constant integer, ToInt64() extracts its value.
@@ -77,12 +77,12 @@ auto GetScalarConstantValue(const EXPR &expr) -> std::optional<Scalar<T>> {
 template <int KIND>
 std::optional<std::int64_t> ToInt64(
     const Expr<Type<TypeCategory::Integer, KIND>> &expr) {
-  if (auto scalar{
-          GetScalarConstantValue<Type<TypeCategory::Integer, KIND>>(expr)}) {
-    return scalar->ToInt64();
-  } else {
-    return std::nullopt;
-  }
+    if (auto scalar{
+    GetScalarConstantValue<Type<TypeCategory::Integer, KIND>>(expr)}) {
+        return scalar->ToInt64();
+    } else {
+        return std::nullopt;
+    }
 }
 
 std::optional<std::int64_t> ToInt64(const Expr<SomeInteger> &);
@@ -90,11 +90,11 @@ std::optional<std::int64_t> ToInt64(const Expr<SomeType> &);
 
 template <typename A>
 std::optional<std::int64_t> ToInt64(const std::optional<A> &x) {
-  if (x) {
-    return ToInt64(*x);
-  } else {
-    return std::nullopt;
-  }
+    if (x) {
+        return ToInt64(*x);
+    } else {
+        return std::nullopt;
+    }
 }
 } // namespace Fortran::evaluate
 #endif // FORTRAN_EVALUATE_FOLD_H_

@@ -56,15 +56,15 @@ typedef void * CXCompileCommand;
  * Error codes for Compilation Database
  */
 typedef enum  {
-  /*
-   * No error occurred
-   */
-  CXCompilationDatabase_NoError = 0,
+    /*
+     * No error occurred
+     */
+    CXCompilationDatabase_NoError = 0,
 
-  /*
-   * Database can not be loaded
-   */
-  CXCompilationDatabase_CanNotLoadDatabase = 1
+    /*
+     * Database can not be loaded
+     */
+    CXCompilationDatabase_CanNotLoadDatabase = 1
 
 } CXCompilationDatabase_Error;
 
@@ -91,7 +91,7 @@ clang_CompilationDatabase_dispose(CXCompilationDatabase);
  */
 CINDEX_LINKAGE CXCompileCommands
 clang_CompilationDatabase_getCompileCommands(CXCompilationDatabase,
-                                             const char *CompleteFileName);
+        const char *CompleteFileName);
 
 /**
  * Get all the compile commands in the given compilation database.

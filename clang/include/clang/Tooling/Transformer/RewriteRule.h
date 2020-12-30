@@ -33,26 +33,26 @@ namespace clang {
 namespace transformer {
 // Specifies how to interpret an edit.
 enum class EditKind {
-  // Edits a source range in the file.
-  Range,
-  // Inserts an include in the file. The `Replacement` field is the name of the
-  // newly included file.
-  AddInclude,
+    // Edits a source range in the file.
+    Range,
+    // Inserts an include in the file. The `Replacement` field is the name of the
+    // newly included file.
+    AddInclude,
 };
 
 /// A concrete description of a source edit, represented by a character range in
 /// the source to be replaced and a corresponding replacement string.
 struct Edit {
-  EditKind Kind = EditKind::Range;
-  CharSourceRange Range;
-  std::string Replacement;
-  llvm::Any Metadata;
+    EditKind Kind = EditKind::Range;
+    CharSourceRange Range;
+    std::string Replacement;
+    llvm::Any Metadata;
 };
 
 /// Format of the path in an include directive -- angle brackets or quotes.
 enum class IncludeFormat {
-  Quoted,
-  Angled,
+    Quoted,
+    Angled,
 };
 
 /// Maps a match result to a list of concrete edits (with possible
@@ -102,16 +102,16 @@ using AnyGenerator = MatchConsumer<llvm::Any>;
 //   changeTo(cat("different_expr"))
 // \endcode
 struct ASTEdit {
-  EditKind Kind = EditKind::Range;
-  RangeSelector TargetRange;
-  TextGenerator Replacement;
-  TextGenerator Note;
-  // Not all transformations will want or need to attach metadata and therefore
-  // should not be required to do so.
-  AnyGenerator Metadata = [](const ast_matchers::MatchFinder::MatchResult &)
-      -> llvm::Expected<llvm::Any> {
-    return llvm::Expected<llvm::Any>(llvm::Any());
-  };
+    EditKind Kind = EditKind::Range;
+    RangeSelector TargetRange;
+    TextGenerator Replacement;
+    TextGenerator Note;
+    // Not all transformations will want or need to attach metadata and therefore
+    // should not be required to do so.
+    AnyGenerator Metadata = [](const ast_matchers::MatchFinder::MatchResult &)
+    -> llvm::Expected<llvm::Any> {
+        return llvm::Expected<llvm::Any>(llvm::Any());
+    };
 };
 
 /// Generates a single (specified) edit.
@@ -129,7 +129,9 @@ EditGenerator edit(ASTEdit E);
 EditGenerator editList(llvm::SmallVector<ASTEdit, 1> Edits);
 
 /// Generates no edits.
-inline EditGenerator noEdits() { return editList({}); }
+inline EditGenerator noEdits() {
+    return editList({});
+}
 
 /// Generates a single, no-op edit anchored at the start location of the
 /// specified range. A `noopEdit` may be preferred over `noEdits` to associate a
@@ -139,14 +141,14 @@ EditGenerator noopEdit(RangeSelector Anchor);
 /// Version of `ifBound` specialized to `ASTEdit`.
 inline EditGenerator ifBound(std::string ID, ASTEdit TrueEdit,
                              ASTEdit FalseEdit) {
-  return ifBound(std::move(ID), edit(std::move(TrueEdit)),
-                 edit(std::move(FalseEdit)));
+    return ifBound(std::move(ID), edit(std::move(TrueEdit)),
+                   edit(std::move(FalseEdit)));
 }
 
 /// Version of `ifBound` that has no "False" branch. If the node is not bound,
 /// then no edits are produced.
 inline EditGenerator ifBound(std::string ID, ASTEdit TrueEdit) {
-  return ifBound(std::move(ID), edit(std::move(TrueEdit)), noEdits());
+    return ifBound(std::move(ID), edit(std::move(TrueEdit)), noEdits());
 }
 
 /// Flattens a list of generators into a single generator whose elements are the
@@ -158,12 +160,16 @@ namespace detail {
 /// cases so that user doesn't need to specify which factory function to
 /// use. This pattern gives benefits similar to implicit constructors, while
 /// maintaing a higher degree of explicitness.
-inline EditGenerator injectEdits(ASTEdit E) { return edit(std::move(E)); }
-inline EditGenerator injectEdits(EditGenerator G) { return G; }
+inline EditGenerator injectEdits(ASTEdit E) {
+    return edit(std::move(E));
+}
+inline EditGenerator injectEdits(EditGenerator G) {
+    return G;
+}
 } // namespace detail
 
 template <typename... Ts> EditGenerator flatten(Ts &&...Edits) {
-  return flattenVector({detail::injectEdits(std::forward<Ts>(Edits))...});
+    return flattenVector({detail::injectEdits(std::forward<Ts>(Edits))...});
 }
 
 // Every rewrite rule is triggered by a match against some AST node.
@@ -175,7 +181,7 @@ extern const char RootID[];
 ASTEdit changeTo(RangeSelector Target, TextGenerator Replacement);
 /// DEPRECATED: use \c changeTo.
 inline ASTEdit change(RangeSelector Target, TextGenerator Replacement) {
-  return changeTo(std::move(Target), std::move(Replacement));
+    return changeTo(std::move(Target), std::move(Replacement));
 }
 
 /// Replaces the entirety of a RewriteRule's match with \p Replacement.  For
@@ -185,23 +191,23 @@ inline ASTEdit change(RangeSelector Target, TextGenerator Replacement) {
 ///            changeTo(cat("bar()")))
 /// \endcode
 inline ASTEdit changeTo(TextGenerator Replacement) {
-  return changeTo(node(RootID), std::move(Replacement));
+    return changeTo(node(RootID), std::move(Replacement));
 }
 /// DEPRECATED: use \c changeTo.
 inline ASTEdit change(TextGenerator Replacement) {
-  return changeTo(std::move(Replacement));
+    return changeTo(std::move(Replacement));
 }
 
 /// Inserts \p Replacement before \p S, leaving the source selected by \S
 /// unchanged.
 inline ASTEdit insertBefore(RangeSelector S, TextGenerator Replacement) {
-  return changeTo(before(std::move(S)), std::move(Replacement));
+    return changeTo(before(std::move(S)), std::move(Replacement));
 }
 
 /// Inserts \p Replacement after \p S, leaving the source selected by \S
 /// unchanged.
 inline ASTEdit insertAfter(RangeSelector S, TextGenerator Replacement) {
-  return changeTo(after(std::move(S)), std::move(Replacement));
+    return changeTo(after(std::move(S)), std::move(Replacement));
 }
 
 /// Removes the source selected by \p S.
@@ -216,7 +222,7 @@ ASTEdit addInclude(RangeSelector Target, StringRef Header,
 /// `RootID`.
 inline ASTEdit addInclude(StringRef Header,
                           IncludeFormat Format = IncludeFormat::Quoted) {
-  return addInclude(node(RootID), Header, Format);
+    return addInclude(node(RootID), Header, Format);
 }
 
 // FIXME: If `Metadata` returns an `llvm::Expected<T>` the `AnyGenerator` will
@@ -233,21 +239,21 @@ inline ASTEdit addInclude(StringRef Header,
 // call-site.
 template <typename Callable>
 inline ASTEdit withMetadata(ASTEdit Edit, Callable Metadata) {
-  Edit.Metadata =
-      [Gen = std::move(Metadata)](
-          const ast_matchers::MatchFinder::MatchResult &R) -> llvm::Any {
-    return Gen(R);
-  };
+    Edit.Metadata =
+        [Gen = std::move(Metadata)](
+    const ast_matchers::MatchFinder::MatchResult &R) -> llvm::Any {
+        return Gen(R);
+    };
 
-  return Edit;
+    return Edit;
 }
 
 /// Assuming that the inner range is enclosed by the outer range, creates
 /// precision edits to remove the parts of the outer range that are not included
 /// in the inner range.
 inline EditGenerator shrinkTo(RangeSelector outer, RangeSelector inner) {
-  return editList({remove(enclose(before(outer), before(inner))),
-                   remove(enclose(after(inner), after(outer)))});
+    return editList({remove(enclose(before(outer), before(inner))),
+                     remove(enclose(after(inner), after(outer)))});
 }
 
 /// Description of a source-code transformation.
@@ -274,16 +280,16 @@ inline EditGenerator shrinkTo(RangeSelector outer, RangeSelector inner) {
 // The \c Transformer class can be used to apply the rewrite rule and obtain the
 // corresponding replacements.
 struct RewriteRule {
-  struct Case {
-    ast_matchers::internal::DynTypedMatcher Matcher;
-    EditGenerator Edits;
-    TextGenerator Explanation;
-  };
-  // We expect RewriteRules will most commonly include only one case.
-  SmallVector<Case, 1> Cases;
+    struct Case {
+        ast_matchers::internal::DynTypedMatcher Matcher;
+        EditGenerator Edits;
+        TextGenerator Explanation;
+    };
+    // We expect RewriteRules will most commonly include only one case.
+    SmallVector<Case, 1> Cases;
 
-  /// DEPRECATED: use `::clang::transformer::RootID` instead.
-  static const llvm::StringRef RootID;
+    /// DEPRECATED: use `::clang::transformer::RootID` instead.
+    static const llvm::StringRef RootID;
 };
 
 /// Constructs a simple \c RewriteRule.
@@ -294,15 +300,15 @@ RewriteRule makeRule(ast_matchers::internal::DynTypedMatcher M,
 inline RewriteRule makeRule(ast_matchers::internal::DynTypedMatcher M,
                             llvm::SmallVector<ASTEdit, 1> Edits,
                             TextGenerator Explanation = nullptr) {
-  return makeRule(std::move(M), editList(std::move(Edits)),
-                  std::move(Explanation));
+    return makeRule(std::move(M), editList(std::move(Edits)),
+                    std::move(Explanation));
 }
 
 /// Overload of \c makeRule for common case of only one edit.
 inline RewriteRule makeRule(ast_matchers::internal::DynTypedMatcher M,
                             ASTEdit Edit,
                             TextGenerator Explanation = nullptr) {
-  return makeRule(std::move(M), edit(std::move(Edit)), std::move(Explanation));
+    return makeRule(std::move(M), edit(std::move(Edit)), std::move(Explanation));
 }
 
 /// For every case in Rule, adds an include directive for the given header. The
@@ -401,20 +407,20 @@ namespace detail {
 /// ```
 /// @{
 llvm::Expected<SmallVector<Edit, 1>>
-rewriteDescendants(const Decl &Node, RewriteRule Rule,
-                   const ast_matchers::MatchFinder::MatchResult &Result);
+                                  rewriteDescendants(const Decl &Node, RewriteRule Rule,
+                                          const ast_matchers::MatchFinder::MatchResult &Result);
 
 llvm::Expected<SmallVector<Edit, 1>>
-rewriteDescendants(const Stmt &Node, RewriteRule Rule,
-                   const ast_matchers::MatchFinder::MatchResult &Result);
+                                  rewriteDescendants(const Stmt &Node, RewriteRule Rule,
+                                          const ast_matchers::MatchFinder::MatchResult &Result);
 
 llvm::Expected<SmallVector<Edit, 1>>
-rewriteDescendants(const TypeLoc &Node, RewriteRule Rule,
-                   const ast_matchers::MatchFinder::MatchResult &Result);
+                                  rewriteDescendants(const TypeLoc &Node, RewriteRule Rule,
+                                          const ast_matchers::MatchFinder::MatchResult &Result);
 
 llvm::Expected<SmallVector<Edit, 1>>
-rewriteDescendants(const DynTypedNode &Node, RewriteRule Rule,
-                   const ast_matchers::MatchFinder::MatchResult &Result);
+                                  rewriteDescendants(const DynTypedNode &Node, RewriteRule Rule,
+                                          const ast_matchers::MatchFinder::MatchResult &Result);
 /// @}
 
 /// Builds a single matcher for the rule, covering all of the rule's cases.

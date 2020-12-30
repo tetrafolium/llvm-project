@@ -27,18 +27,18 @@ TypeIndex getModifiedType(const CVType &CVT);
 /// Return true if this record should be in the IPI stream of a PDB. In an
 /// object file, these record kinds will appear mixed into the .debug$T section.
 inline bool isIdRecord(TypeLeafKind K) {
-  switch (K) {
-  case TypeLeafKind::LF_FUNC_ID:
-  case TypeLeafKind::LF_MFUNC_ID:
-  case TypeLeafKind::LF_STRING_ID:
-  case TypeLeafKind::LF_SUBSTR_LIST:
-  case TypeLeafKind::LF_BUILDINFO:
-  case TypeLeafKind::LF_UDT_SRC_LINE:
-  case TypeLeafKind::LF_UDT_MOD_SRC_LINE:
-    return true;
-  default:
-    return false;
-  }
+    switch (K) {
+    case TypeLeafKind::LF_FUNC_ID:
+    case TypeLeafKind::LF_MFUNC_ID:
+    case TypeLeafKind::LF_STRING_ID:
+    case TypeLeafKind::LF_SUBSTR_LIST:
+    case TypeLeafKind::LF_BUILDINFO:
+    case TypeLeafKind::LF_UDT_SRC_LINE:
+    case TypeLeafKind::LF_UDT_MOD_SRC_LINE:
+        return true;
+    default:
+        return false;
+    }
 }
 
 } // namespace codeview

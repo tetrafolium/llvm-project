@@ -28,17 +28,17 @@ class Module;
 
 /// The type of CFI jumptable needed for a function.
 enum CfiFunctionLinkage {
-  CFL_Definition = 0,
-  CFL_Declaration = 1,
-  CFL_WeakDeclaration = 2
+    CFL_Definition = 0,
+    CFL_Declaration = 1,
+    CFL_WeakDeclaration = 2
 };
 
 /// A call site that could be devirtualized.
 struct DevirtCallSite {
-  /// The offset from the address point to the virtual function.
-  uint64_t Offset;
-  /// The call site itself.
-  CallBase &CB;
+    /// The offset from the address point to the virtual function.
+    uint64_t Offset;
+    /// The call site itself.
+    CallBase &CB;
 };
 
 /// Given a call to the intrinsic \@llvm.type.test, find all devirtualizable

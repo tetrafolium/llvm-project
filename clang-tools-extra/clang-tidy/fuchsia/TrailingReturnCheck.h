@@ -15,21 +15,21 @@ namespace clang {
 namespace tidy {
 namespace fuchsia {
 
-/// Functions that have trailing returns are disallowed, except for those 
-/// using decltype specifiers and lambda with otherwise unutterable 
+/// Functions that have trailing returns are disallowed, except for those
+/// using decltype specifiers and lambda with otherwise unutterable
 /// return types.
 ///
 /// For the user-facing documentation see:
 /// http://clang.llvm.org/extra/clang-tidy/checks/fuchsia-trailing-return.html
 class TrailingReturnCheck : public ClangTidyCheck {
 public:
-  TrailingReturnCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus11;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    TrailingReturnCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus11;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace fuchsia

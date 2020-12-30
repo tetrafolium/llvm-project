@@ -30,57 +30,63 @@ namespace lldb_private {
 // implementations are platform-specific.
 class MainLoopBase {
 private:
-  class ReadHandle;
+    class ReadHandle;
 
 public:
-  MainLoopBase() {}
-  virtual ~MainLoopBase() {}
+    MainLoopBase() {}
+    virtual ~MainLoopBase() {}
 
-  typedef std::unique_ptr<ReadHandle> ReadHandleUP;
+    typedef std::unique_ptr<ReadHandle> ReadHandleUP;
 
-  typedef std::function<void(MainLoopBase &)> Callback;
+    typedef std::function<void(MainLoopBase &)> Callback;
 
-  virtual ReadHandleUP RegisterReadObject(const lldb::IOObjectSP &object_sp,
-                                          const Callback &callback,
-                                          Status &error) {
-    llvm_unreachable("Not implemented");
-  }
+    virtual ReadHandleUP RegisterReadObject(const lldb::IOObjectSP &object_sp,
+                                            const Callback &callback,
+                                            Status &error) {
+        llvm_unreachable("Not implemented");
+    }
 
-  // Waits for registered events and invoke the proper callbacks. Returns when
-  // all callbacks deregister themselves or when someone requests termination.
-  virtual Status Run() { llvm_unreachable("Not implemented"); }
+    // Waits for registered events and invoke the proper callbacks. Returns when
+    // all callbacks deregister themselves or when someone requests termination.
+    virtual Status Run() {
+        llvm_unreachable("Not implemented");
+    }
 
-  // Requests the exit of the Run() function.
-  virtual void RequestTermination() { llvm_unreachable("Not implemented"); }
+    // Requests the exit of the Run() function.
+    virtual void RequestTermination() {
+        llvm_unreachable("Not implemented");
+    }
 
 protected:
-  ReadHandleUP CreateReadHandle(const lldb::IOObjectSP &object_sp) {
-    return ReadHandleUP(new ReadHandle(*this, object_sp->GetWaitableHandle()));
-  }
+    ReadHandleUP CreateReadHandle(const lldb::IOObjectSP &object_sp) {
+        return ReadHandleUP(new ReadHandle(*this, object_sp->GetWaitableHandle()));
+    }
 
-  virtual void UnregisterReadObject(IOObject::WaitableHandle handle) {
-    llvm_unreachable("Not implemented");
-  }
+    virtual void UnregisterReadObject(IOObject::WaitableHandle handle) {
+        llvm_unreachable("Not implemented");
+    }
 
 private:
-  class ReadHandle {
-  public:
-    ~ReadHandle() { m_mainloop.UnregisterReadObject(m_handle); }
+    class ReadHandle {
+    public:
+        ~ReadHandle() {
+            m_mainloop.UnregisterReadObject(m_handle);
+        }
 
-  private:
-    ReadHandle(MainLoopBase &mainloop, IOObject::WaitableHandle handle)
-        : m_mainloop(mainloop), m_handle(handle) {}
+    private:
+        ReadHandle(MainLoopBase &mainloop, IOObject::WaitableHandle handle)
+            : m_mainloop(mainloop), m_handle(handle) {}
 
-    MainLoopBase &m_mainloop;
-    IOObject::WaitableHandle m_handle;
+        MainLoopBase &m_mainloop;
+        IOObject::WaitableHandle m_handle;
 
-    friend class MainLoopBase;
-    ReadHandle(const ReadHandle &) = delete;
-    const ReadHandle &operator=(const ReadHandle &) = delete;
-  };
+        friend class MainLoopBase;
+        ReadHandle(const ReadHandle &) = delete;
+        const ReadHandle &operator=(const ReadHandle &) = delete;
+    };
 
-  MainLoopBase(const MainLoopBase &) = delete;
-  const MainLoopBase &operator=(const MainLoopBase &) = delete;
+    MainLoopBase(const MainLoopBase &) = delete;
+    const MainLoopBase &operator=(const MainLoopBase &) = delete;
 };
 
 } // namespace lldb_private

@@ -24,41 +24,41 @@ describeValue(const char *label, ValType value,
 
 template <typename T, __llvm_libc::testing::TestCondition Condition>
 class FPMatcher : public __llvm_libc::testing::Matcher<T> {
-  static_assert(__llvm_libc::cpp::IsFloatingPointType<T>::Value,
-                "FPMatcher can only be used with floating point values.");
-  static_assert(Condition == __llvm_libc::testing::Cond_EQ ||
-                    Condition == __llvm_libc::testing::Cond_NE,
-                "Unsupported FPMathcer test condition.");
+    static_assert(__llvm_libc::cpp::IsFloatingPointType<T>::Value,
+                  "FPMatcher can only be used with floating point values.");
+    static_assert(Condition == __llvm_libc::testing::Cond_EQ ||
+                  Condition == __llvm_libc::testing::Cond_NE,
+                  "Unsupported FPMathcer test condition.");
 
-  T expected;
-  T actual;
+    T expected;
+    T actual;
 
 public:
-  FPMatcher(T expectedValue) : expected(expectedValue) {}
+    FPMatcher(T expectedValue) : expected(expectedValue) {}
 
-  bool match(T actualValue) {
-    actual = actualValue;
-    fputil::FPBits<T> actualBits(actual), expectedBits(expected);
-    if (Condition == __llvm_libc::testing::Cond_EQ)
-      return (actualBits.isNaN() && expectedBits.isNaN()) ||
-             (actualBits.bitsAsUInt() == expectedBits.bitsAsUInt());
+    bool match(T actualValue) {
+        actual = actualValue;
+        fputil::FPBits<T> actualBits(actual), expectedBits(expected);
+        if (Condition == __llvm_libc::testing::Cond_EQ)
+            return (actualBits.isNaN() && expectedBits.isNaN()) ||
+                   (actualBits.bitsAsUInt() == expectedBits.bitsAsUInt());
 
-    // If condition == Cond_NE.
-    if (actualBits.isNaN())
-      return !expectedBits.isNaN();
-    return expectedBits.isNaN() ||
-           (actualBits.bitsAsUInt() != expectedBits.bitsAsUInt());
-  }
+        // If condition == Cond_NE.
+        if (actualBits.isNaN())
+            return !expectedBits.isNaN();
+        return expectedBits.isNaN() ||
+               (actualBits.bitsAsUInt() != expectedBits.bitsAsUInt());
+    }
 
-  void explainError(testutils::StreamWrapper &stream) override {
-    describeValue("Expected floating point value: ", expected, stream);
-    describeValue("  Actual floating point value: ", actual, stream);
-  }
+    void explainError(testutils::StreamWrapper &stream) override {
+        describeValue("Expected floating point value: ", expected, stream);
+        describeValue("  Actual floating point value: ", actual, stream);
+    }
 };
 
 template <__llvm_libc::testing::TestCondition C, typename T>
 FPMatcher<T, C> getMatcher(T expectedValue) {
-  return FPMatcher<T, C>(expectedValue);
+    return FPMatcher<T, C>(expectedValue);
 }
 
 } // namespace testing

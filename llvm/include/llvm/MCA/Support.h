@@ -25,18 +25,20 @@ namespace mca {
 template <typename T>
 class InstructionError : public ErrorInfo<InstructionError<T>> {
 public:
-  static char ID;
-  std::string Message;
-  const T &Inst;
+    static char ID;
+    std::string Message;
+    const T &Inst;
 
-  InstructionError(std::string M, const T &MCI)
-      : Message(std::move(M)), Inst(MCI) {}
+    InstructionError(std::string M, const T &MCI)
+        : Message(std::move(M)), Inst(MCI) {}
 
-  void log(raw_ostream &OS) const override { OS << Message; }
+    void log(raw_ostream &OS) const override {
+        OS << Message;
+    }
 
-  std::error_code convertToErrorCode() const override {
-    return inconvertibleErrorCode();
-  }
+    std::error_code convertToErrorCode() const override {
+        return inconvertibleErrorCode();
+    }
 };
 
 template <typename T> char InstructionError<T>::ID;
@@ -48,25 +50,29 @@ template <typename T> char InstructionError<T>::ID;
 /// ResourcePressureView to calculate the average resource cycles
 /// per instruction/iteration.
 class ResourceCycles {
-  unsigned Numerator, Denominator;
+    unsigned Numerator, Denominator;
 
 public:
-  ResourceCycles() : Numerator(0), Denominator(1) {}
-  ResourceCycles(unsigned Cycles, unsigned ResourceUnits = 1)
-      : Numerator(Cycles), Denominator(ResourceUnits) {}
+    ResourceCycles() : Numerator(0), Denominator(1) {}
+    ResourceCycles(unsigned Cycles, unsigned ResourceUnits = 1)
+        : Numerator(Cycles), Denominator(ResourceUnits) {}
 
-  operator double() const {
-    assert(Denominator && "Invalid denominator (must be non-zero).");
-    return (Denominator == 1) ? Numerator : (double)Numerator / Denominator;
-  }
+    operator double() const {
+        assert(Denominator && "Invalid denominator (must be non-zero).");
+        return (Denominator == 1) ? Numerator : (double)Numerator / Denominator;
+    }
 
-  unsigned getNumerator() const { return Numerator; }
-  unsigned getDenominator() const { return Denominator; }
+    unsigned getNumerator() const {
+        return Numerator;
+    }
+    unsigned getDenominator() const {
+        return Denominator;
+    }
 
-  // Add the components of RHS to this instance.  Instead of calculating
-  // the final value here, we keep track of the numerator and denominator
-  // separately, to reduce floating point error.
-  ResourceCycles &operator+=(const ResourceCycles &RHS);
+    // Add the components of RHS to this instance.  Instead of calculating
+    // the final value here, we keep track of the numerator and denominator
+    // separately, to reduce floating point error.
+    ResourceCycles &operator+=(const ResourceCycles &RHS);
 };
 
 /// Populates vector Masks with processor resource masks.
@@ -97,8 +103,8 @@ void computeProcResourceMasks(const MCSchedModel &SM,
 // Returns the index of the highest bit set. For resource masks, the position of
 // the highest bit set can be used to construct a resource mask identifier.
 inline unsigned getResourceStateIndex(uint64_t Mask) {
-  assert(Mask && "Processor Resource Mask cannot be zero!");
-  return (std::numeric_limits<uint64_t>::digits - countLeadingZeros(Mask)) - 1;
+    assert(Mask && "Processor Resource Mask cannot be zero!");
+    return (std::numeric_limits<uint64_t>::digits - countLeadingZeros(Mask)) - 1;
 }
 
 /// Compute the reciprocal block throughput from a set of processor resource

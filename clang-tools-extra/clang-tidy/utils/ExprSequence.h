@@ -67,35 +67,35 @@ namespace utils {
 ///   `getSequenceSuccessor()` implements these sequencing rules.
 class ExprSequence {
 public:
-  /// Initializes this `ExprSequence` with sequence information for the given
-  /// `CFG`. `Root` is the root statement the CFG was built from.
-  ExprSequence(const CFG *TheCFG, const Stmt *Root, ASTContext *TheContext);
+    /// Initializes this `ExprSequence` with sequence information for the given
+    /// `CFG`. `Root` is the root statement the CFG was built from.
+    ExprSequence(const CFG *TheCFG, const Stmt *Root, ASTContext *TheContext);
 
-  /// Returns whether \p Before is sequenced before \p After.
-  bool inSequence(const Stmt *Before, const Stmt *After) const;
+    /// Returns whether \p Before is sequenced before \p After.
+    bool inSequence(const Stmt *Before, const Stmt *After) const;
 
-  /// Returns whether \p After can potentially be evaluated after \p Before.
-  /// This is exactly equivalent to `!inSequence(After, Before)` but makes some
-  /// conditions read more naturally.
-  bool potentiallyAfter(const Stmt *After, const Stmt *Before) const;
+    /// Returns whether \p After can potentially be evaluated after \p Before.
+    /// This is exactly equivalent to `!inSequence(After, Before)` but makes some
+    /// conditions read more naturally.
+    bool potentiallyAfter(const Stmt *After, const Stmt *Before) const;
 
 private:
-  // Returns the sibling of \p S (if any) that is directly sequenced after \p S,
-  // or nullptr if no such sibling exists. For example, if \p S is the child of
-  // a `CompoundStmt`, this would return the Stmt that directly follows \p S in
-  // the `CompoundStmt`.
-  //
-  // As the sequencing of many constructs that change control flow is already
-  // encoded in the `CFG`, this function only implements the sequencing rules
-  // for those constructs where sequencing cannot be inferred from the `CFG`.
-  const Stmt *getSequenceSuccessor(const Stmt *S) const;
+    // Returns the sibling of \p S (if any) that is directly sequenced after \p S,
+    // or nullptr if no such sibling exists. For example, if \p S is the child of
+    // a `CompoundStmt`, this would return the Stmt that directly follows \p S in
+    // the `CompoundStmt`.
+    //
+    // As the sequencing of many constructs that change control flow is already
+    // encoded in the `CFG`, this function only implements the sequencing rules
+    // for those constructs where sequencing cannot be inferred from the `CFG`.
+    const Stmt *getSequenceSuccessor(const Stmt *S) const;
 
-  const Stmt *resolveSyntheticStmt(const Stmt *S) const;
+    const Stmt *resolveSyntheticStmt(const Stmt *S) const;
 
-  ASTContext *Context;
-  const Stmt *Root;
+    ASTContext *Context;
+    const Stmt *Root;
 
-  llvm::DenseMap<const Stmt *, const Stmt *> SyntheticStmtSourceMap;
+    llvm::DenseMap<const Stmt *, const Stmt *> SyntheticStmtSourceMap;
 };
 
 /// Maps `Stmt`s to the `CFGBlock` that contains them. Some `Stmt`s may be
@@ -103,18 +103,18 @@ private:
 /// innermost block (i.e. the one that is furthest from the root of the tree).
 class StmtToBlockMap {
 public:
-  /// Initializes the map for the given `CFG`.
-  StmtToBlockMap(const CFG *TheCFG, ASTContext *TheContext);
+    /// Initializes the map for the given `CFG`.
+    StmtToBlockMap(const CFG *TheCFG, ASTContext *TheContext);
 
-  /// Returns the block that \p S is contained in. Some `Stmt`s may be contained
-  /// in more than one `CFGBlock`; in this case, this function returns the
-  /// innermost block (i.e. the one that is furthest from the root of the tree).
-  const CFGBlock *blockContainingStmt(const Stmt *S) const;
+    /// Returns the block that \p S is contained in. Some `Stmt`s may be contained
+    /// in more than one `CFGBlock`; in this case, this function returns the
+    /// innermost block (i.e. the one that is furthest from the root of the tree).
+    const CFGBlock *blockContainingStmt(const Stmt *S) const;
 
 private:
-  ASTContext *Context;
+    ASTContext *Context;
 
-  llvm::DenseMap<const Stmt *, const CFGBlock *> Map;
+    llvm::DenseMap<const Stmt *, const CFGBlock *> Map;
 };
 
 } // namespace utils

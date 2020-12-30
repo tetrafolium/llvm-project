@@ -32,46 +32,46 @@ using namespace trans;
 namespace {
 
 class ARCAssignChecker : public RecursiveASTVisitor<ARCAssignChecker> {
-  MigrationPass &Pass;
-  llvm::DenseSet<VarDecl *> ModifiedVars;
+    MigrationPass &Pass;
+    llvm::DenseSet<VarDecl *> ModifiedVars;
 
 public:
-  ARCAssignChecker(MigrationPass &pass) : Pass(pass) { }
+    ARCAssignChecker(MigrationPass &pass) : Pass(pass) { }
 
-  bool VisitBinaryOperator(BinaryOperator *Exp) {
-    if (Exp->getType()->isDependentType())
-      return true;
+    bool VisitBinaryOperator(BinaryOperator *Exp) {
+        if (Exp->getType()->isDependentType())
+            return true;
 
-    Expr *E = Exp->getLHS();
-    SourceLocation OrigLoc = E->getExprLoc();
-    SourceLocation Loc = OrigLoc;
-    DeclRefExpr *declRef = dyn_cast<DeclRefExpr>(E->IgnoreParenCasts());
-    if (declRef && isa<VarDecl>(declRef->getDecl())) {
-      ASTContext &Ctx = Pass.Ctx;
-      Expr::isModifiableLvalueResult IsLV = E->isModifiableLvalue(Ctx, &Loc);
-      if (IsLV != Expr::MLV_ConstQualified)
-        return true;
-      VarDecl *var = cast<VarDecl>(declRef->getDecl());
-      if (var->isARCPseudoStrong()) {
-        Transaction Trans(Pass.TA);
-        if (Pass.TA.clearDiagnostic(diag::err_typecheck_arr_assign_enumeration,
-                                    Exp->getOperatorLoc())) {
-          if (!ModifiedVars.count(var)) {
-            TypeLoc TLoc = var->getTypeSourceInfo()->getTypeLoc();
-            Pass.TA.insert(TLoc.getBeginLoc(), "__strong ");
-            ModifiedVars.insert(var);
-          }
+        Expr *E = Exp->getLHS();
+        SourceLocation OrigLoc = E->getExprLoc();
+        SourceLocation Loc = OrigLoc;
+        DeclRefExpr *declRef = dyn_cast<DeclRefExpr>(E->IgnoreParenCasts());
+        if (declRef && isa<VarDecl>(declRef->getDecl())) {
+            ASTContext &Ctx = Pass.Ctx;
+            Expr::isModifiableLvalueResult IsLV = E->isModifiableLvalue(Ctx, &Loc);
+            if (IsLV != Expr::MLV_ConstQualified)
+                return true;
+            VarDecl *var = cast<VarDecl>(declRef->getDecl());
+            if (var->isARCPseudoStrong()) {
+                Transaction Trans(Pass.TA);
+                if (Pass.TA.clearDiagnostic(diag::err_typecheck_arr_assign_enumeration,
+                                            Exp->getOperatorLoc())) {
+                    if (!ModifiedVars.count(var)) {
+                        TypeLoc TLoc = var->getTypeSourceInfo()->getTypeLoc();
+                        Pass.TA.insert(TLoc.getBeginLoc(), "__strong ");
+                        ModifiedVars.insert(var);
+                    }
+                }
+            }
         }
-      }
-    }
 
-    return true;
-  }
+        return true;
+    }
 };
 
 } // anonymous namespace
 
 void trans::makeAssignARCSafe(MigrationPass &pass) {
-  ARCAssignChecker assignCheck(pass);
-  assignCheck.TraverseDecl(pass.Ctx.getTranslationUnitDecl());
+    ARCAssignChecker assignCheck(pass);
+    assignCheck.TraverseDecl(pass.Ctx.getTranslationUnitDecl());
 }

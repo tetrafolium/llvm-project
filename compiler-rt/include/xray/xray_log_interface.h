@@ -99,100 +99,100 @@ extern "C" {
 
 /// This enum defines the valid states in which the logging implementation can
 /// be at.
-enum XRayLogInitStatus {
-  /// The default state is uninitialized, and in case there were errors in the
-  /// initialization, the implementation MUST return XRAY_LOG_UNINITIALIZED.
-  XRAY_LOG_UNINITIALIZED = 0,
+    enum XRayLogInitStatus {
+        /// The default state is uninitialized, and in case there were errors in the
+        /// initialization, the implementation MUST return XRAY_LOG_UNINITIALIZED.
+        XRAY_LOG_UNINITIALIZED = 0,
 
-  /// Some implementations support multi-stage init (or asynchronous init), and
-  /// may return XRAY_LOG_INITIALIZING to signal callers of the API that
-  /// there's an ongoing initialization routine running. This allows
-  /// implementations to support concurrent threads attempting to initialize,
-  /// while only signalling success in one.
-  XRAY_LOG_INITIALIZING = 1,
+        /// Some implementations support multi-stage init (or asynchronous init), and
+        /// may return XRAY_LOG_INITIALIZING to signal callers of the API that
+        /// there's an ongoing initialization routine running. This allows
+        /// implementations to support concurrent threads attempting to initialize,
+        /// while only signalling success in one.
+        XRAY_LOG_INITIALIZING = 1,
 
-  /// When an implementation is done initializing, it MUST return
-  /// XRAY_LOG_INITIALIZED. When users call `__xray_patch()`, they are
-  /// guaranteed that the implementation installed with
-  /// `__xray_set_log_impl(...)` has been initialized.
-  XRAY_LOG_INITIALIZED = 2,
+        /// When an implementation is done initializing, it MUST return
+        /// XRAY_LOG_INITIALIZED. When users call `__xray_patch()`, they are
+        /// guaranteed that the implementation installed with
+        /// `__xray_set_log_impl(...)` has been initialized.
+        XRAY_LOG_INITIALIZED = 2,
 
-  /// Some implementations might support multi-stage finalization (or
-  /// asynchronous finalization), and may return XRAY_LOG_FINALIZING to signal
-  /// callers of the API that there's an ongoing finalization routine running.
-  /// This allows implementations to support concurrent threads attempting to
-  /// finalize, while only signalling success/completion in one.
-  XRAY_LOG_FINALIZING = 3,
+        /// Some implementations might support multi-stage finalization (or
+        /// asynchronous finalization), and may return XRAY_LOG_FINALIZING to signal
+        /// callers of the API that there's an ongoing finalization routine running.
+        /// This allows implementations to support concurrent threads attempting to
+        /// finalize, while only signalling success/completion in one.
+        XRAY_LOG_FINALIZING = 3,
 
-  /// When an implementation is done finalizing, it MUST return
-  /// XRAY_LOG_FINALIZED. It is up to the implementation to determine what the
-  /// semantics of a finalized implementation is. Some implementations might
-  /// allow re-initialization once the log is finalized, while some might always
-  /// be on (and that finalization is a no-op).
-  XRAY_LOG_FINALIZED = 4,
-};
+        /// When an implementation is done finalizing, it MUST return
+        /// XRAY_LOG_FINALIZED. It is up to the implementation to determine what the
+        /// semantics of a finalized implementation is. Some implementations might
+        /// allow re-initialization once the log is finalized, while some might always
+        /// be on (and that finalization is a no-op).
+        XRAY_LOG_FINALIZED = 4,
+    };
 
 /// This enum allows an implementation to signal log flushing operations via
 /// `__xray_log_flushLog()`, and the state of flushing the log.
-enum XRayLogFlushStatus {
-  XRAY_LOG_NOT_FLUSHING = 0,
-  XRAY_LOG_FLUSHING = 1,
-  XRAY_LOG_FLUSHED = 2,
-};
+    enum XRayLogFlushStatus {
+        XRAY_LOG_NOT_FLUSHING = 0,
+        XRAY_LOG_FLUSHING = 1,
+        XRAY_LOG_FLUSHED = 2,
+    };
 
 /// This enum indicates the installation state of a logging implementation, when
 /// associating a mode to a particular logging implementation through
 /// `__xray_log_register_impl(...)` or through `__xray_log_select_mode(...`.
-enum XRayLogRegisterStatus {
-  XRAY_REGISTRATION_OK = 0,
-  XRAY_DUPLICATE_MODE = 1,
-  XRAY_MODE_NOT_FOUND = 2,
-  XRAY_INCOMPLETE_IMPL = 3,
-};
+    enum XRayLogRegisterStatus {
+        XRAY_REGISTRATION_OK = 0,
+        XRAY_DUPLICATE_MODE = 1,
+        XRAY_MODE_NOT_FOUND = 2,
+        XRAY_INCOMPLETE_IMPL = 3,
+    };
 
 /// A valid XRay logging implementation MUST provide all of the function
 /// pointers in XRayLogImpl when being installed through `__xray_set_log_impl`.
 /// To be precise, ALL the functions pointers MUST NOT be nullptr.
-struct XRayLogImpl {
-  /// The log initialization routine provided by the implementation, always
-  /// provided with the following parameters:
-  ///
-  ///   - buffer size (unused)
-  ///   - maximum number of buffers (unused)
-  ///   - a pointer to an argument struct that the implementation MUST handle
-  ///   - the size of the argument struct
-  ///
-  /// See XRayLogInitStatus for details on what the implementation MUST return
-  /// when called.
-  ///
-  /// If the implementation needs to install handlers aside from the 0-argument
-  /// function call handler, it MUST do so in this initialization handler.
-  ///
-  /// See xray_interface.h for available handler installation routines.
-  XRayLogInitStatus (*log_init)(size_t, size_t, void *, size_t);
+    struct XRayLogImpl {
+        /// The log initialization routine provided by the implementation, always
+        /// provided with the following parameters:
+        ///
+        ///   - buffer size (unused)
+        ///   - maximum number of buffers (unused)
+        ///   - a pointer to an argument struct that the implementation MUST handle
+        ///   - the size of the argument struct
+        ///
+        /// See XRayLogInitStatus for details on what the implementation MUST return
+        /// when called.
+        ///
+        /// If the implementation needs to install handlers aside from the 0-argument
+        /// function call handler, it MUST do so in this initialization handler.
+        ///
+        /// See xray_interface.h for available handler installation routines.
+        XRayLogInitStatus (*log_init)(size_t, size_t, void *, size_t);
 
-  /// The log finalization routine provided by the implementation.
-  ///
-  /// See XRayLogInitStatus for details on what the implementation MUST return
-  /// when called.
-  XRayLogInitStatus (*log_finalize)();
+        /// The log finalization routine provided by the implementation.
+        ///
+        /// See XRayLogInitStatus for details on what the implementation MUST return
+        /// when called.
+        XRayLogInitStatus (*log_finalize)();
 
-  /// The 0-argument function call handler. XRay logging implementations MUST
-  /// always have a handler for function entry and exit events. In case the
-  /// implementation wants to support arg1 (or other future extensions to XRay
-  /// logging) those MUST be installed by the installed 'log_init' handler.
-  ///
-  /// Because we didn't want to change the ABI of this struct, the arg1 handler
-  /// may be silently overwritten during initialization as well.
-  void (*handle_arg0)(int32_t, XRayEntryType);
+        /// The 0-argument function call handler. XRay logging implementations MUST
+        /// always have a handler for function entry and exit events. In case the
+        /// implementation wants to support arg1 (or other future extensions to XRay
+        /// logging) those MUST be installed by the installed 'log_init' handler.
+        ///
+        /// Because we didn't want to change the ABI of this struct, the arg1 handler
+        /// may be silently overwritten during initialization as well.
+        void (*handle_arg0)(int32_t, XRayEntryType);
 
-  /// The log implementation provided routine for when __xray_log_flushLog() is
-  /// called.
-  ///
-  /// See XRayLogFlushStatus for details on what the implementation MUST return
-  /// when called.
-  XRayLogFlushStatus (*flush_log)();
-};
+        /// The log implementation provided routine for when __xray_log_flushLog() is
+        /// called.
+        ///
+        /// See XRayLogFlushStatus for details on what the implementation MUST return
+        /// when called.
+        XRayLogFlushStatus (*flush_log)();
+    };
 
 /// DEPRECATED: Use the mode registration workflow instead with
 /// __xray_log_register_mode(...) and __xray_log_select_mode(...). See the
@@ -213,7 +213,7 @@ struct XRayLogImpl {
 ///
 /// It is logging implementation defined what happens when this function is
 /// called while in any other states.
-void __xray_set_log_impl(XRayLogImpl Impl);
+    void __xray_set_log_impl(XRayLogImpl Impl);
 
 /// This function registers a logging implementation against a "mode"
 /// identifier. This allows multiple modes to be registered, and chosen at
@@ -228,8 +228,8 @@ void __xray_set_log_impl(XRayLogImpl Impl);
 ///   - XRAY_DUPLICATE_MODE when an implementation is already associated with
 ///     the provided Mode; does not update the already-registered
 ///     implementation.
-XRayLogRegisterStatus __xray_log_register_mode(const char *Mode,
-                                               XRayLogImpl Impl);
+    XRayLogRegisterStatus __xray_log_register_mode(const char *Mode,
+            XRayLogImpl Impl);
 
 /// This function selects the implementation associated with Mode that has been
 /// registered through __xray_log_register_mode(...) and installs that
@@ -241,12 +241,12 @@ XRayLogRegisterStatus __xray_log_register_mode(const char *Mode,
 ///   - XRAY_REGISTRATION_OK on success.
 ///   - XRAY_MODE_NOT_FOUND if there is no implementation associated with Mode;
 ///     does not update the currently installed implementation.
-XRayLogRegisterStatus __xray_log_select_mode(const char *Mode);
+    XRayLogRegisterStatus __xray_log_select_mode(const char *Mode);
 
 /// Returns an identifier for the currently selected XRay mode chosen through
 /// the __xray_log_select_mode(...) function call. Returns nullptr if there is
 /// no currently installed mode.
-const char *__xray_log_get_current_mode();
+    const char *__xray_log_get_current_mode();
 
 /// This function removes the currently installed implementation. It will also
 /// uninstall any handlers that have been previously installed. It does NOT
@@ -263,14 +263,14 @@ const char *__xray_log_get_current_mode();
 ///
 /// It is logging implementation defined what happens when this function is
 /// called while in any other states.
-void __xray_remove_log_impl();
+    void __xray_remove_log_impl();
 
 /// DEPRECATED: Use __xray_log_init_mode() instead, and provide all the options
 /// in string form.
 /// Invokes the installed implementation initialization routine. See
 /// XRayLogInitStatus for what the return values mean.
-XRayLogInitStatus __xray_log_init(size_t BufferSize, size_t MaxBuffers,
-                                  void *Args, size_t ArgsSize);
+    XRayLogInitStatus __xray_log_init(size_t BufferSize, size_t MaxBuffers,
+                                      void *Args, size_t ArgsSize);
 
 /// Invokes the installed initialization routine, which *must* support the
 /// string based form.
@@ -287,30 +287,30 @@ XRayLogInitStatus __xray_log_init(size_t BufferSize, size_t MaxBuffers,
 ///
 /// FIXME: Updating the XRayLogImpl struct is an ABI breaking change. When we
 /// are ready to make a breaking change, we should clean this up appropriately.
-XRayLogInitStatus __xray_log_init_mode(const char *Mode, const char *Config);
+    XRayLogInitStatus __xray_log_init_mode(const char *Mode, const char *Config);
 
 /// Like __xray_log_init_mode(...) this version allows for providing
 /// configurations that might have non-null-terminated strings. This will
 /// operate similarly to __xray_log_init_mode, with the exception that
 /// |ArgsSize| will be what |ConfigSize| is.
-XRayLogInitStatus __xray_log_init_mode_bin(const char *Mode, const char *Config,
-                                           size_t ConfigSize);
+    XRayLogInitStatus __xray_log_init_mode_bin(const char *Mode, const char *Config,
+            size_t ConfigSize);
 
 /// Invokes the installed implementation finalization routine. See
 /// XRayLogInitStatus for what the return values mean.
-XRayLogInitStatus __xray_log_finalize();
+    XRayLogInitStatus __xray_log_finalize();
 
 /// Invokes the install implementation log flushing routine. See
 /// XRayLogFlushStatus for what the return values mean.
-XRayLogFlushStatus __xray_log_flushLog();
+    XRayLogFlushStatus __xray_log_flushLog();
 
 /// An XRayBuffer represents a section of memory which can be treated by log
 /// processing functions as bytes stored in the logging implementation's
 /// buffers.
-struct XRayBuffer {
-  const void *Data;
-  size_t Size;
-};
+    struct XRayBuffer {
+        const void *Data;
+        size_t Size;
+    };
 
 /// Registers an iterator function which takes an XRayBuffer argument, then
 /// returns another XRayBuffer function representing the next buffer. When the
@@ -319,10 +319,10 @@ struct XRayBuffer {
 ///
 /// The first invocation of this Iterator function will always take an empty
 /// XRayBuffer (Data = nullptr, Size = 0).
-void __xray_log_set_buffer_iterator(XRayBuffer (*Iterator)(XRayBuffer));
+    void __xray_log_set_buffer_iterator(XRayBuffer (*Iterator)(XRayBuffer));
 
 /// Removes the currently registered buffer iterator function.
-void __xray_log_remove_buffer_iterator();
+    void __xray_log_remove_buffer_iterator();
 
 /// Invokes the provided handler to process data maintained by the logging
 /// handler. This API will be provided raw access to the data available in
@@ -349,8 +349,8 @@ void __xray_log_remove_buffer_iterator();
 ///
 /// See XRayLogFlushStatus for what the return values mean.
 ///
-XRayLogFlushStatus __xray_log_process_buffers(void (*Processor)(const char *,
-                                                                XRayBuffer));
+    XRayLogFlushStatus __xray_log_process_buffers(void (*Processor)(const char *,
+            XRayBuffer));
 
 } // extern "C"
 

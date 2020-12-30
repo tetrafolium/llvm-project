@@ -31,16 +31,16 @@ namespace gpu {
 /// Utility class for the GPU dialect to represent triples of `Value`s
 /// accessible through `.x`, `.y`, and `.z` similarly to CUDA notation.
 struct KernelDim3 {
-  Value x;
-  Value y;
-  Value z;
+    Value x;
+    Value y;
+    Value z;
 };
 
 class AsyncTokenType
     : public Type::TypeBase<AsyncTokenType, Type, TypeStorage> {
 public:
-  // Used for generic hooks in TypeBase.
-  using Base::Base;
+    // Used for generic hooks in TypeBase.
+    using Base::Base;
 };
 
 // Adds a `gpu.async.token` to the front of the argument list.

@@ -17,15 +17,15 @@ class MCStreamer;
 /// A generic AVR target output stream.
 class AVRTargetStreamer : public MCTargetStreamer {
 public:
-  explicit AVRTargetStreamer(MCStreamer &S);
+    explicit AVRTargetStreamer(MCStreamer &S);
 
-  void finish() override;
+    void finish() override;
 };
 
 /// A target streamer for textual AVR assembly code.
 class AVRTargetAsmStreamer : public AVRTargetStreamer {
 public:
-  explicit AVRTargetAsmStreamer(MCStreamer &S);
+    explicit AVRTargetAsmStreamer(MCStreamer &S);
 };
 
 } // end namespace llvm

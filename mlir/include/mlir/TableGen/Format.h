@@ -39,151 +39,155 @@ namespace tblgen {
 /// same unified setter.
 class FmtContext {
 public:
-  // Placeholder kinds
-  enum class PHKind : char {
-    None,
-    Custom,  // For custom placeholders
-    Builder, // For the $_builder placeholder
-    Op,      // For the $_op placeholder
-    Self,    // For the $_self placeholder
-  };
+    // Placeholder kinds
+    enum class PHKind : char {
+        None,
+        Custom,  // For custom placeholders
+        Builder, // For the $_builder placeholder
+        Op,      // For the $_op placeholder
+        Self,    // For the $_self placeholder
+    };
 
-  FmtContext() = default;
+    FmtContext() = default;
 
-  // Setter for custom placeholders
-  FmtContext &addSubst(StringRef placeholder, Twine subst);
+    // Setter for custom placeholders
+    FmtContext &addSubst(StringRef placeholder, Twine subst);
 
-  // Setters for builtin placeholders
-  FmtContext &withBuilder(Twine subst);
-  FmtContext &withOp(Twine subst);
-  FmtContext &withSelf(Twine subst);
+    // Setters for builtin placeholders
+    FmtContext &withBuilder(Twine subst);
+    FmtContext &withOp(Twine subst);
+    FmtContext &withSelf(Twine subst);
 
-  Optional<StringRef> getSubstFor(PHKind placeholder) const;
-  Optional<StringRef> getSubstFor(StringRef placeholder) const;
+    Optional<StringRef> getSubstFor(PHKind placeholder) const;
+    Optional<StringRef> getSubstFor(StringRef placeholder) const;
 
-  static PHKind getPlaceHolderKind(StringRef str);
+    static PHKind getPlaceHolderKind(StringRef str);
 
 private:
-  struct PHKindInfo : DenseMapInfo<PHKind> {
-    using CharInfo = DenseMapInfo<char>;
+    struct PHKindInfo : DenseMapInfo<PHKind> {
+        using CharInfo = DenseMapInfo<char>;
 
-    static inline PHKind getEmptyKey() {
-      return static_cast<PHKind>(CharInfo::getEmptyKey());
-    }
-    static inline PHKind getTombstoneKey() {
-      return static_cast<PHKind>(CharInfo::getTombstoneKey());
-    }
-    static unsigned getHashValue(const PHKind &val) {
-      return CharInfo::getHashValue(static_cast<char>(val));
-    }
+        static inline PHKind getEmptyKey() {
+            return static_cast<PHKind>(CharInfo::getEmptyKey());
+        }
+        static inline PHKind getTombstoneKey() {
+            return static_cast<PHKind>(CharInfo::getTombstoneKey());
+        }
+        static unsigned getHashValue(const PHKind &val) {
+            return CharInfo::getHashValue(static_cast<char>(val));
+        }
 
-    static bool isEqual(const PHKind &lhs, const PHKind &rhs) {
-      return lhs == rhs;
-    }
-  };
+        static bool isEqual(const PHKind &lhs, const PHKind &rhs) {
+            return lhs == rhs;
+        }
+    };
 
-  llvm::SmallDenseMap<PHKind, std::string, 4, PHKindInfo> builtinSubstMap;
-  llvm::StringMap<std::string> customSubstMap;
+    llvm::SmallDenseMap<PHKind, std::string, 4, PHKindInfo> builtinSubstMap;
+    llvm::StringMap<std::string> customSubstMap;
 };
 
 /// Struct representing a replacement segment for the formatted string. It can
 /// be a segment of the formatting template (for `Literal`) or a replacement
 /// parameter (for `PositionalPH` and `SpecialPH`).
 struct FmtReplacement {
-  enum class Type { Empty, Literal, PositionalPH, SpecialPH };
+    enum class Type { Empty, Literal, PositionalPH, SpecialPH };
 
-  FmtReplacement() = default;
-  explicit FmtReplacement(StringRef literal)
-      : type(Type::Literal), spec(literal) {}
-  FmtReplacement(StringRef spec, size_t index)
-      : type(Type::PositionalPH), spec(spec), index(index) {}
-  FmtReplacement(StringRef spec, FmtContext::PHKind placeholder)
-      : type(Type::SpecialPH), spec(spec), placeholder(placeholder) {}
+    FmtReplacement() = default;
+    explicit FmtReplacement(StringRef literal)
+        : type(Type::Literal), spec(literal) {}
+    FmtReplacement(StringRef spec, size_t index)
+        : type(Type::PositionalPH), spec(spec), index(index) {}
+    FmtReplacement(StringRef spec, FmtContext::PHKind placeholder)
+        : type(Type::SpecialPH), spec(spec), placeholder(placeholder) {}
 
-  Type type = Type::Empty;
-  StringRef spec;
-  size_t index = 0;
-  FmtContext::PHKind placeholder = FmtContext::PHKind::None;
+    Type type = Type::Empty;
+    StringRef spec;
+    size_t index = 0;
+    FmtContext::PHKind placeholder = FmtContext::PHKind::None;
 };
 
 class FmtObjectBase {
 private:
-  static std::pair<FmtReplacement, StringRef> splitFmtSegment(StringRef fmt);
-  static std::vector<FmtReplacement> parseFormatString(StringRef fmt);
+    static std::pair<FmtReplacement, StringRef> splitFmtSegment(StringRef fmt);
+    static std::vector<FmtReplacement> parseFormatString(StringRef fmt);
 
 protected:
-  // The parameters are stored in a std::tuple, which does not provide runtime
-  // indexing capabilities.  In order to enable runtime indexing, we use this
-  // structure to put the parameters into a std::vector.  Since the parameters
-  // are not all the same type, we use some type-erasure by wrapping the
-  // parameters in a template class that derives from a non-template superclass.
-  // Essentially, we are converting a std::tuple<Derived<Ts...>> to a
-  // std::vector<Base*>.
-  struct CreateAdapters {
-    template <typename... Ts>
-    std::vector<llvm::detail::format_adapter *> operator()(Ts &... items) {
-      return std::vector<llvm::detail::format_adapter *>{&items...};
-    }
-  };
+    // The parameters are stored in a std::tuple, which does not provide runtime
+    // indexing capabilities.  In order to enable runtime indexing, we use this
+    // structure to put the parameters into a std::vector.  Since the parameters
+    // are not all the same type, we use some type-erasure by wrapping the
+    // parameters in a template class that derives from a non-template superclass.
+    // Essentially, we are converting a std::tuple<Derived<Ts...>> to a
+    // std::vector<Base*>.
+    struct CreateAdapters {
+        template <typename... Ts>
+        std::vector<llvm::detail::format_adapter *> operator()(Ts &... items) {
+            return std::vector<llvm::detail::format_adapter *> {&items...};
+        }
+    };
 
-  StringRef fmt;
-  const FmtContext *context;
-  std::vector<llvm::detail::format_adapter *> adapters;
-  std::vector<FmtReplacement> replacements;
+    StringRef fmt;
+    const FmtContext *context;
+    std::vector<llvm::detail::format_adapter *> adapters;
+    std::vector<FmtReplacement> replacements;
 
 public:
-  FmtObjectBase(StringRef fmt, const FmtContext *ctx, size_t numParams)
-      : fmt(fmt), context(ctx), replacements(parseFormatString(fmt)) {}
+    FmtObjectBase(StringRef fmt, const FmtContext *ctx, size_t numParams)
+        : fmt(fmt), context(ctx), replacements(parseFormatString(fmt)) {}
 
-  FmtObjectBase(const FmtObjectBase &that) = delete;
+    FmtObjectBase(const FmtObjectBase &that) = delete;
 
-  FmtObjectBase(FmtObjectBase &&that)
-      : fmt(std::move(that.fmt)), context(that.context),
-        adapters(), // adapters are initialized by FmtObject
-        replacements(std::move(that.replacements)) {}
+    FmtObjectBase(FmtObjectBase &&that)
+        : fmt(std::move(that.fmt)), context(that.context),
+          adapters(), // adapters are initialized by FmtObject
+          replacements(std::move(that.replacements)) {}
 
-  void format(llvm::raw_ostream &s) const;
+    void format(llvm::raw_ostream &s) const;
 
-  std::string str() const {
-    std::string result;
-    llvm::raw_string_ostream s(result);
-    format(s);
-    return s.str();
-  }
+    std::string str() const {
+        std::string result;
+        llvm::raw_string_ostream s(result);
+        format(s);
+        return s.str();
+    }
 
-  template <unsigned N> SmallString<N> sstr() const {
-    SmallString<N> result;
-    llvm::raw_svector_ostream s(result);
-    format(s);
-    return result;
-  }
+    template <unsigned N> SmallString<N> sstr() const {
+        SmallString<N> result;
+        llvm::raw_svector_ostream s(result);
+        format(s);
+        return result;
+    }
 
-  template <unsigned N> operator SmallString<N>() const { return sstr<N>(); }
+    template <unsigned N> operator SmallString<N>() const {
+        return sstr<N>();
+    }
 
-  operator std::string() const { return str(); }
+    operator std::string() const {
+        return str();
+    }
 };
 
 template <typename Tuple> class FmtObject : public FmtObjectBase {
-  // Storage for the parameter adapters.  Since the base class erases the type
-  // of the parameters, we have to own the storage for the parameters here, and
-  // have the base class store type-erased pointers into this tuple.
-  Tuple parameters;
+    // Storage for the parameter adapters.  Since the base class erases the type
+    // of the parameters, we have to own the storage for the parameters here, and
+    // have the base class store type-erased pointers into this tuple.
+    Tuple parameters;
 
 public:
-  FmtObject(StringRef fmt, const FmtContext *ctx, Tuple &&params)
-      : FmtObjectBase(fmt, ctx, std::tuple_size<Tuple>::value),
-        parameters(std::move(params)) {
-    adapters.reserve(std::tuple_size<Tuple>::value);
-    adapters = llvm::apply_tuple(CreateAdapters(), parameters);
-  }
+    FmtObject(StringRef fmt, const FmtContext *ctx, Tuple &&params)
+        : FmtObjectBase(fmt, ctx, std::tuple_size<Tuple>::value),
+          parameters(std::move(params)) {
+        adapters.reserve(std::tuple_size<Tuple>::value);
+        adapters = llvm::apply_tuple(CreateAdapters(), parameters);
+    }
 
-  FmtObject(FmtObject const &that) = delete;
+    FmtObject(FmtObject const &that) = delete;
 
-  FmtObject(FmtObject &&that)
-      : FmtObjectBase(std::move(that)), parameters(std::move(that.parameters)) {
-    adapters.reserve(that.adapters.size());
-    adapters = llvm::apply_tuple(CreateAdapters(), parameters);
-  }
+    FmtObject(FmtObject &&that)
+        : FmtObjectBase(std::move(that)), parameters(std::move(that.parameters)) {
+        adapters.reserve(that.adapters.size());
+        adapters = llvm::apply_tuple(CreateAdapters(), parameters);
+    }
 };
 
 /// Formats text by substituting placeholders in format string with replacement
@@ -224,14 +228,14 @@ public:
 ///    in C++ code generation.
 template <typename... Ts>
 inline auto tgfmt(StringRef fmt, const FmtContext *ctx, Ts &&... vals)
-    -> FmtObject<decltype(std::make_tuple(
-        llvm::detail::build_format_adapter(std::forward<Ts>(vals))...))> {
-  using ParamTuple = decltype(std::make_tuple(
-      llvm::detail::build_format_adapter(std::forward<Ts>(vals))...));
-  return FmtObject<ParamTuple>(
-      fmt, ctx,
-      std::make_tuple(
-          llvm::detail::build_format_adapter(std::forward<Ts>(vals))...));
+-> FmtObject<decltype(std::make_tuple(
+                          llvm::detail::build_format_adapter(std::forward<Ts>(vals))...))> {
+    using ParamTuple = decltype(std::make_tuple(
+                                    llvm::detail::build_format_adapter(std::forward<Ts>(vals))...));
+    return FmtObject<ParamTuple>(
+               fmt, ctx,
+               std::make_tuple(
+                   llvm::detail::build_format_adapter(std::forward<Ts>(vals))...));
 }
 
 } // end namespace tblgen

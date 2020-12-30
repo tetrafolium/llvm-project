@@ -38,29 +38,29 @@ void InitializeAllocator();
 const bool kAlwaysClearMemory = true;
 
 struct ChunkMetadata {
-  u8 allocated : 8;  // Must be first.
-  ChunkTag tag : 2;
+    u8 allocated : 8;  // Must be first.
+    ChunkTag tag : 2;
 #if SANITIZER_WORDSIZE == 64
-  uptr requested_size : 54;
+    uptr requested_size : 54;
 #else
-  uptr requested_size : 32;
-  uptr padding : 22;
+    uptr requested_size : 32;
+    uptr padding : 22;
 #endif
-  u32 stack_trace_id;
+    u32 stack_trace_id;
 };
 
 #if defined(__mips64) || defined(__aarch64__) || defined(__i386__) || \
     defined(__arm__)
 template <typename AddressSpaceViewTy>
 struct AP32 {
-  static const uptr kSpaceBeg = 0;
-  static const u64 kSpaceSize = SANITIZER_MMAP_RANGE_SIZE;
-  static const uptr kMetadataSize = sizeof(ChunkMetadata);
-  typedef __sanitizer::CompactSizeClassMap SizeClassMap;
-  static const uptr kRegionSizeLog = 20;
-  using AddressSpaceView = AddressSpaceViewTy;
-  typedef NoOpMapUnmapCallback MapUnmapCallback;
-  static const uptr kFlags = 0;
+    static const uptr kSpaceBeg = 0;
+    static const u64 kSpaceSize = SANITIZER_MMAP_RANGE_SIZE;
+    static const uptr kMetadataSize = sizeof(ChunkMetadata);
+    typedef __sanitizer::CompactSizeClassMap SizeClassMap;
+    static const uptr kRegionSizeLog = 20;
+    using AddressSpaceView = AddressSpaceViewTy;
+    typedef NoOpMapUnmapCallback MapUnmapCallback;
+    static const uptr kFlags = 0;
 };
 template <typename AddressSpaceView>
 using PrimaryAllocatorASVT = SizeClassAllocator32<AP32<AddressSpaceView>>;
@@ -81,13 +81,13 @@ const uptr kAllocatorSize  = 0x40000000000ULL;  // 4T.
 # endif
 template <typename AddressSpaceViewTy>
 struct AP64 {  // Allocator64 parameters. Deliberately using a short name.
-  static const uptr kSpaceBeg = kAllocatorSpace;
-  static const uptr kSpaceSize = kAllocatorSize;
-  static const uptr kMetadataSize = sizeof(ChunkMetadata);
-  typedef DefaultSizeClassMap SizeClassMap;
-  typedef NoOpMapUnmapCallback MapUnmapCallback;
-  static const uptr kFlags = 0;
-  using AddressSpaceView = AddressSpaceViewTy;
+    static const uptr kSpaceBeg = kAllocatorSpace;
+    static const uptr kSpaceSize = kAllocatorSize;
+    static const uptr kMetadataSize = sizeof(ChunkMetadata);
+    typedef DefaultSizeClassMap SizeClassMap;
+    typedef NoOpMapUnmapCallback MapUnmapCallback;
+    static const uptr kFlags = 0;
+    using AddressSpaceView = AddressSpaceViewTy;
 };
 
 template <typename AddressSpaceView>

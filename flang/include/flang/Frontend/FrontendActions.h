@@ -18,15 +18,15 @@ namespace Fortran::frontend {
 //===----------------------------------------------------------------------===//
 
 class InputOutputTestAction : public FrontendAction {
-  void ExecuteAction() override;
+    void ExecuteAction() override;
 };
 
 class PrintPreprocessedAction : public FrontendAction {
-  void ExecuteAction() override;
+    void ExecuteAction() override;
 };
 
 class ParseSyntaxOnlyAction : public FrontendAction {
-  void ExecuteAction() override;
+    void ExecuteAction() override;
 };
 
 } // namespace Fortran::frontend

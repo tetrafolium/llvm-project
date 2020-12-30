@@ -20,44 +20,44 @@ using namespace mlir;
 
 namespace {
 class LLVMAVX512ModuleTranslation : public LLVM::ModuleTranslation {
-  friend LLVM::ModuleTranslation;
+    friend LLVM::ModuleTranslation;
 
 public:
-  using LLVM::ModuleTranslation::ModuleTranslation;
+    using LLVM::ModuleTranslation::ModuleTranslation;
 
 protected:
-  LogicalResult convertOperation(Operation &opInst,
-                                 llvm::IRBuilder<> &builder) override {
+    LogicalResult convertOperation(Operation &opInst,
+                                   llvm::IRBuilder<> &builder) override {
 #include "mlir/Dialect/LLVMIR/LLVMAVX512Conversions.inc"
 
-    return LLVM::ModuleTranslation::convertOperation(opInst, builder);
-  }
+        return LLVM::ModuleTranslation::convertOperation(opInst, builder);
+    }
 };
 
 std::unique_ptr<llvm::Module>
 translateLLVMAVX512ModuleToLLVMIR(Operation *m, llvm::LLVMContext &llvmContext,
                                   StringRef name) {
-  return LLVM::ModuleTranslation::translateModule<LLVMAVX512ModuleTranslation>(
-      m, llvmContext, name);
+    return LLVM::ModuleTranslation::translateModule<LLVMAVX512ModuleTranslation>(
+               m, llvmContext, name);
 }
 } // end namespace
 
 namespace mlir {
 void registerAVX512ToLLVMIRTranslation() {
-  TranslateFromMLIRRegistration reg(
-      "avx512-mlir-to-llvmir",
-      [](ModuleOp module, raw_ostream &output) {
+    TranslateFromMLIRRegistration reg(
+        "avx512-mlir-to-llvmir",
+    [](ModuleOp module, raw_ostream &output) {
         llvm::LLVMContext llvmContext;
         auto llvmModule = translateLLVMAVX512ModuleToLLVMIR(
-            module, llvmContext, "LLVMDialectModule");
+                              module, llvmContext, "LLVMDialectModule");
         if (!llvmModule)
-          return failure();
+            return failure();
 
         llvmModule->print(output, nullptr);
         return success();
-      },
-      [](DialectRegistry &registry) {
+    },
+    [](DialectRegistry &registry) {
         registry.insert<LLVM::LLVMAVX512Dialect, LLVM::LLVMDialect>();
-      });
+    });
 }
 } // namespace mlir

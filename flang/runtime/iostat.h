@@ -22,39 +22,39 @@ namespace Fortran::runtime::io {
 // they're actually defined in another magic-numbers.h header file
 // so that they can be included both here and there.)
 enum Iostat {
-  IostatOk = 0, // no error, EOF, or EOR condition
+    IostatOk = 0, // no error, EOF, or EOR condition
 
-  // These error codes are required by Fortran (see 12.10.2.16-17) to be
-  // negative integer values
-  IostatEnd = FORTRAN_RUNTIME_IOSTAT_END, // end-of-file on input & no error
-  // End-of-record on non-advancing input, no EOF or error
-  IostatEor = FORTRAN_RUNTIME_IOSTAT_EOR,
+    // These error codes are required by Fortran (see 12.10.2.16-17) to be
+    // negative integer values
+    IostatEnd = FORTRAN_RUNTIME_IOSTAT_END, // end-of-file on input & no error
+    // End-of-record on non-advancing input, no EOF or error
+    IostatEor = FORTRAN_RUNTIME_IOSTAT_EOR,
 
-  // This value is also required to be negative (12.11.5 bullet 6).
-  // It signifies a FLUSH statement on an unflushable unit.
-  IostatUnflushable = FORTRAN_RUNTIME_IOSTAT_FLUSH,
+    // This value is also required to be negative (12.11.5 bullet 6).
+    // It signifies a FLUSH statement on an unflushable unit.
+    IostatUnflushable = FORTRAN_RUNTIME_IOSTAT_FLUSH,
 
-  // Other errors are positive.  We use "errno" values unchanged.
-  // This error is exported in ISO_Fortran_env.
-  IostatInquireInternalUnit = FORTRAN_RUNTIME_IOSTAT_INQUIRE_INTERNAL_UNIT,
+    // Other errors are positive.  We use "errno" values unchanged.
+    // This error is exported in ISO_Fortran_env.
+    IostatInquireInternalUnit = FORTRAN_RUNTIME_IOSTAT_INQUIRE_INTERNAL_UNIT,
 
-  // The remaining error codes are not exported.
-  IostatGenericError = 1001, // see IOMSG= for details
-  IostatRecordWriteOverrun,
-  IostatRecordReadOverrun,
-  IostatInternalWriteOverrun,
-  IostatErrorInFormat,
-  IostatErrorInKeyword,
-  IostatEndfileNonSequential,
-  IostatEndfileUnwritable,
-  IostatOpenBadRecl,
-  IostatOpenUnknownSize,
-  IostatOpenBadAppend,
-  IostatWriteToReadOnly,
-  IostatReadFromWriteOnly,
-  IostatBackspaceNonSequential,
-  IostatBackspaceAtFirstRecord,
-  IostatRewindNonSequential,
+    // The remaining error codes are not exported.
+    IostatGenericError = 1001, // see IOMSG= for details
+    IostatRecordWriteOverrun,
+    IostatRecordReadOverrun,
+    IostatInternalWriteOverrun,
+    IostatErrorInFormat,
+    IostatErrorInKeyword,
+    IostatEndfileNonSequential,
+    IostatEndfileUnwritable,
+    IostatOpenBadRecl,
+    IostatOpenUnknownSize,
+    IostatOpenBadAppend,
+    IostatWriteToReadOnly,
+    IostatReadFromWriteOnly,
+    IostatBackspaceNonSequential,
+    IostatBackspaceAtFirstRecord,
+    IostatRewindNonSequential,
 };
 
 const char *IostatErrorString(int);

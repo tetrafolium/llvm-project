@@ -19,27 +19,27 @@ class TFModelEvaluator;
 class InlineSizeEstimatorAnalysis
     : public AnalysisInfoMixin<InlineSizeEstimatorAnalysis> {
 public:
-  InlineSizeEstimatorAnalysis();
-  InlineSizeEstimatorAnalysis(InlineSizeEstimatorAnalysis &&);
-  ~InlineSizeEstimatorAnalysis();
+    InlineSizeEstimatorAnalysis();
+    InlineSizeEstimatorAnalysis(InlineSizeEstimatorAnalysis &&);
+    ~InlineSizeEstimatorAnalysis();
 
-  static AnalysisKey Key;
-  using Result = Optional<size_t>;
-  Result run(const Function &F, FunctionAnalysisManager &FAM);
-  static bool isEvaluatorRequested();
+    static AnalysisKey Key;
+    using Result = Optional<size_t>;
+    Result run(const Function &F, FunctionAnalysisManager &FAM);
+    static bool isEvaluatorRequested();
 
 private:
-  std::unique_ptr<TFModelEvaluator> Evaluator;
+    std::unique_ptr<TFModelEvaluator> Evaluator;
 };
 
 class InlineSizeEstimatorAnalysisPrinterPass
     : public PassInfoMixin<InlineSizeEstimatorAnalysisPrinterPass> {
-  raw_ostream &OS;
+    raw_ostream &OS;
 
 public:
-  explicit InlineSizeEstimatorAnalysisPrinterPass(raw_ostream &OS) : OS(OS) {}
+    explicit InlineSizeEstimatorAnalysisPrinterPass(raw_ostream &OS) : OS(OS) {}
 
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // namespace llvm
 #endif // LLVM_ANALYSIS_INLINESIZEESTIMATORANALYSIS_H

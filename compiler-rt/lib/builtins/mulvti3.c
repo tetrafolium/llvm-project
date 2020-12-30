@@ -21,6 +21,8 @@
 #define fixint_t ti_int
 #include "int_mulv_impl.inc"
 
-COMPILER_RT_ABI ti_int __mulvti3(ti_int a, ti_int b) { return __mulvXi3(a, b); }
+COMPILER_RT_ABI ti_int __mulvti3(ti_int a, ti_int b) {
+    return __mulvXi3(a, b);
+}
 
 #endif // CRT_HAS_128BIT

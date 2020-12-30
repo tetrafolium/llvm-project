@@ -12,23 +12,29 @@
 namespace clang {
 namespace clangd {
 
-Context Context::empty() { return Context(/*DataPtr=*/nullptr); }
+Context Context::empty() {
+    return Context(/*DataPtr=*/nullptr);
+}
 
 Context::Context(std::shared_ptr<const Data> DataPtr)
     : DataPtr(std::move(DataPtr)) {}
 
-Context Context::clone() const { return Context(DataPtr); }
-
-static Context &currentContext() {
-  static thread_local auto C = Context::empty();
-  return C;
+Context Context::clone() const {
+    return Context(DataPtr);
 }
 
-const Context &Context::current() { return currentContext(); }
+static Context &currentContext() {
+    static thread_local auto C = Context::empty();
+    return C;
+}
+
+const Context &Context::current() {
+    return currentContext();
+}
 
 Context Context::swapCurrent(Context Replacement) {
-  std::swap(Replacement, currentContext());
-  return Replacement;
+    std::swap(Replacement, currentContext());
+    return Replacement;
 }
 
 } // namespace clangd

@@ -20,8 +20,8 @@ inline namespace SharedLiveDebugValues {
 // implementation.
 class LDVImpl {
 public:
-  virtual bool ExtendRanges(MachineFunction &MF, TargetPassConfig *TPC) = 0;
-  virtual ~LDVImpl() {}
+    virtual bool ExtendRanges(MachineFunction &MF, TargetPassConfig *TPC) = 0;
+    virtual ~LDVImpl() {}
 };
 
 } // namespace SharedLiveDebugValues

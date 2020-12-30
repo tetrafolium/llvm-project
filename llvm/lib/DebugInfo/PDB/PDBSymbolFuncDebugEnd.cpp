@@ -17,5 +17,5 @@ using namespace llvm;
 using namespace llvm::pdb;
 
 void PDBSymbolFuncDebugEnd::dump(PDBSymDumper &Dumper) const {
-  Dumper.dump(*this);
+    Dumper.dump(*this);
 }

@@ -66,10 +66,10 @@ const char *GetPermissionsAsCString(uint32_t permissions);
 
 namespace llvm {
 template <> struct format_provider<lldb::StateType> {
-  static void format(const lldb::StateType &state, raw_ostream &Stream,
-                     StringRef Style) {
-    Stream << lldb_private::StateAsCString(state);
-  }
+    static void format(const lldb::StateType &state, raw_ostream &Stream,
+                       StringRef Style) {
+        Stream << lldb_private::StateAsCString(state);
+    }
 };
 } // namespace llvm
 

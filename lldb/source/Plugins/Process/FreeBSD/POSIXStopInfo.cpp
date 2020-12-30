@@ -17,14 +17,20 @@ using namespace lldb_private;
 POSIXLimboStopInfo::~POSIXLimboStopInfo() {}
 
 lldb::StopReason POSIXLimboStopInfo::GetStopReason() const {
-  return lldb::eStopReasonThreadExiting;
+    return lldb::eStopReasonThreadExiting;
 }
 
-const char *POSIXLimboStopInfo::GetDescription() { return "thread exiting"; }
+const char *POSIXLimboStopInfo::GetDescription() {
+    return "thread exiting";
+}
 
-bool POSIXLimboStopInfo::ShouldStop(Event *event_ptr) { return false; }
+bool POSIXLimboStopInfo::ShouldStop(Event *event_ptr) {
+    return false;
+}
 
-bool POSIXLimboStopInfo::ShouldNotify(Event *event_ptr) { return false; }
+bool POSIXLimboStopInfo::ShouldNotify(Event *event_ptr) {
+    return false;
+}
 
 //===----------------------------------------------------------------------===//
 // POSIXNewThreadStopInfo
@@ -32,13 +38,17 @@ bool POSIXLimboStopInfo::ShouldNotify(Event *event_ptr) { return false; }
 POSIXNewThreadStopInfo::~POSIXNewThreadStopInfo() {}
 
 lldb::StopReason POSIXNewThreadStopInfo::GetStopReason() const {
-  return lldb::eStopReasonNone;
+    return lldb::eStopReasonNone;
 }
 
 const char *POSIXNewThreadStopInfo::GetDescription() {
-  return "thread spawned";
+    return "thread spawned";
 }
 
-bool POSIXNewThreadStopInfo::ShouldStop(Event *event_ptr) { return false; }
+bool POSIXNewThreadStopInfo::ShouldStop(Event *event_ptr) {
+    return false;
+}
 
-bool POSIXNewThreadStopInfo::ShouldNotify(Event *event_ptr) { return false; }
+bool POSIXNewThreadStopInfo::ShouldNotify(Event *event_ptr) {
+    return false;
+}

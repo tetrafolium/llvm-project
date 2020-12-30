@@ -8,15 +8,17 @@
 namespace llvm {
 class DWPError : public ErrorInfo<DWPError> {
 public:
-  DWPError(std::string Info) : Info(std::move(Info)) {}
-  void log(raw_ostream &OS) const override { OS << Info; }
-  std::error_code convertToErrorCode() const override {
-    llvm_unreachable("Not implemented");
-  }
-  static char ID;
+    DWPError(std::string Info) : Info(std::move(Info)) {}
+    void log(raw_ostream &OS) const override {
+        OS << Info;
+    }
+    std::error_code convertToErrorCode() const override {
+        llvm_unreachable("Not implemented");
+    }
+    static char ID;
 
 private:
-  std::string Info;
+    std::string Info;
 };
 }
 

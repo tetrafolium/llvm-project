@@ -68,14 +68,14 @@ template <typename Fun, typename Ret = decltype(std::declval<Fun>()())>
 Ret retryAfterSignalUnlessShutdown(
     const std::enable_if_t<true, Ret> &Fail, // Suppress deduction.
     const Fun &F) {
-  Ret Res;
-  do {
-    if (shutdownRequested())
-      return Fail;
-    errno = 0;
-    Res = F();
-  } while (Res == Fail && errno == EINTR);
-  return Res;
+    Ret Res;
+    do {
+        if (shutdownRequested())
+            return Fail;
+        errno = 0;
+        Res = F();
+    } while (Res == Fail && errno == EINTR);
+    return Res;
 }
 
 } // namespace clangd

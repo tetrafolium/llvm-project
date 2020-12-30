@@ -55,7 +55,9 @@ const DeclTypeSpec *FindParentTypeSpec(const Scope &);
 const DeclTypeSpec *FindParentTypeSpec(const Symbol &);
 
 enum class Tristate { No, Yes, Maybe };
-inline Tristate ToTristate(bool x) { return x ? Tristate::Yes : Tristate::No; }
+inline Tristate ToTristate(bool x) {
+    return x ? Tristate::Yes : Tristate::No;
+}
 
 // Is this a user-defined assignment? If both sides are the same derived type
 // (and the ranks are okay) the answer is Maybe.
@@ -64,7 +66,7 @@ Tristate IsDefinedAssignment(
     const std::optional<evaluate::DynamicType> &rhsType, int rhsRank);
 // Test for intrinsic unary and binary operators based on types and ranks
 bool IsIntrinsicRelational(common::RelationalOperator,
-    const evaluate::DynamicType &, int, const evaluate::DynamicType &, int);
+                           const evaluate::DynamicType &, int, const evaluate::DynamicType &, int);
 bool IsIntrinsicNumeric(const evaluate::DynamicType &);
 bool IsIntrinsicNumeric(
     const evaluate::DynamicType &, int, const evaluate::DynamicType &, int);
@@ -82,8 +84,8 @@ bool DoesScopeContain(const Scope *, const Symbol &);
 bool IsUseAssociated(const Symbol &, const Scope &);
 bool IsHostAssociated(const Symbol &, const Scope &);
 inline bool IsStmtFunction(const Symbol &symbol) {
-  const auto *subprogram{symbol.detailsIf<SubprogramDetails>()};
-  return subprogram && subprogram->stmtFunction();
+    const auto *subprogram{symbol.detailsIf<SubprogramDetails>()};
+    return subprogram && subprogram->stmtFunction();
 }
 bool IsInStmtFunction(const Symbol &);
 bool IsStmtFunctionDummy(const Symbol &);
@@ -103,7 +105,7 @@ bool IsEventTypeOrLockType(const DerivedTypeSpec *);
 bool IsOrContainsEventOrLockComponent(const Symbol &);
 bool CanBeTypeBoundProc(const Symbol *);
 bool IsInitialized(const Symbol &, bool ignoreDATAstatements = false,
-    const Symbol *derivedType = nullptr);
+                   const Symbol *derivedType = nullptr);
 bool HasIntrinsicTypeName(const Symbol &);
 bool IsSeparateModuleProcedureInterface(const Symbol *);
 bool IsAutomatic(const Symbol &);
@@ -112,7 +114,7 @@ bool InCommonBlock(const Symbol &);
 
 // Return an ultimate component of type that matches predicate, or nullptr.
 const Symbol *FindUltimateComponent(const DerivedTypeSpec &type,
-    const std::function<bool(const Symbol &)> &predicate);
+                                    const std::function<bool(const Symbol &)> &predicate);
 const Symbol *FindUltimateComponent(
     const Symbol &symbol, const std::function<bool(const Symbol &)> &predicate);
 
@@ -123,34 +125,34 @@ const Symbol *FindImmediateComponent(
     const DerivedTypeSpec &, const std::function<bool(const Symbol &)> &);
 
 inline bool IsPointer(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::POINTER);
+    return symbol.attrs().test(Attr::POINTER);
 }
 inline bool IsAllocatable(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::ALLOCATABLE);
+    return symbol.attrs().test(Attr::ALLOCATABLE);
 }
 inline bool IsAllocatableOrPointer(const Symbol &symbol) {
-  return IsPointer(symbol) || IsAllocatable(symbol);
+    return IsPointer(symbol) || IsAllocatable(symbol);
 }
 inline bool IsNamedConstant(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::PARAMETER);
+    return symbol.attrs().test(Attr::PARAMETER);
 }
 inline bool IsOptional(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::OPTIONAL);
+    return symbol.attrs().test(Attr::OPTIONAL);
 }
 inline bool IsIntentIn(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::INTENT_IN);
+    return symbol.attrs().test(Attr::INTENT_IN);
 }
 inline bool IsIntentInOut(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::INTENT_INOUT);
+    return symbol.attrs().test(Attr::INTENT_INOUT);
 }
 inline bool IsIntentOut(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::INTENT_OUT);
+    return symbol.attrs().test(Attr::INTENT_OUT);
 }
 inline bool IsProtected(const Symbol &symbol) {
-  return symbol.attrs().test(Attr::PROTECTED);
+    return symbol.attrs().test(Attr::PROTECTED);
 }
 inline bool IsImpliedDoIndex(const Symbol &symbol) {
-  return symbol.owner().kind() == Scope::Kind::ImpliedDos;
+    return symbol.owner().kind() == Scope::Kind::ImpliedDos;
 }
 bool IsFinalizable(const Symbol &);
 bool IsFinalizable(const DerivedTypeSpec &);
@@ -159,12 +161,12 @@ bool IsCoarray(const Symbol &);
 bool IsInBlankCommon(const Symbol &);
 bool IsAutomaticObject(const Symbol &);
 inline bool IsAssumedSizeArray(const Symbol &symbol) {
-  const auto *details{symbol.detailsIf<ObjectEntityDetails>()};
-  return details && details->IsAssumedSize();
+    const auto *details{symbol.detailsIf<ObjectEntityDetails>()};
+    return details && details->IsAssumedSize();
 }
 inline bool IsAssumedRankArray(const Symbol &symbol) {
-  const auto *details{symbol.detailsIf<ObjectEntityDetails>()};
-  return details && details->IsAssumedRank();
+    const auto *details{symbol.detailsIf<ObjectEntityDetails>()};
+    return details && details->IsAssumedRank();
 }
 bool IsAssumedLengthCharacter(const Symbol &);
 bool IsExternal(const Symbol &);
@@ -173,7 +175,7 @@ bool IsModuleProcedure(const Symbol &);
 std::optional<parser::MessageFixedText> WhyNotModifiable(
     const Symbol &, const Scope &);
 std::optional<parser::Message> WhyNotModifiable(SourceName, const SomeExpr &,
-    const Scope &, bool vectorSubscriptIsOk = false);
+        const Scope &, bool vectorSubscriptIsOk = false);
 const Symbol *IsExternalInPureContext(const Symbol &, const Scope &);
 bool HasCoarray(const parser::Expr &);
 bool IsPolymorphicAllocatable(const Symbol &);
@@ -202,7 +204,7 @@ std::list<SourceName> OrderParameterNames(const Symbol &);
 
 // Return an existing or new derived type instance
 const DeclTypeSpec &FindOrInstantiateDerivedType(Scope &, DerivedTypeSpec &&,
-    SemanticsContext &, DeclTypeSpec::Category = DeclTypeSpec::TypeDerived);
+        SemanticsContext &, DeclTypeSpec::Category = DeclTypeSpec::TypeDerived);
 
 // When a subprogram defined in a submodule defines a separate module
 // procedure whose interface is defined in an ancestor (sub)module,
@@ -216,28 +218,30 @@ const Symbol *FindExternallyVisibleObject(const Symbol &, const Scope &);
 
 template <typename A>
 const Symbol *FindExternallyVisibleObject(const A &, const Scope &) {
-  return nullptr; // default base case
+    return nullptr; // default base case
 }
 
 template <typename T>
 const Symbol *FindExternallyVisibleObject(
     const evaluate::Designator<T> &designator, const Scope &scope) {
-  if (const Symbol * symbol{designator.GetBaseObject().symbol()}) {
-    return FindExternallyVisibleObject(*symbol, scope);
-  } else if (std::holds_alternative<evaluate::CoarrayRef>(designator.u)) {
-    // Coindexed values are visible even if their image-local objects are not.
-    return designator.GetBaseObject().symbol();
-  } else {
-    return nullptr;
-  }
+    if (const Symbol * symbol{designator.GetBaseObject().symbol()}) {
+        return FindExternallyVisibleObject(*symbol, scope);
+    } else if (std::holds_alternative<evaluate::CoarrayRef>(designator.u)) {
+        // Coindexed values are visible even if their image-local objects are not.
+        return designator.GetBaseObject().symbol();
+    } else {
+        return nullptr;
+    }
 }
 
 template <typename T>
 const Symbol *FindExternallyVisibleObject(
     const evaluate::Expr<T> &expr, const Scope &scope) {
-  return std::visit(
-      [&](const auto &x) { return FindExternallyVisibleObject(x, scope); },
-      expr.u);
+    return std::visit(
+    [&](const auto &x) {
+        return FindExternallyVisibleObject(x, scope);
+    },
+    expr.u);
 }
 
 using SomeExpr = evaluate::Expr<evaluate::SomeType>;
@@ -248,29 +252,29 @@ bool ExprTypeKindIsDefault(
     const SomeExpr &expr, const SemanticsContext &context);
 
 struct GetExprHelper {
-  static const SomeExpr *Get(const parser::Expr &);
-  static const SomeExpr *Get(const parser::Variable &);
-  static const SomeExpr *Get(const parser::DataStmtConstant &);
-  template <typename T>
-  static const SomeExpr *Get(const common::Indirection<T> &x) {
-    return Get(x.value());
-  }
-  template <typename T> static const SomeExpr *Get(const std::optional<T> &x) {
-    return x ? Get(*x) : nullptr;
-  }
-  template <typename T> static const SomeExpr *Get(const T &x) {
-    if constexpr (ConstraintTrait<T>) {
-      return Get(x.thing);
-    } else if constexpr (WrapperTrait<T>) {
-      return Get(x.v);
-    } else {
-      return nullptr;
+    static const SomeExpr *Get(const parser::Expr &);
+    static const SomeExpr *Get(const parser::Variable &);
+    static const SomeExpr *Get(const parser::DataStmtConstant &);
+    template <typename T>
+    static const SomeExpr *Get(const common::Indirection<T> &x) {
+        return Get(x.value());
     }
-  }
+    template <typename T> static const SomeExpr *Get(const std::optional<T> &x) {
+        return x ? Get(*x) : nullptr;
+    }
+    template <typename T> static const SomeExpr *Get(const T &x) {
+        if constexpr (ConstraintTrait<T>) {
+            return Get(x.thing);
+        } else if constexpr (WrapperTrait<T>) {
+            return Get(x.v);
+        } else {
+            return nullptr;
+        }
+    }
 };
 
 template <typename T> const SomeExpr *GetExpr(const T &x) {
-  return GetExprHelper{}.Get(x);
+    return GetExprHelper{}.Get(x);
 }
 
 const evaluate::Assignment *GetAssignment(const parser::AssignmentStmt &);
@@ -278,28 +282,28 @@ const evaluate::Assignment *GetAssignment(
     const parser::PointerAssignmentStmt &);
 
 template <typename T> std::optional<std::int64_t> GetIntValue(const T &x) {
-  if (const auto *expr{GetExpr(x)}) {
-    return evaluate::ToInt64(*expr);
-  } else {
-    return std::nullopt;
-  }
+    if (const auto *expr{GetExpr(x)}) {
+        return evaluate::ToInt64(*expr);
+    } else {
+        return std::nullopt;
+    }
 }
 
 template <typename T> bool IsZero(const T &expr) {
-  auto value{GetIntValue(expr)};
-  return value && *value == 0;
+    auto value{GetIntValue(expr)};
+    return value && *value == 0;
 }
 
 // 15.2.2
 enum class ProcedureDefinitionClass {
-  None,
-  Intrinsic,
-  External,
-  Internal,
-  Module,
-  Dummy,
-  Pointer,
-  StatementFunction
+    None,
+    Intrinsic,
+    External,
+    Internal,
+    Module,
+    Dummy,
+    Pointer,
+    StatementFunction
 };
 
 ProcedureDefinitionClass ClassifyProcedure(const Symbol &);
@@ -368,114 +372,146 @@ ENUM_CLASS(ComponentKind, Ordered, Direct, Ultimate, Potential, Scope)
 
 template <ComponentKind componentKind> class ComponentIterator {
 public:
-  ComponentIterator(const DerivedTypeSpec &derived) : derived_{derived} {}
-  class const_iterator {
-  public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = SymbolRef;
-    using difference_type = void;
-    using pointer = const Symbol *;
-    using reference = const Symbol &;
+    ComponentIterator(const DerivedTypeSpec &derived) : derived_{derived} {}
+    class const_iterator {
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = SymbolRef;
+        using difference_type = void;
+        using pointer = const Symbol *;
+        using reference = const Symbol &;
 
-    static const_iterator Create(const DerivedTypeSpec &);
+        static const_iterator Create(const DerivedTypeSpec &);
 
-    const_iterator &operator++() {
-      Increment();
-      return *this;
-    }
-    const_iterator operator++(int) {
-      const_iterator tmp(*this);
-      Increment();
-      return tmp;
-    }
-    reference operator*() const {
-      CHECK(!componentPath_.empty());
-      return DEREF(componentPath_.back().component());
-    }
-    pointer operator->() const { return &**this; }
+        const_iterator &operator++() {
+            Increment();
+            return *this;
+        }
+        const_iterator operator++(int) {
+            const_iterator tmp(*this);
+            Increment();
+            return tmp;
+        }
+        reference operator*() const {
+            CHECK(!componentPath_.empty());
+            return DEREF(componentPath_.back().component());
+        }
+        pointer operator->() const {
+            return &**this;
+        }
 
-    bool operator==(const const_iterator &other) const {
-      return componentPath_ == other.componentPath_;
-    }
-    bool operator!=(const const_iterator &other) const {
-      return !(*this == other);
-    }
+        bool operator==(const const_iterator &other) const {
+            return componentPath_ == other.componentPath_;
+        }
+        bool operator!=(const const_iterator &other) const {
+            return !(*this == other);
+        }
 
-    // bool() operator indicates if the iterator can be dereferenced without
-    // having to check against an end() iterator.
-    explicit operator bool() const { return !componentPath_.empty(); }
+        // bool() operator indicates if the iterator can be dereferenced without
+        // having to check against an end() iterator.
+        explicit operator bool() const {
+            return !componentPath_.empty();
+        }
 
-    // Builds a designator name of the referenced component for messages.
-    // The designator helps when the component referred to by the iterator
-    // may be "buried" into other components. This gives the full
-    // path inside the iterated derived type: e.g "%a%b%c%ultimate"
-    // when it->name() only gives "ultimate". Parent components are
-    // part of the path for clarity, even though they could be
-    // skipped.
-    std::string BuildResultDesignatorName() const;
+        // Builds a designator name of the referenced component for messages.
+        // The designator helps when the component referred to by the iterator
+        // may be "buried" into other components. This gives the full
+        // path inside the iterated derived type: e.g "%a%b%c%ultimate"
+        // when it->name() only gives "ultimate". Parent components are
+        // part of the path for clarity, even though they could be
+        // skipped.
+        std::string BuildResultDesignatorName() const;
 
-  private:
-    using name_iterator =
-        std::conditional_t<componentKind == ComponentKind::Scope,
+    private:
+        using name_iterator =
+            std::conditional_t<componentKind == ComponentKind::Scope,
             typename Scope::const_iterator,
             typename std::list<SourceName>::const_iterator>;
 
-    class ComponentPathNode {
-    public:
-      explicit ComponentPathNode(const DerivedTypeSpec &derived)
-          : derived_{derived} {
-        if constexpr (componentKind == ComponentKind::Scope) {
-          const Scope &scope{DEREF(derived.scope())};
-          nameIterator_ = scope.cbegin();
-          nameEnd_ = scope.cend();
-        } else {
-          const std::list<SourceName> &nameList{
-              derived.typeSymbol().get<DerivedTypeDetails>().componentNames()};
-          nameIterator_ = nameList.cbegin();
-          nameEnd_ = nameList.cend();
-        }
-      }
-      const Symbol *component() const { return component_; }
-      void set_component(const Symbol &component) { component_ = &component; }
-      bool visited() const { return visited_; }
-      void set_visited(bool yes) { visited_ = yes; }
-      bool descended() const { return descended_; }
-      void set_descended(bool yes) { descended_ = yes; }
-      name_iterator &nameIterator() { return nameIterator_; }
-      name_iterator nameEnd() { return nameEnd_; }
-      const Symbol &GetTypeSymbol() const { return derived_->typeSymbol(); }
-      const Scope &GetScope() const { return DEREF(derived_->scope()); }
-      bool operator==(const ComponentPathNode &that) const {
-        return &*derived_ == &*that.derived_ &&
-            nameIterator_ == that.nameIterator_ &&
-            component_ == that.component_;
-      }
+        class ComponentPathNode {
+        public:
+            explicit ComponentPathNode(const DerivedTypeSpec &derived)
+                : derived_{derived} {
+                if constexpr (componentKind == ComponentKind::Scope) {
+                    const Scope &scope{DEREF(derived.scope())};
+                    nameIterator_ = scope.cbegin();
+                    nameEnd_ = scope.cend();
+                } else {
+                    const std::list<SourceName> &nameList{
+                        derived.typeSymbol().get<DerivedTypeDetails>().componentNames()};
+                    nameIterator_ = nameList.cbegin();
+                    nameEnd_ = nameList.cend();
+                }
+            }
+            const Symbol *component() const {
+                return component_;
+            }
+            void set_component(const Symbol &component) {
+                component_ = &component;
+            }
+            bool visited() const {
+                return visited_;
+            }
+            void set_visited(bool yes) {
+                visited_ = yes;
+            }
+            bool descended() const {
+                return descended_;
+            }
+            void set_descended(bool yes) {
+                descended_ = yes;
+            }
+            name_iterator &nameIterator() {
+                return nameIterator_;
+            }
+            name_iterator nameEnd() {
+                return nameEnd_;
+            }
+            const Symbol &GetTypeSymbol() const {
+                return derived_->typeSymbol();
+            }
+            const Scope &GetScope() const {
+                return DEREF(derived_->scope());
+            }
+            bool operator==(const ComponentPathNode &that) const {
+                return &*derived_ == &*that.derived_ &&
+                       nameIterator_ == that.nameIterator_ &&
+                       component_ == that.component_;
+            }
 
-    private:
-      common::Reference<const DerivedTypeSpec> derived_;
-      name_iterator nameEnd_;
-      name_iterator nameIterator_;
-      const Symbol *component_{nullptr}; // until Increment()
-      bool visited_{false};
-      bool descended_{false};
+        private:
+            common::Reference<const DerivedTypeSpec> derived_;
+            name_iterator nameEnd_;
+            name_iterator nameIterator_;
+            const Symbol *component_{nullptr}; // until Increment()
+            bool visited_{false};
+            bool descended_{false};
+        };
+
+        const DerivedTypeSpec *PlanComponentTraversal(
+            const Symbol &component) const;
+        // Advances to the next relevant symbol, if any.  Afterwards, the
+        // iterator will either be at its end or contain no null component().
+        void Increment();
+
+        std::vector<ComponentPathNode> componentPath_;
     };
 
-    const DerivedTypeSpec *PlanComponentTraversal(
-        const Symbol &component) const;
-    // Advances to the next relevant symbol, if any.  Afterwards, the
-    // iterator will either be at its end or contain no null component().
-    void Increment();
-
-    std::vector<ComponentPathNode> componentPath_;
-  };
-
-  const_iterator begin() { return cbegin(); }
-  const_iterator end() { return cend(); }
-  const_iterator cbegin() { return const_iterator::Create(derived_); }
-  const_iterator cend() { return const_iterator{}; }
+    const_iterator begin() {
+        return cbegin();
+    }
+    const_iterator end() {
+        return cend();
+    }
+    const_iterator cbegin() {
+        return const_iterator::Create(derived_);
+    }
+    const_iterator cend() {
+        return const_iterator{};
+    }
 
 private:
-  const DerivedTypeSpec &derived_;
+    const DerivedTypeSpec &derived_;
 };
 
 extern template class ComponentIterator<ComponentKind::Ordered>;
@@ -512,41 +548,43 @@ FindPolymorphicAllocatableNonCoarrayUltimateComponent(const DerivedTypeSpec &);
 // there is a branch to a label which is not in the given set.
 class LabelEnforce {
 public:
-  LabelEnforce(SemanticsContext &context, std::set<parser::Label> &&labels,
-      parser::CharBlock constructSourcePosition, const char *construct)
-      : context_{context}, labels_{labels},
-        constructSourcePosition_{constructSourcePosition}, construct_{
-                                                               construct} {}
-  template <typename T> bool Pre(const T &) { return true; }
-  template <typename T> bool Pre(const parser::Statement<T> &statement) {
-    currentStatementSourcePosition_ = statement.source;
-    return true;
-  }
+    LabelEnforce(SemanticsContext &context, std::set<parser::Label> &&labels,
+                 parser::CharBlock constructSourcePosition, const char *construct)
+        : context_{context}, labels_{labels},
+          constructSourcePosition_{constructSourcePosition}, construct_{
+        construct} {}
+    template <typename T> bool Pre(const T &) {
+        return true;
+    }
+    template <typename T> bool Pre(const parser::Statement<T> &statement) {
+        currentStatementSourcePosition_ = statement.source;
+        return true;
+    }
 
-  template <typename T> void Post(const T &) {}
+    template <typename T> void Post(const T &) {}
 
-  void Post(const parser::GotoStmt &gotoStmt);
-  void Post(const parser::ComputedGotoStmt &computedGotoStmt);
-  void Post(const parser::ArithmeticIfStmt &arithmeticIfStmt);
-  void Post(const parser::AssignStmt &assignStmt);
-  void Post(const parser::AssignedGotoStmt &assignedGotoStmt);
-  void Post(const parser::AltReturnSpec &altReturnSpec);
-  void Post(const parser::ErrLabel &errLabel);
-  void Post(const parser::EndLabel &endLabel);
-  void Post(const parser::EorLabel &eorLabel);
-  void checkLabelUse(const parser::Label &labelUsed);
+    void Post(const parser::GotoStmt &gotoStmt);
+    void Post(const parser::ComputedGotoStmt &computedGotoStmt);
+    void Post(const parser::ArithmeticIfStmt &arithmeticIfStmt);
+    void Post(const parser::AssignStmt &assignStmt);
+    void Post(const parser::AssignedGotoStmt &assignedGotoStmt);
+    void Post(const parser::AltReturnSpec &altReturnSpec);
+    void Post(const parser::ErrLabel &errLabel);
+    void Post(const parser::EndLabel &endLabel);
+    void Post(const parser::EorLabel &eorLabel);
+    void checkLabelUse(const parser::Label &labelUsed);
 
 private:
-  SemanticsContext &context_;
-  std::set<parser::Label> labels_;
-  parser::CharBlock currentStatementSourcePosition_{nullptr};
-  parser::CharBlock constructSourcePosition_{nullptr};
-  const char *construct_{nullptr};
+    SemanticsContext &context_;
+    std::set<parser::Label> labels_;
+    parser::CharBlock currentStatementSourcePosition_{nullptr};
+    parser::CharBlock constructSourcePosition_{nullptr};
+    const char *construct_{nullptr};
 
-  parser::MessageFormattedText GetEnclosingConstructMsg();
-  void SayWithConstruct(SemanticsContext &context,
-      parser::CharBlock stmtLocation, parser::MessageFormattedText &&message,
-      parser::CharBlock constructLocation);
+    parser::MessageFormattedText GetEnclosingConstructMsg();
+    void SayWithConstruct(SemanticsContext &context,
+                          parser::CharBlock stmtLocation, parser::MessageFormattedText &&message,
+                          parser::CharBlock constructLocation);
 };
 // Return the (possibly null) name of the ConstructNode
 const std::optional<parser::Name> &MaybeGetNodeName(

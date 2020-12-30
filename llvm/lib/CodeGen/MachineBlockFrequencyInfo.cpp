@@ -41,7 +41,7 @@ static cl::opt<GVDAGType> ViewMachineBlockFreqPropagationDAG(
                           "display a graph using the raw "
                           "integer fractional block frequency representation."),
                clEnumValN(GVDT_Count, "count", "display a graph using the real "
-                                               "profile count if available.")));
+                          "profile count if available.")));
 
 // Similar option above, but used to control BFI display only after MBP pass
 cl::opt<GVDAGType> ViewBlockLayoutWithBFI(
@@ -77,84 +77,86 @@ static cl::opt<bool> PrintMachineBlockFreq(
 extern cl::opt<std::string> PrintBlockFreqFuncName;
 
 static GVDAGType getGVDT() {
-  if (ViewBlockLayoutWithBFI != GVDT_None)
-    return ViewBlockLayoutWithBFI;
+    if (ViewBlockLayoutWithBFI != GVDT_None)
+        return ViewBlockLayoutWithBFI;
 
-  return ViewMachineBlockFreqPropagationDAG;
+    return ViewMachineBlockFreqPropagationDAG;
 }
 
 namespace llvm {
 
 template <> struct GraphTraits<MachineBlockFrequencyInfo *> {
-  using NodeRef = const MachineBasicBlock *;
-  using ChildIteratorType = MachineBasicBlock::const_succ_iterator;
-  using nodes_iterator = pointer_iterator<MachineFunction::const_iterator>;
+    using NodeRef = const MachineBasicBlock *;
+    using ChildIteratorType = MachineBasicBlock::const_succ_iterator;
+    using nodes_iterator = pointer_iterator<MachineFunction::const_iterator>;
 
-  static NodeRef getEntryNode(const MachineBlockFrequencyInfo *G) {
-    return &G->getFunction()->front();
-  }
+    static NodeRef getEntryNode(const MachineBlockFrequencyInfo *G) {
+        return &G->getFunction()->front();
+    }
 
-  static ChildIteratorType child_begin(const NodeRef N) {
-    return N->succ_begin();
-  }
+    static ChildIteratorType child_begin(const NodeRef N) {
+        return N->succ_begin();
+    }
 
-  static ChildIteratorType child_end(const NodeRef N) { return N->succ_end(); }
+    static ChildIteratorType child_end(const NodeRef N) {
+        return N->succ_end();
+    }
 
-  static nodes_iterator nodes_begin(const MachineBlockFrequencyInfo *G) {
-    return nodes_iterator(G->getFunction()->begin());
-  }
+    static nodes_iterator nodes_begin(const MachineBlockFrequencyInfo *G) {
+        return nodes_iterator(G->getFunction()->begin());
+    }
 
-  static nodes_iterator nodes_end(const MachineBlockFrequencyInfo *G) {
-    return nodes_iterator(G->getFunction()->end());
-  }
+    static nodes_iterator nodes_end(const MachineBlockFrequencyInfo *G) {
+        return nodes_iterator(G->getFunction()->end());
+    }
 };
 
 using MBFIDOTGraphTraitsBase =
     BFIDOTGraphTraitsBase<MachineBlockFrequencyInfo,
-                          MachineBranchProbabilityInfo>;
+    MachineBranchProbabilityInfo>;
 
 template <>
 struct DOTGraphTraits<MachineBlockFrequencyInfo *>
     : public MBFIDOTGraphTraitsBase {
-  const MachineFunction *CurFunc = nullptr;
-  DenseMap<const MachineBasicBlock *, int> LayoutOrderMap;
+    const MachineFunction *CurFunc = nullptr;
+    DenseMap<const MachineBasicBlock *, int> LayoutOrderMap;
 
-  explicit DOTGraphTraits(bool isSimple = false)
-      : MBFIDOTGraphTraitsBase(isSimple) {}
+    explicit DOTGraphTraits(bool isSimple = false)
+        : MBFIDOTGraphTraitsBase(isSimple) {}
 
-  std::string getNodeLabel(const MachineBasicBlock *Node,
-                           const MachineBlockFrequencyInfo *Graph) {
-    int layout_order = -1;
-    // Attach additional ordering information if 'isSimple' is false.
-    if (!isSimple()) {
-      const MachineFunction *F = Node->getParent();
-      if (!CurFunc || F != CurFunc) {
-        if (CurFunc)
-          LayoutOrderMap.clear();
+    std::string getNodeLabel(const MachineBasicBlock *Node,
+                             const MachineBlockFrequencyInfo *Graph) {
+        int layout_order = -1;
+        // Attach additional ordering information if 'isSimple' is false.
+        if (!isSimple()) {
+            const MachineFunction *F = Node->getParent();
+            if (!CurFunc || F != CurFunc) {
+                if (CurFunc)
+                    LayoutOrderMap.clear();
 
-        CurFunc = F;
-        int O = 0;
-        for (auto MBI = F->begin(); MBI != F->end(); ++MBI, ++O) {
-          LayoutOrderMap[&*MBI] = O;
+                CurFunc = F;
+                int O = 0;
+                for (auto MBI = F->begin(); MBI != F->end(); ++MBI, ++O) {
+                    LayoutOrderMap[&*MBI] = O;
+                }
+            }
+            layout_order = LayoutOrderMap[Node];
         }
-      }
-      layout_order = LayoutOrderMap[Node];
+        return MBFIDOTGraphTraitsBase::getNodeLabel(Node, Graph, getGVDT(),
+                layout_order);
     }
-    return MBFIDOTGraphTraitsBase::getNodeLabel(Node, Graph, getGVDT(),
-                                                layout_order);
-  }
 
-  std::string getNodeAttributes(const MachineBasicBlock *Node,
-                                const MachineBlockFrequencyInfo *Graph) {
-    return MBFIDOTGraphTraitsBase::getNodeAttributes(Node, Graph,
-                                                     ViewHotFreqPercent);
-  }
+    std::string getNodeAttributes(const MachineBasicBlock *Node,
+                                  const MachineBlockFrequencyInfo *Graph) {
+        return MBFIDOTGraphTraitsBase::getNodeAttributes(Node, Graph,
+                ViewHotFreqPercent);
+    }
 
-  std::string getEdgeAttributes(const MachineBasicBlock *Node, EdgeIter EI,
-                                const MachineBlockFrequencyInfo *MBFI) {
-    return MBFIDOTGraphTraitsBase::getEdgeAttributes(
-        Node, EI, MBFI, MBFI->getMBPI(), ViewHotFreqPercent);
-  }
+    std::string getEdgeAttributes(const MachineBasicBlock *Node, EdgeIter EI,
+                                  const MachineBlockFrequencyInfo *MBFI) {
+        return MBFIDOTGraphTraitsBase::getEdgeAttributes(
+                   Node, EI, MBFI, MBFI->getMBPI(), ViewHotFreqPercent);
+    }
 };
 
 } // end namespace llvm
@@ -170,114 +172,116 @@ char MachineBlockFrequencyInfo::ID = 0;
 
 MachineBlockFrequencyInfo::MachineBlockFrequencyInfo()
     : MachineFunctionPass(ID) {
-  initializeMachineBlockFrequencyInfoPass(*PassRegistry::getPassRegistry());
+    initializeMachineBlockFrequencyInfoPass(*PassRegistry::getPassRegistry());
 }
 
 MachineBlockFrequencyInfo::MachineBlockFrequencyInfo(
-      MachineFunction &F,
-      MachineBranchProbabilityInfo &MBPI,
-      MachineLoopInfo &MLI) : MachineFunctionPass(ID) {
-  calculate(F, MBPI, MLI);
+    MachineFunction &F,
+    MachineBranchProbabilityInfo &MBPI,
+    MachineLoopInfo &MLI) : MachineFunctionPass(ID) {
+    calculate(F, MBPI, MLI);
 }
 
 MachineBlockFrequencyInfo::~MachineBlockFrequencyInfo() = default;
 
 void MachineBlockFrequencyInfo::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.addRequired<MachineBranchProbabilityInfo>();
-  AU.addRequired<MachineLoopInfo>();
-  AU.setPreservesAll();
-  MachineFunctionPass::getAnalysisUsage(AU);
+    AU.addRequired<MachineBranchProbabilityInfo>();
+    AU.addRequired<MachineLoopInfo>();
+    AU.setPreservesAll();
+    MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 void MachineBlockFrequencyInfo::calculate(
     const MachineFunction &F, const MachineBranchProbabilityInfo &MBPI,
     const MachineLoopInfo &MLI) {
-  if (!MBFI)
-    MBFI.reset(new ImplType);
-  MBFI->calculate(F, MBPI, MLI);
-  if (ViewMachineBlockFreqPropagationDAG != GVDT_None &&
-      (ViewBlockFreqFuncName.empty() ||
-       F.getName().equals(ViewBlockFreqFuncName))) {
-    view("MachineBlockFrequencyDAGS." + F.getName());
-  }
-  if (PrintMachineBlockFreq &&
-      (PrintBlockFreqFuncName.empty() ||
-       F.getName().equals(PrintBlockFreqFuncName))) {
-    MBFI->print(dbgs());
-  }
+    if (!MBFI)
+        MBFI.reset(new ImplType);
+    MBFI->calculate(F, MBPI, MLI);
+    if (ViewMachineBlockFreqPropagationDAG != GVDT_None &&
+            (ViewBlockFreqFuncName.empty() ||
+             F.getName().equals(ViewBlockFreqFuncName))) {
+        view("MachineBlockFrequencyDAGS." + F.getName());
+    }
+    if (PrintMachineBlockFreq &&
+            (PrintBlockFreqFuncName.empty() ||
+             F.getName().equals(PrintBlockFreqFuncName))) {
+        MBFI->print(dbgs());
+    }
 }
 
 bool MachineBlockFrequencyInfo::runOnMachineFunction(MachineFunction &F) {
-  MachineBranchProbabilityInfo &MBPI =
-      getAnalysis<MachineBranchProbabilityInfo>();
-  MachineLoopInfo &MLI = getAnalysis<MachineLoopInfo>();
-  calculate(F, MBPI, MLI);
-  return false;
+    MachineBranchProbabilityInfo &MBPI =
+        getAnalysis<MachineBranchProbabilityInfo>();
+    MachineLoopInfo &MLI = getAnalysis<MachineLoopInfo>();
+    calculate(F, MBPI, MLI);
+    return false;
 }
 
-void MachineBlockFrequencyInfo::releaseMemory() { MBFI.reset(); }
+void MachineBlockFrequencyInfo::releaseMemory() {
+    MBFI.reset();
+}
 
 /// Pop up a ghostview window with the current block frequency propagation
 /// rendered using dot.
 void MachineBlockFrequencyInfo::view(const Twine &Name, bool isSimple) const {
-  // This code is only for debugging.
-  ViewGraph(const_cast<MachineBlockFrequencyInfo *>(this), Name, isSimple);
+    // This code is only for debugging.
+    ViewGraph(const_cast<MachineBlockFrequencyInfo *>(this), Name, isSimple);
 }
 
 BlockFrequency
 MachineBlockFrequencyInfo::getBlockFreq(const MachineBasicBlock *MBB) const {
-  return MBFI ? MBFI->getBlockFreq(MBB) : 0;
+    return MBFI ? MBFI->getBlockFreq(MBB) : 0;
 }
 
 Optional<uint64_t> MachineBlockFrequencyInfo::getBlockProfileCount(
     const MachineBasicBlock *MBB) const {
-  const Function &F = MBFI->getFunction()->getFunction();
-  return MBFI ? MBFI->getBlockProfileCount(F, MBB) : None;
+    const Function &F = MBFI->getFunction()->getFunction();
+    return MBFI ? MBFI->getBlockProfileCount(F, MBB) : None;
 }
 
 Optional<uint64_t>
 MachineBlockFrequencyInfo::getProfileCountFromFreq(uint64_t Freq) const {
-  const Function &F = MBFI->getFunction()->getFunction();
-  return MBFI ? MBFI->getProfileCountFromFreq(F, Freq) : None;
+    const Function &F = MBFI->getFunction()->getFunction();
+    return MBFI ? MBFI->getProfileCountFromFreq(F, Freq) : None;
 }
 
 bool MachineBlockFrequencyInfo::isIrrLoopHeader(
     const MachineBasicBlock *MBB) const {
-  assert(MBFI && "Expected analysis to be available");
-  return MBFI->isIrrLoopHeader(MBB);
+    assert(MBFI && "Expected analysis to be available");
+    return MBFI->isIrrLoopHeader(MBB);
 }
 
 void MachineBlockFrequencyInfo::onEdgeSplit(
     const MachineBasicBlock &NewPredecessor,
     const MachineBasicBlock &NewSuccessor,
     const MachineBranchProbabilityInfo &MBPI) {
-  assert(MBFI && "Expected analysis to be available");
-  auto NewSuccFreq = MBFI->getBlockFreq(&NewPredecessor) *
-                     MBPI.getEdgeProbability(&NewPredecessor, &NewSuccessor);
+    assert(MBFI && "Expected analysis to be available");
+    auto NewSuccFreq = MBFI->getBlockFreq(&NewPredecessor) *
+                       MBPI.getEdgeProbability(&NewPredecessor, &NewSuccessor);
 
-  MBFI->setBlockFreq(&NewSuccessor, NewSuccFreq.getFrequency());
+    MBFI->setBlockFreq(&NewSuccessor, NewSuccFreq.getFrequency());
 }
 
 const MachineFunction *MachineBlockFrequencyInfo::getFunction() const {
-  return MBFI ? MBFI->getFunction() : nullptr;
+    return MBFI ? MBFI->getFunction() : nullptr;
 }
 
 const MachineBranchProbabilityInfo *MachineBlockFrequencyInfo::getMBPI() const {
-  return MBFI ? &MBFI->getBPI() : nullptr;
+    return MBFI ? &MBFI->getBPI() : nullptr;
 }
 
 raw_ostream &
 MachineBlockFrequencyInfo::printBlockFreq(raw_ostream &OS,
-                                          const BlockFrequency Freq) const {
-  return MBFI ? MBFI->printBlockFreq(OS, Freq) : OS;
+        const BlockFrequency Freq) const {
+    return MBFI ? MBFI->printBlockFreq(OS, Freq) : OS;
 }
 
 raw_ostream &
 MachineBlockFrequencyInfo::printBlockFreq(raw_ostream &OS,
-                                          const MachineBasicBlock *MBB) const {
-  return MBFI ? MBFI->printBlockFreq(OS, MBB) : OS;
+        const MachineBasicBlock *MBB) const {
+    return MBFI ? MBFI->printBlockFreq(OS, MBB) : OS;
 }
 
 uint64_t MachineBlockFrequencyInfo::getEntryFreq() const {
-  return MBFI ? MBFI->getEntryFreq() : 0;
+    return MBFI ? MBFI->getEntryFreq() : 0;
 }

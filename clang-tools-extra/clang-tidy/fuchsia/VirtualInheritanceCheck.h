@@ -20,11 +20,11 @@ namespace fuchsia {
 /// For the user-facing documentation see:
 /// http://clang.llvm.org/extra/clang-tidy/checks/fuchsia-virtual-inheritance.html
 class VirtualInheritanceCheck : public ClangTidyCheck {
- public:
-  VirtualInheritanceCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+public:
+    VirtualInheritanceCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 }  // namespace fuchsia

@@ -38,9 +38,9 @@
 static __inline float __DEFAULT_FN_ATTRS128
 _cvtsh_ss(unsigned short __a)
 {
-  __v8hi __v = {(short)__a, 0, 0, 0, 0, 0, 0, 0};
-  __v4sf __r = __builtin_ia32_vcvtph2ps(__v);
-  return __r[0];
+    __v8hi __v = {(short)__a, 0, 0, 0, 0, 0, 0, 0};
+    __v4sf __r = __builtin_ia32_vcvtph2ps(__v);
+    return __r[0];
 }
 
 /// Converts a 32-bit single-precision float value to a 16-bit
@@ -109,7 +109,7 @@ _cvtsh_ss(unsigned short __a)
 static __inline __m128 __DEFAULT_FN_ATTRS128
 _mm_cvtph_ps(__m128i __a)
 {
-  return (__m128)__builtin_ia32_vcvtph2ps((__v8hi)__a);
+    return (__m128)__builtin_ia32_vcvtph2ps((__v8hi)__a);
 }
 
 /// Converts a 256-bit vector of [8 x float] into a 128-bit vector
@@ -153,7 +153,7 @@ _mm_cvtph_ps(__m128i __a)
 static __inline __m256 __DEFAULT_FN_ATTRS256
 _mm256_cvtph_ps(__m128i __a)
 {
-  return (__m256)__builtin_ia32_vcvtph2ps256((__v8hi)__a);
+    return (__m256)__builtin_ia32_vcvtph2ps256((__v8hi)__a);
 }
 
 #undef __DEFAULT_FN_ATTRS128

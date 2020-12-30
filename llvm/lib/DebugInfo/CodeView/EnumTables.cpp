@@ -270,43 +270,44 @@ static const EnumEntry<uint16_t> TrampolineNames[] = {
 };
 
 static const EnumEntry<COFF::SectionCharacteristics>
-    ImageSectionCharacteristicNames[] = {
-        CV_ENUM_ENT(COFF, IMAGE_SCN_TYPE_NOLOAD),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_TYPE_NO_PAD),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_CNT_CODE),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_CNT_INITIALIZED_DATA),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_CNT_UNINITIALIZED_DATA),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_OTHER),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_INFO),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_REMOVE),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_COMDAT),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_GPREL),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_PURGEABLE),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_16BIT),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_LOCKED),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_PRELOAD),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_1BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_2BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_4BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_8BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_16BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_32BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_64BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_128BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_256BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_512BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_1024BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_2048BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_4096BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_8192BYTES),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_NRELOC_OVFL),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_DISCARDABLE),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_NOT_CACHED),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_NOT_PAGED),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_SHARED),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_EXECUTE),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_READ),
-        CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_WRITE)};
+ImageSectionCharacteristicNames[] = {
+    CV_ENUM_ENT(COFF, IMAGE_SCN_TYPE_NOLOAD),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_TYPE_NO_PAD),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_CNT_CODE),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_CNT_INITIALIZED_DATA),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_CNT_UNINITIALIZED_DATA),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_OTHER),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_INFO),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_REMOVE),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_COMDAT),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_GPREL),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_PURGEABLE),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_16BIT),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_LOCKED),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_PRELOAD),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_1BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_2BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_4BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_8BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_16BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_32BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_64BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_128BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_256BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_512BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_1024BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_2048BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_4096BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_ALIGN_8192BYTES),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_LNK_NRELOC_OVFL),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_DISCARDABLE),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_NOT_CACHED),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_NOT_PAGED),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_SHARED),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_EXECUTE),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_READ),
+    CV_ENUM_ENT(COFF, IMAGE_SCN_MEM_WRITE)
+};
 
 static const EnumEntry<uint16_t> ClassOptionNames[] = {
     CV_ENUM_CLASS_ENT(ClassOptions, Packed),
@@ -434,125 +435,125 @@ namespace llvm {
 namespace codeview {
 
 ArrayRef<EnumEntry<SymbolKind>> getSymbolTypeNames() {
-  return makeArrayRef(SymbolTypeNames);
+    return makeArrayRef(SymbolTypeNames);
 }
 
 ArrayRef<EnumEntry<TypeLeafKind>> getTypeLeafNames() {
-  return makeArrayRef(TypeLeafNames);
+    return makeArrayRef(TypeLeafNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getRegisterNames(CPUType Cpu) {
-  if (Cpu == CPUType::ARMNT) {
-    return makeArrayRef(RegisterNames_ARM);
-  } else if (Cpu == CPUType::ARM64) {
-    return makeArrayRef(RegisterNames_ARM64);
-  }
-  return makeArrayRef(RegisterNames_X86);
+    if (Cpu == CPUType::ARMNT) {
+        return makeArrayRef(RegisterNames_ARM);
+    } else if (Cpu == CPUType::ARM64) {
+        return makeArrayRef(RegisterNames_ARM64);
+    }
+    return makeArrayRef(RegisterNames_X86);
 }
 
 ArrayRef<EnumEntry<uint32_t>> getPublicSymFlagNames() {
-  return makeArrayRef(PublicSymFlagNames);
+    return makeArrayRef(PublicSymFlagNames);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getProcSymFlagNames() {
-  return makeArrayRef(ProcSymFlagNames);
+    return makeArrayRef(ProcSymFlagNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getLocalFlagNames() {
-  return makeArrayRef(LocalFlags);
+    return makeArrayRef(LocalFlags);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getFrameCookieKindNames() {
-  return makeArrayRef(FrameCookieKinds);
+    return makeArrayRef(FrameCookieKinds);
 }
 
 ArrayRef<EnumEntry<SourceLanguage>> getSourceLanguageNames() {
-  return makeArrayRef(SourceLanguages);
+    return makeArrayRef(SourceLanguages);
 }
 
 ArrayRef<EnumEntry<uint32_t>> getCompileSym2FlagNames() {
-  return makeArrayRef(CompileSym2FlagNames);
+    return makeArrayRef(CompileSym2FlagNames);
 }
 
 ArrayRef<EnumEntry<uint32_t>> getCompileSym3FlagNames() {
-  return makeArrayRef(CompileSym3FlagNames);
+    return makeArrayRef(CompileSym3FlagNames);
 }
 
 ArrayRef<EnumEntry<uint32_t>> getFileChecksumNames() {
-  return makeArrayRef(FileChecksumNames);
+    return makeArrayRef(FileChecksumNames);
 }
 
 ArrayRef<EnumEntry<unsigned>> getCPUTypeNames() {
-  return makeArrayRef(CPUTypeNames);
+    return makeArrayRef(CPUTypeNames);
 }
 
 ArrayRef<EnumEntry<uint32_t>> getFrameProcSymFlagNames() {
-  return makeArrayRef(FrameProcSymFlagNames);
+    return makeArrayRef(FrameProcSymFlagNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getExportSymFlagNames() {
-  return makeArrayRef(ExportSymFlagNames);
+    return makeArrayRef(ExportSymFlagNames);
 }
 
 ArrayRef<EnumEntry<uint32_t>> getModuleSubstreamKindNames() {
-  return makeArrayRef(ModuleSubstreamKindNames);
+    return makeArrayRef(ModuleSubstreamKindNames);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getThunkOrdinalNames() {
-  return makeArrayRef(ThunkOrdinalNames);
+    return makeArrayRef(ThunkOrdinalNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getTrampolineNames() {
-  return makeArrayRef(TrampolineNames);
+    return makeArrayRef(TrampolineNames);
 }
 
 ArrayRef<EnumEntry<COFF::SectionCharacteristics>>
 getImageSectionCharacteristicNames() {
-  return makeArrayRef(ImageSectionCharacteristicNames);
+    return makeArrayRef(ImageSectionCharacteristicNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getClassOptionNames() {
-  return makeArrayRef(ClassOptionNames);
+    return makeArrayRef(ClassOptionNames);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getMemberAccessNames() {
-  return makeArrayRef(MemberAccessNames);
+    return makeArrayRef(MemberAccessNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getMethodOptionNames() {
-  return makeArrayRef(MethodOptionNames);
+    return makeArrayRef(MethodOptionNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getMemberKindNames() {
-  return makeArrayRef(MemberKindNames);
+    return makeArrayRef(MemberKindNames);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getPtrKindNames() {
-  return makeArrayRef(PtrKindNames);
+    return makeArrayRef(PtrKindNames);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getPtrModeNames() {
-  return makeArrayRef(PtrModeNames);
+    return makeArrayRef(PtrModeNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getPtrMemberRepNames() {
-  return makeArrayRef(PtrMemberRepNames);
+    return makeArrayRef(PtrMemberRepNames);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getTypeModifierNames() {
-  return makeArrayRef(TypeModifierNames);
+    return makeArrayRef(TypeModifierNames);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getCallingConventions() {
-  return makeArrayRef(CallingConventions);
+    return makeArrayRef(CallingConventions);
 }
 
 ArrayRef<EnumEntry<uint8_t>> getFunctionOptionEnum() {
-  return makeArrayRef(FunctionOptionEnum);
+    return makeArrayRef(FunctionOptionEnum);
 }
 
 ArrayRef<EnumEntry<uint16_t>> getLabelTypeEnum() {
-  return makeArrayRef(LabelTypeEnum);
+    return makeArrayRef(LabelTypeEnum);
 }
 
 } // end namespace codeview

@@ -25,31 +25,33 @@ class LangOptions;
 class TextDiagnostic;
 
 class TextDiagnosticPrinter : public DiagnosticConsumer {
-  raw_ostream &OS;
-  IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts;
+    raw_ostream &OS;
+    IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts;
 
-  /// Handle to the currently active text diagnostic emitter.
-  std::unique_ptr<TextDiagnostic> TextDiag;
+    /// Handle to the currently active text diagnostic emitter.
+    std::unique_ptr<TextDiagnostic> TextDiag;
 
-  /// A string to prefix to error messages.
-  std::string Prefix;
+    /// A string to prefix to error messages.
+    std::string Prefix;
 
-  unsigned OwnsOutputStream : 1;
+    unsigned OwnsOutputStream : 1;
 
 public:
-  TextDiagnosticPrinter(raw_ostream &os, DiagnosticOptions *diags,
-                        bool OwnsOutputStream = false);
-  ~TextDiagnosticPrinter() override;
+    TextDiagnosticPrinter(raw_ostream &os, DiagnosticOptions *diags,
+                          bool OwnsOutputStream = false);
+    ~TextDiagnosticPrinter() override;
 
-  /// setPrefix - Set the diagnostic printer prefix string, which will be
-  /// printed at the start of any diagnostics. If empty, no prefix string is
-  /// used.
-  void setPrefix(std::string Value) { Prefix = std::move(Value); }
+    /// setPrefix - Set the diagnostic printer prefix string, which will be
+    /// printed at the start of any diagnostics. If empty, no prefix string is
+    /// used.
+    void setPrefix(std::string Value) {
+        Prefix = std::move(Value);
+    }
 
-  void BeginSourceFile(const LangOptions &LO, const Preprocessor *PP) override;
-  void EndSourceFile() override;
-  void HandleDiagnostic(DiagnosticsEngine::Level Level,
-                        const Diagnostic &Info) override;
+    void BeginSourceFile(const LangOptions &LO, const Preprocessor *PP) override;
+    void EndSourceFile() override;
+    void HandleDiagnostic(DiagnosticsEngine::Level Level,
+                          const Diagnostic &Info) override;
 };
 
 } // end namespace clang

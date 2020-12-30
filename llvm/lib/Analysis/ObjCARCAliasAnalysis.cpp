@@ -39,105 +39,105 @@ using namespace llvm::objcarc;
 AliasResult ObjCARCAAResult::alias(const MemoryLocation &LocA,
                                    const MemoryLocation &LocB,
                                    AAQueryInfo &AAQI) {
-  if (!EnableARCOpts)
-    return AAResultBase::alias(LocA, LocB, AAQI);
+    if (!EnableARCOpts)
+        return AAResultBase::alias(LocA, LocB, AAQI);
 
-  // First, strip off no-ops, including ObjC-specific no-ops, and try making a
-  // precise alias query.
-  const Value *SA = GetRCIdentityRoot(LocA.Ptr);
-  const Value *SB = GetRCIdentityRoot(LocB.Ptr);
-  AliasResult Result =
-      AAResultBase::alias(MemoryLocation(SA, LocA.Size, LocA.AATags),
-                          MemoryLocation(SB, LocB.Size, LocB.AATags), AAQI);
-  if (Result != MayAlias)
-    return Result;
+    // First, strip off no-ops, including ObjC-specific no-ops, and try making a
+    // precise alias query.
+    const Value *SA = GetRCIdentityRoot(LocA.Ptr);
+    const Value *SB = GetRCIdentityRoot(LocB.Ptr);
+    AliasResult Result =
+        AAResultBase::alias(MemoryLocation(SA, LocA.Size, LocA.AATags),
+                            MemoryLocation(SB, LocB.Size, LocB.AATags), AAQI);
+    if (Result != MayAlias)
+        return Result;
 
-  // If that failed, climb to the underlying object, including climbing through
-  // ObjC-specific no-ops, and try making an imprecise alias query.
-  const Value *UA = GetUnderlyingObjCPtr(SA);
-  const Value *UB = GetUnderlyingObjCPtr(SB);
-  if (UA != SA || UB != SB) {
-    Result = AAResultBase::alias(MemoryLocation::getBeforeOrAfter(UA),
-                                 MemoryLocation::getBeforeOrAfter(UB), AAQI);
-    // We can't use MustAlias or PartialAlias results here because
-    // GetUnderlyingObjCPtr may return an offsetted pointer value.
-    if (Result == NoAlias)
-      return NoAlias;
-  }
+    // If that failed, climb to the underlying object, including climbing through
+    // ObjC-specific no-ops, and try making an imprecise alias query.
+    const Value *UA = GetUnderlyingObjCPtr(SA);
+    const Value *UB = GetUnderlyingObjCPtr(SB);
+    if (UA != SA || UB != SB) {
+        Result = AAResultBase::alias(MemoryLocation::getBeforeOrAfter(UA),
+                                     MemoryLocation::getBeforeOrAfter(UB), AAQI);
+        // We can't use MustAlias or PartialAlias results here because
+        // GetUnderlyingObjCPtr may return an offsetted pointer value.
+        if (Result == NoAlias)
+            return NoAlias;
+    }
 
-  // If that failed, fail. We don't need to chain here, since that's covered
-  // by the earlier precise query.
-  return MayAlias;
+    // If that failed, fail. We don't need to chain here, since that's covered
+    // by the earlier precise query.
+    return MayAlias;
 }
 
 bool ObjCARCAAResult::pointsToConstantMemory(const MemoryLocation &Loc,
-                                             AAQueryInfo &AAQI, bool OrLocal) {
-  if (!EnableARCOpts)
-    return AAResultBase::pointsToConstantMemory(Loc, AAQI, OrLocal);
+        AAQueryInfo &AAQI, bool OrLocal) {
+    if (!EnableARCOpts)
+        return AAResultBase::pointsToConstantMemory(Loc, AAQI, OrLocal);
 
-  // First, strip off no-ops, including ObjC-specific no-ops, and try making
-  // a precise alias query.
-  const Value *S = GetRCIdentityRoot(Loc.Ptr);
-  if (AAResultBase::pointsToConstantMemory(
-          MemoryLocation(S, Loc.Size, Loc.AATags), AAQI, OrLocal))
-    return true;
+    // First, strip off no-ops, including ObjC-specific no-ops, and try making
+    // a precise alias query.
+    const Value *S = GetRCIdentityRoot(Loc.Ptr);
+    if (AAResultBase::pointsToConstantMemory(
+                MemoryLocation(S, Loc.Size, Loc.AATags), AAQI, OrLocal))
+        return true;
 
-  // If that failed, climb to the underlying object, including climbing through
-  // ObjC-specific no-ops, and try making an imprecise alias query.
-  const Value *U = GetUnderlyingObjCPtr(S);
-  if (U != S)
-    return AAResultBase::pointsToConstantMemory(
-        MemoryLocation::getBeforeOrAfter(U), AAQI, OrLocal);
+    // If that failed, climb to the underlying object, including climbing through
+    // ObjC-specific no-ops, and try making an imprecise alias query.
+    const Value *U = GetUnderlyingObjCPtr(S);
+    if (U != S)
+        return AAResultBase::pointsToConstantMemory(
+                   MemoryLocation::getBeforeOrAfter(U), AAQI, OrLocal);
 
-  // If that failed, fail. We don't need to chain here, since that's covered
-  // by the earlier precise query.
-  return false;
+    // If that failed, fail. We don't need to chain here, since that's covered
+    // by the earlier precise query.
+    return false;
 }
 
 FunctionModRefBehavior ObjCARCAAResult::getModRefBehavior(const Function *F) {
-  if (!EnableARCOpts)
+    if (!EnableARCOpts)
+        return AAResultBase::getModRefBehavior(F);
+
+    switch (GetFunctionClass(F)) {
+    case ARCInstKind::NoopCast:
+        return FMRB_DoesNotAccessMemory;
+    default:
+        break;
+    }
+
     return AAResultBase::getModRefBehavior(F);
-
-  switch (GetFunctionClass(F)) {
-  case ARCInstKind::NoopCast:
-    return FMRB_DoesNotAccessMemory;
-  default:
-    break;
-  }
-
-  return AAResultBase::getModRefBehavior(F);
 }
 
 ModRefInfo ObjCARCAAResult::getModRefInfo(const CallBase *Call,
-                                          const MemoryLocation &Loc,
-                                          AAQueryInfo &AAQI) {
-  if (!EnableARCOpts)
+        const MemoryLocation &Loc,
+        AAQueryInfo &AAQI) {
+    if (!EnableARCOpts)
+        return AAResultBase::getModRefInfo(Call, Loc, AAQI);
+
+    switch (GetBasicARCInstKind(Call)) {
+    case ARCInstKind::Retain:
+    case ARCInstKind::RetainRV:
+    case ARCInstKind::Autorelease:
+    case ARCInstKind::AutoreleaseRV:
+    case ARCInstKind::NoopCast:
+    case ARCInstKind::AutoreleasepoolPush:
+    case ARCInstKind::FusedRetainAutorelease:
+    case ARCInstKind::FusedRetainAutoreleaseRV:
+        // These functions don't access any memory visible to the compiler.
+        // Note that this doesn't include objc_retainBlock, because it updates
+        // pointers when it copies block data.
+        return ModRefInfo::NoModRef;
+    default:
+        break;
+    }
+
     return AAResultBase::getModRefInfo(Call, Loc, AAQI);
-
-  switch (GetBasicARCInstKind(Call)) {
-  case ARCInstKind::Retain:
-  case ARCInstKind::RetainRV:
-  case ARCInstKind::Autorelease:
-  case ARCInstKind::AutoreleaseRV:
-  case ARCInstKind::NoopCast:
-  case ARCInstKind::AutoreleasepoolPush:
-  case ARCInstKind::FusedRetainAutorelease:
-  case ARCInstKind::FusedRetainAutoreleaseRV:
-    // These functions don't access any memory visible to the compiler.
-    // Note that this doesn't include objc_retainBlock, because it updates
-    // pointers when it copies block data.
-    return ModRefInfo::NoModRef;
-  default:
-    break;
-  }
-
-  return AAResultBase::getModRefInfo(Call, Loc, AAQI);
 }
 
 AnalysisKey ObjCARCAA::Key;
 
 ObjCARCAAResult ObjCARCAA::run(Function &F, FunctionAnalysisManager &AM) {
-  return ObjCARCAAResult(F.getParent()->getDataLayout());
+    return ObjCARCAAResult(F.getParent()->getDataLayout());
 }
 
 char ObjCARCAAWrapperPass::ID = 0;
@@ -145,23 +145,23 @@ INITIALIZE_PASS(ObjCARCAAWrapperPass, "objc-arc-aa",
                 "ObjC-ARC-Based Alias Analysis", false, true)
 
 ImmutablePass *llvm::createObjCARCAAWrapperPass() {
-  return new ObjCARCAAWrapperPass();
+    return new ObjCARCAAWrapperPass();
 }
 
 ObjCARCAAWrapperPass::ObjCARCAAWrapperPass() : ImmutablePass(ID) {
-  initializeObjCARCAAWrapperPassPass(*PassRegistry::getPassRegistry());
+    initializeObjCARCAAWrapperPassPass(*PassRegistry::getPassRegistry());
 }
 
 bool ObjCARCAAWrapperPass::doInitialization(Module &M) {
-  Result.reset(new ObjCARCAAResult(M.getDataLayout()));
-  return false;
+    Result.reset(new ObjCARCAAResult(M.getDataLayout()));
+    return false;
 }
 
 bool ObjCARCAAWrapperPass::doFinalization(Module &M) {
-  Result.reset();
-  return false;
+    Result.reset();
+    return false;
 }
 
 void ObjCARCAAWrapperPass::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesAll();
+    AU.setPreservesAll();
 }

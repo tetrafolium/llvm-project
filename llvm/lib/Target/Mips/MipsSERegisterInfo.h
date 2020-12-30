@@ -20,18 +20,18 @@ namespace llvm {
 
 class MipsSERegisterInfo : public MipsRegisterInfo {
 public:
-  MipsSERegisterInfo();
+    MipsSERegisterInfo();
 
-  bool requiresRegisterScavenging(const MachineFunction &MF) const override;
+    bool requiresRegisterScavenging(const MachineFunction &MF) const override;
 
-  bool requiresFrameIndexScavenging(const MachineFunction &MF) const override;
+    bool requiresFrameIndexScavenging(const MachineFunction &MF) const override;
 
-  const TargetRegisterClass *intRegClass(unsigned Size) const override;
+    const TargetRegisterClass *intRegClass(unsigned Size) const override;
 
 private:
-  void eliminateFI(MachineBasicBlock::iterator II, unsigned OpNo,
-                   int FrameIndex, uint64_t StackSize,
-                   int64_t SPOffset) const override;
+    void eliminateFI(MachineBasicBlock::iterator II, unsigned OpNo,
+                     int FrameIndex, uint64_t StackSize,
+                     int64_t SPOffset) const override;
 };
 
 } // end namespace llvm

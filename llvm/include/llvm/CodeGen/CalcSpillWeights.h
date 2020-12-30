@@ -21,36 +21,36 @@ class MachineFunction;
 class MachineLoopInfo;
 class VirtRegMap;
 
-  /// Normalize the spill weight of a live interval
-  ///
-  /// The spill weight of a live interval is computed as:
-  ///
-  ///   (sum(use freq) + sum(def freq)) / (K + size)
-  ///
-  /// @param UseDefFreq Expected number of executed use and def instructions
-  ///                   per function call. Derived from block frequencies.
-  /// @param Size       Size of live interval as returnexd by getSize()
-  /// @param NumInstr   Number of instructions using this live interval
-  static inline float normalizeSpillWeight(float UseDefFreq, unsigned Size,
-                                           unsigned NumInstr) {
+/// Normalize the spill weight of a live interval
+///
+/// The spill weight of a live interval is computed as:
+///
+///   (sum(use freq) + sum(def freq)) / (K + size)
+///
+/// @param UseDefFreq Expected number of executed use and def instructions
+///                   per function call. Derived from block frequencies.
+/// @param Size       Size of live interval as returnexd by getSize()
+/// @param NumInstr   Number of instructions using this live interval
+static inline float normalizeSpillWeight(float UseDefFreq, unsigned Size,
+        unsigned NumInstr) {
     // The constant 25 instructions is added to avoid depending too much on
     // accidental SlotIndex gaps for small intervals. The effect is that small
     // intervals have a spill weight that is mostly proportional to the number
     // of uses, while large intervals get a spill weight that is closer to a use
     // density.
     return UseDefFreq / (Size + 25*SlotIndex::InstrDist);
-  }
+}
 
-  /// Calculate auxiliary information for a virtual register such as its
-  /// spill weight and allocation hint.
-  class VirtRegAuxInfo {
+/// Calculate auxiliary information for a virtual register such as its
+/// spill weight and allocation hint.
+class VirtRegAuxInfo {
     MachineFunction &MF;
     LiveIntervals &LIS;
     const VirtRegMap &VRM;
     const MachineLoopInfo &Loops;
     const MachineBlockFrequencyInfo &MBFI;
 
-  public:
+public:
     VirtRegAuxInfo(MachineFunction &MF, LiveIntervals &LIS,
                    const VirtRegMap &VRM, const MachineLoopInfo &Loops,
                    const MachineBlockFrequencyInfo &MBFI)
@@ -76,7 +76,7 @@ class VirtRegMap;
     /// live intervals.
     void calculateSpillWeightsAndHints();
 
-  protected:
+protected:
     /// Helper function for weight calculations.
     /// (Re)compute LI's spill weight and allocation hint, or, for non null
     /// start and end - compute future expected spill weight of a split
@@ -95,9 +95,9 @@ class VirtRegMap;
     /// Weight normalization function.
     virtual float normalize(float UseDefFreq, unsigned Size,
                             unsigned NumInstr) {
-      return normalizeSpillWeight(UseDefFreq, Size, NumInstr);
+        return normalizeSpillWeight(UseDefFreq, Size, NumInstr);
     }
-  };
+};
 } // end namespace llvm
 
 #endif // LLVM_CODEGEN_CALCSPILLWEIGHTS_H

@@ -23,15 +23,15 @@ using namespace llvm;
 #include "NVPTXGenSubtargetInfo.inc"
 
 static cl::opt<bool>
-    NoF16Math("nvptx-no-f16-math", cl::ZeroOrMore, cl::Hidden,
-              cl::desc("NVPTX Specific: Disable generation of f16 math ops."),
-              cl::init(false));
+NoF16Math("nvptx-no-f16-math", cl::ZeroOrMore, cl::Hidden,
+          cl::desc("NVPTX Specific: Disable generation of f16 math ops."),
+          cl::init(false));
 
 // Pin the vtable to this file.
 void NVPTXSubtarget::anchor() {}
 
 NVPTXSubtarget &NVPTXSubtarget::initializeSubtargetDependencies(StringRef CPU,
-                                                                StringRef FS) {
+        StringRef FS) {
     // Provide the default CPU if we don't have one.
     TargetName = std::string(CPU.empty() ? "sm_20" : CPU);
 
@@ -39,10 +39,10 @@ NVPTXSubtarget &NVPTXSubtarget::initializeSubtargetDependencies(StringRef CPU,
 
     // Set default to PTX 3.2 (CUDA 5.5)
     if (PTXVersion == 0) {
-      PTXVersion = 32;
-  }
+        PTXVersion = 32;
+    }
 
-  return *this;
+    return *this;
 }
 
 NVPTXSubtarget::NVPTXSubtarget(const Triple &TT, const std::string &CPU,
@@ -53,15 +53,15 @@ NVPTXSubtarget::NVPTXSubtarget(const Triple &TT, const std::string &CPU,
       TLInfo(TM, initializeSubtargetDependencies(CPU, FS)), FrameLowering() {}
 
 bool NVPTXSubtarget::hasImageHandles() const {
-  // Enable handles for Kepler+, where CUDA supports indirect surfaces and
-  // textures
-  if (TM.getDrvInterface() == NVPTX::CUDA)
-    return (SmVersion >= 30);
+    // Enable handles for Kepler+, where CUDA supports indirect surfaces and
+    // textures
+    if (TM.getDrvInterface() == NVPTX::CUDA)
+        return (SmVersion >= 30);
 
-  // Disabled, otherwise
-  return false;
+    // Disabled, otherwise
+    return false;
 }
 
 bool NVPTXSubtarget::allowFP16Math() const {
-  return hasFP16Math() && NoF16Math == false;
+    return hasFP16Math() && NoF16Math == false;
 }

@@ -27,114 +27,128 @@ namespace llvm {
 /// the value is deleted or ReplaceAllUsesWith'd.  See the specific handles
 /// below for details.
 class ValueHandleBase {
-  friend class Value;
+    friend class Value;
 
 protected:
-  /// This indicates what sub class the handle actually is.
-  ///
-  /// This is to avoid having a vtable for the light-weight handle pointers. The
-  /// fully general Callback version does have a vtable.
-  enum HandleBaseKind { Assert, Callback, Weak, WeakTracking };
+    /// This indicates what sub class the handle actually is.
+    ///
+    /// This is to avoid having a vtable for the light-weight handle pointers. The
+    /// fully general Callback version does have a vtable.
+    enum HandleBaseKind { Assert, Callback, Weak, WeakTracking };
 
-  ValueHandleBase(const ValueHandleBase &RHS)
-      : ValueHandleBase(RHS.PrevPair.getInt(), RHS) {}
+    ValueHandleBase(const ValueHandleBase &RHS)
+        : ValueHandleBase(RHS.PrevPair.getInt(), RHS) {}
 
-  ValueHandleBase(HandleBaseKind Kind, const ValueHandleBase &RHS)
-      : PrevPair(nullptr, Kind), Val(RHS.getValPtr()) {
-    if (isValid(getValPtr()))
-      AddToExistingUseList(RHS.getPrevPtr());
-  }
+    ValueHandleBase(HandleBaseKind Kind, const ValueHandleBase &RHS)
+        : PrevPair(nullptr, Kind), Val(RHS.getValPtr()) {
+        if (isValid(getValPtr()))
+            AddToExistingUseList(RHS.getPrevPtr());
+    }
 
 private:
-  PointerIntPair<ValueHandleBase**, 2, HandleBaseKind> PrevPair;
-  ValueHandleBase *Next = nullptr;
-  Value *Val = nullptr;
+    PointerIntPair<ValueHandleBase**, 2, HandleBaseKind> PrevPair;
+    ValueHandleBase *Next = nullptr;
+    Value *Val = nullptr;
 
-  void setValPtr(Value *V) { Val = V; }
+    void setValPtr(Value *V) {
+        Val = V;
+    }
 
 public:
-  explicit ValueHandleBase(HandleBaseKind Kind)
-      : PrevPair(nullptr, Kind) {}
-  ValueHandleBase(HandleBaseKind Kind, Value *V)
-      : PrevPair(nullptr, Kind), Val(V) {
-    if (isValid(getValPtr()))
-      AddToUseList();
-  }
+    explicit ValueHandleBase(HandleBaseKind Kind)
+        : PrevPair(nullptr, Kind) {}
+    ValueHandleBase(HandleBaseKind Kind, Value *V)
+        : PrevPair(nullptr, Kind), Val(V) {
+        if (isValid(getValPtr()))
+            AddToUseList();
+    }
 
-  ~ValueHandleBase() {
-    if (isValid(getValPtr()))
-      RemoveFromUseList();
-  }
+    ~ValueHandleBase() {
+        if (isValid(getValPtr()))
+            RemoveFromUseList();
+    }
 
-  Value *operator=(Value *RHS) {
-    if (getValPtr() == RHS)
-      return RHS;
-    if (isValid(getValPtr()))
-      RemoveFromUseList();
-    setValPtr(RHS);
-    if (isValid(getValPtr()))
-      AddToUseList();
-    return RHS;
-  }
+    Value *operator=(Value *RHS) {
+        if (getValPtr() == RHS)
+            return RHS;
+        if (isValid(getValPtr()))
+            RemoveFromUseList();
+        setValPtr(RHS);
+        if (isValid(getValPtr()))
+            AddToUseList();
+        return RHS;
+    }
 
-  Value *operator=(const ValueHandleBase &RHS) {
-    if (getValPtr() == RHS.getValPtr())
-      return RHS.getValPtr();
-    if (isValid(getValPtr()))
-      RemoveFromUseList();
-    setValPtr(RHS.getValPtr());
-    if (isValid(getValPtr()))
-      AddToExistingUseList(RHS.getPrevPtr());
-    return getValPtr();
-  }
+    Value *operator=(const ValueHandleBase &RHS) {
+        if (getValPtr() == RHS.getValPtr())
+            return RHS.getValPtr();
+        if (isValid(getValPtr()))
+            RemoveFromUseList();
+        setValPtr(RHS.getValPtr());
+        if (isValid(getValPtr()))
+            AddToExistingUseList(RHS.getPrevPtr());
+        return getValPtr();
+    }
 
-  Value *operator->() const { return getValPtr(); }
-  Value &operator*() const {
-    Value *V = getValPtr();
-    assert(V && "Dereferencing deleted ValueHandle");
-    return *V;
-  }
+    Value *operator->() const {
+        return getValPtr();
+    }
+    Value &operator*() const {
+        Value *V = getValPtr();
+        assert(V && "Dereferencing deleted ValueHandle");
+        return *V;
+    }
 
 protected:
-  Value *getValPtr() const { return Val; }
+    Value *getValPtr() const {
+        return Val;
+    }
 
-  static bool isValid(Value *V) {
-    return V &&
-           V != DenseMapInfo<Value *>::getEmptyKey() &&
-           V != DenseMapInfo<Value *>::getTombstoneKey();
-  }
+    static bool isValid(Value *V) {
+        return V &&
+               V != DenseMapInfo<Value *>::getEmptyKey() &&
+               V != DenseMapInfo<Value *>::getTombstoneKey();
+    }
 
-  /// Remove this ValueHandle from its current use list.
-  void RemoveFromUseList();
+    /// Remove this ValueHandle from its current use list.
+    void RemoveFromUseList();
 
-  /// Clear the underlying pointer without clearing the use list.
-  ///
-  /// This should only be used if a derived class has manually removed the
-  /// handle from the use list.
-  void clearValPtr() { setValPtr(nullptr); }
+    /// Clear the underlying pointer without clearing the use list.
+    ///
+    /// This should only be used if a derived class has manually removed the
+    /// handle from the use list.
+    void clearValPtr() {
+        setValPtr(nullptr);
+    }
 
 public:
-  // Callbacks made from Value.
-  static void ValueIsDeleted(Value *V);
-  static void ValueIsRAUWd(Value *Old, Value *New);
+    // Callbacks made from Value.
+    static void ValueIsDeleted(Value *V);
+    static void ValueIsRAUWd(Value *Old, Value *New);
 
 private:
-  // Internal implementation details.
-  ValueHandleBase **getPrevPtr() const { return PrevPair.getPointer(); }
-  HandleBaseKind getKind() const { return PrevPair.getInt(); }
-  void setPrevPtr(ValueHandleBase **Ptr) { PrevPair.setPointer(Ptr); }
+    // Internal implementation details.
+    ValueHandleBase **getPrevPtr() const {
+        return PrevPair.getPointer();
+    }
+    HandleBaseKind getKind() const {
+        return PrevPair.getInt();
+    }
+    void setPrevPtr(ValueHandleBase **Ptr) {
+        PrevPair.setPointer(Ptr);
+    }
 
-  /// Add this ValueHandle to the use list for V.
-  ///
-  /// List is the address of either the head of the list or a Next node within
-  /// the existing use list.
-  void AddToExistingUseList(ValueHandleBase **List);
+    /// Add this ValueHandle to the use list for V.
+    ///
+    /// List is the address of either the head of the list or a Next node within
+    /// the existing use list.
+    void AddToExistingUseList(ValueHandleBase **List);
 
-  /// Add this ValueHandle to the use list after Node.
-  void AddToExistingUseListAfter(ValueHandleBase *Node);
+    /// Add this ValueHandle to the use list after Node.
+    void AddToExistingUseListAfter(ValueHandleBase *Node);
 
-  /// Add this ValueHandle to the use list for V.
-  void AddToUseList();
+    /// Add this ValueHandle to the use list for V.
+    void AddToUseList();
 };
 
 /// A nullable Value handle that is nullable.
@@ -143,55 +157,59 @@ private:
 /// out if that value is deleted.
 class WeakVH : public ValueHandleBase {
 public:
-  WeakVH() : ValueHandleBase(Weak) {}
-  WeakVH(Value *P) : ValueHandleBase(Weak, P) {}
-  WeakVH(const WeakVH &RHS)
-      : ValueHandleBase(Weak, RHS) {}
+    WeakVH() : ValueHandleBase(Weak) {}
+    WeakVH(Value *P) : ValueHandleBase(Weak, P) {}
+    WeakVH(const WeakVH &RHS)
+        : ValueHandleBase(Weak, RHS) {}
 
-  WeakVH &operator=(const WeakVH &RHS) = default;
+    WeakVH &operator=(const WeakVH &RHS) = default;
 
-  Value *operator=(Value *RHS) {
-    return ValueHandleBase::operator=(RHS);
-  }
-  Value *operator=(const ValueHandleBase &RHS) {
-    return ValueHandleBase::operator=(RHS);
-  }
+    Value *operator=(Value *RHS) {
+        return ValueHandleBase::operator=(RHS);
+    }
+    Value *operator=(const ValueHandleBase &RHS) {
+        return ValueHandleBase::operator=(RHS);
+    }
 
-  operator Value*() const {
-    return getValPtr();
-  }
+    operator Value*() const {
+        return getValPtr();
+    }
 };
 
 // Specialize simplify_type to allow WeakVH to participate in
 // dyn_cast, isa, etc.
 template <> struct simplify_type<WeakVH> {
-  using SimpleType = Value *;
+    using SimpleType = Value *;
 
-  static SimpleType getSimplifiedValue(WeakVH &WVH) { return WVH; }
+    static SimpleType getSimplifiedValue(WeakVH &WVH) {
+        return WVH;
+    }
 };
 template <> struct simplify_type<const WeakVH> {
-  using SimpleType = Value *;
+    using SimpleType = Value *;
 
-  static SimpleType getSimplifiedValue(const WeakVH &WVH) { return WVH; }
+    static SimpleType getSimplifiedValue(const WeakVH &WVH) {
+        return WVH;
+    }
 };
 
 // Specialize DenseMapInfo to allow WeakVH to participate in DenseMap.
 template <> struct DenseMapInfo<WeakVH> {
-  static inline WeakVH getEmptyKey() {
-    return WeakVH(DenseMapInfo<Value *>::getEmptyKey());
-  }
+    static inline WeakVH getEmptyKey() {
+        return WeakVH(DenseMapInfo<Value *>::getEmptyKey());
+    }
 
-  static inline WeakVH getTombstoneKey() {
-    return WeakVH(DenseMapInfo<Value *>::getTombstoneKey());
-  }
+    static inline WeakVH getTombstoneKey() {
+        return WeakVH(DenseMapInfo<Value *>::getTombstoneKey());
+    }
 
-  static unsigned getHashValue(const WeakVH &Val) {
-    return DenseMapInfo<Value *>::getHashValue(Val);
-  }
+    static unsigned getHashValue(const WeakVH &Val) {
+        return DenseMapInfo<Value *>::getHashValue(Val);
+    }
 
-  static bool isEqual(const WeakVH &LHS, const WeakVH &RHS) {
-    return DenseMapInfo<Value *>::isEqual(LHS, RHS);
-  }
+    static bool isEqual(const WeakVH &LHS, const WeakVH &RHS) {
+        return DenseMapInfo<Value *>::isEqual(LHS, RHS);
+    }
 };
 
 /// Value handle that is nullable, but tries to track the Value.
@@ -203,42 +221,44 @@ template <> struct DenseMapInfo<WeakVH> {
 /// changes).
 class WeakTrackingVH : public ValueHandleBase {
 public:
-  WeakTrackingVH() : ValueHandleBase(WeakTracking) {}
-  WeakTrackingVH(Value *P) : ValueHandleBase(WeakTracking, P) {}
-  WeakTrackingVH(const WeakTrackingVH &RHS)
-      : ValueHandleBase(WeakTracking, RHS) {}
+    WeakTrackingVH() : ValueHandleBase(WeakTracking) {}
+    WeakTrackingVH(Value *P) : ValueHandleBase(WeakTracking, P) {}
+    WeakTrackingVH(const WeakTrackingVH &RHS)
+        : ValueHandleBase(WeakTracking, RHS) {}
 
-  WeakTrackingVH &operator=(const WeakTrackingVH &RHS) = default;
+    WeakTrackingVH &operator=(const WeakTrackingVH &RHS) = default;
 
-  Value *operator=(Value *RHS) {
-    return ValueHandleBase::operator=(RHS);
-  }
-  Value *operator=(const ValueHandleBase &RHS) {
-    return ValueHandleBase::operator=(RHS);
-  }
+    Value *operator=(Value *RHS) {
+        return ValueHandleBase::operator=(RHS);
+    }
+    Value *operator=(const ValueHandleBase &RHS) {
+        return ValueHandleBase::operator=(RHS);
+    }
 
-  operator Value*() const {
-    return getValPtr();
-  }
+    operator Value*() const {
+        return getValPtr();
+    }
 
-  bool pointsToAliveValue() const {
-    return ValueHandleBase::isValid(getValPtr());
-  }
+    bool pointsToAliveValue() const {
+        return ValueHandleBase::isValid(getValPtr());
+    }
 };
 
 // Specialize simplify_type to allow WeakTrackingVH to participate in
 // dyn_cast, isa, etc.
 template <> struct simplify_type<WeakTrackingVH> {
-  using SimpleType = Value *;
+    using SimpleType = Value *;
 
-  static SimpleType getSimplifiedValue(WeakTrackingVH &WVH) { return WVH; }
+    static SimpleType getSimplifiedValue(WeakTrackingVH &WVH) {
+        return WVH;
+    }
 };
 template <> struct simplify_type<const WeakTrackingVH> {
-  using SimpleType = Value *;
+    using SimpleType = Value *;
 
-  static SimpleType getSimplifiedValue(const WeakTrackingVH &WVH) {
-    return WVH;
-  }
+    static SimpleType getSimplifiedValue(const WeakTrackingVH &WVH) {
+        return WVH;
+    }
 };
 
 /// Value handle that asserts if the Value is deleted.
@@ -259,52 +279,72 @@ template <> struct simplify_type<const WeakTrackingVH> {
 template <typename ValueTy>
 class AssertingVH
 #ifndef NDEBUG
-  : public ValueHandleBase
+    : public ValueHandleBase
 #endif
-  {
-  friend struct DenseMapInfo<AssertingVH<ValueTy>>;
+{
+    friend struct DenseMapInfo<AssertingVH<ValueTy>>;
 
 #ifndef NDEBUG
-  Value *getRawValPtr() const { return ValueHandleBase::getValPtr(); }
-  void setRawValPtr(Value *P) { ValueHandleBase::operator=(P); }
+    Value *getRawValPtr() const {
+        return ValueHandleBase::getValPtr();
+    }
+    void setRawValPtr(Value *P) {
+        ValueHandleBase::operator=(P);
+    }
 #else
-  Value *ThePtr;
-  Value *getRawValPtr() const { return ThePtr; }
-  void setRawValPtr(Value *P) { ThePtr = P; }
+    Value *ThePtr;
+    Value *getRawValPtr() const {
+        return ThePtr;
+    }
+    void setRawValPtr(Value *P) {
+        ThePtr = P;
+    }
 #endif
-  // Convert a ValueTy*, which may be const, to the raw Value*.
-  static Value *GetAsValue(Value *V) { return V; }
-  static Value *GetAsValue(const Value *V) { return const_cast<Value*>(V); }
+    // Convert a ValueTy*, which may be const, to the raw Value*.
+    static Value *GetAsValue(Value *V) {
+        return V;
+    }
+    static Value *GetAsValue(const Value *V) {
+        return const_cast<Value*>(V);
+    }
 
-  ValueTy *getValPtr() const { return static_cast<ValueTy *>(getRawValPtr()); }
-  void setValPtr(ValueTy *P) { setRawValPtr(GetAsValue(P)); }
+    ValueTy *getValPtr() const {
+        return static_cast<ValueTy *>(getRawValPtr());
+    }
+    void setValPtr(ValueTy *P) {
+        setRawValPtr(GetAsValue(P));
+    }
 
 public:
 #ifndef NDEBUG
-  AssertingVH() : ValueHandleBase(Assert) {}
-  AssertingVH(ValueTy *P) : ValueHandleBase(Assert, GetAsValue(P)) {}
-  AssertingVH(const AssertingVH &RHS) : ValueHandleBase(Assert, RHS) {}
+    AssertingVH() : ValueHandleBase(Assert) {}
+    AssertingVH(ValueTy *P) : ValueHandleBase(Assert, GetAsValue(P)) {}
+    AssertingVH(const AssertingVH &RHS) : ValueHandleBase(Assert, RHS) {}
 #else
-  AssertingVH() : ThePtr(nullptr) {}
-  AssertingVH(ValueTy *P) : ThePtr(GetAsValue(P)) {}
-  AssertingVH(const AssertingVH<ValueTy> &) = default;
+    AssertingVH() : ThePtr(nullptr) {}
+    AssertingVH(ValueTy *P) : ThePtr(GetAsValue(P)) {}
+    AssertingVH(const AssertingVH<ValueTy> &) = default;
 #endif
 
-  operator ValueTy*() const {
-    return getValPtr();
-  }
+    operator ValueTy*() const {
+        return getValPtr();
+    }
 
-  ValueTy *operator=(ValueTy *RHS) {
-    setValPtr(RHS);
-    return getValPtr();
-  }
-  ValueTy *operator=(const AssertingVH<ValueTy> &RHS) {
-    setValPtr(RHS.getValPtr());
-    return getValPtr();
-  }
+    ValueTy *operator=(ValueTy *RHS) {
+        setValPtr(RHS);
+        return getValPtr();
+    }
+    ValueTy *operator=(const AssertingVH<ValueTy> &RHS) {
+        setValPtr(RHS.getValPtr());
+        return getValPtr();
+    }
 
-  ValueTy *operator->() const { return getValPtr(); }
-  ValueTy &operator*() const { return *getValPtr(); }
+    ValueTy *operator->() const {
+        return getValPtr();
+    }
+    ValueTy &operator*() const {
+        return *getValPtr();
+    }
 };
 
 // Treat AssertingVH<T> like T* inside maps. This also allows using find_as()
@@ -329,48 +369,58 @@ struct DenseMapInfo<AssertingVH<T>> : DenseMapInfo<T *> {};
 /// Assigning a value to a TrackingVH is always allowed, even if said TrackingVH
 /// no longer points to a valid value.
 template <typename ValueTy> class TrackingVH {
-  WeakTrackingVH InnerHandle;
+    WeakTrackingVH InnerHandle;
 
 public:
-  ValueTy *getValPtr() const {
-    assert(InnerHandle.pointsToAliveValue() &&
-           "TrackingVH must be non-null and valid on dereference!");
+    ValueTy *getValPtr() const {
+        assert(InnerHandle.pointsToAliveValue() &&
+               "TrackingVH must be non-null and valid on dereference!");
 
-    // Check that the value is a member of the correct subclass. We would like
-    // to check this property on assignment for better debugging, but we don't
-    // want to require a virtual interface on this VH. Instead we allow RAUW to
-    // replace this value with a value of an invalid type, and check it here.
-    assert(isa<ValueTy>(InnerHandle) &&
-           "Tracked Value was replaced by one with an invalid type!");
-    return cast<ValueTy>(InnerHandle);
-  }
+        // Check that the value is a member of the correct subclass. We would like
+        // to check this property on assignment for better debugging, but we don't
+        // want to require a virtual interface on this VH. Instead we allow RAUW to
+        // replace this value with a value of an invalid type, and check it here.
+        assert(isa<ValueTy>(InnerHandle) &&
+               "Tracked Value was replaced by one with an invalid type!");
+        return cast<ValueTy>(InnerHandle);
+    }
 
-  void setValPtr(ValueTy *P) {
-    // Assigning to non-valid TrackingVH's are fine so we just unconditionally
-    // assign here.
-    InnerHandle = GetAsValue(P);
-  }
+    void setValPtr(ValueTy *P) {
+        // Assigning to non-valid TrackingVH's are fine so we just unconditionally
+        // assign here.
+        InnerHandle = GetAsValue(P);
+    }
 
-  // Convert a ValueTy*, which may be const, to the type the base
-  // class expects.
-  static Value *GetAsValue(Value *V) { return V; }
-  static Value *GetAsValue(const Value *V) { return const_cast<Value*>(V); }
+    // Convert a ValueTy*, which may be const, to the type the base
+    // class expects.
+    static Value *GetAsValue(Value *V) {
+        return V;
+    }
+    static Value *GetAsValue(const Value *V) {
+        return const_cast<Value*>(V);
+    }
 
 public:
-  TrackingVH() = default;
-  TrackingVH(ValueTy *P) { setValPtr(P); }
+    TrackingVH() = default;
+    TrackingVH(ValueTy *P) {
+        setValPtr(P);
+    }
 
-  operator ValueTy*() const {
-    return getValPtr();
-  }
+    operator ValueTy*() const {
+        return getValPtr();
+    }
 
-  ValueTy *operator=(ValueTy *RHS) {
-    setValPtr(RHS);
-    return getValPtr();
-  }
+    ValueTy *operator=(ValueTy *RHS) {
+        setValPtr(RHS);
+        return getValPtr();
+    }
 
-  ValueTy *operator->() const { return getValPtr(); }
-  ValueTy &operator*() const { return *getValPtr(); }
+    ValueTy *operator->() const {
+        return getValPtr();
+    }
+    ValueTy &operator*() const {
+        return *getValPtr();
+    }
 };
 
 /// Value handle with callbacks on RAUW and destruction.
@@ -381,46 +431,48 @@ public:
 /// the map before calling setValPtr() (since the map has to rearrange itself
 /// when the pointer changes).  Unlike ValueHandleBase, this class has a vtable.
 class CallbackVH : public ValueHandleBase {
-  virtual void anchor();
+    virtual void anchor();
 protected:
-  ~CallbackVH() = default;
-  CallbackVH(const CallbackVH &) = default;
-  CallbackVH &operator=(const CallbackVH &) = default;
+    ~CallbackVH() = default;
+    CallbackVH(const CallbackVH &) = default;
+    CallbackVH &operator=(const CallbackVH &) = default;
 
-  void setValPtr(Value *P) {
-    ValueHandleBase::operator=(P);
-  }
+    void setValPtr(Value *P) {
+        ValueHandleBase::operator=(P);
+    }
 
 public:
-  CallbackVH() : ValueHandleBase(Callback) {}
-  CallbackVH(Value *P) : ValueHandleBase(Callback, P) {}
-  CallbackVH(const Value *P) : CallbackVH(const_cast<Value *>(P)) {}
+    CallbackVH() : ValueHandleBase(Callback) {}
+    CallbackVH(Value *P) : ValueHandleBase(Callback, P) {}
+    CallbackVH(const Value *P) : CallbackVH(const_cast<Value *>(P)) {}
 
-  operator Value*() const {
-    return getValPtr();
-  }
+    operator Value*() const {
+        return getValPtr();
+    }
 
-  /// Callback for Value destruction.
-  ///
-  /// Called when this->getValPtr() is destroyed, inside ~Value(), so you
-  /// may call any non-virtual Value method on getValPtr(), but no subclass
-  /// methods.  If WeakTrackingVH were implemented as a CallbackVH, it would use
-  /// this
-  /// method to call setValPtr(NULL).  AssertingVH would use this method to
-  /// cause an assertion failure.
-  ///
-  /// All implementations must remove the reference from this object to the
-  /// Value that's being destroyed.
-  virtual void deleted() { setValPtr(nullptr); }
+    /// Callback for Value destruction.
+    ///
+    /// Called when this->getValPtr() is destroyed, inside ~Value(), so you
+    /// may call any non-virtual Value method on getValPtr(), but no subclass
+    /// methods.  If WeakTrackingVH were implemented as a CallbackVH, it would use
+    /// this
+    /// method to call setValPtr(NULL).  AssertingVH would use this method to
+    /// cause an assertion failure.
+    ///
+    /// All implementations must remove the reference from this object to the
+    /// Value that's being destroyed.
+    virtual void deleted() {
+        setValPtr(nullptr);
+    }
 
-  /// Callback for Value RAUW.
-  ///
-  /// Called when this->getValPtr()->replaceAllUsesWith(new_value) is called,
-  /// _before_ any of the uses have actually been replaced.  If WeakTrackingVH
-  /// were
-  /// implemented as a CallbackVH, it would use this method to call
-  /// setValPtr(new_value).  AssertingVH would do nothing in this method.
-  virtual void allUsesReplacedWith(Value *) {}
+    /// Callback for Value RAUW.
+    ///
+    /// Called when this->getValPtr()->replaceAllUsesWith(new_value) is called,
+    /// _before_ any of the uses have actually been replaced.  If WeakTrackingVH
+    /// were
+    /// implemented as a CallbackVH, it would use this method to call
+    /// setValPtr(new_value).  AssertingVH would do nothing in this method.
+    virtual void allUsesReplacedWith(Value *) {}
 };
 
 /// Value handle that poisons itself if the Value is deleted.
@@ -447,112 +499,132 @@ class PoisoningVH
     final : public CallbackVH
 #endif
 {
-  friend struct DenseMapInfo<PoisoningVH<ValueTy>>;
+    friend struct DenseMapInfo<PoisoningVH<ValueTy>>;
 
-  // Convert a ValueTy*, which may be const, to the raw Value*.
-  static Value *GetAsValue(Value *V) { return V; }
-  static Value *GetAsValue(const Value *V) { return const_cast<Value *>(V); }
+    // Convert a ValueTy*, which may be const, to the raw Value*.
+    static Value *GetAsValue(Value *V) {
+        return V;
+    }
+    static Value *GetAsValue(const Value *V) {
+        return const_cast<Value *>(V);
+    }
 
 #ifndef NDEBUG
-  /// A flag tracking whether this value has been poisoned.
-  ///
-  /// On delete and RAUW, we leave the value pointer alone so that as a raw
-  /// pointer it produces the same value (and we fit into the same key of
-  /// a hash table, etc), but we poison the handle so that any top-level usage
-  /// will fail.
-  bool Poisoned = false;
+    /// A flag tracking whether this value has been poisoned.
+    ///
+    /// On delete and RAUW, we leave the value pointer alone so that as a raw
+    /// pointer it produces the same value (and we fit into the same key of
+    /// a hash table, etc), but we poison the handle so that any top-level usage
+    /// will fail.
+    bool Poisoned = false;
 
-  Value *getRawValPtr() const { return ValueHandleBase::getValPtr(); }
-  void setRawValPtr(Value *P) { ValueHandleBase::operator=(P); }
+    Value *getRawValPtr() const {
+        return ValueHandleBase::getValPtr();
+    }
+    void setRawValPtr(Value *P) {
+        ValueHandleBase::operator=(P);
+    }
 
-  /// Handle deletion by poisoning the handle.
-  void deleted() override {
-    assert(!Poisoned && "Tried to delete an already poisoned handle!");
-    Poisoned = true;
-    RemoveFromUseList();
-  }
+    /// Handle deletion by poisoning the handle.
+    void deleted() override {
+        assert(!Poisoned && "Tried to delete an already poisoned handle!");
+        Poisoned = true;
+        RemoveFromUseList();
+    }
 
-  /// Handle RAUW by poisoning the handle.
-  void allUsesReplacedWith(Value *) override {
-    assert(!Poisoned && "Tried to RAUW an already poisoned handle!");
-    Poisoned = true;
-    RemoveFromUseList();
-  }
+    /// Handle RAUW by poisoning the handle.
+    void allUsesReplacedWith(Value *) override {
+        assert(!Poisoned && "Tried to RAUW an already poisoned handle!");
+        Poisoned = true;
+        RemoveFromUseList();
+    }
 #else // NDEBUG
-  Value *ThePtr = nullptr;
+    Value *ThePtr = nullptr;
 
-  Value *getRawValPtr() const { return ThePtr; }
-  void setRawValPtr(Value *P) { ThePtr = P; }
+    Value *getRawValPtr() const {
+        return ThePtr;
+    }
+    void setRawValPtr(Value *P) {
+        ThePtr = P;
+    }
 #endif
 
-  ValueTy *getValPtr() const {
-    assert(!Poisoned && "Accessed a poisoned value handle!");
-    return static_cast<ValueTy *>(getRawValPtr());
-  }
-  void setValPtr(ValueTy *P) { setRawValPtr(GetAsValue(P)); }
+    ValueTy *getValPtr() const {
+        assert(!Poisoned && "Accessed a poisoned value handle!");
+        return static_cast<ValueTy *>(getRawValPtr());
+    }
+    void setValPtr(ValueTy *P) {
+        setRawValPtr(GetAsValue(P));
+    }
 
 public:
-  PoisoningVH() = default;
+    PoisoningVH() = default;
 #ifndef NDEBUG
-  PoisoningVH(ValueTy *P) : CallbackVH(GetAsValue(P)) {}
-  PoisoningVH(const PoisoningVH &RHS)
-      : CallbackVH(RHS), Poisoned(RHS.Poisoned) {}
+    PoisoningVH(ValueTy *P) : CallbackVH(GetAsValue(P)) {}
+    PoisoningVH(const PoisoningVH &RHS)
+        : CallbackVH(RHS), Poisoned(RHS.Poisoned) {}
 
-  ~PoisoningVH() {
-    if (Poisoned)
-      clearValPtr();
-  }
+    ~PoisoningVH() {
+        if (Poisoned)
+            clearValPtr();
+    }
 
-  PoisoningVH &operator=(const PoisoningVH &RHS) {
-    if (Poisoned)
-      clearValPtr();
-    CallbackVH::operator=(RHS);
-    Poisoned = RHS.Poisoned;
-    return *this;
-  }
+    PoisoningVH &operator=(const PoisoningVH &RHS) {
+        if (Poisoned)
+            clearValPtr();
+        CallbackVH::operator=(RHS);
+        Poisoned = RHS.Poisoned;
+        return *this;
+    }
 #else
-  PoisoningVH(ValueTy *P) : ThePtr(GetAsValue(P)) {}
+    PoisoningVH(ValueTy *P) : ThePtr(GetAsValue(P)) {}
 #endif
 
-  operator ValueTy *() const { return getValPtr(); }
+    operator ValueTy *() const {
+        return getValPtr();
+    }
 
-  ValueTy *operator->() const { return getValPtr(); }
-  ValueTy &operator*() const { return *getValPtr(); }
+    ValueTy *operator->() const {
+        return getValPtr();
+    }
+    ValueTy &operator*() const {
+        return *getValPtr();
+    }
 };
 
 // Specialize DenseMapInfo to allow PoisoningVH to participate in DenseMap.
 template <typename T> struct DenseMapInfo<PoisoningVH<T>> {
-  static inline PoisoningVH<T> getEmptyKey() {
-    PoisoningVH<T> Res;
-    Res.setRawValPtr(DenseMapInfo<Value *>::getEmptyKey());
-    return Res;
-  }
+    static inline PoisoningVH<T> getEmptyKey() {
+        PoisoningVH<T> Res;
+        Res.setRawValPtr(DenseMapInfo<Value *>::getEmptyKey());
+        return Res;
+    }
 
-  static inline PoisoningVH<T> getTombstoneKey() {
-    PoisoningVH<T> Res;
-    Res.setRawValPtr(DenseMapInfo<Value *>::getTombstoneKey());
-    return Res;
-  }
+    static inline PoisoningVH<T> getTombstoneKey() {
+        PoisoningVH<T> Res;
+        Res.setRawValPtr(DenseMapInfo<Value *>::getTombstoneKey());
+        return Res;
+    }
 
-  static unsigned getHashValue(const PoisoningVH<T> &Val) {
-    return DenseMapInfo<Value *>::getHashValue(Val.getRawValPtr());
-  }
+    static unsigned getHashValue(const PoisoningVH<T> &Val) {
+        return DenseMapInfo<Value *>::getHashValue(Val.getRawValPtr());
+    }
 
-  static bool isEqual(const PoisoningVH<T> &LHS, const PoisoningVH<T> &RHS) {
-    return DenseMapInfo<Value *>::isEqual(LHS.getRawValPtr(),
-                                          RHS.getRawValPtr());
-  }
+    static bool isEqual(const PoisoningVH<T> &LHS, const PoisoningVH<T> &RHS) {
+        return DenseMapInfo<Value *>::isEqual(LHS.getRawValPtr(),
+                                              RHS.getRawValPtr());
+    }
 
-  // Allow lookup by T* via find_as(), without constructing a temporary
-  // value handle.
+    // Allow lookup by T* via find_as(), without constructing a temporary
+    // value handle.
 
-  static unsigned getHashValue(const T *Val) {
-    return DenseMapInfo<Value *>::getHashValue(Val);
-  }
+    static unsigned getHashValue(const T *Val) {
+        return DenseMapInfo<Value *>::getHashValue(Val);
+    }
 
-  static bool isEqual(const T *LHS, const PoisoningVH<T> &RHS) {
-    return DenseMapInfo<Value *>::isEqual(LHS, RHS.getRawValPtr());
-  }
+    static bool isEqual(const T *LHS, const PoisoningVH<T> &RHS) {
+        return DenseMapInfo<Value *>::isEqual(LHS, RHS.getRawValPtr());
+    }
 };
 
 } // end namespace llvm

@@ -19,19 +19,19 @@ namespace {
 /// The result will be the same as if the program where compiled with
 /// -gline-tables-only.
 struct StripNonLineTableDebugLegacyPass : public ModulePass {
-  static char ID; // Pass identification, replacement for typeid
-  StripNonLineTableDebugLegacyPass() : ModulePass(ID) {
-    initializeStripNonLineTableDebugLegacyPassPass(
-        *PassRegistry::getPassRegistry());
-  }
+    static char ID; // Pass identification, replacement for typeid
+    StripNonLineTableDebugLegacyPass() : ModulePass(ID) {
+        initializeStripNonLineTableDebugLegacyPassPass(
+            *PassRegistry::getPassRegistry());
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesAll();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesAll();
+    }
 
-  bool runOnModule(Module &M) override {
-    return llvm::stripNonLineTableDebugInfo(M);
-  }
+    bool runOnModule(Module &M) override {
+        return llvm::stripNonLineTableDebugInfo(M);
+    }
 };
 }
 
@@ -41,11 +41,11 @@ INITIALIZE_PASS(StripNonLineTableDebugLegacyPass,
                 "Strip all debug info except linetables", false, false)
 
 ModulePass *llvm::createStripNonLineTableDebugLegacyPass() {
-  return new StripNonLineTableDebugLegacyPass();
+    return new StripNonLineTableDebugLegacyPass();
 }
 
 PreservedAnalyses
 StripNonLineTableDebugInfoPass::run(Module &M, ModuleAnalysisManager &AM) {
-  llvm::stripNonLineTableDebugInfo(M);
-  return PreservedAnalyses::all();
+    llvm::stripNonLineTableDebugInfo(M);
+    return PreservedAnalyses::all();
 }

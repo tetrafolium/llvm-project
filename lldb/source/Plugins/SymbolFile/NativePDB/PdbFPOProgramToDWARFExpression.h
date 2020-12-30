@@ -16,11 +16,11 @@ namespace lldb_private {
 class Stream;
 
 namespace npdb {
-  
+
 bool TranslateFPOProgramToDWARFExpression(llvm::StringRef program,
-                                          llvm::StringRef register_name,
-                                          llvm::Triple::ArchType arch_type,
-                                          lldb_private::Stream &stream);
+        llvm::StringRef register_name,
+        llvm::Triple::ArchType arch_type,
+        lldb_private::Stream &stream);
 
 } // namespace npdb
 } // namespace lldb_private

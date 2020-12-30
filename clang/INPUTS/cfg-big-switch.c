@@ -14,14 +14,14 @@
 // This has a *monstrous* single fan-out in the CFG, across 8000 blocks inside
 // the while loop.
 unsigned cfg_big_switch(int x) {
-  unsigned y = 0;
-  while (x > 0) {
-    switch(x) {
+    unsigned y = 0;
+    while (x > 0) {
+        switch(x) {
 #define CASE(i, x, y) \
       case i: { int case_var = 3*x + i; y += case_var - 1; break; }
-EXPAND_4096_CASES(0, x, y);
+            EXPAND_4096_CASES(0, x, y);
+        }
+        --x;
     }
-    --x;
-  }
-  return y;
+    return y;
 }

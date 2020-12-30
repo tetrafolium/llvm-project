@@ -34,44 +34,44 @@ const uint64_t FNV_PRIME_64 = 1099511628211u;
 const uint64_t FNV_OFFSET_64 = 14695981039346656037u;
 
 inline void stable_hash_append(stable_hash &Hash, const char Value) {
-  Hash = Hash ^ (Value & 0xFF);
-  Hash = Hash * FNV_PRIME_64;
+    Hash = Hash ^ (Value & 0xFF);
+    Hash = Hash * FNV_PRIME_64;
 }
 
 inline void stable_hash_append(stable_hash &Hash, stable_hash Value) {
-  for (unsigned I = 0; I < 8; ++I) {
-    stable_hash_append(Hash, static_cast<char>(Value));
-    Value >>= 8;
-  }
+    for (unsigned I = 0; I < 8; ++I) {
+        stable_hash_append(Hash, static_cast<char>(Value));
+        Value >>= 8;
+    }
 }
 
 } // namespace detail
 } // namespace hashing
 
 inline stable_hash stable_hash_combine(stable_hash A, stable_hash B) {
-  stable_hash Hash = hashing::detail::FNV_OFFSET_64;
-  hashing::detail::stable_hash_append(Hash, A);
-  hashing::detail::stable_hash_append(Hash, B);
-  return Hash;
+    stable_hash Hash = hashing::detail::FNV_OFFSET_64;
+    hashing::detail::stable_hash_append(Hash, A);
+    hashing::detail::stable_hash_append(Hash, B);
+    return Hash;
 }
 
 inline stable_hash stable_hash_combine(stable_hash A, stable_hash B,
                                        stable_hash C) {
-  stable_hash Hash = hashing::detail::FNV_OFFSET_64;
-  hashing::detail::stable_hash_append(Hash, A);
-  hashing::detail::stable_hash_append(Hash, B);
-  hashing::detail::stable_hash_append(Hash, C);
-  return Hash;
+    stable_hash Hash = hashing::detail::FNV_OFFSET_64;
+    hashing::detail::stable_hash_append(Hash, A);
+    hashing::detail::stable_hash_append(Hash, B);
+    hashing::detail::stable_hash_append(Hash, C);
+    return Hash;
 }
 
 inline stable_hash stable_hash_combine(stable_hash A, stable_hash B,
                                        stable_hash C, stable_hash D) {
-  stable_hash Hash = hashing::detail::FNV_OFFSET_64;
-  hashing::detail::stable_hash_append(Hash, A);
-  hashing::detail::stable_hash_append(Hash, B);
-  hashing::detail::stable_hash_append(Hash, C);
-  hashing::detail::stable_hash_append(Hash, D);
-  return Hash;
+    stable_hash Hash = hashing::detail::FNV_OFFSET_64;
+    hashing::detail::stable_hash_append(Hash, A);
+    hashing::detail::stable_hash_append(Hash, B);
+    hashing::detail::stable_hash_append(Hash, C);
+    hashing::detail::stable_hash_append(Hash, D);
+    return Hash;
 }
 
 /// Compute a stable_hash for a sequence of values.
@@ -83,28 +83,28 @@ inline stable_hash stable_hash_combine(stable_hash A, stable_hash B,
 template <typename InputIteratorT>
 stable_hash stable_hash_combine_range(InputIteratorT First,
                                       InputIteratorT Last) {
-  stable_hash Hash = hashing::detail::FNV_OFFSET_64;
-  for (auto I = First; I != Last; ++I)
-    hashing::detail::stable_hash_append(Hash, *I);
-  return Hash;
+    stable_hash Hash = hashing::detail::FNV_OFFSET_64;
+    for (auto I = First; I != Last; ++I)
+        hashing::detail::stable_hash_append(Hash, *I);
+    return Hash;
 }
 
 inline stable_hash stable_hash_combine_array(const stable_hash *P, size_t C) {
-  stable_hash Hash = hashing::detail::FNV_OFFSET_64;
-  for (size_t I = 0; I < C; ++I)
-    hashing::detail::stable_hash_append(Hash, P[I]);
-  return Hash;
+    stable_hash Hash = hashing::detail::FNV_OFFSET_64;
+    for (size_t I = 0; I < C; ++I)
+        hashing::detail::stable_hash_append(Hash, P[I]);
+    return Hash;
 }
 
 inline stable_hash stable_hash_combine_string(const StringRef &S) {
-  return stable_hash_combine_range(S.begin(), S.end());
+    return stable_hash_combine_range(S.begin(), S.end());
 }
 
 inline stable_hash stable_hash_combine_string(const char *C) {
-  stable_hash Hash = hashing::detail::FNV_OFFSET_64;
-  while (*C)
-    hashing::detail::stable_hash_append(Hash, *(C++));
-  return Hash;
+    stable_hash Hash = hashing::detail::FNV_OFFSET_64;
+    while (*C)
+        hashing::detail::stable_hash_append(Hash, *(C++));
+    return Hash;
 }
 
 } // namespace llvm

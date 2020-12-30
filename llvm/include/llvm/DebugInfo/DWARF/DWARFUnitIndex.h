@@ -54,14 +54,14 @@ class raw_ostream;
 /// serializeSectionKind() and deserializeSectionKind(), should be used for
 /// the translation.
 enum DWARFSectionKind {
-  /// Denotes a value read from an index section that does not correspond
-  /// to any of the supported standards.
-  DW_SECT_EXT_unknown = 0,
+    /// Denotes a value read from an index section that does not correspond
+    /// to any of the supported standards.
+    DW_SECT_EXT_unknown = 0,
 #define HANDLE_DW_SECT(ID, NAME) DW_SECT_##NAME = ID,
 #include "llvm/BinaryFormat/Dwarf.def"
-  DW_SECT_EXT_TYPES = 2,
-  DW_SECT_EXT_LOC = 9,
-  DW_SECT_EXT_MACINFO = 10,
+    DW_SECT_EXT_TYPES = 2,
+    DW_SECT_EXT_LOC = 9,
+    DW_SECT_EXT_MACINFO = 10,
 };
 
 /// Convert the internal value for a section kind to an on-disk value.
@@ -78,79 +78,85 @@ uint32_t serializeSectionKind(DWARFSectionKind Kind, unsigned IndexVersion);
 DWARFSectionKind deserializeSectionKind(uint32_t Value, unsigned IndexVersion);
 
 class DWARFUnitIndex {
-  struct Header {
-    uint32_t Version;
-    uint32_t NumColumns;
-    uint32_t NumUnits;
-    uint32_t NumBuckets = 0;
+    struct Header {
+        uint32_t Version;
+        uint32_t NumColumns;
+        uint32_t NumUnits;
+        uint32_t NumBuckets = 0;
 
-    bool parse(DataExtractor IndexData, uint64_t *OffsetPtr);
-    void dump(raw_ostream &OS) const;
-  };
-
-public:
-  class Entry {
-  public:
-    struct SectionContribution {
-      uint32_t Offset;
-      uint32_t Length;
+        bool parse(DataExtractor IndexData, uint64_t *OffsetPtr);
+        void dump(raw_ostream &OS) const;
     };
 
-  private:
-    const DWARFUnitIndex *Index;
-    uint64_t Signature;
-    std::unique_ptr<SectionContribution[]> Contributions;
-    friend class DWARFUnitIndex;
+public:
+    class Entry {
+    public:
+        struct SectionContribution {
+            uint32_t Offset;
+            uint32_t Length;
+        };
 
-  public:
-    const SectionContribution *getContribution(DWARFSectionKind Sec) const;
-    const SectionContribution *getContribution() const;
+    private:
+        const DWARFUnitIndex *Index;
+        uint64_t Signature;
+        std::unique_ptr<SectionContribution[]> Contributions;
+        friend class DWARFUnitIndex;
 
-    const SectionContribution *getContributions() const {
-      return Contributions.get();
-    }
+    public:
+        const SectionContribution *getContribution(DWARFSectionKind Sec) const;
+        const SectionContribution *getContribution() const;
 
-    uint64_t getSignature() const { return Signature; }
-  };
+        const SectionContribution *getContributions() const {
+            return Contributions.get();
+        }
+
+        uint64_t getSignature() const {
+            return Signature;
+        }
+    };
 
 private:
-  struct Header Header;
+    struct Header Header;
 
-  DWARFSectionKind InfoColumnKind;
-  int InfoColumn = -1;
-  std::unique_ptr<DWARFSectionKind[]> ColumnKinds;
-  // This is a parallel array of section identifiers as they read from the input
-  // file. The mapping from raw values to DWARFSectionKind is not revertable in
-  // case of unknown identifiers, so we keep them here.
-  std::unique_ptr<uint32_t[]> RawSectionIds;
-  std::unique_ptr<Entry[]> Rows;
-  mutable std::vector<Entry *> OffsetLookup;
+    DWARFSectionKind InfoColumnKind;
+    int InfoColumn = -1;
+    std::unique_ptr<DWARFSectionKind[]> ColumnKinds;
+    // This is a parallel array of section identifiers as they read from the input
+    // file. The mapping from raw values to DWARFSectionKind is not revertable in
+    // case of unknown identifiers, so we keep them here.
+    std::unique_ptr<uint32_t[]> RawSectionIds;
+    std::unique_ptr<Entry[]> Rows;
+    mutable std::vector<Entry *> OffsetLookup;
 
-  static StringRef getColumnHeader(DWARFSectionKind DS);
+    static StringRef getColumnHeader(DWARFSectionKind DS);
 
-  bool parseImpl(DataExtractor IndexData);
+    bool parseImpl(DataExtractor IndexData);
 
 public:
-  DWARFUnitIndex(DWARFSectionKind InfoColumnKind)
-      : InfoColumnKind(InfoColumnKind) {}
+    DWARFUnitIndex(DWARFSectionKind InfoColumnKind)
+        : InfoColumnKind(InfoColumnKind) {}
 
-  explicit operator bool() const { return Header.NumBuckets; }
+    explicit operator bool() const {
+        return Header.NumBuckets;
+    }
 
-  bool parse(DataExtractor IndexData);
-  void dump(raw_ostream &OS) const;
+    bool parse(DataExtractor IndexData);
+    void dump(raw_ostream &OS) const;
 
-  uint32_t getVersion() const { return Header.Version; }
+    uint32_t getVersion() const {
+        return Header.Version;
+    }
 
-  const Entry *getFromOffset(uint32_t Offset) const;
-  const Entry *getFromHash(uint64_t Offset) const;
+    const Entry *getFromOffset(uint32_t Offset) const;
+    const Entry *getFromHash(uint64_t Offset) const;
 
-  ArrayRef<DWARFSectionKind> getColumnKinds() const {
-    return makeArrayRef(ColumnKinds.get(), Header.NumColumns);
-  }
+    ArrayRef<DWARFSectionKind> getColumnKinds() const {
+        return makeArrayRef(ColumnKinds.get(), Header.NumColumns);
+    }
 
-  ArrayRef<Entry> getRows() const {
-    return makeArrayRef(Rows.get(), Header.NumBuckets);
-  }
+    ArrayRef<Entry> getRows() const {
+        return makeArrayRef(Rows.get(), Header.NumBuckets);
+    }
 };
 
 } // end namespace llvm

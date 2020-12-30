@@ -45,37 +45,37 @@ enum class align_val_t : size_t {};
 
 CXX_OPERATOR_ATTRIBUTE
 void *operator new(size_t size) {
-  OPERATOR_NEW_BODY(FROM_NEW, false /*nothrow*/);
+    OPERATOR_NEW_BODY(FROM_NEW, false /*nothrow*/);
 }
 CXX_OPERATOR_ATTRIBUTE
 void *operator new[](size_t size) {
-  OPERATOR_NEW_BODY(FROM_NEW_BR, false /*nothrow*/);
+    OPERATOR_NEW_BODY(FROM_NEW_BR, false /*nothrow*/);
 }
 CXX_OPERATOR_ATTRIBUTE
 void *operator new(size_t size, std::nothrow_t const &) {
-  OPERATOR_NEW_BODY(FROM_NEW, true /*nothrow*/);
+    OPERATOR_NEW_BODY(FROM_NEW, true /*nothrow*/);
 }
 CXX_OPERATOR_ATTRIBUTE
 void *operator new[](size_t size, std::nothrow_t const &) {
-  OPERATOR_NEW_BODY(FROM_NEW_BR, true /*nothrow*/);
+    OPERATOR_NEW_BODY(FROM_NEW_BR, true /*nothrow*/);
 }
 CXX_OPERATOR_ATTRIBUTE
 void *operator new(size_t size, std::align_val_t align) {
-  OPERATOR_NEW_BODY_ALIGN(FROM_NEW, false /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(FROM_NEW, false /*nothrow*/);
 }
 CXX_OPERATOR_ATTRIBUTE
 void *operator new[](size_t size, std::align_val_t align) {
-  OPERATOR_NEW_BODY_ALIGN(FROM_NEW_BR, false /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(FROM_NEW_BR, false /*nothrow*/);
 }
 CXX_OPERATOR_ATTRIBUTE
 void *operator new(size_t size, std::align_val_t align,
                    std::nothrow_t const &) {
-  OPERATOR_NEW_BODY_ALIGN(FROM_NEW, true /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(FROM_NEW, true /*nothrow*/);
 }
 CXX_OPERATOR_ATTRIBUTE
 void *operator new[](size_t size, std::align_val_t align,
                      std::nothrow_t const &) {
-  OPERATOR_NEW_BODY_ALIGN(FROM_NEW_BR, true /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(FROM_NEW_BR, true /*nothrow*/);
 }
 
 #define OPERATOR_DELETE_BODY(type)                                             \
@@ -98,48 +98,48 @@ CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr)NOEXCEPT { OPERATOR_DELETE_BODY(FROM_NEW); }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr) NOEXCEPT {
-  OPERATOR_DELETE_BODY(FROM_NEW_BR);
+    OPERATOR_DELETE_BODY(FROM_NEW_BR);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, std::nothrow_t const &) {
-  OPERATOR_DELETE_BODY(FROM_NEW);
+    OPERATOR_DELETE_BODY(FROM_NEW);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr, std::nothrow_t const &) {
-  OPERATOR_DELETE_BODY(FROM_NEW_BR);
+    OPERATOR_DELETE_BODY(FROM_NEW_BR);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, size_t size)NOEXCEPT {
-  OPERATOR_DELETE_BODY_SIZE(FROM_NEW);
+    OPERATOR_DELETE_BODY_SIZE(FROM_NEW);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr, size_t size) NOEXCEPT {
-  OPERATOR_DELETE_BODY_SIZE(FROM_NEW_BR);
+    OPERATOR_DELETE_BODY_SIZE(FROM_NEW_BR);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, std::align_val_t align)NOEXCEPT {
-  OPERATOR_DELETE_BODY_ALIGN(FROM_NEW);
+    OPERATOR_DELETE_BODY_ALIGN(FROM_NEW);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr, std::align_val_t align) NOEXCEPT {
-  OPERATOR_DELETE_BODY_ALIGN(FROM_NEW_BR);
+    OPERATOR_DELETE_BODY_ALIGN(FROM_NEW_BR);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, std::align_val_t align,
                      std::nothrow_t const &) {
-  OPERATOR_DELETE_BODY_ALIGN(FROM_NEW);
+    OPERATOR_DELETE_BODY_ALIGN(FROM_NEW);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr, std::align_val_t align,
                        std::nothrow_t const &) {
-  OPERATOR_DELETE_BODY_ALIGN(FROM_NEW_BR);
+    OPERATOR_DELETE_BODY_ALIGN(FROM_NEW_BR);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete(void *ptr, size_t size, std::align_val_t align)NOEXCEPT {
-  OPERATOR_DELETE_BODY_SIZE_ALIGN(FROM_NEW);
+    OPERATOR_DELETE_BODY_SIZE_ALIGN(FROM_NEW);
 }
 CXX_OPERATOR_ATTRIBUTE
 void operator delete[](void *ptr, size_t size,
                        std::align_val_t align) NOEXCEPT {
-  OPERATOR_DELETE_BODY_SIZE_ALIGN(FROM_NEW_BR);
+    OPERATOR_DELETE_BODY_SIZE_ALIGN(FROM_NEW_BR);
 }

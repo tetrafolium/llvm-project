@@ -27,14 +27,14 @@ class ObjFile;
 
 class BitcodeCompiler {
 public:
-  BitcodeCompiler();
+    BitcodeCompiler();
 
-  void add(BitcodeFile &f);
-  std::vector<ObjFile *> compile();
+    void add(BitcodeFile &f);
+    std::vector<ObjFile *> compile();
 
 private:
-  std::unique_ptr<llvm::lto::LTO> ltoObj;
-  std::vector<llvm::SmallString<0>> buf;
+    std::unique_ptr<llvm::lto::LTO> ltoObj;
+    std::vector<llvm::SmallString<0>> buf;
 };
 
 } // namespace macho

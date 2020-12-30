@@ -19,20 +19,20 @@ namespace pdb {
 
 class NativeTypeTypedef : public NativeRawSymbol {
 public:
-  // Create a pointer record for a non-simple type.
-  NativeTypeTypedef(NativeSession &Session, SymIndexId Id,
-                    codeview::UDTSym Typedef);
+    // Create a pointer record for a non-simple type.
+    NativeTypeTypedef(NativeSession &Session, SymIndexId Id,
+                      codeview::UDTSym Typedef);
 
-  ~NativeTypeTypedef() override;
+    ~NativeTypeTypedef() override;
 
-  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-            PdbSymbolIdField RecurseIdFields) const override;
+    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+              PdbSymbolIdField RecurseIdFields) const override;
 
-  std::string getName() const override;
-  SymIndexId getTypeId() const override;
+    std::string getName() const override;
+    SymIndexId getTypeId() const override;
 
 protected:
-  codeview::UDTSym Record;
+    codeview::UDTSym Record;
 };
 
 } // namespace pdb

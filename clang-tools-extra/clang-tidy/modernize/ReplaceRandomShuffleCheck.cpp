@@ -21,80 +21,80 @@ namespace tidy {
 namespace modernize {
 
 ReplaceRandomShuffleCheck::ReplaceRandomShuffleCheck(StringRef Name,
-                                                     ClangTidyContext *Context)
+        ClangTidyContext *Context)
     : ClangTidyCheck(Name, Context),
       IncludeInserter(Options.getLocalOrGlobal("IncludeStyle",
-                                               utils::IncludeSorter::IS_LLVM)) {
+                      utils::IncludeSorter::IS_LLVM)) {
 }
 
 void ReplaceRandomShuffleCheck::registerMatchers(MatchFinder *Finder) {
-  const auto Begin = hasArgument(0, expr());
-  const auto End = hasArgument(1, expr());
-  const auto RandomFunc = hasArgument(2, expr().bind("randomFunc"));
-  Finder->addMatcher(
-      traverse(
-          TK_AsIs,
-          callExpr(
-              anyOf(allOf(Begin, End, argumentCountIs(2)),
-                    allOf(Begin, End, RandomFunc, argumentCountIs(3))),
-              hasDeclaration(functionDecl(hasName("::std::random_shuffle"))),
-              has(implicitCastExpr(has(declRefExpr().bind("name")))))
-              .bind("match")),
-      this);
+    const auto Begin = hasArgument(0, expr());
+    const auto End = hasArgument(1, expr());
+    const auto RandomFunc = hasArgument(2, expr().bind("randomFunc"));
+    Finder->addMatcher(
+        traverse(
+            TK_AsIs,
+            callExpr(
+                anyOf(allOf(Begin, End, argumentCountIs(2)),
+                      allOf(Begin, End, RandomFunc, argumentCountIs(3))),
+                hasDeclaration(functionDecl(hasName("::std::random_shuffle"))),
+                has(implicitCastExpr(has(declRefExpr().bind("name")))))
+            .bind("match")),
+        this);
 }
 
 void ReplaceRandomShuffleCheck::registerPPCallbacks(
     const SourceManager &SM, Preprocessor *PP, Preprocessor *ModuleExpanderPP) {
-  IncludeInserter.registerPreprocessor(PP);
+    IncludeInserter.registerPreprocessor(PP);
 }
 
 void ReplaceRandomShuffleCheck::storeOptions(
     ClangTidyOptions::OptionMap &Opts) {
-  Options.store(Opts, "IncludeStyle", IncludeInserter.getStyle());
+    Options.store(Opts, "IncludeStyle", IncludeInserter.getStyle());
 }
 
 void ReplaceRandomShuffleCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *MatchedDecl = Result.Nodes.getNodeAs<DeclRefExpr>("name");
-  const auto *MatchedArgumentThree = Result.Nodes.getNodeAs<Expr>("randomFunc");
-  const auto *MatchedCallExpr = Result.Nodes.getNodeAs<CallExpr>("match");
+    const auto *MatchedDecl = Result.Nodes.getNodeAs<DeclRefExpr>("name");
+    const auto *MatchedArgumentThree = Result.Nodes.getNodeAs<Expr>("randomFunc");
+    const auto *MatchedCallExpr = Result.Nodes.getNodeAs<CallExpr>("match");
 
-  if (MatchedCallExpr->getBeginLoc().isMacroID())
-    return;
+    if (MatchedCallExpr->getBeginLoc().isMacroID())
+        return;
 
-  auto Diag = [&] {
-    if (MatchedCallExpr->getNumArgs() == 3) {
-      auto DiagL =
-          diag(MatchedCallExpr->getBeginLoc(),
-               "'std::random_shuffle' has been removed in C++17; use "
-               "'std::shuffle' and an alternative random mechanism instead");
-      DiagL << FixItHint::CreateReplacement(
-          MatchedArgumentThree->getSourceRange(),
-          "std::mt19937(std::random_device()())");
-      return DiagL;
-    } else {
-      auto DiagL = diag(MatchedCallExpr->getBeginLoc(),
-                        "'std::random_shuffle' has been removed in C++17; use "
-                        "'std::shuffle' instead");
-      DiagL << FixItHint::CreateInsertion(
-          MatchedCallExpr->getRParenLoc(),
-          ", std::mt19937(std::random_device()())");
-      return DiagL;
-    }
-  }();
+    auto Diag = [&] {
+        if (MatchedCallExpr->getNumArgs() == 3) {
+            auto DiagL =
+            diag(MatchedCallExpr->getBeginLoc(),
+                 "'std::random_shuffle' has been removed in C++17; use "
+                 "'std::shuffle' and an alternative random mechanism instead");
+            DiagL << FixItHint::CreateReplacement(
+                      MatchedArgumentThree->getSourceRange(),
+                      "std::mt19937(std::random_device()())");
+            return DiagL;
+        } else {
+            auto DiagL = diag(MatchedCallExpr->getBeginLoc(),
+                              "'std::random_shuffle' has been removed in C++17; use "
+                              "'std::shuffle' instead");
+            DiagL << FixItHint::CreateInsertion(
+                      MatchedCallExpr->getRParenLoc(),
+                      ", std::mt19937(std::random_device()())");
+            return DiagL;
+        }
+    }();
 
-  std::string NewName = "shuffle";
-  StringRef ContainerText = Lexer::getSourceText(
-      CharSourceRange::getTokenRange(MatchedDecl->getSourceRange()),
-      *Result.SourceManager, getLangOpts());
-  if (ContainerText.startswith("std::"))
-    NewName = "std::" + NewName;
+    std::string NewName = "shuffle";
+    StringRef ContainerText = Lexer::getSourceText(
+                                  CharSourceRange::getTokenRange(MatchedDecl->getSourceRange()),
+                                  *Result.SourceManager, getLangOpts());
+    if (ContainerText.startswith("std::"))
+        NewName = "std::" + NewName;
 
-  Diag << FixItHint::CreateRemoval(MatchedDecl->getSourceRange());
-  Diag << FixItHint::CreateInsertion(MatchedDecl->getBeginLoc(), NewName);
-  Diag << IncludeInserter.createIncludeInsertion(
-      Result.Context->getSourceManager().getFileID(
-          MatchedCallExpr->getBeginLoc()),
-      "<random>");
+    Diag << FixItHint::CreateRemoval(MatchedDecl->getSourceRange());
+    Diag << FixItHint::CreateInsertion(MatchedDecl->getBeginLoc(), NewName);
+    Diag << IncludeInserter.createIncludeInsertion(
+             Result.Context->getSourceManager().getFileID(
+                 MatchedCallExpr->getBeginLoc()),
+             "<random>");
 }
 
 } // namespace modernize

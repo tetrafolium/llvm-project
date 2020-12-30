@@ -38,55 +38,57 @@ namespace mca {
 
 /// A view that collects and prints a few performance numbers.
 class SummaryView : public View {
-  const llvm::MCSchedModel &SM;
-  llvm::ArrayRef<llvm::MCInst> Source;
-  const unsigned DispatchWidth;
-  unsigned LastInstructionIdx;
-  unsigned TotalCycles;
-  // The total number of micro opcodes contributed by a block of instructions.
-  unsigned NumMicroOps;
-
-  struct DisplayValues {
-    unsigned Instructions;
-    unsigned Iterations;
-    unsigned TotalInstructions;
+    const llvm::MCSchedModel &SM;
+    llvm::ArrayRef<llvm::MCInst> Source;
+    const unsigned DispatchWidth;
+    unsigned LastInstructionIdx;
     unsigned TotalCycles;
-    unsigned DispatchWidth;
-    unsigned TotalUOps;
-    double IPC;
-    double UOpsPerCycle;
-    double BlockRThroughput;
-  };
+    // The total number of micro opcodes contributed by a block of instructions.
+    unsigned NumMicroOps;
 
-  // For each processor resource, this vector stores the cumulative number of
-  // resource cycles consumed by the analyzed code block.
-  llvm::SmallVector<unsigned, 8> ProcResourceUsage;
+    struct DisplayValues {
+        unsigned Instructions;
+        unsigned Iterations;
+        unsigned TotalInstructions;
+        unsigned TotalCycles;
+        unsigned DispatchWidth;
+        unsigned TotalUOps;
+        double IPC;
+        double UOpsPerCycle;
+        double BlockRThroughput;
+    };
 
-  // Each processor resource is associated with a so-called processor resource
-  // mask. This vector allows to correlate processor resource IDs with processor
-  // resource masks. There is exactly one element per each processor resource
-  // declared by the scheduling model.
-  llvm::SmallVector<uint64_t, 8> ProcResourceMasks;
+    // For each processor resource, this vector stores the cumulative number of
+    // resource cycles consumed by the analyzed code block.
+    llvm::SmallVector<unsigned, 8> ProcResourceUsage;
 
-  // Used to map resource indices to actual processor resource IDs.
-  llvm::SmallVector<unsigned, 8> ResIdx2ProcResID;
+    // Each processor resource is associated with a so-called processor resource
+    // mask. This vector allows to correlate processor resource IDs with processor
+    // resource masks. There is exactly one element per each processor resource
+    // declared by the scheduling model.
+    llvm::SmallVector<uint64_t, 8> ProcResourceMasks;
 
-  // Compute the reciprocal throughput for the analyzed code block.
-  // The reciprocal block throughput is computed as the MAX between:
-  //   - NumMicroOps / DispatchWidth
-  //   - Total Resource Cycles / #Units   (for every resource consumed).
-  double getBlockRThroughput() const;
+    // Used to map resource indices to actual processor resource IDs.
+    llvm::SmallVector<unsigned, 8> ResIdx2ProcResID;
 
-  /// Compute the data we want to print out in the object DV.
-  void collectData(DisplayValues &DV) const;
+    // Compute the reciprocal throughput for the analyzed code block.
+    // The reciprocal block throughput is computed as the MAX between:
+    //   - NumMicroOps / DispatchWidth
+    //   - Total Resource Cycles / #Units   (for every resource consumed).
+    double getBlockRThroughput() const;
+
+    /// Compute the data we want to print out in the object DV.
+    void collectData(DisplayValues &DV) const;
 
 public:
-  SummaryView(const llvm::MCSchedModel &Model, llvm::ArrayRef<llvm::MCInst> S,
-              unsigned Width);
+    SummaryView(const llvm::MCSchedModel &Model, llvm::ArrayRef<llvm::MCInst> S,
+                unsigned Width);
 
-  void onCycleEnd() override { ++TotalCycles; }
-  void onEvent(const HWInstructionEvent &Event) override;
-  void printView(llvm::raw_ostream &OS) const override;
+    void onCycleEnd() override {
+        ++TotalCycles;
+    }
+    void onEvent(const HWInstructionEvent &Event) override;
+    void printView(llvm::raw_ostream &OS) const override;
 };
 
 } // namespace mca

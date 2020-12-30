@@ -30,16 +30,16 @@
 namespace __memprof {
 
 enum AllocType {
-  FROM_MALLOC = 1, // Memory block came from malloc, calloc, realloc, etc.
-  FROM_NEW = 2,    // Memory block came from operator new.
-  FROM_NEW_BR = 3  // Memory block came from operator new [ ]
+    FROM_MALLOC = 1, // Memory block came from malloc, calloc, realloc, etc.
+    FROM_NEW = 2,    // Memory block came from operator new.
+    FROM_NEW_BR = 3  // Memory block came from operator new [ ]
 };
 
 void InitializeAllocator();
 
 struct MemprofMapUnmapCallback {
-  void OnMap(uptr p, uptr size) const;
-  void OnUnmap(uptr p, uptr size) const;
+    void OnMap(uptr p, uptr size) const;
+    void OnUnmap(uptr p, uptr size) const;
 };
 
 constexpr uptr kAllocatorSpace = 0x600000000000ULL;
@@ -47,13 +47,13 @@ constexpr uptr kAllocatorSize = 0x40000000000ULL; // 4T.
 typedef DefaultSizeClassMap SizeClassMap;
 template <typename AddressSpaceViewTy>
 struct AP64 { // Allocator64 parameters. Deliberately using a short name.
-  static const uptr kSpaceBeg = kAllocatorSpace;
-  static const uptr kSpaceSize = kAllocatorSize;
-  static const uptr kMetadataSize = 0;
-  typedef __memprof::SizeClassMap SizeClassMap;
-  typedef MemprofMapUnmapCallback MapUnmapCallback;
-  static const uptr kFlags = 0;
-  using AddressSpaceView = AddressSpaceViewTy;
+    static const uptr kSpaceBeg = kAllocatorSpace;
+    static const uptr kSpaceSize = kAllocatorSize;
+    static const uptr kMetadataSize = 0;
+    typedef __memprof::SizeClassMap SizeClassMap;
+    typedef MemprofMapUnmapCallback MapUnmapCallback;
+    static const uptr kFlags = 0;
+    using AddressSpaceView = AddressSpaceViewTy;
 };
 
 template <typename AddressSpaceView>
@@ -69,13 +69,13 @@ using MemprofAllocator = MemprofAllocatorASVT<LocalAddressSpaceView>;
 using AllocatorCache = MemprofAllocator::AllocatorCache;
 
 struct MemprofThreadLocalMallocStorage {
-  uptr quarantine_cache[16];
-  AllocatorCache allocator_cache;
-  void CommitBack();
+    uptr quarantine_cache[16];
+    AllocatorCache allocator_cache;
+    void CommitBack();
 
 private:
-  // These objects are allocated via mmap() and are zero-initialized.
-  MemprofThreadLocalMallocStorage() {}
+    // These objects are allocated via mmap() and are zero-initialized.
+    MemprofThreadLocalMallocStorage() {}
 };
 
 void *memprof_memalign(uptr alignment, uptr size, BufferedStackTrace *stack,

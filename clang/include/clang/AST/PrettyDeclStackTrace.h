@@ -28,17 +28,17 @@ class SourceManager;
 /// parsing something related to a declaration, include that
 /// declaration in the stack trace.
 class PrettyDeclStackTraceEntry : public llvm::PrettyStackTraceEntry {
-  ASTContext &Context;
-  Decl *TheDecl;
-  SourceLocation Loc;
-  const char *Message;
+    ASTContext &Context;
+    Decl *TheDecl;
+    SourceLocation Loc;
+    const char *Message;
 
 public:
-  PrettyDeclStackTraceEntry(ASTContext &Ctx, Decl *D, SourceLocation Loc,
-                            const char *Msg)
-    : Context(Ctx), TheDecl(D), Loc(Loc), Message(Msg) {}
+    PrettyDeclStackTraceEntry(ASTContext &Ctx, Decl *D, SourceLocation Loc,
+                              const char *Msg)
+        : Context(Ctx), TheDecl(D), Loc(Loc), Message(Msg) {}
 
-  void print(raw_ostream &OS) const override;
+    void print(raw_ostream &OS) const override;
 };
 
 }

@@ -19,29 +19,43 @@ namespace edsc {
 /// Base class for MemRefBoundsCapture and VectorBoundsCapture.
 class BoundsCapture {
 public:
-  unsigned rank() const { return lbs.size(); }
-  Value lb(unsigned idx) const { return lbs[idx]; }
-  Value ub(unsigned idx) const { return ubs[idx]; }
-  int64_t step(unsigned idx) const { return steps[idx]; }
-  std::tuple<Value, Value, int64_t> range(unsigned idx) const {
-    return std::make_tuple(lbs[idx], ubs[idx], steps[idx]);
-  }
-  void swapRanges(unsigned i, unsigned j) {
-    if (i == j)
-      return;
-    std::swap(lbs[i], lbs[j]);
-    std::swap(ubs[i], ubs[j]);
-    std::swap(steps[i], steps[j]);
-  }
+    unsigned rank() const {
+        return lbs.size();
+    }
+    Value lb(unsigned idx) const {
+        return lbs[idx];
+    }
+    Value ub(unsigned idx) const {
+        return ubs[idx];
+    }
+    int64_t step(unsigned idx) const {
+        return steps[idx];
+    }
+    std::tuple<Value, Value, int64_t> range(unsigned idx) const {
+        return std::make_tuple(lbs[idx], ubs[idx], steps[idx]);
+    }
+    void swapRanges(unsigned i, unsigned j) {
+        if (i == j)
+            return;
+        std::swap(lbs[i], lbs[j]);
+        std::swap(ubs[i], ubs[j]);
+        std::swap(steps[i], steps[j]);
+    }
 
-  ArrayRef<Value> getLbs() const { return lbs; }
-  ArrayRef<Value> getUbs() const { return ubs; }
-  ArrayRef<int64_t> getSteps() const { return steps; }
+    ArrayRef<Value> getLbs() const {
+        return lbs;
+    }
+    ArrayRef<Value> getUbs() const {
+        return ubs;
+    }
+    ArrayRef<int64_t> getSteps() const {
+        return steps;
+    }
 
 protected:
-  SmallVector<Value, 8> lbs;
-  SmallVector<Value, 8> ubs;
-  SmallVector<int64_t, 8> steps;
+    SmallVector<Value, 8> lbs;
+    SmallVector<Value, 8> ubs;
+    SmallVector<int64_t, 8> steps;
 };
 
 /// A MemRefBoundsCapture represents the information required to step through a
@@ -51,12 +65,14 @@ protected:
 // TODO: Support MemRefs with layoutMaps.
 class MemRefBoundsCapture : public BoundsCapture {
 public:
-  explicit MemRefBoundsCapture(Value v);
+    explicit MemRefBoundsCapture(Value v);
 
-  unsigned fastestVarying() const { return rank() - 1; }
+    unsigned fastestVarying() const {
+        return rank() - 1;
+    }
 
 private:
-  Value base;
+    Value base;
 };
 
 /// A VectorBoundsCapture represents the information required to step through a
@@ -65,11 +81,11 @@ private:
 /// avoidance.
 class VectorBoundsCapture : public BoundsCapture {
 public:
-  explicit VectorBoundsCapture(Value v);
-  explicit VectorBoundsCapture(VectorType t);
+    explicit VectorBoundsCapture(Value v);
+    explicit VectorBoundsCapture(VectorType t);
 
 private:
-  Value base;
+    Value base;
 };
 
 } // namespace edsc

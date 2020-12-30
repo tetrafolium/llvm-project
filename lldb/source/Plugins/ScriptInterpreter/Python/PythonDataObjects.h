@@ -73,49 +73,51 @@ class PythonException;
 
 class StructuredPythonObject : public StructuredData::Generic {
 public:
-  StructuredPythonObject() : StructuredData::Generic() {}
+    StructuredPythonObject() : StructuredData::Generic() {}
 
-  StructuredPythonObject(void *obj) : StructuredData::Generic(obj) {
-    Py_XINCREF(GetValue());
-  }
+    StructuredPythonObject(void *obj) : StructuredData::Generic(obj) {
+        Py_XINCREF(GetValue());
+    }
 
-  ~StructuredPythonObject() override {
-    if (Py_IsInitialized())
-      Py_XDECREF(GetValue());
-    SetValue(nullptr);
-  }
+    ~StructuredPythonObject() override {
+        if (Py_IsInitialized())
+            Py_XDECREF(GetValue());
+        SetValue(nullptr);
+    }
 
-  bool IsValid() const override { return GetValue() && GetValue() != Py_None; }
+    bool IsValid() const override {
+        return GetValue() && GetValue() != Py_None;
+    }
 
-  void Serialize(llvm::json::OStream &s) const override;
+    void Serialize(llvm::json::OStream &s) const override;
 
 private:
-  StructuredPythonObject(const StructuredPythonObject &) = delete;
-  const StructuredPythonObject &
-  operator=(const StructuredPythonObject &) = delete;
+    StructuredPythonObject(const StructuredPythonObject &) = delete;
+    const StructuredPythonObject &
+    operator=(const StructuredPythonObject &) = delete;
 };
 
 enum class PyObjectType {
-  Unknown,
-  None,
-  Boolean,
-  Integer,
-  Dictionary,
-  List,
-  String,
-  Bytes,
-  ByteArray,
-  Module,
-  Callable,
-  Tuple,
-  File
+    Unknown,
+    None,
+    Boolean,
+    Integer,
+    Dictionary,
+    List,
+    String,
+    Bytes,
+    ByteArray,
+    Module,
+    Callable,
+    Tuple,
+    File
 };
 
 enum class PyRefType {
-  Borrowed, // We are not given ownership of the incoming PyObject.
-            // We cannot safely hold it without calling Py_INCREF.
-  Owned     // We have ownership of the incoming PyObject.  We should
-            // not call Py_INCREF.
+    Borrowed, // We are not given ownership of the incoming PyObject.
+    // We cannot safely hold it without calling Py_INCREF.
+    Owned     // We have ownership of the incoming PyObject.  We should
+    // not call Py_INCREF.
 };
 
 
@@ -130,11 +132,11 @@ enum class PyRefType {
 // If T is not just PythonObject, then obj must be already be
 // checked to be of the correct type.
 template <typename T> T Take(PyObject *obj) {
-  assert(obj);
-  assert(!PyErr_Occurred());
-  T thing(PyRefType::Owned, obj);
-  assert(thing.IsValid());
-  return thing;
+    assert(obj);
+    assert(!PyErr_Occurred());
+    T thing(PyRefType::Owned, obj);
+    assert(thing.IsValid());
+    return thing;
 }
 
 // Retain a reference you have borrowed, and turn it into
@@ -148,11 +150,11 @@ template <typename T> T Take(PyObject *obj) {
 // If T is not just PythonObject, then obj must be already be
 // checked to be of the correct type.
 template <typename T> T Retain(PyObject *obj) {
-  assert(obj);
-  assert(!PyErr_Occurred());
-  T thing(PyRefType::Borrowed, obj);
-  assert(thing.IsValid());
-  return thing;
+    assert(obj);
+    assert(!PyErr_Occurred());
+    T thing(PyRefType::Borrowed, obj);
+    assert(thing.IsValid());
+    return thing;
 }
 
 // This class can be used like a utility function to convert from
@@ -168,37 +170,43 @@ template <typename T> T Retain(PyObject *obj) {
 // into.   We need that buffer to stick around for the lifetime of the
 // statement.
 class NullTerminated {
-  const char *str;
-  llvm::SmallString<32> storage;
+    const char *str;
+    llvm::SmallString<32> storage;
 
 public:
-  NullTerminated(const llvm::Twine &twine) {
-    llvm::StringRef ref = twine.toNullTerminatedStringRef(storage);
-    str = ref.begin();
-  }
-  operator const char *() { return str; }
+    NullTerminated(const llvm::Twine &twine) {
+        llvm::StringRef ref = twine.toNullTerminatedStringRef(storage);
+        str = ref.begin();
+    }
+    operator const char *() {
+        return str;
+    }
 };
 
 inline llvm::Error nullDeref() {
-  return llvm::createStringError(llvm::inconvertibleErrorCode(),
-                                 "A NULL PyObject* was dereferenced");
+    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+                                   "A NULL PyObject* was dereferenced");
 }
 
 inline llvm::Error exception(const char *s = nullptr) {
-  return llvm::make_error<PythonException>(s);
+    return llvm::make_error<PythonException>(s);
 }
 
 inline llvm::Error keyError() {
-  return llvm::createStringError(llvm::inconvertibleErrorCode(),
-                                 "key not in dict");
+    return llvm::createStringError(llvm::inconvertibleErrorCode(),
+                                   "key not in dict");
 }
 
 #if PY_MAJOR_VERSION < 3
 // The python 2 API declares some arguments as char* that should
 // be const char *, but it doesn't actually modify them.
-inline char *py2_const_cast(const char *s) { return const_cast<char *>(s); }
+inline char *py2_const_cast(const char *s) {
+    return const_cast<char *>(s);
+}
 #else
-inline const char *py2_const_cast(const char *s) { return s; }
+inline const char *py2_const_cast(const char *s) {
+    return s;
+}
 #endif
 
 enum class PyInitialValue { Invalid, Empty };
@@ -206,190 +214,210 @@ enum class PyInitialValue { Invalid, Empty };
 template <typename T, typename Enable = void> struct PythonFormat;
 
 template <> struct PythonFormat<unsigned long long> {
-  static constexpr char format = 'K';
-  static auto get(unsigned long long value) { return value; }
+    static constexpr char format = 'K';
+    static auto get(unsigned long long value) {
+        return value;
+    }
 };
 
 template <> struct PythonFormat<long long> {
-  static constexpr char format = 'L';
-  static auto get(long long value) { return value; }
+    static constexpr char format = 'L';
+    static auto get(long long value) {
+        return value;
+    }
 };
 
 template <> struct PythonFormat<PyObject *> {
-  static constexpr char format = 'O';
-  static auto get(PyObject *value) { return value; }
+    static constexpr char format = 'O';
+    static auto get(PyObject *value) {
+        return value;
+    }
 };
 
 template <typename T>
 struct PythonFormat<
     T, typename std::enable_if<std::is_base_of<PythonObject, T>::value>::type> {
-  static constexpr char format = 'O';
-  static auto get(const T &value) { return value.get(); }
+    static constexpr char format = 'O';
+    static auto get(const T &value) {
+        return value.get();
+    }
 };
 
 class PythonObject {
 public:
-  PythonObject() : m_py_obj(nullptr) {}
+    PythonObject() : m_py_obj(nullptr) {}
 
-  PythonObject(PyRefType type, PyObject *py_obj) {
-    m_py_obj = py_obj;
-    // If this is a borrowed reference, we need to convert it to
-    // an owned reference by incrementing it.  If it is an owned
-    // reference (for example the caller allocated it with PyDict_New()
-    // then we must *not* increment it.
-    if (m_py_obj && Py_IsInitialized() && type == PyRefType::Borrowed)
-      Py_XINCREF(m_py_obj);
-  }
+    PythonObject(PyRefType type, PyObject *py_obj) {
+        m_py_obj = py_obj;
+        // If this is a borrowed reference, we need to convert it to
+        // an owned reference by incrementing it.  If it is an owned
+        // reference (for example the caller allocated it with PyDict_New()
+        // then we must *not* increment it.
+        if (m_py_obj && Py_IsInitialized() && type == PyRefType::Borrowed)
+            Py_XINCREF(m_py_obj);
+    }
 
-  PythonObject(const PythonObject &rhs)
-      : PythonObject(PyRefType::Borrowed, rhs.m_py_obj) {}
+    PythonObject(const PythonObject &rhs)
+        : PythonObject(PyRefType::Borrowed, rhs.m_py_obj) {}
 
-  PythonObject(PythonObject &&rhs) {
-    m_py_obj = rhs.m_py_obj;
-    rhs.m_py_obj = nullptr;
-  }
+    PythonObject(PythonObject &&rhs) {
+        m_py_obj = rhs.m_py_obj;
+        rhs.m_py_obj = nullptr;
+    }
 
-  ~PythonObject() { Reset(); }
+    ~PythonObject() {
+        Reset();
+    }
 
-  void Reset() {
-    if (m_py_obj && Py_IsInitialized())
-      Py_DECREF(m_py_obj);
-    m_py_obj = nullptr;
-  }
+    void Reset() {
+        if (m_py_obj && Py_IsInitialized())
+            Py_DECREF(m_py_obj);
+        m_py_obj = nullptr;
+    }
 
-  void Dump() const {
-    if (m_py_obj)
-      _PyObject_Dump(m_py_obj);
-    else
-      puts("NULL");
-  }
+    void Dump() const {
+        if (m_py_obj)
+            _PyObject_Dump(m_py_obj);
+        else
+            puts("NULL");
+    }
 
-  void Dump(Stream &strm) const;
+    void Dump(Stream &strm) const;
 
-  PyObject *get() const { return m_py_obj; }
+    PyObject *get() const {
+        return m_py_obj;
+    }
 
-  PyObject *release() {
-    PyObject *result = m_py_obj;
-    m_py_obj = nullptr;
-    return result;
-  }
+    PyObject *release() {
+        PyObject *result = m_py_obj;
+        m_py_obj = nullptr;
+        return result;
+    }
 
-  PythonObject &operator=(PythonObject other) {
-    Reset();
-    m_py_obj = std::exchange(other.m_py_obj, nullptr);
-    return *this;
-  }
+    PythonObject &operator=(PythonObject other) {
+        Reset();
+        m_py_obj = std::exchange(other.m_py_obj, nullptr);
+        return *this;
+    }
 
-  PyObjectType GetObjectType() const;
+    PyObjectType GetObjectType() const;
 
-  PythonString Repr() const;
+    PythonString Repr() const;
 
-  PythonString Str() const;
+    PythonString Str() const;
 
-  static PythonObject ResolveNameWithDictionary(llvm::StringRef name,
-                                                const PythonDictionary &dict);
+    static PythonObject ResolveNameWithDictionary(llvm::StringRef name,
+            const PythonDictionary &dict);
 
-  template <typename T>
-  static T ResolveNameWithDictionary(llvm::StringRef name,
-                                     const PythonDictionary &dict) {
-    return ResolveNameWithDictionary(name, dict).AsType<T>();
-  }
+    template <typename T>
+    static T ResolveNameWithDictionary(llvm::StringRef name,
+                                       const PythonDictionary &dict) {
+        return ResolveNameWithDictionary(name, dict).AsType<T>();
+    }
 
-  PythonObject ResolveName(llvm::StringRef name) const;
+    PythonObject ResolveName(llvm::StringRef name) const;
 
-  template <typename T> T ResolveName(llvm::StringRef name) const {
-    return ResolveName(name).AsType<T>();
-  }
+    template <typename T> T ResolveName(llvm::StringRef name) const {
+        return ResolveName(name).AsType<T>();
+    }
 
-  bool HasAttribute(llvm::StringRef attribute) const;
+    bool HasAttribute(llvm::StringRef attribute) const;
 
-  PythonObject GetAttributeValue(llvm::StringRef attribute) const;
+    PythonObject GetAttributeValue(llvm::StringRef attribute) const;
 
-  bool IsNone() const { return m_py_obj == Py_None; }
+    bool IsNone() const {
+        return m_py_obj == Py_None;
+    }
 
-  bool IsValid() const { return m_py_obj != nullptr; }
+    bool IsValid() const {
+        return m_py_obj != nullptr;
+    }
 
-  bool IsAllocated() const { return IsValid() && !IsNone(); }
+    bool IsAllocated() const {
+        return IsValid() && !IsNone();
+    }
 
-  explicit operator bool() const { return IsValid() && !IsNone(); }
+    explicit operator bool() const {
+        return IsValid() && !IsNone();
+    }
 
-  template <typename T> T AsType() const {
-    if (!T::Check(m_py_obj))
-      return T();
-    return T(PyRefType::Borrowed, m_py_obj);
-  }
+    template <typename T> T AsType() const {
+        if (!T::Check(m_py_obj))
+            return T();
+        return T(PyRefType::Borrowed, m_py_obj);
+    }
 
-  StructuredData::ObjectSP CreateStructuredObject() const;
+    StructuredData::ObjectSP CreateStructuredObject() const;
 
-  template <typename... T>
-  llvm::Expected<PythonObject> CallMethod(const char *name,
-                                          const T &... t) const {
-    const char format[] = {'(', PythonFormat<T>::format..., ')', 0};
-    PyObject *obj =
-        PyObject_CallMethod(m_py_obj, py2_const_cast(name),
-                            py2_const_cast(format), PythonFormat<T>::get(t)...);
-    if (!obj)
-      return exception();
-    return python::Take<PythonObject>(obj);
-  }
+    template <typename... T>
+    llvm::Expected<PythonObject> CallMethod(const char *name,
+                                            const T &... t) const {
+        const char format[] = {'(', PythonFormat<T>::format..., ')', 0};
+        PyObject *obj =
+            PyObject_CallMethod(m_py_obj, py2_const_cast(name),
+                                py2_const_cast(format), PythonFormat<T>::get(t)...);
+        if (!obj)
+            return exception();
+        return python::Take<PythonObject>(obj);
+    }
 
-  template <typename... T>
-  llvm::Expected<PythonObject> Call(const T &... t) const {
-    const char format[] = {'(', PythonFormat<T>::format..., ')', 0};
-    PyObject *obj = PyObject_CallFunction(m_py_obj, py2_const_cast(format),
-                                          PythonFormat<T>::get(t)...);
-    if (!obj)
-      return exception();
-    return python::Take<PythonObject>(obj);
-  }
+    template <typename... T>
+    llvm::Expected<PythonObject> Call(const T &... t) const {
+        const char format[] = {'(', PythonFormat<T>::format..., ')', 0};
+        PyObject *obj = PyObject_CallFunction(m_py_obj, py2_const_cast(format),
+                                              PythonFormat<T>::get(t)...);
+        if (!obj)
+            return exception();
+        return python::Take<PythonObject>(obj);
+    }
 
-  llvm::Expected<PythonObject> GetAttribute(const llvm::Twine &name) const {
-    if (!m_py_obj)
-      return nullDeref();
-    PyObject *obj = PyObject_GetAttrString(m_py_obj, NullTerminated(name));
-    if (!obj)
-      return exception();
-    return python::Take<PythonObject>(obj);
-  }
+    llvm::Expected<PythonObject> GetAttribute(const llvm::Twine &name) const {
+        if (!m_py_obj)
+            return nullDeref();
+        PyObject *obj = PyObject_GetAttrString(m_py_obj, NullTerminated(name));
+        if (!obj)
+            return exception();
+        return python::Take<PythonObject>(obj);
+    }
 
-  llvm::Expected<bool> IsTrue() {
-    if (!m_py_obj)
-      return nullDeref();
-    int r = PyObject_IsTrue(m_py_obj);
-    if (r < 0)
-      return exception();
-    return !!r;
-  }
+    llvm::Expected<bool> IsTrue() {
+        if (!m_py_obj)
+            return nullDeref();
+        int r = PyObject_IsTrue(m_py_obj);
+        if (r < 0)
+            return exception();
+        return !!r;
+    }
 
-  llvm::Expected<long long> AsLongLong() const;
+    llvm::Expected<long long> AsLongLong() const;
 
-  llvm::Expected<long long> AsUnsignedLongLong() const;
+    llvm::Expected<long long> AsUnsignedLongLong() const;
 
-  // wraps on overflow, instead of raising an error.
-  llvm::Expected<unsigned long long> AsModuloUnsignedLongLong() const;
+    // wraps on overflow, instead of raising an error.
+    llvm::Expected<unsigned long long> AsModuloUnsignedLongLong() const;
 
-  llvm::Expected<bool> IsInstance(const PythonObject &cls) {
-    if (!m_py_obj || !cls.IsValid())
-      return nullDeref();
-    int r = PyObject_IsInstance(m_py_obj, cls.get());
-    if (r < 0)
-      return exception();
-    return !!r;
-  }
+    llvm::Expected<bool> IsInstance(const PythonObject &cls) {
+        if (!m_py_obj || !cls.IsValid())
+            return nullDeref();
+        int r = PyObject_IsInstance(m_py_obj, cls.get());
+        if (r < 0)
+            return exception();
+        return !!r;
+    }
 
 protected:
-  PyObject *m_py_obj;
+    PyObject *m_py_obj;
 };
 
 
 // This is why C++ needs monads.
 template <typename T> llvm::Expected<T> As(llvm::Expected<PythonObject> &&obj) {
-  if (!obj)
-    return obj.takeError();
-  if (!T::Check(obj.get().get()))
-    return llvm::createStringError(llvm::inconvertibleErrorCode(),
-                                   "type error");
-  return T(PyRefType::Borrowed, std::move(obj.get().get()));
+    if (!obj)
+        return obj.takeError();
+    if (!T::Check(obj.get().get()))
+        return llvm::createStringError(llvm::inconvertibleErrorCode(),
+                                       "type error");
+    return T(PyRefType::Borrowed, std::move(obj.get().get()));
 }
 
 template <> llvm::Expected<bool> As<bool>(llvm::Expected<PythonObject> &&obj);
@@ -407,269 +435,269 @@ llvm::Expected<std::string> As<std::string>(llvm::Expected<PythonObject> &&obj);
 
 template <class T> class TypedPythonObject : public PythonObject {
 public:
-  // override to perform implicit type conversions on Reset
-  // This can be eliminated once we drop python 2 support.
-  static void Convert(PyRefType &type, PyObject *&py_obj) {}
+    // override to perform implicit type conversions on Reset
+    // This can be eliminated once we drop python 2 support.
+    static void Convert(PyRefType &type, PyObject *&py_obj) {}
 
-  TypedPythonObject(PyRefType type, PyObject *py_obj) {
-    if (!py_obj)
-      return;
-    T::Convert(type, py_obj);
-    if (T::Check(py_obj))
-      PythonObject::operator=(PythonObject(type, py_obj));
-    else if (type == PyRefType::Owned)
-      Py_DECREF(py_obj);
-  }
+    TypedPythonObject(PyRefType type, PyObject *py_obj) {
+        if (!py_obj)
+            return;
+        T::Convert(type, py_obj);
+        if (T::Check(py_obj))
+            PythonObject::operator=(PythonObject(type, py_obj));
+        else if (type == PyRefType::Owned)
+            Py_DECREF(py_obj);
+    }
 
-  TypedPythonObject() {}
+    TypedPythonObject() {}
 };
 
 class PythonBytes : public TypedPythonObject<PythonBytes> {
 public:
-  using TypedPythonObject::TypedPythonObject;
-  explicit PythonBytes(llvm::ArrayRef<uint8_t> bytes);
-  PythonBytes(const uint8_t *bytes, size_t length);
+    using TypedPythonObject::TypedPythonObject;
+    explicit PythonBytes(llvm::ArrayRef<uint8_t> bytes);
+    PythonBytes(const uint8_t *bytes, size_t length);
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  llvm::ArrayRef<uint8_t> GetBytes() const;
+    llvm::ArrayRef<uint8_t> GetBytes() const;
 
-  size_t GetSize() const;
+    size_t GetSize() const;
 
-  void SetBytes(llvm::ArrayRef<uint8_t> stringbytes);
+    void SetBytes(llvm::ArrayRef<uint8_t> stringbytes);
 
-  StructuredData::StringSP CreateStructuredString() const;
+    StructuredData::StringSP CreateStructuredString() const;
 };
 
 class PythonByteArray : public TypedPythonObject<PythonByteArray> {
 public:
-  using TypedPythonObject::TypedPythonObject;
-  explicit PythonByteArray(llvm::ArrayRef<uint8_t> bytes);
-  PythonByteArray(const uint8_t *bytes, size_t length);
-  PythonByteArray(const PythonBytes &object);
+    using TypedPythonObject::TypedPythonObject;
+    explicit PythonByteArray(llvm::ArrayRef<uint8_t> bytes);
+    PythonByteArray(const uint8_t *bytes, size_t length);
+    PythonByteArray(const PythonBytes &object);
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  llvm::ArrayRef<uint8_t> GetBytes() const;
+    llvm::ArrayRef<uint8_t> GetBytes() const;
 
-  size_t GetSize() const;
+    size_t GetSize() const;
 
-  void SetBytes(llvm::ArrayRef<uint8_t> stringbytes);
+    void SetBytes(llvm::ArrayRef<uint8_t> stringbytes);
 
-  StructuredData::StringSP CreateStructuredString() const;
+    StructuredData::StringSP CreateStructuredString() const;
 };
 
 class PythonString : public TypedPythonObject<PythonString> {
 public:
-  using TypedPythonObject::TypedPythonObject;
-  static llvm::Expected<PythonString> FromUTF8(llvm::StringRef string);
+    using TypedPythonObject::TypedPythonObject;
+    static llvm::Expected<PythonString> FromUTF8(llvm::StringRef string);
 
-  PythonString() : TypedPythonObject() {} // MSVC requires this for some reason
+    PythonString() : TypedPythonObject() {} // MSVC requires this for some reason
 
-  explicit PythonString(llvm::StringRef string); // safe, null on error
+    explicit PythonString(llvm::StringRef string); // safe, null on error
 
-  static bool Check(PyObject *py_obj);
-  static void Convert(PyRefType &type, PyObject *&py_obj);
+    static bool Check(PyObject *py_obj);
+    static void Convert(PyRefType &type, PyObject *&py_obj);
 
-  llvm::StringRef GetString() const; // safe, empty string on error
+    llvm::StringRef GetString() const; // safe, empty string on error
 
-  llvm::Expected<llvm::StringRef> AsUTF8() const;
+    llvm::Expected<llvm::StringRef> AsUTF8() const;
 
-  size_t GetSize() const;
+    size_t GetSize() const;
 
-  void SetString(llvm::StringRef string); // safe, null on error
+    void SetString(llvm::StringRef string); // safe, null on error
 
-  StructuredData::StringSP CreateStructuredString() const;
+    StructuredData::StringSP CreateStructuredString() const;
 };
 
 class PythonInteger : public TypedPythonObject<PythonInteger> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  PythonInteger() : TypedPythonObject() {} // MSVC requires this for some reason
+    PythonInteger() : TypedPythonObject() {} // MSVC requires this for some reason
 
-  explicit PythonInteger(int64_t value);
+    explicit PythonInteger(int64_t value);
 
-  static bool Check(PyObject *py_obj);
-  static void Convert(PyRefType &type, PyObject *&py_obj);
+    static bool Check(PyObject *py_obj);
+    static void Convert(PyRefType &type, PyObject *&py_obj);
 
-  void SetInteger(int64_t value);
+    void SetInteger(int64_t value);
 
-  StructuredData::IntegerSP CreateStructuredInteger() const;
+    StructuredData::IntegerSP CreateStructuredInteger() const;
 };
 
 class PythonBoolean : public TypedPythonObject<PythonBoolean> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  explicit PythonBoolean(bool value);
+    explicit PythonBoolean(bool value);
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  bool GetValue() const;
+    bool GetValue() const;
 
-  void SetValue(bool value);
+    void SetValue(bool value);
 
-  StructuredData::BooleanSP CreateStructuredBoolean() const;
+    StructuredData::BooleanSP CreateStructuredBoolean() const;
 };
 
 class PythonList : public TypedPythonObject<PythonList> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  PythonList() : TypedPythonObject() {} // MSVC requires this for some reason
+    PythonList() : TypedPythonObject() {} // MSVC requires this for some reason
 
-  explicit PythonList(PyInitialValue value);
-  explicit PythonList(int list_size);
+    explicit PythonList(PyInitialValue value);
+    explicit PythonList(int list_size);
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  uint32_t GetSize() const;
+    uint32_t GetSize() const;
 
-  PythonObject GetItemAtIndex(uint32_t index) const;
+    PythonObject GetItemAtIndex(uint32_t index) const;
 
-  void SetItemAtIndex(uint32_t index, const PythonObject &object);
+    void SetItemAtIndex(uint32_t index, const PythonObject &object);
 
-  void AppendItem(const PythonObject &object);
+    void AppendItem(const PythonObject &object);
 
-  StructuredData::ArraySP CreateStructuredArray() const;
+    StructuredData::ArraySP CreateStructuredArray() const;
 };
 
 class PythonTuple : public TypedPythonObject<PythonTuple> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  explicit PythonTuple(PyInitialValue value);
-  explicit PythonTuple(int tuple_size);
-  PythonTuple(std::initializer_list<PythonObject> objects);
-  PythonTuple(std::initializer_list<PyObject *> objects);
+    explicit PythonTuple(PyInitialValue value);
+    explicit PythonTuple(int tuple_size);
+    PythonTuple(std::initializer_list<PythonObject> objects);
+    PythonTuple(std::initializer_list<PyObject *> objects);
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  uint32_t GetSize() const;
+    uint32_t GetSize() const;
 
-  PythonObject GetItemAtIndex(uint32_t index) const;
+    PythonObject GetItemAtIndex(uint32_t index) const;
 
-  void SetItemAtIndex(uint32_t index, const PythonObject &object);
+    void SetItemAtIndex(uint32_t index, const PythonObject &object);
 
-  StructuredData::ArraySP CreateStructuredArray() const;
+    StructuredData::ArraySP CreateStructuredArray() const;
 };
 
 class PythonDictionary : public TypedPythonObject<PythonDictionary> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  PythonDictionary() : TypedPythonObject() {} // MSVC requires this for some reason
+    PythonDictionary() : TypedPythonObject() {} // MSVC requires this for some reason
 
-  explicit PythonDictionary(PyInitialValue value);
+    explicit PythonDictionary(PyInitialValue value);
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  uint32_t GetSize() const;
+    uint32_t GetSize() const;
 
-  PythonList GetKeys() const;
+    PythonList GetKeys() const;
 
-  PythonObject GetItemForKey(const PythonObject &key) const; // DEPRECATED
-  void SetItemForKey(const PythonObject &key,
-                     const PythonObject &value); // DEPRECATED
+    PythonObject GetItemForKey(const PythonObject &key) const; // DEPRECATED
+    void SetItemForKey(const PythonObject &key,
+                       const PythonObject &value); // DEPRECATED
 
-  llvm::Expected<PythonObject> GetItem(const PythonObject &key) const;
-  llvm::Expected<PythonObject> GetItem(const llvm::Twine &key) const;
-  llvm::Error SetItem(const PythonObject &key, const PythonObject &value) const;
-  llvm::Error SetItem(const llvm::Twine &key, const PythonObject &value) const;
+    llvm::Expected<PythonObject> GetItem(const PythonObject &key) const;
+    llvm::Expected<PythonObject> GetItem(const llvm::Twine &key) const;
+    llvm::Error SetItem(const PythonObject &key, const PythonObject &value) const;
+    llvm::Error SetItem(const llvm::Twine &key, const PythonObject &value) const;
 
-  StructuredData::DictionarySP CreateStructuredDictionary() const;
+    StructuredData::DictionarySP CreateStructuredDictionary() const;
 };
 
 class PythonModule : public TypedPythonObject<PythonModule> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  static PythonModule BuiltinsModule();
+    static PythonModule BuiltinsModule();
 
-  static PythonModule MainModule();
+    static PythonModule MainModule();
 
-  static PythonModule AddModule(llvm::StringRef module);
+    static PythonModule AddModule(llvm::StringRef module);
 
-  // safe, returns invalid on error;
-  static PythonModule ImportModule(llvm::StringRef name) {
-    std::string s = std::string(name);
-    auto mod = Import(s.c_str());
-    if (!mod) {
-      llvm::consumeError(mod.takeError());
-      return PythonModule();
+    // safe, returns invalid on error;
+    static PythonModule ImportModule(llvm::StringRef name) {
+        std::string s = std::string(name);
+        auto mod = Import(s.c_str());
+        if (!mod) {
+            llvm::consumeError(mod.takeError());
+            return PythonModule();
+        }
+        return std::move(mod.get());
     }
-    return std::move(mod.get());
-  }
 
-  static llvm::Expected<PythonModule> Import(const llvm::Twine &name);
+    static llvm::Expected<PythonModule> Import(const llvm::Twine &name);
 
-  llvm::Expected<PythonObject> Get(const llvm::Twine &name);
+    llvm::Expected<PythonObject> Get(const llvm::Twine &name);
 
-  PythonDictionary GetDictionary() const;
+    PythonDictionary GetDictionary() const;
 };
 
 class PythonCallable : public TypedPythonObject<PythonCallable> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  struct ArgInfo {
-    /* the largest number of positional arguments this callable
-     * can accept, or UNBOUNDED, ie UINT_MAX if it's a varargs
-     * function and can accept an arbitrary number */
-    unsigned max_positional_args;
-    static constexpr unsigned UNBOUNDED = UINT_MAX; // FIXME c++17 inline
-  };
+    struct ArgInfo {
+        /* the largest number of positional arguments this callable
+         * can accept, or UNBOUNDED, ie UINT_MAX if it's a varargs
+         * function and can accept an arbitrary number */
+        unsigned max_positional_args;
+        static constexpr unsigned UNBOUNDED = UINT_MAX; // FIXME c++17 inline
+    };
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  llvm::Expected<ArgInfo> GetArgInfo() const;
+    llvm::Expected<ArgInfo> GetArgInfo() const;
 
-  PythonObject operator()();
+    PythonObject operator()();
 
-  PythonObject operator()(std::initializer_list<PyObject *> args);
+    PythonObject operator()(std::initializer_list<PyObject *> args);
 
-  PythonObject operator()(std::initializer_list<PythonObject> args);
+    PythonObject operator()(std::initializer_list<PythonObject> args);
 
-  template <typename Arg, typename... Args>
-  PythonObject operator()(const Arg &arg, Args... args) {
-    return operator()({arg, args...});
-  }
+    template <typename Arg, typename... Args>
+    PythonObject operator()(const Arg &arg, Args... args) {
+        return operator()({arg, args...});
+    }
 };
 
 class PythonFile : public TypedPythonObject<PythonFile> {
 public:
-  using TypedPythonObject::TypedPythonObject;
+    using TypedPythonObject::TypedPythonObject;
 
-  PythonFile() : TypedPythonObject() {} // MSVC requires this for some reason
+    PythonFile() : TypedPythonObject() {} // MSVC requires this for some reason
 
-  static bool Check(PyObject *py_obj);
+    static bool Check(PyObject *py_obj);
 
-  static llvm::Expected<PythonFile> FromFile(File &file,
-                                             const char *mode = nullptr);
+    static llvm::Expected<PythonFile> FromFile(File &file,
+            const char *mode = nullptr);
 
-  llvm::Expected<lldb::FileSP> ConvertToFile(bool borrowed = false);
-  llvm::Expected<lldb::FileSP>
-  ConvertToFileForcingUseOfScriptingIOMethods(bool borrowed = false);
+    llvm::Expected<lldb::FileSP> ConvertToFile(bool borrowed = false);
+    llvm::Expected<lldb::FileSP>
+    ConvertToFileForcingUseOfScriptingIOMethods(bool borrowed = false);
 };
 
 class PythonException : public llvm::ErrorInfo<PythonException> {
 private:
-  PyObject *m_exception_type, *m_exception, *m_traceback;
-  PyObject *m_repr_bytes;
+    PyObject *m_exception_type, *m_exception, *m_traceback;
+    PyObject *m_repr_bytes;
 
 public:
-  static char ID;
-  const char *toCString() const;
-  PythonException(const char *caller = nullptr);
-  void Restore();
-  ~PythonException();
-  void log(llvm::raw_ostream &OS) const override;
-  std::error_code convertToErrorCode() const override;
-  bool Matches(PyObject *exc) const;
-  std::string ReadBacktrace() const;
+    static char ID;
+    const char *toCString() const;
+    PythonException(const char *caller = nullptr);
+    void Restore();
+    ~PythonException();
+    void log(llvm::raw_ostream &OS) const override;
+    std::error_code convertToErrorCode() const override;
+    bool Matches(PyObject *exc) const;
+    std::string ReadBacktrace() const;
 };
 
 // This extracts the underlying T out of an Expected<T> and returns it.
@@ -694,32 +722,34 @@ public:
 // raised when C++ code called into python, then the original exception
 // will be restored.   Otherwise a simple string exception will be raised.
 template <typename T> T unwrapOrSetPythonException(llvm::Expected<T> expected) {
-  if (expected)
-    return expected.get();
-  llvm::handleAllErrors(
-      expected.takeError(), [](PythonException &E) { E.Restore(); },
-      [](const llvm::ErrorInfoBase &E) {
+    if (expected)
+        return expected.get();
+    llvm::handleAllErrors(
+    expected.takeError(), [](PythonException &E) {
+        E.Restore();
+    },
+    [](const llvm::ErrorInfoBase &E) {
         PyErr_SetString(PyExc_Exception, E.message().c_str());
-      });
-  return T();
+    });
+    return T();
 }
 
 // This is only here to help incrementally migrate old, exception-unsafe
 // code.
 template <typename T> T unwrapIgnoringErrors(llvm::Expected<T> expected) {
-  if (expected)
-    return std::move(expected.get());
-  llvm::consumeError(expected.takeError());
-  return T();
+    if (expected)
+        return std::move(expected.get());
+    llvm::consumeError(expected.takeError());
+    return T();
 }
 
 llvm::Expected<PythonObject> runStringOneLine(const llvm::Twine &string,
-                                              const PythonDictionary &globals,
-                                              const PythonDictionary &locals);
+        const PythonDictionary &globals,
+        const PythonDictionary &locals);
 
 llvm::Expected<PythonObject> runStringMultiLine(const llvm::Twine &string,
-                                                const PythonDictionary &globals,
-                                                const PythonDictionary &locals);
+        const PythonDictionary &globals,
+        const PythonDictionary &locals);
 
 // Sometimes the best way to interact with a python interpreter is
 // to run some python code.   You construct a PythonScript with
@@ -739,20 +769,20 @@ llvm::Expected<PythonObject> runStringMultiLine(const llvm::Twine &string,
 //   return  foo(x, y);
 // }
 class PythonScript {
-  const char *script;
-  PythonCallable function;
+    const char *script;
+    PythonCallable function;
 
-  llvm::Error Init();
+    llvm::Error Init();
 
 public:
-  PythonScript(const char *script) : script(script), function() {}
+    PythonScript(const char *script) : script(script), function() {}
 
-  template <typename... Args>
-  llvm::Expected<PythonObject> operator()(Args &&... args) {
-    if (llvm::Error error = Init())
-      return std::move(error);
-    return function.Call(std::forward<Args>(args)...);
-  }
+    template <typename... Args>
+    llvm::Expected<PythonObject> operator()(Args &&... args) {
+        if (llvm::Error error = Init())
+            return std::move(error);
+        return function.Call(std::forward<Args>(args)...);
+    }
 };
 
 } // namespace python

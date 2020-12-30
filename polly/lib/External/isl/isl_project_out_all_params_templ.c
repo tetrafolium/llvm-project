@@ -12,10 +12,10 @@
  */
 __isl_give TYPE *FN(TYPE,project_out_all_params)(__isl_take TYPE *obj)
 {
-	isl_size n;
+    isl_size n;
 
-	n = FN(TYPE,dim)(obj, isl_dim_param);
-	if (n < 0)
-		return FN(TYPE,free)(obj);
-	return FN(TYPE,project_out)(obj, isl_dim_param, 0, n);
+    n = FN(TYPE,dim)(obj, isl_dim_param);
+    if (n < 0)
+        return FN(TYPE,free)(obj);
+    return FN(TYPE,project_out)(obj, isl_dim_param, 0, n);
 }

@@ -374,7 +374,7 @@ enum LinkerInitialized { LINKER_INITIALIZED = 0 };
 #endif
 #define GET_CURRENT_FRAME() (__sanitizer::uptr) __builtin_frame_address(0)
 inline void Trap() {
-  __builtin_trap();
+    __builtin_trap();
 }
 #else
 extern "C" void* _ReturnAddress(void);
@@ -389,7 +389,7 @@ extern "C" void* _AddressOfReturnAddress(void);
 extern "C" void __ud2(void);
 # pragma intrinsic(__ud2)
 inline void Trap() {
-  __ud2();
+    __ud2();
 }
 #endif
 

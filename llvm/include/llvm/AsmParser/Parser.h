@@ -29,7 +29,7 @@ class SMDiagnostic;
 class Type;
 
 typedef llvm::function_ref<Optional<std::string>(StringRef)>
-    DataLayoutCallbackTy;
+DataLayoutCallbackTy;
 
 /// This function is a main interface to the LLVM Assembly Parser. It parses
 /// an ASCII file that (presumably) contains LLVM Assembly code. It returns a
@@ -43,8 +43,8 @@ typedef llvm::function_ref<Optional<std::string>(StringRef)>
 /// \param Slots The optional slot mapping that will be initialized during
 ///              parsing.
 std::unique_ptr<Module> parseAssemblyFile(StringRef Filename, SMDiagnostic &Err,
-                                          LLVMContext &Context,
-                                          SlotMapping *Slots = nullptr);
+        LLVMContext &Context,
+        SlotMapping *Slots = nullptr);
 
 /// The function is a secondary interface to the LLVM Assembly Parser. It parses
 /// an ASCII string that (presumably) contains LLVM Assembly code. It returns a
@@ -58,15 +58,15 @@ std::unique_ptr<Module> parseAssemblyFile(StringRef Filename, SMDiagnostic &Err,
 /// \param Slots The optional slot mapping that will be initialized during
 ///              parsing.
 std::unique_ptr<Module> parseAssemblyString(StringRef AsmString,
-                                            SMDiagnostic &Err,
-                                            LLVMContext &Context,
-                                            SlotMapping *Slots = nullptr);
+        SMDiagnostic &Err,
+        LLVMContext &Context,
+        SlotMapping *Slots = nullptr);
 
 /// Holds the Module and ModuleSummaryIndex returned by the interfaces
 /// that parse both.
 struct ParsedModuleAndIndex {
-  std::unique_ptr<Module> Mod;
-  std::unique_ptr<ModuleSummaryIndex> Index;
+    std::unique_ptr<Module> Mod;
+    std::unique_ptr<ModuleSummaryIndex> Index;
 };
 
 /// This function is a main interface to the LLVM Assembly Parser. It parses
@@ -85,7 +85,9 @@ struct ParsedModuleAndIndex {
 ParsedModuleAndIndex parseAssemblyFileWithIndex(
     StringRef Filename, SMDiagnostic &Err, LLVMContext &Context,
     SlotMapping *Slots = nullptr,
-    DataLayoutCallbackTy DataLayoutCallback = [](StringRef) { return None; });
+DataLayoutCallbackTy DataLayoutCallback = [](StringRef) {
+    return None;
+});
 
 /// Only for use in llvm-as for testing; this does not produce a valid module.
 ParsedModuleAndIndex parseAssemblyFileWithIndexNoUpgradeDebugInfo(
@@ -113,7 +115,9 @@ parseSummaryIndexAssemblyFile(StringRef Filename, SMDiagnostic &Err);
 std::unique_ptr<Module> parseAssembly(
     MemoryBufferRef F, SMDiagnostic &Err, LLVMContext &Context,
     SlotMapping *Slots = nullptr,
-    DataLayoutCallbackTy DataLayoutCallback = [](StringRef) { return None; });
+DataLayoutCallbackTy DataLayoutCallback = [](StringRef) {
+    return None;
+});
 
 /// Parse LLVM Assembly including the summary index from a MemoryBuffer.
 ///
@@ -124,9 +128,9 @@ std::unique_ptr<Module> parseAssembly(
 ///
 /// parseAssemblyFileWithIndex is a wrapper around this function.
 ParsedModuleAndIndex parseAssemblyWithIndex(MemoryBufferRef F,
-                                            SMDiagnostic &Err,
-                                            LLVMContext &Context,
-                                            SlotMapping *Slots = nullptr);
+        SMDiagnostic &Err,
+        LLVMContext &Context,
+        SlotMapping *Slots = nullptr);
 
 /// Parse LLVM Assembly for summary index from a MemoryBuffer.
 ///
@@ -153,7 +157,9 @@ parseSummaryIndexAssembly(MemoryBufferRef F, SMDiagnostic &Err);
 bool parseAssemblyInto(
     MemoryBufferRef F, Module *M, ModuleSummaryIndex *Index, SMDiagnostic &Err,
     SlotMapping *Slots = nullptr,
-    DataLayoutCallbackTy DataLayoutCallback = [](StringRef) { return None; });
+DataLayoutCallbackTy DataLayoutCallback = [](StringRef) {
+    return None;
+});
 
 /// Parse a type and a constant value in the given string.
 ///

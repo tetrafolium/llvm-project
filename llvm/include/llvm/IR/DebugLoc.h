@@ -19,21 +19,21 @@
 
 namespace llvm {
 
-  class LLVMContext;
-  class raw_ostream;
-  class DILocation;
+class LLVMContext;
+class raw_ostream;
+class DILocation;
 
-  /// A debug info location.
-  ///
-  /// This class is a wrapper around a tracking reference to an \a DILocation
-  /// pointer.
-  ///
-  /// To avoid extra includes, \a DebugLoc doubles the \a DILocation API with a
-  /// one based on relatively opaque \a MDNode pointers.
-  class DebugLoc {
+/// A debug info location.
+///
+/// This class is a wrapper around a tracking reference to an \a DILocation
+/// pointer.
+///
+/// To avoid extra includes, \a DebugLoc doubles the \a DILocation API with a
+/// one based on relatively opaque \a MDNode pointers.
+class DebugLoc {
     TrackingMDNodeRef Loc;
 
-  public:
+public:
     DebugLoc() = default;
 
     /// Construct from an \a DILocation.
@@ -52,9 +52,15 @@ namespace llvm {
     /// \pre !*this or \c isa<DILocation>(getAsMDNode()).
     /// @{
     DILocation *get() const;
-    operator DILocation *() const { return get(); }
-    DILocation *operator->() const { return get(); }
-    DILocation &operator*() const { return *get(); }
+    operator DILocation *() const {
+        return get();
+    }
+    DILocation *operator->() const {
+        return get();
+    }
+    DILocation &operator*() const {
+        return *get();
+    }
     /// @}
 
     /// Check for null.
@@ -63,10 +69,14 @@ namespace llvm {
     /// the conversion to \c DILocation, this doesn't require that \c Loc is of
     /// the right type.  Important for cases like \a llvm::StripDebugInfo() and
     /// \a Instruction::hasMetadata().
-    explicit operator bool() const { return Loc; }
+    explicit operator bool() const {
+        return Loc;
+    }
 
     /// Check whether this has a trivial destructor.
-    bool hasTrivialDestructor() const { return Loc.hasTrivialDestructor(); }
+    bool hasTrivialDestructor() const {
+        return Loc.hasTrivialDestructor();
+    }
 
     enum { ReplaceLastInlinedAt = true };
     /// Rebuild the entire inlined-at chain for this instruction so that the top of
@@ -98,20 +108,26 @@ namespace llvm {
     DebugLoc getFnDebugLoc() const;
 
     /// Return \c this as a bar \a MDNode.
-    MDNode *getAsMDNode() const { return Loc; }
+    MDNode *getAsMDNode() const {
+        return Loc;
+    }
 
     /// Check if the DebugLoc corresponds to an implicit code.
     bool isImplicitCode() const;
     void setImplicitCode(bool ImplicitCode);
 
-    bool operator==(const DebugLoc &DL) const { return Loc == DL.Loc; }
-    bool operator!=(const DebugLoc &DL) const { return Loc != DL.Loc; }
+    bool operator==(const DebugLoc &DL) const {
+        return Loc == DL.Loc;
+    }
+    bool operator!=(const DebugLoc &DL) const {
+        return Loc != DL.Loc;
+    }
 
     void dump() const;
 
     /// prints source location /path/to/file.exe:line:col @[inlined at]
     void print(raw_ostream &OS) const;
-  };
+};
 
 } // end namespace llvm
 

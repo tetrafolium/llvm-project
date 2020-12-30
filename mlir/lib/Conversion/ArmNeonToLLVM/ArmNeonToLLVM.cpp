@@ -27,5 +27,5 @@ using SMullOpLowering =
 /// Populate the given list with patterns that convert from ArmNeon to LLVM.
 void mlir::populateArmNeonToLLVMConversionPatterns(
     LLVMTypeConverter &converter, OwningRewritePatternList &patterns) {
-  patterns.insert<SMullOpLowering>(converter);
+    patterns.insert<SMullOpLowering>(converter);
 }

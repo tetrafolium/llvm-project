@@ -22,7 +22,7 @@
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)
 # error "The AddressSanitizer run-time should not be"
-        " instrumented by AddressSanitizer"
+" instrumented by AddressSanitizer"
 #endif
 
 // Build-time configuration options.

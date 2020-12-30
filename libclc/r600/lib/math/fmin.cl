@@ -5,12 +5,12 @@
 
 _CLC_DEF _CLC_OVERLOAD float fmin(float x, float y)
 {
-   /* fcanonicalize removes sNaNs and flushes denormals if not enabled.
-    * Otherwise fmin instruction flushes the values for comparison,
-    * but outputs original denormal */
-   x = __clc_flush_denormal_if_not_supported(x);
-   y = __clc_flush_denormal_if_not_supported(y);
-   return __builtin_fminf(x, y);
+    /* fcanonicalize removes sNaNs and flushes denormals if not enabled.
+     * Otherwise fmin instruction flushes the values for comparison,
+     * but outputs original denormal */
+    x = __clc_flush_denormal_if_not_supported(x);
+    y = __clc_flush_denormal_if_not_supported(y);
+    return __builtin_fminf(x, y);
 }
 _CLC_BINARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, fmin, float, float)
 
@@ -20,7 +20,7 @@ _CLC_BINARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, fmin, float, float)
 
 _CLC_DEF _CLC_OVERLOAD double fmin(double x, double y)
 {
-   return __builtin_fmin(x, y);
+    return __builtin_fmin(x, y);
 }
 _CLC_BINARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, double, fmin, double, double)
 

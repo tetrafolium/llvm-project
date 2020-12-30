@@ -28,18 +28,18 @@ namespace llvm {
 
 template <typename SubClass, unsigned ARITY>
 struct FixedNumOperandTraits {
-  static Use *op_begin(SubClass* U) {
-    static_assert(
-        !std::is_polymorphic<SubClass>::value,
-        "adding virtual methods to subclasses of User breaks use lists");
-    return reinterpret_cast<Use*>(U) - ARITY;
-  }
-  static Use *op_end(SubClass* U) {
-    return reinterpret_cast<Use*>(U);
-  }
-  static unsigned operands(const User*) {
-    return ARITY;
-  }
+    static Use *op_begin(SubClass* U) {
+        static_assert(
+            !std::is_polymorphic<SubClass>::value,
+            "adding virtual methods to subclasses of User breaks use lists");
+        return reinterpret_cast<Use*>(U) - ARITY;
+    }
+    static Use *op_end(SubClass* U) {
+        return reinterpret_cast<Use*>(U);
+    }
+    static unsigned operands(const User*) {
+        return ARITY;
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -51,9 +51,9 @@ struct FixedNumOperandTraits {
 
 template <typename SubClass, unsigned ARITY = 1>
 struct OptionalOperandTraits : public FixedNumOperandTraits<SubClass, ARITY> {
-  static unsigned operands(const User *U) {
-    return U->getNumOperands();
-  }
+    static unsigned operands(const User *U) {
+        return U->getNumOperands();
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -66,18 +66,18 @@ struct OptionalOperandTraits : public FixedNumOperandTraits<SubClass, ARITY> {
 
 template <typename SubClass, unsigned MINARITY = 0>
 struct VariadicOperandTraits {
-  static Use *op_begin(SubClass* U) {
-    static_assert(
-        !std::is_polymorphic<SubClass>::value,
-        "adding virtual methods to subclasses of User breaks use lists");
-    return reinterpret_cast<Use*>(U) - static_cast<User*>(U)->getNumOperands();
-  }
-  static Use *op_end(SubClass* U) {
-    return reinterpret_cast<Use*>(U);
-  }
-  static unsigned operands(const User *U) {
-    return U->getNumOperands();
-  }
+    static Use *op_begin(SubClass* U) {
+        static_assert(
+            !std::is_polymorphic<SubClass>::value,
+            "adding virtual methods to subclasses of User breaks use lists");
+        return reinterpret_cast<Use*>(U) - static_cast<User*>(U)->getNumOperands();
+    }
+    static Use *op_end(SubClass* U) {
+        return reinterpret_cast<Use*>(U);
+    }
+    static unsigned operands(const User *U) {
+        return U->getNumOperands();
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -93,15 +93,15 @@ struct VariadicOperandTraits {
 
 template <unsigned MINARITY = 1>
 struct HungoffOperandTraits {
-  static Use *op_begin(User* U) {
-    return U->getOperandList();
-  }
-  static Use *op_end(User* U) {
-    return U->getOperandList() + U->getNumOperands();
-  }
-  static unsigned operands(const User *U) {
-    return U->getNumOperands();
-  }
+    static Use *op_begin(User* U) {
+        return U->getOperandList();
+    }
+    static Use *op_end(User* U) {
+        return U->getOperandList() + U->getNumOperands();
+    }
+    static unsigned operands(const User *U) {
+        return U->getNumOperands();
+    }
 };
 
 /// Macro for generating in-class operand accessor declarations.

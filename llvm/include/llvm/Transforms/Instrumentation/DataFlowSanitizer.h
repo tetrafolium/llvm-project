@@ -17,14 +17,16 @@ namespace llvm {
 
 class DataFlowSanitizerPass : public PassInfoMixin<DataFlowSanitizerPass> {
 private:
-  std::vector<std::string> ABIListFiles;
+    std::vector<std::string> ABIListFiles;
 
 public:
-  DataFlowSanitizerPass(
-      const std::vector<std::string> &ABIListFiles = std::vector<std::string>())
-      : ABIListFiles(ABIListFiles) {}
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    DataFlowSanitizerPass(
+        const std::vector<std::string> &ABIListFiles = std::vector<std::string>())
+        : ABIListFiles(ABIListFiles) {}
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 };
 
 } // namespace llvm

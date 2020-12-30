@@ -23,20 +23,20 @@ namespace readability {
 /// https://google.github.io/styleguide/cppguide.html#Namespaces
 class NamespaceCommentCheck : public ClangTidyCheck {
 public:
-  NamespaceCommentCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    NamespaceCommentCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void storeOptions(ClangTidyOptions::OptionMap &Options) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Options) override;
 
-  llvm::Regex NamespaceCommentPattern;
-  const unsigned ShortNamespaceLines;
-  const unsigned SpacesBeforeComments;
-  llvm::SmallVector<SourceLocation, 4> Ends;
+    llvm::Regex NamespaceCommentPattern;
+    const unsigned ShortNamespaceLines;
+    const unsigned SpacesBeforeComments;
+    llvm::SmallVector<SourceLocation, 4> Ends;
 };
 
 } // namespace readability

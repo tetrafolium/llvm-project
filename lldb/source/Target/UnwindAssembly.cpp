@@ -15,17 +15,17 @@ using namespace lldb;
 using namespace lldb_private;
 
 UnwindAssemblySP UnwindAssembly::FindPlugin(const ArchSpec &arch) {
-  UnwindAssemblyCreateInstance create_callback;
+    UnwindAssemblyCreateInstance create_callback;
 
-  for (uint32_t idx = 0;
-       (create_callback = PluginManager::GetUnwindAssemblyCreateCallbackAtIndex(
-            idx)) != nullptr;
-       ++idx) {
-    UnwindAssemblySP assembly_profiler_up(create_callback(arch));
-    if (assembly_profiler_up)
-      return assembly_profiler_up;
-  }
-  return nullptr;
+    for (uint32_t idx = 0;
+            (create_callback = PluginManager::GetUnwindAssemblyCreateCallbackAtIndex(
+                                   idx)) != nullptr;
+            ++idx) {
+        UnwindAssemblySP assembly_profiler_up(create_callback(arch));
+        if (assembly_profiler_up)
+            return assembly_profiler_up;
+    }
+    return nullptr;
 }
 
 UnwindAssembly::UnwindAssembly(const ArchSpec &arch) : m_arch(arch) {}

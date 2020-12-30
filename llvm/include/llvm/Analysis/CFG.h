@@ -35,7 +35,7 @@ template <typename T> class SmallVectorImpl;
 void FindFunctionBackedges(
     const Function &F,
     SmallVectorImpl<std::pair<const BasicBlock *, const BasicBlock *> > &
-        Result);
+    Result);
 
 /// Search for the specified successor of basic block BB and return its position
 /// in the terminator instruction's list of successors.  It is an error to call
@@ -145,33 +145,33 @@ bool isPotentiallyReachableFromMany(
 template <class NodeT, class RPOTraversalT, class LoopInfoT,
           class GT = GraphTraits<NodeT>>
 bool containsIrreducibleCFG(RPOTraversalT &RPOTraversal, const LoopInfoT &LI) {
-  /// Check whether the edge (\p Src, \p Dst) is a reducible loop backedge
-  /// according to LI. I.e., check if there exists a loop that contains Src and
-  /// where Dst is the loop header.
-  auto isProperBackedge = [&](NodeT Src, NodeT Dst) {
-    for (const auto *Lp = LI.getLoopFor(Src); Lp; Lp = Lp->getParentLoop()) {
-      if (Lp->getHeader() == Dst)
-        return true;
+    /// Check whether the edge (\p Src, \p Dst) is a reducible loop backedge
+    /// according to LI. I.e., check if there exists a loop that contains Src and
+    /// where Dst is the loop header.
+    auto isProperBackedge = [&](NodeT Src, NodeT Dst) {
+        for (const auto *Lp = LI.getLoopFor(Src); Lp; Lp = Lp->getParentLoop()) {
+            if (Lp->getHeader() == Dst)
+                return true;
+        }
+        return false;
+    };
+
+    SmallPtrSet<NodeT, 32> Visited;
+    for (NodeT Node : RPOTraversal) {
+        Visited.insert(Node);
+        for (NodeT Succ : make_range(GT::child_begin(Node), GT::child_end(Node))) {
+            // Succ hasn't been visited yet
+            if (!Visited.count(Succ))
+                continue;
+            // We already visited Succ, thus Node->Succ must be a backedge. Check that
+            // the head matches what we have in the loop information. Otherwise, we
+            // have an irreducible graph.
+            if (!isProperBackedge(Node, Succ))
+                return true;
+        }
     }
+
     return false;
-  };
-
-  SmallPtrSet<NodeT, 32> Visited;
-  for (NodeT Node : RPOTraversal) {
-    Visited.insert(Node);
-    for (NodeT Succ : make_range(GT::child_begin(Node), GT::child_end(Node))) {
-      // Succ hasn't been visited yet
-      if (!Visited.count(Succ))
-        continue;
-      // We already visited Succ, thus Node->Succ must be a backedge. Check that
-      // the head matches what we have in the loop information. Otherwise, we
-      // have an irreducible graph.
-      if (!isProperBackedge(Node, Succ))
-        return true;
-    }
-  }
-
-  return false;
 }
 } // End llvm namespace
 

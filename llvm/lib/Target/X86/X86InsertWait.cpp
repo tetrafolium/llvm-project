@@ -38,110 +38,112 @@ namespace {
 
 class WaitInsert : public MachineFunctionPass {
 public:
-  static char ID;
+    static char ID;
 
-  WaitInsert() : MachineFunctionPass(ID) {}
+    WaitInsert() : MachineFunctionPass(ID) {}
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 
-  StringRef getPassName() const override {
-    return "X86 insert wait instruction";
-  }
+    StringRef getPassName() const override {
+        return "X86 insert wait instruction";
+    }
 };
 
 } // namespace
 
 char WaitInsert::ID = 0;
 
-FunctionPass *llvm::createX86InsertX87waitPass() { return new WaitInsert(); }
+FunctionPass *llvm::createX86InsertX87waitPass() {
+    return new WaitInsert();
+}
 
 /// Return true if the Reg is X87 register.
 static bool isX87Reg(unsigned Reg) {
-  return (Reg == X86::FPCW || Reg == X86::FPSW ||
-          (Reg >= X86::ST0 && Reg <= X86::ST7));
+    return (Reg == X86::FPCW || Reg == X86::FPSW ||
+            (Reg >= X86::ST0 && Reg <= X86::ST7));
 }
 
 /// check if the instruction is X87 instruction
 static bool isX87Instruction(MachineInstr &MI) {
-  for (const MachineOperand &MO : MI.operands()) {
-    if (!MO.isReg())
-      continue;
-    if (isX87Reg(MO.getReg()))
-      return true;
-  }
-  return false;
+    for (const MachineOperand &MO : MI.operands()) {
+        if (!MO.isReg())
+            continue;
+        if (isX87Reg(MO.getReg()))
+            return true;
+    }
+    return false;
 }
 
 static bool isX87ControlInstruction(MachineInstr &MI) {
-  switch (MI.getOpcode()) {
-  case X86::FNINIT:
-  case X86::FLDCW16m:
-  case X86::FNSTCW16m:
-  case X86::FNSTSW16r:
-  case X86::FNSTSWm:
-  case X86::FNCLEX:
-  case X86::FLDENVm:
-  case X86::FSTENVm:
-  case X86::FRSTORm:
-  case X86::FSAVEm:
-  case X86::FINCSTP:
-  case X86::FDECSTP:
-  case X86::FFREE:
-  case X86::FFREEP:
-  case X86::FNOP:
-  case X86::WAIT:
-    return true;
-  default:
-    return false;
-  }
+    switch (MI.getOpcode()) {
+    case X86::FNINIT:
+    case X86::FLDCW16m:
+    case X86::FNSTCW16m:
+    case X86::FNSTSW16r:
+    case X86::FNSTSWm:
+    case X86::FNCLEX:
+    case X86::FLDENVm:
+    case X86::FSTENVm:
+    case X86::FRSTORm:
+    case X86::FSAVEm:
+    case X86::FINCSTP:
+    case X86::FDECSTP:
+    case X86::FFREE:
+    case X86::FFREEP:
+    case X86::FNOP:
+    case X86::WAIT:
+        return true;
+    default:
+        return false;
+    }
 }
 
 static bool isX87NonWaitingControlInstruction(MachineInstr &MI) {
-  // a few special control instructions don't perform a wait operation
-  switch (MI.getOpcode()) {
-  case X86::FNINIT:
-  case X86::FNSTSW16r:
-  case X86::FNSTSWm:
-  case X86::FNSTCW16m:
-  case X86::FNCLEX:
-    return true;
-  default:
-    return false;
-  }
+    // a few special control instructions don't perform a wait operation
+    switch (MI.getOpcode()) {
+    case X86::FNINIT:
+    case X86::FNSTSW16r:
+    case X86::FNSTSWm:
+    case X86::FNSTCW16m:
+    case X86::FNCLEX:
+        return true;
+    default:
+        return false;
+    }
 }
 
 bool WaitInsert::runOnMachineFunction(MachineFunction &MF) {
-  if (!MF.getFunction().hasFnAttribute(Attribute::StrictFP))
-    return false;
+    if (!MF.getFunction().hasFnAttribute(Attribute::StrictFP))
+        return false;
 
-  const X86Subtarget &ST = MF.getSubtarget<X86Subtarget>();
-  const X86InstrInfo *TII = ST.getInstrInfo();
-  bool Changed = false;
+    const X86Subtarget &ST = MF.getSubtarget<X86Subtarget>();
+    const X86InstrInfo *TII = ST.getInstrInfo();
+    bool Changed = false;
 
-  for (MachineBasicBlock &MBB : MF) {
-    for (MachineBasicBlock::iterator MI = MBB.begin(); MI != MBB.end(); ++MI) {
-      // Jump non X87 instruction.
-      if (!isX87Instruction(*MI))
-        continue;
-      // If the instruction instruction neither has float exception nor is
-      // a load/store instruction, or the instruction is x87 control
-      // instruction, do not insert wait.
-      if (!(MI->mayRaiseFPException() || MI->mayLoadOrStore()) ||
-          isX87ControlInstruction(*MI))
-        continue;
-      // If the following instruction is an X87 instruction and isn't an X87
-      // non-waiting control instruction, we can omit insert wait instruction.
-      MachineBasicBlock::iterator AfterMI = std::next(MI);
-      if (AfterMI != MBB.end() && isX87Instruction(*AfterMI) &&
-          !isX87NonWaitingControlInstruction(*AfterMI))
-        continue;
+    for (MachineBasicBlock &MBB : MF) {
+        for (MachineBasicBlock::iterator MI = MBB.begin(); MI != MBB.end(); ++MI) {
+            // Jump non X87 instruction.
+            if (!isX87Instruction(*MI))
+                continue;
+            // If the instruction instruction neither has float exception nor is
+            // a load/store instruction, or the instruction is x87 control
+            // instruction, do not insert wait.
+            if (!(MI->mayRaiseFPException() || MI->mayLoadOrStore()) ||
+                    isX87ControlInstruction(*MI))
+                continue;
+            // If the following instruction is an X87 instruction and isn't an X87
+            // non-waiting control instruction, we can omit insert wait instruction.
+            MachineBasicBlock::iterator AfterMI = std::next(MI);
+            if (AfterMI != MBB.end() && isX87Instruction(*AfterMI) &&
+                    !isX87NonWaitingControlInstruction(*AfterMI))
+                continue;
 
-      BuildMI(MBB, AfterMI, MI->getDebugLoc(), TII->get(X86::WAIT));
-      LLVM_DEBUG(dbgs() << "\nInsert wait after:\t" << *MI);
-      // Jump the newly inserting wait
-      ++MI;
-      Changed = true;
+            BuildMI(MBB, AfterMI, MI->getDebugLoc(), TII->get(X86::WAIT));
+            LLVM_DEBUG(dbgs() << "\nInsert wait after:\t" << *MI);
+            // Jump the newly inserting wait
+            ++MI;
+            Changed = true;
+        }
     }
-  }
-  return Changed;
+    return Changed;
 }

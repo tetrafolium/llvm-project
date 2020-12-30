@@ -21,22 +21,22 @@
 using namespace clang::clangd;
 
 extern "C" int LLVMFuzzerTestOneInput(uint8_t *data, size_t size) {
-  if (size == 0)
+    if (size == 0)
+        return 0;
+
+    // fmemopen isn't portable, but I think we only run the fuzzer on Linux.
+    std::FILE *In = fmemopen(data, size, "r");
+    auto Transport = newJSONTransport(In, llvm::nulls(),
+                                      /*InMirror=*/nullptr, /*Pretty=*/false,
+                                      /*Style=*/JSONStreamStyle::Delimited);
+    RealThreadsafeFS FS;
+    CodeCompleteOptions CCOpts;
+    ClangdLSPServer::Options Opts;
+    Opts.CodeComplete.EnableSnippets = false;
+    Opts.UseDirBasedCDB = false;
+
+    // Initialize and run ClangdLSPServer.
+    ClangdLSPServer LSPServer(*Transport, FS, Opts);
+    LSPServer.run();
     return 0;
-
-  // fmemopen isn't portable, but I think we only run the fuzzer on Linux.
-  std::FILE *In = fmemopen(data, size, "r");
-  auto Transport = newJSONTransport(In, llvm::nulls(),
-                                    /*InMirror=*/nullptr, /*Pretty=*/false,
-                                    /*Style=*/JSONStreamStyle::Delimited);
-  RealThreadsafeFS FS;
-  CodeCompleteOptions CCOpts;
-  ClangdLSPServer::Options Opts;
-  Opts.CodeComplete.EnableSnippets = false;
-  Opts.UseDirBasedCDB = false;
-
-  // Initialize and run ClangdLSPServer.
-  ClangdLSPServer LSPServer(*Transport, FS, Opts);
-  LSPServer.run();
-  return 0;
 }

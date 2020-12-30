@@ -41,140 +41,146 @@ typedef std::vector<std::string> NamePath;
 typedef std::function<bool(const XMLNode &node)> NodeCallback;
 typedef std::function<bool(const llvm::StringRef &name,
                            const llvm::StringRef &value)>
-    AttributeCallback;
+AttributeCallback;
 
 class XMLNode {
 public:
-  XMLNode();
+    XMLNode();
 
-  XMLNode(XMLNodeImpl node);
+    XMLNode(XMLNodeImpl node);
 
-  ~XMLNode();
+    ~XMLNode();
 
-  explicit operator bool() const { return IsValid(); }
+    explicit operator bool() const {
+        return IsValid();
+    }
 
-  void Clear();
+    void Clear();
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  bool IsElement() const;
+    bool IsElement() const;
 
-  llvm::StringRef GetName() const;
+    llvm::StringRef GetName() const;
 
-  bool GetElementText(std::string &text) const;
+    bool GetElementText(std::string &text) const;
 
-  bool GetElementTextAsUnsigned(uint64_t &value, uint64_t fail_value = 0,
-                                int base = 0) const;
+    bool GetElementTextAsUnsigned(uint64_t &value, uint64_t fail_value = 0,
+                                  int base = 0) const;
 
-  bool GetElementTextAsFloat(double &value, double fail_value = 0.0) const;
+    bool GetElementTextAsFloat(double &value, double fail_value = 0.0) const;
 
-  bool NameIs(const char *name) const;
+    bool NameIs(const char *name) const;
 
-  XMLNode GetParent() const;
+    XMLNode GetParent() const;
 
-  XMLNode GetSibling() const;
+    XMLNode GetSibling() const;
 
-  XMLNode GetChild() const;
+    XMLNode GetChild() const;
 
-  llvm::StringRef GetAttributeValue(const char *name,
-                                    const char *fail_value = nullptr) const;
+    llvm::StringRef GetAttributeValue(const char *name,
+                                      const char *fail_value = nullptr) const;
 
-  bool GetAttributeValueAsUnsigned(const char *name, uint64_t &value,
-                                   uint64_t fail_value = 0, int base = 0) const;
+    bool GetAttributeValueAsUnsigned(const char *name, uint64_t &value,
+                                     uint64_t fail_value = 0, int base = 0) const;
 
-  XMLNode FindFirstChildElementWithName(const char *name) const;
+    XMLNode FindFirstChildElementWithName(const char *name) const;
 
-  XMLNode GetElementForPath(const NamePath &path);
+    XMLNode GetElementForPath(const NamePath &path);
 
-  // Iterate through all sibling nodes of any type
-  void ForEachSiblingNode(NodeCallback const &callback) const;
+    // Iterate through all sibling nodes of any type
+    void ForEachSiblingNode(NodeCallback const &callback) const;
 
-  // Iterate through only the sibling nodes that are elements
-  void ForEachSiblingElement(NodeCallback const &callback) const;
+    // Iterate through only the sibling nodes that are elements
+    void ForEachSiblingElement(NodeCallback const &callback) const;
 
-  // Iterate through only the sibling nodes that are elements and whose name
-  // matches \a name.
-  void ForEachSiblingElementWithName(const char *name,
+    // Iterate through only the sibling nodes that are elements and whose name
+    // matches \a name.
+    void ForEachSiblingElementWithName(const char *name,
+                                       NodeCallback const &callback) const;
+
+    void ForEachChildNode(NodeCallback const &callback) const;
+
+    void ForEachChildElement(NodeCallback const &callback) const;
+
+    void ForEachChildElementWithName(const char *name,
                                      NodeCallback const &callback) const;
 
-  void ForEachChildNode(NodeCallback const &callback) const;
-
-  void ForEachChildElement(NodeCallback const &callback) const;
-
-  void ForEachChildElementWithName(const char *name,
-                                   NodeCallback const &callback) const;
-
-  void ForEachAttribute(AttributeCallback const &callback) const;
+    void ForEachAttribute(AttributeCallback const &callback) const;
 
 protected:
-  XMLNodeImpl m_node;
+    XMLNodeImpl m_node;
 };
 
 class XMLDocument {
 public:
-  XMLDocument();
+    XMLDocument();
 
-  ~XMLDocument();
+    ~XMLDocument();
 
-  explicit operator bool() const { return IsValid(); }
+    explicit operator bool() const {
+        return IsValid();
+    }
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  void Clear();
+    void Clear();
 
-  bool ParseFile(const char *path);
+    bool ParseFile(const char *path);
 
-  bool ParseMemory(const char *xml, size_t xml_length,
-                   const char *url = "untitled.xml");
+    bool ParseMemory(const char *xml, size_t xml_length,
+                     const char *url = "untitled.xml");
 
-  // If \a name is nullptr, just get the root element node, else only return a
-  // value XMLNode if the name of the root element matches \a name.
-  XMLNode GetRootElement(const char *required_name = nullptr);
+    // If \a name is nullptr, just get the root element node, else only return a
+    // value XMLNode if the name of the root element matches \a name.
+    XMLNode GetRootElement(const char *required_name = nullptr);
 
-  llvm::StringRef GetErrors() const;
+    llvm::StringRef GetErrors() const;
 
-  static void ErrorCallback(void *ctx, const char *format, ...);
+    static void ErrorCallback(void *ctx, const char *format, ...);
 
-  static bool XMLEnabled();
+    static bool XMLEnabled();
 
 protected:
-  XMLDocumentImpl m_document;
-  StreamString m_errors;
+    XMLDocumentImpl m_document;
+    StreamString m_errors;
 };
 
 class ApplePropertyList {
 public:
-  ApplePropertyList();
+    ApplePropertyList();
 
-  ApplePropertyList(const char *path);
+    ApplePropertyList(const char *path);
 
-  ~ApplePropertyList();
+    ~ApplePropertyList();
 
-  bool ParseFile(const char *path);
+    bool ParseFile(const char *path);
 
-  llvm::StringRef GetErrors() const;
+    llvm::StringRef GetErrors() const;
 
-  explicit operator bool() const { return IsValid(); }
+    explicit operator bool() const {
+        return IsValid();
+    }
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  XMLNode GetValueNode(const char *key) const;
+    XMLNode GetValueNode(const char *key) const;
 
-  bool GetValueAsString(const char *key, std::string &value) const;
+    bool GetValueAsString(const char *key, std::string &value) const;
 
-  StructuredData::ObjectSP GetStructuredData();
+    StructuredData::ObjectSP GetStructuredData();
 
 protected:
-  // Using a node returned from GetValueNode() extract its value as a string
-  // (if possible). Array and dictionary nodes will return false as they have
-  // no string value. Boolean nodes will return true and \a value will be
-  // "true" or "false" as the string value comes from the element name itself.
-  // All other nodes will return the text content of the XMLNode.
-  static bool ExtractStringFromValueNode(const XMLNode &node,
-                                         std::string &value);
+    // Using a node returned from GetValueNode() extract its value as a string
+    // (if possible). Array and dictionary nodes will return false as they have
+    // no string value. Boolean nodes will return true and \a value will be
+    // "true" or "false" as the string value comes from the element name itself.
+    // All other nodes will return the text content of the XMLNode.
+    static bool ExtractStringFromValueNode(const XMLNode &node,
+                                           std::string &value);
 
-  XMLDocument m_xml_doc;
-  XMLNode m_dict_node;
+    XMLDocument m_xml_doc;
+    XMLNode m_dict_node;
 };
 
 } // namespace lldb_private

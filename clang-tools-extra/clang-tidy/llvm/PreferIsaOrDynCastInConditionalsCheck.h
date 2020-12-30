@@ -50,14 +50,14 @@ namespace llvm_check {
 /// http://clang.llvm.org/extra/clang-tidy/checks/llvm-prefer-isa-or-dyn-cast-in-conditionals.html
 class PreferIsaOrDynCastInConditionalsCheck : public ClangTidyCheck {
 public:
-  PreferIsaOrDynCastInConditionalsCheck(StringRef Name,
-                                        ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    PreferIsaOrDynCastInConditionalsCheck(StringRef Name,
+                                          ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace llvm_check

@@ -19,15 +19,15 @@ namespace lldb_private {
 
 class StreamCallback : public llvm::raw_ostream {
 public:
-  StreamCallback(lldb::LogOutputCallback callback, void *baton);
-  ~StreamCallback() override = default;
+    StreamCallback(lldb::LogOutputCallback callback, void *baton);
+    ~StreamCallback() override = default;
 
 private:
-  lldb::LogOutputCallback m_callback;
-  void *m_baton;
+    lldb::LogOutputCallback m_callback;
+    void *m_baton;
 
-  void write_impl(const char *Ptr, size_t Size) override;
-  uint64_t current_pos() const override;
+    void write_impl(const char *Ptr, size_t Size) override;
+    uint64_t current_pos() const override;
 };
 
 } // namespace lldb_private

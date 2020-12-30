@@ -48,28 +48,28 @@ bool isCPSRDefined(const MCInst &MI, const MCInstrInfo *MCII);
 
 template<class Inst>
 bool isLDMBaseRegInList(const Inst &MI) {
-  auto BaseReg = MI.getOperand(0).getReg();
-  for (unsigned I = 1, E = MI.getNumOperands(); I < E; ++I) {
-    const auto &Op = MI.getOperand(I);
-    if (Op.isReg() && Op.getReg() == BaseReg)
-      return true;
-  }
-  return false;
+    auto BaseReg = MI.getOperand(0).getReg();
+    for (unsigned I = 1, E = MI.getNumOperands(); I < E; ++I) {
+        const auto &Op = MI.getOperand(I);
+        if (Op.isReg() && Op.getReg() == BaseReg)
+            return true;
+    }
+    return false;
 }
 
 /// Create a ARM MCSubtargetInfo instance. This is exposed so Asm parser, etc.
 /// do not need to go through TargetRegistry.
 MCSubtargetInfo *createARMMCSubtargetInfo(const Triple &TT, StringRef CPU,
-                                          StringRef FS);
+        StringRef FS);
 }
 
 MCTargetStreamer *createARMNullTargetStreamer(MCStreamer &S);
 MCTargetStreamer *createARMTargetAsmStreamer(MCStreamer &S,
-                                             formatted_raw_ostream &OS,
-                                             MCInstPrinter *InstPrint,
-                                             bool isVerboseAsm);
+        formatted_raw_ostream &OS,
+        MCInstPrinter *InstPrint,
+        bool isVerboseAsm);
 MCTargetStreamer *createARMObjectTargetStreamer(MCStreamer &S,
-                                                const MCSubtargetInfo &STI);
+        const MCSubtargetInfo &STI);
 
 MCCodeEmitter *createARMLEMCCodeEmitter(const MCInstrInfo &MCII,
                                         const MCRegisterInfo &MRI,
@@ -113,14 +113,14 @@ MCRelocationInfo *createARMMachORelocationInfo(MCContext &Ctx);
 
 namespace ARM {
 enum OperandType {
-  OPERAND_VPRED_R = MCOI::OPERAND_FIRST_TARGET,
-  OPERAND_VPRED_N,
+    OPERAND_VPRED_R = MCOI::OPERAND_FIRST_TARGET,
+    OPERAND_VPRED_N,
 };
 inline bool isVpred(OperandType op) {
-  return op == OPERAND_VPRED_R || op == OPERAND_VPRED_N;
+    return op == OPERAND_VPRED_R || op == OPERAND_VPRED_N;
 }
 inline bool isVpred(uint8_t op) {
-  return isVpred(static_cast<OperandType>(op));
+    return isVpred(static_cast<OperandType>(op));
 }
 
 bool isCDECoproc(size_t Coproc, const MCSubtargetInfo &STI);

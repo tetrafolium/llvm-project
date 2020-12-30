@@ -21,54 +21,54 @@ using namespace lldb_private;
 using namespace llvm;
 
 void TraceSessionFileParser::NormalizePath(lldb_private::FileSpec &file_spec) {
-  if (file_spec.IsRelative())
-    file_spec.PrependPathComponent(m_session_file_dir);
+    if (file_spec.IsRelative())
+        file_spec.PrependPathComponent(m_session_file_dir);
 }
 
 Error TraceSessionFileParser::ParseModule(lldb::TargetSP &target_sp,
-                                          const JSONModule &module) {
-  FileSpec system_file_spec(module.system_path);
-  NormalizePath(system_file_spec);
+        const JSONModule &module) {
+    FileSpec system_file_spec(module.system_path);
+    NormalizePath(system_file_spec);
 
-  FileSpec local_file_spec(module.file.hasValue() ? *module.file
-                                                  : module.system_path);
-  NormalizePath(local_file_spec);
+    FileSpec local_file_spec(module.file.hasValue() ? *module.file
+                             : module.system_path);
+    NormalizePath(local_file_spec);
 
-  ModuleSpec module_spec;
-  module_spec.GetFileSpec() = local_file_spec;
-  module_spec.GetPlatformFileSpec() = system_file_spec;
+    ModuleSpec module_spec;
+    module_spec.GetFileSpec() = local_file_spec;
+    module_spec.GetPlatformFileSpec() = system_file_spec;
 
-  if (module.uuid.hasValue())
-    module_spec.GetUUID().SetFromStringRef(*module.uuid);
+    if (module.uuid.hasValue())
+        module_spec.GetUUID().SetFromStringRef(*module.uuid);
 
-  Status error;
-  ModuleSP module_sp =
-      target_sp->GetOrCreateModule(module_spec, /*notify*/ false, &error);
+    Status error;
+    ModuleSP module_sp =
+        target_sp->GetOrCreateModule(module_spec, /*notify*/ false, &error);
 
-  if (error.Fail())
-    return error.ToError();
+    if (error.Fail())
+        return error.ToError();
 
-  bool load_addr_changed = false;
-  module_sp->SetLoadAddress(*target_sp, module.load_address.value, false,
-                            load_addr_changed);
-  return llvm::Error::success();
+    bool load_addr_changed = false;
+    module_sp->SetLoadAddress(*target_sp, module.load_address.value, false,
+                              load_addr_changed);
+    return llvm::Error::success();
 }
 
 Error TraceSessionFileParser::CreateJSONError(json::Path::Root &root,
-                                              const json::Value &value) {
-  std::string err;
-  raw_string_ostream os(err);
-  root.printErrorContext(value, os);
-  return createStringError(
-      std::errc::invalid_argument, "%s\n\nContext:\n%s\n\nSchema:\n%s",
-      toString(root.getError()).c_str(), os.str().c_str(), m_schema.data());
+        const json::Value &value) {
+    std::string err;
+    raw_string_ostream os(err);
+    root.printErrorContext(value, os);
+    return createStringError(
+               std::errc::invalid_argument, "%s\n\nContext:\n%s\n\nSchema:\n%s",
+               toString(root.getError()).c_str(), os.str().c_str(), m_schema.data());
 }
 
 std::string TraceSessionFileParser::BuildSchema(StringRef plugin_schema) {
-  std::ostringstream schema_builder;
-  schema_builder << "{\n  \"trace\": ";
-  schema_builder << plugin_schema.data() << ",";
-  schema_builder << R"(
+    std::ostringstream schema_builder;
+    schema_builder << "{\n  \"trace\": ";
+    schema_builder << plugin_schema.data() << ",";
+    schema_builder << R"(
   "processes": [
     {
       "pid": integer,

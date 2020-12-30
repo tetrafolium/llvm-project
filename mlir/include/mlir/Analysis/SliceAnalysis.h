@@ -70,7 +70,9 @@ using TransitiveFilter = std::function<bool(Operation *)>;
 void getForwardSlice(
     Operation *op, llvm::SetVector<Operation *> *forwardSlice,
     TransitiveFilter filter = /* pass-through*/
-    [](Operation *) { return true; });
+[](Operation *) {
+    return true;
+});
 
 /// Fills `backwardSlice` with the computed backward slice (i.e.
 /// all the transitive defs of op), **without** including that operation.
@@ -109,7 +111,9 @@ void getForwardSlice(
 void getBackwardSlice(
     Operation *op, llvm::SetVector<Operation *> *backwardSlice,
     TransitiveFilter filter = /* pass-through*/
-    [](Operation *) { return true; });
+[](Operation *) {
+    return true;
+});
 
 /// Iteratively computes backward slices and forward slices until
 /// a fixed point is reached. Returns an `llvm::SetVector<Operation *>` which
@@ -191,9 +195,13 @@ void getBackwardSlice(
 llvm::SetVector<Operation *> getSlice(
     Operation *op,
     TransitiveFilter backwardFilter = /* pass-through*/
-    [](Operation *) { return true; },
-    TransitiveFilter forwardFilter = /* pass-through*/
-    [](Operation *) { return true; });
+[](Operation *) {
+    return true;
+},
+TransitiveFilter forwardFilter = /* pass-through*/
+[](Operation *) {
+    return true;
+});
 
 /// Multi-root DAG topological sort.
 /// Performs a topological sort of the Operation in the `toSort` SetVector.

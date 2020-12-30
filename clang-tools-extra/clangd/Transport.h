@@ -33,40 +33,40 @@ namespace clangd {
 //  - messages MAY be sent while loop() is reading, or its callback is active
 class Transport {
 public:
-  virtual ~Transport() = default;
+    virtual ~Transport() = default;
 
-  // Called by Clangd to send messages to the client.
-  virtual void notify(llvm::StringRef Method, llvm::json::Value Params) = 0;
-  virtual void call(llvm::StringRef Method, llvm::json::Value Params,
-                    llvm::json::Value ID) = 0;
-  virtual void reply(llvm::json::Value ID,
-                     llvm::Expected<llvm::json::Value> Result) = 0;
+    // Called by Clangd to send messages to the client.
+    virtual void notify(llvm::StringRef Method, llvm::json::Value Params) = 0;
+    virtual void call(llvm::StringRef Method, llvm::json::Value Params,
+                      llvm::json::Value ID) = 0;
+    virtual void reply(llvm::json::Value ID,
+                       llvm::Expected<llvm::json::Value> Result) = 0;
 
-  // Implemented by Clangd to handle incoming messages. (See loop() below).
-  class MessageHandler {
-  public:
-    virtual ~MessageHandler() = default;
-    // Handler returns true to keep processing messages, or false to shut down.
-    virtual bool onNotify(llvm::StringRef Method, llvm::json::Value) = 0;
-    virtual bool onCall(llvm::StringRef Method, llvm::json::Value Params,
-                        llvm::json::Value ID) = 0;
-    virtual bool onReply(llvm::json::Value ID,
-                         llvm::Expected<llvm::json::Value> Result) = 0;
-  };
-  // Called by Clangd to receive messages from the client.
-  // The transport should in turn invoke the handler to process messages.
-  // If handler returns false, the transport should immediately exit the loop.
-  // (This is used to implement the `exit` notification).
-  // Otherwise, it returns an error when the transport becomes unusable.
-  virtual llvm::Error loop(MessageHandler &) = 0;
+    // Implemented by Clangd to handle incoming messages. (See loop() below).
+    class MessageHandler {
+    public:
+        virtual ~MessageHandler() = default;
+        // Handler returns true to keep processing messages, or false to shut down.
+        virtual bool onNotify(llvm::StringRef Method, llvm::json::Value) = 0;
+        virtual bool onCall(llvm::StringRef Method, llvm::json::Value Params,
+                            llvm::json::Value ID) = 0;
+        virtual bool onReply(llvm::json::Value ID,
+                             llvm::Expected<llvm::json::Value> Result) = 0;
+    };
+    // Called by Clangd to receive messages from the client.
+    // The transport should in turn invoke the handler to process messages.
+    // If handler returns false, the transport should immediately exit the loop.
+    // (This is used to implement the `exit` notification).
+    // Otherwise, it returns an error when the transport becomes unusable.
+    virtual llvm::Error loop(MessageHandler &) = 0;
 };
 
 // Controls the way JSON-RPC messages are encoded (both input and output).
 enum JSONStreamStyle {
-  // Encoding per the LSP specification, with mandatory Content-Length header.
-  Standard,
-  // Messages are delimited by a '---' line. Comment lines start with #.
-  Delimited
+    // Encoding per the LSP specification, with mandatory Content-Length header.
+    Standard,
+    // Messages are delimited by a '---' line. Comment lines start with #.
+    Delimited
 };
 
 // Returns a Transport that speaks JSON-RPC over a pair of streams.

@@ -15,19 +15,21 @@ using namespace llvm;
 
 namespace {
 
-  class MCNullStreamer : public MCStreamer {
-  public:
+class MCNullStreamer : public MCStreamer {
+public:
     MCNullStreamer(MCContext &Context) : MCStreamer(Context) {}
 
     /// @name MCStreamer Interface
     /// @{
 
-    bool hasRawTextSupport() const override { return true; }
+    bool hasRawTextSupport() const override {
+        return true;
+    }
     void emitRawTextImpl(StringRef String) override {}
 
     bool emitSymbolAttribute(MCSymbol *Symbol,
                              MCSymbolAttr Attribute) override {
-      return true;
+        return true;
     }
 
     void emitCommonSymbol(MCSymbol *Symbol, uint64_t Size,
@@ -40,10 +42,10 @@ namespace {
     void EmitCOFFSymbolStorageClass(int StorageClass) override {}
     void EmitCOFFSymbolType(int Type) override {}
     void EndCOFFSymbolDef() override {}
-  };
+};
 
 }
 
 MCStreamer *llvm::createNullStreamer(MCContext &Context) {
-  return new MCNullStreamer(Context);
+    return new MCNullStreamer(Context);
 }

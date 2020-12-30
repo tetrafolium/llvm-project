@@ -23,52 +23,54 @@ class MCAsmInfo;
 
 /// AsmLexer - Lexer class for assembly files.
 class AsmLexer : public MCAsmLexer {
-  const MCAsmInfo &MAI;
+    const MCAsmInfo &MAI;
 
-  const char *CurPtr = nullptr;
-  StringRef CurBuf;
-  bool IsAtStartOfLine = true;
-  bool IsAtStartOfStatement = true;
-  bool IsPeeking = false;
-  bool EndStatementAtEOF = true;
+    const char *CurPtr = nullptr;
+    StringRef CurBuf;
+    bool IsAtStartOfLine = true;
+    bool IsAtStartOfStatement = true;
+    bool IsPeeking = false;
+    bool EndStatementAtEOF = true;
 
 protected:
-  /// LexToken - Read the next token and return its code.
-  AsmToken LexToken() override;
+    /// LexToken - Read the next token and return its code.
+    AsmToken LexToken() override;
 
 public:
-  AsmLexer(const MCAsmInfo &MAI);
-  AsmLexer(const AsmLexer &) = delete;
-  AsmLexer &operator=(const AsmLexer &) = delete;
-  ~AsmLexer() override;
+    AsmLexer(const MCAsmInfo &MAI);
+    AsmLexer(const AsmLexer &) = delete;
+    AsmLexer &operator=(const AsmLexer &) = delete;
+    ~AsmLexer() override;
 
-  void setBuffer(StringRef Buf, const char *ptr = nullptr,
-                 bool EndStatementAtEOF = true);
+    void setBuffer(StringRef Buf, const char *ptr = nullptr,
+                   bool EndStatementAtEOF = true);
 
-  StringRef LexUntilEndOfStatement() override;
+    StringRef LexUntilEndOfStatement() override;
 
-  size_t peekTokens(MutableArrayRef<AsmToken> Buf,
-                    bool ShouldSkipSpace = true) override;
+    size_t peekTokens(MutableArrayRef<AsmToken> Buf,
+                      bool ShouldSkipSpace = true) override;
 
-  const MCAsmInfo &getMAI() const { return MAI; }
+    const MCAsmInfo &getMAI() const {
+        return MAI;
+    }
 
 private:
-  bool isAtStartOfComment(const char *Ptr);
-  bool isAtStatementSeparator(const char *Ptr);
-  int getNextChar();
-  int peekNextChar();
-  AsmToken ReturnError(const char *Loc, const std::string &Msg);
+    bool isAtStartOfComment(const char *Ptr);
+    bool isAtStatementSeparator(const char *Ptr);
+    int getNextChar();
+    int peekNextChar();
+    AsmToken ReturnError(const char *Loc, const std::string &Msg);
 
-  AsmToken LexIdentifier();
-  AsmToken LexSlash();
-  AsmToken LexLineComment();
-  AsmToken LexDigit();
-  AsmToken LexSingleQuote();
-  AsmToken LexQuote();
-  AsmToken LexFloatLiteral();
-  AsmToken LexHexFloatLiteral(bool NoIntDigits);
+    AsmToken LexIdentifier();
+    AsmToken LexSlash();
+    AsmToken LexLineComment();
+    AsmToken LexDigit();
+    AsmToken LexSingleQuote();
+    AsmToken LexQuote();
+    AsmToken LexFloatLiteral();
+    AsmToken LexHexFloatLiteral(bool NoIntDigits);
 
-  StringRef LexUntilEndOfLine();
+    StringRef LexUntilEndOfLine();
 };
 
 } // end namespace llvm

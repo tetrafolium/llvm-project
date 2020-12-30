@@ -84,23 +84,24 @@ _LIBCPP_HIDDEN ios_base::Init __start_std_streams _LIBCPP_INIT_PRIORITY_MAX;
 // when we flush the streams.
 static void force_locale_initialization() {
 #if defined(_LIBCPP_MSVCRT_LIKE)
-  static bool once = []() {
-    auto loc = newlocale(LC_ALL_MASK, "C", 0);
-    {
-        __libcpp_locale_guard g(loc); // forces initialization of locale TLS
-        ((void)g);
+    static bool once = []() {
+        auto loc = newlocale(LC_ALL_MASK, "C", 0);
+        {
+            __libcpp_locale_guard g(loc); // forces initialization of locale TLS
+            ((void)g);
+        }
+        freelocale(loc);
+        return true;
     }
-    freelocale(loc);
-    return true;
-  }();
-  ((void)once);
+    ();
+    ((void)once);
 #endif
 }
 
 class DoIOSInit {
 public:
-	DoIOSInit();
-	~DoIOSInit();
+    DoIOSInit();
+    ~DoIOSInit();
 };
 
 DoIOSInit::DoIOSInit()
@@ -116,9 +117,9 @@ DoIOSInit::DoIOSInit()
     wostream* wcout_ptr = ::new(wcout) wostream(::new(__wcout) __stdoutbuf<wchar_t>(stdout, &mb_wcout));
 #endif
     ostream* cerr_ptr = ::new(cerr) ostream(::new(__cerr) __stdoutbuf<char>(stderr, &mb_cerr));
-                        ::new(clog) ostream(cerr_ptr->rdbuf());
+    ::new(clog) ostream(cerr_ptr->rdbuf());
     wostream* wcerr_ptr = ::new(wcerr) wostream(::new(__wcerr) __stdoutbuf<wchar_t>(stderr, &mb_wcerr));
-                          ::new(wclog) wostream(wcerr_ptr->rdbuf());
+    ::new(wclog) wostream(wcerr_ptr->rdbuf());
 
 #if !defined(_LIBCPP_HAS_NO_STDIN) && !defined(_LIBCPP_HAS_NO_STDOUT)
     cin_ptr->tie(cout_ptr);

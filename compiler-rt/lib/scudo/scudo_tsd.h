@@ -23,35 +23,39 @@
 namespace __scudo {
 
 struct ALIGNED(SANITIZER_CACHE_LINE_SIZE) ScudoTSD {
-  AllocatorCacheT Cache;
-  uptr QuarantineCachePlaceHolder[4];
+    AllocatorCacheT Cache;
+    uptr QuarantineCachePlaceHolder[4];
 
-  void init();
-  void commitBack();
+    void init();
+    void commitBack();
 
-  inline bool tryLock() {
-    if (Mutex.TryLock()) {
-      atomic_store_relaxed(&Precedence, 0);
-      return true;
+    inline bool tryLock() {
+        if (Mutex.TryLock()) {
+            atomic_store_relaxed(&Precedence, 0);
+            return true;
+        }
+        if (atomic_load_relaxed(&Precedence) == 0)
+            atomic_store_relaxed(&Precedence, static_cast<uptr>(
+                                     MonotonicNanoTime() >> FIRST_32_SECOND_64(16, 0)));
+        return false;
     }
-    if (atomic_load_relaxed(&Precedence) == 0)
-      atomic_store_relaxed(&Precedence, static_cast<uptr>(
-          MonotonicNanoTime() >> FIRST_32_SECOND_64(16, 0)));
-    return false;
-  }
 
-  inline void lock() {
-    atomic_store_relaxed(&Precedence, 0);
-    Mutex.Lock();
-  }
+    inline void lock() {
+        atomic_store_relaxed(&Precedence, 0);
+        Mutex.Lock();
+    }
 
-  inline void unlock() { Mutex.Unlock(); }
+    inline void unlock() {
+        Mutex.Unlock();
+    }
 
-  inline uptr getPrecedence() { return atomic_load_relaxed(&Precedence); }
+    inline uptr getPrecedence() {
+        return atomic_load_relaxed(&Precedence);
+    }
 
- private:
-  StaticSpinMutex Mutex;
-  atomic_uintptr_t Precedence;
+private:
+    StaticSpinMutex Mutex;
+    atomic_uintptr_t Precedence;
 };
 
 void initThread(bool MinimalInit);

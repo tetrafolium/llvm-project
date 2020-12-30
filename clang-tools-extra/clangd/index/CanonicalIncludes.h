@@ -35,34 +35,34 @@ namespace clangd {
 /// Only const methods (i.e. mapHeader) in this class are thread safe.
 class CanonicalIncludes {
 public:
-  /// Adds a string-to-string mapping from \p Path to \p CanonicalPath.
-  void addMapping(llvm::StringRef Path, llvm::StringRef CanonicalPath);
+    /// Adds a string-to-string mapping from \p Path to \p CanonicalPath.
+    void addMapping(llvm::StringRef Path, llvm::StringRef CanonicalPath);
 
-  /// Returns the canonical include for symbol with \p QualifiedName.
-  /// \p Header is the file the declaration was reachable from.
-  /// Header itself will be returned if there is no relevant mapping.
-  llvm::StringRef mapHeader(llvm::StringRef Header,
-                            llvm::StringRef QualifiedName) const;
+    /// Returns the canonical include for symbol with \p QualifiedName.
+    /// \p Header is the file the declaration was reachable from.
+    /// Header itself will be returned if there is no relevant mapping.
+    llvm::StringRef mapHeader(llvm::StringRef Header,
+                              llvm::StringRef QualifiedName) const;
 
-  /// Adds mapping for system headers and some special symbols (e.g. STL symbols
-  /// in <iosfwd> need to be mapped individually). Approximately, the following
-  /// system headers are handled:
-  ///   - C++ standard library e.g. bits/basic_string.h$ -> <string>
-  ///   - Posix library e.g. bits/pthreadtypes.h$ -> <pthread.h>
-  ///   - Compiler extensions, e.g. include/avx512bwintrin.h$ -> <immintrin.h>
-  /// The mapping is hardcoded and hand-maintained, so it might not cover all
-  /// headers.
-  void addSystemHeadersMapping(const LangOptions &Language);
+    /// Adds mapping for system headers and some special symbols (e.g. STL symbols
+    /// in <iosfwd> need to be mapped individually). Approximately, the following
+    /// system headers are handled:
+    ///   - C++ standard library e.g. bits/basic_string.h$ -> <string>
+    ///   - Posix library e.g. bits/pthreadtypes.h$ -> <pthread.h>
+    ///   - Compiler extensions, e.g. include/avx512bwintrin.h$ -> <immintrin.h>
+    /// The mapping is hardcoded and hand-maintained, so it might not cover all
+    /// headers.
+    void addSystemHeadersMapping(const LangOptions &Language);
 
 private:
-  /// A map from full include path to a canonical path.
-  llvm::StringMap<std::string> FullPathMapping;
-  /// A map from a suffix (one or components of a path) to a canonical path.
-  /// Used only for mapping standard headers.
-  const llvm::StringMap<llvm::StringRef> *StdSuffixHeaderMapping = nullptr;
-  /// A map from fully qualified symbol names to header names.
-  /// Used only for mapping standard symbols.
-  const llvm::StringMap<llvm::StringRef> *StdSymbolMapping = nullptr;
+    /// A map from full include path to a canonical path.
+    llvm::StringMap<std::string> FullPathMapping;
+    /// A map from a suffix (one or components of a path) to a canonical path.
+    /// Used only for mapping standard headers.
+    const llvm::StringMap<llvm::StringRef> *StdSuffixHeaderMapping = nullptr;
+    /// A map from fully qualified symbol names to header names.
+    /// Used only for mapping standard symbols.
+    const llvm::StringMap<llvm::StringRef> *StdSymbolMapping = nullptr;
 };
 
 /// Returns a CommentHandler that parses pragma comment on include files to

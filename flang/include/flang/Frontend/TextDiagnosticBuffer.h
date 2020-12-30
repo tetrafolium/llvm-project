@@ -26,25 +26,25 @@ namespace Fortran::frontend {
 
 class TextDiagnosticBuffer : public clang::DiagnosticConsumer {
 public:
-  using DiagList = std::vector<std::pair<clang::SourceLocation, std::string>>;
-  using DiagnosticsLevelAndIndexPairs =
-      std::vector<std::pair<clang::DiagnosticsEngine::Level, size_t>>;
+    using DiagList = std::vector<std::pair<clang::SourceLocation, std::string>>;
+    using DiagnosticsLevelAndIndexPairs =
+        std::vector<std::pair<clang::DiagnosticsEngine::Level, size_t>>;
 
 private:
-  DiagList errors_, warnings_, remarks_, notes_;
+    DiagList errors_, warnings_, remarks_, notes_;
 
-  /// All diagnostics in the order in which they were generated. That order
-  /// likely doesn't correspond to user input order, but at least it keeps
-  /// notes in the right places. Each pair is a diagnostic level and an index
-  /// into the corresponding DiagList above.
-  DiagnosticsLevelAndIndexPairs all_;
+    /// All diagnostics in the order in which they were generated. That order
+    /// likely doesn't correspond to user input order, but at least it keeps
+    /// notes in the right places. Each pair is a diagnostic level and an index
+    /// into the corresponding DiagList above.
+    DiagnosticsLevelAndIndexPairs all_;
 
 public:
-  void HandleDiagnostic(clang::DiagnosticsEngine::Level diagLevel,
-      const clang::Diagnostic &info) override;
+    void HandleDiagnostic(clang::DiagnosticsEngine::Level diagLevel,
+                          const clang::Diagnostic &info) override;
 
-  /// Flush the buffered diagnostics to a given diagnostic engine.
-  void FlushDiagnostics(clang::DiagnosticsEngine &diags) const;
+    /// Flush the buffered diagnostics to a given diagnostic engine.
+    void FlushDiagnostics(clang::DiagnosticsEngine &diags) const;
 };
 
 } // namespace Fortran::frontend

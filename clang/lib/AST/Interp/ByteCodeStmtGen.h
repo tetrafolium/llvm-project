@@ -38,47 +38,47 @@ template <class Emitter> class LabelScope;
 /// Compilation context for statements.
 template <class Emitter>
 class ByteCodeStmtGen : public ByteCodeExprGen<Emitter> {
-  using LabelTy = typename Emitter::LabelTy;
-  using AddrTy = typename Emitter::AddrTy;
-  using OptLabelTy = llvm::Optional<LabelTy>;
-  using CaseMap = llvm::DenseMap<const SwitchCase *, LabelTy>;
+    using LabelTy = typename Emitter::LabelTy;
+    using AddrTy = typename Emitter::AddrTy;
+    using OptLabelTy = llvm::Optional<LabelTy>;
+    using CaseMap = llvm::DenseMap<const SwitchCase *, LabelTy>;
 
 public:
-  template<typename... Tys>
-  ByteCodeStmtGen(Tys&&... Args)
-      : ByteCodeExprGen<Emitter>(std::forward<Tys>(Args)...) {}
+    template<typename... Tys>
+    ByteCodeStmtGen(Tys&&... Args)
+        : ByteCodeExprGen<Emitter>(std::forward<Tys>(Args)...) {}
 
 protected:
-  bool visitFunc(const FunctionDecl *F) override;
+    bool visitFunc(const FunctionDecl *F) override;
 
 private:
-  friend class LabelScope<Emitter>;
-  friend class LoopScope<Emitter>;
-  friend class SwitchScope<Emitter>;
+    friend class LabelScope<Emitter>;
+    friend class LoopScope<Emitter>;
+    friend class SwitchScope<Emitter>;
 
-  // Statement visitors.
-  bool visitStmt(const Stmt *S);
-  bool visitCompoundStmt(const CompoundStmt *S);
-  bool visitDeclStmt(const DeclStmt *DS);
-  bool visitReturnStmt(const ReturnStmt *RS);
-  bool visitIfStmt(const IfStmt *IS);
+    // Statement visitors.
+    bool visitStmt(const Stmt *S);
+    bool visitCompoundStmt(const CompoundStmt *S);
+    bool visitDeclStmt(const DeclStmt *DS);
+    bool visitReturnStmt(const ReturnStmt *RS);
+    bool visitIfStmt(const IfStmt *IS);
 
-  /// Compiles a variable declaration.
-  bool visitVarDecl(const VarDecl *VD);
+    /// Compiles a variable declaration.
+    bool visitVarDecl(const VarDecl *VD);
 
 private:
-  /// Type of the expression returned by the function.
-  llvm::Optional<PrimType> ReturnType;
+    /// Type of the expression returned by the function.
+    llvm::Optional<PrimType> ReturnType;
 
-  /// Switch case mapping.
-  CaseMap CaseLabels;
+    /// Switch case mapping.
+    CaseMap CaseLabels;
 
-  /// Point to break to.
-  OptLabelTy BreakLabel;
-  /// Point to continue to.
-  OptLabelTy ContinueLabel;
-  /// Default case label.
-  OptLabelTy DefaultLabel;
+    /// Point to break to.
+    OptLabelTy BreakLabel;
+    /// Point to continue to.
+    OptLabelTy ContinueLabel;
+    /// Default case label.
+    OptLabelTy DefaultLabel;
 };
 
 extern template class ByteCodeExprGen<EvalEmitter>;

@@ -24,10 +24,10 @@ using namespace ento;
 
 namespace {
 class CastSizeChecker : public Checker< check::PreStmt<CastExpr> > {
-  mutable std::unique_ptr<BuiltinBug> BT;
+    mutable std::unique_ptr<BuiltinBug> BT;
 
 public:
-  void checkPreStmt(const CastExpr *CE, CheckerContext &C) const;
+    void checkPreStmt(const CastExpr *CE, CheckerContext &C) const;
 };
 }
 
@@ -49,108 +49,108 @@ public:
 /// of struct bar.
 static bool evenFlexibleArraySize(ASTContext &Ctx, CharUnits RegionSize,
                                   CharUnits TypeSize, QualType ToPointeeTy) {
-  const RecordType *RT = ToPointeeTy->getAs<RecordType>();
-  if (!RT)
-    return false;
+    const RecordType *RT = ToPointeeTy->getAs<RecordType>();
+    if (!RT)
+        return false;
 
-  const RecordDecl *RD = RT->getDecl();
-  RecordDecl::field_iterator Iter(RD->field_begin());
-  RecordDecl::field_iterator End(RD->field_end());
-  const FieldDecl *Last = nullptr;
-  for (; Iter != End; ++Iter)
-    Last = *Iter;
-  assert(Last && "empty structs should already be handled");
+    const RecordDecl *RD = RT->getDecl();
+    RecordDecl::field_iterator Iter(RD->field_begin());
+    RecordDecl::field_iterator End(RD->field_end());
+    const FieldDecl *Last = nullptr;
+    for (; Iter != End; ++Iter)
+        Last = *Iter;
+    assert(Last && "empty structs should already be handled");
 
-  const Type *ElemType = Last->getType()->getArrayElementTypeNoTypeQual();
-  CharUnits FlexSize;
-  if (const ConstantArrayType *ArrayTy =
-        Ctx.getAsConstantArrayType(Last->getType())) {
-    FlexSize = Ctx.getTypeSizeInChars(ElemType);
-    if (ArrayTy->getSize() == 1 && TypeSize > FlexSize)
-      TypeSize -= FlexSize;
-    else if (ArrayTy->getSize() != 0)
-      return false;
-  } else if (RD->hasFlexibleArrayMember()) {
-    FlexSize = Ctx.getTypeSizeInChars(ElemType);
-  } else {
-    return false;
-  }
+    const Type *ElemType = Last->getType()->getArrayElementTypeNoTypeQual();
+    CharUnits FlexSize;
+    if (const ConstantArrayType *ArrayTy =
+                Ctx.getAsConstantArrayType(Last->getType())) {
+        FlexSize = Ctx.getTypeSizeInChars(ElemType);
+        if (ArrayTy->getSize() == 1 && TypeSize > FlexSize)
+            TypeSize -= FlexSize;
+        else if (ArrayTy->getSize() != 0)
+            return false;
+    } else if (RD->hasFlexibleArrayMember()) {
+        FlexSize = Ctx.getTypeSizeInChars(ElemType);
+    } else {
+        return false;
+    }
 
-  if (FlexSize.isZero())
-    return false;
+    if (FlexSize.isZero())
+        return false;
 
-  CharUnits Left = RegionSize - TypeSize;
-  if (Left.isNegative())
-    return false;
+    CharUnits Left = RegionSize - TypeSize;
+    if (Left.isNegative())
+        return false;
 
-  return Left % FlexSize == 0;
+    return Left % FlexSize == 0;
 }
 
 void CastSizeChecker::checkPreStmt(const CastExpr *CE,CheckerContext &C) const {
-  const Expr *E = CE->getSubExpr();
-  ASTContext &Ctx = C.getASTContext();
-  QualType ToTy = Ctx.getCanonicalType(CE->getType());
-  const PointerType *ToPTy = dyn_cast<PointerType>(ToTy.getTypePtr());
+    const Expr *E = CE->getSubExpr();
+    ASTContext &Ctx = C.getASTContext();
+    QualType ToTy = Ctx.getCanonicalType(CE->getType());
+    const PointerType *ToPTy = dyn_cast<PointerType>(ToTy.getTypePtr());
 
-  if (!ToPTy)
-    return;
+    if (!ToPTy)
+        return;
 
-  QualType ToPointeeTy = ToPTy->getPointeeType();
+    QualType ToPointeeTy = ToPTy->getPointeeType();
 
-  // Only perform the check if 'ToPointeeTy' is a complete type.
-  if (ToPointeeTy->isIncompleteType())
-    return;
+    // Only perform the check if 'ToPointeeTy' is a complete type.
+    if (ToPointeeTy->isIncompleteType())
+        return;
 
-  ProgramStateRef state = C.getState();
-  const MemRegion *R = C.getSVal(E).getAsRegion();
-  if (!R)
-    return;
+    ProgramStateRef state = C.getState();
+    const MemRegion *R = C.getSVal(E).getAsRegion();
+    if (!R)
+        return;
 
-  const SymbolicRegion *SR = dyn_cast<SymbolicRegion>(R);
-  if (!SR)
-    return;
+    const SymbolicRegion *SR = dyn_cast<SymbolicRegion>(R);
+    if (!SR)
+        return;
 
-  SValBuilder &svalBuilder = C.getSValBuilder();
+    SValBuilder &svalBuilder = C.getSValBuilder();
 
-  DefinedOrUnknownSVal Size = getDynamicSize(state, SR, svalBuilder);
-  const llvm::APSInt *SizeInt = svalBuilder.getKnownValue(state, Size);
-  if (!SizeInt)
-    return;
+    DefinedOrUnknownSVal Size = getDynamicSize(state, SR, svalBuilder);
+    const llvm::APSInt *SizeInt = svalBuilder.getKnownValue(state, Size);
+    if (!SizeInt)
+        return;
 
-  CharUnits regionSize = CharUnits::fromQuantity(SizeInt->getZExtValue());
-  CharUnits typeSize = C.getASTContext().getTypeSizeInChars(ToPointeeTy);
+    CharUnits regionSize = CharUnits::fromQuantity(SizeInt->getZExtValue());
+    CharUnits typeSize = C.getASTContext().getTypeSizeInChars(ToPointeeTy);
 
-  // Ignore void, and a few other un-sizeable types.
-  if (typeSize.isZero())
-    return;
+    // Ignore void, and a few other un-sizeable types.
+    if (typeSize.isZero())
+        return;
 
-  if (regionSize % typeSize == 0)
-    return;
+    if (regionSize % typeSize == 0)
+        return;
 
-  if (evenFlexibleArraySize(Ctx, regionSize, typeSize, ToPointeeTy))
-    return;
+    if (evenFlexibleArraySize(Ctx, regionSize, typeSize, ToPointeeTy))
+        return;
 
-  if (ExplodedNode *errorNode = C.generateErrorNode()) {
-    if (!BT)
-      BT.reset(new BuiltinBug(this, "Cast region with wrong size.",
+    if (ExplodedNode *errorNode = C.generateErrorNode()) {
+        if (!BT)
+            BT.reset(new BuiltinBug(this, "Cast region with wrong size.",
                                     "Cast a region whose size is not a multiple"
                                     " of the destination type size."));
-    auto R = std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(),
-                                                      errorNode);
-    R->addRange(CE->getSourceRange());
-    C.emitReport(std::move(R));
-  }
+        auto R = std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(),
+                 errorNode);
+        R->addRange(CE->getSourceRange());
+        C.emitReport(std::move(R));
+    }
 }
 
 void ento::registerCastSizeChecker(CheckerManager &mgr) {
-  mgr.registerChecker<CastSizeChecker>();
+    mgr.registerChecker<CastSizeChecker>();
 }
 
 bool ento::shouldRegisterCastSizeChecker(const CheckerManager &mgr) {
-  // PR31226: C++ is more complicated than what this checker currently supports.
-  // There are derived-to-base casts, there are different rules for 0-size
-  // structures, no flexible arrays, etc.
-  // FIXME: Disabled on C++ for now.
-  const LangOptions &LO = mgr.getLangOpts();
-  return !LO.CPlusPlus;
+    // PR31226: C++ is more complicated than what this checker currently supports.
+    // There are derived-to-base casts, there are different rules for 0-size
+    // structures, no flexible arrays, etc.
+    // FIXME: Disabled on C++ for now.
+    const LangOptions &LO = mgr.getLangOpts();
+    return !LO.CPlusPlus;
 }

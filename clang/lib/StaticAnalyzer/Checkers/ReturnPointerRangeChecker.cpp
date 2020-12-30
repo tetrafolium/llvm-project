@@ -25,7 +25,7 @@ using namespace ento;
 namespace {
 class ReturnPointerRangeChecker :
     public Checker< check::PreStmt<ReturnStmt> > {
-  mutable std::unique_ptr<BuiltinBug> BT;
+    mutable std::unique_ptr<BuiltinBug> BT;
 
 public:
     void checkPreStmt(const ReturnStmt *RS, CheckerContext &C) const;
@@ -33,69 +33,69 @@ public:
 }
 
 void ReturnPointerRangeChecker::checkPreStmt(const ReturnStmt *RS,
-                                             CheckerContext &C) const {
-  ProgramStateRef state = C.getState();
+        CheckerContext &C) const {
+    ProgramStateRef state = C.getState();
 
-  const Expr *RetE = RS->getRetValue();
-  if (!RetE)
-    return;
+    const Expr *RetE = RS->getRetValue();
+    if (!RetE)
+        return;
 
-  SVal V = C.getSVal(RetE);
-  const MemRegion *R = V.getAsRegion();
+    SVal V = C.getSVal(RetE);
+    const MemRegion *R = V.getAsRegion();
 
-  const ElementRegion *ER = dyn_cast_or_null<ElementRegion>(R);
-  if (!ER)
-    return;
+    const ElementRegion *ER = dyn_cast_or_null<ElementRegion>(R);
+    if (!ER)
+        return;
 
-  DefinedOrUnknownSVal Idx = ER->getIndex().castAs<DefinedOrUnknownSVal>();
-  // Zero index is always in bound, this also passes ElementRegions created for
-  // pointer casts.
-  if (Idx.isZeroConstant())
-    return;
+    DefinedOrUnknownSVal Idx = ER->getIndex().castAs<DefinedOrUnknownSVal>();
+    // Zero index is always in bound, this also passes ElementRegions created for
+    // pointer casts.
+    if (Idx.isZeroConstant())
+        return;
 
-  // FIXME: All of this out-of-bounds checking should eventually be refactored
-  // into a common place.
-  DefinedOrUnknownSVal ElementCount = getDynamicElementCount(
-      state, ER->getSuperRegion(), C.getSValBuilder(), ER->getValueType());
+    // FIXME: All of this out-of-bounds checking should eventually be refactored
+    // into a common place.
+    DefinedOrUnknownSVal ElementCount = getDynamicElementCount(
+                                            state, ER->getSuperRegion(), C.getSValBuilder(), ER->getValueType());
 
-  // We assume that the location after the last element in the array is used as
-  // end() iterator. Reporting on these would return too many false positives.
-  if (Idx == ElementCount)
-    return;
+    // We assume that the location after the last element in the array is used as
+    // end() iterator. Reporting on these would return too many false positives.
+    if (Idx == ElementCount)
+        return;
 
-  ProgramStateRef StInBound = state->assumeInBound(Idx, ElementCount, true);
-  ProgramStateRef StOutBound = state->assumeInBound(Idx, ElementCount, false);
-  if (StOutBound && !StInBound) {
-    ExplodedNode *N = C.generateErrorNode(StOutBound);
+    ProgramStateRef StInBound = state->assumeInBound(Idx, ElementCount, true);
+    ProgramStateRef StOutBound = state->assumeInBound(Idx, ElementCount, false);
+    if (StOutBound && !StInBound) {
+        ExplodedNode *N = C.generateErrorNode(StOutBound);
 
-    if (!N)
-      return;
+        if (!N)
+            return;
 
-    // FIXME: This bug correspond to CWE-466.  Eventually we should have bug
-    // types explicitly reference such exploit categories (when applicable).
-    if (!BT)
-      BT.reset(new BuiltinBug(
-          this, "Buffer overflow",
-          "Returned pointer value points outside the original object "
-          "(potential buffer overflow)"));
+        // FIXME: This bug correspond to CWE-466.  Eventually we should have bug
+        // types explicitly reference such exploit categories (when applicable).
+        if (!BT)
+            BT.reset(new BuiltinBug(
+                         this, "Buffer overflow",
+                         "Returned pointer value points outside the original object "
+                         "(potential buffer overflow)"));
 
-    // FIXME: It would be nice to eventually make this diagnostic more clear,
-    // e.g., by referencing the original declaration or by saying *why* this
-    // reference is outside the range.
+        // FIXME: It would be nice to eventually make this diagnostic more clear,
+        // e.g., by referencing the original declaration or by saying *why* this
+        // reference is outside the range.
 
-    // Generate a report for this bug.
-    auto report =
-        std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N);
+        // Generate a report for this bug.
+        auto report =
+            std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N);
 
-    report->addRange(RetE->getSourceRange());
-    C.emitReport(std::move(report));
-  }
+        report->addRange(RetE->getSourceRange());
+        C.emitReport(std::move(report));
+    }
 }
 
 void ento::registerReturnPointerRangeChecker(CheckerManager &mgr) {
-  mgr.registerChecker<ReturnPointerRangeChecker>();
+    mgr.registerChecker<ReturnPointerRangeChecker>();
 }
 
 bool ento::shouldRegisterReturnPointerRangeChecker(const CheckerManager &mgr) {
-  return true;
+    return true;
 }

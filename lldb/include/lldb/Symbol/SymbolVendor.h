@@ -30,24 +30,26 @@ namespace lldb_private {
 // deep as needed in order to provide the information that is requested.
 class SymbolVendor : public ModuleChild, public PluginInterface {
 public:
-  static SymbolVendor *FindPlugin(const lldb::ModuleSP &module_sp,
-                                  Stream *feedback_strm);
+    static SymbolVendor *FindPlugin(const lldb::ModuleSP &module_sp,
+                                    Stream *feedback_strm);
 
-  // Constructors and Destructors
-  SymbolVendor(const lldb::ModuleSP &module_sp);
+    // Constructors and Destructors
+    SymbolVendor(const lldb::ModuleSP &module_sp);
 
-  void AddSymbolFileRepresentation(const lldb::ObjectFileSP &objfile_sp);
+    void AddSymbolFileRepresentation(const lldb::ObjectFileSP &objfile_sp);
 
-  SymbolFile *GetSymbolFile() { return m_sym_file_up.get(); }
+    SymbolFile *GetSymbolFile() {
+        return m_sym_file_up.get();
+    }
 
-  // PluginInterface protocol
-  ConstString GetPluginName() override;
+    // PluginInterface protocol
+    ConstString GetPluginName() override;
 
-  uint32_t GetPluginVersion() override;
+    uint32_t GetPluginVersion() override;
 
 protected:
-  std::unique_ptr<SymbolFile> m_sym_file_up; // A single symbol file. Subclasses
-                                             // can add more of these if needed.
+    std::unique_ptr<SymbolFile> m_sym_file_up; // A single symbol file. Subclasses
+    // can add more of these if needed.
 };
 
 } // namespace lldb_private

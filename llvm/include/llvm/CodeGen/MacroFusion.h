@@ -28,9 +28,9 @@ class TargetSubtargetInfo;
 /// together. Given SecondMI, when FirstMI is unspecified, then check if
 /// SecondMI may be part of a fused pair at all.
 using ShouldSchedulePredTy = std::function<bool(const TargetInstrInfo &TII,
-                                                const TargetSubtargetInfo &TSI,
-                                                const MachineInstr *FirstMI,
-                                                const MachineInstr &SecondMI)>;
+                             const TargetSubtargetInfo &TSI,
+                             const MachineInstr *FirstMI,
+                             const MachineInstr &SecondMI)>;
 
 /// Create a DAG scheduling mutation to pair instructions back to back
 /// for instructions that benefit according to the target-specific

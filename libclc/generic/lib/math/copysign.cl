@@ -17,10 +17,10 @@ _CLC_DEFINE_BINARY_BUILTIN(double, copysign, __builtin_copysign, double, double)
 
 _CLC_DEF _CLC_OVERLOAD half copysign(half x, half y)
 {
-   ushort sign_x = as_ushort(x) & 0x8000u;
-   ushort unsigned_y = as_ushort(y) & 0x7ffffu;
+    ushort sign_x = as_ushort(x) & 0x8000u;
+    ushort unsigned_y = as_ushort(y) & 0x7ffffu;
 
-   return as_half((ushort)(sign_x | unsigned_y));
+    return as_half((ushort)(sign_x | unsigned_y));
 }
 _CLC_BINARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, half, copysign, half, half)
 

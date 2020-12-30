@@ -31,54 +31,54 @@ using namespace llvm;
 
 /// Splits a string of comma separated items in to a vector of strings.
 void SubtargetFeatures::Split(std::vector<std::string> &V, StringRef S) {
-  SmallVector<StringRef, 3> Tmp;
-  S.split(Tmp, ',', -1, false /* KeepEmpty */);
-  V.reserve(Tmp.size());
-  for (StringRef T : Tmp)
-    V.push_back(std::string(T));
+    SmallVector<StringRef, 3> Tmp;
+    S.split(Tmp, ',', -1, false /* KeepEmpty */);
+    V.reserve(Tmp.size());
+    for (StringRef T : Tmp)
+        V.push_back(std::string(T));
 }
 
 void SubtargetFeatures::AddFeature(StringRef String, bool Enable) {
-  // Don't add empty features.
-  if (!String.empty())
-    // Convert to lowercase, prepend flag if we don't already have a flag.
-    Features.push_back(hasFlag(String) ? String.lower()
-                                       : (Enable ? "+" : "-") + String.lower());
+    // Don't add empty features.
+    if (!String.empty())
+        // Convert to lowercase, prepend flag if we don't already have a flag.
+        Features.push_back(hasFlag(String) ? String.lower()
+                           : (Enable ? "+" : "-") + String.lower());
 }
 
 SubtargetFeatures::SubtargetFeatures(StringRef Initial) {
-  // Break up string into separate features
-  Split(Features, Initial);
+    // Break up string into separate features
+    Split(Features, Initial);
 }
 
 std::string SubtargetFeatures::getString() const {
-  return join(Features.begin(), Features.end(), ",");
+    return join(Features.begin(), Features.end(), ",");
 }
 
 void SubtargetFeatures::print(raw_ostream &OS) const {
-  for (auto &F : Features)
-    OS << F << " ";
-  OS << "\n";
+    for (auto &F : Features)
+        OS << F << " ";
+    OS << "\n";
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void SubtargetFeatures::dump() const {
-  print(dbgs());
+    print(dbgs());
 }
 #endif
 
 void SubtargetFeatures::getDefaultSubtargetFeatures(const Triple& Triple) {
-  // FIXME: This is an inelegant way of specifying the features of a
-  // subtarget. It would be better if we could encode this information
-  // into the IR. See <rdar://5972456>.
-  if (Triple.getVendor() == Triple::Apple) {
-    if (Triple.getArch() == Triple::ppc) {
-      // powerpc-apple-*
-      AddFeature("altivec");
-    } else if (Triple.getArch() == Triple::ppc64) {
-      // powerpc64-apple-*
-      AddFeature("64bit");
-      AddFeature("altivec");
+    // FIXME: This is an inelegant way of specifying the features of a
+    // subtarget. It would be better if we could encode this information
+    // into the IR. See <rdar://5972456>.
+    if (Triple.getVendor() == Triple::Apple) {
+        if (Triple.getArch() == Triple::ppc) {
+            // powerpc-apple-*
+            AddFeature("altivec");
+        } else if (Triple.getArch() == Triple::ppc64) {
+            // powerpc64-apple-*
+            AddFeature("64bit");
+            AddFeature("altivec");
+        }
     }
-  }
 }

@@ -37,8 +37,8 @@ class ForOp;
 // detection followed by an affine.parallel -> scf.parallel -> gpu.launch
 // conversion
 LogicalResult convertAffineLoopNestToGPULaunch(AffineForOp forOp,
-                                               unsigned numBlockDims,
-                                               unsigned numThreadDims);
+        unsigned numBlockDims,
+        unsigned numThreadDims);
 
 /// Adds the conversion pattern from `scf.parallel` to `gpu.launch` to the
 /// provided pattern list.

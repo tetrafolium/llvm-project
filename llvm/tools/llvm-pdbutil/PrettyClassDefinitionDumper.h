@@ -29,17 +29,17 @@ class LinePrinter;
 
 class ClassDefinitionDumper : public PDBSymDumper {
 public:
-  ClassDefinitionDumper(LinePrinter &P);
+    ClassDefinitionDumper(LinePrinter &P);
 
-  void start(const PDBSymbolTypeUDT &Class);
-  void start(const ClassLayout &Class);
+    void start(const PDBSymbolTypeUDT &Class);
+    void start(const ClassLayout &Class);
 
 private:
-  void prettyPrintClassIntro(const ClassLayout &Class);
-  void prettyPrintClassOutro(const ClassLayout &Class);
+    void prettyPrintClassIntro(const ClassLayout &Class);
+    void prettyPrintClassOutro(const ClassLayout &Class);
 
-  LinePrinter &Printer;
-  bool DumpedAnything = false;
+    LinePrinter &Printer;
+    bool DumpedAnything = false;
 };
 }
 }

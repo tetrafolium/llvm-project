@@ -27,55 +27,59 @@ class MemoryLocation;
 
 /// A simple AA result which uses scoped-noalias metadata to answer queries.
 class ScopedNoAliasAAResult : public AAResultBase<ScopedNoAliasAAResult> {
-  friend AAResultBase<ScopedNoAliasAAResult>;
+    friend AAResultBase<ScopedNoAliasAAResult>;
 
 public:
-  /// Handle invalidation events from the new pass manager.
-  ///
-  /// By definition, this result is stateless and so remains valid.
-  bool invalidate(Function &, const PreservedAnalyses &,
-                  FunctionAnalysisManager::Invalidator &) {
-    return false;
-  }
+    /// Handle invalidation events from the new pass manager.
+    ///
+    /// By definition, this result is stateless and so remains valid.
+    bool invalidate(Function &, const PreservedAnalyses &,
+                    FunctionAnalysisManager::Invalidator &) {
+        return false;
+    }
 
-  AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
-                    AAQueryInfo &AAQI);
-  ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
-                           AAQueryInfo &AAQI);
-  ModRefInfo getModRefInfo(const CallBase *Call1, const CallBase *Call2,
-                           AAQueryInfo &AAQI);
+    AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
+                      AAQueryInfo &AAQI);
+    ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
+                             AAQueryInfo &AAQI);
+    ModRefInfo getModRefInfo(const CallBase *Call1, const CallBase *Call2,
+                             AAQueryInfo &AAQI);
 
 private:
-  bool mayAliasInScopes(const MDNode *Scopes, const MDNode *NoAlias) const;
+    bool mayAliasInScopes(const MDNode *Scopes, const MDNode *NoAlias) const;
 };
 
 /// Analysis pass providing a never-invalidated alias analysis result.
 class ScopedNoAliasAA : public AnalysisInfoMixin<ScopedNoAliasAA> {
-  friend AnalysisInfoMixin<ScopedNoAliasAA>;
+    friend AnalysisInfoMixin<ScopedNoAliasAA>;
 
-  static AnalysisKey Key;
+    static AnalysisKey Key;
 
 public:
-  using Result = ScopedNoAliasAAResult;
+    using Result = ScopedNoAliasAAResult;
 
-  ScopedNoAliasAAResult run(Function &F, FunctionAnalysisManager &AM);
+    ScopedNoAliasAAResult run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Legacy wrapper pass to provide the ScopedNoAliasAAResult object.
 class ScopedNoAliasAAWrapperPass : public ImmutablePass {
-  std::unique_ptr<ScopedNoAliasAAResult> Result;
+    std::unique_ptr<ScopedNoAliasAAResult> Result;
 
 public:
-  static char ID;
+    static char ID;
 
-  ScopedNoAliasAAWrapperPass();
+    ScopedNoAliasAAWrapperPass();
 
-  ScopedNoAliasAAResult &getResult() { return *Result; }
-  const ScopedNoAliasAAResult &getResult() const { return *Result; }
+    ScopedNoAliasAAResult &getResult() {
+        return *Result;
+    }
+    const ScopedNoAliasAAResult &getResult() const {
+        return *Result;
+    }
 
-  bool doInitialization(Module &M) override;
-  bool doFinalization(Module &M) override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool doInitialization(Module &M) override;
+    bool doFinalization(Module &M) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 //===--------------------------------------------------------------------===//

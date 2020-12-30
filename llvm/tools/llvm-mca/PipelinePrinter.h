@@ -34,18 +34,18 @@ namespace mca {
 /// classes the task of printing out timeline information as well as
 /// resource pressure.
 class PipelinePrinter {
-  Pipeline &P;
-  llvm::SmallVector<std::unique_ptr<View>, 8> Views;
+    Pipeline &P;
+    llvm::SmallVector<std::unique_ptr<View>, 8> Views;
 
 public:
-  PipelinePrinter(Pipeline &pipeline) : P(pipeline) {}
+    PipelinePrinter(Pipeline &pipeline) : P(pipeline) {}
 
-  void addView(std::unique_ptr<View> V) {
-    P.addEventListener(V.get());
-    Views.emplace_back(std::move(V));
-  }
+    void addView(std::unique_ptr<View> V) {
+        P.addEventListener(V.get());
+        Views.emplace_back(std::move(V));
+    }
 
-  void printReport(llvm::raw_ostream &OS) const;
+    void printReport(llvm::raw_ostream &OS) const;
 };
 } // namespace mca
 } // namespace llvm

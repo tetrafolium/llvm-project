@@ -15,23 +15,23 @@
 
 class LogFilterChain {
 public:
-  LogFilterChain(bool default_accept);
+    LogFilterChain(bool default_accept);
 
-  void AppendFilter(const LogFilterSP &filter_sp);
+    void AppendFilter(const LogFilterSP &filter_sp);
 
-  void ClearFilterChain();
+    void ClearFilterChain();
 
-  bool GetDefaultAccepts() const;
+    bool GetDefaultAccepts() const;
 
-  void SetDefaultAccepts(bool default_accepts);
+    void SetDefaultAccepts(bool default_accepts);
 
-  bool GetAcceptMessage(const LogMessage &message) const;
+    bool GetAcceptMessage(const LogMessage &message) const;
 
 private:
-  using FilterVector = std::vector<LogFilterSP>;
+    using FilterVector = std::vector<LogFilterSP>;
 
-  FilterVector m_filters;
-  bool m_default_accept;
+    FilterVector m_filters;
+    bool m_default_accept;
 };
 
 #endif // LLDB_TOOLS_DEBUGSERVER_SOURCE_MACOSX_DARWINLOG_LOGFILTERCHAIN_H

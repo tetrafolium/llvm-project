@@ -44,63 +44,63 @@ using namespace llvm::objcarc;
 
 namespace {
 static bool runImpl(Function &F) {
-  if (!EnableARCOpts)
-    return false;
+    if (!EnableARCOpts)
+        return false;
 
-  // If nothing in the Module uses ARC, don't do anything.
-  if (!ModuleHasARC(*F.getParent()))
-    return false;
+    // If nothing in the Module uses ARC, don't do anything.
+    if (!ModuleHasARC(*F.getParent()))
+        return false;
 
-  bool Changed = false;
+    bool Changed = false;
 
-  LLVM_DEBUG(dbgs() << "ObjCARCExpand: Visiting Function: " << F.getName()
-                    << "\n");
+    LLVM_DEBUG(dbgs() << "ObjCARCExpand: Visiting Function: " << F.getName()
+               << "\n");
 
-  for (inst_iterator I = inst_begin(&F), E = inst_end(&F); I != E; ++I) {
-    Instruction *Inst = &*I;
+    for (inst_iterator I = inst_begin(&F), E = inst_end(&F); I != E; ++I) {
+        Instruction *Inst = &*I;
 
-    LLVM_DEBUG(dbgs() << "ObjCARCExpand: Visiting: " << *Inst << "\n");
+        LLVM_DEBUG(dbgs() << "ObjCARCExpand: Visiting: " << *Inst << "\n");
 
-    switch (GetBasicARCInstKind(Inst)) {
-    case ARCInstKind::Retain:
-    case ARCInstKind::RetainRV:
-    case ARCInstKind::Autorelease:
-    case ARCInstKind::AutoreleaseRV:
-    case ARCInstKind::FusedRetainAutorelease:
-    case ARCInstKind::FusedRetainAutoreleaseRV: {
-      // These calls return their argument verbatim, as a low-level
-      // optimization. However, this makes high-level optimizations
-      // harder. Undo any uses of this optimization that the front-end
-      // emitted here. We'll redo them in the contract pass.
-      Changed = true;
-      Value *Value = cast<CallInst>(Inst)->getArgOperand(0);
-      LLVM_DEBUG(dbgs() << "ObjCARCExpand: Old = " << *Inst
-                        << "\n"
-                           "               New = "
-                        << *Value << "\n");
-      Inst->replaceAllUsesWith(Value);
-      break;
+        switch (GetBasicARCInstKind(Inst)) {
+        case ARCInstKind::Retain:
+        case ARCInstKind::RetainRV:
+        case ARCInstKind::Autorelease:
+        case ARCInstKind::AutoreleaseRV:
+        case ARCInstKind::FusedRetainAutorelease:
+        case ARCInstKind::FusedRetainAutoreleaseRV: {
+            // These calls return their argument verbatim, as a low-level
+            // optimization. However, this makes high-level optimizations
+            // harder. Undo any uses of this optimization that the front-end
+            // emitted here. We'll redo them in the contract pass.
+            Changed = true;
+            Value *Value = cast<CallInst>(Inst)->getArgOperand(0);
+            LLVM_DEBUG(dbgs() << "ObjCARCExpand: Old = " << *Inst
+                       << "\n"
+                       "               New = "
+                       << *Value << "\n");
+            Inst->replaceAllUsesWith(Value);
+            break;
+        }
+        default:
+            break;
+        }
     }
-    default:
-      break;
-    }
-  }
 
-  LLVM_DEBUG(dbgs() << "ObjCARCExpand: Finished List.\n\n");
+    LLVM_DEBUG(dbgs() << "ObjCARCExpand: Finished List.\n\n");
 
-  return Changed;
+    return Changed;
 }
 
 /// Early ARC transformations.
 class ObjCARCExpand : public FunctionPass {
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
-  bool runOnFunction(Function &F) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnFunction(Function &F) override;
 
 public:
-  static char ID;
-  ObjCARCExpand() : FunctionPass(ID) {
-    initializeObjCARCExpandPass(*PassRegistry::getPassRegistry());
-  }
+    static char ID;
+    ObjCARCExpand() : FunctionPass(ID) {
+        initializeObjCARCExpandPass(*PassRegistry::getPassRegistry());
+    }
 };
 } // namespace
 
@@ -108,19 +108,23 @@ char ObjCARCExpand::ID = 0;
 INITIALIZE_PASS(ObjCARCExpand, "objc-arc-expand", "ObjC ARC expansion", false,
                 false)
 
-Pass *llvm::createObjCARCExpandPass() { return new ObjCARCExpand(); }
-
-void ObjCARCExpand::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesCFG();
+Pass *llvm::createObjCARCExpandPass() {
+    return new ObjCARCExpand();
 }
 
-bool ObjCARCExpand::runOnFunction(Function &F) { return runImpl(F); }
+void ObjCARCExpand::getAnalysisUsage(AnalysisUsage &AU) const {
+    AU.setPreservesCFG();
+}
+
+bool ObjCARCExpand::runOnFunction(Function &F) {
+    return runImpl(F);
+}
 
 PreservedAnalyses ObjCARCExpandPass::run(Function &F,
-                                         FunctionAnalysisManager &AM) {
-  if (!runImpl(F))
-    return PreservedAnalyses::all();
-  PreservedAnalyses PA;
-  PA.preserveSet<CFGAnalyses>();
-  return PA;
+        FunctionAnalysisManager &AM) {
+    if (!runImpl(F))
+        return PreservedAnalyses::all();
+    PreservedAnalyses PA;
+    PA.preserveSet<CFGAnalyses>();
+    return PA;
 }

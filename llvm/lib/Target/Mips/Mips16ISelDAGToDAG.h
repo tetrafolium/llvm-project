@@ -19,32 +19,32 @@ namespace llvm {
 
 class Mips16DAGToDAGISel : public MipsDAGToDAGISel {
 public:
-  explicit Mips16DAGToDAGISel(MipsTargetMachine &TM, CodeGenOpt::Level OL)
-      : MipsDAGToDAGISel(TM, OL) {}
+    explicit Mips16DAGToDAGISel(MipsTargetMachine &TM, CodeGenOpt::Level OL)
+        : MipsDAGToDAGISel(TM, OL) {}
 
 private:
-  std::pair<SDNode *, SDNode *> selectMULT(SDNode *N, unsigned Opc,
-                                           const SDLoc &DL, EVT Ty, bool HasLo,
-                                           bool HasHi);
+    std::pair<SDNode *, SDNode *> selectMULT(SDNode *N, unsigned Opc,
+            const SDLoc &DL, EVT Ty, bool HasLo,
+            bool HasHi);
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 
-  bool selectAddr(bool SPAllowed, SDValue Addr, SDValue &Base,
-                  SDValue &Offset);
-  bool selectAddr16(SDValue Addr, SDValue &Base,
-                    SDValue &Offset) override;
-  bool selectAddr16SP(SDValue Addr, SDValue &Base,
+    bool selectAddr(bool SPAllowed, SDValue Addr, SDValue &Base,
+                    SDValue &Offset);
+    bool selectAddr16(SDValue Addr, SDValue &Base,
                       SDValue &Offset) override;
+    bool selectAddr16SP(SDValue Addr, SDValue &Base,
+                        SDValue &Offset) override;
 
-  bool trySelect(SDNode *Node) override;
+    bool trySelect(SDNode *Node) override;
 
-  void processFunctionAfterISel(MachineFunction &MF) override;
+    void processFunctionAfterISel(MachineFunction &MF) override;
 
-  // Insert instructions to initialize the global base register in the
-  // first MBB of the function.
-  void initGlobalBaseReg(MachineFunction &MF);
+    // Insert instructions to initialize the global base register in the
+    // first MBB of the function.
+    void initGlobalBaseReg(MachineFunction &MF);
 
-  void initMips16SPAliasReg(MachineFunction &MF);
+    void initMips16SPAliasReg(MachineFunction &MF);
 };
 
 FunctionPass *createMips16ISelDag(MipsTargetMachine &TM,

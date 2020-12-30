@@ -25,57 +25,57 @@
  * is the expression with no constraints on its explicit domain.
  */
 __isl_give MULTI(BASE) *FN(MULTI(BASE),union_add)(
-	__isl_take MULTI(BASE) *multi1, __isl_take MULTI(BASE) *multi2)
+    __isl_take MULTI(BASE) *multi1, __isl_take MULTI(BASE) *multi2)
 {
-	isl_bool has_domain, is_params1, is_params2;
+    isl_bool has_domain, is_params1, is_params2;
 
-	if (!multi1)
-		goto error;
-	if (multi1->n > 0)
-		return FN(MULTI(BASE),bin_op)(multi1, multi2,
-					    &FN(EL,union_add));
-	FN(MULTI(BASE),align_params_bin)(&multi1, &multi2);
-	if (FN(MULTI(BASE),check_equal_space)(multi1, multi2) < 0)
-		goto error;
-	if (FN(MULTI(BASE),check_has_explicit_domain)(multi1) < 0 ||
-	    FN(MULTI(BASE),check_has_explicit_domain)(multi2) < 0)
-		goto error;
+    if (!multi1)
+        goto error;
+    if (multi1->n > 0)
+        return FN(MULTI(BASE),bin_op)(multi1, multi2,
+                                      &FN(EL,union_add));
+    FN(MULTI(BASE),align_params_bin)(&multi1, &multi2);
+    if (FN(MULTI(BASE),check_equal_space)(multi1, multi2) < 0)
+        goto error;
+    if (FN(MULTI(BASE),check_has_explicit_domain)(multi1) < 0 ||
+            FN(MULTI(BASE),check_has_explicit_domain)(multi2) < 0)
+        goto error;
 
-	has_domain = FN(MULTI(BASE),has_non_trivial_domain)(multi1);
-	if (has_domain < 0)
-		goto error;
-	if (!has_domain) {
-		FN(MULTI(BASE),free)(multi2);
-		return multi1;
-	}
-	has_domain = FN(MULTI(BASE),has_non_trivial_domain)(multi2);
-	if (has_domain < 0)
-		goto error;
-	if (!has_domain) {
-		FN(MULTI(BASE),free)(multi1);
-		return multi2;
-	}
+    has_domain = FN(MULTI(BASE),has_non_trivial_domain)(multi1);
+    if (has_domain < 0)
+        goto error;
+    if (!has_domain) {
+        FN(MULTI(BASE),free)(multi2);
+        return multi1;
+    }
+    has_domain = FN(MULTI(BASE),has_non_trivial_domain)(multi2);
+    if (has_domain < 0)
+        goto error;
+    if (!has_domain) {
+        FN(MULTI(BASE),free)(multi1);
+        return multi2;
+    }
 
-	is_params1 = FN(DOM,is_params)(multi1->u.dom);
-	is_params2 = FN(DOM,is_params)(multi2->u.dom);
-	if (is_params1 < 0 || is_params2 < 0)
-		goto error;
-	if (is_params1 != is_params2)
-		isl_die(FN(MULTI(BASE),get_ctx)(multi1),
-			isl_error_invalid,
-			"cannot compute union of concrete domain and "
-			"parameter constraints", goto error);
-	multi1 = FN(MULTI(BASE),cow)(multi1);
-	if (!multi1)
-		goto error;
-	multi1->u.dom = FN(DOM,union)(multi1->u.dom,
-					FN(DOM,copy)(multi2->u.dom));
-	if (!multi1->u.dom)
-		goto error;
-	FN(MULTI(BASE),free)(multi2);
-	return multi1;
+    is_params1 = FN(DOM,is_params)(multi1->u.dom);
+    is_params2 = FN(DOM,is_params)(multi2->u.dom);
+    if (is_params1 < 0 || is_params2 < 0)
+        goto error;
+    if (is_params1 != is_params2)
+        isl_die(FN(MULTI(BASE),get_ctx)(multi1),
+                isl_error_invalid,
+                "cannot compute union of concrete domain and "
+                "parameter constraints", goto error);
+    multi1 = FN(MULTI(BASE),cow)(multi1);
+    if (!multi1)
+        goto error;
+    multi1->u.dom = FN(DOM,union)(multi1->u.dom,
+                                  FN(DOM,copy)(multi2->u.dom));
+    if (!multi1->u.dom)
+        goto error;
+    FN(MULTI(BASE),free)(multi2);
+    return multi1;
 error:
-	FN(MULTI(BASE),free)(multi1);
-	FN(MULTI(BASE),free)(multi2);
-	return NULL;
+    FN(MULTI(BASE),free)(multi1);
+    FN(MULTI(BASE),free)(multi2);
+    return NULL;
 }

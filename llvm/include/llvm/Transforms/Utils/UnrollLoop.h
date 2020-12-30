@@ -51,31 +51,31 @@ const Loop* addClonedBlockToLoopInfo(BasicBlock *OriginalBB,
 
 /// Represents the result of a \c UnrollLoop invocation.
 enum class LoopUnrollResult {
-  /// The loop was not modified.
-  Unmodified,
+    /// The loop was not modified.
+    Unmodified,
 
-  /// The loop was partially unrolled -- we still have a loop, but with a
-  /// smaller trip count.  We may also have emitted epilogue loop if the loop
-  /// had a non-constant trip count.
-  PartiallyUnrolled,
+    /// The loop was partially unrolled -- we still have a loop, but with a
+    /// smaller trip count.  We may also have emitted epilogue loop if the loop
+    /// had a non-constant trip count.
+    PartiallyUnrolled,
 
-  /// The loop was fully unrolled into straight-line code.  We no longer have
-  /// any back-edges.
-  FullyUnrolled
+    /// The loop was fully unrolled into straight-line code.  We no longer have
+    /// any back-edges.
+    FullyUnrolled
 };
 
 struct UnrollLoopOptions {
-  unsigned Count;
-  unsigned TripCount;
-  bool Force;
-  bool AllowRuntime;
-  bool AllowExpensiveTripCount;
-  bool PreserveCondBr;
-  bool PreserveOnlyFirst;
-  unsigned TripMultiple;
-  unsigned PeelCount;
-  bool UnrollRemainder;
-  bool ForgetAllSCEV;
+    unsigned Count;
+    unsigned TripCount;
+    bool Force;
+    bool AllowRuntime;
+    bool AllowExpensiveTripCount;
+    bool PreserveCondBr;
+    bool PreserveOnlyFirst;
+    unsigned TripMultiple;
+    unsigned PeelCount;
+    bool UnrollRemainder;
+    bool ForgetAllSCEV;
 };
 
 LoopUnrollResult UnrollLoop(Loop *L, UnrollLoopOptions ULO, LoopInfo *LI,

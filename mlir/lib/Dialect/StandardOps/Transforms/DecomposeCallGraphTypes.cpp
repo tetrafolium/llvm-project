@@ -19,10 +19,10 @@ using namespace mlir;
 void ValueDecomposer::decomposeValue(OpBuilder &builder, Location loc,
                                      Type type, Value value,
                                      SmallVectorImpl<Value> &results) {
-  for (auto &conversion : decomposeValueConversions)
-    if (conversion(builder, loc, type, value, results))
-      return;
-  results.push_back(value);
+    for (auto &conversion : decomposeValueConversions)
+        if (conversion(builder, loc, type, value, results))
+            return;
+    results.push_back(value);
 }
 
 //===----------------------------------------------------------------------===//
@@ -36,15 +36,15 @@ template <typename SourceOp>
 class DecomposeCallGraphTypesOpConversionPattern
     : public OpConversionPattern<SourceOp> {
 public:
-  DecomposeCallGraphTypesOpConversionPattern(TypeConverter &typeConverter,
-                                             MLIRContext *context,
-                                             ValueDecomposer &decomposer,
-                                             PatternBenefit benefit = 1)
-      : OpConversionPattern<SourceOp>(typeConverter, context, benefit),
-        decomposer(decomposer) {}
+    DecomposeCallGraphTypesOpConversionPattern(TypeConverter &typeConverter,
+            MLIRContext *context,
+            ValueDecomposer &decomposer,
+            PatternBenefit benefit = 1)
+        : OpConversionPattern<SourceOp>(typeConverter, context, benefit),
+          decomposer(decomposer) {}
 
 protected:
-  ValueDecomposer &decomposer;
+    ValueDecomposer &decomposer;
 };
 } // namespace
 
@@ -57,37 +57,37 @@ namespace {
 /// ValueDecomposer.
 struct DecomposeCallGraphTypesForFuncArgs
     : public DecomposeCallGraphTypesOpConversionPattern<FuncOp> {
-  using DecomposeCallGraphTypesOpConversionPattern::
-      DecomposeCallGraphTypesOpConversionPattern;
+    using DecomposeCallGraphTypesOpConversionPattern::
+    DecomposeCallGraphTypesOpConversionPattern;
 
-  LogicalResult
-  matchAndRewrite(FuncOp op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter &rewriter) const final {
-    auto functionType = op.getType();
+    LogicalResult
+    matchAndRewrite(FuncOp op, ArrayRef<Value> operands,
+                    ConversionPatternRewriter &rewriter) const final {
+        auto functionType = op.getType();
 
-    // Convert function arguments using the provided TypeConverter.
-    TypeConverter::SignatureConversion conversion(functionType.getNumInputs());
-    for (auto argType : llvm::enumerate(functionType.getInputs())) {
-      SmallVector<Type, 2> decomposedTypes;
-      getTypeConverter()->convertType(argType.value(), decomposedTypes);
-      if (!decomposedTypes.empty())
-        conversion.addInputs(argType.index(), decomposedTypes);
+        // Convert function arguments using the provided TypeConverter.
+        TypeConverter::SignatureConversion conversion(functionType.getNumInputs());
+        for (auto argType : llvm::enumerate(functionType.getInputs())) {
+            SmallVector<Type, 2> decomposedTypes;
+            getTypeConverter()->convertType(argType.value(), decomposedTypes);
+            if (!decomposedTypes.empty())
+                conversion.addInputs(argType.index(), decomposedTypes);
+        }
+
+        // If the SignatureConversion doesn't apply, bail out.
+        if (failed(rewriter.convertRegionTypes(&op.getBody(), *getTypeConverter(),
+                                               &conversion)))
+            return failure();
+
+        // Update the signature of the function.
+        SmallVector<Type, 2> newResultTypes;
+        getTypeConverter()->convertTypes(functionType.getResults(), newResultTypes);
+        rewriter.updateRootInPlace(op, [&] {
+            op.setType(rewriter.getFunctionType(conversion.getConvertedTypes(),
+                                                newResultTypes));
+        });
+        return success();
     }
-
-    // If the SignatureConversion doesn't apply, bail out.
-    if (failed(rewriter.convertRegionTypes(&op.getBody(), *getTypeConverter(),
-                                           &conversion)))
-      return failure();
-
-    // Update the signature of the function.
-    SmallVector<Type, 2> newResultTypes;
-    getTypeConverter()->convertTypes(functionType.getResults(), newResultTypes);
-    rewriter.updateRootInPlace(op, [&] {
-      op.setType(rewriter.getFunctionType(conversion.getConvertedTypes(),
-                                          newResultTypes));
-    });
-    return success();
-  }
 };
 } // namespace
 
@@ -100,18 +100,18 @@ namespace {
 /// ValueDecomposer.
 struct DecomposeCallGraphTypesForReturnOp
     : public DecomposeCallGraphTypesOpConversionPattern<ReturnOp> {
-  using DecomposeCallGraphTypesOpConversionPattern::
-      DecomposeCallGraphTypesOpConversionPattern;
-  LogicalResult
-  matchAndRewrite(ReturnOp op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter &rewriter) const final {
-    SmallVector<Value, 2> newOperands;
-    for (Value operand : operands)
-      decomposer.decomposeValue(rewriter, op.getLoc(), operand.getType(),
-                                operand, newOperands);
-    rewriter.replaceOpWithNewOp<ReturnOp>(op, newOperands);
-    return success();
-  }
+    using DecomposeCallGraphTypesOpConversionPattern::
+    DecomposeCallGraphTypesOpConversionPattern;
+    LogicalResult
+    matchAndRewrite(ReturnOp op, ArrayRef<Value> operands,
+                    ConversionPatternRewriter &rewriter) const final {
+        SmallVector<Value, 2> newOperands;
+        for (Value operand : operands)
+            decomposer.decomposeValue(rewriter, op.getLoc(), operand.getType(),
+                                      operand, newOperands);
+        rewriter.replaceOpWithNewOp<ReturnOp>(op, newOperands);
+        return success();
+    }
 };
 } // namespace
 
@@ -124,69 +124,71 @@ namespace {
 /// and ValueDecomposer.
 struct DecomposeCallGraphTypesForCallOp
     : public DecomposeCallGraphTypesOpConversionPattern<CallOp> {
-  using DecomposeCallGraphTypesOpConversionPattern::
-      DecomposeCallGraphTypesOpConversionPattern;
+    using DecomposeCallGraphTypesOpConversionPattern::
+    DecomposeCallGraphTypesOpConversionPattern;
 
-  LogicalResult
-  matchAndRewrite(CallOp op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter &rewriter) const final {
+    LogicalResult
+    matchAndRewrite(CallOp op, ArrayRef<Value> operands,
+                    ConversionPatternRewriter &rewriter) const final {
 
-    // Create the operands list of the new `CallOp`.
-    SmallVector<Value, 2> newOperands;
-    for (Value operand : operands)
-      decomposer.decomposeValue(rewriter, op.getLoc(), operand.getType(),
-                                operand, newOperands);
+        // Create the operands list of the new `CallOp`.
+        SmallVector<Value, 2> newOperands;
+        for (Value operand : operands)
+            decomposer.decomposeValue(rewriter, op.getLoc(), operand.getType(),
+                                      operand, newOperands);
 
-    // Create the new result types for the new `CallOp` and track the indices in
-    // the new call op's results that correspond to the old call op's results.
-    //
-    // expandedResultIndices[i] = "list of new result indices that old result i
-    // expanded to".
-    SmallVector<Type, 2> newResultTypes;
-    SmallVector<SmallVector<unsigned, 2>, 4> expandedResultIndices;
-    for (Type resultType : op.getResultTypes()) {
-      unsigned oldSize = newResultTypes.size();
-      getTypeConverter()->convertType(resultType, newResultTypes);
-      auto &resultMapping = expandedResultIndices.emplace_back();
-      for (unsigned i = oldSize, e = newResultTypes.size(); i < e; i++)
-        resultMapping.push_back(i);
+        // Create the new result types for the new `CallOp` and track the indices in
+        // the new call op's results that correspond to the old call op's results.
+        //
+        // expandedResultIndices[i] = "list of new result indices that old result i
+        // expanded to".
+        SmallVector<Type, 2> newResultTypes;
+        SmallVector<SmallVector<unsigned, 2>, 4> expandedResultIndices;
+        for (Type resultType : op.getResultTypes()) {
+            unsigned oldSize = newResultTypes.size();
+            getTypeConverter()->convertType(resultType, newResultTypes);
+            auto &resultMapping = expandedResultIndices.emplace_back();
+            for (unsigned i = oldSize, e = newResultTypes.size(); i < e; i++)
+                resultMapping.push_back(i);
+        }
+
+        CallOp newCallOp = rewriter.create<CallOp>(op.getLoc(), op.getCallee(),
+                           newResultTypes, newOperands);
+
+        // Build a replacement value for each result to replace its uses. If a
+        // result has multiple mapping values, it needs to be materialized as a
+        // single value.
+        SmallVector<Value, 2> replacedValues;
+        replacedValues.reserve(op.getNumResults());
+        for (unsigned i = 0, e = op.getNumResults(); i < e; ++i) {
+            auto decomposedValues = llvm::to_vector<6>(
+                                        llvm::map_range(expandedResultIndices[i],
+            [&](unsigned i) {
+                return newCallOp.getResult(i);
+            }));
+            if (decomposedValues.empty()) {
+                // No replacement is required.
+                replacedValues.push_back(nullptr);
+            } else if (decomposedValues.size() == 1) {
+                replacedValues.push_back(decomposedValues.front());
+            } else {
+                // Materialize a single Value to replace the original Value.
+                Value materialized = getTypeConverter()->materializeArgumentConversion(
+                                         rewriter, op.getLoc(), op.getType(i), decomposedValues);
+                replacedValues.push_back(materialized);
+            }
+        }
+        rewriter.replaceOp(op, replacedValues);
+        return success();
     }
-
-    CallOp newCallOp = rewriter.create<CallOp>(op.getLoc(), op.getCallee(),
-                                               newResultTypes, newOperands);
-
-    // Build a replacement value for each result to replace its uses. If a
-    // result has multiple mapping values, it needs to be materialized as a
-    // single value.
-    SmallVector<Value, 2> replacedValues;
-    replacedValues.reserve(op.getNumResults());
-    for (unsigned i = 0, e = op.getNumResults(); i < e; ++i) {
-      auto decomposedValues = llvm::to_vector<6>(
-          llvm::map_range(expandedResultIndices[i],
-                          [&](unsigned i) { return newCallOp.getResult(i); }));
-      if (decomposedValues.empty()) {
-        // No replacement is required.
-        replacedValues.push_back(nullptr);
-      } else if (decomposedValues.size() == 1) {
-        replacedValues.push_back(decomposedValues.front());
-      } else {
-        // Materialize a single Value to replace the original Value.
-        Value materialized = getTypeConverter()->materializeArgumentConversion(
-            rewriter, op.getLoc(), op.getType(i), decomposedValues);
-        replacedValues.push_back(materialized);
-      }
-    }
-    rewriter.replaceOp(op, replacedValues);
-    return success();
-  }
 };
 } // namespace
 
 void mlir::populateDecomposeCallGraphTypesPatterns(
     MLIRContext *context, TypeConverter &typeConverter,
     ValueDecomposer &decomposer, OwningRewritePatternList &patterns) {
-  patterns.insert<DecomposeCallGraphTypesForCallOp,
-                  DecomposeCallGraphTypesForFuncArgs,
-                  DecomposeCallGraphTypesForReturnOp>(typeConverter, context,
-                                                      decomposer);
+    patterns.insert<DecomposeCallGraphTypesForCallOp,
+                    DecomposeCallGraphTypesForFuncArgs,
+                    DecomposeCallGraphTypesForReturnOp>(typeConverter, context,
+                            decomposer);
 }

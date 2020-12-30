@@ -20,8 +20,8 @@
 ///
 class POSIXStopInfo : public lldb_private::StopInfo {
 public:
-  POSIXStopInfo(lldb_private::Thread &thread, uint32_t status)
-      : StopInfo(thread, status) {}
+    POSIXStopInfo(lldb_private::Thread &thread, uint32_t status)
+        : StopInfo(thread, status) {}
 };
 
 //===----------------------------------------------------------------------===//
@@ -30,17 +30,17 @@ public:
 ///
 class POSIXLimboStopInfo : public POSIXStopInfo {
 public:
-  POSIXLimboStopInfo(FreeBSDThread &thread) : POSIXStopInfo(thread, 0) {}
+    POSIXLimboStopInfo(FreeBSDThread &thread) : POSIXStopInfo(thread, 0) {}
 
-  ~POSIXLimboStopInfo();
+    ~POSIXLimboStopInfo();
 
-  lldb::StopReason GetStopReason() const override;
+    lldb::StopReason GetStopReason() const override;
 
-  const char *GetDescription() override;
+    const char *GetDescription() override;
 
-  bool ShouldStop(lldb_private::Event *event_ptr) override;
+    bool ShouldStop(lldb_private::Event *event_ptr) override;
 
-  bool ShouldNotify(lldb_private::Event *event_ptr) override;
+    bool ShouldNotify(lldb_private::Event *event_ptr) override;
 };
 
 //===----------------------------------------------------------------------===//
@@ -50,17 +50,17 @@ public:
 
 class POSIXNewThreadStopInfo : public POSIXStopInfo {
 public:
-  POSIXNewThreadStopInfo(FreeBSDThread &thread) : POSIXStopInfo(thread, 0) {}
+    POSIXNewThreadStopInfo(FreeBSDThread &thread) : POSIXStopInfo(thread, 0) {}
 
-  ~POSIXNewThreadStopInfo();
+    ~POSIXNewThreadStopInfo();
 
-  lldb::StopReason GetStopReason() const override;
+    lldb::StopReason GetStopReason() const override;
 
-  const char *GetDescription() override;
+    const char *GetDescription() override;
 
-  bool ShouldStop(lldb_private::Event *event_ptr) override;
+    bool ShouldStop(lldb_private::Event *event_ptr) override;
 
-  bool ShouldNotify(lldb_private::Event *event_ptr) override;
+    bool ShouldNotify(lldb_private::Event *event_ptr) override;
 };
 
 #endif

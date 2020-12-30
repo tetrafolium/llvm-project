@@ -26,50 +26,54 @@
 namespace llvm {
 
 class WebAssemblyTTIImpl final : public BasicTTIImplBase<WebAssemblyTTIImpl> {
-  typedef BasicTTIImplBase<WebAssemblyTTIImpl> BaseT;
-  typedef TargetTransformInfo TTI;
-  friend BaseT;
+    typedef BasicTTIImplBase<WebAssemblyTTIImpl> BaseT;
+    typedef TargetTransformInfo TTI;
+    friend BaseT;
 
-  const WebAssemblySubtarget *ST;
-  const WebAssemblyTargetLowering *TLI;
+    const WebAssemblySubtarget *ST;
+    const WebAssemblyTargetLowering *TLI;
 
-  const WebAssemblySubtarget *getST() const { return ST; }
-  const WebAssemblyTargetLowering *getTLI() const { return TLI; }
+    const WebAssemblySubtarget *getST() const {
+        return ST;
+    }
+    const WebAssemblyTargetLowering *getTLI() const {
+        return TLI;
+    }
 
 public:
-  WebAssemblyTTIImpl(const WebAssemblyTargetMachine *TM, const Function &F)
-      : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
-        TLI(ST->getTargetLowering()) {}
+    WebAssemblyTTIImpl(const WebAssemblyTargetMachine *TM, const Function &F)
+        : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
+          TLI(ST->getTargetLowering()) {}
 
-  /// \name Scalar TTI Implementations
-  /// @{
+    /// \name Scalar TTI Implementations
+    /// @{
 
-  // TODO: Implement more Scalar TTI for WebAssembly
+    // TODO: Implement more Scalar TTI for WebAssembly
 
-  TTI::PopcntSupportKind getPopcntSupport(unsigned TyWidth) const;
+    TTI::PopcntSupportKind getPopcntSupport(unsigned TyWidth) const;
 
-  /// @}
+    /// @}
 
-  /// \name Vector TTI Implementations
-  /// @{
+    /// \name Vector TTI Implementations
+    /// @{
 
-  unsigned getNumberOfRegisters(unsigned ClassID) const;
-  unsigned getRegisterBitWidth(bool Vector) const;
-  unsigned getArithmeticInstrCost(
-      unsigned Opcode, Type *Ty,
-      TTI::TargetCostKind CostKind = TTI::TCK_SizeAndLatency,
-      TTI::OperandValueKind Opd1Info = TTI::OK_AnyValue,
-      TTI::OperandValueKind Opd2Info = TTI::OK_AnyValue,
-      TTI::OperandValueProperties Opd1PropInfo = TTI::OP_None,
-      TTI::OperandValueProperties Opd2PropInfo = TTI::OP_None,
-      ArrayRef<const Value *> Args = ArrayRef<const Value *>(),
-      const Instruction *CxtI = nullptr);
-  unsigned getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
+    unsigned getNumberOfRegisters(unsigned ClassID) const;
+    unsigned getRegisterBitWidth(bool Vector) const;
+    unsigned getArithmeticInstrCost(
+        unsigned Opcode, Type *Ty,
+        TTI::TargetCostKind CostKind = TTI::TCK_SizeAndLatency,
+        TTI::OperandValueKind Opd1Info = TTI::OK_AnyValue,
+        TTI::OperandValueKind Opd2Info = TTI::OK_AnyValue,
+        TTI::OperandValueProperties Opd1PropInfo = TTI::OP_None,
+        TTI::OperandValueProperties Opd2PropInfo = TTI::OP_None,
+        ArrayRef<const Value *> Args = ArrayRef<const Value *>(),
+        const Instruction *CxtI = nullptr);
+    unsigned getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index);
 
-  /// @}
+    /// @}
 
-  bool areInlineCompatible(const Function *Caller,
-                           const Function *Callee) const;
+    bool areInlineCompatible(const Function *Caller,
+                             const Function *Callee) const;
 };
 
 } // end namespace llvm

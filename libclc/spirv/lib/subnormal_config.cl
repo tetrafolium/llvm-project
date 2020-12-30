@@ -24,8 +24,14 @@
 
 #include "config.h"
 
-_CLC_DEF bool __clc_fp16_subnormals_supported() { return false; }
+_CLC_DEF bool __clc_fp16_subnormals_supported() {
+    return false;
+}
 
-_CLC_DEF bool __clc_fp32_subnormals_supported() { return false; }
+_CLC_DEF bool __clc_fp32_subnormals_supported() {
+    return false;
+}
 
-_CLC_DEF bool __clc_fp64_subnormals_supported() { return false; }
+_CLC_DEF bool __clc_fp64_subnormals_supported() {
+    return false;
+}

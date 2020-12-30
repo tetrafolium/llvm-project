@@ -44,61 +44,63 @@ Timer *getPassTimer(Pass *);
 /// passes are being run. At the end of its life-time it prints the resulting
 /// timing report.
 class TimePassesHandler {
-  /// Value of this type is capable of uniquely identifying pass invocations.
-  /// It is a pair of string Pass-Identifier (which for now is common
-  /// to all the instance of a given pass) + sequential invocation counter.
-  using PassInvocationID = std::pair<StringRef, unsigned>;
+    /// Value of this type is capable of uniquely identifying pass invocations.
+    /// It is a pair of string Pass-Identifier (which for now is common
+    /// to all the instance of a given pass) + sequential invocation counter.
+    using PassInvocationID = std::pair<StringRef, unsigned>;
 
-  /// A group of all pass-timing timers.
-  TimerGroup TG;
+    /// A group of all pass-timing timers.
+    TimerGroup TG;
 
-  using TimerVector = llvm::SmallVector<std::unique_ptr<Timer>, 4>;
-  /// Map of timers for pass invocations
-  StringMap<TimerVector> TimingData;
+    using TimerVector = llvm::SmallVector<std::unique_ptr<Timer>, 4>;
+    /// Map of timers for pass invocations
+    StringMap<TimerVector> TimingData;
 
-  /// Stack of currently active timers.
-  SmallVector<Timer *, 8> TimerStack;
+    /// Stack of currently active timers.
+    SmallVector<Timer *, 8> TimerStack;
 
-  /// Custom output stream to print timing information into.
-  /// By default (== nullptr) we emit time report into the stream created by
-  /// CreateInfoOutputFile().
-  raw_ostream *OutStream = nullptr;
+    /// Custom output stream to print timing information into.
+    /// By default (== nullptr) we emit time report into the stream created by
+    /// CreateInfoOutputFile().
+    raw_ostream *OutStream = nullptr;
 
-  bool Enabled;
-  bool PerRun;
+    bool Enabled;
+    bool PerRun;
 
 public:
-  TimePassesHandler();
-  TimePassesHandler(bool Enabled, bool PerRun = false);
+    TimePassesHandler();
+    TimePassesHandler(bool Enabled, bool PerRun = false);
 
-  /// Destructor handles the print action if it has not been handled before.
-  ~TimePassesHandler() { print(); }
+    /// Destructor handles the print action if it has not been handled before.
+    ~TimePassesHandler() {
+        print();
+    }
 
-  /// Prints out timing information and then resets the timers.
-  void print();
+    /// Prints out timing information and then resets the timers.
+    void print();
 
-  // We intend this to be unique per-compilation, thus no copies.
-  TimePassesHandler(const TimePassesHandler &) = delete;
-  void operator=(const TimePassesHandler &) = delete;
+    // We intend this to be unique per-compilation, thus no copies.
+    TimePassesHandler(const TimePassesHandler &) = delete;
+    void operator=(const TimePassesHandler &) = delete;
 
-  void registerCallbacks(PassInstrumentationCallbacks &PIC);
+    void registerCallbacks(PassInstrumentationCallbacks &PIC);
 
-  /// Set a custom output stream for subsequent reporting.
-  void setOutStream(raw_ostream &OutStream);
+    /// Set a custom output stream for subsequent reporting.
+    void setOutStream(raw_ostream &OutStream);
 
 private:
-  /// Dumps information for running/triggered timers, useful for debugging
-  LLVM_DUMP_METHOD void dump() const;
+    /// Dumps information for running/triggered timers, useful for debugging
+    LLVM_DUMP_METHOD void dump() const;
 
-  /// Returns the new timer for each new run of the pass.
-  Timer &getPassTimer(StringRef PassID);
+    /// Returns the new timer for each new run of the pass.
+    Timer &getPassTimer(StringRef PassID);
 
-  void startTimer(StringRef PassID);
-  void stopTimer(StringRef PassID);
+    void startTimer(StringRef PassID);
+    void stopTimer(StringRef PassID);
 
-  // Implementation of pass instrumentation callbacks.
-  void runBeforePass(StringRef PassID);
-  void runAfterPass(StringRef PassID);
+    // Implementation of pass instrumentation callbacks.
+    void runBeforePass(StringRef PassID);
+    void runAfterPass(StringRef PassID);
 };
 
 } // namespace llvm

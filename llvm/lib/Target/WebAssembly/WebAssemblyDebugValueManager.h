@@ -22,15 +22,15 @@ namespace llvm {
 class MachineInstr;
 
 class WebAssemblyDebugValueManager {
-  SmallVector<MachineInstr *, 2> DbgValues;
+    SmallVector<MachineInstr *, 2> DbgValues;
 
 public:
-  WebAssemblyDebugValueManager(MachineInstr *Instr);
+    WebAssemblyDebugValueManager(MachineInstr *Instr);
 
-  void move(MachineInstr *Insert);
-  void updateReg(unsigned Reg);
-  void clone(MachineInstr *Insert, unsigned NewReg);
-  void replaceWithLocal(unsigned LocalId);
+    void move(MachineInstr *Insert);
+    void updateReg(unsigned Reg);
+    void clone(MachineInstr *Insert, unsigned NewReg);
+    void replaceWithLocal(unsigned LocalId);
 };
 
 } // end namespace llvm

@@ -22,18 +22,18 @@ using HandlerType = std::function<Error()>;
 ManagedStatic<std::unordered_map<cl::SubCommand *, HandlerType>> Commands;
 
 CommandRegistration::CommandRegistration(cl::SubCommand *SC,
-                                         HandlerType Command) {
-  assert(Commands->count(SC) == 0 &&
-         "Attempting to overwrite a command handler");
-  assert(Command && "Attempting to register an empty std::function<Error()>");
-  (*Commands)[SC] = Command;
+        HandlerType Command) {
+    assert(Commands->count(SC) == 0 &&
+           "Attempting to overwrite a command handler");
+    assert(Command && "Attempting to register an empty std::function<Error()>");
+    (*Commands)[SC] = Command;
 }
 
 HandlerType dispatch(cl::SubCommand *SC) {
-  auto It = Commands->find(SC);
-  assert(It != Commands->end() &&
-         "Attempting to dispatch on un-registered SubCommand.");
-  return It->second;
+    auto It = Commands->find(SC);
+    assert(It != Commands->end() &&
+           "Attempting to dispatch on un-registered SubCommand.");
+    return It->second;
 }
 
 } // namespace xray

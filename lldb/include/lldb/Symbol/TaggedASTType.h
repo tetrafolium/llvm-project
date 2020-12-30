@@ -17,22 +17,22 @@ namespace lldb_private {
 // interchangeable, to allow static type checking.
 template <unsigned int C> class TaggedASTType : public CompilerType {
 public:
-  TaggedASTType(const CompilerType &compiler_type)
-      : CompilerType(compiler_type) {}
+    TaggedASTType(const CompilerType &compiler_type)
+        : CompilerType(compiler_type) {}
 
-  TaggedASTType(lldb::opaque_compiler_type_t type, TypeSystem *type_system)
-      : CompilerType(type_system, type) {}
+    TaggedASTType(lldb::opaque_compiler_type_t type, TypeSystem *type_system)
+        : CompilerType(type_system, type) {}
 
-  TaggedASTType(const TaggedASTType<C> &tw) : CompilerType(tw) {}
+    TaggedASTType(const TaggedASTType<C> &tw) : CompilerType(tw) {}
 
-  TaggedASTType() : CompilerType() {}
+    TaggedASTType() : CompilerType() {}
 
-  virtual ~TaggedASTType() {}
+    virtual ~TaggedASTType() {}
 
-  TaggedASTType<C> &operator=(const TaggedASTType<C> &tw) {
-    CompilerType::operator=(tw);
-    return *this;
-  }
+    TaggedASTType<C> &operator=(const TaggedASTType<C> &tw) {
+        CompilerType::operator=(tw);
+        return *this;
+    }
 };
 
 // Commonly-used tagged types, so code using them is interoperable

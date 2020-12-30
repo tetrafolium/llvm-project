@@ -49,160 +49,168 @@ namespace clang {
 namespace clangd {
 namespace {
 class PopulateSwitch : public Tweak {
-  const char *id() const override;
-  bool prepare(const Selection &Sel) override;
-  Expected<Effect> apply(const Selection &Sel) override;
-  std::string title() const override { return "Populate switch"; }
-  llvm::StringLiteral kind() const override {
-    return CodeAction::QUICKFIX_KIND;
-  }
-
-private:
-  class ExpectedCase {
-  public:
-    ExpectedCase(const EnumConstantDecl *Decl) : Data(Decl, false) {}
-    bool isCovered() const { return Data.getInt(); }
-    void setCovered(bool Val = true) { Data.setInt(Val); }
-    const EnumConstantDecl *getEnumConstant() const {
-      return Data.getPointer();
+    const char *id() const override;
+    bool prepare(const Selection &Sel) override;
+    Expected<Effect> apply(const Selection &Sel) override;
+    std::string title() const override {
+        return "Populate switch";
+    }
+    llvm::StringLiteral kind() const override {
+        return CodeAction::QUICKFIX_KIND;
     }
 
-  private:
-    llvm::PointerIntPair<const EnumConstantDecl *, 1, bool> Data;
-  };
+private:
+    class ExpectedCase {
+    public:
+        ExpectedCase(const EnumConstantDecl *Decl) : Data(Decl, false) {}
+        bool isCovered() const {
+            return Data.getInt();
+        }
+        void setCovered(bool Val = true) {
+            Data.setInt(Val);
+        }
+        const EnumConstantDecl *getEnumConstant() const {
+            return Data.getPointer();
+        }
 
-  const DeclContext *DeclCtx = nullptr;
-  const SwitchStmt *Switch = nullptr;
-  const CompoundStmt *Body = nullptr;
-  const EnumType *EnumT = nullptr;
-  const EnumDecl *EnumD = nullptr;
-  // Maps the Enum values to the EnumConstantDecl and a bool signifying if its
-  // covered in the switch.
-  llvm::MapVector<llvm::APSInt, ExpectedCase> ExpectedCases;
+    private:
+        llvm::PointerIntPair<const EnumConstantDecl *, 1, bool> Data;
+    };
+
+    const DeclContext *DeclCtx = nullptr;
+    const SwitchStmt *Switch = nullptr;
+    const CompoundStmt *Body = nullptr;
+    const EnumType *EnumT = nullptr;
+    const EnumDecl *EnumD = nullptr;
+    // Maps the Enum values to the EnumConstantDecl and a bool signifying if its
+    // covered in the switch.
+    llvm::MapVector<llvm::APSInt, ExpectedCase> ExpectedCases;
 };
 
 REGISTER_TWEAK(PopulateSwitch)
 
 bool PopulateSwitch::prepare(const Selection &Sel) {
-  const SelectionTree::Node *CA = Sel.ASTSelection.commonAncestor();
-  if (!CA)
-    return false;
-
-  const Stmt *CAStmt = CA->ASTNode.get<Stmt>();
-  if (!CAStmt)
-    return false;
-
-  // Go up a level if we see a compound statement.
-  // switch (value) {}
-  //                ^^
-  if (isa<CompoundStmt>(CAStmt)) {
-    CA = CA->Parent;
+    const SelectionTree::Node *CA = Sel.ASTSelection.commonAncestor();
     if (!CA)
-      return false;
+        return false;
 
-    CAStmt = CA->ASTNode.get<Stmt>();
+    const Stmt *CAStmt = CA->ASTNode.get<Stmt>();
     if (!CAStmt)
-      return false;
-  }
+        return false;
 
-  DeclCtx = &CA->getDeclContext();
-  Switch = dyn_cast<SwitchStmt>(CAStmt);
-  if (!Switch)
-    return false;
+    // Go up a level if we see a compound statement.
+    // switch (value) {}
+    //                ^^
+    if (isa<CompoundStmt>(CAStmt)) {
+        CA = CA->Parent;
+        if (!CA)
+            return false;
 
-  Body = dyn_cast<CompoundStmt>(Switch->getBody());
-  if (!Body)
-    return false;
+        CAStmt = CA->ASTNode.get<Stmt>();
+        if (!CAStmt)
+            return false;
+    }
 
-  const Expr *Cond = Switch->getCond();
-  if (!Cond)
-    return false;
+    DeclCtx = &CA->getDeclContext();
+    Switch = dyn_cast<SwitchStmt>(CAStmt);
+    if (!Switch)
+        return false;
 
-  // Ignore implicit casts, since enums implicitly cast to integer types.
-  Cond = Cond->IgnoreParenImpCasts();
+    Body = dyn_cast<CompoundStmt>(Switch->getBody());
+    if (!Body)
+        return false;
 
-  EnumT = Cond->getType()->getAsAdjusted<EnumType>();
-  if (!EnumT)
-    return false;
+    const Expr *Cond = Switch->getCond();
+    if (!Cond)
+        return false;
 
-  EnumD = EnumT->getDecl();
-  if (!EnumD || EnumD->isDependentType())
-    return false;
+    // Ignore implicit casts, since enums implicitly cast to integer types.
+    Cond = Cond->IgnoreParenImpCasts();
 
-  // We trigger if there are any values in the enum that aren't covered by the
-  // switch.
+    EnumT = Cond->getType()->getAsAdjusted<EnumType>();
+    if (!EnumT)
+        return false;
 
-  ASTContext &Ctx = Sel.AST->getASTContext();
+    EnumD = EnumT->getDecl();
+    if (!EnumD || EnumD->isDependentType())
+        return false;
 
-  unsigned EnumIntWidth = Ctx.getIntWidth(QualType(EnumT, 0));
-  bool EnumIsSigned = EnumT->isSignedIntegerOrEnumerationType();
+    // We trigger if there are any values in the enum that aren't covered by the
+    // switch.
 
-  auto Normalize = [&](llvm::APSInt Val) {
-    Val = Val.extOrTrunc(EnumIntWidth);
-    Val.setIsSigned(EnumIsSigned);
-    return Val;
-  };
+    ASTContext &Ctx = Sel.AST->getASTContext();
 
-  for (auto *EnumConstant : EnumD->enumerators()) {
-    ExpectedCases.insert(
-        std::make_pair(Normalize(EnumConstant->getInitVal()), EnumConstant));
-  }
+    unsigned EnumIntWidth = Ctx.getIntWidth(QualType(EnumT, 0));
+    bool EnumIsSigned = EnumT->isSignedIntegerOrEnumerationType();
 
-  for (const SwitchCase *CaseList = Switch->getSwitchCaseList(); CaseList;
-       CaseList = CaseList->getNextSwitchCase()) {
-    // Default likely intends to cover cases we'd insert.
-    if (isa<DefaultStmt>(CaseList))
-      return false;
+    auto Normalize = [&](llvm::APSInt Val) {
+        Val = Val.extOrTrunc(EnumIntWidth);
+        Val.setIsSigned(EnumIsSigned);
+        return Val;
+    };
 
-    const CaseStmt *CS = cast<CaseStmt>(CaseList);
+    for (auto *EnumConstant : EnumD->enumerators()) {
+        ExpectedCases.insert(
+            std::make_pair(Normalize(EnumConstant->getInitVal()), EnumConstant));
+    }
 
-    // GNU range cases are rare, we don't support them.
-    if (CS->caseStmtIsGNURange())
-      return false;
+    for (const SwitchCase *CaseList = Switch->getSwitchCaseList(); CaseList;
+            CaseList = CaseList->getNextSwitchCase()) {
+        // Default likely intends to cover cases we'd insert.
+        if (isa<DefaultStmt>(CaseList))
+            return false;
 
-    // Case expression is not a constant expression or is value-dependent,
-    // so we may not be able to work out which cases are covered.
-    const ConstantExpr *CE = dyn_cast<ConstantExpr>(CS->getLHS());
-    if (!CE || CE->isValueDependent())
-      return false;
+        const CaseStmt *CS = cast<CaseStmt>(CaseList);
 
-    // Unsure if this case could ever come up, but prevents an unreachable
-    // executing in getResultAsAPSInt.
-    if (CE->getResultStorageKind() == ConstantExpr::RSK_None)
-      return false;
-    auto Iter = ExpectedCases.find(Normalize(CE->getResultAsAPSInt()));
-    if (Iter != ExpectedCases.end())
-      Iter->second.setCovered();
-  }
+        // GNU range cases are rare, we don't support them.
+        if (CS->caseStmtIsGNURange())
+            return false;
 
-  return !llvm::all_of(ExpectedCases,
-                       [](auto &Pair) { return Pair.second.isCovered(); });
+        // Case expression is not a constant expression or is value-dependent,
+        // so we may not be able to work out which cases are covered.
+        const ConstantExpr *CE = dyn_cast<ConstantExpr>(CS->getLHS());
+        if (!CE || CE->isValueDependent())
+            return false;
+
+        // Unsure if this case could ever come up, but prevents an unreachable
+        // executing in getResultAsAPSInt.
+        if (CE->getResultStorageKind() == ConstantExpr::RSK_None)
+            return false;
+        auto Iter = ExpectedCases.find(Normalize(CE->getResultAsAPSInt()));
+        if (Iter != ExpectedCases.end())
+            Iter->second.setCovered();
+    }
+
+    return !llvm::all_of(ExpectedCases,
+    [](auto &Pair) {
+        return Pair.second.isCovered();
+    });
 }
 
 Expected<Tweak::Effect> PopulateSwitch::apply(const Selection &Sel) {
-  ASTContext &Ctx = Sel.AST->getASTContext();
+    ASTContext &Ctx = Sel.AST->getASTContext();
 
-  SourceLocation Loc = Body->getRBracLoc();
-  ASTContext &DeclASTCtx = DeclCtx->getParentASTContext();
+    SourceLocation Loc = Body->getRBracLoc();
+    ASTContext &DeclASTCtx = DeclCtx->getParentASTContext();
 
-  llvm::SmallString<256> Text;
-  for (auto &EnumConstant : ExpectedCases) {
-    // Skip any enum constants already covered
-    if (EnumConstant.second.isCovered())
-      continue;
+    llvm::SmallString<256> Text;
+    for (auto &EnumConstant : ExpectedCases) {
+        // Skip any enum constants already covered
+        if (EnumConstant.second.isCovered())
+            continue;
 
-    Text.append({"case ", getQualification(DeclASTCtx, DeclCtx, Loc, EnumD)});
-    if (EnumD->isScoped())
-      Text.append({EnumD->getName(), "::"});
-    Text.append({EnumConstant.second.getEnumConstant()->getName(), ":"});
-  }
+        Text.append({"case ", getQualification(DeclASTCtx, DeclCtx, Loc, EnumD)});
+        if (EnumD->isScoped())
+            Text.append({EnumD->getName(), "::"});
+        Text.append({EnumConstant.second.getEnumConstant()->getName(), ":"});
+    }
 
-  assert(!Text.empty() && "No enumerators to insert!");
-  Text += "break;";
+    assert(!Text.empty() && "No enumerators to insert!");
+    Text += "break;";
 
-  const SourceManager &SM = Ctx.getSourceManager();
-  return Effect::mainFileEdit(
-      SM, tooling::Replacements(tooling::Replacement(SM, Loc, 0, Text)));
+    const SourceManager &SM = Ctx.getSourceManager();
+    return Effect::mainFileEdit(
+               SM, tooling::Replacements(tooling::Replacement(SM, Loc, 0, Text)));
 }
 } // namespace
 } // namespace clangd

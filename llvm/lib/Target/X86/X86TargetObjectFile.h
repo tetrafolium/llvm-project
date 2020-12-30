@@ -13,10 +13,10 @@
 
 namespace llvm {
 
-  /// X86_64MachoTargetObjectFile - This TLOF implementation is used for Darwin
-  /// x86-64.
-  class X86_64MachoTargetObjectFile : public TargetLoweringObjectFileMachO {
-  public:
+/// X86_64MachoTargetObjectFile - This TLOF implementation is used for Darwin
+/// x86-64.
+class X86_64MachoTargetObjectFile : public TargetLoweringObjectFileMachO {
+public:
     const MCExpr *getTTypeGlobalReference(const GlobalValue *GV,
                                           unsigned Encoding,
                                           const TargetMachine &TM,
@@ -34,18 +34,18 @@ namespace llvm {
                                             const MCValue &MV, int64_t Offset,
                                             MachineModuleInfo *MMI,
                                             MCStreamer &Streamer) const override;
-  };
+};
 
-  /// This implementation is used for X86 ELF targets that don't
-  /// have a further specialization.
-  class X86ELFTargetObjectFile : public TargetLoweringObjectFileELF {
-  public:
+/// This implementation is used for X86 ELF targets that don't
+/// have a further specialization.
+class X86ELFTargetObjectFile : public TargetLoweringObjectFileELF {
+public:
     X86ELFTargetObjectFile() {
-      PLTRelativeVariantKind = MCSymbolRefExpr::VK_PLT;
+        PLTRelativeVariantKind = MCSymbolRefExpr::VK_PLT;
     }
     /// Describe a TLS variable address within debug info.
     const MCExpr *getDebugThreadLocalSymbol(const MCSymbol *Sym) const override;
-  };
+};
 
 } // end namespace llvm
 

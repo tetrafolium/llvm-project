@@ -30,69 +30,71 @@ namespace mlir {
 /// which defines the relationship between all the different generated variants.
 class ReductionNode {
 public:
-  ReductionNode(ModuleOp module, ReductionNode *parent);
+    ReductionNode(ModuleOp module, ReductionNode *parent);
 
-  ReductionNode(ModuleOp module, ReductionNode *parent,
-                std::vector<bool> transformSpace);
+    ReductionNode(ModuleOp module, ReductionNode *parent,
+                  std::vector<bool> transformSpace);
 
-  /// Calculates and initializes the size and interesting values of the node.
-  void measureAndTest(const Tester &test);
+    /// Calculates and initializes the size and interesting values of the node.
+    void measureAndTest(const Tester &test);
 
-  /// Returns the module.
-  ModuleOp getModule() const { return module; }
+    /// Returns the module.
+    ModuleOp getModule() const {
+        return module;
+    }
 
-  /// Returns true if the size and interestingness have been calculated.
-  bool isEvaluated() const;
+    /// Returns true if the size and interestingness have been calculated.
+    bool isEvaluated() const;
 
-  /// Returns the size in bytes of the module.
-  int getSize() const;
+    /// Returns the size in bytes of the module.
+    int getSize() const;
 
-  /// Returns true if the module exhibits the interesting behavior.
-  bool isInteresting() const;
+    /// Returns true if the module exhibits the interesting behavior.
+    bool isInteresting() const;
 
-  /// Returns the pointer to a child variant by index.
-  ReductionNode *getVariant(unsigned long index) const;
+    /// Returns the pointer to a child variant by index.
+    ReductionNode *getVariant(unsigned long index) const;
 
-  /// Returns the number of child variants.
-  int variantsSize() const;
+    /// Returns the number of child variants.
+    int variantsSize() const;
 
-  /// Returns true if the vector containing the child variants is empty.
-  bool variantsEmpty() const;
+    /// Returns true if the vector containing the child variants is empty.
+    bool variantsEmpty() const;
 
-  /// Sort the child variants and remove the uninteresting ones.
-  void organizeVariants(const Tester &test);
+    /// Sort the child variants and remove the uninteresting ones.
+    void organizeVariants(const Tester &test);
 
-  /// Returns the number of child variants.
-  int transformSpaceSize();
+    /// Returns the number of child variants.
+    int transformSpaceSize();
 
-  /// Returns a vector indicating the transformed indices as true.
-  const std::vector<bool> getTransformSpace();
+    /// Returns a vector indicating the transformed indices as true.
+    const std::vector<bool> getTransformSpace();
 
 private:
-  /// Link a child variant node.
-  void linkVariant(ReductionNode *newVariant);
+    /// Link a child variant node.
+    void linkVariant(ReductionNode *newVariant);
 
-  // This is the MLIR module of this variant.
-  ModuleOp module;
+    // This is the MLIR module of this variant.
+    ModuleOp module;
 
-  // This is true if the module has been evaluated and it exhibits the
-  // interesting behavior.
-  bool interesting;
+    // This is true if the module has been evaluated and it exhibits the
+    // interesting behavior.
+    bool interesting;
 
-  // This indicates the number of characters in the printed module if the module
-  // has been evaluated.
-  int size;
+    // This indicates the number of characters in the printed module if the module
+    // has been evaluated.
+    int size;
 
-  // This indicates if the module has been evaluated (measured and tested).
-  bool evaluated;
+    // This indicates if the module has been evaluated (measured and tested).
+    bool evaluated;
 
-  // Indicates the indices in the node that have been transformed in previous
-  // levels of the reduction tree.
-  std::vector<bool> transformSpace;
+    // Indicates the indices in the node that have been transformed in previous
+    // levels of the reduction tree.
+    std::vector<bool> transformSpace;
 
-  // This points to the child variants that were created using this node as a
-  // starting point.
-  std::vector<std::unique_ptr<ReductionNode>> variants;
+    // This points to the child variants that were created using this node as a
+    // starting point.
+    std::vector<std::unique_ptr<ReductionNode>> variants;
 };
 
 } // end namespace mlir

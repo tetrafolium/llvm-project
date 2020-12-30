@@ -23,43 +23,45 @@ namespace objcopy {
 // TODO: refactor the buffer classes in LLVM to enable us to use them here
 // directly.
 class Buffer {
-  StringRef Name;
+    StringRef Name;
 
 public:
-  virtual ~Buffer();
-  virtual Error allocate(size_t Size) = 0;
-  virtual uint8_t *getBufferStart() = 0;
-  virtual Error commit() = 0;
+    virtual ~Buffer();
+    virtual Error allocate(size_t Size) = 0;
+    virtual uint8_t *getBufferStart() = 0;
+    virtual Error commit() = 0;
 
-  explicit Buffer(StringRef Name) : Name(Name) {}
-  StringRef getName() const { return Name; }
+    explicit Buffer(StringRef Name) : Name(Name) {}
+    StringRef getName() const {
+        return Name;
+    }
 };
 
 class FileBuffer : public Buffer {
-  std::unique_ptr<FileOutputBuffer> Buf;
-  // Indicates that allocate(0) was called, and commit() should create or
-  // truncate a file instead of using a FileOutputBuffer.
-  bool EmptyFile = false;
+    std::unique_ptr<FileOutputBuffer> Buf;
+    // Indicates that allocate(0) was called, and commit() should create or
+    // truncate a file instead of using a FileOutputBuffer.
+    bool EmptyFile = false;
 
 public:
-  Error allocate(size_t Size) override;
-  uint8_t *getBufferStart() override;
-  Error commit() override;
+    Error allocate(size_t Size) override;
+    uint8_t *getBufferStart() override;
+    Error commit() override;
 
-  explicit FileBuffer(StringRef FileName) : Buffer(FileName) {}
+    explicit FileBuffer(StringRef FileName) : Buffer(FileName) {}
 };
 
 class MemBuffer : public Buffer {
-  std::unique_ptr<WritableMemoryBuffer> Buf;
+    std::unique_ptr<WritableMemoryBuffer> Buf;
 
 public:
-  Error allocate(size_t Size) override;
-  uint8_t *getBufferStart() override;
-  Error commit() override;
+    Error allocate(size_t Size) override;
+    uint8_t *getBufferStart() override;
+    Error commit() override;
 
-  explicit MemBuffer(StringRef Name) : Buffer(Name) {}
+    explicit MemBuffer(StringRef Name) : Buffer(Name) {}
 
-  std::unique_ptr<WritableMemoryBuffer> releaseMemoryBuffer();
+    std::unique_ptr<WritableMemoryBuffer> releaseMemoryBuffer();
 };
 
 } // end namespace objcopy

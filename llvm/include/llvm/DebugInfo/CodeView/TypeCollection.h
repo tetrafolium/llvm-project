@@ -17,29 +17,31 @@ namespace llvm {
 namespace codeview {
 class TypeCollection {
 public:
-  virtual ~TypeCollection() = default;
+    virtual ~TypeCollection() = default;
 
-  bool empty() { return size() == 0; }
-
-  virtual Optional<TypeIndex> getFirst() = 0;
-  virtual Optional<TypeIndex> getNext(TypeIndex Prev) = 0;
-
-  virtual CVType getType(TypeIndex Index) = 0;
-  virtual StringRef getTypeName(TypeIndex Index) = 0;
-  virtual bool contains(TypeIndex Index) = 0;
-  virtual uint32_t size() = 0;
-  virtual uint32_t capacity() = 0;
-  virtual bool replaceType(TypeIndex &Index, CVType Data, bool Stabilize) = 0;
-
-  template <typename TFunc> void ForEachRecord(TFunc Func) {
-    Optional<TypeIndex> Next = getFirst();
-
-    while (Next.hasValue()) {
-      TypeIndex N = *Next;
-      Func(N, getType(N));
-      Next = getNext(N);
+    bool empty() {
+        return size() == 0;
     }
-  }
+
+    virtual Optional<TypeIndex> getFirst() = 0;
+    virtual Optional<TypeIndex> getNext(TypeIndex Prev) = 0;
+
+    virtual CVType getType(TypeIndex Index) = 0;
+    virtual StringRef getTypeName(TypeIndex Index) = 0;
+    virtual bool contains(TypeIndex Index) = 0;
+    virtual uint32_t size() = 0;
+    virtual uint32_t capacity() = 0;
+    virtual bool replaceType(TypeIndex &Index, CVType Data, bool Stabilize) = 0;
+
+    template <typename TFunc> void ForEachRecord(TFunc Func) {
+        Optional<TypeIndex> Next = getFirst();
+
+        while (Next.hasValue()) {
+            TypeIndex N = *Next;
+            Func(N, getType(N));
+            Next = getNext(N);
+        }
+    }
 };
 }
 }

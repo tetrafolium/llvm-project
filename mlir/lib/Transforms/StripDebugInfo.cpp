@@ -16,17 +16,19 @@ using namespace mlir;
 
 namespace {
 struct StripDebugInfo : public StripDebugInfoBase<StripDebugInfo> {
-  void runOnOperation() override;
+    void runOnOperation() override;
 };
 } // end anonymous namespace
 
 void StripDebugInfo::runOnOperation() {
-  // Strip the debug info from all operations.
-  auto unknownLoc = UnknownLoc::get(&getContext());
-  getOperation()->walk([&](Operation *op) { op->setLoc(unknownLoc); });
+    // Strip the debug info from all operations.
+    auto unknownLoc = UnknownLoc::get(&getContext());
+    getOperation()->walk([&](Operation *op) {
+        op->setLoc(unknownLoc);
+    });
 }
 
 /// Creates a pass to strip debug information from a function.
 std::unique_ptr<Pass> mlir::createStripDebugInfoPass() {
-  return std::make_unique<StripDebugInfo>();
+    return std::make_unique<StripDebugInfo>();
 }

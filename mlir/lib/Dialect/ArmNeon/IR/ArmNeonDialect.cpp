@@ -19,10 +19,10 @@
 using namespace mlir;
 
 void arm_neon::ArmNeonDialect::initialize() {
-  addOperations<
+    addOperations<
 #define GET_OP_LIST
 #include "mlir/Dialect/ArmNeon/ArmNeon.cpp.inc"
-      >();
+    >();
 }
 
 #define GET_OP_CLASSES

@@ -22,59 +22,59 @@ namespace clang {
 namespace ast_matchers {
 
 static DeclarationMatcher getComparisonDecl(GtestCmp Cmp) {
-  switch (Cmp) {
+    switch (Cmp) {
     case GtestCmp::Eq:
-      return cxxMethodDecl(hasName("Compare"),
-                           ofClass(cxxRecordDecl(isSameOrDerivedFrom(
-                               hasName("::testing::internal::EqHelper")))));
+        return cxxMethodDecl(hasName("Compare"),
+                             ofClass(cxxRecordDecl(isSameOrDerivedFrom(
+                                         hasName("::testing::internal::EqHelper")))));
     case GtestCmp::Ne:
-      return functionDecl(hasName("::testing::internal::CmpHelperNE"));
+        return functionDecl(hasName("::testing::internal::CmpHelperNE"));
     case GtestCmp::Ge:
-      return functionDecl(hasName("::testing::internal::CmpHelperGE"));
+        return functionDecl(hasName("::testing::internal::CmpHelperGE"));
     case GtestCmp::Gt:
-      return functionDecl(hasName("::testing::internal::CmpHelperGT"));
+        return functionDecl(hasName("::testing::internal::CmpHelperGT"));
     case GtestCmp::Le:
-      return functionDecl(hasName("::testing::internal::CmpHelperLE"));
+        return functionDecl(hasName("::testing::internal::CmpHelperLE"));
     case GtestCmp::Lt:
-      return functionDecl(hasName("::testing::internal::CmpHelperLT"));
-  }
-  llvm_unreachable("Unhandled GtestCmp enum");
+        return functionDecl(hasName("::testing::internal::CmpHelperLT"));
+    }
+    llvm_unreachable("Unhandled GtestCmp enum");
 }
 
 static llvm::StringRef getAssertMacro(GtestCmp Cmp) {
-  switch (Cmp) {
+    switch (Cmp) {
     case GtestCmp::Eq:
-      return "ASSERT_EQ";
+        return "ASSERT_EQ";
     case GtestCmp::Ne:
-      return "ASSERT_NE";
+        return "ASSERT_NE";
     case GtestCmp::Ge:
-      return "ASSERT_GE";
+        return "ASSERT_GE";
     case GtestCmp::Gt:
-      return "ASSERT_GT";
+        return "ASSERT_GT";
     case GtestCmp::Le:
-      return "ASSERT_LE";
+        return "ASSERT_LE";
     case GtestCmp::Lt:
-      return "ASSERT_LT";
-  }
-  llvm_unreachable("Unhandled GtestCmp enum");
+        return "ASSERT_LT";
+    }
+    llvm_unreachable("Unhandled GtestCmp enum");
 }
 
 static llvm::StringRef getExpectMacro(GtestCmp Cmp) {
-  switch (Cmp) {
+    switch (Cmp) {
     case GtestCmp::Eq:
-      return "EXPECT_EQ";
+        return "EXPECT_EQ";
     case GtestCmp::Ne:
-      return "EXPECT_NE";
+        return "EXPECT_NE";
     case GtestCmp::Ge:
-      return "EXPECT_GE";
+        return "EXPECT_GE";
     case GtestCmp::Gt:
-      return "EXPECT_GT";
+        return "EXPECT_GT";
     case GtestCmp::Le:
-      return "EXPECT_LE";
+        return "EXPECT_LE";
     case GtestCmp::Lt:
-      return "EXPECT_LT";
-  }
-  llvm_unreachable("Unhandled GtestCmp enum");
+        return "EXPECT_LT";
+    }
+    llvm_unreachable("Unhandled GtestCmp enum");
 }
 
 // In general, AST matchers cannot match calls to macros. However, we can
@@ -87,17 +87,17 @@ static llvm::StringRef getExpectMacro(GtestCmp Cmp) {
 // We use this approach to implement the derived matchers gtestAssert and
 // gtestExpect.
 internal::BindableMatcher<Stmt> gtestAssert(GtestCmp Cmp, StatementMatcher Left,
-                                            StatementMatcher Right) {
-  return callExpr(callee(getComparisonDecl(Cmp)),
-                  isExpandedFromMacro(getAssertMacro(Cmp).str()),
-                  hasArgument(2, Left), hasArgument(3, Right));
+        StatementMatcher Right) {
+    return callExpr(callee(getComparisonDecl(Cmp)),
+                    isExpandedFromMacro(getAssertMacro(Cmp).str()),
+                    hasArgument(2, Left), hasArgument(3, Right));
 }
 
 internal::BindableMatcher<Stmt> gtestExpect(GtestCmp Cmp, StatementMatcher Left,
-                                            StatementMatcher Right) {
-  return callExpr(callee(getComparisonDecl(Cmp)),
-                  isExpandedFromMacro(getExpectMacro(Cmp).str()),
-                  hasArgument(2, Left), hasArgument(3, Right));
+        StatementMatcher Right) {
+    return callExpr(callee(getComparisonDecl(Cmp)),
+                    isExpandedFromMacro(getExpectMacro(Cmp).str()),
+                    hasArgument(2, Left), hasArgument(3, Right));
 }
 
 } // end namespace ast_matchers

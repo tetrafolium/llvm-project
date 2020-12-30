@@ -88,109 +88,109 @@ class CheckerManager;
 /// "core.builtin", or the full name "core.builtin.NoReturnFunctionChecker".
 class CheckerRegistry {
 public:
-  CheckerRegistry(CheckerRegistryData &Data, ArrayRef<std::string> Plugins,
-                  DiagnosticsEngine &Diags, AnalyzerOptions &AnOpts,
-                  ArrayRef<std::function<void(CheckerRegistry &)>>
-                      CheckerRegistrationFns = {});
+    CheckerRegistry(CheckerRegistryData &Data, ArrayRef<std::string> Plugins,
+                    DiagnosticsEngine &Diags, AnalyzerOptions &AnOpts,
+                    ArrayRef<std::function<void(CheckerRegistry &)>>
+                    CheckerRegistrationFns = {});
 
-  /// Collects all enabled checkers in the field EnabledCheckers. It preserves
-  /// the order of insertion, as dependencies have to be enabled before the
-  /// checkers that depend on them.
-  void initializeRegistry(const CheckerManager &Mgr);
+    /// Collects all enabled checkers in the field EnabledCheckers. It preserves
+    /// the order of insertion, as dependencies have to be enabled before the
+    /// checkers that depend on them.
+    void initializeRegistry(const CheckerManager &Mgr);
 
 
 private:
-  /// Default initialization function for checkers -- since CheckerManager
-  /// includes this header, we need to make it a template parameter, and since
-  /// the checker must be a template parameter as well, we can't put this in the
-  /// cpp file.
-  template <typename MGR, typename T> static void initializeManager(MGR &mgr) {
-    mgr.template registerChecker<T>();
-  }
+    /// Default initialization function for checkers -- since CheckerManager
+    /// includes this header, we need to make it a template parameter, and since
+    /// the checker must be a template parameter as well, we can't put this in the
+    /// cpp file.
+    template <typename MGR, typename T> static void initializeManager(MGR &mgr) {
+        mgr.template registerChecker<T>();
+    }
 
-  template <typename T> static bool returnTrue(const CheckerManager &mgr) {
-    return true;
-  }
+    template <typename T> static bool returnTrue(const CheckerManager &mgr) {
+        return true;
+    }
 
 public:
-  /// Adds a checker to the registry. Use this non-templated overload when your
-  /// checker requires custom initialization.
-  void addChecker(RegisterCheckerFn Fn, ShouldRegisterFunction sfn,
-                  StringRef FullName, StringRef Desc, StringRef DocsUri,
-                  bool IsHidden);
+    /// Adds a checker to the registry. Use this non-templated overload when your
+    /// checker requires custom initialization.
+    void addChecker(RegisterCheckerFn Fn, ShouldRegisterFunction sfn,
+                    StringRef FullName, StringRef Desc, StringRef DocsUri,
+                    bool IsHidden);
 
-  /// Adds a checker to the registry. Use this templated overload when your
-  /// checker does not require any custom initialization.
-  /// This function isn't really needed and probably causes more headaches than
-  /// the tiny convenience that it provides, but external plugins might use it,
-  /// and there isn't a strong incentive to remove it.
-  template <class T>
-  void addChecker(StringRef FullName, StringRef Desc, StringRef DocsUri,
-                  bool IsHidden = false) {
-    // Avoid MSVC's Compiler Error C2276:
-    // http://msdn.microsoft.com/en-us/library/850cstw1(v=VS.80).aspx
-    addChecker(&CheckerRegistry::initializeManager<CheckerManager, T>,
-               &CheckerRegistry::returnTrue<T>, FullName, Desc, DocsUri,
-               IsHidden);
-  }
+    /// Adds a checker to the registry. Use this templated overload when your
+    /// checker does not require any custom initialization.
+    /// This function isn't really needed and probably causes more headaches than
+    /// the tiny convenience that it provides, but external plugins might use it,
+    /// and there isn't a strong incentive to remove it.
+    template <class T>
+    void addChecker(StringRef FullName, StringRef Desc, StringRef DocsUri,
+                    bool IsHidden = false) {
+        // Avoid MSVC's Compiler Error C2276:
+        // http://msdn.microsoft.com/en-us/library/850cstw1(v=VS.80).aspx
+        addChecker(&CheckerRegistry::initializeManager<CheckerManager, T>,
+                   &CheckerRegistry::returnTrue<T>, FullName, Desc, DocsUri,
+                   IsHidden);
+    }
 
-  /// Makes the checker with the full name \p fullName depend on the checker
-  /// called \p dependency.
-  void addDependency(StringRef FullName, StringRef Dependency);
+    /// Makes the checker with the full name \p fullName depend on the checker
+    /// called \p dependency.
+    void addDependency(StringRef FullName, StringRef Dependency);
 
-  /// Makes the checker with the full name \p fullName weak depend on the
-  /// checker called \p dependency.
-  void addWeakDependency(StringRef FullName, StringRef Dependency);
+    /// Makes the checker with the full name \p fullName weak depend on the
+    /// checker called \p dependency.
+    void addWeakDependency(StringRef FullName, StringRef Dependency);
 
-  /// Registers an option to a given checker. A checker option will always have
-  /// the following format:
-  ///   CheckerFullName:OptionName=Value
-  /// And can be specified from the command line like this:
-  ///   -analyzer-config CheckerFullName:OptionName=Value
-  ///
-  /// Options for unknown checkers, or unknown options for a given checker, or
-  /// invalid value types for that given option are reported as an error in
-  /// non-compatibility mode.
-  void addCheckerOption(StringRef OptionType, StringRef CheckerFullName,
-                        StringRef OptionName, StringRef DefaultValStr,
-                        StringRef Description, StringRef DevelopmentStatus,
-                        bool IsHidden = false);
+    /// Registers an option to a given checker. A checker option will always have
+    /// the following format:
+    ///   CheckerFullName:OptionName=Value
+    /// And can be specified from the command line like this:
+    ///   -analyzer-config CheckerFullName:OptionName=Value
+    ///
+    /// Options for unknown checkers, or unknown options for a given checker, or
+    /// invalid value types for that given option are reported as an error in
+    /// non-compatibility mode.
+    void addCheckerOption(StringRef OptionType, StringRef CheckerFullName,
+                          StringRef OptionName, StringRef DefaultValStr,
+                          StringRef Description, StringRef DevelopmentStatus,
+                          bool IsHidden = false);
 
-  /// Adds a package to the registry.
-  void addPackage(StringRef FullName);
+    /// Adds a package to the registry.
+    void addPackage(StringRef FullName);
 
-  /// Registers an option to a given package. A package option will always have
-  /// the following format:
-  ///   PackageFullName:OptionName=Value
-  /// And can be specified from the command line like this:
-  ///   -analyzer-config PackageFullName:OptionName=Value
-  ///
-  /// Options for unknown packages, or unknown options for a given package, or
-  /// invalid value types for that given option are reported as an error in
-  /// non-compatibility mode.
-  void addPackageOption(StringRef OptionType, StringRef PackageFullName,
-                        StringRef OptionName, StringRef DefaultValStr,
-                        StringRef Description, StringRef DevelopmentStatus,
-                        bool IsHidden = false);
+    /// Registers an option to a given package. A package option will always have
+    /// the following format:
+    ///   PackageFullName:OptionName=Value
+    /// And can be specified from the command line like this:
+    ///   -analyzer-config PackageFullName:OptionName=Value
+    ///
+    /// Options for unknown packages, or unknown options for a given package, or
+    /// invalid value types for that given option are reported as an error in
+    /// non-compatibility mode.
+    void addPackageOption(StringRef OptionType, StringRef PackageFullName,
+                          StringRef OptionName, StringRef DefaultValStr,
+                          StringRef Description, StringRef DevelopmentStatus,
+                          bool IsHidden = false);
 
-  // FIXME: This *really* should be added to the frontend flag descriptions.
-  /// Initializes a CheckerManager by calling the initialization functions for
-  /// all checkers specified by the given CheckerOptInfo list. The order of this
-  /// list is significant; later options can be used to reverse earlier ones.
-  /// This can be used to exclude certain checkers in an included package.
-  void initializeManager(CheckerManager &CheckerMgr) const;
+    // FIXME: This *really* should be added to the frontend flag descriptions.
+    /// Initializes a CheckerManager by calling the initialization functions for
+    /// all checkers specified by the given CheckerOptInfo list. The order of this
+    /// list is significant; later options can be used to reverse earlier ones.
+    /// This can be used to exclude certain checkers in an included package.
+    void initializeManager(CheckerManager &CheckerMgr) const;
 
-  /// Check if every option corresponds to a specific checker or package.
-  void validateCheckerOptions() const;
+    /// Check if every option corresponds to a specific checker or package.
+    void validateCheckerOptions() const;
 
 private:
-  template <bool IsWeak> void resolveDependencies();
-  void resolveCheckerAndPackageOptions();
+    template <bool IsWeak> void resolveDependencies();
+    void resolveCheckerAndPackageOptions();
 
-  CheckerRegistryData &Data;
+    CheckerRegistryData &Data;
 
-  DiagnosticsEngine &Diags;
-  AnalyzerOptions &AnOpts;
+    DiagnosticsEngine &Diags;
+    AnalyzerOptions &AnOpts;
 };
 
 } // namespace ento

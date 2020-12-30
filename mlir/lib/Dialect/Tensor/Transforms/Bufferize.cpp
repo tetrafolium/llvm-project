@@ -22,57 +22,57 @@ using namespace mlir;
 namespace {
 class BufferizeCastOp : public OpConversionPattern<tensor::CastOp> {
 public:
-  using OpConversionPattern::OpConversionPattern;
-  LogicalResult
-  matchAndRewrite(tensor::CastOp op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter &rewriter) const override {
-    auto resultType = getTypeConverter()->convertType(op.getType());
-    rewriter.replaceOpWithNewOp<MemRefCastOp>(op, resultType, operands[0]);
-    return success();
-  }
+    using OpConversionPattern::OpConversionPattern;
+    LogicalResult
+    matchAndRewrite(tensor::CastOp op, ArrayRef<Value> operands,
+                    ConversionPatternRewriter &rewriter) const override {
+        auto resultType = getTypeConverter()->convertType(op.getType());
+        rewriter.replaceOpWithNewOp<MemRefCastOp>(op, resultType, operands[0]);
+        return success();
+    }
 };
 } // namespace
 
 namespace {
 class BufferizeExtractOp : public OpConversionPattern<tensor::ExtractOp> {
 public:
-  using OpConversionPattern::OpConversionPattern;
-  LogicalResult
-  matchAndRewrite(tensor::ExtractOp op, ArrayRef<Value> operands,
-                  ConversionPatternRewriter &rewriter) const override {
-    tensor::ExtractOp::Adaptor adaptor(operands);
-    rewriter.replaceOpWithNewOp<LoadOp>(op, adaptor.tensor(),
-                                        adaptor.indices());
-    return success();
-  }
+    using OpConversionPattern::OpConversionPattern;
+    LogicalResult
+    matchAndRewrite(tensor::ExtractOp op, ArrayRef<Value> operands,
+                    ConversionPatternRewriter &rewriter) const override {
+        tensor::ExtractOp::Adaptor adaptor(operands);
+        rewriter.replaceOpWithNewOp<LoadOp>(op, adaptor.tensor(),
+                                            adaptor.indices());
+        return success();
+    }
 };
 } // namespace
 
 void mlir::populateTensorBufferizePatterns(
     MLIRContext *context, BufferizeTypeConverter &typeConverter,
     OwningRewritePatternList &patterns) {
-  patterns.insert<BufferizeCastOp, BufferizeExtractOp>(typeConverter, context);
+    patterns.insert<BufferizeCastOp, BufferizeExtractOp>(typeConverter, context);
 }
 
 namespace {
 struct TensorBufferizePass : public TensorBufferizeBase<TensorBufferizePass> {
-  void runOnFunction() override {
-    auto *context = &getContext();
-    BufferizeTypeConverter typeConverter;
-    OwningRewritePatternList patterns;
-    ConversionTarget target(*context);
+    void runOnFunction() override {
+        auto *context = &getContext();
+        BufferizeTypeConverter typeConverter;
+        OwningRewritePatternList patterns;
+        ConversionTarget target(*context);
 
-    populateTensorBufferizePatterns(context, typeConverter, patterns);
-    target.addIllegalOp<tensor::CastOp, tensor::ExtractOp>();
-    target.addLegalDialect<StandardOpsDialect>();
+        populateTensorBufferizePatterns(context, typeConverter, patterns);
+        target.addIllegalOp<tensor::CastOp, tensor::ExtractOp>();
+        target.addLegalDialect<StandardOpsDialect>();
 
-    if (failed(
-            applyPartialConversion(getFunction(), target, std::move(patterns))))
-      signalPassFailure();
-  }
+        if (failed(
+                    applyPartialConversion(getFunction(), target, std::move(patterns))))
+            signalPassFailure();
+    }
 };
 } // namespace
 
 std::unique_ptr<Pass> mlir::createTensorBufferizePass() {
-  return std::make_unique<TensorBufferizePass>();
+    return std::make_unique<TensorBufferizePass>();
 }

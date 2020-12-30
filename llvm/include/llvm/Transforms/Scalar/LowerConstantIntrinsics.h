@@ -23,17 +23,17 @@ namespace llvm {
 struct LowerConstantIntrinsicsPass :
     PassInfoMixin<LowerConstantIntrinsicsPass> {
 public:
-  explicit LowerConstantIntrinsicsPass() {}
+    explicit LowerConstantIntrinsicsPass() {}
 
-  /// Run the pass over the function.
-  ///
-  /// This will lower all remaining 'objectsize' and 'is.constant'`
-  /// intrinsic calls in this function, even when the argument has no known
-  /// size or is not a constant respectively. The resulting constant is
-  /// propagated and conditional branches are resolved where possible.
-  /// This complements the Instruction Simplification and
-  /// Instruction Combination passes of the optimized pass chain.
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+    /// Run the pass over the function.
+    ///
+    /// This will lower all remaining 'objectsize' and 'is.constant'`
+    /// intrinsic calls in this function, even when the argument has no known
+    /// size or is not a constant respectively. The resulting constant is
+    /// propagated and conditional branches are resolved where possible.
+    /// This complements the Instruction Simplification and
+    /// Instruction Combination passes of the optimized pass chain.
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 };
 
 }

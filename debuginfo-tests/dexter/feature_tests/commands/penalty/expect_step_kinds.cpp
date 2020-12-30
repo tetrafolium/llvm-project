@@ -7,7 +7,7 @@
 // RUN: not %dexter_regression_test -- %s | FileCheck %s
 // CHECK: expect_step_kinds.cpp:
 
-int abs(int i){
+int abs(int i) {
     return i < 0? i * -1: i;
 }
 

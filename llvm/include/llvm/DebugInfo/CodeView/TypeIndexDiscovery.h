@@ -18,9 +18,9 @@ namespace llvm {
 namespace codeview {
 enum class TiRefKind { TypeRef, IndexRef };
 struct TiReference {
-  TiRefKind Kind;
-  uint32_t Offset;
-  uint32_t Count;
+    TiRefKind Kind;
+    uint32_t Offset;
+    uint32_t Count;
 };
 
 void discoverTypeIndices(ArrayRef<uint8_t> RecordData,

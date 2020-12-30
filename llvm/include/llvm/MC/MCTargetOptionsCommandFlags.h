@@ -45,7 +45,7 @@ std::string getABIName();
 /// Create this object with static storage to register mc-related command
 /// line options.
 struct RegisterMCTargetOptionsFlags {
-  RegisterMCTargetOptionsFlags();
+    RegisterMCTargetOptionsFlags();
 };
 
 MCTargetOptions InitMCTargetOptionsFromFlags();

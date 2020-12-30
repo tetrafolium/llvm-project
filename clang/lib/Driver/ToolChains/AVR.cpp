@@ -29,9 +29,9 @@ using namespace llvm::opt;
 namespace {
 
 const struct {
-  StringRef Name;
-  std::string SubPath;
-  StringRef Family;
+    StringRef Name;
+    std::string SubPath;
+    StringRef Family;
 } MCUInfo[] = {
     {"at90s1200", "", "avr1"},
     {"attiny11", "", "avr1"},
@@ -276,24 +276,24 @@ const struct {
 };
 
 std::string GetMCUSubPath(StringRef MCUName) {
-  for (const auto &MCU : MCUInfo)
-    if (MCU.Name == MCUName)
-      return std::string(MCU.SubPath);
-  return "";
+    for (const auto &MCU : MCUInfo)
+        if (MCU.Name == MCUName)
+            return std::string(MCU.SubPath);
+    return "";
 }
 
 llvm::Optional<StringRef> GetMCUFamilyName(StringRef MCUName) {
-  for (const auto &MCU : MCUInfo)
-    if (MCU.Name == MCUName)
-      return Optional<StringRef>(MCU.Family);
-  return Optional<StringRef>();
+    for (const auto &MCU : MCUInfo)
+        if (MCU.Name == MCUName)
+            return Optional<StringRef>(MCU.Family);
+    return Optional<StringRef>();
 }
 
 llvm::Optional<unsigned> GetMCUSectionAddressData(StringRef MCU) {
-  return llvm::StringSwitch<llvm::Optional<unsigned>>(MCU)
-      .Case("atmega328", Optional<unsigned>(0x800100))
-      .Case("atmega328p", Optional<unsigned>(0x800100))
-      .Default(Optional<unsigned>());
+    return llvm::StringSwitch<llvm::Optional<unsigned>>(MCU)
+           .Case("atmega328", Optional<unsigned>(0x800100))
+           .Case("atmega328p", Optional<unsigned>(0x800100))
+           .Default(Optional<unsigned>());
 }
 
 const StringRef PossibleAVRLibcLocations[] = {
@@ -307,122 +307,122 @@ const StringRef PossibleAVRLibcLocations[] = {
 AVRToolChain::AVRToolChain(const Driver &D, const llvm::Triple &Triple,
                            const ArgList &Args)
     : Generic_ELF(D, Triple, Args), LinkStdlib(false) {
-  GCCInstallation.init(Triple, Args);
+    GCCInstallation.init(Triple, Args);
 
-  // Only add default libraries if the user hasn't explicitly opted out.
-  if (!Args.hasArg(options::OPT_nostdlib) &&
-      !Args.hasArg(options::OPT_nodefaultlibs) &&
-      !Args.hasArg(options::OPT_c /* does not apply when not linking */)) {
-    std::string CPU = getCPUName(Args, Triple);
+    // Only add default libraries if the user hasn't explicitly opted out.
+    if (!Args.hasArg(options::OPT_nostdlib) &&
+            !Args.hasArg(options::OPT_nodefaultlibs) &&
+            !Args.hasArg(options::OPT_c /* does not apply when not linking */)) {
+        std::string CPU = getCPUName(Args, Triple);
 
-    if (CPU.empty()) {
-      // We cannot link any standard libraries without an MCU specified.
-      D.Diag(diag::warn_drv_avr_mcu_not_specified);
-    } else {
-      Optional<StringRef> FamilyName = GetMCUFamilyName(CPU);
-      Optional<std::string> AVRLibcRoot = findAVRLibcInstallation();
+        if (CPU.empty()) {
+            // We cannot link any standard libraries without an MCU specified.
+            D.Diag(diag::warn_drv_avr_mcu_not_specified);
+        } else {
+            Optional<StringRef> FamilyName = GetMCUFamilyName(CPU);
+            Optional<std::string> AVRLibcRoot = findAVRLibcInstallation();
 
-      if (!FamilyName.hasValue()) {
-        // We do not have an entry for this CPU in the family
-        // mapping table yet.
-        D.Diag(diag::warn_drv_avr_family_linking_stdlibs_not_implemented)
-            << CPU;
-      } else if (!GCCInstallation.isValid()) {
-        // No avr-gcc found and so no runtime linked.
-        D.Diag(diag::warn_drv_avr_gcc_not_found);
-      } else if (!AVRLibcRoot.hasValue()) {
-        // No avr-libc found and so no runtime linked.
-        D.Diag(diag::warn_drv_avr_libc_not_found);
-      } else { // We have enough information to link stdlibs
-        std::string GCCRoot = std::string(GCCInstallation.getInstallPath());
-        std::string LibcRoot = AVRLibcRoot.getValue();
-        std::string SubPath = GetMCUSubPath(CPU);
+            if (!FamilyName.hasValue()) {
+                // We do not have an entry for this CPU in the family
+                // mapping table yet.
+                D.Diag(diag::warn_drv_avr_family_linking_stdlibs_not_implemented)
+                        << CPU;
+            } else if (!GCCInstallation.isValid()) {
+                // No avr-gcc found and so no runtime linked.
+                D.Diag(diag::warn_drv_avr_gcc_not_found);
+            } else if (!AVRLibcRoot.hasValue()) {
+                // No avr-libc found and so no runtime linked.
+                D.Diag(diag::warn_drv_avr_libc_not_found);
+            } else { // We have enough information to link stdlibs
+                std::string GCCRoot = std::string(GCCInstallation.getInstallPath());
+                std::string LibcRoot = AVRLibcRoot.getValue();
+                std::string SubPath = GetMCUSubPath(CPU);
 
-        getFilePaths().push_back(LibcRoot + std::string("/lib/") + SubPath);
-        getFilePaths().push_back(GCCRoot + std::string("/") + SubPath);
+                getFilePaths().push_back(LibcRoot + std::string("/lib/") + SubPath);
+                getFilePaths().push_back(GCCRoot + std::string("/") + SubPath);
 
-        LinkStdlib = true;
-      }
+                LinkStdlib = true;
+            }
+        }
+
+        if (!LinkStdlib)
+            D.Diag(diag::warn_drv_avr_stdlib_not_linked);
     }
-
-    if (!LinkStdlib)
-      D.Diag(diag::warn_drv_avr_stdlib_not_linked);
-  }
 }
 
 Tool *AVRToolChain::buildLinker() const {
-  return new tools::AVR::Linker(getTriple(), *this, LinkStdlib);
+    return new tools::AVR::Linker(getTriple(), *this, LinkStdlib);
 }
 
 void AVR::Linker::ConstructJob(Compilation &C, const JobAction &JA,
                                const InputInfo &Output,
                                const InputInfoList &Inputs, const ArgList &Args,
                                const char *LinkingOutput) const {
-  // Compute information about the target AVR.
-  std::string CPU = getCPUName(Args, getToolChain().getTriple());
-  llvm::Optional<StringRef> FamilyName = GetMCUFamilyName(CPU);
-  llvm::Optional<unsigned> SectionAddressData = GetMCUSectionAddressData(CPU);
+    // Compute information about the target AVR.
+    std::string CPU = getCPUName(Args, getToolChain().getTriple());
+    llvm::Optional<StringRef> FamilyName = GetMCUFamilyName(CPU);
+    llvm::Optional<unsigned> SectionAddressData = GetMCUSectionAddressData(CPU);
 
-  std::string Linker = getToolChain().GetProgramPath(getShortName());
-  ArgStringList CmdArgs;
-  AddLinkerInputs(getToolChain(), Inputs, Args, CmdArgs, JA);
+    std::string Linker = getToolChain().GetProgramPath(getShortName());
+    ArgStringList CmdArgs;
+    AddLinkerInputs(getToolChain(), Inputs, Args, CmdArgs, JA);
 
-  CmdArgs.push_back("-o");
-  CmdArgs.push_back(Output.getFilename());
+    CmdArgs.push_back("-o");
+    CmdArgs.push_back(Output.getFilename());
 
-  // Enable garbage collection of unused sections.
-  CmdArgs.push_back("--gc-sections");
+    // Enable garbage collection of unused sections.
+    CmdArgs.push_back("--gc-sections");
 
-  // Add library search paths before we specify libraries.
-  Args.AddAllArgs(CmdArgs, options::OPT_L);
-  getToolChain().AddFilePathLibArgs(Args, CmdArgs);
+    // Add library search paths before we specify libraries.
+    Args.AddAllArgs(CmdArgs, options::OPT_L);
+    getToolChain().AddFilePathLibArgs(Args, CmdArgs);
 
-  if (SectionAddressData.hasValue()) {
-    std::string DataSectionArg = std::string("-Tdata=0x") +
-                                 llvm::utohexstr(SectionAddressData.getValue());
-    CmdArgs.push_back(Args.MakeArgString(DataSectionArg));
-  } else {
-    // We do not have an entry for this CPU in the address mapping table yet.
-    getToolChain().getDriver().Diag(
-        diag::warn_drv_avr_linker_section_addresses_not_implemented)
-        << CPU;
-  }
+    if (SectionAddressData.hasValue()) {
+        std::string DataSectionArg = std::string("-Tdata=0x") +
+                                     llvm::utohexstr(SectionAddressData.getValue());
+        CmdArgs.push_back(Args.MakeArgString(DataSectionArg));
+    } else {
+        // We do not have an entry for this CPU in the address mapping table yet.
+        getToolChain().getDriver().Diag(
+            diag::warn_drv_avr_linker_section_addresses_not_implemented)
+                << CPU;
+    }
 
-  // If the family name is known, we can link with the device-specific libgcc.
-  // Without it, libgcc will simply not be linked. This matches avr-gcc
-  // behavior.
-  if (LinkStdlib) {
-    assert(!CPU.empty() && "CPU name must be known in order to link stdlibs");
+    // If the family name is known, we can link with the device-specific libgcc.
+    // Without it, libgcc will simply not be linked. This matches avr-gcc
+    // behavior.
+    if (LinkStdlib) {
+        assert(!CPU.empty() && "CPU name must be known in order to link stdlibs");
 
-    // Add the object file for the CRT.
-    std::string CrtFileName = std::string("-l:crt") + CPU + std::string(".o");
-    CmdArgs.push_back(Args.MakeArgString(CrtFileName));
+        // Add the object file for the CRT.
+        std::string CrtFileName = std::string("-l:crt") + CPU + std::string(".o");
+        CmdArgs.push_back(Args.MakeArgString(CrtFileName));
 
-    CmdArgs.push_back("-lgcc");
-    CmdArgs.push_back("-lm");
-    CmdArgs.push_back("-lc");
+        CmdArgs.push_back("-lgcc");
+        CmdArgs.push_back("-lm");
+        CmdArgs.push_back("-lc");
 
-    // Add the link library specific to the MCU.
-    CmdArgs.push_back(Args.MakeArgString(std::string("-l") + CPU));
+        // Add the link library specific to the MCU.
+        CmdArgs.push_back(Args.MakeArgString(std::string("-l") + CPU));
 
-    // Specify the family name as the emulation mode to use.
-    // This is almost always required because otherwise avr-ld
-    // will assume 'avr2' and warn about the program being larger
-    // than the bare minimum supports.
-    CmdArgs.push_back(Args.MakeArgString(std::string("-m") + *FamilyName));
-  }
+        // Specify the family name as the emulation mode to use.
+        // This is almost always required because otherwise avr-ld
+        // will assume 'avr2' and warn about the program being larger
+        // than the bare minimum supports.
+        CmdArgs.push_back(Args.MakeArgString(std::string("-m") + *FamilyName));
+    }
 
-  C.addCommand(std::make_unique<Command>(
-      JA, *this, ResponseFileSupport::AtFileCurCP(), Args.MakeArgString(Linker),
-      CmdArgs, Inputs, Output));
+    C.addCommand(std::make_unique<Command>(
+                     JA, *this, ResponseFileSupport::AtFileCurCP(), Args.MakeArgString(Linker),
+                     CmdArgs, Inputs, Output));
 }
 
 llvm::Optional<std::string> AVRToolChain::findAVRLibcInstallation() const {
-  for (StringRef PossiblePath : PossibleAVRLibcLocations) {
-    // Return the first avr-libc installation that exists.
-    if (llvm::sys::fs::is_directory(PossiblePath))
-      return Optional<std::string>(std::string(PossiblePath));
-  }
+    for (StringRef PossiblePath : PossibleAVRLibcLocations) {
+        // Return the first avr-libc installation that exists.
+        if (llvm::sys::fs::is_directory(PossiblePath))
+            return Optional<std::string>(std::string(PossiblePath));
+    }
 
-  return llvm::None;
+    return llvm::None;
 }

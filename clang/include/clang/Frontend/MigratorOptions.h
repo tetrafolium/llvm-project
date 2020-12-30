@@ -18,12 +18,12 @@ namespace clang {
 
 class MigratorOptions {
 public:
-  unsigned NoNSAllocReallocError : 1;
-  unsigned NoFinalizeRemoval : 1;
-  MigratorOptions() {
-    NoNSAllocReallocError = 0;
-    NoFinalizeRemoval = 0;
-  }
+    unsigned NoNSAllocReallocError : 1;
+    unsigned NoFinalizeRemoval : 1;
+    MigratorOptions() {
+        NoNSAllocReallocError = 0;
+        NoFinalizeRemoval = 0;
+    }
 };
 
 }

@@ -33,8 +33,8 @@ namespace serialized_diags {
 /// (via libclang) without needing to parse Clang's command line output.
 ///
 std::unique_ptr<DiagnosticConsumer> create(StringRef OutputFile,
-                                           DiagnosticOptions *Diags,
-                                           bool MergeChildRecords = false);
+        DiagnosticOptions *Diags,
+        bool MergeChildRecords = false);
 
 } // end serialized_diags namespace
 } // end clang namespace

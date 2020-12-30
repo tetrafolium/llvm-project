@@ -29,15 +29,15 @@ static const char *AVRDataLayout = "e-P1-p:16:8-i8:8-i16:8-i32:8-i64:8-f32:8-f64
 
 /// Processes a CPU name.
 static StringRef getCPU(StringRef CPU) {
-  if (CPU.empty() || CPU == "generic") {
-    return "avr2";
-  }
+    if (CPU.empty() || CPU == "generic") {
+        return "avr2";
+    }
 
-  return CPU;
+    return CPU;
 }
 
 static Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
-  return RM.hasValue() ? *RM : Reloc::Static;
+    return RM.hasValue() ? *RM : Reloc::Static;
 }
 
 AVRTargetMachine::AVRTargetMachine(const Target &T, const Triple &TT,
@@ -50,47 +50,47 @@ AVRTargetMachine::AVRTargetMachine(const Target &T, const Triple &TT,
                         getEffectiveRelocModel(RM),
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
       SubTarget(TT, std::string(getCPU(CPU)), std::string(FS), *this) {
-  this->TLOF = std::make_unique<AVRTargetObjectFile>();
-  initAsmInfo();
+    this->TLOF = std::make_unique<AVRTargetObjectFile>();
+    initAsmInfo();
 }
 
 namespace {
 /// AVR Code Generator Pass Configuration Options.
 class AVRPassConfig : public TargetPassConfig {
 public:
-  AVRPassConfig(AVRTargetMachine &TM, PassManagerBase &PM)
-      : TargetPassConfig(TM, PM) {}
+    AVRPassConfig(AVRTargetMachine &TM, PassManagerBase &PM)
+        : TargetPassConfig(TM, PM) {}
 
-  AVRTargetMachine &getAVRTargetMachine() const {
-    return getTM<AVRTargetMachine>();
-  }
+    AVRTargetMachine &getAVRTargetMachine() const {
+        return getTM<AVRTargetMachine>();
+    }
 
-  bool addInstSelector() override;
-  void addPreSched2() override;
-  void addPreEmitPass() override;
-  void addPreRegAlloc() override;
+    bool addInstSelector() override;
+    void addPreSched2() override;
+    void addPreEmitPass() override;
+    void addPreRegAlloc() override;
 };
 } // namespace
 
 TargetPassConfig *AVRTargetMachine::createPassConfig(PassManagerBase &PM) {
-  return new AVRPassConfig(*this, PM);
+    return new AVRPassConfig(*this, PM);
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeAVRTarget() {
-  // Register the target.
-  RegisterTargetMachine<AVRTargetMachine> X(getTheAVRTarget());
+    // Register the target.
+    RegisterTargetMachine<AVRTargetMachine> X(getTheAVRTarget());
 
-  auto &PR = *PassRegistry::getPassRegistry();
-  initializeAVRExpandPseudoPass(PR);
-  initializeAVRRelaxMemPass(PR);
+    auto &PR = *PassRegistry::getPassRegistry();
+    initializeAVRExpandPseudoPass(PR);
+    initializeAVRRelaxMemPass(PR);
 }
 
 const AVRSubtarget *AVRTargetMachine::getSubtargetImpl() const {
-  return &SubTarget;
+    return &SubTarget;
 }
 
 const AVRSubtarget *AVRTargetMachine::getSubtargetImpl(const Function &) const {
-  return &SubTarget;
+    return &SubTarget;
 }
 
 //===----------------------------------------------------------------------===//
@@ -98,27 +98,27 @@ const AVRSubtarget *AVRTargetMachine::getSubtargetImpl(const Function &) const {
 //===----------------------------------------------------------------------===//
 
 bool AVRPassConfig::addInstSelector() {
-  // Install an instruction selector.
-  addPass(createAVRISelDag(getAVRTargetMachine(), getOptLevel()));
-  // Create the frame analyzer pass used by the PEI pass.
-  addPass(createAVRFrameAnalyzerPass());
+    // Install an instruction selector.
+    addPass(createAVRISelDag(getAVRTargetMachine(), getOptLevel()));
+    // Create the frame analyzer pass used by the PEI pass.
+    addPass(createAVRFrameAnalyzerPass());
 
-  return false;
+    return false;
 }
 
 void AVRPassConfig::addPreRegAlloc() {
-  // Create the dynalloc SP save/restore pass to handle variable sized allocas.
-  addPass(createAVRDynAllocaSRPass());
+    // Create the dynalloc SP save/restore pass to handle variable sized allocas.
+    addPass(createAVRDynAllocaSRPass());
 }
 
 void AVRPassConfig::addPreSched2() {
-  addPass(createAVRRelaxMemPass());
-  addPass(createAVRExpandPseudoPass());
+    addPass(createAVRRelaxMemPass());
+    addPass(createAVRExpandPseudoPass());
 }
 
 void AVRPassConfig::addPreEmitPass() {
-  // Must run branch selection immediately preceding the asm printer.
-  addPass(&BranchRelaxationPassID);
+    // Must run branch selection immediately preceding the asm printer.
+    addPass(&BranchRelaxationPassID);
 }
 
 } // end of namespace llvm

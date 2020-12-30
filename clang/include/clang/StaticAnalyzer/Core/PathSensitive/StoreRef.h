@@ -27,24 +27,30 @@ class StoreManager;
 using Store = const void *;
 
 class StoreRef {
-  Store store;
-  StoreManager &mgr;
+    Store store;
+    StoreManager &mgr;
 
 public:
-  StoreRef(Store store, StoreManager &smgr);
-  StoreRef(const StoreRef &sr);
-  StoreRef &operator=(StoreRef const &newStore);
-  ~StoreRef();
+    StoreRef(Store store, StoreManager &smgr);
+    StoreRef(const StoreRef &sr);
+    StoreRef &operator=(StoreRef const &newStore);
+    ~StoreRef();
 
-  bool operator==(const StoreRef &x) const {
-    assert(&mgr == &x.mgr);
-    return x.store == store;
-  }
+    bool operator==(const StoreRef &x) const {
+        assert(&mgr == &x.mgr);
+        return x.store == store;
+    }
 
-  bool operator!=(const StoreRef &x) const { return !operator==(x); }
+    bool operator!=(const StoreRef &x) const {
+        return !operator==(x);
+    }
 
-  Store getStore() const { return store; }
-  const StoreManager &getStoreManager() const { return mgr; }
+    Store getStore() const {
+        return store;
+    }
+    const StoreManager &getStoreManager() const {
+        return mgr;
+    }
 };
 
 } // namespace ento

@@ -37,11 +37,13 @@ class _LIBCPP_TYPE_VIS __new_delete_memory_resource_imp
     }
 
     void do_deallocate(void *p, size_t n, size_t align) override {
-      _VSTD::__libcpp_deallocate(p, n, align);
+        _VSTD::__libcpp_deallocate(p, n, align);
     }
 
     bool do_is_equal(memory_resource const & other) const _NOEXCEPT override
-        { return &other == this; }
+    {
+        return &other == this;
+    }
 
 public:
     ~__new_delete_memory_resource_imp() override = default;
@@ -61,19 +63,21 @@ protected:
     }
     virtual void do_deallocate(void *, size_t, size_t) {}
     virtual bool do_is_equal(memory_resource const & __other) const _NOEXCEPT
-    { return &__other == this; }
+    {
+        return &__other == this;
+    }
 };
 
 namespace {
 
 union ResourceInitHelper {
-  struct {
-    __new_delete_memory_resource_imp new_delete_res;
-    __null_memory_resource_imp       null_res;
-  } resources;
-  char dummy;
-  _LIBCPP_CONSTEXPR_AFTER_CXX11 ResourceInitHelper() : resources() {}
-  ~ResourceInitHelper() {}
+    struct {
+        __new_delete_memory_resource_imp new_delete_res;
+        __null_memory_resource_imp       null_res;
+    } resources;
+    char dummy;
+    _LIBCPP_CONSTEXPR_AFTER_CXX11 ResourceInitHelper() : resources() {}
+    ~ResourceInitHelper() {}
 };
 
 // When compiled in C++14 this initialization should be a constant expression.
@@ -101,7 +105,7 @@ __default_memory_resource(bool set = false, memory_resource * new_res = nullptr)
 {
 #ifndef _LIBCPP_HAS_NO_ATOMIC_HEADER
     _LIBCPP_SAFE_STATIC static atomic<memory_resource*> __res =
-        ATOMIC_VAR_INIT(&res_init.resources.new_delete_res);
+    ATOMIC_VAR_INIT(&res_init.resources.new_delete_res);
     if (set) {
         new_res = new_res ? new_res : new_delete_resource();
         // TODO: Can a weaker ordering be used?

@@ -28,7 +28,7 @@
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_clzero (void * __line)
 {
-  __builtin_ia32_clzero ((void *)__line);
+    __builtin_ia32_clzero ((void *)__line);
 }
 
 #undef __DEFAULT_FN_ATTRS

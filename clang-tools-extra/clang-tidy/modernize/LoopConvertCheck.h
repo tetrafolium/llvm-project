@@ -19,70 +19,70 @@ namespace modernize {
 
 class LoopConvertCheck : public ClangTidyCheck {
 public:
-  LoopConvertCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    LoopConvertCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  struct RangeDescriptor {
-    RangeDescriptor();
-    bool ContainerNeedsDereference;
-    bool DerefByConstRef;
-    bool DerefByValue;
-    std::string ContainerString;
-    QualType ElemType;
-    bool NeedsReverseCall;
-  };
+    struct RangeDescriptor {
+        RangeDescriptor();
+        bool ContainerNeedsDereference;
+        bool DerefByConstRef;
+        bool DerefByValue;
+        std::string ContainerString;
+        QualType ElemType;
+        bool NeedsReverseCall;
+    };
 
-  void getAliasRange(SourceManager &SM, SourceRange &DeclRange);
+    void getAliasRange(SourceManager &SM, SourceRange &DeclRange);
 
-  void doConversion(ASTContext *Context, const VarDecl *IndexVar,
-                    const ValueDecl *MaybeContainer, const UsageResult &Usages,
-                    const DeclStmt *AliasDecl, bool AliasUseRequired,
-                    bool AliasFromForInit, const ForStmt *Loop,
-                    RangeDescriptor Descriptor);
+    void doConversion(ASTContext *Context, const VarDecl *IndexVar,
+                      const ValueDecl *MaybeContainer, const UsageResult &Usages,
+                      const DeclStmt *AliasDecl, bool AliasUseRequired,
+                      bool AliasFromForInit, const ForStmt *Loop,
+                      RangeDescriptor Descriptor);
 
-  StringRef getContainerString(ASTContext *Context, const ForStmt *Loop,
-                               const Expr *ContainerExpr);
+    StringRef getContainerString(ASTContext *Context, const ForStmt *Loop,
+                                 const Expr *ContainerExpr);
 
-  void getArrayLoopQualifiers(ASTContext *Context,
-                              const ast_matchers::BoundNodes &Nodes,
-                              const Expr *ContainerExpr,
-                              const UsageResult &Usages,
-                              RangeDescriptor &Descriptor);
-
-  void getIteratorLoopQualifiers(ASTContext *Context,
-                                 const ast_matchers::BoundNodes &Nodes,
-                                 RangeDescriptor &Descriptor);
-
-  void determineRangeDescriptor(ASTContext *Context,
+    void getArrayLoopQualifiers(ASTContext *Context,
                                 const ast_matchers::BoundNodes &Nodes,
-                                const ForStmt *Loop, LoopFixerKind FixerKind,
                                 const Expr *ContainerExpr,
                                 const UsageResult &Usages,
                                 RangeDescriptor &Descriptor);
 
-  bool isConvertible(ASTContext *Context, const ast_matchers::BoundNodes &Nodes,
-                     const ForStmt *Loop, LoopFixerKind FixerKind);
+    void getIteratorLoopQualifiers(ASTContext *Context,
+                                   const ast_matchers::BoundNodes &Nodes,
+                                   RangeDescriptor &Descriptor);
 
-  StringRef getReverseFunction() const;
-  StringRef getReverseHeader() const;
+    void determineRangeDescriptor(ASTContext *Context,
+                                  const ast_matchers::BoundNodes &Nodes,
+                                  const ForStmt *Loop, LoopFixerKind FixerKind,
+                                  const Expr *ContainerExpr,
+                                  const UsageResult &Usages,
+                                  RangeDescriptor &Descriptor);
 
-  std::unique_ptr<TUTrackingInfo> TUInfo;
-  const unsigned long long MaxCopySize;
-  const Confidence::Level MinConfidence;
-  const VariableNamer::NamingStyle NamingStyle;
-  utils::IncludeInserter Inserter;
-  bool UseReverseRanges;
-  const bool UseCxx20IfAvailable;
-  std::string ReverseFunction;
-  std::string ReverseHeader;
+    bool isConvertible(ASTContext *Context, const ast_matchers::BoundNodes &Nodes,
+                       const ForStmt *Loop, LoopFixerKind FixerKind);
+
+    StringRef getReverseFunction() const;
+    StringRef getReverseHeader() const;
+
+    std::unique_ptr<TUTrackingInfo> TUInfo;
+    const unsigned long long MaxCopySize;
+    const Confidence::Level MinConfidence;
+    const VariableNamer::NamingStyle NamingStyle;
+    utils::IncludeInserter Inserter;
+    bool UseReverseRanges;
+    const bool UseCxx20IfAvailable;
+    std::string ReverseFunction;
+    std::string ReverseHeader;
 };
 
 } // namespace modernize

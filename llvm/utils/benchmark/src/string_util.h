@@ -15,21 +15,21 @@ std::string HumanReadableNumber(double n, double one_k = 1024.0);
 std::string StrFormat(const char* format, ...);
 
 inline std::ostream& StrCatImp(std::ostream& out) BENCHMARK_NOEXCEPT {
-  return out;
+    return out;
 }
 
 template <class First, class... Rest>
 inline std::ostream& StrCatImp(std::ostream& out, First&& f,
-                                  Rest&&... rest) {
-  out << std::forward<First>(f);
-  return StrCatImp(out, std::forward<Rest>(rest)...);
+                               Rest&&... rest) {
+    out << std::forward<First>(f);
+    return StrCatImp(out, std::forward<Rest>(rest)...);
 }
 
 template <class... Args>
 inline std::string StrCat(Args&&... args) {
-  std::ostringstream ss;
-  StrCatImp(ss, std::forward<Args>(args)...);
-  return ss.str();
+    std::ostringstream ss;
+    StrCatImp(ss, std::forward<Args>(args)...);
+    return ss.str();
 }
 
 void ReplaceAll(std::string* str, const std::string& from,

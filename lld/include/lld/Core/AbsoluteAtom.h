@@ -18,23 +18,25 @@ namespace lld {
 class AbsoluteAtom : public Atom {
 public:
 
-  virtual uint64_t value() const = 0;
+    virtual uint64_t value() const = 0;
 
-  /// scope - The visibility of this atom to other atoms.  C static functions
-  /// have scope scopeTranslationUnit.  Regular C functions have scope
-  /// scopeGlobal.  Functions compiled with visibility=hidden have scope
-  /// scopeLinkageUnit so they can be see by other atoms being linked but not
-  /// by the OS loader.
-  virtual Scope scope() const = 0;
+    /// scope - The visibility of this atom to other atoms.  C static functions
+    /// have scope scopeTranslationUnit.  Regular C functions have scope
+    /// scopeGlobal.  Functions compiled with visibility=hidden have scope
+    /// scopeLinkageUnit so they can be see by other atoms being linked but not
+    /// by the OS loader.
+    virtual Scope scope() const = 0;
 
-  static bool classof(const Atom *a) {
-    return a->definition() == definitionAbsolute;
-  }
+    static bool classof(const Atom *a) {
+        return a->definition() == definitionAbsolute;
+    }
 
-  static bool classof(const AbsoluteAtom *) { return true; }
+    static bool classof(const AbsoluteAtom *) {
+        return true;
+    }
 
 protected:
-  AbsoluteAtom() : Atom(definitionAbsolute) {}
+    AbsoluteAtom() : Atom(definitionAbsolute) {}
 };
 
 } // namespace lld

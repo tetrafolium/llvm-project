@@ -17,20 +17,20 @@ namespace tidy {
 namespace cert {
 
 void VariadicFunctionDefCheck::registerMatchers(MatchFinder *Finder) {
-  // We only care about function *definitions* that are variadic, and do not
-  // have extern "C" language linkage.
-  Finder->addMatcher(
-      functionDecl(isDefinition(), isVariadic(), unless(isExternC()))
-          .bind("func"),
-      this);
+    // We only care about function *definitions* that are variadic, and do not
+    // have extern "C" language linkage.
+    Finder->addMatcher(
+        functionDecl(isDefinition(), isVariadic(), unless(isExternC()))
+        .bind("func"),
+        this);
 }
 
 void VariadicFunctionDefCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>("func");
+    const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>("func");
 
-  diag(FD->getLocation(),
-       "do not define a C-style variadic function; consider using a function "
-       "parameter pack or currying instead");
+    diag(FD->getLocation(),
+         "do not define a C-style variadic function; consider using a function "
+         "parameter pack or currying instead");
 }
 
 } // namespace cert

@@ -29,65 +29,65 @@ class IRBuilderBase;
 ///     for CurrentRow = 0..NumRows
 ///       for CurrentInner = 0..NumInner
 struct TileInfo {
-  /// Number of rows of the matrix.
-  unsigned NumRows;
+    /// Number of rows of the matrix.
+    unsigned NumRows;
 
-  /// Number of columns of the matrix.
-  unsigned NumColumns;
+    /// Number of columns of the matrix.
+    unsigned NumColumns;
 
-  /// Number of columns of the first matrix of a multiply /
-  /// number of rows of the second matrix of a multiply.
-  unsigned NumInner;
+    /// Number of columns of the first matrix of a multiply /
+    /// number of rows of the second matrix of a multiply.
+    unsigned NumInner;
 
-  /// Number of rows/columns in a tile.
-  unsigned TileSize = -1;
+    /// Number of rows/columns in a tile.
+    unsigned TileSize = -1;
 
-  /// Start row of the current tile to compute.
-  Value *CurrentRow;
+    /// Start row of the current tile to compute.
+    Value *CurrentRow;
 
-  /// Start column of the current tile to compute.
-  Value *CurrentCol;
+    /// Start column of the current tile to compute.
+    Value *CurrentCol;
 
-  /// Current tile offset during the tile computation.
-  Value *CurrentK;
+    /// Current tile offset during the tile computation.
+    Value *CurrentK;
 
-  /// Header of the outermost loop iterating from 0..NumColumns.
-  BasicBlock *ColumnLoopHeader = nullptr;
+    /// Header of the outermost loop iterating from 0..NumColumns.
+    BasicBlock *ColumnLoopHeader = nullptr;
 
-  /// Header of the second loop iterating from 0..NumRows.
-  BasicBlock *RowLoopHeader = nullptr;
-  /// Latch of the second loop iterating from 0..NumRows.
-  BasicBlock *RowLoopLatch = nullptr;
-  /// Header of the innermost loop iterating from 0..NumInner.
-  BasicBlock *InnerLoopHeader = nullptr;
-  /// Latch of the innermost loop iterating from 0..NumInner.
-  BasicBlock *InnerLoopLatch = nullptr;
+    /// Header of the second loop iterating from 0..NumRows.
+    BasicBlock *RowLoopHeader = nullptr;
+    /// Latch of the second loop iterating from 0..NumRows.
+    BasicBlock *RowLoopLatch = nullptr;
+    /// Header of the innermost loop iterating from 0..NumInner.
+    BasicBlock *InnerLoopHeader = nullptr;
+    /// Latch of the innermost loop iterating from 0..NumInner.
+    BasicBlock *InnerLoopLatch = nullptr;
 
-  TileInfo(unsigned NumRows, unsigned NumColumns, unsigned NumInner,
-           unsigned TileSize)
-      : NumRows(NumRows), NumColumns(NumColumns), NumInner(NumInner),
-        TileSize(TileSize) {}
+    TileInfo(unsigned NumRows, unsigned NumColumns, unsigned NumInner,
+             unsigned TileSize)
+        : NumRows(NumRows), NumColumns(NumColumns), NumInner(NumInner),
+          TileSize(TileSize) {}
 
-  /// Creates an IR loop nests for tiling of the form below. Returns the block
-  /// for the inner loop body and sets {Column,Row,Inner}LoopHeader/Latch
-  /// fields.
-  ///
-  /// for CurrentColumn = 0..NumColumns
-  ///   for CurrentRow = 0..NumRows
-  ///     for CurrentInner = 0..NumInner
-  BasicBlock *CreateTiledLoops(BasicBlock *Start, BasicBlock *End,
-                               IRBuilderBase &B, DomTreeUpdater &DTU,
-                               LoopInfo &LI);
+    /// Creates an IR loop nests for tiling of the form below. Returns the block
+    /// for the inner loop body and sets {Column,Row,Inner}LoopHeader/Latch
+    /// fields.
+    ///
+    /// for CurrentColumn = 0..NumColumns
+    ///   for CurrentRow = 0..NumRows
+    ///     for CurrentInner = 0..NumInner
+    BasicBlock *CreateTiledLoops(BasicBlock *Start, BasicBlock *End,
+                                 IRBuilderBase &B, DomTreeUpdater &DTU,
+                                 LoopInfo &LI);
 
 private:
-  /// Creates a new loop with header, body and latch blocks that iterates from
-  /// [0, Bound). Updates \p Preheader to branch to the new header and uses \p
-  /// Exit as exit block.  Adds the new loop blocks to \L and applies dominator
-  /// tree updates to \p DTU.
-  static BasicBlock *CreateLoop(BasicBlock *Preheader, BasicBlock *Exit,
-                                Value *Bound, Value *Step, StringRef Name,
-                                IRBuilderBase &B, DomTreeUpdater &DTU, Loop *L,
-                                LoopInfo &LI);
+    /// Creates a new loop with header, body and latch blocks that iterates from
+    /// [0, Bound). Updates \p Preheader to branch to the new header and uses \p
+    /// Exit as exit block.  Adds the new loop blocks to \L and applies dominator
+    /// tree updates to \p DTU.
+    static BasicBlock *CreateLoop(BasicBlock *Preheader, BasicBlock *Exit,
+                                  Value *Bound, Value *Step, StringRef Name,
+                                  IRBuilderBase &B, DomTreeUpdater &DTU, Loop *L,
+                                  LoopInfo &LI);
 };
 } // namespace llvm
 

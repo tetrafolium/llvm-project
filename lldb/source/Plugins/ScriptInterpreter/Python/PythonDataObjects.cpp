@@ -35,820 +35,828 @@ using llvm::Expected;
 using llvm::Twine;
 
 template <> Expected<bool> python::As<bool>(Expected<PythonObject> &&obj) {
-  if (!obj)
-    return obj.takeError();
-  return obj.get().IsTrue();
+    if (!obj)
+        return obj.takeError();
+    return obj.get().IsTrue();
 }
 
 template <>
 Expected<long long> python::As<long long>(Expected<PythonObject> &&obj) {
-  if (!obj)
-    return obj.takeError();
-  return obj->AsLongLong();
+    if (!obj)
+        return obj.takeError();
+    return obj->AsLongLong();
 }
 
 template <>
 Expected<unsigned long long>
 python::As<unsigned long long>(Expected<PythonObject> &&obj) {
-  if (!obj)
-    return obj.takeError();
-  return obj->AsUnsignedLongLong();
+    if (!obj)
+        return obj.takeError();
+    return obj->AsUnsignedLongLong();
 }
 
 template <>
 Expected<std::string> python::As<std::string>(Expected<PythonObject> &&obj) {
-  if (!obj)
-    return obj.takeError();
-  PyObject *str_obj = PyObject_Str(obj.get().get());
-  if (!obj)
-    return llvm::make_error<PythonException>();
-  auto str = Take<PythonString>(str_obj);
-  auto utf8 = str.AsUTF8();
-  if (!utf8)
-    return utf8.takeError();
-  return std::string(utf8.get());
+    if (!obj)
+        return obj.takeError();
+    PyObject *str_obj = PyObject_Str(obj.get().get());
+    if (!obj)
+        return llvm::make_error<PythonException>();
+    auto str = Take<PythonString>(str_obj);
+    auto utf8 = str.AsUTF8();
+    if (!utf8)
+        return utf8.takeError();
+    return std::string(utf8.get());
 }
 
 Expected<long long> PythonObject::AsLongLong() const {
-  if (!m_py_obj)
-    return nullDeref();
+    if (!m_py_obj)
+        return nullDeref();
 #if PY_MAJOR_VERSION < 3
-  if (!PyLong_Check(m_py_obj)) {
-    PythonInteger i(PyRefType::Borrowed, m_py_obj);
-    return i.AsLongLong();
-  }
+    if (!PyLong_Check(m_py_obj)) {
+        PythonInteger i(PyRefType::Borrowed, m_py_obj);
+        return i.AsLongLong();
+    }
 #endif
-  assert(!PyErr_Occurred());
-  long long r = PyLong_AsLongLong(m_py_obj);
-  if (PyErr_Occurred())
-    return exception();
-  return r;
+    assert(!PyErr_Occurred());
+    long long r = PyLong_AsLongLong(m_py_obj);
+    if (PyErr_Occurred())
+        return exception();
+    return r;
 }
 
 Expected<long long> PythonObject::AsUnsignedLongLong() const {
-  if (!m_py_obj)
-    return nullDeref();
+    if (!m_py_obj)
+        return nullDeref();
 #if PY_MAJOR_VERSION < 3
-  if (!PyLong_Check(m_py_obj)) {
-    PythonInteger i(PyRefType::Borrowed, m_py_obj);
-    return i.AsUnsignedLongLong();
-  }
+    if (!PyLong_Check(m_py_obj)) {
+        PythonInteger i(PyRefType::Borrowed, m_py_obj);
+        return i.AsUnsignedLongLong();
+    }
 #endif
-  assert(!PyErr_Occurred());
-  long long r = PyLong_AsUnsignedLongLong(m_py_obj);
-  if (PyErr_Occurred())
-    return exception();
-  return r;
+    assert(!PyErr_Occurred());
+    long long r = PyLong_AsUnsignedLongLong(m_py_obj);
+    if (PyErr_Occurred())
+        return exception();
+    return r;
 }
 
 // wraps on overflow, instead of raising an error.
 Expected<unsigned long long> PythonObject::AsModuloUnsignedLongLong() const {
-  if (!m_py_obj)
-    return nullDeref();
+    if (!m_py_obj)
+        return nullDeref();
 #if PY_MAJOR_VERSION < 3
-  if (!PyLong_Check(m_py_obj)) {
-    PythonInteger i(PyRefType::Borrowed, m_py_obj);
-    return i.AsModuloUnsignedLongLong();
-  }
+    if (!PyLong_Check(m_py_obj)) {
+        PythonInteger i(PyRefType::Borrowed, m_py_obj);
+        return i.AsModuloUnsignedLongLong();
+    }
 #endif
-  assert(!PyErr_Occurred());
-  unsigned long long r = PyLong_AsUnsignedLongLongMask(m_py_obj);
-  if (PyErr_Occurred())
-    return exception();
-  return r;
+    assert(!PyErr_Occurred());
+    unsigned long long r = PyLong_AsUnsignedLongLongMask(m_py_obj);
+    if (PyErr_Occurred())
+        return exception();
+    return r;
 }
 
 void StructuredPythonObject::Serialize(llvm::json::OStream &s) const {
-  s.value(llvm::formatv("Python Obj: {0:X}", GetValue()).str());
+    s.value(llvm::formatv("Python Obj: {0:X}", GetValue()).str());
 }
 
 // PythonObject
 
 void PythonObject::Dump(Stream &strm) const {
-  if (m_py_obj) {
-    FILE *file = llvm::sys::RetryAfterSignal(nullptr, ::tmpfile);
-    if (file) {
-      ::PyObject_Print(m_py_obj, file, 0);
-      const long length = ftell(file);
-      if (length) {
-        ::rewind(file);
-        std::vector<char> file_contents(length, '\0');
-        const size_t length_read =
-            ::fread(file_contents.data(), 1, file_contents.size(), file);
-        if (length_read > 0)
-          strm.Write(file_contents.data(), length_read);
-      }
-      ::fclose(file);
-    }
-  } else
-    strm.PutCString("NULL");
+    if (m_py_obj) {
+        FILE *file = llvm::sys::RetryAfterSignal(nullptr, ::tmpfile);
+        if (file) {
+            ::PyObject_Print(m_py_obj, file, 0);
+            const long length = ftell(file);
+            if (length) {
+                ::rewind(file);
+                std::vector<char> file_contents(length, '\0');
+                const size_t length_read =
+                    ::fread(file_contents.data(), 1, file_contents.size(), file);
+                if (length_read > 0)
+                    strm.Write(file_contents.data(), length_read);
+            }
+            ::fclose(file);
+        }
+    } else
+        strm.PutCString("NULL");
 }
 
 PyObjectType PythonObject::GetObjectType() const {
-  if (!IsAllocated())
-    return PyObjectType::None;
+    if (!IsAllocated())
+        return PyObjectType::None;
 
-  if (PythonModule::Check(m_py_obj))
-    return PyObjectType::Module;
-  if (PythonList::Check(m_py_obj))
-    return PyObjectType::List;
-  if (PythonTuple::Check(m_py_obj))
-    return PyObjectType::Tuple;
-  if (PythonDictionary::Check(m_py_obj))
-    return PyObjectType::Dictionary;
-  if (PythonString::Check(m_py_obj))
-    return PyObjectType::String;
+    if (PythonModule::Check(m_py_obj))
+        return PyObjectType::Module;
+    if (PythonList::Check(m_py_obj))
+        return PyObjectType::List;
+    if (PythonTuple::Check(m_py_obj))
+        return PyObjectType::Tuple;
+    if (PythonDictionary::Check(m_py_obj))
+        return PyObjectType::Dictionary;
+    if (PythonString::Check(m_py_obj))
+        return PyObjectType::String;
 #if PY_MAJOR_VERSION >= 3
-  if (PythonBytes::Check(m_py_obj))
-    return PyObjectType::Bytes;
+    if (PythonBytes::Check(m_py_obj))
+        return PyObjectType::Bytes;
 #endif
-  if (PythonByteArray::Check(m_py_obj))
-    return PyObjectType::ByteArray;
-  if (PythonBoolean::Check(m_py_obj))
-    return PyObjectType::Boolean;
-  if (PythonInteger::Check(m_py_obj))
-    return PyObjectType::Integer;
-  if (PythonFile::Check(m_py_obj))
-    return PyObjectType::File;
-  if (PythonCallable::Check(m_py_obj))
-    return PyObjectType::Callable;
-  return PyObjectType::Unknown;
+    if (PythonByteArray::Check(m_py_obj))
+        return PyObjectType::ByteArray;
+    if (PythonBoolean::Check(m_py_obj))
+        return PyObjectType::Boolean;
+    if (PythonInteger::Check(m_py_obj))
+        return PyObjectType::Integer;
+    if (PythonFile::Check(m_py_obj))
+        return PyObjectType::File;
+    if (PythonCallable::Check(m_py_obj))
+        return PyObjectType::Callable;
+    return PyObjectType::Unknown;
 }
 
 PythonString PythonObject::Repr() const {
-  if (!m_py_obj)
-    return PythonString();
-  PyObject *repr = PyObject_Repr(m_py_obj);
-  if (!repr)
-    return PythonString();
-  return PythonString(PyRefType::Owned, repr);
+    if (!m_py_obj)
+        return PythonString();
+    PyObject *repr = PyObject_Repr(m_py_obj);
+    if (!repr)
+        return PythonString();
+    return PythonString(PyRefType::Owned, repr);
 }
 
 PythonString PythonObject::Str() const {
-  if (!m_py_obj)
-    return PythonString();
-  PyObject *str = PyObject_Str(m_py_obj);
-  if (!str)
-    return PythonString();
-  return PythonString(PyRefType::Owned, str);
+    if (!m_py_obj)
+        return PythonString();
+    PyObject *str = PyObject_Str(m_py_obj);
+    if (!str)
+        return PythonString();
+    return PythonString(PyRefType::Owned, str);
 }
 
 PythonObject
 PythonObject::ResolveNameWithDictionary(llvm::StringRef name,
                                         const PythonDictionary &dict) {
-  size_t dot_pos = name.find('.');
-  llvm::StringRef piece = name.substr(0, dot_pos);
-  PythonObject result = dict.GetItemForKey(PythonString(piece));
-  if (dot_pos == llvm::StringRef::npos) {
-    // There was no dot, we're done.
-    return result;
-  }
+    size_t dot_pos = name.find('.');
+    llvm::StringRef piece = name.substr(0, dot_pos);
+    PythonObject result = dict.GetItemForKey(PythonString(piece));
+    if (dot_pos == llvm::StringRef::npos) {
+        // There was no dot, we're done.
+        return result;
+    }
 
-  // There was a dot.  The remaining portion of the name should be looked up in
-  // the context of the object that was found in the dictionary.
-  return result.ResolveName(name.substr(dot_pos + 1));
+    // There was a dot.  The remaining portion of the name should be looked up in
+    // the context of the object that was found in the dictionary.
+    return result.ResolveName(name.substr(dot_pos + 1));
 }
 
 PythonObject PythonObject::ResolveName(llvm::StringRef name) const {
-  // Resolve the name in the context of the specified object.  If, for example,
-  // `this` refers to a PyModule, then this will look for `name` in this
-  // module.  If `this` refers to a PyType, then it will resolve `name` as an
-  // attribute of that type.  If `this` refers to an instance of an object,
-  // then it will resolve `name` as the value of the specified field.
-  //
-  // This function handles dotted names so that, for example, if `m_py_obj`
-  // refers to the `sys` module, and `name` == "path.append", then it will find
-  // the function `sys.path.append`.
+    // Resolve the name in the context of the specified object.  If, for example,
+    // `this` refers to a PyModule, then this will look for `name` in this
+    // module.  If `this` refers to a PyType, then it will resolve `name` as an
+    // attribute of that type.  If `this` refers to an instance of an object,
+    // then it will resolve `name` as the value of the specified field.
+    //
+    // This function handles dotted names so that, for example, if `m_py_obj`
+    // refers to the `sys` module, and `name` == "path.append", then it will find
+    // the function `sys.path.append`.
 
-  size_t dot_pos = name.find('.');
-  if (dot_pos == llvm::StringRef::npos) {
-    // No dots in the name, we should be able to find the value immediately as
-    // an attribute of `m_py_obj`.
-    return GetAttributeValue(name);
-  }
+    size_t dot_pos = name.find('.');
+    if (dot_pos == llvm::StringRef::npos) {
+        // No dots in the name, we should be able to find the value immediately as
+        // an attribute of `m_py_obj`.
+        return GetAttributeValue(name);
+    }
 
-  // Look up the first piece of the name, and resolve the rest as a child of
-  // that.
-  PythonObject parent = ResolveName(name.substr(0, dot_pos));
-  if (!parent.IsAllocated())
-    return PythonObject();
+    // Look up the first piece of the name, and resolve the rest as a child of
+    // that.
+    PythonObject parent = ResolveName(name.substr(0, dot_pos));
+    if (!parent.IsAllocated())
+        return PythonObject();
 
-  // Tail recursion.. should be optimized by the compiler
-  return parent.ResolveName(name.substr(dot_pos + 1));
+    // Tail recursion.. should be optimized by the compiler
+    return parent.ResolveName(name.substr(dot_pos + 1));
 }
 
 bool PythonObject::HasAttribute(llvm::StringRef attr) const {
-  if (!IsValid())
-    return false;
-  PythonString py_attr(attr);
-  return !!PyObject_HasAttr(m_py_obj, py_attr.get());
+    if (!IsValid())
+        return false;
+    PythonString py_attr(attr);
+    return !!PyObject_HasAttr(m_py_obj, py_attr.get());
 }
 
 PythonObject PythonObject::GetAttributeValue(llvm::StringRef attr) const {
-  if (!IsValid())
-    return PythonObject();
+    if (!IsValid())
+        return PythonObject();
 
-  PythonString py_attr(attr);
-  if (!PyObject_HasAttr(m_py_obj, py_attr.get()))
-    return PythonObject();
+    PythonString py_attr(attr);
+    if (!PyObject_HasAttr(m_py_obj, py_attr.get()))
+        return PythonObject();
 
-  return PythonObject(PyRefType::Owned,
-                      PyObject_GetAttr(m_py_obj, py_attr.get()));
+    return PythonObject(PyRefType::Owned,
+                        PyObject_GetAttr(m_py_obj, py_attr.get()));
 }
 
 StructuredData::ObjectSP PythonObject::CreateStructuredObject() const {
-  switch (GetObjectType()) {
-  case PyObjectType::Dictionary:
-    return PythonDictionary(PyRefType::Borrowed, m_py_obj)
-        .CreateStructuredDictionary();
-  case PyObjectType::Boolean:
-    return PythonBoolean(PyRefType::Borrowed, m_py_obj)
-        .CreateStructuredBoolean();
-  case PyObjectType::Integer:
-    return PythonInteger(PyRefType::Borrowed, m_py_obj)
-        .CreateStructuredInteger();
-  case PyObjectType::List:
-    return PythonList(PyRefType::Borrowed, m_py_obj).CreateStructuredArray();
-  case PyObjectType::String:
-    return PythonString(PyRefType::Borrowed, m_py_obj).CreateStructuredString();
-  case PyObjectType::Bytes:
-    return PythonBytes(PyRefType::Borrowed, m_py_obj).CreateStructuredString();
-  case PyObjectType::ByteArray:
-    return PythonByteArray(PyRefType::Borrowed, m_py_obj)
-        .CreateStructuredString();
-  case PyObjectType::None:
-    return StructuredData::ObjectSP();
-  default:
-    return StructuredData::ObjectSP(new StructuredPythonObject(m_py_obj));
-  }
+    switch (GetObjectType()) {
+    case PyObjectType::Dictionary:
+        return PythonDictionary(PyRefType::Borrowed, m_py_obj)
+               .CreateStructuredDictionary();
+    case PyObjectType::Boolean:
+        return PythonBoolean(PyRefType::Borrowed, m_py_obj)
+               .CreateStructuredBoolean();
+    case PyObjectType::Integer:
+        return PythonInteger(PyRefType::Borrowed, m_py_obj)
+               .CreateStructuredInteger();
+    case PyObjectType::List:
+        return PythonList(PyRefType::Borrowed, m_py_obj).CreateStructuredArray();
+    case PyObjectType::String:
+        return PythonString(PyRefType::Borrowed, m_py_obj).CreateStructuredString();
+    case PyObjectType::Bytes:
+        return PythonBytes(PyRefType::Borrowed, m_py_obj).CreateStructuredString();
+    case PyObjectType::ByteArray:
+        return PythonByteArray(PyRefType::Borrowed, m_py_obj)
+               .CreateStructuredString();
+    case PyObjectType::None:
+        return StructuredData::ObjectSP();
+    default:
+        return StructuredData::ObjectSP(new StructuredPythonObject(m_py_obj));
+    }
 }
 
 // PythonString
 
-PythonBytes::PythonBytes(llvm::ArrayRef<uint8_t> bytes) { SetBytes(bytes); }
+PythonBytes::PythonBytes(llvm::ArrayRef<uint8_t> bytes) {
+    SetBytes(bytes);
+}
 
 PythonBytes::PythonBytes(const uint8_t *bytes, size_t length) {
-  SetBytes(llvm::ArrayRef<uint8_t>(bytes, length));
+    SetBytes(llvm::ArrayRef<uint8_t>(bytes, length));
 }
 
 bool PythonBytes::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
-  return PyBytes_Check(py_obj);
+    if (!py_obj)
+        return false;
+    return PyBytes_Check(py_obj);
 }
 
 llvm::ArrayRef<uint8_t> PythonBytes::GetBytes() const {
-  if (!IsValid())
-    return llvm::ArrayRef<uint8_t>();
+    if (!IsValid())
+        return llvm::ArrayRef<uint8_t>();
 
-  Py_ssize_t size;
-  char *c;
+    Py_ssize_t size;
+    char *c;
 
-  PyBytes_AsStringAndSize(m_py_obj, &c, &size);
-  return llvm::ArrayRef<uint8_t>(reinterpret_cast<uint8_t *>(c), size);
+    PyBytes_AsStringAndSize(m_py_obj, &c, &size);
+    return llvm::ArrayRef<uint8_t>(reinterpret_cast<uint8_t *>(c), size);
 }
 
 size_t PythonBytes::GetSize() const {
-  if (!IsValid())
-    return 0;
-  return PyBytes_Size(m_py_obj);
+    if (!IsValid())
+        return 0;
+    return PyBytes_Size(m_py_obj);
 }
 
 void PythonBytes::SetBytes(llvm::ArrayRef<uint8_t> bytes) {
-  const char *data = reinterpret_cast<const char *>(bytes.data());
-  *this = Take<PythonBytes>(PyBytes_FromStringAndSize(data, bytes.size()));
+    const char *data = reinterpret_cast<const char *>(bytes.data());
+    *this = Take<PythonBytes>(PyBytes_FromStringAndSize(data, bytes.size()));
 }
 
 StructuredData::StringSP PythonBytes::CreateStructuredString() const {
-  StructuredData::StringSP result(new StructuredData::String);
-  Py_ssize_t size;
-  char *c;
-  PyBytes_AsStringAndSize(m_py_obj, &c, &size);
-  result->SetValue(std::string(c, size));
-  return result;
+    StructuredData::StringSP result(new StructuredData::String);
+    Py_ssize_t size;
+    char *c;
+    PyBytes_AsStringAndSize(m_py_obj, &c, &size);
+    result->SetValue(std::string(c, size));
+    return result;
 }
 
 PythonByteArray::PythonByteArray(llvm::ArrayRef<uint8_t> bytes)
     : PythonByteArray(bytes.data(), bytes.size()) {}
 
 PythonByteArray::PythonByteArray(const uint8_t *bytes, size_t length) {
-  const char *str = reinterpret_cast<const char *>(bytes);
-  *this = Take<PythonByteArray>(PyByteArray_FromStringAndSize(str, length));
+    const char *str = reinterpret_cast<const char *>(bytes);
+    *this = Take<PythonByteArray>(PyByteArray_FromStringAndSize(str, length));
 }
 
 bool PythonByteArray::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
-  return PyByteArray_Check(py_obj);
+    if (!py_obj)
+        return false;
+    return PyByteArray_Check(py_obj);
 }
 
 llvm::ArrayRef<uint8_t> PythonByteArray::GetBytes() const {
-  if (!IsValid())
-    return llvm::ArrayRef<uint8_t>();
+    if (!IsValid())
+        return llvm::ArrayRef<uint8_t>();
 
-  char *c = PyByteArray_AsString(m_py_obj);
-  size_t size = GetSize();
-  return llvm::ArrayRef<uint8_t>(reinterpret_cast<uint8_t *>(c), size);
+    char *c = PyByteArray_AsString(m_py_obj);
+    size_t size = GetSize();
+    return llvm::ArrayRef<uint8_t>(reinterpret_cast<uint8_t *>(c), size);
 }
 
 size_t PythonByteArray::GetSize() const {
-  if (!IsValid())
-    return 0;
+    if (!IsValid())
+        return 0;
 
-  return PyByteArray_Size(m_py_obj);
+    return PyByteArray_Size(m_py_obj);
 }
 
 StructuredData::StringSP PythonByteArray::CreateStructuredString() const {
-  StructuredData::StringSP result(new StructuredData::String);
-  llvm::ArrayRef<uint8_t> bytes = GetBytes();
-  const char *str = reinterpret_cast<const char *>(bytes.data());
-  result->SetValue(std::string(str, bytes.size()));
-  return result;
+    StructuredData::StringSP result(new StructuredData::String);
+    llvm::ArrayRef<uint8_t> bytes = GetBytes();
+    const char *str = reinterpret_cast<const char *>(bytes.data());
+    result->SetValue(std::string(str, bytes.size()));
+    return result;
 }
 
 // PythonString
 
 Expected<PythonString> PythonString::FromUTF8(llvm::StringRef string) {
 #if PY_MAJOR_VERSION >= 3
-  PyObject *str = PyUnicode_FromStringAndSize(string.data(), string.size());
+    PyObject *str = PyUnicode_FromStringAndSize(string.data(), string.size());
 #else
-  PyObject *str = PyString_FromStringAndSize(string.data(), string.size());
+    PyObject *str = PyString_FromStringAndSize(string.data(), string.size());
 #endif
-  if (!str)
-    return llvm::make_error<PythonException>();
-  return Take<PythonString>(str);
+    if (!str)
+        return llvm::make_error<PythonException>();
+    return Take<PythonString>(str);
 }
 
-PythonString::PythonString(llvm::StringRef string) { SetString(string); }
+PythonString::PythonString(llvm::StringRef string) {
+    SetString(string);
+}
 
 bool PythonString::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
+    if (!py_obj)
+        return false;
 
-  if (PyUnicode_Check(py_obj))
-    return true;
+    if (PyUnicode_Check(py_obj))
+        return true;
 #if PY_MAJOR_VERSION < 3
-  if (PyString_Check(py_obj))
-    return true;
+    if (PyString_Check(py_obj))
+        return true;
 #endif
-  return false;
+    return false;
 }
 
 void PythonString::Convert(PyRefType &type, PyObject *&py_obj) {
 #if PY_MAJOR_VERSION < 3
-  // In Python 2, Don't store PyUnicode objects directly, because we need
-  // access to their underlying character buffers which Python 2 doesn't
-  // provide.
-  if (PyUnicode_Check(py_obj)) {
-    PyObject *s = PyUnicode_AsUTF8String(py_obj);
-    if (s == nullptr) {
-      PyErr_Clear();
-      if (type == PyRefType::Owned)
-        Py_DECREF(py_obj);
-      return;
+    // In Python 2, Don't store PyUnicode objects directly, because we need
+    // access to their underlying character buffers which Python 2 doesn't
+    // provide.
+    if (PyUnicode_Check(py_obj)) {
+        PyObject *s = PyUnicode_AsUTF8String(py_obj);
+        if (s == nullptr) {
+            PyErr_Clear();
+            if (type == PyRefType::Owned)
+                Py_DECREF(py_obj);
+            return;
+        }
+        if (type == PyRefType::Owned)
+            Py_DECREF(py_obj);
+        else
+            type = PyRefType::Owned;
+        py_obj = s;
     }
-    if (type == PyRefType::Owned)
-      Py_DECREF(py_obj);
-    else
-      type = PyRefType::Owned;
-    py_obj = s;
-  }
 #endif
 }
 
 llvm::StringRef PythonString::GetString() const {
-  auto s = AsUTF8();
-  if (!s) {
-    llvm::consumeError(s.takeError());
-    return llvm::StringRef("");
-  }
-  return s.get();
+    auto s = AsUTF8();
+    if (!s) {
+        llvm::consumeError(s.takeError());
+        return llvm::StringRef("");
+    }
+    return s.get();
 }
 
 Expected<llvm::StringRef> PythonString::AsUTF8() const {
-  if (!IsValid())
-    return nullDeref();
+    if (!IsValid())
+        return nullDeref();
 
-  Py_ssize_t size;
-  const char *data;
+    Py_ssize_t size;
+    const char *data;
 
 #if PY_MAJOR_VERSION >= 3
-  data = PyUnicode_AsUTF8AndSize(m_py_obj, &size);
+    data = PyUnicode_AsUTF8AndSize(m_py_obj, &size);
 #else
-  char *c = NULL;
-  int r = PyString_AsStringAndSize(m_py_obj, &c, &size);
-  if (r < 0)
-    c = NULL;
-  data = c;
+    char *c = NULL;
+    int r = PyString_AsStringAndSize(m_py_obj, &c, &size);
+    if (r < 0)
+        c = NULL;
+    data = c;
 #endif
 
-  if (!data)
-    return exception();
+    if (!data)
+        return exception();
 
-  return llvm::StringRef(data, size);
+    return llvm::StringRef(data, size);
 }
 
 size_t PythonString::GetSize() const {
-  if (IsValid()) {
+    if (IsValid()) {
 #if PY_MAJOR_VERSION >= 3
 #if PY_MINOR_VERSION >= 3
-    return PyUnicode_GetLength(m_py_obj);
+        return PyUnicode_GetLength(m_py_obj);
 #else
-    return PyUnicode_GetSize(m_py_obj);
+        return PyUnicode_GetSize(m_py_obj);
 #endif
 #else
-    return PyString_Size(m_py_obj);
+        return PyString_Size(m_py_obj);
 #endif
-  }
-  return 0;
+    }
+    return 0;
 }
 
 void PythonString::SetString(llvm::StringRef string) {
-  auto s = FromUTF8(string);
-  if (!s) {
-    llvm::consumeError(s.takeError());
-    Reset();
-  } else {
-    *this = std::move(s.get());
-  }
+    auto s = FromUTF8(string);
+    if (!s) {
+        llvm::consumeError(s.takeError());
+        Reset();
+    } else {
+        *this = std::move(s.get());
+    }
 }
 
 StructuredData::StringSP PythonString::CreateStructuredString() const {
-  StructuredData::StringSP result(new StructuredData::String);
-  result->SetValue(GetString());
-  return result;
+    StructuredData::StringSP result(new StructuredData::String);
+    result->SetValue(GetString());
+    return result;
 }
 
 // PythonInteger
 
-PythonInteger::PythonInteger(int64_t value) { SetInteger(value); }
+PythonInteger::PythonInteger(int64_t value) {
+    SetInteger(value);
+}
 
 bool PythonInteger::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
+    if (!py_obj)
+        return false;
 
 #if PY_MAJOR_VERSION >= 3
-  // Python 3 does not have PyInt_Check.  There is only one type of integral
-  // value, long.
-  return PyLong_Check(py_obj);
+    // Python 3 does not have PyInt_Check.  There is only one type of integral
+    // value, long.
+    return PyLong_Check(py_obj);
 #else
-  return PyLong_Check(py_obj) || PyInt_Check(py_obj);
+    return PyLong_Check(py_obj) || PyInt_Check(py_obj);
 #endif
 }
 
 void PythonInteger::Convert(PyRefType &type, PyObject *&py_obj) {
 #if PY_MAJOR_VERSION < 3
-  // Always store this as a PyLong, which makes interoperability between Python
-  // 2.x and Python 3.x easier.  This is only necessary in 2.x, since 3.x
-  // doesn't even have a PyInt.
-  if (PyInt_Check(py_obj)) {
-    // Since we converted the original object to a different type, the new
-    // object is an owned object regardless of the ownership semantics
-    // requested by the user.
-    long long value = PyInt_AsLong(py_obj);
-    PyObject *l = nullptr;
-    if (!PyErr_Occurred())
-      l = PyLong_FromLongLong(value);
-    if (l == nullptr) {
-      PyErr_Clear();
-      if (type == PyRefType::Owned)
-        Py_DECREF(py_obj);
-      return;
+    // Always store this as a PyLong, which makes interoperability between Python
+    // 2.x and Python 3.x easier.  This is only necessary in 2.x, since 3.x
+    // doesn't even have a PyInt.
+    if (PyInt_Check(py_obj)) {
+        // Since we converted the original object to a different type, the new
+        // object is an owned object regardless of the ownership semantics
+        // requested by the user.
+        long long value = PyInt_AsLong(py_obj);
+        PyObject *l = nullptr;
+        if (!PyErr_Occurred())
+            l = PyLong_FromLongLong(value);
+        if (l == nullptr) {
+            PyErr_Clear();
+            if (type == PyRefType::Owned)
+                Py_DECREF(py_obj);
+            return;
+        }
+        if (type == PyRefType::Owned)
+            Py_DECREF(py_obj);
+        else
+            type = PyRefType::Owned;
+        py_obj = l;
     }
-    if (type == PyRefType::Owned)
-      Py_DECREF(py_obj);
-    else
-      type = PyRefType::Owned;
-    py_obj = l;
-  }
 #endif
 }
 
 void PythonInteger::SetInteger(int64_t value) {
-  *this = Take<PythonInteger>(PyLong_FromLongLong(value));
+    *this = Take<PythonInteger>(PyLong_FromLongLong(value));
 }
 
 StructuredData::IntegerSP PythonInteger::CreateStructuredInteger() const {
-  StructuredData::IntegerSP result(new StructuredData::Integer);
-  // FIXME this is really not ideal.   Errors are silently converted to 0
-  // and overflows are silently wrapped.   But we'd need larger changes
-  // to StructuredData to fix it, so that's how it is for now.
-  llvm::Expected<unsigned long long> value = AsModuloUnsignedLongLong();
-  if (!value) {
-    llvm::consumeError(value.takeError());
-    result->SetValue(0);
-  } else {
-    result->SetValue(value.get());
-  }
-  return result;
+    StructuredData::IntegerSP result(new StructuredData::Integer);
+    // FIXME this is really not ideal.   Errors are silently converted to 0
+    // and overflows are silently wrapped.   But we'd need larger changes
+    // to StructuredData to fix it, so that's how it is for now.
+    llvm::Expected<unsigned long long> value = AsModuloUnsignedLongLong();
+    if (!value) {
+        llvm::consumeError(value.takeError());
+        result->SetValue(0);
+    } else {
+        result->SetValue(value.get());
+    }
+    return result;
 }
 
 // PythonBoolean
 
 PythonBoolean::PythonBoolean(bool value) {
-  SetValue(value);
+    SetValue(value);
 }
 
 bool PythonBoolean::Check(PyObject *py_obj) {
-  return py_obj ? PyBool_Check(py_obj) : false;
+    return py_obj ? PyBool_Check(py_obj) : false;
 }
 
 bool PythonBoolean::GetValue() const {
-  return m_py_obj ? PyObject_IsTrue(m_py_obj) : false;
+    return m_py_obj ? PyObject_IsTrue(m_py_obj) : false;
 }
 
 void PythonBoolean::SetValue(bool value) {
-  *this = Take<PythonBoolean>(PyBool_FromLong(value));
+    *this = Take<PythonBoolean>(PyBool_FromLong(value));
 }
 
 StructuredData::BooleanSP PythonBoolean::CreateStructuredBoolean() const {
-  StructuredData::BooleanSP result(new StructuredData::Boolean);
-  result->SetValue(GetValue());
-  return result;
+    StructuredData::BooleanSP result(new StructuredData::Boolean);
+    result->SetValue(GetValue());
+    return result;
 }
 
 // PythonList
 
 PythonList::PythonList(PyInitialValue value) {
-  if (value == PyInitialValue::Empty)
-    *this = Take<PythonList>(PyList_New(0));
+    if (value == PyInitialValue::Empty)
+        *this = Take<PythonList>(PyList_New(0));
 }
 
 PythonList::PythonList(int list_size) {
-  *this = Take<PythonList>(PyList_New(list_size));
+    *this = Take<PythonList>(PyList_New(list_size));
 }
 
 bool PythonList::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
-  return PyList_Check(py_obj);
+    if (!py_obj)
+        return false;
+    return PyList_Check(py_obj);
 }
 
 uint32_t PythonList::GetSize() const {
-  if (IsValid())
-    return PyList_GET_SIZE(m_py_obj);
-  return 0;
+    if (IsValid())
+        return PyList_GET_SIZE(m_py_obj);
+    return 0;
 }
 
 PythonObject PythonList::GetItemAtIndex(uint32_t index) const {
-  if (IsValid())
-    return PythonObject(PyRefType::Borrowed, PyList_GetItem(m_py_obj, index));
-  return PythonObject();
+    if (IsValid())
+        return PythonObject(PyRefType::Borrowed, PyList_GetItem(m_py_obj, index));
+    return PythonObject();
 }
 
 void PythonList::SetItemAtIndex(uint32_t index, const PythonObject &object) {
-  if (IsAllocated() && object.IsValid()) {
-    // PyList_SetItem is documented to "steal" a reference, so we need to
-    // convert it to an owned reference by incrementing it.
-    Py_INCREF(object.get());
-    PyList_SetItem(m_py_obj, index, object.get());
-  }
+    if (IsAllocated() && object.IsValid()) {
+        // PyList_SetItem is documented to "steal" a reference, so we need to
+        // convert it to an owned reference by incrementing it.
+        Py_INCREF(object.get());
+        PyList_SetItem(m_py_obj, index, object.get());
+    }
 }
 
 void PythonList::AppendItem(const PythonObject &object) {
-  if (IsAllocated() && object.IsValid()) {
-    // `PyList_Append` does *not* steal a reference, so do not call `Py_INCREF`
-    // here like we do with `PyList_SetItem`.
-    PyList_Append(m_py_obj, object.get());
-  }
+    if (IsAllocated() && object.IsValid()) {
+        // `PyList_Append` does *not* steal a reference, so do not call `Py_INCREF`
+        // here like we do with `PyList_SetItem`.
+        PyList_Append(m_py_obj, object.get());
+    }
 }
 
 StructuredData::ArraySP PythonList::CreateStructuredArray() const {
-  StructuredData::ArraySP result(new StructuredData::Array);
-  uint32_t count = GetSize();
-  for (uint32_t i = 0; i < count; ++i) {
-    PythonObject obj = GetItemAtIndex(i);
-    result->AddItem(obj.CreateStructuredObject());
-  }
-  return result;
+    StructuredData::ArraySP result(new StructuredData::Array);
+    uint32_t count = GetSize();
+    for (uint32_t i = 0; i < count; ++i) {
+        PythonObject obj = GetItemAtIndex(i);
+        result->AddItem(obj.CreateStructuredObject());
+    }
+    return result;
 }
 
 // PythonTuple
 
 PythonTuple::PythonTuple(PyInitialValue value) {
-  if (value == PyInitialValue::Empty)
-    *this = Take<PythonTuple>(PyTuple_New(0));
+    if (value == PyInitialValue::Empty)
+        *this = Take<PythonTuple>(PyTuple_New(0));
 }
 
 PythonTuple::PythonTuple(int tuple_size) {
-  *this = Take<PythonTuple>(PyTuple_New(tuple_size));
+    *this = Take<PythonTuple>(PyTuple_New(tuple_size));
 }
 
 PythonTuple::PythonTuple(std::initializer_list<PythonObject> objects) {
-  m_py_obj = PyTuple_New(objects.size());
+    m_py_obj = PyTuple_New(objects.size());
 
-  uint32_t idx = 0;
-  for (auto object : objects) {
-    if (object.IsValid())
-      SetItemAtIndex(idx, object);
-    idx++;
-  }
+    uint32_t idx = 0;
+    for (auto object : objects) {
+        if (object.IsValid())
+            SetItemAtIndex(idx, object);
+        idx++;
+    }
 }
 
 PythonTuple::PythonTuple(std::initializer_list<PyObject *> objects) {
-  m_py_obj = PyTuple_New(objects.size());
+    m_py_obj = PyTuple_New(objects.size());
 
-  uint32_t idx = 0;
-  for (auto py_object : objects) {
-    PythonObject object(PyRefType::Borrowed, py_object);
-    if (object.IsValid())
-      SetItemAtIndex(idx, object);
-    idx++;
-  }
+    uint32_t idx = 0;
+    for (auto py_object : objects) {
+        PythonObject object(PyRefType::Borrowed, py_object);
+        if (object.IsValid())
+            SetItemAtIndex(idx, object);
+        idx++;
+    }
 }
 
 bool PythonTuple::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
-  return PyTuple_Check(py_obj);
+    if (!py_obj)
+        return false;
+    return PyTuple_Check(py_obj);
 }
 
 uint32_t PythonTuple::GetSize() const {
-  if (IsValid())
-    return PyTuple_GET_SIZE(m_py_obj);
-  return 0;
+    if (IsValid())
+        return PyTuple_GET_SIZE(m_py_obj);
+    return 0;
 }
 
 PythonObject PythonTuple::GetItemAtIndex(uint32_t index) const {
-  if (IsValid())
-    return PythonObject(PyRefType::Borrowed, PyTuple_GetItem(m_py_obj, index));
-  return PythonObject();
+    if (IsValid())
+        return PythonObject(PyRefType::Borrowed, PyTuple_GetItem(m_py_obj, index));
+    return PythonObject();
 }
 
 void PythonTuple::SetItemAtIndex(uint32_t index, const PythonObject &object) {
-  if (IsAllocated() && object.IsValid()) {
-    // PyTuple_SetItem is documented to "steal" a reference, so we need to
-    // convert it to an owned reference by incrementing it.
-    Py_INCREF(object.get());
-    PyTuple_SetItem(m_py_obj, index, object.get());
-  }
+    if (IsAllocated() && object.IsValid()) {
+        // PyTuple_SetItem is documented to "steal" a reference, so we need to
+        // convert it to an owned reference by incrementing it.
+        Py_INCREF(object.get());
+        PyTuple_SetItem(m_py_obj, index, object.get());
+    }
 }
 
 StructuredData::ArraySP PythonTuple::CreateStructuredArray() const {
-  StructuredData::ArraySP result(new StructuredData::Array);
-  uint32_t count = GetSize();
-  for (uint32_t i = 0; i < count; ++i) {
-    PythonObject obj = GetItemAtIndex(i);
-    result->AddItem(obj.CreateStructuredObject());
-  }
-  return result;
+    StructuredData::ArraySP result(new StructuredData::Array);
+    uint32_t count = GetSize();
+    for (uint32_t i = 0; i < count; ++i) {
+        PythonObject obj = GetItemAtIndex(i);
+        result->AddItem(obj.CreateStructuredObject());
+    }
+    return result;
 }
 
 // PythonDictionary
 
 PythonDictionary::PythonDictionary(PyInitialValue value) {
-  if (value == PyInitialValue::Empty)
-    *this = Take<PythonDictionary>(PyDict_New());
+    if (value == PyInitialValue::Empty)
+        *this = Take<PythonDictionary>(PyDict_New());
 }
 
 bool PythonDictionary::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
+    if (!py_obj)
+        return false;
 
-  return PyDict_Check(py_obj);
+    return PyDict_Check(py_obj);
 }
 
 uint32_t PythonDictionary::GetSize() const {
-  if (IsValid())
-    return PyDict_Size(m_py_obj);
-  return 0;
+    if (IsValid())
+        return PyDict_Size(m_py_obj);
+    return 0;
 }
 
 PythonList PythonDictionary::GetKeys() const {
-  if (IsValid())
-    return PythonList(PyRefType::Owned, PyDict_Keys(m_py_obj));
-  return PythonList(PyInitialValue::Invalid);
+    if (IsValid())
+        return PythonList(PyRefType::Owned, PyDict_Keys(m_py_obj));
+    return PythonList(PyInitialValue::Invalid);
 }
 
 PythonObject PythonDictionary::GetItemForKey(const PythonObject &key) const {
-  auto item = GetItem(key);
-  if (!item) {
-    llvm::consumeError(item.takeError());
-    return PythonObject();
-  }
-  return std::move(item.get());
+    auto item = GetItem(key);
+    if (!item) {
+        llvm::consumeError(item.takeError());
+        return PythonObject();
+    }
+    return std::move(item.get());
 }
 
 Expected<PythonObject>
 PythonDictionary::GetItem(const PythonObject &key) const {
-  if (!IsValid())
-    return nullDeref();
+    if (!IsValid())
+        return nullDeref();
 #if PY_MAJOR_VERSION >= 3
-  PyObject *o = PyDict_GetItemWithError(m_py_obj, key.get());
-  if (PyErr_Occurred())
-    return exception();
+    PyObject *o = PyDict_GetItemWithError(m_py_obj, key.get());
+    if (PyErr_Occurred())
+        return exception();
 #else
-  PyObject *o = PyDict_GetItem(m_py_obj, key.get());
+    PyObject *o = PyDict_GetItem(m_py_obj, key.get());
 #endif
-  if (!o)
-    return keyError();
-  return Retain<PythonObject>(o);
+    if (!o)
+        return keyError();
+    return Retain<PythonObject>(o);
 }
 
 Expected<PythonObject> PythonDictionary::GetItem(const Twine &key) const {
-  if (!IsValid())
-    return nullDeref();
-  PyObject *o = PyDict_GetItemString(m_py_obj, NullTerminated(key));
-  if (PyErr_Occurred())
-    return exception();
-  if (!o)
-    return keyError();
-  return Retain<PythonObject>(o);
+    if (!IsValid())
+        return nullDeref();
+    PyObject *o = PyDict_GetItemString(m_py_obj, NullTerminated(key));
+    if (PyErr_Occurred())
+        return exception();
+    if (!o)
+        return keyError();
+    return Retain<PythonObject>(o);
 }
 
 Error PythonDictionary::SetItem(const PythonObject &key,
                                 const PythonObject &value) const {
-  if (!IsValid() || !value.IsValid())
-    return nullDeref();
-  int r = PyDict_SetItem(m_py_obj, key.get(), value.get());
-  if (r < 0)
-    return exception();
-  return Error::success();
+    if (!IsValid() || !value.IsValid())
+        return nullDeref();
+    int r = PyDict_SetItem(m_py_obj, key.get(), value.get());
+    if (r < 0)
+        return exception();
+    return Error::success();
 }
 
 Error PythonDictionary::SetItem(const Twine &key,
                                 const PythonObject &value) const {
-  if (!IsValid() || !value.IsValid())
-    return nullDeref();
-  int r = PyDict_SetItemString(m_py_obj, NullTerminated(key), value.get());
-  if (r < 0)
-    return exception();
-  return Error::success();
+    if (!IsValid() || !value.IsValid())
+        return nullDeref();
+    int r = PyDict_SetItemString(m_py_obj, NullTerminated(key), value.get());
+    if (r < 0)
+        return exception();
+    return Error::success();
 }
 
 void PythonDictionary::SetItemForKey(const PythonObject &key,
                                      const PythonObject &value) {
-  Error error = SetItem(key, value);
-  if (error)
-    llvm::consumeError(std::move(error));
+    Error error = SetItem(key, value);
+    if (error)
+        llvm::consumeError(std::move(error));
 }
 
 StructuredData::DictionarySP
 PythonDictionary::CreateStructuredDictionary() const {
-  StructuredData::DictionarySP result(new StructuredData::Dictionary);
-  PythonList keys(GetKeys());
-  uint32_t num_keys = keys.GetSize();
-  for (uint32_t i = 0; i < num_keys; ++i) {
-    PythonObject key = keys.GetItemAtIndex(i);
-    PythonObject value = GetItemForKey(key);
-    StructuredData::ObjectSP structured_value = value.CreateStructuredObject();
-    result->AddItem(key.Str().GetString(), structured_value);
-  }
-  return result;
+    StructuredData::DictionarySP result(new StructuredData::Dictionary);
+    PythonList keys(GetKeys());
+    uint32_t num_keys = keys.GetSize();
+    for (uint32_t i = 0; i < num_keys; ++i) {
+        PythonObject key = keys.GetItemAtIndex(i);
+        PythonObject value = GetItemForKey(key);
+        StructuredData::ObjectSP structured_value = value.CreateStructuredObject();
+        result->AddItem(key.Str().GetString(), structured_value);
+    }
+    return result;
 }
 
 PythonModule PythonModule::BuiltinsModule() {
 #if PY_MAJOR_VERSION >= 3
-  return AddModule("builtins");
+    return AddModule("builtins");
 #else
-  return AddModule("__builtin__");
+    return AddModule("__builtin__");
 #endif
 }
 
-PythonModule PythonModule::MainModule() { return AddModule("__main__"); }
+PythonModule PythonModule::MainModule() {
+    return AddModule("__main__");
+}
 
 PythonModule PythonModule::AddModule(llvm::StringRef module) {
-  std::string str = module.str();
-  return PythonModule(PyRefType::Borrowed, PyImport_AddModule(str.c_str()));
+    std::string str = module.str();
+    return PythonModule(PyRefType::Borrowed, PyImport_AddModule(str.c_str()));
 }
 
 Expected<PythonModule> PythonModule::Import(const Twine &name) {
-  PyObject *mod = PyImport_ImportModule(NullTerminated(name));
-  if (!mod)
-    return exception();
-  return Take<PythonModule>(mod);
+    PyObject *mod = PyImport_ImportModule(NullTerminated(name));
+    if (!mod)
+        return exception();
+    return Take<PythonModule>(mod);
 }
 
 Expected<PythonObject> PythonModule::Get(const Twine &name) {
-  if (!IsValid())
-    return nullDeref();
-  PyObject *dict = PyModule_GetDict(m_py_obj);
-  if (!dict)
-    return exception();
-  PyObject *item = PyDict_GetItemString(dict, NullTerminated(name));
-  if (!item)
-    return exception();
-  return Retain<PythonObject>(item);
+    if (!IsValid())
+        return nullDeref();
+    PyObject *dict = PyModule_GetDict(m_py_obj);
+    if (!dict)
+        return exception();
+    PyObject *item = PyDict_GetItemString(dict, NullTerminated(name));
+    if (!item)
+        return exception();
+    return Retain<PythonObject>(item);
 }
 
 bool PythonModule::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
+    if (!py_obj)
+        return false;
 
-  return PyModule_Check(py_obj);
+    return PyModule_Check(py_obj);
 }
 
 PythonDictionary PythonModule::GetDictionary() const {
-  if (!IsValid())
-    return PythonDictionary();
-  return Retain<PythonDictionary>(PyModule_GetDict(m_py_obj));
+    if (!IsValid())
+        return PythonDictionary();
+    return Retain<PythonDictionary>(PyModule_GetDict(m_py_obj));
 }
 
 bool PythonCallable::Check(PyObject *py_obj) {
-  if (!py_obj)
-    return false;
+    if (!py_obj)
+        return false;
 
-  return PyCallable_Check(py_obj);
+    return PyCallable_Check(py_obj);
 }
 
 #if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3

@@ -25,53 +25,53 @@ using namespace llvm;
 /// that aren't inside any of the desired Chunks.
 static void extractFunctionsFromModule(const std::vector<Chunk> &ChunksToKeep,
                                        Module *Program) {
-  Oracle O(ChunksToKeep);
+    Oracle O(ChunksToKeep);
 
-  // Record all out-of-chunk functions.
-  std::vector<std::reference_wrapper<Function>> FuncsToRemove;
-  copy_if(Program->functions(), std::back_inserter(FuncsToRemove),
-          [&O](Function &F) {
-            // Intrinsics don't have function bodies that are useful to
-            // reduce. Additionally, intrinsics may have additional operand
-            // constraints.
-            return !F.isIntrinsic() && !O.shouldKeep();
-          });
+    // Record all out-of-chunk functions.
+    std::vector<std::reference_wrapper<Function>> FuncsToRemove;
+    copy_if(Program->functions(), std::back_inserter(FuncsToRemove),
+    [&O](Function &F) {
+        // Intrinsics don't have function bodies that are useful to
+        // reduce. Additionally, intrinsics may have additional operand
+        // constraints.
+        return !F.isIntrinsic() && !O.shouldKeep();
+    });
 
-  // Then, drop body of each of them. We want to batch this and do nothing else
-  // here so that minimal number of remaining exteranal uses will remain.
-  for (Function &F : FuncsToRemove)
-    F.dropAllReferences();
+    // Then, drop body of each of them. We want to batch this and do nothing else
+    // here so that minimal number of remaining exteranal uses will remain.
+    for (Function &F : FuncsToRemove)
+        F.dropAllReferences();
 
-  // And finally, we can actually delete them.
-  for (Function &F : FuncsToRemove) {
-    // Replace all *still* remaining uses with undef.
-    F.replaceAllUsesWith(UndefValue::get(F.getType()));
-    // And finally, fully drop it.
-    F.eraseFromParent();
-  }
+    // And finally, we can actually delete them.
+    for (Function &F : FuncsToRemove) {
+        // Replace all *still* remaining uses with undef.
+        F.replaceAllUsesWith(UndefValue::get(F.getType()));
+        // And finally, fully drop it.
+        F.eraseFromParent();
+    }
 }
 
 /// Counts the amount of non-declaration functions and prints their
 /// respective name & index
 static int countFunctions(Module *Program) {
-  // TODO: Silence index with --quiet flag
-  errs() << "----------------------------\n";
-  errs() << "Function Index Reference:\n";
-  int FunctionCount = 0;
-  for (auto &F : *Program) {
-    if (F.isIntrinsic())
-      continue;
+    // TODO: Silence index with --quiet flag
+    errs() << "----------------------------\n";
+    errs() << "Function Index Reference:\n";
+    int FunctionCount = 0;
+    for (auto &F : *Program) {
+        if (F.isIntrinsic())
+            continue;
 
-    errs() << '\t' << ++FunctionCount << ": " << F.getName() << '\n';
-  }
+        errs() << '\t' << ++FunctionCount << ": " << F.getName() << '\n';
+    }
 
-  errs() << "----------------------------\n";
-  return FunctionCount;
+    errs() << "----------------------------\n";
+    return FunctionCount;
 }
 
 void llvm::reduceFunctionsDeltaPass(TestRunner &Test) {
-  errs() << "*** Reducing Functions...\n";
-  int Functions = countFunctions(Test.getProgram());
-  runDeltaPass(Test, Functions, extractFunctionsFromModule);
-  errs() << "----------------------------\n";
+    errs() << "*** Reducing Functions...\n";
+    int Functions = countFunctions(Test.getProgram());
+    runDeltaPass(Test, Functions, extractFunctionsFromModule);
+    errs() << "----------------------------\n";
 }

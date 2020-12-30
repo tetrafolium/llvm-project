@@ -35,9 +35,9 @@
 _CLC_DEFINE_BINARY_BUILTIN(float, ldexp, BUILTINF, float, int);
 
 #ifdef cl_khr_fp64
-  #pragma OPENCL EXTENSION cl_khr_fp64 : enable
-    // This defines all the ldexp(doubleN, intN) variants.
-  _CLC_DEFINE_BINARY_BUILTIN(double, ldexp, __builtin_amdgcn_ldexp, double, int);
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+// This defines all the ldexp(doubleN, intN) variants.
+_CLC_DEFINE_BINARY_BUILTIN(double, ldexp, __builtin_amdgcn_ldexp, double, int);
 #endif
 
 // This defines all the ldexp(GENTYPE, int);

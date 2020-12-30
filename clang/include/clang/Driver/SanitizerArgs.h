@@ -21,80 +21,110 @@ namespace driver {
 class ToolChain;
 
 class SanitizerArgs {
-  SanitizerSet Sanitizers;
-  SanitizerSet RecoverableSanitizers;
-  SanitizerSet TrapSanitizers;
+    SanitizerSet Sanitizers;
+    SanitizerSet RecoverableSanitizers;
+    SanitizerSet TrapSanitizers;
 
-  std::vector<std::string> UserBlacklistFiles;
-  std::vector<std::string> SystemBlacklistFiles;
-  std::vector<std::string> CoverageAllowlistFiles;
-  std::vector<std::string> CoverageBlocklistFiles;
-  int CoverageFeatures = 0;
-  int MsanTrackOrigins = 0;
-  bool MsanUseAfterDtor = true;
-  bool CfiCrossDso = false;
-  bool CfiICallGeneralizePointers = false;
-  bool CfiCanonicalJumpTables = false;
-  int AsanFieldPadding = 0;
-  bool SharedRuntime = false;
-  bool AsanUseAfterScope = true;
-  bool AsanPoisonCustomArrayCookie = false;
-  bool AsanGlobalsDeadStripping = false;
-  bool AsanUseOdrIndicator = false;
-  bool AsanInvalidPointerCmp = false;
-  bool AsanInvalidPointerSub = false;
-  std::string HwasanAbi;
-  bool LinkRuntimes = true;
-  bool LinkCXXRuntimes = false;
-  bool NeedPIE = false;
-  bool SafeStackRuntime = false;
-  bool Stats = false;
-  bool TsanMemoryAccess = true;
-  bool TsanFuncEntryExit = true;
-  bool TsanAtomics = true;
-  bool MinimalRuntime = false;
-  // True if cross-dso CFI support if provided by the system (i.e. Android).
-  bool ImplicitCfiRuntime = false;
-  bool NeedsMemProfRt = false;
+    std::vector<std::string> UserBlacklistFiles;
+    std::vector<std::string> SystemBlacklistFiles;
+    std::vector<std::string> CoverageAllowlistFiles;
+    std::vector<std::string> CoverageBlocklistFiles;
+    int CoverageFeatures = 0;
+    int MsanTrackOrigins = 0;
+    bool MsanUseAfterDtor = true;
+    bool CfiCrossDso = false;
+    bool CfiICallGeneralizePointers = false;
+    bool CfiCanonicalJumpTables = false;
+    int AsanFieldPadding = 0;
+    bool SharedRuntime = false;
+    bool AsanUseAfterScope = true;
+    bool AsanPoisonCustomArrayCookie = false;
+    bool AsanGlobalsDeadStripping = false;
+    bool AsanUseOdrIndicator = false;
+    bool AsanInvalidPointerCmp = false;
+    bool AsanInvalidPointerSub = false;
+    std::string HwasanAbi;
+    bool LinkRuntimes = true;
+    bool LinkCXXRuntimes = false;
+    bool NeedPIE = false;
+    bool SafeStackRuntime = false;
+    bool Stats = false;
+    bool TsanMemoryAccess = true;
+    bool TsanFuncEntryExit = true;
+    bool TsanAtomics = true;
+    bool MinimalRuntime = false;
+    // True if cross-dso CFI support if provided by the system (i.e. Android).
+    bool ImplicitCfiRuntime = false;
+    bool NeedsMemProfRt = false;
 
 public:
-  /// Parses the sanitizer arguments from an argument list.
-  SanitizerArgs(const ToolChain &TC, const llvm::opt::ArgList &Args);
+    /// Parses the sanitizer arguments from an argument list.
+    SanitizerArgs(const ToolChain &TC, const llvm::opt::ArgList &Args);
 
-  bool needsSharedRt() const { return SharedRuntime; }
+    bool needsSharedRt() const {
+        return SharedRuntime;
+    }
 
-  bool needsMemProfRt() const { return NeedsMemProfRt; }
-  bool needsAsanRt() const { return Sanitizers.has(SanitizerKind::Address); }
-  bool needsHwasanRt() const {
-    return Sanitizers.has(SanitizerKind::HWAddress);
-  }
-  bool needsTsanRt() const { return Sanitizers.has(SanitizerKind::Thread); }
-  bool needsMsanRt() const { return Sanitizers.has(SanitizerKind::Memory); }
-  bool needsFuzzer() const { return Sanitizers.has(SanitizerKind::Fuzzer); }
-  bool needsLsanRt() const {
-    return Sanitizers.has(SanitizerKind::Leak) &&
-           !Sanitizers.has(SanitizerKind::Address) &&
-           !Sanitizers.has(SanitizerKind::HWAddress);
-  }
-  bool needsFuzzerInterceptors() const;
-  bool needsUbsanRt() const;
-  bool requiresMinimalRuntime() const { return MinimalRuntime; }
-  bool needsDfsanRt() const { return Sanitizers.has(SanitizerKind::DataFlow); }
-  bool needsSafeStackRt() const { return SafeStackRuntime; }
-  bool needsCfiRt() const;
-  bool needsCfiDiagRt() const;
-  bool needsStatsRt() const { return Stats; }
-  bool needsScudoRt() const { return Sanitizers.has(SanitizerKind::Scudo); }
+    bool needsMemProfRt() const {
+        return NeedsMemProfRt;
+    }
+    bool needsAsanRt() const {
+        return Sanitizers.has(SanitizerKind::Address);
+    }
+    bool needsHwasanRt() const {
+        return Sanitizers.has(SanitizerKind::HWAddress);
+    }
+    bool needsTsanRt() const {
+        return Sanitizers.has(SanitizerKind::Thread);
+    }
+    bool needsMsanRt() const {
+        return Sanitizers.has(SanitizerKind::Memory);
+    }
+    bool needsFuzzer() const {
+        return Sanitizers.has(SanitizerKind::Fuzzer);
+    }
+    bool needsLsanRt() const {
+        return Sanitizers.has(SanitizerKind::Leak) &&
+               !Sanitizers.has(SanitizerKind::Address) &&
+               !Sanitizers.has(SanitizerKind::HWAddress);
+    }
+    bool needsFuzzerInterceptors() const;
+    bool needsUbsanRt() const;
+    bool requiresMinimalRuntime() const {
+        return MinimalRuntime;
+    }
+    bool needsDfsanRt() const {
+        return Sanitizers.has(SanitizerKind::DataFlow);
+    }
+    bool needsSafeStackRt() const {
+        return SafeStackRuntime;
+    }
+    bool needsCfiRt() const;
+    bool needsCfiDiagRt() const;
+    bool needsStatsRt() const {
+        return Stats;
+    }
+    bool needsScudoRt() const {
+        return Sanitizers.has(SanitizerKind::Scudo);
+    }
 
-  bool requiresPIE() const;
-  bool needsUnwindTables() const;
-  bool needsLTO() const;
-  bool linkRuntimes() const { return LinkRuntimes; }
-  bool linkCXXRuntimes() const { return LinkCXXRuntimes; }
-  bool hasCrossDsoCfi() const { return CfiCrossDso; }
-  bool hasAnySanitizer() const { return !Sanitizers.empty(); }
-  void addArgs(const ToolChain &TC, const llvm::opt::ArgList &Args,
-               llvm::opt::ArgStringList &CmdArgs, types::ID InputType) const;
+    bool requiresPIE() const;
+    bool needsUnwindTables() const;
+    bool needsLTO() const;
+    bool linkRuntimes() const {
+        return LinkRuntimes;
+    }
+    bool linkCXXRuntimes() const {
+        return LinkCXXRuntimes;
+    }
+    bool hasCrossDsoCfi() const {
+        return CfiCrossDso;
+    }
+    bool hasAnySanitizer() const {
+        return !Sanitizers.empty();
+    }
+    void addArgs(const ToolChain &TC, const llvm::opt::ArgList &Args,
+                 llvm::opt::ArgStringList &CmdArgs, types::ID InputType) const;
 };
 
 }  // namespace driver

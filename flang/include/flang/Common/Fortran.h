@@ -22,8 +22,8 @@ namespace Fortran::common {
 ENUM_CLASS(TypeCategory, Integer, Real, Complex, Character, Logical, Derived)
 
 constexpr bool IsNumericTypeCategory(TypeCategory category) {
-  return category == TypeCategory::Integer || category == TypeCategory::Real ||
-      category == TypeCategory::Complex;
+    return category == TypeCategory::Integer || category == TypeCategory::Real ||
+           category == TypeCategory::Complex;
 }
 
 // Kinds of IMPORT statements. Default means IMPORT or IMPORT :: names.
@@ -44,27 +44,27 @@ const char *AsFortran(RelationalOperator);
 ENUM_CLASS(Intent, Default, In, Out, InOut)
 
 ENUM_CLASS(IoStmtKind, None, Backspace, Close, Endfile, Flush, Inquire, Open,
-    Print, Read, Rewind, Wait, Write)
+           Print, Read, Rewind, Wait, Write)
 
 // Union of specifiers for all I/O statements.
 ENUM_CLASS(IoSpecKind, Access, Action, Advance, Asynchronous, Blank, Decimal,
-    Delim, Direct, Encoding, End, Eor, Err, Exist, File, Fmt, Form, Formatted,
-    Id, Iomsg, Iostat, Name, Named, Newunit, Nextrec, Nml, Number, Opened, Pad,
-    Pending, Pos, Position, Read, Readwrite, Rec, Recl, Round, Sequential, Sign,
-    Size, Status, Stream, Unformatted, Unit, Write,
-    Carriagecontrol, // nonstandard
-    Convert, // nonstandard
-    Dispose, // nonstandard
-)
+           Delim, Direct, Encoding, End, Eor, Err, Exist, File, Fmt, Form, Formatted,
+           Id, Iomsg, Iostat, Name, Named, Newunit, Nextrec, Nml, Number, Opened, Pad,
+           Pending, Pos, Position, Read, Readwrite, Rec, Recl, Round, Sequential, Sign,
+           Size, Status, Stream, Unformatted, Unit, Write,
+           Carriagecontrol, // nonstandard
+           Convert, // nonstandard
+           Dispose, // nonstandard
+          )
 
 // Floating-point rounding modes; these are packed into a byte to save
 // room in the runtime's format processing context structure.
 enum class RoundingMode : std::uint8_t {
-  TiesToEven, // ROUND=NEAREST, RN - default IEEE rounding
-  ToZero, // ROUND=ZERO, RZ - truncation
-  Down, // ROUND=DOWN, RD
-  Up, // ROUND=UP, RU
-  TiesAwayFromZero, // ROUND=COMPATIBLE, RC - ties round away from zero
+    TiesToEven, // ROUND=NEAREST, RN - default IEEE rounding
+    ToZero, // ROUND=ZERO, RZ - truncation
+    Down, // ROUND=DOWN, RD
+    Up, // ROUND=UP, RU
+    TiesAwayFromZero, // ROUND=COMPATIBLE, RC - ties round away from zero
 };
 
 // Fortran arrays may have up to 15 dimensions (See Fortran 2018 section 5.4.6).

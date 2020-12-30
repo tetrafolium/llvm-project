@@ -26,21 +26,21 @@ namespace mpi {
 /// http://clang.llvm.org/extra/clang-tidy/checks/mpi-buffer-deref.html
 class BufferDerefCheck : public ClangTidyCheck {
 public:
-  BufferDerefCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    BufferDerefCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  /// Checks for all buffers in an MPI call if they are sufficiently
-  /// dereferenced.
-  ///
-  /// \param BufferTypes buffer types
-  /// \param BufferExprs buffer arguments as expressions
-  void checkBuffers(ArrayRef<const Type *> BufferTypes,
-                    ArrayRef<const Expr *> BufferExprs);
+    /// Checks for all buffers in an MPI call if they are sufficiently
+    /// dereferenced.
+    ///
+    /// \param BufferTypes buffer types
+    /// \param BufferExprs buffer arguments as expressions
+    void checkBuffers(ArrayRef<const Type *> BufferTypes,
+                      ArrayRef<const Expr *> BufferExprs);
 
-  enum class IndirectionType : unsigned char { Pointer, Array };
+    enum class IndirectionType : unsigned char { Pointer, Array };
 };
 
 } // namespace mpi

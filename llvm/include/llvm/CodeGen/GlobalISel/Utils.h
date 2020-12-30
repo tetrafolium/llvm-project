@@ -128,8 +128,8 @@ Optional<int64_t> getConstantVRegVal(Register VReg,
 /// Simple struct used to hold a constant integer value and a virtual
 /// register.
 struct ValueAndVReg {
-  int64_t Value;
-  Register VReg;
+    int64_t Value;
+    Register VReg;
 };
 /// If \p VReg is defined by a statically evaluable chain of
 /// instructions rooted on a G_F/CONSTANT (\p LookThroughInstrs == true)
@@ -154,8 +154,8 @@ MachineInstr *getOpcodeDef(unsigned Opcode, Register Reg,
 /// Simple struct used to hold a Register value and the instruction which
 /// defines it.
 struct DefinitionAndSourceRegister {
-  MachineInstr *MI;
-  Register Reg;
+    MachineInstr *MI;
+    Register Reg;
 };
 
 /// Find the def instruction for \p Reg, and underlying value Register folding
@@ -196,7 +196,7 @@ bool isKnownNeverNaN(Register Val, const MachineRegisterInfo &MRI,
 
 /// Returns true if \p Val can be assumed to never be a signaling NaN.
 inline bool isKnownNeverSNaN(Register Val, const MachineRegisterInfo &MRI) {
-  return isKnownNeverNaN(Val, MRI, true);
+    return isKnownNeverNaN(Val, MRI, true);
 }
 
 Align inferAlignFromPtrInfo(MachineFunction &MF, const MachinePointerInfo &MPO);
@@ -241,7 +241,7 @@ Optional<int> getSplatIndex(MachineInstr &MI);
 
 /// Returns a scalar constant of a G_BUILD_VECTOR splat if it exists.
 Optional<int64_t> getBuildVectorConstantSplat(const MachineInstr &MI,
-                                              const MachineRegisterInfo &MRI);
+        const MachineRegisterInfo &MRI);
 
 /// Return true if the specified instruction is a G_BUILD_VECTOR or
 /// G_BUILD_VECTOR_TRUNC where all of the elements are 0 or undef.

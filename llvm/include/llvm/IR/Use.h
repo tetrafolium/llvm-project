@@ -43,85 +43,101 @@ class Value;
 /// jumping directly to the User when we arrive from the Value's uses.
 class Use {
 public:
-  Use(const Use &U) = delete;
+    Use(const Use &U) = delete;
 
-  /// Provide a fast substitute to std::swap<Use>
-  /// that also works with less standard-compliant compilers
-  void swap(Use &RHS);
+    /// Provide a fast substitute to std::swap<Use>
+    /// that also works with less standard-compliant compilers
+    void swap(Use &RHS);
 
 private:
-  /// Destructor - Only for zap()
-  ~Use() {
-    if (Val)
-      removeFromList();
-  }
+    /// Destructor - Only for zap()
+    ~Use() {
+        if (Val)
+            removeFromList();
+    }
 
-  /// Constructor
-  Use(User *Parent) : Parent(Parent) {}
+    /// Constructor
+    Use(User *Parent) : Parent(Parent) {}
 
 public:
-  friend class Value;
-  friend class User;
+    friend class Value;
+    friend class User;
 
-  operator Value *() const { return Val; }
-  Value *get() const { return Val; }
+    operator Value *() const {
+        return Val;
+    }
+    Value *get() const {
+        return Val;
+    }
 
-  /// Returns the User that contains this Use.
-  ///
-  /// For an instruction operand, for example, this will return the
-  /// instruction.
-  User *getUser() const { return Parent; };
+    /// Returns the User that contains this Use.
+    ///
+    /// For an instruction operand, for example, this will return the
+    /// instruction.
+    User *getUser() const {
+        return Parent;
+    };
 
-  inline void set(Value *Val);
+    inline void set(Value *Val);
 
-  inline Value *operator=(Value *RHS);
-  inline const Use &operator=(const Use &RHS);
+    inline Value *operator=(Value *RHS);
+    inline const Use &operator=(const Use &RHS);
 
-  Value *operator->() { return Val; }
-  const Value *operator->() const { return Val; }
+    Value *operator->() {
+        return Val;
+    }
+    const Value *operator->() const {
+        return Val;
+    }
 
-  Use *getNext() const { return Next; }
+    Use *getNext() const {
+        return Next;
+    }
 
-  /// Return the operand # of this use in its User.
-  unsigned getOperandNo() const;
+    /// Return the operand # of this use in its User.
+    unsigned getOperandNo() const;
 
-  /// Destroys Use operands when the number of operands of
-  /// a User changes.
-  static void zap(Use *Start, const Use *Stop, bool del = false);
+    /// Destroys Use operands when the number of operands of
+    /// a User changes.
+    static void zap(Use *Start, const Use *Stop, bool del = false);
 
 private:
 
-  Value *Val = nullptr;
-  Use *Next = nullptr;
-  Use **Prev = nullptr;
-  User *Parent = nullptr;
+    Value *Val = nullptr;
+    Use *Next = nullptr;
+    Use **Prev = nullptr;
+    User *Parent = nullptr;
 
-  void addToList(Use **List) {
-    Next = *List;
-    if (Next)
-      Next->Prev = &Next;
-    Prev = List;
-    *Prev = this;
-  }
+    void addToList(Use **List) {
+        Next = *List;
+        if (Next)
+            Next->Prev = &Next;
+        Prev = List;
+        *Prev = this;
+    }
 
-  void removeFromList() {
-    *Prev = Next;
-    if (Next)
-      Next->Prev = Prev;
-  }
+    void removeFromList() {
+        *Prev = Next;
+        if (Next)
+            Next->Prev = Prev;
+    }
 };
 
 /// Allow clients to treat uses just like values when using
 /// casting operators.
 template <> struct simplify_type<Use> {
-  using SimpleType = Value *;
+    using SimpleType = Value *;
 
-  static SimpleType getSimplifiedValue(Use &Val) { return Val.get(); }
+    static SimpleType getSimplifiedValue(Use &Val) {
+        return Val.get();
+    }
 };
 template <> struct simplify_type<const Use> {
-  using SimpleType = /*const*/ Value *;
+    using SimpleType = /*const*/ Value *;
 
-  static SimpleType getSimplifiedValue(const Use &Val) { return Val.get(); }
+    static SimpleType getSimplifiedValue(const Use &Val) {
+        return Val.get();
+    }
 };
 
 // Create wrappers for C Binding types (see CBindingWrapping.h).

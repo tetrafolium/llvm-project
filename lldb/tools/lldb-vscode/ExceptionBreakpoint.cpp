@@ -13,22 +13,22 @@
 namespace lldb_vscode {
 
 void ExceptionBreakpoint::SetBreakpoint() {
-  if (bp.IsValid())
-    return;
-  bool catch_value = filter.find("_catch") != std::string::npos;
-  bool throw_value = filter.find("_throw") != std::string::npos;
-  bp = g_vsc.target.BreakpointCreateForException(language, catch_value,
-                                                 throw_value);
-  // See comments in BreakpointBase::GetBreakpointLabel() for details of why
-  // we add a label to our breakpoints.
-  bp.AddName(BreakpointBase::GetBreakpointLabel());
+    if (bp.IsValid())
+        return;
+    bool catch_value = filter.find("_catch") != std::string::npos;
+    bool throw_value = filter.find("_throw") != std::string::npos;
+    bp = g_vsc.target.BreakpointCreateForException(language, catch_value,
+            throw_value);
+    // See comments in BreakpointBase::GetBreakpointLabel() for details of why
+    // we add a label to our breakpoints.
+    bp.AddName(BreakpointBase::GetBreakpointLabel());
 }
 
 void ExceptionBreakpoint::ClearBreakpoint() {
-  if (!bp.IsValid())
-    return;
-  g_vsc.target.BreakpointDelete(bp.GetID());
-  bp = lldb::SBBreakpoint();
+    if (!bp.IsValid())
+        return;
+    g_vsc.target.BreakpointDelete(bp.GetID());
+    bp = lldb::SBBreakpoint();
 }
 
 } // namespace lldb_vscode

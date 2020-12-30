@@ -11,5 +11,7 @@
 namespace gwp_asan {
 // This is only used for AllocationTrace.ThreadID and allocation traces are not
 // yet supported on Fuchsia.
-uint64_t getThreadID() { return kInvalidThreadID; }
+uint64_t getThreadID() {
+    return kInvalidThreadID;
+}
 } // namespace gwp_asan

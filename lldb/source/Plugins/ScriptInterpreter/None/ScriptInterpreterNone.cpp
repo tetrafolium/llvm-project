@@ -28,46 +28,48 @@ ScriptInterpreterNone::ScriptInterpreterNone(Debugger &debugger)
 ScriptInterpreterNone::~ScriptInterpreterNone() {}
 
 bool ScriptInterpreterNone::ExecuteOneLine(llvm::StringRef command,
-                                           CommandReturnObject *,
-                                           const ExecuteScriptOptions &) {
-  m_debugger.GetErrorStream().PutCString(
-      "error: there is no embedded script interpreter in this mode.\n");
-  return false;
+        CommandReturnObject *,
+        const ExecuteScriptOptions &) {
+    m_debugger.GetErrorStream().PutCString(
+        "error: there is no embedded script interpreter in this mode.\n");
+    return false;
 }
 
 void ScriptInterpreterNone::ExecuteInterpreterLoop() {
-  m_debugger.GetErrorStream().PutCString(
-      "error: there is no embedded script interpreter in this mode.\n");
+    m_debugger.GetErrorStream().PutCString(
+        "error: there is no embedded script interpreter in this mode.\n");
 }
 
 void ScriptInterpreterNone::Initialize() {
-  static llvm::once_flag g_once_flag;
+    static llvm::once_flag g_once_flag;
 
-  llvm::call_once(g_once_flag, []() {
-    PluginManager::RegisterPlugin(GetPluginNameStatic(),
-                                  GetPluginDescriptionStatic(),
-                                  lldb::eScriptLanguageNone, CreateInstance);
-  });
+    llvm::call_once(g_once_flag, []() {
+        PluginManager::RegisterPlugin(GetPluginNameStatic(),
+                                      GetPluginDescriptionStatic(),
+                                      lldb::eScriptLanguageNone, CreateInstance);
+    });
 }
 
 void ScriptInterpreterNone::Terminate() {}
 
 lldb::ScriptInterpreterSP
 ScriptInterpreterNone::CreateInstance(Debugger &debugger) {
-  return std::make_shared<ScriptInterpreterNone>(debugger);
+    return std::make_shared<ScriptInterpreterNone>(debugger);
 }
 
 lldb_private::ConstString ScriptInterpreterNone::GetPluginNameStatic() {
-  static ConstString g_name("script-none");
-  return g_name;
+    static ConstString g_name("script-none");
+    return g_name;
 }
 
 const char *ScriptInterpreterNone::GetPluginDescriptionStatic() {
-  return "Null script interpreter";
+    return "Null script interpreter";
 }
 
 lldb_private::ConstString ScriptInterpreterNone::GetPluginName() {
-  return GetPluginNameStatic();
+    return GetPluginNameStatic();
 }
 
-uint32_t ScriptInterpreterNone::GetPluginVersion() { return 1; }
+uint32_t ScriptInterpreterNone::GetPluginVersion() {
+    return 1;
+}

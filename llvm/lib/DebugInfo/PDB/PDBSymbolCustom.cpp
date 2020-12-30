@@ -18,7 +18,9 @@ using namespace llvm;
 using namespace llvm::pdb;
 
 void PDBSymbolCustom::getDataBytes(llvm::SmallVector<uint8_t, 32> &bytes) {
-  RawSymbol->getDataBytes(bytes);
+    RawSymbol->getDataBytes(bytes);
 }
 
-void PDBSymbolCustom::dump(PDBSymDumper &Dumper) const { Dumper.dump(*this); }
+void PDBSymbolCustom::dump(PDBSymDumper &Dumper) const {
+    Dumper.dump(*this);
+}

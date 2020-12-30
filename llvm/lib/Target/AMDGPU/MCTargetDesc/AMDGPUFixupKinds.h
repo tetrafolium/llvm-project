@@ -14,12 +14,12 @@
 namespace llvm {
 namespace AMDGPU {
 enum Fixups {
-  /// 16-bit PC relative fixup for SOPP branch instructions.
-  fixup_si_sopp_br = FirstTargetFixupKind,
+    /// 16-bit PC relative fixup for SOPP branch instructions.
+    fixup_si_sopp_br = FirstTargetFixupKind,
 
-  // Marker
-  LastTargetFixupKind,
-  NumTargetFixupKinds = LastTargetFixupKind - FirstTargetFixupKind
+    // Marker
+    LastTargetFixupKind,
+    NumTargetFixupKinds = LastTargetFixupKind - FirstTargetFixupKind
 };
 }
 }

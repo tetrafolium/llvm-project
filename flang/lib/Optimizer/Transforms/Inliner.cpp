@@ -13,12 +13,12 @@
 #include "llvm/Support/CommandLine.h"
 
 static llvm::cl::opt<bool>
-    aggressivelyInline("inline-all",
-                       llvm::cl::desc("aggressively inline everything"),
-                       llvm::cl::init(false));
+aggressivelyInline("inline-all",
+                   llvm::cl::desc("aggressively inline everything"),
+                   llvm::cl::init(false));
 
 /// Should we inline the callable `op` into region `reg`?
 bool fir::canLegallyInline(mlir::Operation *op, mlir::Region *reg,
                            mlir::BlockAndValueMapping &map) {
-  return aggressivelyInline;
+    return aggressivelyInline;
 }

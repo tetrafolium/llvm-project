@@ -31,26 +31,26 @@ void initializeLanaiMemAluCombinerPass(PassRegistry &);
 } // namespace llvm
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeLanaiTarget() {
-  // Register the target.
-  RegisterTargetMachine<LanaiTargetMachine> registered_target(
-      getTheLanaiTarget());
+    // Register the target.
+    RegisterTargetMachine<LanaiTargetMachine> registered_target(
+        getTheLanaiTarget());
 }
 
 static std::string computeDataLayout() {
-  // Data layout (keep in sync with clang/lib/Basic/Targets.cpp)
-  return "E"        // Big endian
-         "-m:e"     // ELF name manging
-         "-p:32:32" // 32-bit pointers, 32 bit aligned
-         "-i64:64"  // 64 bit integers, 64 bit aligned
-         "-a:0:32"  // 32 bit alignment of objects of aggregate type
-         "-n32"     // 32 bit native integer width
-         "-S64";    // 64 bit natural stack alignment
+    // Data layout (keep in sync with clang/lib/Basic/Targets.cpp)
+    return "E"        // Big endian
+           "-m:e"     // ELF name manging
+           "-p:32:32" // 32-bit pointers, 32 bit aligned
+           "-i64:64"  // 64 bit integers, 64 bit aligned
+           "-a:0:32"  // 32 bit alignment of objects of aggregate type
+           "-n32"     // 32 bit native integer width
+           "-S64";    // 64 bit natural stack alignment
 }
 
 static Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
-  if (!RM.hasValue())
-    return Reloc::PIC_;
-  return *RM;
+    if (!RM.hasValue())
+        return Reloc::PIC_;
+    return *RM;
 }
 
 LanaiTargetMachine::LanaiTargetMachine(const Target &T, const Triple &TT,
@@ -66,50 +66,50 @@ LanaiTargetMachine::LanaiTargetMachine(const Target &T, const Triple &TT,
       Subtarget(TT, Cpu, FeatureString, *this, Options, getCodeModel(),
                 OptLevel),
       TLOF(new LanaiTargetObjectFile()) {
-  initAsmInfo();
+    initAsmInfo();
 }
 
 TargetTransformInfo
 LanaiTargetMachine::getTargetTransformInfo(const Function &F) {
-  return TargetTransformInfo(LanaiTTIImpl(this, F));
+    return TargetTransformInfo(LanaiTTIImpl(this, F));
 }
 
 namespace {
 // Lanai Code Generator Pass Configuration Options.
 class LanaiPassConfig : public TargetPassConfig {
 public:
-  LanaiPassConfig(LanaiTargetMachine &TM, PassManagerBase *PassManager)
-      : TargetPassConfig(TM, *PassManager) {}
+    LanaiPassConfig(LanaiTargetMachine &TM, PassManagerBase *PassManager)
+        : TargetPassConfig(TM, *PassManager) {}
 
-  LanaiTargetMachine &getLanaiTargetMachine() const {
-    return getTM<LanaiTargetMachine>();
-  }
+    LanaiTargetMachine &getLanaiTargetMachine() const {
+        return getTM<LanaiTargetMachine>();
+    }
 
-  bool addInstSelector() override;
-  void addPreSched2() override;
-  void addPreEmitPass() override;
+    bool addInstSelector() override;
+    void addPreSched2() override;
+    void addPreEmitPass() override;
 };
 } // namespace
 
 TargetPassConfig *
 LanaiTargetMachine::createPassConfig(PassManagerBase &PassManager) {
-  return new LanaiPassConfig(*this, &PassManager);
+    return new LanaiPassConfig(*this, &PassManager);
 }
 
 // Install an instruction selector pass.
 bool LanaiPassConfig::addInstSelector() {
-  addPass(createLanaiISelDag(getLanaiTargetMachine()));
-  return false;
+    addPass(createLanaiISelDag(getLanaiTargetMachine()));
+    return false;
 }
 
 // Implemented by targets that want to run passes immediately before
 // machine code is emitted.
 void LanaiPassConfig::addPreEmitPass() {
-  addPass(createLanaiDelaySlotFillerPass(getLanaiTargetMachine()));
+    addPass(createLanaiDelaySlotFillerPass(getLanaiTargetMachine()));
 }
 
 // Run passes after prolog-epilog insertion and before the second instruction
 // scheduling pass.
 void LanaiPassConfig::addPreSched2() {
-  addPass(createLanaiMemAluCombinerPass());
+    addPass(createLanaiMemAluCombinerPass());
 }

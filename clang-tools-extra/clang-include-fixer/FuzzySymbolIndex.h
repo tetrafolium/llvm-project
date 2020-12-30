@@ -31,21 +31,21 @@ namespace include_fixer {
 // Implementations may choose to truncate results, refuse short queries, etc.
 class FuzzySymbolIndex : public SymbolIndex {
 public:
-  // Loads the specified clang-include-fixer database and returns an index serving it.
-  static llvm::Expected<std::unique_ptr<FuzzySymbolIndex>>
-  createFromYAML(llvm::StringRef File);
+    // Loads the specified clang-include-fixer database and returns an index serving it.
+    static llvm::Expected<std::unique_ptr<FuzzySymbolIndex>>
+            createFromYAML(llvm::StringRef File);
 
-  // Helpers for implementing indexes:
+    // Helpers for implementing indexes:
 
-  // Transforms a symbol name or query into a sequence of tokens.
-  // - URLHandlerCallback --> [url, handler, callback]
-  // - snake_case11 --> [snake, case, 11]
-  // - _WTF$ --> [wtf]
-  static std::vector<std::string> tokenize(llvm::StringRef Text);
+    // Transforms a symbol name or query into a sequence of tokens.
+    // - URLHandlerCallback --> [url, handler, callback]
+    // - snake_case11 --> [snake, case, 11]
+    // - _WTF$ --> [wtf]
+    static std::vector<std::string> tokenize(llvm::StringRef Text);
 
-  // Transforms query tokens into an unanchored regexp to match symbol tokens.
-  // - [fe f] --> /f(\w* )?e\w* f/, matches [fee fie foe].
-  static std::string queryRegexp(const std::vector<std::string> &Tokens);
+    // Transforms query tokens into an unanchored regexp to match symbol tokens.
+    // - [fe f] --> /f(\w* )?e\w* f/, matches [fee fie foe].
+    static std::string queryRegexp(const std::vector<std::string> &Tokens);
 };
 
 } // namespace include_fixer

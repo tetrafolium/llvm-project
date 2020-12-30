@@ -20,80 +20,80 @@
 namespace lldb_private {
 
 class CommandObjectExpression : public CommandObjectRaw,
-                                public IOHandlerDelegate {
+    public IOHandlerDelegate {
 public:
-  class CommandOptions : public OptionGroup {
-  public:
-    CommandOptions();
+    class CommandOptions : public OptionGroup {
+    public:
+        CommandOptions();
 
-    ~CommandOptions() override;
+        ~CommandOptions() override;
 
-    llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
+        llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
 
-    Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
-                          ExecutionContext *execution_context) override;
+        Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
+                              ExecutionContext *execution_context) override;
 
-    void OptionParsingStarting(ExecutionContext *execution_context) override;
+        void OptionParsingStarting(ExecutionContext *execution_context) override;
 
-    bool top_level;
-    bool unwind_on_error;
-    bool ignore_breakpoints;
-    bool allow_jit;
-    bool show_types;
-    bool show_summary;
-    bool debug;
-    uint32_t timeout;
-    bool try_all_threads;
-    lldb::LanguageType language;
-    LanguageRuntimeDescriptionDisplayVerbosity m_verbosity;
-    LazyBool auto_apply_fixits;
-  };
+        bool top_level;
+        bool unwind_on_error;
+        bool ignore_breakpoints;
+        bool allow_jit;
+        bool show_types;
+        bool show_summary;
+        bool debug;
+        uint32_t timeout;
+        bool try_all_threads;
+        lldb::LanguageType language;
+        LanguageRuntimeDescriptionDisplayVerbosity m_verbosity;
+        LazyBool auto_apply_fixits;
+    };
 
-  CommandObjectExpression(CommandInterpreter &interpreter);
+    CommandObjectExpression(CommandInterpreter &interpreter);
 
-  ~CommandObjectExpression() override;
+    ~CommandObjectExpression() override;
 
-  Options *GetOptions() override;
+    Options *GetOptions() override;
 
-  void HandleCompletion(CompletionRequest &request) override;
+    void HandleCompletion(CompletionRequest &request) override;
 
 protected:
-  // IOHandler::Delegate functions
-  void IOHandlerInputComplete(IOHandler &io_handler,
-                              std::string &line) override;
+    // IOHandler::Delegate functions
+    void IOHandlerInputComplete(IOHandler &io_handler,
+                                std::string &line) override;
 
-  bool IOHandlerIsInputComplete(IOHandler &io_handler,
-                                StringList &lines) override;
+    bool IOHandlerIsInputComplete(IOHandler &io_handler,
+                                  StringList &lines) override;
 
-  bool DoExecute(llvm::StringRef command, CommandReturnObject &result) override;
+    bool DoExecute(llvm::StringRef command, CommandReturnObject &result) override;
 
-  /// Return the appropriate expression options used for evaluating the
-  /// expression in the given target.
-  EvaluateExpressionOptions GetEvalOptions(const Target &target);
+    /// Return the appropriate expression options used for evaluating the
+    /// expression in the given target.
+    EvaluateExpressionOptions GetEvalOptions(const Target &target);
 
-  /// Evaluates the given expression.
-  /// \param output_stream The stream to which the evaluation result will be
-  ///                      printed.
-  /// \param error_stream Contains error messages that should be displayed to
-  ///                     the user in case the evaluation fails.
-  /// \param result A CommandReturnObject which status will be set to the
-  ///               appropriate value depending on evaluation success and
-  ///               whether the expression produced any result.
-  /// \return Returns true iff the expression was successfully evaluated,
-  ///         executed and the result could be printed to the output stream.
-  bool EvaluateExpression(llvm::StringRef expr, Stream &output_stream,
-                          Stream &error_stream, CommandReturnObject &result);
+    /// Evaluates the given expression.
+    /// \param output_stream The stream to which the evaluation result will be
+    ///                      printed.
+    /// \param error_stream Contains error messages that should be displayed to
+    ///                     the user in case the evaluation fails.
+    /// \param result A CommandReturnObject which status will be set to the
+    ///               appropriate value depending on evaluation success and
+    ///               whether the expression produced any result.
+    /// \return Returns true iff the expression was successfully evaluated,
+    ///         executed and the result could be printed to the output stream.
+    bool EvaluateExpression(llvm::StringRef expr, Stream &output_stream,
+                            Stream &error_stream, CommandReturnObject &result);
 
-  void GetMultilineExpression();
+    void GetMultilineExpression();
 
-  OptionGroupOptions m_option_group;
-  OptionGroupFormat m_format_options;
-  OptionGroupValueObjectDisplay m_varobj_options;
-  OptionGroupBoolean m_repl_option;
-  CommandOptions m_command_options;
-  uint32_t m_expr_line_count;
-  std::string m_expr_lines;       // Multi-line expression support
-  std::string m_fixed_expression; // Holds the current expression's fixed text.
+    OptionGroupOptions m_option_group;
+    OptionGroupFormat m_format_options;
+    OptionGroupValueObjectDisplay m_varobj_options;
+    OptionGroupBoolean m_repl_option;
+    CommandOptions m_command_options;
+    uint32_t m_expr_line_count;
+    std::string m_expr_lines;       // Multi-line expression support
+    std::string m_fixed_expression; // Holds the current expression's fixed text.
 };
 
 } // namespace lldb_private

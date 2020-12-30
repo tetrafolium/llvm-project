@@ -17,38 +17,38 @@ namespace lldb_private {
 
 class OptionGroupWatchpoint : public OptionGroup {
 public:
-  OptionGroupWatchpoint();
+    OptionGroupWatchpoint();
 
-  ~OptionGroupWatchpoint() override;
+    ~OptionGroupWatchpoint() override;
 
-  static bool IsWatchSizeSupported(uint32_t watch_size);
+    static bool IsWatchSizeSupported(uint32_t watch_size);
 
-  llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
+    llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
 
-  Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
-                        ExecutionContext *execution_context) override;
-  Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
+    Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
+                          ExecutionContext *execution_context) override;
+    Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
 
-  void OptionParsingStarting(ExecutionContext *execution_context) override;
+    void OptionParsingStarting(ExecutionContext *execution_context) override;
 
-  // Note:
-  // eWatchRead == LLDB_WATCH_TYPE_READ; and
-  // eWatchWrite == LLDB_WATCH_TYPE_WRITE
-  enum WatchType {
-    eWatchInvalid = 0,
-    eWatchRead,
-    eWatchWrite,
-    eWatchReadWrite
-  };
+    // Note:
+    // eWatchRead == LLDB_WATCH_TYPE_READ; and
+    // eWatchWrite == LLDB_WATCH_TYPE_WRITE
+    enum WatchType {
+        eWatchInvalid = 0,
+        eWatchRead,
+        eWatchWrite,
+        eWatchReadWrite
+    };
 
-  WatchType watch_type;
-  uint32_t watch_size;
-  bool watch_type_specified;
+    WatchType watch_type;
+    uint32_t watch_size;
+    bool watch_type_specified;
 
 private:
-  OptionGroupWatchpoint(const OptionGroupWatchpoint &) = delete;
-  const OptionGroupWatchpoint &
-  operator=(const OptionGroupWatchpoint &) = delete;
+    OptionGroupWatchpoint(const OptionGroupWatchpoint &) = delete;
+    const OptionGroupWatchpoint &
+    operator=(const OptionGroupWatchpoint &) = delete;
 };
 
 } // namespace lldb_private

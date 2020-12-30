@@ -17,125 +17,135 @@ namespace lldb_private {
 // CommandObjectMultiword
 
 class CommandObjectMultiword : public CommandObject {
-  // These two want to iterate over the subcommand dictionary.
-  friend class CommandInterpreter;
-  friend class CommandObjectSyntax;
+    // These two want to iterate over the subcommand dictionary.
+    friend class CommandInterpreter;
+    friend class CommandObjectSyntax;
 
 public:
-  CommandObjectMultiword(CommandInterpreter &interpreter, const char *name,
-                         const char *help = nullptr,
-                         const char *syntax = nullptr, uint32_t flags = 0);
+    CommandObjectMultiword(CommandInterpreter &interpreter, const char *name,
+                           const char *help = nullptr,
+                           const char *syntax = nullptr, uint32_t flags = 0);
 
-  ~CommandObjectMultiword() override;
+    ~CommandObjectMultiword() override;
 
-  bool IsMultiwordObject() override { return true; }
+    bool IsMultiwordObject() override {
+        return true;
+    }
 
-  CommandObjectMultiword *GetAsMultiwordCommand() override { return this; }
+    CommandObjectMultiword *GetAsMultiwordCommand() override {
+        return this;
+    }
 
-  bool LoadSubCommand(llvm::StringRef cmd_name,
-                      const lldb::CommandObjectSP &command_obj) override;
+    bool LoadSubCommand(llvm::StringRef cmd_name,
+                        const lldb::CommandObjectSP &command_obj) override;
 
-  void GenerateHelpText(Stream &output_stream) override;
+    void GenerateHelpText(Stream &output_stream) override;
 
-  lldb::CommandObjectSP GetSubcommandSP(llvm::StringRef sub_cmd,
-                                        StringList *matches = nullptr) override;
+    lldb::CommandObjectSP GetSubcommandSP(llvm::StringRef sub_cmd,
+                                          StringList *matches = nullptr) override;
 
-  CommandObject *GetSubcommandObject(llvm::StringRef sub_cmd,
-                                     StringList *matches = nullptr) override;
+    CommandObject *GetSubcommandObject(llvm::StringRef sub_cmd,
+                                       StringList *matches = nullptr) override;
 
-  void AproposAllSubCommands(llvm::StringRef prefix,
-                             llvm::StringRef search_word,
-                             StringList &commands_found,
-                             StringList &commands_help) override;
+    void AproposAllSubCommands(llvm::StringRef prefix,
+                               llvm::StringRef search_word,
+                               StringList &commands_found,
+                               StringList &commands_help) override;
 
-  bool WantsRawCommandString() override { return false; }
+    bool WantsRawCommandString() override {
+        return false;
+    }
 
-  void HandleCompletion(CompletionRequest &request) override;
+    void HandleCompletion(CompletionRequest &request) override;
 
-  const char *GetRepeatCommand(Args &current_command_args,
-                               uint32_t index) override;
+    const char *GetRepeatCommand(Args &current_command_args,
+                                 uint32_t index) override;
 
-  bool Execute(const char *args_string, CommandReturnObject &result) override;
+    bool Execute(const char *args_string, CommandReturnObject &result) override;
 
-  bool IsRemovable() const override { return m_can_be_removed; }
+    bool IsRemovable() const override {
+        return m_can_be_removed;
+    }
 
-  void SetRemovable(bool removable) { m_can_be_removed = removable; }
+    void SetRemovable(bool removable) {
+        m_can_be_removed = removable;
+    }
 
 protected:
-  CommandObject::CommandMap &GetSubcommandDictionary() {
-    return m_subcommand_dict;
-  }
+    CommandObject::CommandMap &GetSubcommandDictionary() {
+        return m_subcommand_dict;
+    }
 
-  CommandObject::CommandMap m_subcommand_dict;
-  bool m_can_be_removed;
+    CommandObject::CommandMap m_subcommand_dict;
+    bool m_can_be_removed;
 };
 
 class CommandObjectProxy : public CommandObject {
 public:
-  CommandObjectProxy(CommandInterpreter &interpreter, const char *name,
-                     const char *help = nullptr, const char *syntax = nullptr,
-                     uint32_t flags = 0);
+    CommandObjectProxy(CommandInterpreter &interpreter, const char *name,
+                       const char *help = nullptr, const char *syntax = nullptr,
+                       uint32_t flags = 0);
 
-  ~CommandObjectProxy() override;
+    ~CommandObjectProxy() override;
 
-  // Subclasses must provide a command object that will be transparently used
-  // for this object.
-  virtual CommandObject *GetProxyCommandObject() = 0;
+    // Subclasses must provide a command object that will be transparently used
+    // for this object.
+    virtual CommandObject *GetProxyCommandObject() = 0;
 
-  llvm::StringRef GetSyntax() override;
+    llvm::StringRef GetSyntax() override;
 
-  llvm::StringRef GetHelp() override;
+    llvm::StringRef GetHelp() override;
 
-  llvm::StringRef GetHelpLong() override;
+    llvm::StringRef GetHelpLong() override;
 
-  bool IsRemovable() const override;
+    bool IsRemovable() const override;
 
-  bool IsMultiwordObject() override;
+    bool IsMultiwordObject() override;
 
-  CommandObjectMultiword *GetAsMultiwordCommand() override;
+    CommandObjectMultiword *GetAsMultiwordCommand() override;
 
-  void GenerateHelpText(Stream &result) override;
+    void GenerateHelpText(Stream &result) override;
 
-  lldb::CommandObjectSP GetSubcommandSP(llvm::StringRef sub_cmd,
-                                        StringList *matches = nullptr) override;
+    lldb::CommandObjectSP GetSubcommandSP(llvm::StringRef sub_cmd,
+                                          StringList *matches = nullptr) override;
 
-  CommandObject *GetSubcommandObject(llvm::StringRef sub_cmd,
-                                     StringList *matches = nullptr) override;
+    CommandObject *GetSubcommandObject(llvm::StringRef sub_cmd,
+                                       StringList *matches = nullptr) override;
 
-  void AproposAllSubCommands(llvm::StringRef prefix,
-                             llvm::StringRef search_word,
-                             StringList &commands_found,
-                             StringList &commands_help) override;
+    void AproposAllSubCommands(llvm::StringRef prefix,
+                               llvm::StringRef search_word,
+                               StringList &commands_found,
+                               StringList &commands_help) override;
 
-  bool LoadSubCommand(llvm::StringRef cmd_name,
-                      const lldb::CommandObjectSP &command_obj) override;
+    bool LoadSubCommand(llvm::StringRef cmd_name,
+                        const lldb::CommandObjectSP &command_obj) override;
 
-  bool WantsRawCommandString() override;
+    bool WantsRawCommandString() override;
 
-  bool WantsCompletion() override;
+    bool WantsCompletion() override;
 
-  Options *GetOptions() override;
+    Options *GetOptions() override;
 
-  void HandleCompletion(CompletionRequest &request) override;
+    void HandleCompletion(CompletionRequest &request) override;
 
-  void
-  HandleArgumentCompletion(CompletionRequest &request,
-                           OptionElementVector &opt_element_vector) override;
+    void
+    HandleArgumentCompletion(CompletionRequest &request,
+                             OptionElementVector &opt_element_vector) override;
 
-  const char *GetRepeatCommand(Args &current_command_args,
-                               uint32_t index) override;
+    const char *GetRepeatCommand(Args &current_command_args,
+                                 uint32_t index) override;
 
-  /// \return
-  ///     An error message to be displayed when the command is executed (i.e.
-  ///     Execute is called) and \a GetProxyCommandObject returned null.
-  virtual llvm::StringRef GetUnsupportedError();
+    /// \return
+    ///     An error message to be displayed when the command is executed (i.e.
+    ///     Execute is called) and \a GetProxyCommandObject returned null.
+    virtual llvm::StringRef GetUnsupportedError();
 
-  bool Execute(const char *args_string, CommandReturnObject &result) override;
+    bool Execute(const char *args_string, CommandReturnObject &result) override;
 
 protected:
-  // These two want to iterate over the subcommand dictionary.
-  friend class CommandInterpreter;
-  friend class CommandObjectSyntax;
+    // These two want to iterate over the subcommand dictionary.
+    friend class CommandInterpreter;
+    friend class CommandObjectSyntax;
 };
 
 } // namespace lldb_private

@@ -38,30 +38,32 @@ using namespace lldb_private;
 
 LLDB_PLUGIN_DEFINE(InstrumentationRuntimeUBSan)
 
-InstrumentationRuntimeUBSan::~InstrumentationRuntimeUBSan() { Deactivate(); }
+InstrumentationRuntimeUBSan::~InstrumentationRuntimeUBSan() {
+    Deactivate();
+}
 
 lldb::InstrumentationRuntimeSP
 InstrumentationRuntimeUBSan::CreateInstance(const lldb::ProcessSP &process_sp) {
-  return InstrumentationRuntimeSP(new InstrumentationRuntimeUBSan(process_sp));
+    return InstrumentationRuntimeSP(new InstrumentationRuntimeUBSan(process_sp));
 }
 
 void InstrumentationRuntimeUBSan::Initialize() {
-  PluginManager::RegisterPlugin(
-      GetPluginNameStatic(),
-      "UndefinedBehaviorSanitizer instrumentation runtime plugin.",
-      CreateInstance, GetTypeStatic);
+    PluginManager::RegisterPlugin(
+        GetPluginNameStatic(),
+        "UndefinedBehaviorSanitizer instrumentation runtime plugin.",
+        CreateInstance, GetTypeStatic);
 }
 
 void InstrumentationRuntimeUBSan::Terminate() {
-  PluginManager::UnregisterPlugin(CreateInstance);
+    PluginManager::UnregisterPlugin(CreateInstance);
 }
 
 lldb_private::ConstString InstrumentationRuntimeUBSan::GetPluginNameStatic() {
-  return ConstString("UndefinedBehaviorSanitizer");
+    return ConstString("UndefinedBehaviorSanitizer");
 }
 
 lldb::InstrumentationRuntimeType InstrumentationRuntimeUBSan::GetTypeStatic() {
-  return eInstrumentationRuntimeTypeUndefinedBehaviorSanitizer;
+    return eInstrumentationRuntimeTypeUndefinedBehaviorSanitizer;
 }
 
 static const char *ub_sanitizer_retrieve_report_data_prefix = R"(

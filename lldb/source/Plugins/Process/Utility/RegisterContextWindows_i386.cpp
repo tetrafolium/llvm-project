@@ -16,22 +16,22 @@ using namespace lldb;
 namespace {
 // Declare our g_register_infos structure.
 typedef struct _GPR {
-  uint32_t eax;
-  uint32_t ebx;
-  uint32_t ecx;
-  uint32_t edx;
-  uint32_t edi;
-  uint32_t esi;
-  uint32_t ebp;
-  uint32_t esp;
-  uint32_t eip;
-  uint32_t eflags;
-  uint32_t cs;
-  uint32_t fs;
-  uint32_t gs;
-  uint32_t ss;
-  uint32_t ds;
-  uint32_t es;
+    uint32_t eax;
+    uint32_t ebx;
+    uint32_t ecx;
+    uint32_t edx;
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebp;
+    uint32_t esp;
+    uint32_t eip;
+    uint32_t eflags;
+    uint32_t cs;
+    uint32_t fs;
+    uint32_t gs;
+    uint32_t ss;
+    uint32_t ds;
+    uint32_t es;
 } GPR;
 
 #define GPR_OFFSET(regname) (LLVM_EXTENSION offsetof(GPR, regname))
@@ -71,19 +71,21 @@ static RegisterInfo g_register_infos_i386[] = {
 RegisterContextWindows_i386::RegisterContextWindows_i386(
     const ArchSpec &target_arch)
     : lldb_private::RegisterInfoInterface(target_arch) {
-  assert(target_arch.GetMachine() == llvm::Triple::x86);
+    assert(target_arch.GetMachine() == llvm::Triple::x86);
 }
 
 const RegisterInfo *RegisterContextWindows_i386::GetRegisterInfo() const {
-  return g_register_infos_i386;
+    return g_register_infos_i386;
 }
 
 uint32_t RegisterContextWindows_i386::GetRegisterCount() const {
-  return llvm::array_lengthof(g_register_infos_i386);
+    return llvm::array_lengthof(g_register_infos_i386);
 }
 
 uint32_t RegisterContextWindows_i386::GetUserRegisterCount() const {
-  return llvm::array_lengthof(g_register_infos_i386);
+    return llvm::array_lengthof(g_register_infos_i386);
 }
 
-size_t RegisterContextWindows_i386::GetGPRSize() const { return sizeof(GPR); }
+size_t RegisterContextWindows_i386::GetGPRSize() const {
+    return sizeof(GPR);
+}

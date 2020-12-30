@@ -35,67 +35,67 @@ FileSystemStatCache::get(StringRef Path, llvm::vfs::Status &Status,
                          bool isFile, std::unique_ptr<llvm::vfs::File> *F,
                          FileSystemStatCache *Cache,
                          llvm::vfs::FileSystem &FS) {
-  bool isForDir = !isFile;
-  std::error_code RetCode;
+    bool isForDir = !isFile;
+    std::error_code RetCode;
 
-  // If we have a cache, use it to resolve the stat query.
-  if (Cache)
-    RetCode = Cache->getStat(Path, Status, isFile, F, FS);
-  else if (isForDir || !F) {
-    // If this is a directory or a file descriptor is not needed and we have
-    // no cache, just go to the file system.
-    llvm::ErrorOr<llvm::vfs::Status> StatusOrErr = FS.status(Path);
-    if (!StatusOrErr) {
-      RetCode = StatusOrErr.getError();
+    // If we have a cache, use it to resolve the stat query.
+    if (Cache)
+        RetCode = Cache->getStat(Path, Status, isFile, F, FS);
+    else if (isForDir || !F) {
+        // If this is a directory or a file descriptor is not needed and we have
+        // no cache, just go to the file system.
+        llvm::ErrorOr<llvm::vfs::Status> StatusOrErr = FS.status(Path);
+        if (!StatusOrErr) {
+            RetCode = StatusOrErr.getError();
+        } else {
+            Status = *StatusOrErr;
+        }
     } else {
-      Status = *StatusOrErr;
+        // Otherwise, we have to go to the filesystem.  We can always just use
+        // 'stat' here, but (for files) the client is asking whether the file exists
+        // because it wants to turn around and *open* it.  It is more efficient to
+        // do "open+fstat" on success than it is to do "stat+open".
+        //
+        // Because of this, check to see if the file exists with 'open'.  If the
+        // open succeeds, use fstat to get the stat info.
+        auto OwnedFile = FS.openFileForRead(Path);
+
+        if (!OwnedFile) {
+            // If the open fails, our "stat" fails.
+            RetCode = OwnedFile.getError();
+        } else {
+            // Otherwise, the open succeeded.  Do an fstat to get the information
+            // about the file.  We'll end up returning the open file descriptor to the
+            // client to do what they please with it.
+            llvm::ErrorOr<llvm::vfs::Status> StatusOrErr = (*OwnedFile)->status();
+            if (StatusOrErr) {
+                Status = *StatusOrErr;
+                *F = std::move(*OwnedFile);
+            } else {
+                // fstat rarely fails.  If it does, claim the initial open didn't
+                // succeed.
+                *F = nullptr;
+                RetCode = StatusOrErr.getError();
+            }
+        }
     }
-  } else {
-    // Otherwise, we have to go to the filesystem.  We can always just use
-    // 'stat' here, but (for files) the client is asking whether the file exists
-    // because it wants to turn around and *open* it.  It is more efficient to
-    // do "open+fstat" on success than it is to do "stat+open".
-    //
-    // Because of this, check to see if the file exists with 'open'.  If the
-    // open succeeds, use fstat to get the stat info.
-    auto OwnedFile = FS.openFileForRead(Path);
 
-    if (!OwnedFile) {
-      // If the open fails, our "stat" fails.
-      RetCode = OwnedFile.getError();
-    } else {
-      // Otherwise, the open succeeded.  Do an fstat to get the information
-      // about the file.  We'll end up returning the open file descriptor to the
-      // client to do what they please with it.
-      llvm::ErrorOr<llvm::vfs::Status> StatusOrErr = (*OwnedFile)->status();
-      if (StatusOrErr) {
-        Status = *StatusOrErr;
-        *F = std::move(*OwnedFile);
-      } else {
-        // fstat rarely fails.  If it does, claim the initial open didn't
-        // succeed.
-        *F = nullptr;
-        RetCode = StatusOrErr.getError();
-      }
+    // If the path doesn't exist, return failure.
+    if (RetCode)
+        return RetCode;
+
+    // If the path exists, make sure that its "directoryness" matches the clients
+    // demands.
+    if (Status.isDirectory() != isForDir) {
+        // If not, close the file if opened.
+        if (F)
+            *F = nullptr;
+        return std::make_error_code(
+                   Status.isDirectory() ?
+                   std::errc::is_a_directory : std::errc::not_a_directory);
     }
-  }
 
-  // If the path doesn't exist, return failure.
-  if (RetCode)
-    return RetCode;
-
-  // If the path exists, make sure that its "directoryness" matches the clients
-  // demands.
-  if (Status.isDirectory() != isForDir) {
-    // If not, close the file if opened.
-    if (F)
-      *F = nullptr;
-    return std::make_error_code(
-        Status.isDirectory() ?
-            std::errc::is_a_directory : std::errc::not_a_directory);
-  }
-
-  return std::error_code();
+    return std::error_code();
 }
 
 std::error_code
@@ -103,18 +103,18 @@ MemorizeStatCalls::getStat(StringRef Path, llvm::vfs::Status &Status,
                            bool isFile,
                            std::unique_ptr<llvm::vfs::File> *F,
                            llvm::vfs::FileSystem &FS) {
-  auto err = get(Path, Status, isFile, F, nullptr, FS);
-  if (err) {
-    // Do not cache failed stats, it is easy to construct common inconsistent
-    // situations if we do, and they are not important for PCH performance
-    // (which currently only needs the stats to construct the initial
-    // FileManager entries).
-    return err;
-  }
+    auto err = get(Path, Status, isFile, F, nullptr, FS);
+    if (err) {
+        // Do not cache failed stats, it is easy to construct common inconsistent
+        // situations if we do, and they are not important for PCH performance
+        // (which currently only needs the stats to construct the initial
+        // FileManager entries).
+        return err;
+    }
 
-  // Cache file 'stat' results and directories with absolutely paths.
-  if (!Status.isDirectory() || llvm::sys::path::is_absolute(Path))
-    StatCalls[Path] = Status;
+    // Cache file 'stat' results and directories with absolutely paths.
+    if (!Status.isDirectory() || llvm::sys::path::is_absolute(Path))
+        StatCalls[Path] = Status;
 
-  return std::error_code();
+    return std::error_code();
 }

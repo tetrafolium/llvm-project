@@ -15,8 +15,8 @@
 NOINLINE static float
 with_errnof (float y, int e)
 {
-  errno = e;
-  return y;
+    errno = e;
+    return y;
 }
 #else
 #define with_errnof(x, e) (x)
@@ -26,14 +26,14 @@ with_errnof (float y, int e)
 NOINLINE static float
 xflowf (uint32_t sign, float y)
 {
-  y = eval_as_float (opt_barrier_float (sign ? -y : y) * y);
-  return with_errnof (y, ERANGE);
+    y = eval_as_float (opt_barrier_float (sign ? -y : y) * y);
+    return with_errnof (y, ERANGE);
 }
 
 HIDDEN float
 __math_uflowf (uint32_t sign)
 {
-  return xflowf (sign, 0x1p-95f);
+    return xflowf (sign, 0x1p-95f);
 }
 
 #if WANT_ERRNO_UFLOW
@@ -42,26 +42,26 @@ __math_uflowf (uint32_t sign)
 HIDDEN float
 __math_may_uflowf (uint32_t sign)
 {
-  return xflowf (sign, 0x1.4p-75f);
+    return xflowf (sign, 0x1.4p-75f);
 }
 #endif
 
 HIDDEN float
 __math_oflowf (uint32_t sign)
 {
-  return xflowf (sign, 0x1p97f);
+    return xflowf (sign, 0x1p97f);
 }
 
 HIDDEN float
 __math_divzerof (uint32_t sign)
 {
-  float y = opt_barrier_float (sign ? -1.0f : 1.0f) / 0.0f;
-  return with_errnof (y, ERANGE);
+    float y = opt_barrier_float (sign ? -1.0f : 1.0f) / 0.0f;
+    return with_errnof (y, ERANGE);
 }
 
 HIDDEN float
 __math_invalidf (float x)
 {
-  float y = (x - x) / (x - x);
-  return isnan (x) ? y : with_errnof (y, EDOM);
+    float y = (x - x) / (x - x);
+    return isnan (x) ? y : with_errnof (y, EDOM);
 }

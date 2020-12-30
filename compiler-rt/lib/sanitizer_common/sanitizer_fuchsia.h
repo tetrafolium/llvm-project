@@ -26,8 +26,8 @@ extern uptr MainThreadStackBase, MainThreadStackSize;
 extern sanitizer_shadow_bounds_t ShadowBounds;
 
 struct MemoryMappingLayoutData {
-  InternalMmapVector<zx_info_maps_t> data;
-  size_t current;  // Current index into the vector.
+    InternalMmapVector<zx_info_maps_t> data;
+    size_t current;  // Current index into the vector.
 };
 
 }  // namespace __sanitizer

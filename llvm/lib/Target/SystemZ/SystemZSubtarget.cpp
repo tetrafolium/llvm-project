@@ -29,25 +29,25 @@ void SystemZSubtarget::anchor() {}
 
 SystemZSubtarget &
 SystemZSubtarget::initializeSubtargetDependencies(StringRef CPU, StringRef FS) {
-  StringRef CPUName = CPU;
-  if (CPUName.empty())
-    CPUName = "generic";
-  // Parse features string.
-  ParseSubtargetFeatures(CPUName, /*TuneCPU*/ CPUName, FS);
+    StringRef CPUName = CPU;
+    if (CPUName.empty())
+        CPUName = "generic";
+    // Parse features string.
+    ParseSubtargetFeatures(CPUName, /*TuneCPU*/ CPUName, FS);
 
-  // -msoft-float implies -mno-vx.
-  if (HasSoftFloat)
-    HasVector = false;
+    // -msoft-float implies -mno-vx.
+    if (HasSoftFloat)
+        HasVector = false;
 
-  // -mno-vx implicitly disables all vector-related features.
-  if (!HasVector) {
-    HasVectorEnhancements1 = false;
-    HasVectorEnhancements2 = false;
-    HasVectorPackedDecimal = false;
-    HasVectorPackedDecimalEnhancement = false;
-  }
+    // -mno-vx implicitly disables all vector-related features.
+    if (!HasVector) {
+        HasVectorEnhancements1 = false;
+        HasVectorEnhancements2 = false;
+        HasVectorPackedDecimal = false;
+        HasVectorPackedDecimalEnhancement = false;
+    }
 
-  return *this;
+    return *this;
 }
 
 SystemZSubtarget::SystemZSubtarget(const Triple &TT, const std::string &CPU,
@@ -77,25 +77,25 @@ SystemZSubtarget::SystemZSubtarget(const Triple &TT, const std::string &CPU,
 
 
 bool SystemZSubtarget::enableSubRegLiveness() const {
-  return UseSubRegLiveness;
+    return UseSubRegLiveness;
 }
 
 bool SystemZSubtarget::isPC32DBLSymbol(const GlobalValue *GV,
                                        CodeModel::Model CM) const {
-  // PC32DBL accesses require the low bit to be clear.
-  //
-  // FIXME: Explicitly check for functions: the datalayout is currently
-  // missing information about function pointers.
-  const DataLayout &DL = GV->getParent()->getDataLayout();
-  if (GV->getPointerAlignment(DL) == 1 && !GV->getValueType()->isFunctionTy())
+    // PC32DBL accesses require the low bit to be clear.
+    //
+    // FIXME: Explicitly check for functions: the datalayout is currently
+    // missing information about function pointers.
+    const DataLayout &DL = GV->getParent()->getDataLayout();
+    if (GV->getPointerAlignment(DL) == 1 && !GV->getValueType()->isFunctionTy())
+        return false;
+
+    // For the small model, all locally-binding symbols are in range.
+    if (CM == CodeModel::Small)
+        return TLInfo.getTargetMachine().shouldAssumeDSOLocal(*GV->getParent(), GV);
+
+    // For Medium and above, assume that the symbol is not within the 4GB range.
+    // Taking the address of locally-defined text would be OK, but that
+    // case isn't easy to detect.
     return false;
-
-  // For the small model, all locally-binding symbols are in range.
-  if (CM == CodeModel::Small)
-    return TLInfo.getTargetMachine().shouldAssumeDSOLocal(*GV->getParent(), GV);
-
-  // For Medium and above, assume that the symbol is not within the 4GB range.
-  // Taking the address of locally-defined text would be OK, but that
-  // case isn't easy to detect.
-  return false;
 }

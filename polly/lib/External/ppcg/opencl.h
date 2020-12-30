@@ -6,6 +6,6 @@
 #include "ppcg.h"
 
 int generate_opencl(isl_ctx *ctx, struct ppcg_options *options,
-	const char *input, const char *output);
+                    const char *input, const char *output);
 
 #endif

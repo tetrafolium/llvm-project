@@ -33,29 +33,29 @@ namespace bugprone {
 /// The check tries to detect typos and suggest automated fixes for them.
 class ArgumentCommentCheck : public ClangTidyCheck {
 public:
-  ArgumentCommentCheck(StringRef Name, ClangTidyContext *Context);
+    ArgumentCommentCheck(StringRef Name, ClangTidyContext *Context);
 
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-  const unsigned StrictMode : 1;
-  const unsigned IgnoreSingleArgument : 1;
-  const unsigned CommentBoolLiterals : 1;
-  const unsigned CommentIntegerLiterals : 1;
-  const unsigned CommentFloatLiterals : 1;
-  const unsigned CommentStringLiterals : 1;
-  const unsigned CommentUserDefinedLiterals : 1;
-  const unsigned CommentCharacterLiterals : 1;
-  const unsigned CommentNullPtrs : 1;
-  llvm::Regex IdentRE;
+    const unsigned StrictMode : 1;
+    const unsigned IgnoreSingleArgument : 1;
+    const unsigned CommentBoolLiterals : 1;
+    const unsigned CommentIntegerLiterals : 1;
+    const unsigned CommentFloatLiterals : 1;
+    const unsigned CommentStringLiterals : 1;
+    const unsigned CommentUserDefinedLiterals : 1;
+    const unsigned CommentCharacterLiterals : 1;
+    const unsigned CommentNullPtrs : 1;
+    llvm::Regex IdentRE;
 
-  void checkCallArgs(ASTContext *Ctx, const FunctionDecl *Callee,
-                     SourceLocation ArgBeginLoc,
-                     llvm::ArrayRef<const Expr *> Args);
+    void checkCallArgs(ASTContext *Ctx, const FunctionDecl *Callee,
+                       SourceLocation ArgBeginLoc,
+                       llvm::ArrayRef<const Expr *> Args);
 
-  bool shouldAddComment(const Expr *Arg) const;
+    bool shouldAddComment(const Expr *Arg) const;
 };
 
 } // namespace bugprone

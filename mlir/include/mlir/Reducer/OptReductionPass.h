@@ -28,23 +28,23 @@ namespace mlir {
 
 class OptReductionPass : public OptReductionBase<OptReductionPass> {
 public:
-  OptReductionPass(const Tester &test, MLIRContext *context,
-                   std::unique_ptr<Pass> optPass);
+    OptReductionPass(const Tester &test, MLIRContext *context,
+                     std::unique_ptr<Pass> optPass);
 
-  OptReductionPass(const OptReductionPass &srcPass);
+    OptReductionPass(const OptReductionPass &srcPass);
 
-  /// Runs the pass instance in the pass pipeline.
-  void runOnOperation() override;
+    /// Runs the pass instance in the pass pipeline.
+    void runOnOperation() override;
 
 private:
-  // Points to the context to be used in the pass manager.
-  MLIRContext *context;
+    // Points to the context to be used in the pass manager.
+    MLIRContext *context;
 
-  // This is used to test the interesting behavior of the transformed module.
-  const Tester &test;
+    // This is used to test the interesting behavior of the transformed module.
+    const Tester &test;
 
-  // Points to the mlir-opt pass to be called.
-  std::unique_ptr<Pass> optPass;
+    // Points to the mlir-opt pass to be called.
+    std::unique_ptr<Pass> optPass;
 };
 
 } // end namespace mlir

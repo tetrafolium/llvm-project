@@ -22,82 +22,82 @@ using namespace llvm;
 
 ThreadPool::ThreadPool(ThreadPoolStrategy S)
     : ThreadCount(S.compute_thread_count()) {
-  // Create ThreadCount threads that will loop forever, wait on QueueCondition
-  // for tasks to be queued or the Pool to be destroyed.
-  Threads.reserve(ThreadCount);
-  for (unsigned ThreadID = 0; ThreadID < ThreadCount; ++ThreadID) {
-    Threads.emplace_back([S, ThreadID, this] {
-      S.apply_thread_strategy(ThreadID);
-      while (true) {
-        PackagedTaskTy Task;
-        {
-          std::unique_lock<std::mutex> LockGuard(QueueLock);
-          // Wait for tasks to be pushed in the queue
-          QueueCondition.wait(LockGuard,
-                              [&] { return !EnableFlag || !Tasks.empty(); });
-          // Exit condition
-          if (!EnableFlag && Tasks.empty())
-            return;
-          // Yeah, we have a task, grab it and release the lock on the queue
+    // Create ThreadCount threads that will loop forever, wait on QueueCondition
+    // for tasks to be queued or the Pool to be destroyed.
+    Threads.reserve(ThreadCount);
+    for (unsigned ThreadID = 0; ThreadID < ThreadCount; ++ThreadID) {
+        Threads.emplace_back([S, ThreadID, this] {
+            S.apply_thread_strategy(ThreadID);
+            while (true) {
+                PackagedTaskTy Task;
+                {
+                    std::unique_lock<std::mutex> LockGuard(QueueLock);
+                    // Wait for tasks to be pushed in the queue
+                    QueueCondition.wait(LockGuard,
+                    [&] { return !EnableFlag || !Tasks.empty(); });
+                    // Exit condition
+                    if (!EnableFlag && Tasks.empty())
+                        return;
+                    // Yeah, we have a task, grab it and release the lock on the queue
 
-          // We first need to signal that we are active before popping the queue
-          // in order for wait() to properly detect that even if the queue is
-          // empty, there is still a task in flight.
-          ++ActiveThreads;
-          Task = std::move(Tasks.front());
-          Tasks.pop();
-        }
-        // Run the task we just grabbed
-        Task();
+                    // We first need to signal that we are active before popping the queue
+                    // in order for wait() to properly detect that even if the queue is
+                    // empty, there is still a task in flight.
+                    ++ActiveThreads;
+                    Task = std::move(Tasks.front());
+                    Tasks.pop();
+                }
+                // Run the task we just grabbed
+                Task();
 
-        bool Notify;
-        {
-          // Adjust `ActiveThreads`, in case someone waits on ThreadPool::wait()
-          std::lock_guard<std::mutex> LockGuard(QueueLock);
-          --ActiveThreads;
-          Notify = workCompletedUnlocked();
-        }
-        // Notify task completion if this is the last active thread, in case
-        // someone waits on ThreadPool::wait().
-        if (Notify)
-          CompletionCondition.notify_all();
-      }
-    });
-  }
+                bool Notify;
+                {
+                    // Adjust `ActiveThreads`, in case someone waits on ThreadPool::wait()
+                    std::lock_guard<std::mutex> LockGuard(QueueLock);
+                    --ActiveThreads;
+                    Notify = workCompletedUnlocked();
+                }
+                // Notify task completion if this is the last active thread, in case
+                // someone waits on ThreadPool::wait().
+                if (Notify)
+                    CompletionCondition.notify_all();
+            }
+        });
+    }
 }
 
 void ThreadPool::wait() {
-  // Wait for all threads to complete and the queue to be empty
-  std::unique_lock<std::mutex> LockGuard(QueueLock);
-  CompletionCondition.wait(LockGuard, [&] { return workCompletedUnlocked(); });
+    // Wait for all threads to complete and the queue to be empty
+    std::unique_lock<std::mutex> LockGuard(QueueLock);
+    CompletionCondition.wait(LockGuard, [&] { return workCompletedUnlocked(); });
 }
 
 std::shared_future<void> ThreadPool::asyncImpl(TaskTy Task) {
-  /// Wrap the Task in a packaged_task to return a future object.
-  PackagedTaskTy PackagedTask(std::move(Task));
-  auto Future = PackagedTask.get_future();
-  {
-    // Lock the queue and push the new task
-    std::unique_lock<std::mutex> LockGuard(QueueLock);
+    /// Wrap the Task in a packaged_task to return a future object.
+    PackagedTaskTy PackagedTask(std::move(Task));
+    auto Future = PackagedTask.get_future();
+    {
+        // Lock the queue and push the new task
+        std::unique_lock<std::mutex> LockGuard(QueueLock);
 
-    // Don't allow enqueueing after disabling the pool
-    assert(EnableFlag && "Queuing a thread during ThreadPool destruction");
+        // Don't allow enqueueing after disabling the pool
+        assert(EnableFlag && "Queuing a thread during ThreadPool destruction");
 
-    Tasks.push(std::move(PackagedTask));
-  }
-  QueueCondition.notify_one();
-  return Future.share();
+        Tasks.push(std::move(PackagedTask));
+    }
+    QueueCondition.notify_one();
+    return Future.share();
 }
 
 // The destructor joins all threads, waiting for completion.
 ThreadPool::~ThreadPool() {
-  {
-    std::unique_lock<std::mutex> LockGuard(QueueLock);
-    EnableFlag = false;
-  }
-  QueueCondition.notify_all();
-  for (auto &Worker : Threads)
-    Worker.join();
+    {
+        std::unique_lock<std::mutex> LockGuard(QueueLock);
+        EnableFlag = false;
+    }
+    QueueCondition.notify_all();
+    for (auto &Worker : Threads)
+        Worker.join();
 }
 
 #else // LLVM_ENABLE_THREADS Disabled
@@ -105,31 +105,35 @@ ThreadPool::~ThreadPool() {
 // No threads are launched, issue a warning if ThreadCount is not 0
 ThreadPool::ThreadPool(ThreadPoolStrategy S)
     : ThreadCount(S.compute_thread_count()) {
-  if (ThreadCount != 1) {
-    errs() << "Warning: request a ThreadPool with " << ThreadCount
-           << " threads, but LLVM_ENABLE_THREADS has been turned off\n";
-  }
+    if (ThreadCount != 1) {
+        errs() << "Warning: request a ThreadPool with " << ThreadCount
+               << " threads, but LLVM_ENABLE_THREADS has been turned off\n";
+    }
 }
 
 void ThreadPool::wait() {
-  // Sequential implementation running the tasks
-  while (!Tasks.empty()) {
-    auto Task = std::move(Tasks.front());
-    Tasks.pop();
-    Task();
-  }
+    // Sequential implementation running the tasks
+    while (!Tasks.empty()) {
+        auto Task = std::move(Tasks.front());
+        Tasks.pop();
+        Task();
+    }
 }
 
 std::shared_future<void> ThreadPool::asyncImpl(TaskTy Task) {
-  // Get a Future with launch::deferred execution using std::async
-  auto Future = std::async(std::launch::deferred, std::move(Task)).share();
-  // Wrap the future so that both ThreadPool::wait() can operate and the
-  // returned future can be sync'ed on.
-  PackagedTaskTy PackagedTask([Future]() { Future.get(); });
-  Tasks.push(std::move(PackagedTask));
-  return Future;
+    // Get a Future with launch::deferred execution using std::async
+    auto Future = std::async(std::launch::deferred, std::move(Task)).share();
+    // Wrap the future so that both ThreadPool::wait() can operate and the
+    // returned future can be sync'ed on.
+    PackagedTaskTy PackagedTask([Future]() {
+        Future.get();
+    });
+    Tasks.push(std::move(PackagedTask));
+    return Future;
 }
 
-ThreadPool::~ThreadPool() { wait(); }
+ThreadPool::~ThreadPool() {
+    wait();
+}
 
 #endif

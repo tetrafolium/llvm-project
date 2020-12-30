@@ -70,133 +70,133 @@ enum VSCodeBroadcasterBits { eBroadcastBitStopEventThread = 1u << 0 };
 typedef void (*RequestCallback)(const llvm::json::Object &command);
 
 enum class PacketStatus {
-  Success = 0,
-  EndOfFile,
-  JSONMalformed,
-  JSONNotObject
+    Success = 0,
+    EndOfFile,
+    JSONMalformed,
+    JSONNotObject
 };
 
 struct VSCode {
-  InputStream input;
-  OutputStream output;
-  lldb::SBDebugger debugger;
-  lldb::SBTarget target;
-  lldb::SBValueList variables;
-  lldb::SBBroadcaster broadcaster;
-  int64_t num_regs;
-  int64_t num_locals;
-  int64_t num_globals;
-  std::thread event_thread;
-  std::unique_ptr<std::ofstream> log;
-  llvm::DenseMap<lldb::addr_t, int64_t> addr_to_source_ref;
-  llvm::DenseMap<int64_t, SourceReference> source_map;
-  llvm::StringMap<SourceBreakpointMap> source_breakpoints;
-  FunctionBreakpointMap function_breakpoints;
-  std::vector<ExceptionBreakpoint> exception_breakpoints;
-  std::vector<std::string> init_commands;
-  std::vector<std::string> pre_run_commands;
-  std::vector<std::string> exit_commands;
-  std::vector<std::string> stop_commands;
-  std::vector<std::string> terminate_commands;
-  lldb::tid_t focus_tid;
-  bool sent_terminated_event;
-  bool stop_at_entry;
-  bool is_attach;
-  uint32_t reverse_request_seq;
-  std::map<std::string, RequestCallback> request_handlers;
-  std::condition_variable request_in_terminal_cv;
-  bool waiting_for_run_in_terminal;
-  // Keep track of the last stop thread index IDs as threads won't go away
-  // unless we send a "thread" event to indicate the thread exited.
-  llvm::DenseSet<lldb::tid_t> thread_ids;
-  VSCode();
-  ~VSCode();
-  VSCode(const VSCode &rhs) = delete;
-  void operator=(const VSCode &rhs) = delete;
-  int64_t GetLineForPC(int64_t sourceReference, lldb::addr_t pc) const;
-  ExceptionBreakpoint *GetExceptionBreakpoint(const std::string &filter);
-  ExceptionBreakpoint *GetExceptionBreakpoint(const lldb::break_id_t bp_id);
-  // Send the JSON in "json_str" to the "out" stream. Correctly send the
-  // "Content-Length:" field followed by the length, followed by the raw
-  // JSON bytes.
-  void SendJSON(const std::string &json_str);
+    InputStream input;
+    OutputStream output;
+    lldb::SBDebugger debugger;
+    lldb::SBTarget target;
+    lldb::SBValueList variables;
+    lldb::SBBroadcaster broadcaster;
+    int64_t num_regs;
+    int64_t num_locals;
+    int64_t num_globals;
+    std::thread event_thread;
+    std::unique_ptr<std::ofstream> log;
+    llvm::DenseMap<lldb::addr_t, int64_t> addr_to_source_ref;
+    llvm::DenseMap<int64_t, SourceReference> source_map;
+    llvm::StringMap<SourceBreakpointMap> source_breakpoints;
+    FunctionBreakpointMap function_breakpoints;
+    std::vector<ExceptionBreakpoint> exception_breakpoints;
+    std::vector<std::string> init_commands;
+    std::vector<std::string> pre_run_commands;
+    std::vector<std::string> exit_commands;
+    std::vector<std::string> stop_commands;
+    std::vector<std::string> terminate_commands;
+    lldb::tid_t focus_tid;
+    bool sent_terminated_event;
+    bool stop_at_entry;
+    bool is_attach;
+    uint32_t reverse_request_seq;
+    std::map<std::string, RequestCallback> request_handlers;
+    std::condition_variable request_in_terminal_cv;
+    bool waiting_for_run_in_terminal;
+    // Keep track of the last stop thread index IDs as threads won't go away
+    // unless we send a "thread" event to indicate the thread exited.
+    llvm::DenseSet<lldb::tid_t> thread_ids;
+    VSCode();
+    ~VSCode();
+    VSCode(const VSCode &rhs) = delete;
+    void operator=(const VSCode &rhs) = delete;
+    int64_t GetLineForPC(int64_t sourceReference, lldb::addr_t pc) const;
+    ExceptionBreakpoint *GetExceptionBreakpoint(const std::string &filter);
+    ExceptionBreakpoint *GetExceptionBreakpoint(const lldb::break_id_t bp_id);
+    // Send the JSON in "json_str" to the "out" stream. Correctly send the
+    // "Content-Length:" field followed by the length, followed by the raw
+    // JSON bytes.
+    void SendJSON(const std::string &json_str);
 
-  // Serialize the JSON value into a string and send the JSON packet to
-  // the "out" stream.
-  void SendJSON(const llvm::json::Value &json);
+    // Serialize the JSON value into a string and send the JSON packet to
+    // the "out" stream.
+    void SendJSON(const llvm::json::Value &json);
 
-  std::string ReadJSON();
+    std::string ReadJSON();
 
-  void SendOutput(OutputType o, const llvm::StringRef output);
+    void SendOutput(OutputType o, const llvm::StringRef output);
 
-  void __attribute__((format(printf, 3, 4)))
-  SendFormattedOutput(OutputType o, const char *format, ...);
+    void __attribute__((format(printf, 3, 4)))
+    SendFormattedOutput(OutputType o, const char *format, ...);
 
-  static int64_t GetNextSourceReference();
+    static int64_t GetNextSourceReference();
 
-  ExceptionBreakpoint *GetExceptionBPFromStopReason(lldb::SBThread &thread);
+    ExceptionBreakpoint *GetExceptionBPFromStopReason(lldb::SBThread &thread);
 
-  lldb::SBThread GetLLDBThread(const llvm::json::Object &arguments);
+    lldb::SBThread GetLLDBThread(const llvm::json::Object &arguments);
 
-  lldb::SBFrame GetLLDBFrame(const llvm::json::Object &arguments);
+    lldb::SBFrame GetLLDBFrame(const llvm::json::Object &arguments);
 
-  llvm::json::Value CreateTopLevelScopes();
+    llvm::json::Value CreateTopLevelScopes();
 
-  void RunLLDBCommands(llvm::StringRef prefix,
-                       const std::vector<std::string> &commands);
+    void RunLLDBCommands(llvm::StringRef prefix,
+                         const std::vector<std::string> &commands);
 
-  void RunInitCommands();
-  void RunPreRunCommands();
-  void RunStopCommands();
-  void RunExitCommands();
-  void RunTerminateCommands();
+    void RunInitCommands();
+    void RunPreRunCommands();
+    void RunStopCommands();
+    void RunExitCommands();
+    void RunTerminateCommands();
 
-  /// Create a new SBTarget object from the given request arguments.
-  /// \param[in] arguments
-  ///     Launch configuration arguments.
-  ///
-  /// \param[out] error
-  ///     An SBError object that will contain an error description if
-  ///     function failed to create the target.
-  ///
-  /// \return
-  ///     An SBTarget object.
-  lldb::SBTarget CreateTargetFromArguments(const llvm::json::Object &arguments,
-                                           lldb::SBError &error);
+    /// Create a new SBTarget object from the given request arguments.
+    /// \param[in] arguments
+    ///     Launch configuration arguments.
+    ///
+    /// \param[out] error
+    ///     An SBError object that will contain an error description if
+    ///     function failed to create the target.
+    ///
+    /// \return
+    ///     An SBTarget object.
+    lldb::SBTarget CreateTargetFromArguments(const llvm::json::Object &arguments,
+            lldb::SBError &error);
 
-  /// Set given target object as a current target for lldb-vscode and start
-  /// listeing for its breakpoint events.
-  void SetTarget(const lldb::SBTarget target);
+    /// Set given target object as a current target for lldb-vscode and start
+    /// listeing for its breakpoint events.
+    void SetTarget(const lldb::SBTarget target);
 
-  const std::map<std::string, RequestCallback> &GetRequestHandlers();
+    const std::map<std::string, RequestCallback> &GetRequestHandlers();
 
-  PacketStatus GetNextObject(llvm::json::Object &object);
-  bool HandleObject(const llvm::json::Object &object);
+    PacketStatus GetNextObject(llvm::json::Object &object);
+    bool HandleObject(const llvm::json::Object &object);
 
-  /// Send a Debug Adapter Protocol reverse request to the IDE
-  ///
-  /// \param[in] request
-  ///   The payload of the request to send.
-  ///
-  /// \param[out] response
-  ///   The response of the IDE. It might be undefined if there was an error.
-  ///
-  /// \return
-  ///   A \a PacketStatus object indicating the sucess or failure of the
-  ///   request.
-  PacketStatus SendReverseRequest(llvm::json::Object request,
-                                  llvm::json::Object &response);
+    /// Send a Debug Adapter Protocol reverse request to the IDE
+    ///
+    /// \param[in] request
+    ///   The payload of the request to send.
+    ///
+    /// \param[out] response
+    ///   The response of the IDE. It might be undefined if there was an error.
+    ///
+    /// \return
+    ///   A \a PacketStatus object indicating the sucess or failure of the
+    ///   request.
+    PacketStatus SendReverseRequest(llvm::json::Object request,
+                                    llvm::json::Object &response);
 
-  /// Registers a callback handler for a Debug Adapter Protocol request
-  ///
-  /// \param[in] request
-  ///     The name of the request following the Debug Adapter Protocol
-  ///     specification.
-  ///
-  /// \param[in] callback
-  ///     The callback to execute when the given request is triggered by the
-  ///     IDE.
-  void RegisterRequestCallback(std::string request, RequestCallback callback);
+    /// Registers a callback handler for a Debug Adapter Protocol request
+    ///
+    /// \param[in] request
+    ///     The name of the request following the Debug Adapter Protocol
+    ///     specification.
+    ///
+    /// \param[in] callback
+    ///     The callback to execute when the given request is triggered by the
+    ///     IDE.
+    void RegisterRequestCallback(std::string request, RequestCallback callback);
 };
 
 extern VSCode g_vsc;

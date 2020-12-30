@@ -22,26 +22,26 @@ class CallInst;
 class DataLayout;
 
 class IntrinsicLowering {
-  const DataLayout &DL;
+    const DataLayout &DL;
 
-  bool Warned;
+    bool Warned;
 
 public:
-  explicit IntrinsicLowering(const DataLayout &DL) : DL(DL), Warned(false) {}
+    explicit IntrinsicLowering(const DataLayout &DL) : DL(DL), Warned(false) {}
 
-  /// Replace a call to the specified intrinsic function.
-  /// If an intrinsic function must be implemented by the code generator
-  /// (such as va_start), this function should print a message and abort.
-  ///
-  /// Otherwise, if an intrinsic function call can be lowered, the code to
-  /// implement it (often a call to a non-intrinsic function) is inserted
-  /// _after_ the call instruction and the call is deleted. The caller must
-  /// be capable of handling this kind of change.
-  void LowerIntrinsicCall(CallInst *CI);
+    /// Replace a call to the specified intrinsic function.
+    /// If an intrinsic function must be implemented by the code generator
+    /// (such as va_start), this function should print a message and abort.
+    ///
+    /// Otherwise, if an intrinsic function call can be lowered, the code to
+    /// implement it (often a call to a non-intrinsic function) is inserted
+    /// _after_ the call instruction and the call is deleted. The caller must
+    /// be capable of handling this kind of change.
+    void LowerIntrinsicCall(CallInst *CI);
 
-  /// Try to replace a call instruction with a call to a bswap intrinsic. Return
-  /// false if the call is not a simple integer bswap.
-  static bool LowerToByteSwap(CallInst *CI);
+    /// Try to replace a call instruction with a call to a bswap intrinsic. Return
+    /// false if the call is not a simple integer bswap.
+    static bool LowerToByteSwap(CallInst *CI);
 };
 }
 

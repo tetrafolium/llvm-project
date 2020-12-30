@@ -24,81 +24,82 @@ namespace {
 
 class AMDGPUELFObjectWriter : public MCELFObjectTargetWriter {
 public:
-  AMDGPUELFObjectWriter(bool Is64Bit, uint8_t OSABI, bool HasRelocationAddend,
-                        uint8_t ABIVersion);
+    AMDGPUELFObjectWriter(bool Is64Bit, uint8_t OSABI, bool HasRelocationAddend,
+                          uint8_t ABIVersion);
 
 protected:
-  unsigned getRelocType(MCContext &Ctx, const MCValue &Target,
-                        const MCFixup &Fixup, bool IsPCRel) const override;
+    unsigned getRelocType(MCContext &Ctx, const MCValue &Target,
+                          const MCFixup &Fixup, bool IsPCRel) const override;
 };
 
 
 } // end anonymous namespace
 
 AMDGPUELFObjectWriter::AMDGPUELFObjectWriter(bool Is64Bit,
-                                             uint8_t OSABI,
-                                             bool HasRelocationAddend,
-                                             uint8_t ABIVersion)
-  : MCELFObjectTargetWriter(Is64Bit, OSABI, ELF::EM_AMDGPU,
-                            HasRelocationAddend, ABIVersion) {}
+        uint8_t OSABI,
+        bool HasRelocationAddend,
+        uint8_t ABIVersion)
+    : MCELFObjectTargetWriter(Is64Bit, OSABI, ELF::EM_AMDGPU,
+                              HasRelocationAddend, ABIVersion) {}
 
 unsigned AMDGPUELFObjectWriter::getRelocType(MCContext &Ctx,
-                                             const MCValue &Target,
-                                             const MCFixup &Fixup,
-                                             bool IsPCRel) const {
-  if (const auto *SymA = Target.getSymA()) {
-    // SCRATCH_RSRC_DWORD[01] is a special global variable that represents
-    // the scratch buffer.
-    if (SymA->getSymbol().getName() == "SCRATCH_RSRC_DWORD0" ||
-        SymA->getSymbol().getName() == "SCRATCH_RSRC_DWORD1")
-      return ELF::R_AMDGPU_ABS32_LO;
-  }
+        const MCValue &Target,
+        const MCFixup &Fixup,
+        bool IsPCRel) const {
+    if (const auto *SymA = Target.getSymA()) {
+        // SCRATCH_RSRC_DWORD[01] is a special global variable that represents
+        // the scratch buffer.
+        if (SymA->getSymbol().getName() == "SCRATCH_RSRC_DWORD0" ||
+                SymA->getSymbol().getName() == "SCRATCH_RSRC_DWORD1")
+            return ELF::R_AMDGPU_ABS32_LO;
+    }
 
-  switch (Target.getAccessVariant()) {
-  default:
-    break;
-  case MCSymbolRefExpr::VK_GOTPCREL:
-    return ELF::R_AMDGPU_GOTPCREL;
-  case MCSymbolRefExpr::VK_AMDGPU_GOTPCREL32_LO:
-    return ELF::R_AMDGPU_GOTPCREL32_LO;
-  case MCSymbolRefExpr::VK_AMDGPU_GOTPCREL32_HI:
-    return ELF::R_AMDGPU_GOTPCREL32_HI;
-  case MCSymbolRefExpr::VK_AMDGPU_REL32_LO:
-    return ELF::R_AMDGPU_REL32_LO;
-  case MCSymbolRefExpr::VK_AMDGPU_REL32_HI:
-    return ELF::R_AMDGPU_REL32_HI;
-  case MCSymbolRefExpr::VK_AMDGPU_REL64:
-    return ELF::R_AMDGPU_REL64;
-  }
+    switch (Target.getAccessVariant()) {
+    default:
+        break;
+    case MCSymbolRefExpr::VK_GOTPCREL:
+        return ELF::R_AMDGPU_GOTPCREL;
+    case MCSymbolRefExpr::VK_AMDGPU_GOTPCREL32_LO:
+        return ELF::R_AMDGPU_GOTPCREL32_LO;
+    case MCSymbolRefExpr::VK_AMDGPU_GOTPCREL32_HI:
+        return ELF::R_AMDGPU_GOTPCREL32_HI;
+    case MCSymbolRefExpr::VK_AMDGPU_REL32_LO:
+        return ELF::R_AMDGPU_REL32_LO;
+    case MCSymbolRefExpr::VK_AMDGPU_REL32_HI:
+        return ELF::R_AMDGPU_REL32_HI;
+    case MCSymbolRefExpr::VK_AMDGPU_REL64:
+        return ELF::R_AMDGPU_REL64;
+    }
 
-  switch (Fixup.getKind()) {
-  default: break;
-  case FK_PCRel_4:
-    return ELF::R_AMDGPU_REL32;
-  case FK_Data_4:
-  case FK_SecRel_4:
-    return ELF::R_AMDGPU_ABS32;
-  case FK_Data_8:
-    return ELF::R_AMDGPU_ABS64;
-  }
+    switch (Fixup.getKind()) {
+    default:
+        break;
+    case FK_PCRel_4:
+        return ELF::R_AMDGPU_REL32;
+    case FK_Data_4:
+    case FK_SecRel_4:
+        return ELF::R_AMDGPU_ABS32;
+    case FK_Data_8:
+        return ELF::R_AMDGPU_ABS64;
+    }
 
-  if (Fixup.getTargetKind() == AMDGPU::fixup_si_sopp_br) {
-    const auto *SymA = Target.getSymA();
-    assert(SymA);
+    if (Fixup.getTargetKind() == AMDGPU::fixup_si_sopp_br) {
+        const auto *SymA = Target.getSymA();
+        assert(SymA);
 
-    Ctx.reportError(Fixup.getLoc(),
-                    Twine("undefined label '") + SymA->getSymbol().getName() + "'");
-    return ELF::R_AMDGPU_NONE;
-  }
+        Ctx.reportError(Fixup.getLoc(),
+                        Twine("undefined label '") + SymA->getSymbol().getName() + "'");
+        return ELF::R_AMDGPU_NONE;
+    }
 
-  llvm_unreachable("unhandled relocation type");
+    llvm_unreachable("unhandled relocation type");
 }
 
 std::unique_ptr<MCObjectTargetWriter>
 llvm::createAMDGPUELFObjectWriter(bool Is64Bit, uint8_t OSABI,
                                   bool HasRelocationAddend,
                                   uint8_t ABIVersion) {
-  return std::make_unique<AMDGPUELFObjectWriter>(Is64Bit, OSABI,
-                                                  HasRelocationAddend,
-                                                  ABIVersion);
+    return std::make_unique<AMDGPUELFObjectWriter>(Is64Bit, OSABI,
+            HasRelocationAddend,
+            ABIVersion);
 }

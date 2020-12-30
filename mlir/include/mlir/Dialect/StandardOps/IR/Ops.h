@@ -53,17 +53,17 @@ SmallVector<Range, 8> getOrCreateRanges(OffsetSizeAndStrideOpInterface op,
 ///
 class ConstantFloatOp : public ConstantOp {
 public:
-  using ConstantOp::ConstantOp;
+    using ConstantOp::ConstantOp;
 
-  /// Builds a constant float op producing a float of the specified type.
-  static void build(OpBuilder &builder, OperationState &result,
-                    const APFloat &value, FloatType type);
+    /// Builds a constant float op producing a float of the specified type.
+    static void build(OpBuilder &builder, OperationState &result,
+                      const APFloat &value, FloatType type);
 
-  APFloat getValue() {
-    return (*this)->getAttrOfType<FloatAttr>("value").getValue();
-  }
+    APFloat getValue() {
+        return (*this)->getAttrOfType<FloatAttr>("value").getValue();
+    }
 
-  static bool classof(Operation *op);
+    static bool classof(Operation *op);
 };
 
 /// This is a refinement of the "constant" op for the case where it is
@@ -73,21 +73,21 @@ public:
 ///
 class ConstantIntOp : public ConstantOp {
 public:
-  using ConstantOp::ConstantOp;
-  /// Build a constant int op producing an integer of the specified width.
-  static void build(OpBuilder &builder, OperationState &result, int64_t value,
-                    unsigned width);
+    using ConstantOp::ConstantOp;
+    /// Build a constant int op producing an integer of the specified width.
+    static void build(OpBuilder &builder, OperationState &result, int64_t value,
+                      unsigned width);
 
-  /// Build a constant int op producing an integer with the specified type,
-  /// which must be an integer type.
-  static void build(OpBuilder &builder, OperationState &result, int64_t value,
-                    Type type);
+    /// Build a constant int op producing an integer with the specified type,
+    /// which must be an integer type.
+    static void build(OpBuilder &builder, OperationState &result, int64_t value,
+                      Type type);
 
-  int64_t getValue() {
-    return (*this)->getAttrOfType<IntegerAttr>("value").getInt();
-  }
+    int64_t getValue() {
+        return (*this)->getAttrOfType<IntegerAttr>("value").getInt();
+    }
 
-  static bool classof(Operation *op);
+    static bool classof(Operation *op);
 };
 
 /// This is a refinement of the "constant" op for the case where it is
@@ -97,16 +97,16 @@ public:
 ///
 class ConstantIndexOp : public ConstantOp {
 public:
-  using ConstantOp::ConstantOp;
+    using ConstantOp::ConstantOp;
 
-  /// Build a constant int op producing an index.
-  static void build(OpBuilder &builder, OperationState &result, int64_t value);
+    /// Build a constant int op producing an index.
+    static void build(OpBuilder &builder, OperationState &result, int64_t value);
 
-  int64_t getValue() {
-    return (*this)->getAttrOfType<IntegerAttr>("value").getInt();
-  }
+    int64_t getValue() {
+        return (*this)->getAttrOfType<IntegerAttr>("value").getInt();
+    }
 
-  static bool classof(Operation *op);
+    static bool classof(Operation *op);
 };
 
 // DmaStartOp starts a non-blocking DMA operation that transfers data from a
@@ -149,111 +149,117 @@ public:
 class DmaStartOp
     : public Op<DmaStartOp, OpTrait::VariadicOperands, OpTrait::ZeroResult> {
 public:
-  using Op::Op;
+    using Op::Op;
 
-  static void build(OpBuilder &builder, OperationState &result, Value srcMemRef,
-                    ValueRange srcIndices, Value destMemRef,
-                    ValueRange destIndices, Value numElements, Value tagMemRef,
-                    ValueRange tagIndices, Value stride = nullptr,
-                    Value elementsPerStride = nullptr);
+    static void build(OpBuilder &builder, OperationState &result, Value srcMemRef,
+                      ValueRange srcIndices, Value destMemRef,
+                      ValueRange destIndices, Value numElements, Value tagMemRef,
+                      ValueRange tagIndices, Value stride = nullptr,
+                      Value elementsPerStride = nullptr);
 
-  // Returns the source MemRefType for this DMA operation.
-  Value getSrcMemRef() { return getOperand(0); }
-  // Returns the rank (number of indices) of the source MemRefType.
-  unsigned getSrcMemRefRank() {
-    return getSrcMemRef().getType().cast<MemRefType>().getRank();
-  }
-  // Returns the source memref indices for this DMA operation.
-  operand_range getSrcIndices() {
-    return {(*this)->operand_begin() + 1,
-            (*this)->operand_begin() + 1 + getSrcMemRefRank()};
-  }
+    // Returns the source MemRefType for this DMA operation.
+    Value getSrcMemRef() {
+        return getOperand(0);
+    }
+    // Returns the rank (number of indices) of the source MemRefType.
+    unsigned getSrcMemRefRank() {
+        return getSrcMemRef().getType().cast<MemRefType>().getRank();
+    }
+    // Returns the source memref indices for this DMA operation.
+    operand_range getSrcIndices() {
+        return {(*this)->operand_begin() + 1,
+                (*this)->operand_begin() + 1 + getSrcMemRefRank()};
+    }
 
-  // Returns the destination MemRefType for this DMA operations.
-  Value getDstMemRef() { return getOperand(1 + getSrcMemRefRank()); }
-  // Returns the rank (number of indices) of the destination MemRefType.
-  unsigned getDstMemRefRank() {
-    return getDstMemRef().getType().cast<MemRefType>().getRank();
-  }
-  unsigned getSrcMemorySpace() {
-    return getSrcMemRef().getType().cast<MemRefType>().getMemorySpace();
-  }
-  unsigned getDstMemorySpace() {
-    return getDstMemRef().getType().cast<MemRefType>().getMemorySpace();
-  }
+    // Returns the destination MemRefType for this DMA operations.
+    Value getDstMemRef() {
+        return getOperand(1 + getSrcMemRefRank());
+    }
+    // Returns the rank (number of indices) of the destination MemRefType.
+    unsigned getDstMemRefRank() {
+        return getDstMemRef().getType().cast<MemRefType>().getRank();
+    }
+    unsigned getSrcMemorySpace() {
+        return getSrcMemRef().getType().cast<MemRefType>().getMemorySpace();
+    }
+    unsigned getDstMemorySpace() {
+        return getDstMemRef().getType().cast<MemRefType>().getMemorySpace();
+    }
 
-  // Returns the destination memref indices for this DMA operation.
-  operand_range getDstIndices() {
-    return {(*this)->operand_begin() + 1 + getSrcMemRefRank() + 1,
-            (*this)->operand_begin() + 1 + getSrcMemRefRank() + 1 +
+    // Returns the destination memref indices for this DMA operation.
+    operand_range getDstIndices() {
+        return {(*this)->operand_begin() + 1 + getSrcMemRefRank() + 1,
+                (*this)->operand_begin() + 1 + getSrcMemRefRank() + 1 +
                 getDstMemRefRank()};
-  }
+    }
 
-  // Returns the number of elements being transferred by this DMA operation.
-  Value getNumElements() {
-    return getOperand(1 + getSrcMemRefRank() + 1 + getDstMemRefRank());
-  }
+    // Returns the number of elements being transferred by this DMA operation.
+    Value getNumElements() {
+        return getOperand(1 + getSrcMemRefRank() + 1 + getDstMemRefRank());
+    }
 
-  // Returns the Tag MemRef for this DMA operation.
-  Value getTagMemRef() {
-    return getOperand(1 + getSrcMemRefRank() + 1 + getDstMemRefRank() + 1);
-  }
-  // Returns the rank (number of indices) of the tag MemRefType.
-  unsigned getTagMemRefRank() {
-    return getTagMemRef().getType().cast<MemRefType>().getRank();
-  }
+    // Returns the Tag MemRef for this DMA operation.
+    Value getTagMemRef() {
+        return getOperand(1 + getSrcMemRefRank() + 1 + getDstMemRefRank() + 1);
+    }
+    // Returns the rank (number of indices) of the tag MemRefType.
+    unsigned getTagMemRefRank() {
+        return getTagMemRef().getType().cast<MemRefType>().getRank();
+    }
 
-  // Returns the tag memref index for this DMA operation.
-  operand_range getTagIndices() {
-    unsigned tagIndexStartPos =
-        1 + getSrcMemRefRank() + 1 + getDstMemRefRank() + 1 + 1;
-    return {(*this)->operand_begin() + tagIndexStartPos,
-            (*this)->operand_begin() + tagIndexStartPos + getTagMemRefRank()};
-  }
+    // Returns the tag memref index for this DMA operation.
+    operand_range getTagIndices() {
+        unsigned tagIndexStartPos =
+            1 + getSrcMemRefRank() + 1 + getDstMemRefRank() + 1 + 1;
+        return {(*this)->operand_begin() + tagIndexStartPos,
+                (*this)->operand_begin() + tagIndexStartPos + getTagMemRefRank()};
+    }
 
-  /// Returns true if this is a DMA from a faster memory space to a slower one.
-  bool isDestMemorySpaceFaster() {
-    return (getSrcMemorySpace() < getDstMemorySpace());
-  }
+    /// Returns true if this is a DMA from a faster memory space to a slower one.
+    bool isDestMemorySpaceFaster() {
+        return (getSrcMemorySpace() < getDstMemorySpace());
+    }
 
-  /// Returns true if this is a DMA from a slower memory space to a faster one.
-  bool isSrcMemorySpaceFaster() {
-    // Assumes that a lower number is for a slower memory space.
-    return (getDstMemorySpace() < getSrcMemorySpace());
-  }
+    /// Returns true if this is a DMA from a slower memory space to a faster one.
+    bool isSrcMemorySpaceFaster() {
+        // Assumes that a lower number is for a slower memory space.
+        return (getDstMemorySpace() < getSrcMemorySpace());
+    }
 
-  /// Given a DMA start operation, returns the operand position of either the
-  /// source or destination memref depending on the one that is at the higher
-  /// level of the memory hierarchy. Asserts failure if neither is true.
-  unsigned getFasterMemPos() {
-    assert(isSrcMemorySpaceFaster() || isDestMemorySpaceFaster());
-    return isSrcMemorySpaceFaster() ? 0 : getSrcMemRefRank() + 1;
-  }
+    /// Given a DMA start operation, returns the operand position of either the
+    /// source or destination memref depending on the one that is at the higher
+    /// level of the memory hierarchy. Asserts failure if neither is true.
+    unsigned getFasterMemPos() {
+        assert(isSrcMemorySpaceFaster() || isDestMemorySpaceFaster());
+        return isSrcMemorySpaceFaster() ? 0 : getSrcMemRefRank() + 1;
+    }
 
-  static StringRef getOperationName() { return "std.dma_start"; }
-  static ParseResult parse(OpAsmParser &parser, OperationState &result);
-  void print(OpAsmPrinter &p);
-  LogicalResult verify();
+    static StringRef getOperationName() {
+        return "std.dma_start";
+    }
+    static ParseResult parse(OpAsmParser &parser, OperationState &result);
+    void print(OpAsmPrinter &p);
+    LogicalResult verify();
 
-  LogicalResult fold(ArrayRef<Attribute> cstOperands,
-                     SmallVectorImpl<OpFoldResult> &results);
+    LogicalResult fold(ArrayRef<Attribute> cstOperands,
+                       SmallVectorImpl<OpFoldResult> &results);
 
-  bool isStrided() {
-    return getNumOperands() != 1 + getSrcMemRefRank() + 1 + getDstMemRefRank() +
-                                   1 + 1 + getTagMemRefRank();
-  }
+    bool isStrided() {
+        return getNumOperands() != 1 + getSrcMemRefRank() + 1 + getDstMemRefRank() +
+               1 + 1 + getTagMemRefRank();
+    }
 
-  Value getStride() {
-    if (!isStrided())
-      return nullptr;
-    return getOperand(getNumOperands() - 1 - 1);
-  }
+    Value getStride() {
+        if (!isStrided())
+            return nullptr;
+        return getOperand(getNumOperands() - 1 - 1);
+    }
 
-  Value getNumElementsPerStride() {
-    if (!isStrided())
-      return nullptr;
-    return getOperand(getNumOperands() - 1);
-  }
+    Value getNumElementsPerStride() {
+        if (!isStrided())
+            return nullptr;
+        return getOperand(getNumOperands() - 1);
+    }
 };
 
 // DmaWaitOp blocks until the completion of a DMA operation associated with the
@@ -272,35 +278,41 @@ public:
 class DmaWaitOp
     : public Op<DmaWaitOp, OpTrait::VariadicOperands, OpTrait::ZeroResult> {
 public:
-  using Op::Op;
+    using Op::Op;
 
-  static void build(OpBuilder &builder, OperationState &result, Value tagMemRef,
-                    ValueRange tagIndices, Value numElements);
+    static void build(OpBuilder &builder, OperationState &result, Value tagMemRef,
+                      ValueRange tagIndices, Value numElements);
 
-  static StringRef getOperationName() { return "std.dma_wait"; }
+    static StringRef getOperationName() {
+        return "std.dma_wait";
+    }
 
-  // Returns the Tag MemRef associated with the DMA operation being waited on.
-  Value getTagMemRef() { return getOperand(0); }
+    // Returns the Tag MemRef associated with the DMA operation being waited on.
+    Value getTagMemRef() {
+        return getOperand(0);
+    }
 
-  // Returns the tag memref index for this DMA operation.
-  operand_range getTagIndices() {
-    return {(*this)->operand_begin() + 1,
-            (*this)->operand_begin() + 1 + getTagMemRefRank()};
-  }
+    // Returns the tag memref index for this DMA operation.
+    operand_range getTagIndices() {
+        return {(*this)->operand_begin() + 1,
+                (*this)->operand_begin() + 1 + getTagMemRefRank()};
+    }
 
-  // Returns the rank (number of indices) of the tag memref.
-  unsigned getTagMemRefRank() {
-    return getTagMemRef().getType().cast<MemRefType>().getRank();
-  }
+    // Returns the rank (number of indices) of the tag memref.
+    unsigned getTagMemRefRank() {
+        return getTagMemRef().getType().cast<MemRefType>().getRank();
+    }
 
-  // Returns the number of elements transferred in the associated DMA operation.
-  Value getNumElements() { return getOperand(1 + getTagMemRefRank()); }
+    // Returns the number of elements transferred in the associated DMA operation.
+    Value getNumElements() {
+        return getOperand(1 + getTagMemRefRank());
+    }
 
-  static ParseResult parse(OpAsmParser &parser, OperationState &result);
-  void print(OpAsmPrinter &p);
-  LogicalResult fold(ArrayRef<Attribute> cstOperands,
-                     SmallVectorImpl<OpFoldResult> &results);
-  LogicalResult verify();
+    static ParseResult parse(OpAsmParser &parser, OperationState &result);
+    void print(OpAsmPrinter &p);
+    LogicalResult fold(ArrayRef<Attribute> cstOperands,
+                       SmallVectorImpl<OpFoldResult> &results);
+    LogicalResult verify();
 };
 
 /// Given an `originalShape` and a `reducedShape` assumed to be a subset of
@@ -312,8 +324,8 @@ public:
 /// rank-reducing operations. Return None if reducedShape cannot be obtained
 /// by dropping only `1` entries in `originalShape`.
 llvm::Optional<SmallVector<bool, 4>>
-computeRankReductionMask(ArrayRef<int64_t> originalShape,
-                         ArrayRef<int64_t> reducedShape);
+                                  computeRankReductionMask(ArrayRef<int64_t> originalShape,
+                                          ArrayRef<int64_t> reducedShape);
 
 /// Determines whether MemRefCastOp casts to a more dynamic version of the
 /// source memref. This is useful to to fold a memref_cast into a consuming op

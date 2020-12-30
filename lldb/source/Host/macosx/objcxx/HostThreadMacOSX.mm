@@ -23,34 +23,34 @@ pthread_key_t g_thread_create_key = 0;
 
 class MacOSXDarwinThread {
 public:
-  MacOSXDarwinThread() : m_pool(nil) {
-    m_pool = [[NSAutoreleasePool alloc] init];
-  }
-
-  ~MacOSXDarwinThread() {
-    if (m_pool) {
-      [m_pool drain];
-      m_pool = nil;
+    MacOSXDarwinThread() : m_pool(nil) {
+        m_pool = [[NSAutoreleasePool alloc] init];
     }
-  }
 
-  static void PThreadDestructor(void *v) {
-    if (v)
-      delete static_cast<MacOSXDarwinThread *>(v);
-    ::pthread_setspecific(g_thread_create_key, NULL);
-  }
+    ~MacOSXDarwinThread() {
+        if (m_pool) {
+            [m_pool drain];
+            m_pool = nil;
+        }
+    }
+
+    static void PThreadDestructor(void *v) {
+        if (v)
+            delete static_cast<MacOSXDarwinThread *>(v);
+        ::pthread_setspecific(g_thread_create_key, NULL);
+    }
 
 protected:
-  NSAutoreleasePool *m_pool;
+    NSAutoreleasePool *m_pool;
 
 private:
-  MacOSXDarwinThread(const MacOSXDarwinThread &) = delete;
-  const MacOSXDarwinThread &operator=(const MacOSXDarwinThread &) = delete;
+    MacOSXDarwinThread(const MacOSXDarwinThread &) = delete;
+    const MacOSXDarwinThread &operator=(const MacOSXDarwinThread &) = delete;
 };
 
 void InitThreadCreated() {
-  ::pthread_key_create(&g_thread_create_key,
-                       MacOSXDarwinThread::PThreadDestructor);
+    ::pthread_key_create(&g_thread_create_key,
+                         MacOSXDarwinThread::PThreadDestructor);
 }
 } // namespace
 
@@ -61,10 +61,10 @@ HostThreadMacOSX::HostThreadMacOSX(lldb::thread_t thread)
 
 lldb::thread_result_t
 HostThreadMacOSX::ThreadCreateTrampoline(lldb::thread_arg_t arg) {
-  ::pthread_once(&g_thread_create_once, InitThreadCreated);
-  if (g_thread_create_key) {
-    ::pthread_setspecific(g_thread_create_key, new MacOSXDarwinThread());
-  }
+    ::pthread_once(&g_thread_create_once, InitThreadCreated);
+    if (g_thread_create_key) {
+        ::pthread_setspecific(g_thread_create_key, new MacOSXDarwinThread());
+    }
 
-  return HostThreadPosix::ThreadCreateTrampoline(arg);
+    return HostThreadPosix::ThreadCreateTrampoline(arg);
 }

@@ -24,11 +24,11 @@ SDValue LanaiSelectionDAGInfo::EmitTargetCodeForMemcpy(
     bool /*isVolatile*/, bool /*AlwaysInline*/,
     MachinePointerInfo /*DstPtrInfo*/,
     MachinePointerInfo /*SrcPtrInfo*/) const {
-  ConstantSDNode *ConstantSize = dyn_cast<ConstantSDNode>(Size);
-  if (!ConstantSize)
-    return SDValue();
+    ConstantSDNode *ConstantSize = dyn_cast<ConstantSDNode>(Size);
+    if (!ConstantSize)
+        return SDValue();
 
-  return SDValue();
+    return SDValue();
 }
 
 } // namespace llvm

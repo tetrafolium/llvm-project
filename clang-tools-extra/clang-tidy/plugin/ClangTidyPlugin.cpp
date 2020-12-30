@@ -20,61 +20,61 @@ namespace tidy {
 /// The core clang tidy plugin action. This just provides the AST consumer and
 /// command line flag parsing for using clang-tidy as a clang plugin.
 class ClangTidyPluginAction : public PluginASTAction {
-  /// Wrapper to grant the context and diagnostics engine the same lifetime as
-  /// the action.
-  /// We use MultiplexConsumer to avoid writing out all the forwarding methods.
-  class WrapConsumer : public MultiplexConsumer {
-    std::unique_ptr<ClangTidyContext> Context;
-    std::unique_ptr<DiagnosticsEngine> DiagEngine;
+    /// Wrapper to grant the context and diagnostics engine the same lifetime as
+    /// the action.
+    /// We use MultiplexConsumer to avoid writing out all the forwarding methods.
+    class WrapConsumer : public MultiplexConsumer {
+        std::unique_ptr<ClangTidyContext> Context;
+        std::unique_ptr<DiagnosticsEngine> DiagEngine;
 
-  public:
-    WrapConsumer(std::unique_ptr<ClangTidyContext> Context,
-                 std::unique_ptr<DiagnosticsEngine> DiagEngine,
-                 std::vector<std::unique_ptr<ASTConsumer>> Consumer)
-        : MultiplexConsumer(std::move(Consumer)), Context(std::move(Context)),
-          DiagEngine(std::move(DiagEngine)) {}
-  };
+    public:
+        WrapConsumer(std::unique_ptr<ClangTidyContext> Context,
+                     std::unique_ptr<DiagnosticsEngine> DiagEngine,
+                     std::vector<std::unique_ptr<ASTConsumer>> Consumer)
+            : MultiplexConsumer(std::move(Consumer)), Context(std::move(Context)),
+              DiagEngine(std::move(DiagEngine)) {}
+    };
 
 public:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &Compiler,
-                                                 StringRef File) override {
-    // Create and set diagnostics engine
-    auto ExternalDiagEngine = &Compiler.getDiagnostics();
-    auto DiagConsumer =
-        new ClangTidyDiagnosticConsumer(*Context, ExternalDiagEngine);
-    auto DiagEngine = std::make_unique<DiagnosticsEngine>(
-        new DiagnosticIDs, new DiagnosticOptions, DiagConsumer);
-    Context->setDiagnosticsEngine(DiagEngine.get());
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &Compiler,
+            StringRef File) override {
+        // Create and set diagnostics engine
+        auto ExternalDiagEngine = &Compiler.getDiagnostics();
+        auto DiagConsumer =
+            new ClangTidyDiagnosticConsumer(*Context, ExternalDiagEngine);
+        auto DiagEngine = std::make_unique<DiagnosticsEngine>(
+                              new DiagnosticIDs, new DiagnosticOptions, DiagConsumer);
+        Context->setDiagnosticsEngine(DiagEngine.get());
 
-    // Create the AST consumer.
-    ClangTidyASTConsumerFactory Factory(*Context);
-    std::vector<std::unique_ptr<ASTConsumer>> Vec;
-    Vec.push_back(Factory.CreateASTConsumer(Compiler, File));
+        // Create the AST consumer.
+        ClangTidyASTConsumerFactory Factory(*Context);
+        std::vector<std::unique_ptr<ASTConsumer>> Vec;
+        Vec.push_back(Factory.CreateASTConsumer(Compiler, File));
 
-    return std::make_unique<WrapConsumer>(
-        std::move(Context), std::move(DiagEngine), std::move(Vec));
-  }
+        return std::make_unique<WrapConsumer>(
+                   std::move(Context), std::move(DiagEngine), std::move(Vec));
+    }
 
-  bool ParseArgs(const CompilerInstance &,
-                 const std::vector<std::string> &Args) override {
-    ClangTidyGlobalOptions GlobalOptions;
-    ClangTidyOptions DefaultOptions;
-    ClangTidyOptions OverrideOptions;
+    bool ParseArgs(const CompilerInstance &,
+                   const std::vector<std::string> &Args) override {
+        ClangTidyGlobalOptions GlobalOptions;
+        ClangTidyOptions DefaultOptions;
+        ClangTidyOptions OverrideOptions;
 
-    // Parse the extra command line args.
-    // FIXME: This is very limited at the moment.
-    for (StringRef Arg : Args)
-      if (Arg.startswith("-checks="))
-        OverrideOptions.Checks = std::string(Arg.substr(strlen("-checks=")));
+        // Parse the extra command line args.
+        // FIXME: This is very limited at the moment.
+        for (StringRef Arg : Args)
+            if (Arg.startswith("-checks="))
+                OverrideOptions.Checks = std::string(Arg.substr(strlen("-checks=")));
 
-    auto Options = std::make_unique<FileOptionsProvider>(
-        GlobalOptions, DefaultOptions, OverrideOptions);
-    Context = std::make_unique<ClangTidyContext>(std::move(Options));
-    return true;
-  }
+        auto Options = std::make_unique<FileOptionsProvider>(
+                           GlobalOptions, DefaultOptions, OverrideOptions);
+        Context = std::make_unique<ClangTidyContext>(std::move(Options));
+        return true;
+    }
 
 private:
-  std::unique_ptr<ClangTidyContext> Context;
+    std::unique_ptr<ClangTidyContext> Context;
 };
 } // namespace tidy
 } // namespace clang
@@ -84,4 +84,4 @@ private:
 volatile int ClangTidyPluginAnchorSource = 0;
 
 static clang::FrontendPluginRegistry::Add<clang::tidy::ClangTidyPluginAction>
-    X("clang-tidy", "clang-tidy");
+X("clang-tidy", "clang-tidy");

@@ -86,110 +86,122 @@ class GsymReader;
 ///
 /// Where "N" is the number of tuples.
 struct FunctionInfo {
-  AddressRange Range;
-  uint32_t Name; ///< String table offset in the string table.
-  llvm::Optional<LineTable> OptLineTable;
-  llvm::Optional<InlineInfo> Inline;
+    AddressRange Range;
+    uint32_t Name; ///< String table offset in the string table.
+    llvm::Optional<LineTable> OptLineTable;
+    llvm::Optional<InlineInfo> Inline;
 
-  FunctionInfo(uint64_t Addr = 0, uint64_t Size = 0, uint32_t N = 0)
-      : Range(Addr, Addr + Size), Name(N) {}
+    FunctionInfo(uint64_t Addr = 0, uint64_t Size = 0, uint32_t N = 0)
+        : Range(Addr, Addr + Size), Name(N) {}
 
-  /// Query if a FunctionInfo has rich debug info.
-  ///
-  /// \returns A bool that indicates if this object has something else than
-  /// range and name. When converting information from a symbol table and from
-  /// debug info, we might end up with multiple FunctionInfo objects for the
-  /// same range and we need to be able to tell which one is the better object
-  /// to use.
-  bool hasRichInfo() const {
-    return OptLineTable.hasValue() || Inline.hasValue();
-  }
+    /// Query if a FunctionInfo has rich debug info.
+    ///
+    /// \returns A bool that indicates if this object has something else than
+    /// range and name. When converting information from a symbol table and from
+    /// debug info, we might end up with multiple FunctionInfo objects for the
+    /// same range and we need to be able to tell which one is the better object
+    /// to use.
+    bool hasRichInfo() const {
+        return OptLineTable.hasValue() || Inline.hasValue();
+    }
 
-  /// Query if a FunctionInfo object is valid.
-  ///
-  /// Address and size can be zero and there can be no line entries for a
-  /// symbol so the only indication this entry is valid is if the name is
-  /// not zero. This can happen when extracting information from symbol
-  /// tables that do not encode symbol sizes. In that case only the
-  /// address and name will be filled in.
-  ///
-  /// \returns A boolean indicating if this FunctionInfo is valid.
-  bool isValid() const {
-    return Name != 0;
-  }
+    /// Query if a FunctionInfo object is valid.
+    ///
+    /// Address and size can be zero and there can be no line entries for a
+    /// symbol so the only indication this entry is valid is if the name is
+    /// not zero. This can happen when extracting information from symbol
+    /// tables that do not encode symbol sizes. In that case only the
+    /// address and name will be filled in.
+    ///
+    /// \returns A boolean indicating if this FunctionInfo is valid.
+    bool isValid() const {
+        return Name != 0;
+    }
 
-  /// Decode an object from a binary data stream.
-  ///
-  /// \param Data The binary stream to read the data from. This object must
-  /// have the data for the object starting at offset zero. The data
-  /// can contain more data than needed.
-  ///
-  /// \param BaseAddr The FunctionInfo's start address and will be used as the
-  /// base address when decoding any contained information like the line table
-  /// and the inline info.
-  ///
-  /// \returns An FunctionInfo or an error describing the issue that was
-  /// encountered during decoding.
-  static llvm::Expected<FunctionInfo> decode(DataExtractor &Data,
-                                             uint64_t BaseAddr);
+    /// Decode an object from a binary data stream.
+    ///
+    /// \param Data The binary stream to read the data from. This object must
+    /// have the data for the object starting at offset zero. The data
+    /// can contain more data than needed.
+    ///
+    /// \param BaseAddr The FunctionInfo's start address and will be used as the
+    /// base address when decoding any contained information like the line table
+    /// and the inline info.
+    ///
+    /// \returns An FunctionInfo or an error describing the issue that was
+    /// encountered during decoding.
+    static llvm::Expected<FunctionInfo> decode(DataExtractor &Data,
+            uint64_t BaseAddr);
 
-  /// Encode this object into FileWriter stream.
-  ///
-  /// \param O The binary stream to write the data to at the current file
-  /// position.
-  ///
-  /// \returns An error object that indicates failure or the offset of the
-  /// function info that was successfully written into the stream.
-  llvm::Expected<uint64_t> encode(FileWriter &O) const;
+    /// Encode this object into FileWriter stream.
+    ///
+    /// \param O The binary stream to write the data to at the current file
+    /// position.
+    ///
+    /// \returns An error object that indicates failure or the offset of the
+    /// function info that was successfully written into the stream.
+    llvm::Expected<uint64_t> encode(FileWriter &O) const;
 
 
-  /// Lookup an address within a FunctionInfo object's data stream.
-  ///
-  /// Instead of decoding an entire FunctionInfo object when doing lookups,
-  /// we can decode only the information we need from the FunctionInfo's data
-  /// for the specific address. The lookup result information is returned as
-  /// a LookupResult.
-  ///
-  /// \param Data The binary stream to read the data from. This object must
-  /// have the data for the object starting at offset zero. The data
-  /// can contain more data than needed.
-  ///
-  /// \param GR The GSYM reader that contains the string and file table that
-  /// will be used to fill in information in the returned result.
-  ///
-  /// \param FuncAddr The function start address decoded from the GsymReader.
-  ///
-  /// \param Addr The address to lookup.
-  ///
-  /// \returns An LookupResult or an error describing the issue that was
-  /// encountered during decoding. An error should only be returned if the
-  /// address is not contained in the FunctionInfo or if the data is corrupted.
-  static llvm::Expected<LookupResult> lookup(DataExtractor &Data,
-                                             const GsymReader &GR,
-                                             uint64_t FuncAddr,
-                                             uint64_t Addr);
+    /// Lookup an address within a FunctionInfo object's data stream.
+    ///
+    /// Instead of decoding an entire FunctionInfo object when doing lookups,
+    /// we can decode only the information we need from the FunctionInfo's data
+    /// for the specific address. The lookup result information is returned as
+    /// a LookupResult.
+    ///
+    /// \param Data The binary stream to read the data from. This object must
+    /// have the data for the object starting at offset zero. The data
+    /// can contain more data than needed.
+    ///
+    /// \param GR The GSYM reader that contains the string and file table that
+    /// will be used to fill in information in the returned result.
+    ///
+    /// \param FuncAddr The function start address decoded from the GsymReader.
+    ///
+    /// \param Addr The address to lookup.
+    ///
+    /// \returns An LookupResult or an error describing the issue that was
+    /// encountered during decoding. An error should only be returned if the
+    /// address is not contained in the FunctionInfo or if the data is corrupted.
+    static llvm::Expected<LookupResult> lookup(DataExtractor &Data,
+            const GsymReader &GR,
+            uint64_t FuncAddr,
+            uint64_t Addr);
 
-  uint64_t startAddress() const { return Range.Start; }
-  uint64_t endAddress() const { return Range.End; }
-  uint64_t size() const { return Range.size(); }
-  void setStartAddress(uint64_t Addr) { Range.Start = Addr; }
-  void setEndAddress(uint64_t Addr) { Range.End = Addr; }
-  void setSize(uint64_t Size) { Range.End = Range.Start + Size; }
+    uint64_t startAddress() const {
+        return Range.Start;
+    }
+    uint64_t endAddress() const {
+        return Range.End;
+    }
+    uint64_t size() const {
+        return Range.size();
+    }
+    void setStartAddress(uint64_t Addr) {
+        Range.Start = Addr;
+    }
+    void setEndAddress(uint64_t Addr) {
+        Range.End = Addr;
+    }
+    void setSize(uint64_t Size) {
+        Range.End = Range.Start + Size;
+    }
 
-  void clear() {
-    Range = {0, 0};
-    Name = 0;
-    OptLineTable = None;
-    Inline = None;
-  }
+    void clear() {
+        Range = {0, 0};
+        Name = 0;
+        OptLineTable = None;
+        Inline = None;
+    }
 };
 
 inline bool operator==(const FunctionInfo &LHS, const FunctionInfo &RHS) {
-  return LHS.Range == RHS.Range && LHS.Name == RHS.Name &&
-         LHS.OptLineTable == RHS.OptLineTable && LHS.Inline == RHS.Inline;
+    return LHS.Range == RHS.Range && LHS.Name == RHS.Name &&
+           LHS.OptLineTable == RHS.OptLineTable && LHS.Inline == RHS.Inline;
 }
 inline bool operator!=(const FunctionInfo &LHS, const FunctionInfo &RHS) {
-  return !(LHS == RHS);
+    return !(LHS == RHS);
 }
 /// This sorting will order things consistently by address range first, but then
 /// followed by inlining being valid and line tables. We might end up with a
@@ -197,15 +209,15 @@ inline bool operator!=(const FunctionInfo &LHS, const FunctionInfo &RHS) {
 /// symbol table, but we want to quickly be able to sort and use the best version
 /// when creating the final GSYM file.
 inline bool operator<(const FunctionInfo &LHS, const FunctionInfo &RHS) {
-  // First sort by address range
-  if (LHS.Range != RHS.Range)
-    return LHS.Range < RHS.Range;
+    // First sort by address range
+    if (LHS.Range != RHS.Range)
+        return LHS.Range < RHS.Range;
 
-  // Then sort by inline
-  if (LHS.Inline.hasValue() != RHS.Inline.hasValue())
-    return RHS.Inline.hasValue();
+    // Then sort by inline
+    if (LHS.Inline.hasValue() != RHS.Inline.hasValue())
+        return RHS.Inline.hasValue();
 
-  return LHS.OptLineTable < RHS.OptLineTable;
+    return LHS.OptLineTable < RHS.OptLineTable;
 }
 
 raw_ostream &operator<<(raw_ostream &OS, const FunctionInfo &R);

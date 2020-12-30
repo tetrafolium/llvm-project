@@ -17,36 +17,36 @@
 pthread_barrier_t all_threads_ready;
 
 void* Thread(void *unused) {
-  pthread_barrier_wait(&all_threads_ready);
-  return 0;
+    pthread_barrier_wait(&all_threads_ready);
+    return 0;
 }
 
 int main(int argc, char **argv) {
-  int n_threads;
-  if (argc == 1) {
-    n_threads = 100;
-  } else if (argc == 2) {
-    n_threads = atoi(argv[1]);
-  } else {
-    printf("Usage: %s n_threads\n", argv[0]);
-    return 1;
-  }
-  printf("%s: n_threads=%d\n", __FILE__, n_threads);
+    int n_threads;
+    if (argc == 1) {
+        n_threads = 100;
+    } else if (argc == 2) {
+        n_threads = atoi(argv[1]);
+    } else {
+        printf("Usage: %s n_threads\n", argv[0]);
+        return 1;
+    }
+    printf("%s: n_threads=%d\n", __FILE__, n_threads);
 
-  pthread_barrier_init(&all_threads_ready, NULL, n_threads + 1);
+    pthread_barrier_init(&all_threads_ready, NULL, n_threads + 1);
 
-  pthread_t *t = new pthread_t[n_threads];
-  for (int i = 0; i < n_threads; i++) {
-    int status = pthread_create(&t[i], 0, Thread, (void*)i);
-    assert(status == 0);
-  }
-  // sleep(5);  // FIXME: simplify measuring the memory usage.
-  pthread_barrier_wait(&all_threads_ready);
-  for (int i = 0; i < n_threads; i++) {
-    pthread_join(t[i], 0);
-  }
-  // sleep(5);  // FIXME: simplify measuring the memory usage.
-  delete [] t;
+    pthread_t *t = new pthread_t[n_threads];
+    for (int i = 0; i < n_threads; i++) {
+        int status = pthread_create(&t[i], 0, Thread, (void*)i);
+        assert(status == 0);
+    }
+    // sleep(5);  // FIXME: simplify measuring the memory usage.
+    pthread_barrier_wait(&all_threads_ready);
+    for (int i = 0; i < n_threads; i++) {
+        pthread_join(t[i], 0);
+    }
+    // sleep(5);  // FIXME: simplify measuring the memory usage.
+    delete [] t;
 
-  return 0;
+    return 0;
 }

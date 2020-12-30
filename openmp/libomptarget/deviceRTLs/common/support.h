@@ -20,15 +20,15 @@
 // Execution Parameters
 ////////////////////////////////////////////////////////////////////////////////
 enum ExecutionMode {
-  Spmd = 0x00u,
-  Generic = 0x01u,
-  ModeMask = 0x01u,
+    Spmd = 0x00u,
+    Generic = 0x01u,
+    ModeMask = 0x01u,
 };
 
 enum RuntimeMode {
-  RuntimeInitialized = 0x00u,
-  RuntimeUninitialized = 0x02u,
-  RuntimeMask = 0x02u,
+    RuntimeInitialized = 0x00u,
+    RuntimeUninitialized = 0x02u,
+    RuntimeMask = 0x02u,
 };
 
 DEVICE void setExecutionParameters(ExecutionMode EMode, RuntimeMode RMode);

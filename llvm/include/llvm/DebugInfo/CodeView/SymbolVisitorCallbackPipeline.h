@@ -19,43 +19,43 @@ namespace codeview {
 
 class SymbolVisitorCallbackPipeline : public SymbolVisitorCallbacks {
 public:
-  SymbolVisitorCallbackPipeline() = default;
+    SymbolVisitorCallbackPipeline() = default;
 
-  Error visitUnknownSymbol(CVSymbol &Record) override {
-    for (auto Visitor : Pipeline) {
-      if (auto EC = Visitor->visitUnknownSymbol(Record))
-        return EC;
+    Error visitUnknownSymbol(CVSymbol &Record) override {
+        for (auto Visitor : Pipeline) {
+            if (auto EC = Visitor->visitUnknownSymbol(Record))
+                return EC;
+        }
+        return Error::success();
     }
-    return Error::success();
-  }
 
-  Error visitSymbolBegin(CVSymbol &Record, uint32_t Offset) override {
-    for (auto Visitor : Pipeline) {
-      if (auto EC = Visitor->visitSymbolBegin(Record, Offset))
-        return EC;
+    Error visitSymbolBegin(CVSymbol &Record, uint32_t Offset) override {
+        for (auto Visitor : Pipeline) {
+            if (auto EC = Visitor->visitSymbolBegin(Record, Offset))
+                return EC;
+        }
+        return Error::success();
     }
-    return Error::success();
-  }
 
-  Error visitSymbolBegin(CVSymbol &Record) override {
-    for (auto Visitor : Pipeline) {
-      if (auto EC = Visitor->visitSymbolBegin(Record))
-        return EC;
+    Error visitSymbolBegin(CVSymbol &Record) override {
+        for (auto Visitor : Pipeline) {
+            if (auto EC = Visitor->visitSymbolBegin(Record))
+                return EC;
+        }
+        return Error::success();
     }
-    return Error::success();
-  }
 
-  Error visitSymbolEnd(CVSymbol &Record) override {
-    for (auto Visitor : Pipeline) {
-      if (auto EC = Visitor->visitSymbolEnd(Record))
-        return EC;
+    Error visitSymbolEnd(CVSymbol &Record) override {
+        for (auto Visitor : Pipeline) {
+            if (auto EC = Visitor->visitSymbolEnd(Record))
+                return EC;
+        }
+        return Error::success();
     }
-    return Error::success();
-  }
 
-  void addCallbackToPipeline(SymbolVisitorCallbacks &Callbacks) {
-    Pipeline.push_back(&Callbacks);
-  }
+    void addCallbackToPipeline(SymbolVisitorCallbacks &Callbacks) {
+        Pipeline.push_back(&Callbacks);
+    }
 
 #define SYMBOL_RECORD(EnumName, EnumVal, Name)                                 \
   Error visitKnownRecord(CVSymbol &CVR, Name &Record) override {               \
@@ -69,7 +69,7 @@ public:
 #include "llvm/DebugInfo/CodeView/CodeViewSymbols.def"
 
 private:
-  std::vector<SymbolVisitorCallbacks *> Pipeline;
+    std::vector<SymbolVisitorCallbacks *> Pipeline;
 };
 
 } // end namespace codeview

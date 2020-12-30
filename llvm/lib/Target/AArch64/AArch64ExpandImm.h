@@ -20,13 +20,13 @@ namespace llvm {
 namespace AArch64_IMM {
 
 struct ImmInsnModel {
-  unsigned Opcode;
-  uint64_t Op1;
-  uint64_t Op2;
+    unsigned Opcode;
+    uint64_t Op1;
+    uint64_t Op2;
 };
 
 void expandMOVImm(uint64_t Imm, unsigned BitSize,
-		  SmallVectorImpl<ImmInsnModel> &Insn);
+                  SmallVectorImpl<ImmInsnModel> &Insn);
 
 } // end namespace AArch64_IMM
 

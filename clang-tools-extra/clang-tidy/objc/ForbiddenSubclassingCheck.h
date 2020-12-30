@@ -25,16 +25,16 @@ namespace objc {
 /// http://clang.llvm.org/extra/clang-tidy/checks/objc-forbidden-subclassing.html
 class ForbiddenSubclassingCheck : public ClangTidyCheck {
 public:
-  ForbiddenSubclassingCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.ObjC;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Options) override;
+    ForbiddenSubclassingCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.ObjC;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Options) override;
 
 private:
-  const std::vector<std::string> ForbiddenSuperClassNames;
+    const std::vector<std::string> ForbiddenSuperClassNames;
 };
 
 } // namespace objc

@@ -11,7 +11,7 @@
 namespace __llvm_libc {
 
 float LLVM_LIBC_ENTRYPOINT(hypotf)(float x, float y) {
-  return __llvm_libc::fputil::hypot(x, y);
+    return __llvm_libc::fputil::hypot(x, y);
 }
 
 } // namespace __llvm_libc

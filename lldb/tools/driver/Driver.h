@@ -26,77 +26,79 @@
 
 class Driver : public lldb::SBBroadcaster {
 public:
-  enum CommandPlacement {
-    eCommandPlacementBeforeFile,
-    eCommandPlacementAfterFile,
-    eCommandPlacementAfterCrash,
-  };
-
-  Driver();
-
-  virtual ~Driver();
-
-  /// Runs the main loop.
-  ///
-  /// \return The exit code that the process should return.
-  int MainLoop();
-
-  lldb::SBError ProcessArgs(const llvm::opt::InputArgList &args, bool &exiting);
-
-  void WriteCommandsForSourcing(CommandPlacement placement,
-                                lldb::SBStream &strm);
-
-  struct OptionData {
-    void AddInitialCommand(std::string command, CommandPlacement placement,
-                           bool is_file, lldb::SBError &error);
-
-    struct InitialCmdEntry {
-      InitialCmdEntry(std::string contents, bool in_is_file,
-                      bool in_quiet = false)
-          : contents(std::move(contents)), is_file(in_is_file),
-            source_quietly(in_quiet) {}
-
-      std::string contents;
-      bool is_file;
-      bool source_quietly;
+    enum CommandPlacement {
+        eCommandPlacementBeforeFile,
+        eCommandPlacementAfterFile,
+        eCommandPlacementAfterCrash,
     };
 
-    std::vector<std::string> m_args;
+    Driver();
 
-    lldb::LanguageType m_repl_lang = lldb::eLanguageTypeUnknown;
-    lldb::pid_t m_process_pid = LLDB_INVALID_PROCESS_ID;
+    virtual ~Driver();
 
-    std::string m_core_file;
-    std::string m_crash_log;
-    std::string m_repl_options;
-    std::string m_process_name;
+    /// Runs the main loop.
+    ///
+    /// \return The exit code that the process should return.
+    int MainLoop();
 
-    std::vector<InitialCmdEntry> m_initial_commands;
-    std::vector<InitialCmdEntry> m_after_file_commands;
-    std::vector<InitialCmdEntry> m_after_crash_commands;
+    lldb::SBError ProcessArgs(const llvm::opt::InputArgList &args, bool &exiting);
 
-    bool m_debug_mode = false;
-    bool m_source_quietly = false;
-    bool m_print_version = false;
-    bool m_print_python_path = false;
-    bool m_wait_for = false;
-    bool m_repl = false;
-    bool m_batch = false;
+    void WriteCommandsForSourcing(CommandPlacement placement,
+                                  lldb::SBStream &strm);
 
-    // FIXME: When we have set/show variables we can remove this from here.
-    bool m_use_external_editor = false;
+    struct OptionData {
+        void AddInitialCommand(std::string command, CommandPlacement placement,
+                               bool is_file, lldb::SBError &error);
 
-    using OptionSet = std::set<char>;
-    OptionSet m_seen_options;
-  };
+        struct InitialCmdEntry {
+            InitialCmdEntry(std::string contents, bool in_is_file,
+                            bool in_quiet = false)
+                : contents(std::move(contents)), is_file(in_is_file),
+                  source_quietly(in_quiet) {}
 
-  lldb::SBDebugger &GetDebugger() { return m_debugger; }
+            std::string contents;
+            bool is_file;
+            bool source_quietly;
+        };
 
-  void ResizeWindow(unsigned short col);
+        std::vector<std::string> m_args;
+
+        lldb::LanguageType m_repl_lang = lldb::eLanguageTypeUnknown;
+        lldb::pid_t m_process_pid = LLDB_INVALID_PROCESS_ID;
+
+        std::string m_core_file;
+        std::string m_crash_log;
+        std::string m_repl_options;
+        std::string m_process_name;
+
+        std::vector<InitialCmdEntry> m_initial_commands;
+        std::vector<InitialCmdEntry> m_after_file_commands;
+        std::vector<InitialCmdEntry> m_after_crash_commands;
+
+        bool m_debug_mode = false;
+        bool m_source_quietly = false;
+        bool m_print_version = false;
+        bool m_print_python_path = false;
+        bool m_wait_for = false;
+        bool m_repl = false;
+        bool m_batch = false;
+
+        // FIXME: When we have set/show variables we can remove this from here.
+        bool m_use_external_editor = false;
+
+        using OptionSet = std::set<char>;
+        OptionSet m_seen_options;
+    };
+
+    lldb::SBDebugger &GetDebugger() {
+        return m_debugger;
+    }
+
+    void ResizeWindow(unsigned short col);
 
 private:
-  lldb::SBDebugger m_debugger;
-  OptionData m_option_data;
+    lldb::SBDebugger m_debugger;
+    OptionData m_option_data;
 };
 
 #endif // LLDB_TOOLS_DRIVER_DRIVER_H

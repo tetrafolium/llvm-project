@@ -27,7 +27,7 @@ class LangOptions;
 class ScratchBuffer;
 class SourceManager;
 
-  class TokenRewriter {
+class TokenRewriter {
     /// TokenList - This is the list of raw tokens that make up this file.  Each
     /// of these tokens has a unique SourceLocation, which is a FileID.
     std::list<Token> TokenList;
@@ -44,7 +44,7 @@ class SourceManager;
     /// ScratchBuf - This is the buffer that we create scratch tokens from.
     std::unique_ptr<ScratchBuffer> ScratchBuf;
 
-  public:
+public:
     /// TokenRewriter - This creates a TokenRewriter for the file with the
     /// specified FileID.
     TokenRewriter(FileID FID, SourceManager &SM, const LangOptions &LO);
@@ -55,17 +55,21 @@ class SourceManager;
 
     using token_iterator = std::list<Token>::const_iterator;
 
-    token_iterator token_begin() const { return TokenList.begin(); }
-    token_iterator token_end() const { return TokenList.end(); }
+    token_iterator token_begin() const {
+        return TokenList.begin();
+    }
+    token_iterator token_end() const {
+        return TokenList.end();
+    }
 
     token_iterator AddTokenBefore(token_iterator I, const char *Val);
 
     token_iterator AddTokenAfter(token_iterator I, const char *Val) {
-      assert(I != token_end() && "Cannot insert after token_end()!");
-      return AddTokenBefore(++I, Val);
+        assert(I != token_end() && "Cannot insert after token_end()!");
+        return AddTokenBefore(++I, Val);
     }
 
-  private:
+private:
     /// RemapIterator - Convert from token_iterator (a const iterator) to
     /// TokenRefTy (a non-const iterator).
     TokenRefTy RemapIterator(token_iterator I);
@@ -73,7 +77,7 @@ class SourceManager;
     /// AddToken - Add the specified token into the Rewriter before the other
     /// position.
     TokenRefTy AddToken(const Token &T, TokenRefTy Where);
-  };
+};
 
 } // namespace clang
 

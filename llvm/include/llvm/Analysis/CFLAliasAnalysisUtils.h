@@ -21,35 +21,39 @@ namespace llvm {
 namespace cflaa {
 
 template <typename AAResult> struct FunctionHandle final : public CallbackVH {
-  FunctionHandle(Function *Fn, AAResult *Result)
-      : CallbackVH(Fn), Result(Result) {
-    assert(Fn != nullptr);
-    assert(Result != nullptr);
-  }
+    FunctionHandle(Function *Fn, AAResult *Result)
+        : CallbackVH(Fn), Result(Result) {
+        assert(Fn != nullptr);
+        assert(Result != nullptr);
+    }
 
-  void deleted() override { removeSelfFromCache(); }
-  void allUsesReplacedWith(Value *) override { removeSelfFromCache(); }
+    void deleted() override {
+        removeSelfFromCache();
+    }
+    void allUsesReplacedWith(Value *) override {
+        removeSelfFromCache();
+    }
 
 private:
-  AAResult *Result;
+    AAResult *Result;
 
-  void removeSelfFromCache() {
-    assert(Result != nullptr);
-    auto *Val = getValPtr();
-    Result->evict(cast<Function>(Val));
-    setValPtr(nullptr);
-  }
+    void removeSelfFromCache() {
+        assert(Result != nullptr);
+        auto *Val = getValPtr();
+        Result->evict(cast<Function>(Val));
+        setValPtr(nullptr);
+    }
 };
 
 static inline const Function *parentFunctionOfValue(const Value *Val) {
-  if (auto *Inst = dyn_cast<Instruction>(Val)) {
-    auto *Bb = Inst->getParent();
-    return Bb->getParent();
-  }
+    if (auto *Inst = dyn_cast<Instruction>(Val)) {
+        auto *Bb = Inst->getParent();
+        return Bb->getParent();
+    }
 
-  if (auto *Arg = dyn_cast<Argument>(Val))
-    return Arg->getParent();
-  return nullptr;
+    if (auto *Arg = dyn_cast<Argument>(Val))
+        return Arg->getParent();
+    return nullptr;
 } // namespace cflaa
 } // namespace llvm
 }

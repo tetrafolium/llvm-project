@@ -113,20 +113,20 @@ class DwarfDebug;
 /// argument of the AccelTable class template.
 class AccelTableData {
 public:
-  virtual ~AccelTableData() = default;
+    virtual ~AccelTableData() = default;
 
-  bool operator<(const AccelTableData &Other) const {
-    return order() < Other.order();
-  }
+    bool operator<(const AccelTableData &Other) const {
+        return order() < Other.order();
+    }
 
     // Subclasses should implement:
     // static uint32_t hash(StringRef Name);
 
 #ifndef NDEBUG
-  virtual void print(raw_ostream &OS) const = 0;
+    virtual void print(raw_ostream &OS) const = 0;
 #endif
 protected:
-  virtual uint64_t order() const = 0;
+    virtual uint64_t order() const = 0;
 };
 
 /// A base class holding non-template-dependant functionality of the AccelTable
@@ -134,58 +134,70 @@ protected:
 /// AccelTable with a type derived from AccelTableData.
 class AccelTableBase {
 public:
-  using HashFn = uint32_t(StringRef);
+    using HashFn = uint32_t(StringRef);
 
-  /// Represents a group of entries with identical name (and hence, hash value).
-  struct HashData {
-    DwarfStringPoolEntryRef Name;
-    uint32_t HashValue;
-    std::vector<AccelTableData *> Values;
-    MCSymbol *Sym;
+    /// Represents a group of entries with identical name (and hence, hash value).
+    struct HashData {
+        DwarfStringPoolEntryRef Name;
+        uint32_t HashValue;
+        std::vector<AccelTableData *> Values;
+        MCSymbol *Sym;
 
-    HashData(DwarfStringPoolEntryRef Name, HashFn *Hash)
-        : Name(Name), HashValue(Hash(Name.getString())) {}
+        HashData(DwarfStringPoolEntryRef Name, HashFn *Hash)
+            : Name(Name), HashValue(Hash(Name.getString())) {}
+
+#ifndef NDEBUG
+        void print(raw_ostream &OS) const;
+        void dump() const {
+            print(dbgs());
+        }
+#endif
+    };
+    using HashList = std::vector<HashData *>;
+    using BucketList = std::vector<HashList>;
+
+protected:
+    /// Allocator for HashData and Values.
+    BumpPtrAllocator Allocator;
+
+    using StringEntries = StringMap<HashData, BumpPtrAllocator &>;
+    StringEntries Entries;
+
+    HashFn *Hash;
+    uint32_t BucketCount;
+    uint32_t UniqueHashCount;
+
+    HashList Hashes;
+    BucketList Buckets;
+
+    void computeBucketCount();
+
+    AccelTableBase(HashFn *Hash) : Entries(Allocator), Hash(Hash) {}
+
+public:
+    void finalize(AsmPrinter *Asm, StringRef Prefix);
+    ArrayRef<HashList> getBuckets() const {
+        return Buckets;
+    }
+    uint32_t getBucketCount() const {
+        return BucketCount;
+    }
+    uint32_t getUniqueHashCount() const {
+        return UniqueHashCount;
+    }
+    uint32_t getUniqueNameCount() const {
+        return Entries.size();
+    }
 
 #ifndef NDEBUG
     void print(raw_ostream &OS) const;
-    void dump() const { print(dbgs()); }
-#endif
-  };
-  using HashList = std::vector<HashData *>;
-  using BucketList = std::vector<HashList>;
-
-protected:
-  /// Allocator for HashData and Values.
-  BumpPtrAllocator Allocator;
-
-  using StringEntries = StringMap<HashData, BumpPtrAllocator &>;
-  StringEntries Entries;
-
-  HashFn *Hash;
-  uint32_t BucketCount;
-  uint32_t UniqueHashCount;
-
-  HashList Hashes;
-  BucketList Buckets;
-
-  void computeBucketCount();
-
-  AccelTableBase(HashFn *Hash) : Entries(Allocator), Hash(Hash) {}
-
-public:
-  void finalize(AsmPrinter *Asm, StringRef Prefix);
-  ArrayRef<HashList> getBuckets() const { return Buckets; }
-  uint32_t getBucketCount() const { return BucketCount; }
-  uint32_t getUniqueHashCount() const { return UniqueHashCount; }
-  uint32_t getUniqueNameCount() const { return Entries.size(); }
-
-#ifndef NDEBUG
-  void print(raw_ostream &OS) const;
-  void dump() const { print(dbgs()); }
+    void dump() const {
+        print(dbgs());
+    }
 #endif
 
-  AccelTableBase(const AccelTableBase &) = delete;
-  void operator=(const AccelTableBase &) = delete;
+    AccelTableBase(const AccelTableBase &) = delete;
+    void operator=(const AccelTableBase &) = delete;
 };
 
 /// This class holds an abstract representation of an Accelerator Table,
@@ -195,23 +207,23 @@ public:
 /// hashing names.
 template <typename DataT> class AccelTable : public AccelTableBase {
 public:
-  AccelTable() : AccelTableBase(DataT::hash) {}
+    AccelTable() : AccelTableBase(DataT::hash) {}
 
-  template <typename... Types>
-  void addName(DwarfStringPoolEntryRef Name, Types &&... Args);
+    template <typename... Types>
+    void addName(DwarfStringPoolEntryRef Name, Types &&... Args);
 };
 
 template <typename AccelTableDataT>
 template <typename... Types>
 void AccelTable<AccelTableDataT>::addName(DwarfStringPoolEntryRef Name,
-                                          Types &&... Args) {
-  assert(Buckets.empty() && "Already finalized!");
-  // If the string is in the list already then add this die to the list
-  // otherwise add a new one.
-  auto Iter = Entries.try_emplace(Name.getString(), Name, Hash).first;
-  assert(Iter->second.Name == Name);
-  Iter->second.Values.push_back(
-      new (Allocator) AccelTableDataT(std::forward<Types>(Args)...));
+        Types &&... Args) {
+    assert(Buckets.empty() && "Already finalized!");
+    // If the string is in the list already then add this die to the list
+    // otherwise add a new one.
+    auto Iter = Entries.try_emplace(Name.getString(), Name, Hash).first;
+    assert(Iter->second.Name == Name);
+    Iter->second.Values.push_back(
+        new (Allocator) AccelTableDataT(std::forward<Types>(Args)...));
 }
 
 /// A base class for different implementations of Data classes for Apple
@@ -219,28 +231,32 @@ void AccelTable<AccelTableDataT>::addName(DwarfStringPoolEntryRef Name,
 /// variable defined on the subclasses.
 class AppleAccelTableData : public AccelTableData {
 public:
-  /// An Atom defines the form of the data in an Apple accelerator table.
-  /// Conceptually it is a column in the accelerator consisting of a type and a
-  /// specification of the form of its data.
-  struct Atom {
-    /// Atom Type.
-    const uint16_t Type;
-    /// DWARF Form.
-    const uint16_t Form;
+    /// An Atom defines the form of the data in an Apple accelerator table.
+    /// Conceptually it is a column in the accelerator consisting of a type and a
+    /// specification of the form of its data.
+    struct Atom {
+        /// Atom Type.
+        const uint16_t Type;
+        /// DWARF Form.
+        const uint16_t Form;
 
-    constexpr Atom(uint16_t Type, uint16_t Form) : Type(Type), Form(Form) {}
+        constexpr Atom(uint16_t Type, uint16_t Form) : Type(Type), Form(Form) {}
 
 #ifndef NDEBUG
-    void print(raw_ostream &OS) const;
-    void dump() const { print(dbgs()); }
+        void print(raw_ostream &OS) const;
+        void dump() const {
+            print(dbgs());
+        }
 #endif
-  };
-  // Subclasses should define:
-  // static constexpr Atom Atoms[];
+    };
+    // Subclasses should define:
+    // static constexpr Atom Atoms[];
 
-  virtual void emit(AsmPrinter *Asm) const = 0;
+    virtual void emit(AsmPrinter *Asm) const = 0;
 
-  static uint32_t hash(StringRef Buffer) { return djbHash(Buffer); }
+    static uint32_t hash(StringRef Buffer) {
+        return djbHash(Buffer);
+    }
 };
 
 /// The Data class implementation for DWARF v5 accelerator table. Unlike the
@@ -249,46 +265,66 @@ public:
 /// emitDWARF5AccelTable function.
 class DWARF5AccelTableData : public AccelTableData {
 public:
-  static uint32_t hash(StringRef Name) { return caseFoldingDjbHash(Name); }
+    static uint32_t hash(StringRef Name) {
+        return caseFoldingDjbHash(Name);
+    }
 
-  DWARF5AccelTableData(const DIE &Die) : Die(Die) {}
+    DWARF5AccelTableData(const DIE &Die) : Die(Die) {}
 
 #ifndef NDEBUG
-  void print(raw_ostream &OS) const override;
+    void print(raw_ostream &OS) const override;
 #endif
 
-  const DIE &getDie() const { return Die; }
-  uint64_t getDieOffset() const { return Die.getOffset(); }
-  unsigned getDieTag() const { return Die.getTag(); }
+    const DIE &getDie() const {
+        return Die;
+    }
+    uint64_t getDieOffset() const {
+        return Die.getOffset();
+    }
+    unsigned getDieTag() const {
+        return Die.getTag();
+    }
 
 protected:
-  const DIE &Die;
+    const DIE &Die;
 
-  uint64_t order() const override { return Die.getOffset(); }
+    uint64_t order() const override {
+        return Die.getOffset();
+    }
 };
 
 class DWARF5AccelTableStaticData : public AccelTableData {
 public:
-  static uint32_t hash(StringRef Name) { return caseFoldingDjbHash(Name); }
+    static uint32_t hash(StringRef Name) {
+        return caseFoldingDjbHash(Name);
+    }
 
-  DWARF5AccelTableStaticData(uint64_t DieOffset, unsigned DieTag,
-                             unsigned CUIndex)
-      : DieOffset(DieOffset), DieTag(DieTag), CUIndex(CUIndex) {}
+    DWARF5AccelTableStaticData(uint64_t DieOffset, unsigned DieTag,
+                               unsigned CUIndex)
+        : DieOffset(DieOffset), DieTag(DieTag), CUIndex(CUIndex) {}
 
 #ifndef NDEBUG
-  void print(raw_ostream &OS) const override;
+    void print(raw_ostream &OS) const override;
 #endif
 
-  uint64_t getDieOffset() const { return DieOffset; }
-  unsigned getDieTag() const { return DieTag; }
-  unsigned getCUIndex() const { return CUIndex; }
+    uint64_t getDieOffset() const {
+        return DieOffset;
+    }
+    unsigned getDieTag() const {
+        return DieTag;
+    }
+    unsigned getCUIndex() const {
+        return CUIndex;
+    }
 
 protected:
-  uint64_t DieOffset;
-  unsigned DieTag;
-  unsigned CUIndex;
+    uint64_t DieOffset;
+    unsigned DieTag;
+    unsigned CUIndex;
 
-  uint64_t order() const override { return DieOffset; }
+    uint64_t order() const override {
+        return DieOffset;
+    }
 };
 
 void emitAppleAccelTableImpl(AsmPrinter *Asm, AccelTableBase &Contents,
@@ -301,8 +337,8 @@ void emitAppleAccelTableImpl(AsmPrinter *Asm, AccelTableBase &Contents,
 template <typename DataT>
 void emitAppleAccelTable(AsmPrinter *Asm, AccelTable<DataT> &Contents,
                          StringRef Prefix, const MCSymbol *SecBegin) {
-  static_assert(std::is_convertible<DataT *, AppleAccelTableData *>::value, "");
-  emitAppleAccelTableImpl(Asm, Contents, Prefix, SecBegin, DataT::Atoms);
+    static_assert(std::is_convertible<DataT *, AppleAccelTableData *>::value, "");
+    emitAppleAccelTableImpl(Asm, Contents, Prefix, SecBegin, DataT::Atoms);
 }
 
 void emitDWARF5AccelTable(AsmPrinter *Asm,
@@ -314,42 +350,46 @@ void emitDWARF5AccelTable(
     AsmPrinter *Asm, AccelTable<DWARF5AccelTableStaticData> &Contents,
     ArrayRef<MCSymbol *> CUs,
     llvm::function_ref<unsigned(const DWARF5AccelTableStaticData &)>
-        getCUIndexForEntry);
+    getCUIndexForEntry);
 
 /// Accelerator table data implementation for simple Apple accelerator tables
 /// with just a DIE reference.
 class AppleAccelTableOffsetData : public AppleAccelTableData {
 public:
-  AppleAccelTableOffsetData(const DIE &D) : Die(D) {}
+    AppleAccelTableOffsetData(const DIE &D) : Die(D) {}
 
-  void emit(AsmPrinter *Asm) const override;
+    void emit(AsmPrinter *Asm) const override;
 
-  static constexpr Atom Atoms[] = {
-      Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4)};
+    static constexpr Atom Atoms[] = {
+        Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4)
+    };
 
 #ifndef NDEBUG
-  void print(raw_ostream &OS) const override;
+    void print(raw_ostream &OS) const override;
 #endif
 protected:
-  uint64_t order() const override { return Die.getOffset(); }
+    uint64_t order() const override {
+        return Die.getOffset();
+    }
 
-  const DIE &Die;
+    const DIE &Die;
 };
 
 /// Accelerator table data implementation for Apple type accelerator tables.
 class AppleAccelTableTypeData : public AppleAccelTableOffsetData {
 public:
-  AppleAccelTableTypeData(const DIE &D) : AppleAccelTableOffsetData(D) {}
+    AppleAccelTableTypeData(const DIE &D) : AppleAccelTableOffsetData(D) {}
 
-  void emit(AsmPrinter *Asm) const override;
+    void emit(AsmPrinter *Asm) const override;
 
-  static constexpr Atom Atoms[] = {
-      Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4),
-      Atom(dwarf::DW_ATOM_die_tag, dwarf::DW_FORM_data2),
-      Atom(dwarf::DW_ATOM_type_flags, dwarf::DW_FORM_data1)};
+    static constexpr Atom Atoms[] = {
+        Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4),
+        Atom(dwarf::DW_ATOM_die_tag, dwarf::DW_FORM_data2),
+        Atom(dwarf::DW_ATOM_type_flags, dwarf::DW_FORM_data1)
+    };
 
 #ifndef NDEBUG
-  void print(raw_ostream &OS) const override;
+    void print(raw_ostream &OS) const override;
 #endif
 };
 
@@ -357,49 +397,55 @@ public:
 /// with a DIE offset but no actual DIE pointer.
 class AppleAccelTableStaticOffsetData : public AppleAccelTableData {
 public:
-  AppleAccelTableStaticOffsetData(uint32_t Offset) : Offset(Offset) {}
+    AppleAccelTableStaticOffsetData(uint32_t Offset) : Offset(Offset) {}
 
-  void emit(AsmPrinter *Asm) const override;
+    void emit(AsmPrinter *Asm) const override;
 
-  static constexpr Atom Atoms[] = {
-      Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4)};
+    static constexpr Atom Atoms[] = {
+        Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4)
+    };
 
 #ifndef NDEBUG
-  void print(raw_ostream &OS) const override;
+    void print(raw_ostream &OS) const override;
 #endif
 protected:
-  uint64_t order() const override { return Offset; }
+    uint64_t order() const override {
+        return Offset;
+    }
 
-  uint32_t Offset;
+    uint32_t Offset;
 };
 
 /// Accelerator table data implementation for type accelerator tables with
 /// a DIE offset but no actual DIE pointer.
 class AppleAccelTableStaticTypeData : public AppleAccelTableStaticOffsetData {
 public:
-  AppleAccelTableStaticTypeData(uint32_t Offset, uint16_t Tag,
-                                bool ObjCClassIsImplementation,
-                                uint32_t QualifiedNameHash)
-      : AppleAccelTableStaticOffsetData(Offset),
-        QualifiedNameHash(QualifiedNameHash), Tag(Tag),
-        ObjCClassIsImplementation(ObjCClassIsImplementation) {}
+    AppleAccelTableStaticTypeData(uint32_t Offset, uint16_t Tag,
+                                  bool ObjCClassIsImplementation,
+                                  uint32_t QualifiedNameHash)
+        : AppleAccelTableStaticOffsetData(Offset),
+          QualifiedNameHash(QualifiedNameHash), Tag(Tag),
+          ObjCClassIsImplementation(ObjCClassIsImplementation) {}
 
-  void emit(AsmPrinter *Asm) const override;
+    void emit(AsmPrinter *Asm) const override;
 
-  static constexpr Atom Atoms[] = {
-      Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4),
-      Atom(dwarf::DW_ATOM_die_tag, dwarf::DW_FORM_data2),
-      Atom(5, dwarf::DW_FORM_data1), Atom(6, dwarf::DW_FORM_data4)};
+    static constexpr Atom Atoms[] = {
+        Atom(dwarf::DW_ATOM_die_offset, dwarf::DW_FORM_data4),
+        Atom(dwarf::DW_ATOM_die_tag, dwarf::DW_FORM_data2),
+        Atom(5, dwarf::DW_FORM_data1), Atom(6, dwarf::DW_FORM_data4)
+    };
 
 #ifndef NDEBUG
-  void print(raw_ostream &OS) const override;
+    void print(raw_ostream &OS) const override;
 #endif
 protected:
-  uint64_t order() const override { return Offset; }
+    uint64_t order() const override {
+        return Offset;
+    }
 
-  uint32_t QualifiedNameHash;
-  uint16_t Tag;
-  bool ObjCClassIsImplementation;
+    uint32_t QualifiedNameHash;
+    uint16_t Tag;
+    bool ObjCClassIsImplementation;
 };
 
 } // end namespace llvm

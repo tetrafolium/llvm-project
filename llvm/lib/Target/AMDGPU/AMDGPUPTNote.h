@@ -26,7 +26,7 @@ const char NoteNameV2[] = "AMD";
 const char NoteNameV3[] = "AMDGPU";
 
 // TODO: Remove this file once we drop code object v2.
-enum NoteType{
+enum NoteType {
     NT_AMDGPU_HSA_RESERVED_0 = 0,
     NT_AMDGPU_HSA_CODE_OBJECT_VERSION = 1,
     NT_AMDGPU_HSA_HSAIL = 2,

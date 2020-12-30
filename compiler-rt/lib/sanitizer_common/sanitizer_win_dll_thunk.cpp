@@ -17,35 +17,35 @@
 #include "interception/interception.h"
 
 extern "C" {
-void *WINAPI GetModuleHandleA(const char *module_name);
-void abort();
+    void *WINAPI GetModuleHandleA(const char *module_name);
+    void abort();
 }
 
 namespace __sanitizer {
 uptr dllThunkGetRealAddrOrDie(const char *name) {
-  uptr ret =
-      __interception::InternalGetProcAddress((void *)GetModuleHandleA(0), name);
-  if (!ret)
-    abort();
-  return ret;
+    uptr ret =
+        __interception::InternalGetProcAddress((void *)GetModuleHandleA(0), name);
+    if (!ret)
+        abort();
+    return ret;
 }
 
 int dllThunkIntercept(const char* main_function, uptr dll_function) {
-  uptr wrapper = dllThunkGetRealAddrOrDie(main_function);
-  if (!__interception::OverrideFunction(dll_function, wrapper, 0))
-    abort();
-  return 0;
+    uptr wrapper = dllThunkGetRealAddrOrDie(main_function);
+    if (!__interception::OverrideFunction(dll_function, wrapper, 0))
+        abort();
+    return 0;
 }
 
 int dllThunkInterceptWhenPossible(const char* main_function,
-    const char* default_function, uptr dll_function) {
-  uptr wrapper = __interception::InternalGetProcAddress(
-    (void *)GetModuleHandleA(0), main_function);
-  if (!wrapper)
-    wrapper = dllThunkGetRealAddrOrDie(default_function);
-  if (!__interception::OverrideFunction(dll_function, wrapper, 0))
-    abort();
-  return 0;
+                                  const char* default_function, uptr dll_function) {
+    uptr wrapper = __interception::InternalGetProcAddress(
+                       (void *)GetModuleHandleA(0), main_function);
+    if (!wrapper)
+        wrapper = dllThunkGetRealAddrOrDie(default_function);
+    if (!__interception::OverrideFunction(dll_function, wrapper, 0))
+        abort();
+    return 0;
 }
 } // namespace __sanitizer
 
@@ -59,8 +59,8 @@ int dllThunkInterceptWhenPossible(const char* main_function,
 
 typedef void (*DllThunkCB)();
 extern "C" {
-__declspec(allocate(".DLLTH$A")) DllThunkCB __start_dll_thunk;
-__declspec(allocate(".DLLTH$Z")) DllThunkCB __stop_dll_thunk;
+    __declspec(allocate(".DLLTH$A")) DllThunkCB __start_dll_thunk;
+    __declspec(allocate(".DLLTH$Z")) DllThunkCB __stop_dll_thunk;
 }
 
 // Disable compiler warnings that show up if we declare our own version
@@ -69,18 +69,18 @@ __declspec(allocate(".DLLTH$Z")) DllThunkCB __stop_dll_thunk;
 #pragma warning(disable: 4392)
 
 extern "C" int __dll_thunk_init() {
-  static bool flag = false;
-  // __dll_thunk_init is expected to be called by only one thread.
-  if (flag) return 0;
-  flag = true;
+    static bool flag = false;
+    // __dll_thunk_init is expected to be called by only one thread.
+    if (flag) return 0;
+    flag = true;
 
-  for (DllThunkCB *it = &__start_dll_thunk; it < &__stop_dll_thunk; ++it)
-    if (*it)
-      (*it)();
+    for (DllThunkCB *it = &__start_dll_thunk; it < &__stop_dll_thunk; ++it)
+        if (*it)
+            (*it)();
 
-  // In DLLs, the callbacks are expected to return 0,
-  // otherwise CRT initialization fails.
-  return 0;
+    // In DLLs, the callbacks are expected to return 0,
+    // otherwise CRT initialization fails.
+    return 0;
 }
 
 // We want to call dll_thunk_init before C/C++ initializers / constructors are
@@ -90,12 +90,12 @@ __declspec(allocate(".CRT$XIB")) int (*__dll_thunk_preinit)() =
     __dll_thunk_init;
 
 static void WINAPI dll_thunk_thread_init(void *mod, unsigned long reason,
-                                         void *reserved) {
-  if (reason == /*DLL_PROCESS_ATTACH=*/1) __dll_thunk_init();
+        void *reserved) {
+    if (reason == /*DLL_PROCESS_ATTACH=*/1) __dll_thunk_init();
 }
 
 #pragma section(".CRT$XLAB", long, read)
 __declspec(allocate(".CRT$XLAB")) void (WINAPI *__dll_thunk_tls_init)(void *,
-    unsigned long, void *) = dll_thunk_thread_init;
+        unsigned long, void *) = dll_thunk_thread_init;
 
 #endif // SANITIZER_DLL_THUNK

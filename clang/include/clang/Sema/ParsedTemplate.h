@@ -25,17 +25,17 @@
 #include <new>
 
 namespace clang {
-  /// Represents the parsed form of a C++ template argument.
-  class ParsedTemplateArgument {
-  public:
+/// Represents the parsed form of a C++ template argument.
+class ParsedTemplateArgument {
+public:
     /// Describes the kind of template argument that was parsed.
     enum KindType {
-      /// A template type parameter, stored as a type.
-      Type,
-      /// A non-type template parameter, stored as an expression.
-      NonType,
-      /// A template template argument, stored as a template name.
-      Template
+        /// A template type parameter, stored as a type.
+        Type,
+        /// A non-type template parameter, stored as an expression.
+        NonType,
+        /// A template template argument, stored as a template name.
+        Template
     };
 
     /// Build an empty template argument.
@@ -48,7 +48,7 @@ namespace clang {
     /// \param Arg the template type argument or non-type template argument.
     /// \param Loc the location of the type.
     ParsedTemplateArgument(KindType Kind, void *Arg, SourceLocation Loc)
-      : Kind(Kind), Arg(Arg), Loc(Loc) { }
+        : Kind(Kind), Arg(Arg), Loc(Loc) { }
 
     /// Create a template template argument.
     ///
@@ -62,51 +62,57 @@ namespace clang {
     ParsedTemplateArgument(const CXXScopeSpec &SS,
                            ParsedTemplateTy Template,
                            SourceLocation TemplateLoc)
-      : Kind(ParsedTemplateArgument::Template),
-        Arg(Template.getAsOpaquePtr()),
-        SS(SS), Loc(TemplateLoc), EllipsisLoc() { }
+        : Kind(ParsedTemplateArgument::Template),
+          Arg(Template.getAsOpaquePtr()),
+          SS(SS), Loc(TemplateLoc), EllipsisLoc() { }
 
     /// Determine whether the given template argument is invalid.
-    bool isInvalid() const { return Arg == nullptr; }
+    bool isInvalid() const {
+        return Arg == nullptr;
+    }
 
     /// Determine what kind of template argument we have.
-    KindType getKind() const { return Kind; }
+    KindType getKind() const {
+        return Kind;
+    }
 
     /// Retrieve the template type argument's type.
     ParsedType getAsType() const {
-      assert(Kind == Type && "Not a template type argument");
-      return ParsedType::getFromOpaquePtr(Arg);
+        assert(Kind == Type && "Not a template type argument");
+        return ParsedType::getFromOpaquePtr(Arg);
     }
 
     /// Retrieve the non-type template argument's expression.
     Expr *getAsExpr() const {
-      assert(Kind == NonType && "Not a non-type template argument");
-      return static_cast<Expr*>(Arg);
+        assert(Kind == NonType && "Not a non-type template argument");
+        return static_cast<Expr*>(Arg);
     }
 
     /// Retrieve the template template argument's template name.
     ParsedTemplateTy getAsTemplate() const {
-      assert(Kind == Template && "Not a template template argument");
-      return ParsedTemplateTy::getFromOpaquePtr(Arg);
+        assert(Kind == Template && "Not a template template argument");
+        return ParsedTemplateTy::getFromOpaquePtr(Arg);
     }
 
     /// Retrieve the location of the template argument.
-    SourceLocation getLocation() const { return Loc; }
+    SourceLocation getLocation() const {
+        return Loc;
+    }
 
     /// Retrieve the nested-name-specifier that precedes the template
     /// name in a template template argument.
     const CXXScopeSpec &getScopeSpec() const {
-      assert(Kind == Template &&
-             "Only template template arguments can have a scope specifier");
-      return SS;
+        assert(Kind == Template &&
+               "Only template template arguments can have a scope specifier");
+        return SS;
     }
 
     /// Retrieve the location of the ellipsis that makes a template
     /// template argument into a pack expansion.
     SourceLocation getEllipsisLoc() const {
-      assert(Kind == Template &&
-             "Only template template arguments can have an ellipsis");
-      return EllipsisLoc;
+        assert(Kind == Template &&
+               "Only template template arguments can have an ellipsis");
+        return EllipsisLoc;
     }
 
     /// Retrieve a pack expansion of the given template template
@@ -114,9 +120,9 @@ namespace clang {
     ///
     /// \param EllipsisLoc The location of the ellipsis.
     ParsedTemplateArgument getTemplatePackExpansion(
-                                              SourceLocation EllipsisLoc) const;
+        SourceLocation EllipsisLoc) const;
 
-  private:
+private:
     KindType Kind;
 
     /// The actual template argument representation, which may be
@@ -134,22 +140,22 @@ namespace clang {
     /// The ellipsis location that can accompany a template template
     /// argument (turning it into a template template argument expansion).
     SourceLocation EllipsisLoc;
-  };
+};
 
-  /// Information about a template-id annotation
-  /// token.
-  ///
-  /// A template-id annotation token contains the template name,
-  /// template arguments, and the source locations for important
-  /// tokens. All of the information about template arguments is allocated
-  /// directly after this structure.
-  /// A template-id annotation token can also be generated by a type-constraint
-  /// construct with no explicit template arguments, e.g. "template<C T>" would
-  /// annotate C as a TemplateIdAnnotation with no template arguments (the angle
-  /// locations would be invalid in this case).
-  struct TemplateIdAnnotation final
-      : private llvm::TrailingObjects<TemplateIdAnnotation,
-                                      ParsedTemplateArgument> {
+/// Information about a template-id annotation
+/// token.
+///
+/// A template-id annotation token contains the template name,
+/// template arguments, and the source locations for important
+/// tokens. All of the information about template arguments is allocated
+/// directly after this structure.
+/// A template-id annotation token can also be generated by a type-constraint
+/// construct with no explicit template arguments, e.g. "template<C T>" would
+/// annotate C as a TemplateIdAnnotation with no template arguments (the angle
+/// locations would be invalid in this case).
+struct TemplateIdAnnotation final
+    : private llvm::TrailingObjects<TemplateIdAnnotation,
+      ParsedTemplateArgument> {
     friend TrailingObjects;
     /// TemplateKWLoc - The location of the template keyword.
     /// For e.g. typename T::template Y<U>
@@ -191,7 +197,7 @@ namespace clang {
 
     /// Retrieves a pointer to the template arguments
     ParsedTemplateArgument *getTemplateArgs() {
-      return getTrailingObjects<ParsedTemplateArgument>();
+        return getTrailingObjects<ParsedTemplateArgument>();
     }
 
     /// Creates a new TemplateIdAnnotation with NumArgs arguments and
@@ -203,37 +209,45 @@ namespace clang {
            SourceLocation LAngleLoc, SourceLocation RAngleLoc,
            ArrayRef<ParsedTemplateArgument> TemplateArgs, bool ArgsInvalid,
            SmallVectorImpl<TemplateIdAnnotation *> &CleanupList) {
-      TemplateIdAnnotation *TemplateId = new (llvm::safe_malloc(
-          totalSizeToAlloc<ParsedTemplateArgument>(TemplateArgs.size())))
-          TemplateIdAnnotation(TemplateKWLoc, TemplateNameLoc, Name,
-                               OperatorKind, OpaqueTemplateName, TemplateKind,
-                               LAngleLoc, RAngleLoc, TemplateArgs, ArgsInvalid);
-      CleanupList.push_back(TemplateId);
-      return TemplateId;
+        TemplateIdAnnotation *TemplateId = new (llvm::safe_malloc(
+                totalSizeToAlloc<ParsedTemplateArgument>(TemplateArgs.size())))
+        TemplateIdAnnotation(TemplateKWLoc, TemplateNameLoc, Name,
+                             OperatorKind, OpaqueTemplateName, TemplateKind,
+                             LAngleLoc, RAngleLoc, TemplateArgs, ArgsInvalid);
+        CleanupList.push_back(TemplateId);
+        return TemplateId;
     }
 
     void Destroy() {
-      std::for_each(
-          getTemplateArgs(), getTemplateArgs() + NumArgs,
-          [](ParsedTemplateArgument &A) { A.~ParsedTemplateArgument(); });
-      this->~TemplateIdAnnotation();
-      free(this);
+        std::for_each(
+            getTemplateArgs(), getTemplateArgs() + NumArgs,
+        [](ParsedTemplateArgument &A) {
+            A.~ParsedTemplateArgument();
+        });
+        this->~TemplateIdAnnotation();
+        free(this);
     }
 
     /// Determine whether this might be a type template.
     bool mightBeType() const {
-      return Kind == TNK_Non_template ||
-             Kind == TNK_Type_template ||
-             Kind == TNK_Dependent_template_name ||
-             Kind == TNK_Undeclared_template;
+        return Kind == TNK_Non_template ||
+               Kind == TNK_Type_template ||
+               Kind == TNK_Dependent_template_name ||
+               Kind == TNK_Undeclared_template;
     }
 
-    bool hasInvalidName() const { return Kind == TNK_Non_template; }
-    bool hasInvalidArgs() const { return ArgsInvalid; }
+    bool hasInvalidName() const {
+        return Kind == TNK_Non_template;
+    }
+    bool hasInvalidArgs() const {
+        return ArgsInvalid;
+    }
 
-    bool isInvalid() const { return hasInvalidName() || hasInvalidArgs(); }
+    bool isInvalid() const {
+        return hasInvalidName() || hasInvalidArgs();
+    }
 
-  private:
+private:
     TemplateIdAnnotation(const TemplateIdAnnotation &) = delete;
 
     TemplateIdAnnotation(SourceLocation TemplateKWLoc,
@@ -249,15 +263,15 @@ namespace clang {
           Kind(TemplateKind), LAngleLoc(LAngleLoc), RAngleLoc(RAngleLoc),
           NumArgs(TemplateArgs.size()), ArgsInvalid(ArgsInvalid) {
 
-      std::uninitialized_copy(TemplateArgs.begin(), TemplateArgs.end(),
-                              getTemplateArgs());
+        std::uninitialized_copy(TemplateArgs.begin(), TemplateArgs.end(),
+                                getTemplateArgs());
     }
     ~TemplateIdAnnotation() = default;
-  };
+};
 
-  /// Retrieves the range of the given template parameter lists.
-  SourceRange getTemplateParamsRange(TemplateParameterList const *const *Params,
-                                     unsigned NumParams);
+/// Retrieves the range of the given template parameter lists.
+SourceRange getTemplateParamsRange(TemplateParameterList const *const *Params,
+                                   unsigned NumParams);
 } // end namespace clang
 
 #endif // LLVM_CLANG_SEMA_PARSEDTEMPLATE_H

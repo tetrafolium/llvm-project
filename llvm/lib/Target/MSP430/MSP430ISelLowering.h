@@ -19,68 +19,68 @@
 #include "llvm/CodeGen/TargetLowering.h"
 
 namespace llvm {
-  namespace MSP430ISD {
-    enum NodeType : unsigned {
-      FIRST_NUMBER = ISD::BUILTIN_OP_END,
+namespace MSP430ISD {
+enum NodeType : unsigned {
+    FIRST_NUMBER = ISD::BUILTIN_OP_END,
 
-      /// Return with a flag operand. Operand 0 is the chain operand.
-      RET_FLAG,
+    /// Return with a flag operand. Operand 0 is the chain operand.
+    RET_FLAG,
 
-      /// Same as RET_FLAG, but used for returning from ISRs.
-      RETI_FLAG,
+    /// Same as RET_FLAG, but used for returning from ISRs.
+    RETI_FLAG,
 
-      /// Y = R{R,L}A X, rotate right (left) arithmetically
-      RRA, RLA,
+    /// Y = R{R,L}A X, rotate right (left) arithmetically
+    RRA, RLA,
 
-      /// Y = RRC X, rotate right via carry
-      RRC,
+    /// Y = RRC X, rotate right via carry
+    RRC,
 
-      /// Rotate right via carry, carry gets cleared beforehand by clrc
-      RRCL,
+    /// Rotate right via carry, carry gets cleared beforehand by clrc
+    RRCL,
 
-      /// CALL - These operations represent an abstract call
-      /// instruction, which includes a bunch of information.
-      CALL,
+    /// CALL - These operations represent an abstract call
+    /// instruction, which includes a bunch of information.
+    CALL,
 
-      /// Wrapper - A wrapper node for TargetConstantPool, TargetExternalSymbol,
-      /// and TargetGlobalAddress.
-      Wrapper,
+    /// Wrapper - A wrapper node for TargetConstantPool, TargetExternalSymbol,
+    /// and TargetGlobalAddress.
+    Wrapper,
 
-      /// CMP - Compare instruction.
-      CMP,
+    /// CMP - Compare instruction.
+    CMP,
 
-      /// SetCC - Operand 0 is condition code, and operand 1 is the flag
-      /// operand produced by a CMP instruction.
-      SETCC,
+    /// SetCC - Operand 0 is condition code, and operand 1 is the flag
+    /// operand produced by a CMP instruction.
+    SETCC,
 
-      /// MSP430 conditional branches. Operand 0 is the chain operand, operand 1
-      /// is the block to branch if condition is true, operand 2 is the
-      /// condition code, and operand 3 is the flag operand produced by a CMP
-      /// instruction.
-      BR_CC,
+    /// MSP430 conditional branches. Operand 0 is the chain operand, operand 1
+    /// is the block to branch if condition is true, operand 2 is the
+    /// condition code, and operand 3 is the flag operand produced by a CMP
+    /// instruction.
+    BR_CC,
 
-      /// SELECT_CC - Operand 0 and operand 1 are selection variable, operand 3
-      /// is condition code and operand 4 is flag operand.
-      SELECT_CC,
+    /// SELECT_CC - Operand 0 and operand 1 are selection variable, operand 3
+    /// is condition code and operand 4 is flag operand.
+    SELECT_CC,
 
-      /// DADD - Decimal addition with carry
-      /// TODO Nothing generates a node of this type yet.
-      DADD,
-    };
-  }
+    /// DADD - Decimal addition with carry
+    /// TODO Nothing generates a node of this type yet.
+    DADD,
+};
+}
 
-  class MSP430Subtarget;
-  class MSP430TargetLowering : public TargetLowering {
-  public:
+class MSP430Subtarget;
+class MSP430TargetLowering : public TargetLowering {
+public:
     explicit MSP430TargetLowering(const TargetMachine &TM,
                                   const MSP430Subtarget &STI);
 
     MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override {
-      return MVT::i8;
+        return MVT::i8;
     }
 
     MVT::SimpleValueType getCmpLibcallReturnType() const override {
-      return MVT::i16;
+        return MVT::i16;
     }
 
     /// LowerOperation - Provide custom lowering hooks for some operations.
@@ -137,7 +137,7 @@ namespace llvm {
     MachineBasicBlock *EmitShiftInstr(MachineInstr &MI,
                                       MachineBasicBlock *BB) const;
 
-  private:
+private:
     SDValue LowerCCCCallTo(SDValue Chain, SDValue Callee,
                            CallingConv::ID CallConv, bool isVarArg,
                            bool isTailCall,
@@ -165,8 +165,8 @@ namespace llvm {
                          const SDLoc &dl, SelectionDAG &DAG,
                          SmallVectorImpl<SDValue> &InVals) const override;
     SDValue
-      LowerCall(TargetLowering::CallLoweringInfo &CLI,
-                SmallVectorImpl<SDValue> &InVals) const override;
+    LowerCall(TargetLowering::CallLoweringInfo &CLI,
+              SmallVectorImpl<SDValue> &InVals) const override;
 
     bool CanLowerReturn(CallingConv::ID CallConv,
                         MachineFunction &MF,
@@ -184,7 +184,7 @@ namespace llvm {
                                     SDValue &Offset,
                                     ISD::MemIndexedMode &AM,
                                     SelectionDAG &DAG) const override;
-  };
+};
 } // namespace llvm
 
 #endif

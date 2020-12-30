@@ -33,12 +33,12 @@ struct Flags {
 #include "asan_flags.inc"
 #undef ASAN_FLAG
 
-  void SetDefaults();
+    void SetDefaults();
 };
 
 extern Flags asan_flags_dont_use_directly;
 inline Flags *flags() {
-  return &asan_flags_dont_use_directly;
+    return &asan_flags_dont_use_directly;
 }
 
 void InitializeFlags();

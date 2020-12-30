@@ -20,107 +20,107 @@
 #include <memory>
 
 namespace llvm {
-  struct fltSemantics;
-  class MachineFunction;
-  class MemoryBuffer;
+struct fltSemantics;
+class MachineFunction;
+class MemoryBuffer;
 
-  namespace FloatABI {
-    enum ABIType {
-      Default, // Target-specific (either soft or hard depending on triple, etc).
-      Soft,    // Soft float.
-      Hard     // Hard float.
-    };
-  }
+namespace FloatABI {
+enum ABIType {
+    Default, // Target-specific (either soft or hard depending on triple, etc).
+    Soft,    // Soft float.
+    Hard     // Hard float.
+};
+}
 
-  namespace FPOpFusion {
-    enum FPOpFusionMode {
-      Fast,     // Enable fusion of FP ops wherever it's profitable.
-      Standard, // Only allow fusion of 'blessed' ops (currently just fmuladd).
-      Strict    // Never fuse FP-ops.
-    };
-  }
+namespace FPOpFusion {
+enum FPOpFusionMode {
+    Fast,     // Enable fusion of FP ops wherever it's profitable.
+    Standard, // Only allow fusion of 'blessed' ops (currently just fmuladd).
+    Strict    // Never fuse FP-ops.
+};
+}
 
-  namespace JumpTable {
-    enum JumpTableType {
-      Single,          // Use a single table for all indirect jumptable calls.
-      Arity,           // Use one table per number of function parameters.
-      Simplified,      // Use one table per function type, with types projected
-                       // into 4 types: pointer to non-function, struct,
-                       // primitive, and function pointer.
-      Full             // Use one table per unique function type
-    };
-  }
+namespace JumpTable {
+enum JumpTableType {
+    Single,          // Use a single table for all indirect jumptable calls.
+    Arity,           // Use one table per number of function parameters.
+    Simplified,      // Use one table per function type, with types projected
+    // into 4 types: pointer to non-function, struct,
+    // primitive, and function pointer.
+    Full             // Use one table per unique function type
+};
+}
 
-  namespace ThreadModel {
-    enum Model {
-      POSIX,  // POSIX Threads
-      Single  // Single Threaded Environment
-    };
-  }
+namespace ThreadModel {
+enum Model {
+    POSIX,  // POSIX Threads
+    Single  // Single Threaded Environment
+};
+}
 
-  enum class BasicBlockSection {
+enum class BasicBlockSection {
     All,    // Use Basic Block Sections for all basic blocks.  A section
-            // for every basic block can significantly bloat object file sizes.
+    // for every basic block can significantly bloat object file sizes.
     List,   // Get list of functions & BBs from a file. Selectively enables
-            // basic block sections for a subset of basic blocks which can be
-            // used to control object size bloats from creating sections.
+    // basic block sections for a subset of basic blocks which can be
+    // used to control object size bloats from creating sections.
     Labels, // Do not use Basic Block Sections but label basic blocks.  This
-            // is useful when associating profile counts from virtual addresses
-            // to basic blocks.
+    // is useful when associating profile counts from virtual addresses
+    // to basic blocks.
     Preset, // Similar to list but the blocks are identified by passes which
-            // seek to use Basic Block Sections, e.g. MachineFunctionSplitter.
-            // This option cannot be set via the command line.
+    // seek to use Basic Block Sections, e.g. MachineFunctionSplitter.
+    // This option cannot be set via the command line.
     None    // Do not use Basic Block Sections.
-  };
+};
 
-  enum class StackProtectorGuards {
+enum class StackProtectorGuards {
     None,
     TLS,
     Global
-  };
+};
 
-  enum class EABI {
+enum class EABI {
     Unknown,
     Default, // Default means not specified
     EABI4,   // Target-specific (either 4, 5 or gnu depending on triple).
     EABI5,
     GNU
-  };
+};
 
-  /// Identify a debugger for "tuning" the debug info.
-  ///
-  /// The "debugger tuning" concept allows us to present a more intuitive
-  /// interface that unpacks into different sets of defaults for the various
-  /// individual feature-flag settings, that suit the preferences of the
-  /// various debuggers.  However, it's worth remembering that debuggers are
-  /// not the only consumers of debug info, and some variations in DWARF might
-  /// better be treated as target/platform issues. Fundamentally,
-  /// o if the feature is useful (or not) to a particular debugger, regardless
-  ///   of the target, that's a tuning decision;
-  /// o if the feature is useful (or not) on a particular platform, regardless
-  ///   of the debugger, that's a target decision.
-  /// It's not impossible to see both factors in some specific case.
-  ///
-  /// The "tuning" should be used to set defaults for individual feature flags
-  /// in DwarfDebug; if a given feature has a more specific command-line option,
-  /// that option should take precedence over the tuning.
-  enum class DebuggerKind {
+/// Identify a debugger for "tuning" the debug info.
+///
+/// The "debugger tuning" concept allows us to present a more intuitive
+/// interface that unpacks into different sets of defaults for the various
+/// individual feature-flag settings, that suit the preferences of the
+/// various debuggers.  However, it's worth remembering that debuggers are
+/// not the only consumers of debug info, and some variations in DWARF might
+/// better be treated as target/platform issues. Fundamentally,
+/// o if the feature is useful (or not) to a particular debugger, regardless
+///   of the target, that's a tuning decision;
+/// o if the feature is useful (or not) on a particular platform, regardless
+///   of the debugger, that's a target decision.
+/// It's not impossible to see both factors in some specific case.
+///
+/// The "tuning" should be used to set defaults for individual feature flags
+/// in DwarfDebug; if a given feature has a more specific command-line option,
+/// that option should take precedence over the tuning.
+enum class DebuggerKind {
     Default,  // No specific tuning requested.
     GDB,      // Tune debug info for gdb.
     LLDB,     // Tune debug info for lldb.
     SCE       // Tune debug info for SCE targets (e.g. PS4).
-  };
+};
 
-  /// Enable abort calls when global instruction selection fails to lower/select
-  /// an instruction.
-  enum class GlobalISelAbortMode {
+/// Enable abort calls when global instruction selection fails to lower/select
+/// an instruction.
+enum class GlobalISelAbortMode {
     Disable,        // Disable the abort.
     Enable,         // Enable the abort.
     DisableWithDiag // Disable the abort but emit a diagnostic on failure.
-  };
+};
 
-  class TargetOptions {
-  public:
+class TargetOptions {
+public:
     TargetOptions()
         : UnsafeFPMath(false), NoInfsFPMath(false), NoNaNsFPMath(false),
           NoTrappingFPMath(true), NoSignedZerosFPMath(false),
@@ -307,7 +307,7 @@ namespace llvm {
     /// of debug entry values even if the target does not officially support
     /// it. Useful for testing purposes only. This flag should never be checked
     /// directly, always use \ref ShouldEmitDebugEntryValues instead.
-     unsigned EnableDebugEntryValues : 1;
+    unsigned EnableDebugEntryValues : 1;
     /// NOTE: There are targets that still do not support the debug entry values
     /// production.
     bool ShouldEmitDebugEntryValues() const;
@@ -331,7 +331,7 @@ namespace llvm {
 
     /// Stack protector guard mode to use, e.g. tls, global.
     StackProtectorGuards StackProtectorGuard =
-                                         StackProtectorGuards::None;
+        StackProtectorGuards::None;
 
     /// Stack protector guard reg to use, e.g. usually fs or gs in X86.
     std::string StackProtectorGuardReg = "None";
@@ -372,7 +372,7 @@ namespace llvm {
     /// Which debugger to tune for.
     DebuggerKind DebuggerTuning = DebuggerKind::Default;
 
-  private:
+private:
     /// Flushing mode to assume in default FP environment.
     DenormalMode FPDenormalMode;
 
@@ -380,21 +380,21 @@ namespace llvm {
     /// float.
     DenormalMode FP32DenormalMode;
 
-  public:
+public:
     void setFPDenormalMode(DenormalMode Mode) {
-      FPDenormalMode = Mode;
+        FPDenormalMode = Mode;
     }
 
     void setFP32DenormalMode(DenormalMode Mode) {
-      FP32DenormalMode = Mode;
+        FP32DenormalMode = Mode;
     }
 
     DenormalMode getRawFPDenormalMode() const {
-      return FPDenormalMode;
+        return FPDenormalMode;
     }
 
     DenormalMode getRawFP32DenormalMode() const {
-      return FP32DenormalMode;
+        return FP32DenormalMode;
     }
 
     DenormalMode getDenormalMode(const fltSemantics &FPType) const;
@@ -404,7 +404,7 @@ namespace llvm {
 
     /// Machine level options.
     MCTargetOptions MCOptions;
-  };
+};
 
 } // End llvm namespace
 

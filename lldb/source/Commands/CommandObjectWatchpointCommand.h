@@ -17,9 +17,9 @@ namespace lldb_private {
 
 class CommandObjectWatchpointCommand : public CommandObjectMultiword {
 public:
-  CommandObjectWatchpointCommand(CommandInterpreter &interpreter);
+    CommandObjectWatchpointCommand(CommandInterpreter &interpreter);
 
-  ~CommandObjectWatchpointCommand() override;
+    ~CommandObjectWatchpointCommand() override;
 };
 
 } // namespace lldb_private

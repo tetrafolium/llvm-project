@@ -21,8 +21,10 @@ namespace llvm {
 class Function;
 
 struct CoroCleanupPass : PassInfoMixin<CoroCleanupPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 };
 } // end namespace llvm
 

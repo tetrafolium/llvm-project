@@ -80,10 +80,10 @@ using namespace llvm;
 //===----------------------------------------------------------------------===//
 
 const MipsFrameLowering *MipsFrameLowering::create(const MipsSubtarget &ST) {
-  if (ST.inMips16Mode())
-    return llvm::createMips16FrameLowering(ST);
+    if (ST.inMips16Mode())
+        return llvm::createMips16FrameLowering(ST);
 
-  return llvm::createMipsSEFrameLowering(ST);
+    return llvm::createMipsSEFrameLowering(ST);
 }
 
 // hasFP - Return true if the specified function should have a dedicated frame
@@ -91,19 +91,19 @@ const MipsFrameLowering *MipsFrameLowering::create(const MipsSubtarget &ST) {
 // if it needs dynamic stack realignment, if frame pointer elimination is
 // disabled, or if the frame address is taken.
 bool MipsFrameLowering::hasFP(const MachineFunction &MF) const {
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
-  const TargetRegisterInfo *TRI = STI.getRegisterInfo();
+    const MachineFrameInfo &MFI = MF.getFrameInfo();
+    const TargetRegisterInfo *TRI = STI.getRegisterInfo();
 
-  return MF.getTarget().Options.DisableFramePointerElim(MF) ||
-      MFI.hasVarSizedObjects() || MFI.isFrameAddressTaken() ||
-      TRI->needsStackRealignment(MF);
+    return MF.getTarget().Options.DisableFramePointerElim(MF) ||
+           MFI.hasVarSizedObjects() || MFI.isFrameAddressTaken() ||
+           TRI->needsStackRealignment(MF);
 }
 
 bool MipsFrameLowering::hasBP(const MachineFunction &MF) const {
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
-  const TargetRegisterInfo *TRI = STI.getRegisterInfo();
+    const MachineFrameInfo &MFI = MF.getFrameInfo();
+    const TargetRegisterInfo *TRI = STI.getRegisterInfo();
 
-  return MFI.hasVarSizedObjects() && TRI->needsStackRealignment(MF);
+    return MFI.hasVarSizedObjects() && TRI->needsStackRealignment(MF);
 }
 
 // Estimate the size of the stack, including the incoming arguments. We need to
@@ -112,40 +112,40 @@ bool MipsFrameLowering::hasBP(const MachineFunction &MF) const {
 // from $sp so that it can be determined if an emergency spill slot for stack
 // addresses is required.
 uint64_t MipsFrameLowering::estimateStackSize(const MachineFunction &MF) const {
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
-  const TargetRegisterInfo &TRI = *STI.getRegisterInfo();
+    const MachineFrameInfo &MFI = MF.getFrameInfo();
+    const TargetRegisterInfo &TRI = *STI.getRegisterInfo();
 
-  int64_t Size = 0;
+    int64_t Size = 0;
 
-  // Iterate over fixed sized objects which are incoming arguments.
-  for (int I = MFI.getObjectIndexBegin(); I != 0; ++I)
-    if (MFI.getObjectOffset(I) > 0)
-      Size += MFI.getObjectSize(I);
+    // Iterate over fixed sized objects which are incoming arguments.
+    for (int I = MFI.getObjectIndexBegin(); I != 0; ++I)
+        if (MFI.getObjectOffset(I) > 0)
+            Size += MFI.getObjectSize(I);
 
-  // Conservatively assume all callee-saved registers will be saved.
-  for (const MCPhysReg *R = TRI.getCalleeSavedRegs(&MF); *R; ++R) {
-    unsigned RegSize = TRI.getSpillSize(*TRI.getMinimalPhysRegClass(*R));
-    Size = alignTo(Size + RegSize, RegSize);
-  }
+    // Conservatively assume all callee-saved registers will be saved.
+    for (const MCPhysReg *R = TRI.getCalleeSavedRegs(&MF); *R; ++R) {
+        unsigned RegSize = TRI.getSpillSize(*TRI.getMinimalPhysRegClass(*R));
+        Size = alignTo(Size + RegSize, RegSize);
+    }
 
-  // Get the size of the rest of the frame objects and any possible reserved
-  // call frame, accounting for alignment.
-  return Size + MFI.estimateStackSize(MF);
+    // Get the size of the rest of the frame objects and any possible reserved
+    // call frame, accounting for alignment.
+    return Size + MFI.estimateStackSize(MF);
 }
 
 // Eliminate ADJCALLSTACKDOWN, ADJCALLSTACKUP pseudo instructions
 MachineBasicBlock::iterator MipsFrameLowering::
 eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
                               MachineBasicBlock::iterator I) const {
-  unsigned SP = STI.getABI().IsN64() ? Mips::SP_64 : Mips::SP;
+    unsigned SP = STI.getABI().IsN64() ? Mips::SP_64 : Mips::SP;
 
-  if (!hasReservedCallFrame(MF)) {
-    int64_t Amount = I->getOperand(0).getImm();
-    if (I->getOpcode() == Mips::ADJCALLSTACKDOWN)
-      Amount = -Amount;
+    if (!hasReservedCallFrame(MF)) {
+        int64_t Amount = I->getOperand(0).getImm();
+        if (I->getOpcode() == Mips::ADJCALLSTACKDOWN)
+            Amount = -Amount;
 
-    STI.getInstrInfo()->adjustStackPtr(SP, Amount, MBB, I);
-  }
+        STI.getInstrInfo()->adjustStackPtr(SP, Amount, MBB, I);
+    }
 
-  return MBB.erase(I);
+    return MBB.erase(I);
 }

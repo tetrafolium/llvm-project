@@ -47,21 +47,21 @@ namespace X86Disassembler {
 // processed correctly.  Most of these indicate the presence of particular
 // prefixes, but ATTR_64BIT is simply an attribute of the decoding context.
 enum attributeBits {
-  ATTR_NONE   = 0x00,
-  ATTR_64BIT  = 0x1 << 0,
-  ATTR_XS     = 0x1 << 1,
-  ATTR_XD     = 0x1 << 2,
-  ATTR_REXW   = 0x1 << 3,
-  ATTR_OPSIZE = 0x1 << 4,
-  ATTR_ADSIZE = 0x1 << 5,
-  ATTR_VEX    = 0x1 << 6,
-  ATTR_VEXL   = 0x1 << 7,
-  ATTR_EVEX   = 0x1 << 8,
-  ATTR_EVEXL2 = 0x1 << 9,
-  ATTR_EVEXK  = 0x1 << 10,
-  ATTR_EVEXKZ = 0x1 << 11,
-  ATTR_EVEXB  = 0x1 << 12,
-  ATTR_max    = 0x1 << 13,
+    ATTR_NONE   = 0x00,
+    ATTR_64BIT  = 0x1 << 0,
+    ATTR_XS     = 0x1 << 1,
+    ATTR_XD     = 0x1 << 2,
+    ATTR_REXW   = 0x1 << 3,
+    ATTR_OPSIZE = 0x1 << 4,
+    ATTR_ADSIZE = 0x1 << 5,
+    ATTR_VEX    = 0x1 << 6,
+    ATTR_VEXL   = 0x1 << 7,
+    ATTR_EVEX   = 0x1 << 8,
+    ATTR_EVEXL2 = 0x1 << 9,
+    ATTR_EVEXK  = 0x1 << 10,
+    ATTR_EVEXKZ = 0x1 << 11,
+    ATTR_EVEXB  = 0x1 << 12,
+    ATTR_max    = 0x1 << 13,
 };
 
 // Combinations of the above attributes that are relevant to instruction
@@ -275,22 +275,22 @@ enum attributeBits {
 
 #define ENUM_ENTRY(n, r, d) n,
 enum InstructionContext {
-  INSTRUCTION_CONTEXTS
-  IC_max
+    INSTRUCTION_CONTEXTS
+    IC_max
 };
 #undef ENUM_ENTRY
 
 // Opcode types, which determine which decode table to use, both in the Intel
 // manual and also for the decoder.
 enum OpcodeType {
-  ONEBYTE       = 0,
-  TWOBYTE       = 1,
-  THREEBYTE_38  = 2,
-  THREEBYTE_3A  = 3,
-  XOP8_MAP      = 4,
-  XOP9_MAP      = 5,
-  XOPA_MAP      = 6,
-  THREEDNOW_MAP = 7
+    ONEBYTE       = 0,
+    TWOBYTE       = 1,
+    THREEBYTE_38  = 2,
+    THREEBYTE_3A  = 3,
+    XOP8_MAP      = 4,
+    XOP9_MAP      = 5,
+    XOPA_MAP      = 6,
+    THREEDNOW_MAP = 7
 };
 
 // The following structs are used for the hierarchical decode table.  After
@@ -327,8 +327,8 @@ typedef uint16_t InstrUID;
 
 #define ENUM_ENTRY(n) n,
 enum ModRMDecisionType {
-  MODRMTYPES
-  MODRM_max
+    MODRMTYPES
+    MODRM_max
 };
 #undef ENUM_ENTRY
 
@@ -396,8 +396,8 @@ enum ModRMDecisionType {
 
 #define ENUM_ENTRY(n, d) n,
 enum OperandEncoding {
-  ENCODINGS
-  ENCODING_max
+    ENCODINGS
+    ENCODING_max
 };
 #undef ENUM_ENTRY
 
@@ -442,15 +442,15 @@ enum OperandEncoding {
 
 #define ENUM_ENTRY(n, d) n,
 enum OperandType {
-  TYPES
-  TYPE_max
+    TYPES
+    TYPE_max
 };
 #undef ENUM_ENTRY
 
 /// The specification for how to extract and interpret one operand.
 struct OperandSpecifier {
-  uint8_t encoding;
-  uint8_t type;
+    uint8_t encoding;
+    uint8_t type;
 };
 
 static const unsigned X86_MAX_OPERANDS = 6;
@@ -459,9 +459,9 @@ static const unsigned X86_MAX_OPERANDS = 6;
 /// are supported, and represent real mode, IA-32e, and IA-32e in 64-bit mode,
 /// respectively.
 enum DisassemblerMode {
-  MODE_16BIT,
-  MODE_32BIT,
-  MODE_64BIT
+    MODE_16BIT,
+    MODE_32BIT,
+    MODE_64BIT
 };
 
 } // namespace X86Disassembler

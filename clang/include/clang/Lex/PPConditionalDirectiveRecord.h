@@ -23,78 +23,84 @@ namespace clang {
 /// Records preprocessor conditional directive regions and allows
 /// querying in which region source locations belong to.
 class PPConditionalDirectiveRecord : public PPCallbacks {
-  SourceManager &SourceMgr;
+    SourceManager &SourceMgr;
 
-  SmallVector<SourceLocation, 6> CondDirectiveStack;
+    SmallVector<SourceLocation, 6> CondDirectiveStack;
 
-  class CondDirectiveLoc {
-    SourceLocation Loc;
-    SourceLocation RegionLoc;
+    class CondDirectiveLoc {
+        SourceLocation Loc;
+        SourceLocation RegionLoc;
 
-  public:
-    CondDirectiveLoc(SourceLocation Loc, SourceLocation RegionLoc)
-      : Loc(Loc), RegionLoc(RegionLoc) {}
-
-    SourceLocation getLoc() const { return Loc; }
-    SourceLocation getRegionLoc() const { return RegionLoc; }
-
-    class Comp {
-      SourceManager &SM;
     public:
-      explicit Comp(SourceManager &SM) : SM(SM) {}
-      bool operator()(const CondDirectiveLoc &LHS,
-                      const CondDirectiveLoc &RHS) {
-        return SM.isBeforeInTranslationUnit(LHS.getLoc(), RHS.getLoc());
-      }
-      bool operator()(const CondDirectiveLoc &LHS, SourceLocation RHS) {
-        return SM.isBeforeInTranslationUnit(LHS.getLoc(), RHS);
-      }
-      bool operator()(SourceLocation LHS, const CondDirectiveLoc &RHS) {
-        return SM.isBeforeInTranslationUnit(LHS, RHS.getLoc());
-      }
+        CondDirectiveLoc(SourceLocation Loc, SourceLocation RegionLoc)
+            : Loc(Loc), RegionLoc(RegionLoc) {}
+
+        SourceLocation getLoc() const {
+            return Loc;
+        }
+        SourceLocation getRegionLoc() const {
+            return RegionLoc;
+        }
+
+        class Comp {
+            SourceManager &SM;
+        public:
+            explicit Comp(SourceManager &SM) : SM(SM) {}
+            bool operator()(const CondDirectiveLoc &LHS,
+                            const CondDirectiveLoc &RHS) {
+                return SM.isBeforeInTranslationUnit(LHS.getLoc(), RHS.getLoc());
+            }
+            bool operator()(const CondDirectiveLoc &LHS, SourceLocation RHS) {
+                return SM.isBeforeInTranslationUnit(LHS.getLoc(), RHS);
+            }
+            bool operator()(SourceLocation LHS, const CondDirectiveLoc &RHS) {
+                return SM.isBeforeInTranslationUnit(LHS, RHS.getLoc());
+            }
+        };
     };
-  };
 
-  typedef std::vector<CondDirectiveLoc> CondDirectiveLocsTy;
-  /// The locations of conditional directives in source order.
-  CondDirectiveLocsTy CondDirectiveLocs;
+    typedef std::vector<CondDirectiveLoc> CondDirectiveLocsTy;
+    /// The locations of conditional directives in source order.
+    CondDirectiveLocsTy CondDirectiveLocs;
 
-  void addCondDirectiveLoc(CondDirectiveLoc DirLoc);
+    void addCondDirectiveLoc(CondDirectiveLoc DirLoc);
 
 public:
-  /// Construct a new preprocessing record.
-  explicit PPConditionalDirectiveRecord(SourceManager &SM);
+    /// Construct a new preprocessing record.
+    explicit PPConditionalDirectiveRecord(SourceManager &SM);
 
-  size_t getTotalMemory() const;
+    size_t getTotalMemory() const;
 
-  SourceManager &getSourceManager() const { return SourceMgr; }
+    SourceManager &getSourceManager() const {
+        return SourceMgr;
+    }
 
-  /// Returns true if the given range intersects with a conditional
-  /// directive. if a \#if/\#endif block is fully contained within the range,
-  /// this function will return false.
-  bool rangeIntersectsConditionalDirective(SourceRange Range) const;
+    /// Returns true if the given range intersects with a conditional
+    /// directive. if a \#if/\#endif block is fully contained within the range,
+    /// this function will return false.
+    bool rangeIntersectsConditionalDirective(SourceRange Range) const;
 
-  /// Returns true if the given locations are in different regions,
-  /// separated by conditional directive blocks.
-  bool areInDifferentConditionalDirectiveRegion(SourceLocation LHS,
-                                                SourceLocation RHS) const {
-    return findConditionalDirectiveRegionLoc(LHS) !=
-        findConditionalDirectiveRegionLoc(RHS);
-  }
+    /// Returns true if the given locations are in different regions,
+    /// separated by conditional directive blocks.
+    bool areInDifferentConditionalDirectiveRegion(SourceLocation LHS,
+            SourceLocation RHS) const {
+        return findConditionalDirectiveRegionLoc(LHS) !=
+               findConditionalDirectiveRegionLoc(RHS);
+    }
 
-  SourceLocation findConditionalDirectiveRegionLoc(SourceLocation Loc) const;
+    SourceLocation findConditionalDirectiveRegionLoc(SourceLocation Loc) const;
 
 private:
-  void If(SourceLocation Loc, SourceRange ConditionRange,
-          ConditionValueKind ConditionValue) override;
-  void Elif(SourceLocation Loc, SourceRange ConditionRange,
-            ConditionValueKind ConditionValue, SourceLocation IfLoc) override;
-  void Ifdef(SourceLocation Loc, const Token &MacroNameTok,
-             const MacroDefinition &MD) override;
-  void Ifndef(SourceLocation Loc, const Token &MacroNameTok,
-              const MacroDefinition &MD) override;
-  void Else(SourceLocation Loc, SourceLocation IfLoc) override;
-  void Endif(SourceLocation Loc, SourceLocation IfLoc) override;
+    void If(SourceLocation Loc, SourceRange ConditionRange,
+            ConditionValueKind ConditionValue) override;
+    void Elif(SourceLocation Loc, SourceRange ConditionRange,
+              ConditionValueKind ConditionValue, SourceLocation IfLoc) override;
+    void Ifdef(SourceLocation Loc, const Token &MacroNameTok,
+               const MacroDefinition &MD) override;
+    void Ifndef(SourceLocation Loc, const Token &MacroNameTok,
+                const MacroDefinition &MD) override;
+    void Else(SourceLocation Loc, SourceLocation IfLoc) override;
+    void Endif(SourceLocation Loc, SourceLocation IfLoc) override;
 };
 
 } // end namespace clang

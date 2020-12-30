@@ -34,105 +34,111 @@ namespace {
 /// type to the standard error, or to to compliment many others. Emits detailed
 /// diagnostics in textual format for the 'text' output type.
 class TextDiagnostics : public PathDiagnosticConsumer {
-  PathDiagnosticConsumerOptions DiagOpts;
-  DiagnosticsEngine &DiagEng;
-  const LangOptions &LO;
-  bool ShouldDisplayPathNotes;
+    PathDiagnosticConsumerOptions DiagOpts;
+    DiagnosticsEngine &DiagEng;
+    const LangOptions &LO;
+    bool ShouldDisplayPathNotes;
 
 public:
-  TextDiagnostics(PathDiagnosticConsumerOptions DiagOpts,
-                  DiagnosticsEngine &DiagEng, const LangOptions &LO,
-                  bool ShouldDisplayPathNotes)
-      : DiagOpts(std::move(DiagOpts)), DiagEng(DiagEng), LO(LO),
-        ShouldDisplayPathNotes(ShouldDisplayPathNotes) {}
-  ~TextDiagnostics() override {}
+    TextDiagnostics(PathDiagnosticConsumerOptions DiagOpts,
+                    DiagnosticsEngine &DiagEng, const LangOptions &LO,
+                    bool ShouldDisplayPathNotes)
+        : DiagOpts(std::move(DiagOpts)), DiagEng(DiagEng), LO(LO),
+          ShouldDisplayPathNotes(ShouldDisplayPathNotes) {}
+    ~TextDiagnostics() override {}
 
-  StringRef getName() const override { return "TextDiagnostics"; }
+    StringRef getName() const override {
+        return "TextDiagnostics";
+    }
 
-  bool supportsLogicalOpControlFlow() const override { return true; }
-  bool supportsCrossFileDiagnostics() const override { return true; }
+    bool supportsLogicalOpControlFlow() const override {
+        return true;
+    }
+    bool supportsCrossFileDiagnostics() const override {
+        return true;
+    }
 
-  PathGenerationScheme getGenerationScheme() const override {
-    return ShouldDisplayPathNotes ? Minimal : None;
-  }
+    PathGenerationScheme getGenerationScheme() const override {
+        return ShouldDisplayPathNotes ? Minimal : None;
+    }
 
-  void FlushDiagnosticsImpl(std::vector<const PathDiagnostic *> &Diags,
-                            FilesMade *filesMade) override {
-    unsigned WarnID =
-        DiagOpts.ShouldDisplayWarningsAsErrors
+    void FlushDiagnosticsImpl(std::vector<const PathDiagnostic *> &Diags,
+                              FilesMade *filesMade) override {
+        unsigned WarnID =
+            DiagOpts.ShouldDisplayWarningsAsErrors
             ? DiagEng.getCustomDiagID(DiagnosticsEngine::Error, "%0")
             : DiagEng.getCustomDiagID(DiagnosticsEngine::Warning, "%0");
-    unsigned NoteID = DiagEng.getCustomDiagID(DiagnosticsEngine::Note, "%0");
-    SourceManager &SM = DiagEng.getSourceManager();
+        unsigned NoteID = DiagEng.getCustomDiagID(DiagnosticsEngine::Note, "%0");
+        SourceManager &SM = DiagEng.getSourceManager();
 
-    Replacements Repls;
-    auto reportPiece = [&](unsigned ID, FullSourceLoc Loc, StringRef String,
-                           ArrayRef<SourceRange> Ranges,
-                           ArrayRef<FixItHint> Fixits) {
-      if (!DiagOpts.ShouldApplyFixIts) {
-        DiagEng.Report(Loc, ID) << String << Ranges << Fixits;
-        return;
-      }
+        Replacements Repls;
+        auto reportPiece = [&](unsigned ID, FullSourceLoc Loc, StringRef String,
+                               ArrayRef<SourceRange> Ranges,
+        ArrayRef<FixItHint> Fixits) {
+            if (!DiagOpts.ShouldApplyFixIts) {
+                DiagEng.Report(Loc, ID) << String << Ranges << Fixits;
+                return;
+            }
 
-      DiagEng.Report(Loc, ID) << String << Ranges;
-      for (const FixItHint &Hint : Fixits) {
-        Replacement Repl(SM, Hint.RemoveRange, Hint.CodeToInsert);
+            DiagEng.Report(Loc, ID) << String << Ranges;
+            for (const FixItHint &Hint : Fixits) {
+                Replacement Repl(SM, Hint.RemoveRange, Hint.CodeToInsert);
 
-        if (llvm::Error Err = Repls.add(Repl)) {
-          llvm::errs() << "Error applying replacement " << Repl.toString()
-                       << ": " << Err << "\n";
+                if (llvm::Error Err = Repls.add(Repl)) {
+                    llvm::errs() << "Error applying replacement " << Repl.toString()
+                                 << ": " << Err << "\n";
+                }
+            }
+        };
+
+        for (std::vector<const PathDiagnostic *>::iterator I = Diags.begin(),
+                E = Diags.end();
+                I != E; ++I) {
+            const PathDiagnostic *PD = *I;
+            std::string WarningMsg = (DiagOpts.ShouldDisplayDiagnosticName
+                                      ? " [" + PD->getCheckerName() + "]"
+                                      : "")
+                                     .str();
+
+            reportPiece(WarnID, PD->getLocation().asLocation(),
+                        (PD->getShortDescription() + WarningMsg).str(),
+                        PD->path.back()->getRanges(), PD->path.back()->getFixits());
+
+            // First, add extra notes, even if paths should not be included.
+            for (const auto &Piece : PD->path) {
+                if (!isa<PathDiagnosticNotePiece>(Piece.get()))
+                    continue;
+
+                reportPiece(NoteID, Piece->getLocation().asLocation(),
+                            Piece->getString(), Piece->getRanges(),
+                            Piece->getFixits());
+            }
+
+            if (!ShouldDisplayPathNotes)
+                continue;
+
+            // Then, add the path notes if necessary.
+            PathPieces FlatPath = PD->path.flatten(/*ShouldFlattenMacros=*/true);
+            for (const auto &Piece : FlatPath) {
+                if (isa<PathDiagnosticNotePiece>(Piece.get()))
+                    continue;
+
+                reportPiece(NoteID, Piece->getLocation().asLocation(),
+                            Piece->getString(), Piece->getRanges(),
+                            Piece->getFixits());
+            }
         }
-      }
-    };
 
-    for (std::vector<const PathDiagnostic *>::iterator I = Diags.begin(),
-         E = Diags.end();
-         I != E; ++I) {
-      const PathDiagnostic *PD = *I;
-      std::string WarningMsg = (DiagOpts.ShouldDisplayDiagnosticName
-                                    ? " [" + PD->getCheckerName() + "]"
-                                    : "")
-                                   .str();
+        if (Repls.empty())
+            return;
 
-      reportPiece(WarnID, PD->getLocation().asLocation(),
-                  (PD->getShortDescription() + WarningMsg).str(),
-                  PD->path.back()->getRanges(), PD->path.back()->getFixits());
+        Rewriter Rewrite(SM, LO);
+        if (!applyAllReplacements(Repls, Rewrite)) {
+            llvm::errs() << "An error occured during applying fix-it.\n";
+        }
 
-      // First, add extra notes, even if paths should not be included.
-      for (const auto &Piece : PD->path) {
-        if (!isa<PathDiagnosticNotePiece>(Piece.get()))
-          continue;
-
-        reportPiece(NoteID, Piece->getLocation().asLocation(),
-                    Piece->getString(), Piece->getRanges(),
-                    Piece->getFixits());
-      }
-
-      if (!ShouldDisplayPathNotes)
-        continue;
-
-      // Then, add the path notes if necessary.
-      PathPieces FlatPath = PD->path.flatten(/*ShouldFlattenMacros=*/true);
-      for (const auto &Piece : FlatPath) {
-        if (isa<PathDiagnosticNotePiece>(Piece.get()))
-          continue;
-
-        reportPiece(NoteID, Piece->getLocation().asLocation(),
-                    Piece->getString(), Piece->getRanges(),
-                    Piece->getFixits());
-      }
+        Rewrite.overwriteChangedFiles();
     }
-
-    if (Repls.empty())
-      return;
-
-    Rewriter Rewrite(SM, LO);
-    if (!applyAllReplacements(Repls, Rewrite)) {
-      llvm::errs() << "An error occured during applying fix-it.\n";
-    }
-
-    Rewrite.overwriteChangedFiles();
-  }
 };
 } // end anonymous namespace
 
@@ -140,16 +146,16 @@ void ento::createTextPathDiagnosticConsumer(
     PathDiagnosticConsumerOptions DiagOpts, PathDiagnosticConsumers &C,
     const std::string &Prefix, const clang::Preprocessor &PP,
     const cross_tu::CrossTranslationUnitContext &CTU) {
-  C.emplace_back(new TextDiagnostics(std::move(DiagOpts), PP.getDiagnostics(),
-                                     PP.getLangOpts(),
-                                     /*ShouldDisplayPathNotes=*/true));
+    C.emplace_back(new TextDiagnostics(std::move(DiagOpts), PP.getDiagnostics(),
+                                       PP.getLangOpts(),
+                                       /*ShouldDisplayPathNotes=*/true));
 }
 
 void ento::createTextMinimalPathDiagnosticConsumer(
     PathDiagnosticConsumerOptions DiagOpts, PathDiagnosticConsumers &C,
     const std::string &Prefix, const clang::Preprocessor &PP,
     const cross_tu::CrossTranslationUnitContext &CTU) {
-  C.emplace_back(new TextDiagnostics(std::move(DiagOpts), PP.getDiagnostics(),
-                                     PP.getLangOpts(),
-                                     /*ShouldDisplayPathNotes=*/false));
+    C.emplace_back(new TextDiagnostics(std::move(DiagOpts), PP.getDiagnostics(),
+                                       PP.getLangOpts(),
+                                       /*ShouldDisplayPathNotes=*/false));
 }

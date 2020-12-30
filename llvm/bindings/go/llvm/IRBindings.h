@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-struct LLVMDebugLocMetadata{
+struct LLVMDebugLocMetadata {
     unsigned Line;
     unsigned Col;
     LLVMMetadataRef Scope;
@@ -44,8 +44,8 @@ void LLVMAddNamedMetadataOperand2(LLVMModuleRef M, const char *name,
 void LLVMSetMetadata2(LLVMValueRef Inst, unsigned KindID, LLVMMetadataRef MD);
 
 void LLVMGoSetCurrentDebugLocation(LLVMBuilderRef Bref, unsigned Line,
-                                  unsigned Col, LLVMMetadataRef Scope,
-                                  LLVMMetadataRef InlinedAt);
+                                   unsigned Col, LLVMMetadataRef Scope,
+                                   LLVMMetadataRef InlinedAt);
 
 struct LLVMDebugLocMetadata LLVMGoGetCurrentDebugLocation(LLVMBuilderRef Bref);
 

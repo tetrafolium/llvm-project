@@ -22,9 +22,9 @@ namespace llvm {
 
 class LoopFlattenPass : public PassInfoMixin<LoopFlattenPass> {
 public:
-  LoopFlattenPass() = default;
+    LoopFlattenPass() = default;
 
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

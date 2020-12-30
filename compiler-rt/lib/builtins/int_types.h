@@ -38,29 +38,29 @@ typedef int64_t di_int;
 typedef uint64_t du_int;
 
 typedef union {
-  di_int all;
-  struct {
+    di_int all;
+    struct {
 #if _YUGA_LITTLE_ENDIAN
-    su_int low;
-    si_int high;
+        su_int low;
+        si_int high;
 #else
-    si_int high;
-    su_int low;
+        si_int high;
+        su_int low;
 #endif // _YUGA_LITTLE_ENDIAN
-  } s;
+    } s;
 } dwords;
 
 typedef union {
-  du_int all;
-  struct {
+    du_int all;
+    struct {
 #if _YUGA_LITTLE_ENDIAN
-    su_int low;
-    su_int high;
+        su_int low;
+        su_int high;
 #else
-    su_int high;
-    su_int low;
+        su_int high;
+        su_int low;
 #endif // _YUGA_LITTLE_ENDIAN
-  } s;
+    } s;
 } udwords;
 
 #if defined(__LP64__) || defined(__wasm__) || defined(__mips64) ||             \
@@ -80,64 +80,64 @@ typedef int ti_int __attribute__((mode(TI)));
 typedef unsigned tu_int __attribute__((mode(TI)));
 
 typedef union {
-  ti_int all;
-  struct {
+    ti_int all;
+    struct {
 #if _YUGA_LITTLE_ENDIAN
-    du_int low;
-    di_int high;
+        du_int low;
+        di_int high;
 #else
-    di_int high;
-    du_int low;
+        di_int high;
+        du_int low;
 #endif // _YUGA_LITTLE_ENDIAN
-  } s;
+    } s;
 } twords;
 
 typedef union {
-  tu_int all;
-  struct {
+    tu_int all;
+    struct {
 #if _YUGA_LITTLE_ENDIAN
-    du_int low;
-    du_int high;
+        du_int low;
+        du_int high;
 #else
-    du_int high;
-    du_int low;
+        du_int high;
+        du_int low;
 #endif // _YUGA_LITTLE_ENDIAN
-  } s;
+    } s;
 } utwords;
 
 static __inline ti_int make_ti(di_int h, di_int l) {
-  twords r;
-  r.s.high = h;
-  r.s.low = l;
-  return r.all;
+    twords r;
+    r.s.high = h;
+    r.s.low = l;
+    return r.all;
 }
 
 static __inline tu_int make_tu(du_int h, du_int l) {
-  utwords r;
-  r.s.high = h;
-  r.s.low = l;
-  return r.all;
+    utwords r;
+    r.s.high = h;
+    r.s.low = l;
+    return r.all;
 }
 
 #endif // CRT_HAS_128BIT
 
 typedef union {
-  su_int u;
-  float f;
+    su_int u;
+    float f;
 } float_bits;
 
 typedef union {
-  udwords u;
-  double f;
+    udwords u;
+    double f;
 } double_bits;
 
 typedef struct {
 #if _YUGA_LITTLE_ENDIAN
-  udwords low;
-  udwords high;
+    udwords low;
+    udwords high;
 #else
-  udwords high;
-  udwords low;
+    udwords high;
+    udwords low;
 #endif // _YUGA_LITTLE_ENDIAN
 } uqwords;
 
@@ -156,8 +156,8 @@ typedef struct {
 #endif
 
 typedef union {
-  uqwords u;
-  long double f;
+    uqwords u;
+    long double f;
 } long_double_bits;
 
 #if __STDC_VERSION__ >= 199901L
@@ -169,15 +169,15 @@ typedef long double _Complex Lcomplex;
 #define COMPLEX_IMAGINARY(x) __imag__(x)
 #else
 typedef struct {
-  float real, imaginary;
+    float real, imaginary;
 } Fcomplex;
 
 typedef struct {
-  double real, imaginary;
+    double real, imaginary;
 } Dcomplex;
 
 typedef struct {
-  long double real, imaginary;
+    long double real, imaginary;
 } Lcomplex;
 
 #define COMPLEX_REAL(x) (x).real

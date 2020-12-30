@@ -19,22 +19,22 @@ namespace pdb {
 
 class NativePublicSymbol : public NativeRawSymbol {
 public:
-  NativePublicSymbol(NativeSession &Session, SymIndexId Id,
-                     const codeview::PublicSym32 &Sym);
+    NativePublicSymbol(NativeSession &Session, SymIndexId Id,
+                       const codeview::PublicSym32 &Sym);
 
-  ~NativePublicSymbol() override;
+    ~NativePublicSymbol() override;
 
-  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-            PdbSymbolIdField RecurseIdFields) const override;
+    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+              PdbSymbolIdField RecurseIdFields) const override;
 
-  uint32_t getAddressOffset() const override;
-  uint32_t getAddressSection() const override;
-  std::string getName() const override;
-  uint32_t getRelativeVirtualAddress() const override;
-  uint64_t getVirtualAddress() const override;
+    uint32_t getAddressOffset() const override;
+    uint32_t getAddressSection() const override;
+    std::string getName() const override;
+    uint32_t getRelativeVirtualAddress() const override;
+    uint64_t getVirtualAddress() const override;
 
 protected:
-  const codeview::PublicSym32 Sym;
+    const codeview::PublicSym32 Sym;
 };
 
 } // namespace pdb

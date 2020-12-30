@@ -39,7 +39,8 @@ int __kmp_debugging = FALSE; // Boolean whether currently debugging OpenMP RTL.
 
 #define nthr_buffer_size 1024
 static kmp_int32 kmp_omp_nthr_info_buffer[nthr_buffer_size] = {
-    nthr_buffer_size * sizeof(kmp_int32)};
+    nthr_buffer_size * sizeof(kmp_int32)
+};
 
 /* TODO: Check punctuation for various platforms here */
 static char func_microtask[] = "__kmp_invoke_microtask";
@@ -62,8 +63,9 @@ kmp_omp_struct_info_t __kmp_omp_debug_struct_info = {
     addr_and_size_of(__kmp_version_minor),
     addr_and_size_of(__kmp_version_build),
     addr_and_size_of(__kmp_openmp_version),
-    {(kmp_uint64)(__kmp_copyright) + KMP_VERSION_MAGIC_LEN,
-     0}, // Skip magic prefix.
+    {   (kmp_uint64)(__kmp_copyright) + KMP_VERSION_MAGIC_LEN,
+        0
+    }, // Skip magic prefix.
 
     /* Various globals. */
     addr_and_size_of(__kmp_threads),
@@ -232,7 +234,7 @@ static inline void *__kmp_convert_to_ptr(kmp_uint64 addr) {
 // *" may lose significant bits
 #pragma warning(disable : 1195) // conversion from integer to smaller pointer
 #endif // KMP_COMPILER_ICC
-  return (void *)addr;
+    return (void *)addr;
 #if KMP_COMPILER_ICC
 #pragma warning(pop)
 #endif // KMP_COMPILER_ICC
@@ -240,47 +242,47 @@ static inline void *__kmp_convert_to_ptr(kmp_uint64 addr) {
 
 static int kmp_location_match(kmp_str_loc_t *loc, kmp_omp_nthr_item_t *item) {
 
-  int file_match = 0;
-  int func_match = 0;
-  int line_match = 0;
+    int file_match = 0;
+    int func_match = 0;
+    int line_match = 0;
 
-  char *file = (char *)__kmp_convert_to_ptr(item->file);
-  char *func = (char *)__kmp_convert_to_ptr(item->func);
-  file_match = __kmp_str_fname_match(&loc->fname, file);
-  func_match =
-      item->func == 0 // If item->func is NULL, it allows any func name.
-      || strcmp(func, "*") == 0 ||
-      (loc->func != NULL && strcmp(loc->func, func) == 0);
-  line_match =
-      item->begin <= loc->line &&
-      (item->end <= 0 ||
-       loc->line <= item->end); // if item->end <= 0, it means "end of file".
+    char *file = (char *)__kmp_convert_to_ptr(item->file);
+    char *func = (char *)__kmp_convert_to_ptr(item->func);
+    file_match = __kmp_str_fname_match(&loc->fname, file);
+    func_match =
+        item->func == 0 // If item->func is NULL, it allows any func name.
+        || strcmp(func, "*") == 0 ||
+        (loc->func != NULL && strcmp(loc->func, func) == 0);
+    line_match =
+        item->begin <= loc->line &&
+        (item->end <= 0 ||
+         loc->line <= item->end); // if item->end <= 0, it means "end of file".
 
-  return (file_match && func_match && line_match);
+    return (file_match && func_match && line_match);
 
 } // kmp_location_match
 
 int __kmp_omp_num_threads(ident_t const *ident) {
 
-  int num_threads = 0;
+    int num_threads = 0;
 
-  kmp_omp_nthr_info_t *info = (kmp_omp_nthr_info_t *)__kmp_convert_to_ptr(
-      __kmp_omp_debug_struct_info.nthr_info.addr);
-  if (info->num > 0 && info->array != 0) {
-    kmp_omp_nthr_item_t *items =
-        (kmp_omp_nthr_item_t *)__kmp_convert_to_ptr(info->array);
-    kmp_str_loc_t loc = __kmp_str_loc_init(ident->psource, true);
-    int i;
-    for (i = 0; i < info->num; ++i) {
-      if (kmp_location_match(&loc, &items[i])) {
-        num_threads = items[i].num_threads;
-      }
+    kmp_omp_nthr_info_t *info = (kmp_omp_nthr_info_t *)__kmp_convert_to_ptr(
+                                    __kmp_omp_debug_struct_info.nthr_info.addr);
+    if (info->num > 0 && info->array != 0) {
+        kmp_omp_nthr_item_t *items =
+            (kmp_omp_nthr_item_t *)__kmp_convert_to_ptr(info->array);
+        kmp_str_loc_t loc = __kmp_str_loc_init(ident->psource, true);
+        int i;
+        for (i = 0; i < info->num; ++i) {
+            if (kmp_location_match(&loc, &items[i])) {
+                num_threads = items[i].num_threads;
+            }
+        }
+        __kmp_str_loc_free(&loc);
     }
-    __kmp_str_loc_free(&loc);
-  }
 
-  return num_threads;
-  ;
+    return num_threads;
+    ;
 
 } // __kmp_omp_num_threads
 #endif /* USE_DEBUGGER */

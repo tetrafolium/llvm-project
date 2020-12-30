@@ -39,16 +39,16 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-forward-declaration-namespace.html
 class ForwardDeclarationNamespaceCheck : public ClangTidyCheck {
 public:
-  ForwardDeclarationNamespaceCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void onEndOfTranslationUnit() override;
+    ForwardDeclarationNamespaceCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void onEndOfTranslationUnit() override;
 
 private:
-  llvm::StringMap<std::vector<const CXXRecordDecl *>> DeclNameToDefinitions;
-  llvm::StringMap<std::vector<const CXXRecordDecl *>> DeclNameToDeclarations;
-  llvm::SmallPtrSet<const Type *, 16> FriendTypes;
+    llvm::StringMap<std::vector<const CXXRecordDecl *>> DeclNameToDefinitions;
+    llvm::StringMap<std::vector<const CXXRecordDecl *>> DeclNameToDeclarations;
+    llvm::SmallPtrSet<const Type *, 16> FriendTypes;
 };
 
 } // namespace bugprone

@@ -46,12 +46,12 @@ VSTORE_ADDR_SPACES(float)
 
 #ifdef cl_khr_fp64
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
-    VSTORE_ADDR_SPACES(double)
+VSTORE_ADDR_SPACES(double)
 #endif
 
 #ifdef cl_khr_fp16
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
-    VSTORE_ADDR_SPACES(half)
+VSTORE_ADDR_SPACES(half)
 #endif
 
 /* vstore_half are legal even without cl_khr_fp16 */
@@ -106,133 +106,133 @@ DECLARE_HELPER(double, __local, __builtin_store_half);
 
 _CLC_DEF _CLC_OVERLOAD float __clc_noop(float x)
 {
-	return x;
+    return x;
 }
 _CLC_DEF _CLC_OVERLOAD float __clc_rtz(float x)
 {
-	/* Remove lower 13 bits to make sure the number is rounded down */
-	int mask = 0xffffe000;
-	const int exp = (as_uint(x) >> 23 & 0xff) - 127;
-	/* Denormals cannot be flushed, and they use different bit for rounding */
-	if (exp < -14)
-		mask <<= min(-(exp + 14), 10);
-	/* RTZ does not produce Inf for large numbers */
-	if (fabs(x) > 65504.0f && !isinf(x))
-		return copysign(65504.0f, x);
-	/* Handle nan corner case */
-	if (isnan(x))
-		return x;
-	return as_float(as_uint(x) & mask);
+    /* Remove lower 13 bits to make sure the number is rounded down */
+    int mask = 0xffffe000;
+    const int exp = (as_uint(x) >> 23 & 0xff) - 127;
+    /* Denormals cannot be flushed, and they use different bit for rounding */
+    if (exp < -14)
+        mask <<= min(-(exp + 14), 10);
+    /* RTZ does not produce Inf for large numbers */
+    if (fabs(x) > 65504.0f && !isinf(x))
+        return copysign(65504.0f, x);
+    /* Handle nan corner case */
+    if (isnan(x))
+        return x;
+    return as_float(as_uint(x) & mask);
 }
 _CLC_DEF _CLC_OVERLOAD float __clc_rti(float x)
 {
-	const float inf = copysign(INFINITY, x);
-	/* Set lower 13 bits */
-	int mask = (1 << 13) - 1;
-	const int exp = (as_uint(x) >> 23 & 0xff) - 127;
-	/* Denormals cannot be flushed, and they use different bit for rounding */
-	if (exp < -14)
-		mask = (1 << (13 + min(-(exp + 14), 10))) - 1;
-	/* Handle nan corner case */
-	if (isnan(x))
-		return x;
-	const float next = nextafter(as_float(as_uint(x) | mask), inf);
-	return ((as_uint(x) & mask) == 0) ? x : next;
+    const float inf = copysign(INFINITY, x);
+    /* Set lower 13 bits */
+    int mask = (1 << 13) - 1;
+    const int exp = (as_uint(x) >> 23 & 0xff) - 127;
+    /* Denormals cannot be flushed, and they use different bit for rounding */
+    if (exp < -14)
+        mask = (1 << (13 + min(-(exp + 14), 10))) - 1;
+    /* Handle nan corner case */
+    if (isnan(x))
+        return x;
+    const float next = nextafter(as_float(as_uint(x) | mask), inf);
+    return ((as_uint(x) & mask) == 0) ? x : next;
 }
 _CLC_DEF _CLC_OVERLOAD float __clc_rtn(float x)
 {
-	return ((as_uint(x) & 0x80000000) == 0) ? __clc_rtz(x) : __clc_rti(x);
+    return ((as_uint(x) & 0x80000000) == 0) ? __clc_rtz(x) : __clc_rti(x);
 }
 _CLC_DEF _CLC_OVERLOAD float __clc_rtp(float x)
 {
-	return ((as_uint(x) & 0x80000000) == 0) ? __clc_rti(x) : __clc_rtz(x);
+    return ((as_uint(x) & 0x80000000) == 0) ? __clc_rti(x) : __clc_rtz(x);
 }
 _CLC_DEF _CLC_OVERLOAD float __clc_rte(float x)
 {
-	/* Mantisa + implicit bit */
-	const uint mantissa = (as_uint(x) & 0x7fffff) | (1u << 23);
-	const int exp = (as_uint(x) >> 23 & 0xff) - 127;
-	int shift = 13;
-	if (exp < -14) {
-		/* The default assumes lower 13 bits are rounded,
-		 * but it might be more for denormals.
-		 * Shifting beyond last == 0b, and qr == 00b is not necessary */
-		shift += min(-(exp + 14), 15);
-	}
-	int mask = (1 << shift) - 1;
-	const uint grs = mantissa & mask;
-	const uint last = mantissa & (1 << shift);
-	/* IEEE round up rule is: grs > 101b or grs == 100b and last == 1.
-	 * exp > 15 should round to inf. */
-	bool roundup = (grs > (1 << (shift - 1))) ||
-		(grs == (1 << (shift - 1)) && last != 0) || (exp > 15);
-	return roundup ? __clc_rti(x) : __clc_rtz(x);
+    /* Mantisa + implicit bit */
+    const uint mantissa = (as_uint(x) & 0x7fffff) | (1u << 23);
+    const int exp = (as_uint(x) >> 23 & 0xff) - 127;
+    int shift = 13;
+    if (exp < -14) {
+        /* The default assumes lower 13 bits are rounded,
+         * but it might be more for denormals.
+         * Shifting beyond last == 0b, and qr == 00b is not necessary */
+        shift += min(-(exp + 14), 15);
+    }
+    int mask = (1 << shift) - 1;
+    const uint grs = mantissa & mask;
+    const uint last = mantissa & (1 << shift);
+    /* IEEE round up rule is: grs > 101b or grs == 100b and last == 1.
+     * exp > 15 should round to inf. */
+    bool roundup = (grs > (1 << (shift - 1))) ||
+                   (grs == (1 << (shift - 1)) && last != 0) || (exp > 15);
+    return roundup ? __clc_rti(x) : __clc_rtz(x);
 }
 
 #ifdef cl_khr_fp64
 _CLC_DEF _CLC_OVERLOAD double __clc_noop(double x)
 {
-	return x;
+    return x;
 }
 _CLC_DEF _CLC_OVERLOAD double __clc_rtz(double x)
 {
-	/* Remove lower 42 bits to make sure the number is rounded down */
-	ulong mask = 0xfffffc0000000000UL;
-	const int exp = (as_ulong(x) >> 52 & 0x7ff) - 1023;
-	/* Denormals cannot be flushed, and they use different bit for rounding */
-	if (exp < -14)
-		mask <<= min(-(exp + 14), 10);
-	/* RTZ does not produce Inf for large numbers */
-	if (fabs(x) > 65504.0 && !isinf(x))
-		return copysign(65504.0, x);
-	/* Handle nan corner case */
-	if (isnan(x))
-		return x;
-	return as_double(as_ulong(x) & mask);
+    /* Remove lower 42 bits to make sure the number is rounded down */
+    ulong mask = 0xfffffc0000000000UL;
+    const int exp = (as_ulong(x) >> 52 & 0x7ff) - 1023;
+    /* Denormals cannot be flushed, and they use different bit for rounding */
+    if (exp < -14)
+        mask <<= min(-(exp + 14), 10);
+    /* RTZ does not produce Inf for large numbers */
+    if (fabs(x) > 65504.0 && !isinf(x))
+        return copysign(65504.0, x);
+    /* Handle nan corner case */
+    if (isnan(x))
+        return x;
+    return as_double(as_ulong(x) & mask);
 }
 _CLC_DEF _CLC_OVERLOAD double __clc_rti(double x)
 {
-	const double inf = copysign((double)INFINITY, x);
-	/* Set lower 42 bits */
-	long mask = (1UL << 42UL) - 1UL;
-	const int exp = (as_ulong(x) >> 52 & 0x7ff) - 1023;
-	/* Denormals cannot be flushed, and they use different bit for rounding */
-	if (exp < -14)
-		mask = (1UL << (42UL + min(-(exp + 14), 10))) - 1;
-	/* Handle nan corner case */
-	if (isnan(x))
-		return x;
-	const double next = nextafter(as_double(as_ulong(x) | mask), inf);
-	return ((as_ulong(x) & mask) == 0) ? x : next;
+    const double inf = copysign((double)INFINITY, x);
+    /* Set lower 42 bits */
+    long mask = (1UL << 42UL) - 1UL;
+    const int exp = (as_ulong(x) >> 52 & 0x7ff) - 1023;
+    /* Denormals cannot be flushed, and they use different bit for rounding */
+    if (exp < -14)
+        mask = (1UL << (42UL + min(-(exp + 14), 10))) - 1;
+    /* Handle nan corner case */
+    if (isnan(x))
+        return x;
+    const double next = nextafter(as_double(as_ulong(x) | mask), inf);
+    return ((as_ulong(x) & mask) == 0) ? x : next;
 }
 _CLC_DEF _CLC_OVERLOAD double __clc_rtn(double x)
 {
-	return ((as_ulong(x) & 0x8000000000000000UL) == 0) ? __clc_rtz(x) : __clc_rti(x);
+    return ((as_ulong(x) & 0x8000000000000000UL) == 0) ? __clc_rtz(x) : __clc_rti(x);
 }
 _CLC_DEF _CLC_OVERLOAD double __clc_rtp(double x)
 {
-	return ((as_ulong(x) & 0x8000000000000000UL) == 0) ? __clc_rti(x) : __clc_rtz(x);
+    return ((as_ulong(x) & 0x8000000000000000UL) == 0) ? __clc_rti(x) : __clc_rtz(x);
 }
 _CLC_DEF _CLC_OVERLOAD double __clc_rte(double x)
 {
-	/* Mantisa + implicit bit */
-	const ulong mantissa = (as_ulong(x) & 0xfffffffffffff) | (1UL << 52);
-	const int exp = (as_ulong(x) >> 52 & 0x7ff) - 1023;
-	int shift = 42;
-	if (exp < -14) {
-		/* The default assumes lower 13 bits are rounded,
-		 * but it might be more for denormals.
-		 * Shifting beyond last == 0b, and qr == 00b is not necessary */
-		shift += min(-(exp + 14), 15);
-	}
-	ulong mask = (1UL << shift) - 1UL;
-	const ulong grs = mantissa & mask;
-	const ulong last = mantissa & (1UL << shift);
-	/* IEEE round up rule is: grs > 101b or grs == 100b and last == 1.
-	 * exp > 15 should round to inf. */
-	bool roundup = (grs > (1UL << (shift - 1UL))) ||
-		(grs == (1UL << (shift - 1UL)) && last != 0) || (exp > 15);
-	return roundup ? __clc_rti(x) : __clc_rtz(x);
+    /* Mantisa + implicit bit */
+    const ulong mantissa = (as_ulong(x) & 0xfffffffffffff) | (1UL << 52);
+    const int exp = (as_ulong(x) >> 52 & 0x7ff) - 1023;
+    int shift = 42;
+    if (exp < -14) {
+        /* The default assumes lower 13 bits are rounded,
+         * but it might be more for denormals.
+         * Shifting beyond last == 0b, and qr == 00b is not necessary */
+        shift += min(-(exp + 14), 15);
+    }
+    ulong mask = (1UL << shift) - 1UL;
+    const ulong grs = mantissa & mask;
+    const ulong last = mantissa & (1UL << shift);
+    /* IEEE round up rule is: grs > 101b or grs == 100b and last == 1.
+     * exp > 15 should round to inf. */
+    bool roundup = (grs > (1UL << (shift - 1UL))) ||
+                   (grs == (1UL << (shift - 1UL)) && last != 0) || (exp > 15);
+    return roundup ? __clc_rti(x) : __clc_rtz(x);
 }
 #endif
 

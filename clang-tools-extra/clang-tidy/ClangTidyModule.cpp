@@ -17,22 +17,22 @@ namespace clang {
 namespace tidy {
 
 void ClangTidyCheckFactories::registerCheckFactory(StringRef Name,
-                                                   CheckFactory Factory) {
-  Factories.insert_or_assign(Name, std::move(Factory));
+        CheckFactory Factory) {
+    Factories.insert_or_assign(Name, std::move(Factory));
 }
 
 std::vector<std::unique_ptr<ClangTidyCheck>>
 ClangTidyCheckFactories::createChecks(ClangTidyContext *Context) {
-  std::vector<std::unique_ptr<ClangTidyCheck>> Checks;
-  for (const auto &Factory : Factories) {
-    if (Context->isCheckEnabled(Factory.getKey()))
-      Checks.emplace_back(Factory.getValue()(Factory.getKey(), Context));
-  }
-  return Checks;
+    std::vector<std::unique_ptr<ClangTidyCheck>> Checks;
+    for (const auto &Factory : Factories) {
+        if (Context->isCheckEnabled(Factory.getKey()))
+            Checks.emplace_back(Factory.getValue()(Factory.getKey(), Context));
+    }
+    return Checks;
 }
 
 ClangTidyOptions ClangTidyModule::getModuleOptions() {
-  return ClangTidyOptions();
+    return ClangTidyOptions();
 }
 
 } // namespace tidy

@@ -18,60 +18,60 @@ namespace tidy {
 namespace modernize {
 
 UseBoolLiteralsCheck::UseBoolLiteralsCheck(StringRef Name,
-                                           ClangTidyContext *Context)
+        ClangTidyContext *Context)
     : ClangTidyCheck(Name, Context),
       IgnoreMacros(Options.getLocalOrGlobal("IgnoreMacros", true)) {}
 
 void UseBoolLiteralsCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
-  Options.store(Opts, "IgnoreMacros", IgnoreMacros);
+    Options.store(Opts, "IgnoreMacros", IgnoreMacros);
 }
 
 void UseBoolLiteralsCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(
-      traverse(
-          TK_AsIs,
-          implicitCastExpr(
-              has(ignoringParenImpCasts(integerLiteral().bind("literal"))),
-              hasImplicitDestinationType(qualType(booleanType())),
-              unless(isInTemplateInstantiation()),
-              anyOf(hasParent(explicitCastExpr().bind("cast")), anything()))),
-      this);
+    Finder->addMatcher(
+        traverse(
+            TK_AsIs,
+            implicitCastExpr(
+                has(ignoringParenImpCasts(integerLiteral().bind("literal"))),
+                hasImplicitDestinationType(qualType(booleanType())),
+                unless(isInTemplateInstantiation()),
+                anyOf(hasParent(explicitCastExpr().bind("cast")), anything()))),
+        this);
 
-  Finder->addMatcher(
-      traverse(TK_AsIs,
-               conditionalOperator(
-                   hasParent(implicitCastExpr(
-                       hasImplicitDestinationType(qualType(booleanType())),
-                       unless(isInTemplateInstantiation()))),
-                   eachOf(hasTrueExpression(ignoringParenImpCasts(
-                              integerLiteral().bind("literal"))),
-                          hasFalseExpression(ignoringParenImpCasts(
-                              integerLiteral().bind("literal")))))),
-      this);
+    Finder->addMatcher(
+        traverse(TK_AsIs,
+                 conditionalOperator(
+                     hasParent(implicitCastExpr(
+                                   hasImplicitDestinationType(qualType(booleanType())),
+                                   unless(isInTemplateInstantiation()))),
+                     eachOf(hasTrueExpression(ignoringParenImpCasts(
+                                 integerLiteral().bind("literal"))),
+                            hasFalseExpression(ignoringParenImpCasts(
+                                        integerLiteral().bind("literal")))))),
+        this);
 }
 
 void UseBoolLiteralsCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *Literal = Result.Nodes.getNodeAs<IntegerLiteral>("literal");
-  const auto *Cast = Result.Nodes.getNodeAs<Expr>("cast");
-  bool LiteralBooleanValue = Literal->getValue().getBoolValue();
+    const auto *Literal = Result.Nodes.getNodeAs<IntegerLiteral>("literal");
+    const auto *Cast = Result.Nodes.getNodeAs<Expr>("cast");
+    bool LiteralBooleanValue = Literal->getValue().getBoolValue();
 
-  if (Literal->isInstantiationDependent())
-    return;
+    if (Literal->isInstantiationDependent())
+        return;
 
-  const Expr *Expression = Cast ? Cast : Literal;
+    const Expr *Expression = Cast ? Cast : Literal;
 
-  bool InMacro = Expression->getBeginLoc().isMacroID();
+    bool InMacro = Expression->getBeginLoc().isMacroID();
 
-  if (InMacro && IgnoreMacros)
-    return;
+    if (InMacro && IgnoreMacros)
+        return;
 
-  auto Diag =
-      diag(Expression->getExprLoc(),
-           "converting integer literal to bool, use bool literal instead");
+    auto Diag =
+        diag(Expression->getExprLoc(),
+             "converting integer literal to bool, use bool literal instead");
 
-  if (!InMacro)
-    Diag << FixItHint::CreateReplacement(
-        Expression->getSourceRange(), LiteralBooleanValue ? "true" : "false");
+    if (!InMacro)
+        Diag << FixItHint::CreateReplacement(
+                 Expression->getSourceRange(), LiteralBooleanValue ? "true" : "false");
 }
 
 } // namespace modernize

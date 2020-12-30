@@ -22,78 +22,82 @@ class CompilerInstance;
 
 /// Abstract base class for actions which can be performed by the frontend.
 class FrontendAction {
-  FrontendInputFile currentInput_;
-  CompilerInstance *instance_;
+    FrontendInputFile currentInput_;
+    CompilerInstance *instance_;
 
 protected:
-  /// @name Implementation Action Interface
-  /// @{
+    /// @name Implementation Action Interface
+    /// @{
 
-  /// Callback to run the program action, using the initialized
-  /// compiler instance.
-  virtual void ExecuteAction() = 0;
+    /// Callback to run the program action, using the initialized
+    /// compiler instance.
+    virtual void ExecuteAction() = 0;
 
-  /// Callback at the end of processing a single input, to determine
-  /// if the output files should be erased or not.
-  ///
-  /// By default it returns true if a compiler error occurred.
-  virtual bool ShouldEraseOutputFiles();
+    /// Callback at the end of processing a single input, to determine
+    /// if the output files should be erased or not.
+    ///
+    /// By default it returns true if a compiler error occurred.
+    virtual bool ShouldEraseOutputFiles();
 
-  /// @}
+    /// @}
 
 public:
-  FrontendAction() : instance_(nullptr) {}
-  virtual ~FrontendAction() = default;
+    FrontendAction() : instance_(nullptr) {}
+    virtual ~FrontendAction() = default;
 
-  /// @name Compiler Instance Access
-  /// @{
+    /// @name Compiler Instance Access
+    /// @{
 
-  CompilerInstance &instance() const {
-    assert(instance_ && "Compiler instance not registered!");
-    return *instance_;
-  }
+    CompilerInstance &instance() const {
+        assert(instance_ && "Compiler instance not registered!");
+        return *instance_;
+    }
 
-  void set_instance(CompilerInstance *value) { instance_ = value; }
+    void set_instance(CompilerInstance *value) {
+        instance_ = value;
+    }
 
-  /// @}
-  /// @name Current File Information
-  /// @{
+    /// @}
+    /// @name Current File Information
+    /// @{
 
-  const FrontendInputFile &currentInput() const { return currentInput_; }
+    const FrontendInputFile &currentInput() const {
+        return currentInput_;
+    }
 
-  llvm::StringRef GetCurrentFile() const {
-    assert(!currentInput_.IsEmpty() && "No current file!");
-    return currentInput_.file();
-  }
+    llvm::StringRef GetCurrentFile() const {
+        assert(!currentInput_.IsEmpty() && "No current file!");
+        return currentInput_.file();
+    }
 
-  llvm::StringRef GetCurrentFileOrBufferName() const {
-    assert(!currentInput_.IsEmpty() && "No current file!");
-    return currentInput_.IsFile()
-        ? currentInput_.file()
-        : currentInput_.buffer()->getBufferIdentifier();
-  }
-  void set_currentInput(const FrontendInputFile &currentInput);
+    llvm::StringRef GetCurrentFileOrBufferName() const {
+        assert(!currentInput_.IsEmpty() && "No current file!");
+        return currentInput_.IsFile()
+               ? currentInput_.file()
+               : currentInput_.buffer()->getBufferIdentifier();
+    }
+    void set_currentInput(const FrontendInputFile &currentInput);
 
-  /// @}
-  /// @name Public Action Interface
-  /// @}
+    /// @}
+    /// @name Public Action Interface
+    /// @}
 
-  /// Prepare the action for processing the input file \p input.
-  ///
-  /// This is run after the options and frontend have been initialized,
-  /// but prior to executing any per-file processing.
-  /// \param ci - The compiler instance this action is being run from. The
-  /// action may store and use this object.
-  /// \param input - The input filename and kind.
-  /// \return True on success; on failure the compilation of this file should
-  bool BeginSourceFile(CompilerInstance &ci, const FrontendInputFile &input);
+    /// Prepare the action for processing the input file \p input.
+    ///
+    /// This is run after the options and frontend have been initialized,
+    /// but prior to executing any per-file processing.
+    /// \param ci - The compiler instance this action is being run from. The
+    /// action may store and use this object.
+    /// \param input - The input filename and kind.
+    /// \return True on success; on failure the compilation of this file should
+    bool BeginSourceFile(CompilerInstance &ci, const FrontendInputFile &input);
 
-  /// Run the action.
-  llvm::Error Execute();
+    /// Run the action.
+    llvm::Error Execute();
 
-  /// Perform any per-file post processing, deallocate per-file
-  /// objects, and run statistics and output file cleanup code.
-  void EndSourceFile();
+    /// Perform any per-file post processing, deallocate per-file
+    /// objects, and run statistics and output file cleanup code.
+    void EndSourceFile();
 };
 
 } // namespace Fortran::frontend

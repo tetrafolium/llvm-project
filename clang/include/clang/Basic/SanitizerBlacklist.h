@@ -26,22 +26,22 @@ class SourceManager;
 class SanitizerSpecialCaseList;
 
 class SanitizerBlacklist {
-  std::unique_ptr<SanitizerSpecialCaseList> SSCL;
-  SourceManager &SM;
+    std::unique_ptr<SanitizerSpecialCaseList> SSCL;
+    SourceManager &SM;
 
 public:
-  SanitizerBlacklist(const std::vector<std::string> &BlacklistPaths,
-                     SourceManager &SM);
-  ~SanitizerBlacklist();
-  bool isBlacklistedGlobal(SanitizerMask Mask, StringRef GlobalName,
-                           StringRef Category = StringRef()) const;
-  bool isBlacklistedType(SanitizerMask Mask, StringRef MangledTypeName,
-                         StringRef Category = StringRef()) const;
-  bool isBlacklistedFunction(SanitizerMask Mask, StringRef FunctionName) const;
-  bool isBlacklistedFile(SanitizerMask Mask, StringRef FileName,
-                         StringRef Category = StringRef()) const;
-  bool isBlacklistedLocation(SanitizerMask Mask, SourceLocation Loc,
+    SanitizerBlacklist(const std::vector<std::string> &BlacklistPaths,
+                       SourceManager &SM);
+    ~SanitizerBlacklist();
+    bool isBlacklistedGlobal(SanitizerMask Mask, StringRef GlobalName,
                              StringRef Category = StringRef()) const;
+    bool isBlacklistedType(SanitizerMask Mask, StringRef MangledTypeName,
+                           StringRef Category = StringRef()) const;
+    bool isBlacklistedFunction(SanitizerMask Mask, StringRef FunctionName) const;
+    bool isBlacklistedFile(SanitizerMask Mask, StringRef FileName,
+                           StringRef Category = StringRef()) const;
+    bool isBlacklistedLocation(SanitizerMask Mask, SourceLocation Loc,
+                               StringRef Category = StringRef()) const;
 };
 
 }  // end namespace clang

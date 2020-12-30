@@ -42,9 +42,9 @@ __iostream_category::message(int ev) const
 {
     if (ev != static_cast<int>(io_errc::stream)
 #ifdef _LIBCPP_ELAST
-        && ev <= _LIBCPP_ELAST
+            && ev <= _LIBCPP_ELAST
 #endif  // _LIBCPP_ELAST
-        )
+       )
         return __do_message::message(ev);
     return string("unspecified iostream_category error");
 }
@@ -144,12 +144,12 @@ int ios_base::__xindex_ = 0;
 
 template <typename _Tp>
 static size_t __ios_new_cap(size_t __req_size, size_t __current_cap)
-{ // Precondition: __req_size > __current_cap
-	const size_t mx = std::numeric_limits<size_t>::max() / sizeof(_Tp);
-	if (__req_size < mx/2)
-		return _VSTD::max(2 * __current_cap, __req_size);
-	else
-		return mx;
+{   // Precondition: __req_size > __current_cap
+    const size_t mx = std::numeric_limits<size_t>::max() / sizeof(_Tp);
+    if (__req_size < mx/2)
+        return _VSTD::max(2 * __current_cap, __req_size);
+    else
+        return mx;
 }
 
 int

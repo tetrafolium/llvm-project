@@ -23,10 +23,10 @@ namespace google {
 /// http://clang.llvm.org/extra/clang-tidy/checks/google-default-arguments.html
 class DefaultArgumentsCheck : public ClangTidyCheck {
 public:
-  DefaultArgumentsCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    DefaultArgumentsCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace google

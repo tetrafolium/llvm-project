@@ -14,6 +14,8 @@ namespace __llvm_libc {
 
 // TODO: Currently restricted to default locale.
 // These should be extended using locale information.
-int LLVM_LIBC_ENTRYPOINT(isdigit)(int c) { return internal::isdigit(c); }
+int LLVM_LIBC_ENTRYPOINT(isdigit)(int c) {
+    return internal::isdigit(c);
+}
 
 } // namespace __llvm_libc

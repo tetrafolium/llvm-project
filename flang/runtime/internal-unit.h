@@ -24,27 +24,29 @@ class IoErrorHandler;
 // Does not buffer.
 template <Direction DIR> class InternalDescriptorUnit : public ConnectionState {
 public:
-  using Scalar =
-      std::conditional_t<DIR == Direction::Input, const char *, char *>;
-  InternalDescriptorUnit(Scalar, std::size_t);
-  InternalDescriptorUnit(const Descriptor &, const Terminator &);
-  void EndIoStatement();
+    using Scalar =
+        std::conditional_t<DIR == Direction::Input, const char *, char *>;
+    InternalDescriptorUnit(Scalar, std::size_t);
+    InternalDescriptorUnit(const Descriptor &, const Terminator &);
+    void EndIoStatement();
 
-  bool Emit(const char *, std::size_t, IoErrorHandler &);
-  std::optional<char32_t> GetCurrentChar(IoErrorHandler &);
-  bool AdvanceRecord(IoErrorHandler &);
-  void BackspaceRecord(IoErrorHandler &);
+    bool Emit(const char *, std::size_t, IoErrorHandler &);
+    std::optional<char32_t> GetCurrentChar(IoErrorHandler &);
+    bool AdvanceRecord(IoErrorHandler &);
+    void BackspaceRecord(IoErrorHandler &);
 
 private:
-  Descriptor &descriptor() { return staticDescriptor_.descriptor(); }
-  const Descriptor &descriptor() const {
-    return staticDescriptor_.descriptor();
-  }
-  Scalar CurrentRecord() const {
-    return descriptor().template ZeroBasedIndexedElement<char>(
-        currentRecordNumber - 1);
-  }
-  StaticDescriptor<maxRank, true /*addendum*/> staticDescriptor_;
+    Descriptor &descriptor() {
+        return staticDescriptor_.descriptor();
+    }
+    const Descriptor &descriptor() const {
+        return staticDescriptor_.descriptor();
+    }
+    Scalar CurrentRecord() const {
+        return descriptor().template ZeroBasedIndexedElement<char>(
+                   currentRecordNumber - 1);
+    }
+    StaticDescriptor<maxRank, true /*addendum*/> staticDescriptor_;
 };
 
 extern template class InternalDescriptorUnit<Direction::Output>;

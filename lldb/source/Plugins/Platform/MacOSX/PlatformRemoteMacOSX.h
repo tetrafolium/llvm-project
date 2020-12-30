@@ -20,41 +20,45 @@
 
 class PlatformRemoteMacOSX : public virtual PlatformRemoteDarwinDevice {
 public:
-  PlatformRemoteMacOSX();
+    PlatformRemoteMacOSX();
 
-  static lldb::PlatformSP CreateInstance(bool force,
-                                         const lldb_private::ArchSpec *arch);
+    static lldb::PlatformSP CreateInstance(bool force,
+                                           const lldb_private::ArchSpec *arch);
 
-  static void Initialize();
+    static void Initialize();
 
-  static void Terminate();
+    static void Terminate();
 
-  static lldb_private::ConstString GetPluginNameStatic();
+    static lldb_private::ConstString GetPluginNameStatic();
 
-  static const char *GetDescriptionStatic();
+    static const char *GetDescriptionStatic();
 
-  lldb_private::ConstString GetPluginName() override {
-    return GetPluginNameStatic();
-  }
+    lldb_private::ConstString GetPluginName() override {
+        return GetPluginNameStatic();
+    }
 
-  uint32_t GetPluginVersion() override { return 1; }
+    uint32_t GetPluginVersion() override {
+        return 1;
+    }
 
-  const char *GetDescription() override { return GetDescriptionStatic(); }
+    const char *GetDescription() override {
+        return GetDescriptionStatic();
+    }
 
-  lldb_private::Status
-  GetFileWithUUID(const lldb_private::FileSpec &platform_file,
-                  const lldb_private::UUID *uuid_ptr,
-                  lldb_private::FileSpec &local_file) override;
+    lldb_private::Status
+    GetFileWithUUID(const lldb_private::FileSpec &platform_file,
+                    const lldb_private::UUID *uuid_ptr,
+                    lldb_private::FileSpec &local_file) override;
 
-  bool GetSupportedArchitectureAtIndex(uint32_t idx,
-                                       lldb_private::ArchSpec &arch) override;
+    bool GetSupportedArchitectureAtIndex(uint32_t idx,
+                                         lldb_private::ArchSpec &arch) override;
 
 protected:
-  llvm::StringRef GetDeviceSupportDirectoryName() override;
-  llvm::StringRef GetPlatformName() override;
+    llvm::StringRef GetDeviceSupportDirectoryName() override;
+    llvm::StringRef GetPlatformName() override;
 
 private:
-  uint32_t m_num_arm_arches = 0;
+    uint32_t m_num_arm_arches = 0;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PLATFORM_MACOSX_PLATFORMREMOTEMACOSX_H

@@ -28,29 +28,29 @@ using namespace llvm::omp;
 
 CGOpenMPRuntimeNVPTX::CGOpenMPRuntimeNVPTX(CodeGenModule &CGM)
     : CGOpenMPRuntimeGPU(CGM) {
-  if (!CGM.getLangOpts().OpenMPIsDevice)
-    llvm_unreachable("OpenMP NVPTX can only handle device code.");
+    if (!CGM.getLangOpts().OpenMPIsDevice)
+        llvm_unreachable("OpenMP NVPTX can only handle device code.");
 }
 
 llvm::Value *CGOpenMPRuntimeNVPTX::getGPUWarpSize(CodeGenFunction &CGF) {
-  return CGF.EmitRuntimeCall(
-      llvm::Intrinsic::getDeclaration(
-          &CGF.CGM.getModule(), llvm::Intrinsic::nvvm_read_ptx_sreg_warpsize),
-      "nvptx_warp_size");
+    return CGF.EmitRuntimeCall(
+               llvm::Intrinsic::getDeclaration(
+                   &CGF.CGM.getModule(), llvm::Intrinsic::nvvm_read_ptx_sreg_warpsize),
+               "nvptx_warp_size");
 }
 
 llvm::Value *CGOpenMPRuntimeNVPTX::getGPUThreadID(CodeGenFunction &CGF) {
-  CGBuilderTy &Bld = CGF.Builder;
-  llvm::Function *F;
-  F = llvm::Intrinsic::getDeclaration(
-      &CGF.CGM.getModule(), llvm::Intrinsic::nvvm_read_ptx_sreg_tid_x);
-  return Bld.CreateCall(F, llvm::None, "nvptx_tid");
+    CGBuilderTy &Bld = CGF.Builder;
+    llvm::Function *F;
+    F = llvm::Intrinsic::getDeclaration(
+            &CGF.CGM.getModule(), llvm::Intrinsic::nvvm_read_ptx_sreg_tid_x);
+    return Bld.CreateCall(F, llvm::None, "nvptx_tid");
 }
 
 llvm::Value *CGOpenMPRuntimeNVPTX::getGPUNumThreads(CodeGenFunction &CGF) {
-  CGBuilderTy &Bld = CGF.Builder;
-  llvm::Function *F;
-  F = llvm::Intrinsic::getDeclaration(
-      &CGF.CGM.getModule(), llvm::Intrinsic::nvvm_read_ptx_sreg_ntid_x);
-  return Bld.CreateCall(F, llvm::None, "nvptx_num_threads");
+    CGBuilderTy &Bld = CGF.Builder;
+    llvm::Function *F;
+    F = llvm::Intrinsic::getDeclaration(
+            &CGF.CGM.getModule(), llvm::Intrinsic::nvvm_read_ptx_sreg_ntid_x);
+    return Bld.CreateCall(F, llvm::None, "nvptx_num_threads");
 }

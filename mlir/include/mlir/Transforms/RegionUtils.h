@@ -21,10 +21,10 @@ namespace mlir {
 /// of `limit`.
 template <typename Range>
 bool areValuesDefinedAbove(Range values, Region &limit) {
-  for (Value v : values)
-    if (!v.getParentRegion()->isProperAncestor(&limit))
-      return false;
-  return true;
+    for (Value v : values)
+        if (!v.getParentRegion()->isProperAncestor(&limit))
+            return false;
+    return true;
 }
 
 /// Replace all uses of `orig` within the given region with `replacement`.

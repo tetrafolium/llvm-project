@@ -36,80 +36,80 @@ namespace yaml {
 struct SerializationContext;
 
 struct MSFHeaders {
-  msf::SuperBlock SuperBlock;
-  uint32_t NumDirectoryBlocks = 0;
-  std::vector<uint32_t> DirectoryBlocks;
-  uint32_t NumStreams = 0;
-  uint32_t FileSize = 0;
+    msf::SuperBlock SuperBlock;
+    uint32_t NumDirectoryBlocks = 0;
+    std::vector<uint32_t> DirectoryBlocks;
+    uint32_t NumStreams = 0;
+    uint32_t FileSize = 0;
 };
 
 struct StreamBlockList {
-  std::vector<uint32_t> Blocks;
+    std::vector<uint32_t> Blocks;
 };
 
 struct NamedStreamMapping {
-  StringRef StreamName;
-  uint32_t StreamNumber;
+    StringRef StreamName;
+    uint32_t StreamNumber;
 };
 
 struct PdbInfoStream {
-  PdbRaw_ImplVer Version = PdbImplVC70;
-  uint32_t Signature = 0;
-  uint32_t Age = 1;
-  codeview::GUID Guid;
-  std::vector<PdbRaw_FeatureSig> Features;
-  std::vector<NamedStreamMapping> NamedStreams;
+    PdbRaw_ImplVer Version = PdbImplVC70;
+    uint32_t Signature = 0;
+    uint32_t Age = 1;
+    codeview::GUID Guid;
+    std::vector<PdbRaw_FeatureSig> Features;
+    std::vector<NamedStreamMapping> NamedStreams;
 };
 
 struct PdbModiStream {
-  uint32_t Signature;
-  std::vector<CodeViewYAML::SymbolRecord> Symbols;
+    uint32_t Signature;
+    std::vector<CodeViewYAML::SymbolRecord> Symbols;
 };
 
 struct PdbDbiModuleInfo {
-  StringRef Obj;
-  StringRef Mod;
-  std::vector<StringRef> SourceFiles;
-  std::vector<CodeViewYAML::YAMLDebugSubsection> Subsections;
-  Optional<PdbModiStream> Modi;
+    StringRef Obj;
+    StringRef Mod;
+    std::vector<StringRef> SourceFiles;
+    std::vector<CodeViewYAML::YAMLDebugSubsection> Subsections;
+    Optional<PdbModiStream> Modi;
 };
 
 struct PdbDbiStream {
-  PdbRaw_DbiVer VerHeader = PdbDbiV70;
-  uint32_t Age = 1;
-  uint16_t BuildNumber = 0;
-  uint32_t PdbDllVersion = 0;
-  uint16_t PdbDllRbld = 0;
-  uint16_t Flags = 1;
-  PDB_Machine MachineType = PDB_Machine::x86;
+    PdbRaw_DbiVer VerHeader = PdbDbiV70;
+    uint32_t Age = 1;
+    uint16_t BuildNumber = 0;
+    uint32_t PdbDllVersion = 0;
+    uint16_t PdbDllRbld = 0;
+    uint16_t Flags = 1;
+    PDB_Machine MachineType = PDB_Machine::x86;
 
-  std::vector<PdbDbiModuleInfo> ModInfos;
+    std::vector<PdbDbiModuleInfo> ModInfos;
 };
 
 struct PdbTpiStream {
-  PdbRaw_TpiVer Version = PdbTpiV80;
-  std::vector<CodeViewYAML::LeafRecord> Records;
+    PdbRaw_TpiVer Version = PdbTpiV80;
+    std::vector<CodeViewYAML::LeafRecord> Records;
 };
 
 struct PdbPublicsStream {
-  std::vector<CodeViewYAML::SymbolRecord> PubSyms;
+    std::vector<CodeViewYAML::SymbolRecord> PubSyms;
 };
 
 struct PdbObject {
-  explicit PdbObject(BumpPtrAllocator &Allocator) : Allocator(Allocator) {}
+    explicit PdbObject(BumpPtrAllocator &Allocator) : Allocator(Allocator) {}
 
-  Optional<MSFHeaders> Headers;
-  Optional<std::vector<uint32_t>> StreamSizes;
-  Optional<std::vector<StreamBlockList>> StreamMap;
-  Optional<PdbInfoStream> PdbStream;
-  Optional<PdbDbiStream> DbiStream;
-  Optional<PdbTpiStream> TpiStream;
-  Optional<PdbTpiStream> IpiStream;
-  Optional<PdbPublicsStream> PublicsStream;
+    Optional<MSFHeaders> Headers;
+    Optional<std::vector<uint32_t>> StreamSizes;
+    Optional<std::vector<StreamBlockList>> StreamMap;
+    Optional<PdbInfoStream> PdbStream;
+    Optional<PdbDbiStream> DbiStream;
+    Optional<PdbTpiStream> TpiStream;
+    Optional<PdbTpiStream> IpiStream;
+    Optional<PdbPublicsStream> PublicsStream;
 
-  Optional<std::vector<StringRef>> StringTable;
+    Optional<std::vector<StringRef>> StringTable;
 
-  BumpPtrAllocator &Allocator;
+    BumpPtrAllocator &Allocator;
 };
 }
 }

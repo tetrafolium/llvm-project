@@ -40,84 +40,84 @@ static constexpr char indent16[] = "                "; // 16 spaces
 // Print out the first three columns of a line.
 static void writeHeader(raw_ostream &os, uint64_t addr, uint64_t size,
                         uint64_t align) {
-  os << format("%08llx %08llx %5lld ", addr, size, align);
+    os << format("%08llx %08llx %5lld ", addr, size, align);
 }
 
 // Returns a list of all symbols that we want to print out.
 static std::vector<DefinedRegular *> getSymbols() {
-  std::vector<DefinedRegular *> v;
-  for (ObjFile *file : ObjFile::instances)
-    for (Symbol *b : file->getSymbols())
-      if (auto *sym = dyn_cast_or_null<DefinedRegular>(b))
-        if (sym && !sym->getCOFFSymbol().isSectionDefinition())
-          v.push_back(sym);
-  return v;
+    std::vector<DefinedRegular *> v;
+    for (ObjFile *file : ObjFile::instances)
+        for (Symbol *b : file->getSymbols())
+            if (auto *sym = dyn_cast_or_null<DefinedRegular>(b))
+                if (sym && !sym->getCOFFSymbol().isSectionDefinition())
+                    v.push_back(sym);
+    return v;
 }
 
 // Returns a map from sections to their symbols.
 static SymbolMapTy getSectionSyms(ArrayRef<DefinedRegular *> syms) {
-  SymbolMapTy ret;
-  for (DefinedRegular *s : syms)
-    ret[s->getChunk()].push_back(s);
+    SymbolMapTy ret;
+    for (DefinedRegular *s : syms)
+        ret[s->getChunk()].push_back(s);
 
-  // Sort symbols by address.
-  for (auto &it : ret) {
-    SmallVectorImpl<DefinedRegular *> &v = it.second;
-    std::stable_sort(v.begin(), v.end(), [](DefinedRegular *a, DefinedRegular *b) {
-      return a->getRVA() < b->getRVA();
-    });
-  }
-  return ret;
+    // Sort symbols by address.
+    for (auto &it : ret) {
+        SmallVectorImpl<DefinedRegular *> &v = it.second;
+        std::stable_sort(v.begin(), v.end(), [](DefinedRegular *a, DefinedRegular *b) {
+            return a->getRVA() < b->getRVA();
+        });
+    }
+    return ret;
 }
 
 // Construct a map from symbols to their stringified representations.
 static DenseMap<DefinedRegular *, std::string>
 getSymbolStrings(ArrayRef<DefinedRegular *> syms) {
-  std::vector<std::string> str(syms.size());
-  parallelForEachN((size_t)0, syms.size(), [&](size_t i) {
-    raw_string_ostream os(str[i]);
-    writeHeader(os, syms[i]->getRVA(), 0, 0);
-    os << indent16 << toString(*syms[i]);
-  });
+    std::vector<std::string> str(syms.size());
+    parallelForEachN((size_t)0, syms.size(), [&](size_t i) {
+        raw_string_ostream os(str[i]);
+        writeHeader(os, syms[i]->getRVA(), 0, 0);
+        os << indent16 << toString(*syms[i]);
+    });
 
-  DenseMap<DefinedRegular *, std::string> ret;
-  for (size_t i = 0, e = syms.size(); i < e; ++i)
-    ret[syms[i]] = std::move(str[i]);
-  return ret;
+    DenseMap<DefinedRegular *, std::string> ret;
+    for (size_t i = 0, e = syms.size(); i < e; ++i)
+        ret[syms[i]] = std::move(str[i]);
+    return ret;
 }
 
 void lld::coff::writeLLDMapFile(ArrayRef<OutputSection *> outputSections) {
-  if (config->lldmapFile.empty())
-    return;
+    if (config->lldmapFile.empty())
+        return;
 
-  std::error_code ec;
-  raw_fd_ostream os(config->lldmapFile, ec, sys::fs::OF_None);
-  if (ec)
-    fatal("cannot open " + config->lldmapFile + ": " + ec.message());
+    std::error_code ec;
+    raw_fd_ostream os(config->lldmapFile, ec, sys::fs::OF_None);
+    if (ec)
+        fatal("cannot open " + config->lldmapFile + ": " + ec.message());
 
-  // Collect symbol info that we want to print out.
-  std::vector<DefinedRegular *> syms = getSymbols();
-  SymbolMapTy sectionSyms = getSectionSyms(syms);
-  DenseMap<DefinedRegular *, std::string> symStr = getSymbolStrings(syms);
+    // Collect symbol info that we want to print out.
+    std::vector<DefinedRegular *> syms = getSymbols();
+    SymbolMapTy sectionSyms = getSectionSyms(syms);
+    DenseMap<DefinedRegular *, std::string> symStr = getSymbolStrings(syms);
 
-  // Print out the header line.
-  os << "Address  Size     Align Out     In      Symbol\n";
+    // Print out the header line.
+    os << "Address  Size     Align Out     In      Symbol\n";
 
-  // Print out file contents.
-  for (OutputSection *sec : outputSections) {
-    writeHeader(os, sec->getRVA(), sec->getVirtualSize(), /*align=*/pageSize);
-    os << sec->name << '\n';
+    // Print out file contents.
+    for (OutputSection *sec : outputSections) {
+        writeHeader(os, sec->getRVA(), sec->getVirtualSize(), /*align=*/pageSize);
+        os << sec->name << '\n';
 
-    for (Chunk *c : sec->chunks) {
-      auto *sc = dyn_cast<SectionChunk>(c);
-      if (!sc)
-        continue;
+        for (Chunk *c : sec->chunks) {
+            auto *sc = dyn_cast<SectionChunk>(c);
+            if (!sc)
+                continue;
 
-      writeHeader(os, sc->getRVA(), sc->getSize(), sc->getAlignment());
-      os << indent8 << sc->file->getName() << ":(" << sc->getSectionName()
-         << ")\n";
-      for (DefinedRegular *sym : sectionSyms[sc])
-        os << symStr[sym] << '\n';
+            writeHeader(os, sc->getRVA(), sc->getSize(), sc->getAlignment());
+            os << indent8 << sc->file->getName() << ":(" << sc->getSectionName()
+               << ")\n";
+            for (DefinedRegular *sym : sectionSyms[sc])
+                os << symStr[sym] << '\n';
+        }
     }
-  }
 }

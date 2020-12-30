@@ -21,11 +21,11 @@
 namespace llvm {
 
 struct LoopExtractorPass : public PassInfoMixin<LoopExtractorPass> {
-  LoopExtractorPass(unsigned NumLoops = ~0) : NumLoops(NumLoops) {}
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    LoopExtractorPass(unsigned NumLoops = ~0) : NumLoops(NumLoops) {}
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
 private:
-  unsigned NumLoops;
+    unsigned NumLoops;
 };
 } // namespace llvm
 

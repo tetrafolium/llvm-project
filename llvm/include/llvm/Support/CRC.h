@@ -44,15 +44,17 @@ uint32_t crc32(uint32_t CRC, ArrayRef<uint8_t> Data);
 //       it to be zero.
 class JamCRC {
 public:
-  JamCRC(uint32_t Init = 0xFFFFFFFFU) : CRC(Init) {}
+    JamCRC(uint32_t Init = 0xFFFFFFFFU) : CRC(Init) {}
 
-  // Update the CRC calculation with Data.
-  void update(ArrayRef<uint8_t> Data);
+    // Update the CRC calculation with Data.
+    void update(ArrayRef<uint8_t> Data);
 
-  uint32_t getCRC() const { return CRC; }
+    uint32_t getCRC() const {
+        return CRC;
+    }
 
 private:
-  uint32_t CRC;
+    uint32_t CRC;
 };
 
 } // end namespace llvm

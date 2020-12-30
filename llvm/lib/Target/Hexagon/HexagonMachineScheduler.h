@@ -33,71 +33,79 @@ namespace llvm {
 class SUnit;
 
 class VLIWResourceModel {
-  /// ResourcesModel - Represents VLIW state.
-  /// Not limited to VLIW targets per se, but assumes
-  /// definition of DFA by a target.
-  DFAPacketizer *ResourcesModel;
+    /// ResourcesModel - Represents VLIW state.
+    /// Not limited to VLIW targets per se, but assumes
+    /// definition of DFA by a target.
+    DFAPacketizer *ResourcesModel;
 
-  const TargetSchedModel *SchedModel;
+    const TargetSchedModel *SchedModel;
 
-  /// Local packet/bundle model. Purely
-  /// internal to the MI schedulre at the time.
-  std::vector<SUnit *> Packet;
+    /// Local packet/bundle model. Purely
+    /// internal to the MI schedulre at the time.
+    std::vector<SUnit *> Packet;
 
-  /// Total packets created.
-  unsigned TotalPackets = 0;
+    /// Total packets created.
+    unsigned TotalPackets = 0;
 
 public:
-  VLIWResourceModel(const TargetSubtargetInfo &STI, const TargetSchedModel *SM)
-      : SchedModel(SM) {
-    ResourcesModel = STI.getInstrInfo()->CreateTargetScheduleState(STI);
+    VLIWResourceModel(const TargetSubtargetInfo &STI, const TargetSchedModel *SM)
+        : SchedModel(SM) {
+        ResourcesModel = STI.getInstrInfo()->CreateTargetScheduleState(STI);
 
-    // This hard requirement could be relaxed,
-    // but for now do not let it proceed.
-    assert(ResourcesModel && "Unimplemented CreateTargetScheduleState.");
+        // This hard requirement could be relaxed,
+        // but for now do not let it proceed.
+        assert(ResourcesModel && "Unimplemented CreateTargetScheduleState.");
 
-    Packet.resize(SchedModel->getIssueWidth());
-    Packet.clear();
-    ResourcesModel->clearResources();
-  }
+        Packet.resize(SchedModel->getIssueWidth());
+        Packet.clear();
+        ResourcesModel->clearResources();
+    }
 
-  ~VLIWResourceModel() {
-    delete ResourcesModel;
-  }
+    ~VLIWResourceModel() {
+        delete ResourcesModel;
+    }
 
-  void resetPacketState() {
-    Packet.clear();
-  }
+    void resetPacketState() {
+        Packet.clear();
+    }
 
-  void resetDFA() {
-    ResourcesModel->clearResources();
-  }
+    void resetDFA() {
+        ResourcesModel->clearResources();
+    }
 
-  void reset() {
-    Packet.clear();
-    ResourcesModel->clearResources();
-  }
+    void reset() {
+        Packet.clear();
+        ResourcesModel->clearResources();
+    }
 
-  bool isResourceAvailable(SUnit *SU, bool IsTop);
-  bool reserveResources(SUnit *SU, bool IsTop);
-  unsigned getTotalPackets() const { return TotalPackets; }
-  bool isInPacket(SUnit *SU) const { return is_contained(Packet, SU); }
+    bool isResourceAvailable(SUnit *SU, bool IsTop);
+    bool reserveResources(SUnit *SU, bool IsTop);
+    unsigned getTotalPackets() const {
+        return TotalPackets;
+    }
+    bool isInPacket(SUnit *SU) const {
+        return is_contained(Packet, SU);
+    }
 };
 
 /// Extend the standard ScheduleDAGMI to provide more context and override the
 /// top-level schedule() driver.
 class VLIWMachineScheduler : public ScheduleDAGMILive {
 public:
-  VLIWMachineScheduler(MachineSchedContext *C,
-                       std::unique_ptr<MachineSchedStrategy> S)
-      : ScheduleDAGMILive(C, std::move(S)) {}
+    VLIWMachineScheduler(MachineSchedContext *C,
+                         std::unique_ptr<MachineSchedStrategy> S)
+        : ScheduleDAGMILive(C, std::move(S)) {}
 
-  /// Schedule - This is called back from ScheduleDAGInstrs::Run() when it's
-  /// time to do some work.
-  void schedule() override;
+    /// Schedule - This is called back from ScheduleDAGInstrs::Run() when it's
+    /// time to do some work.
+    void schedule() override;
 
-  RegisterClassInfo *getRegClassInfo() { return RegClassInfo; }
-  int getBBSize() { return BB->size(); }
+    RegisterClassInfo *getRegClassInfo() {
+        return RegClassInfo;
+    }
+    int getBBSize() {
+        return BB->size();
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -108,165 +116,166 @@ public:
 /// ConvergingVLIWScheduler shrinks the unscheduled zone using heuristics
 /// to balance the schedule.
 class ConvergingVLIWScheduler : public MachineSchedStrategy {
-  /// Store the state used by ConvergingVLIWScheduler heuristics, required
-  ///  for the lifetime of one invocation of pickNode().
-  struct SchedCandidate {
-    // The best SUnit candidate.
-    SUnit *SU = nullptr;
+    /// Store the state used by ConvergingVLIWScheduler heuristics, required
+    ///  for the lifetime of one invocation of pickNode().
+    struct SchedCandidate {
+        // The best SUnit candidate.
+        SUnit *SU = nullptr;
 
-    // Register pressure values for the best candidate.
-    RegPressureDelta RPDelta;
+        // Register pressure values for the best candidate.
+        RegPressureDelta RPDelta;
 
-    // Best scheduling cost.
-    int SCost = 0;
+        // Best scheduling cost.
+        int SCost = 0;
 
-    SchedCandidate() = default;
-  };
-  /// Represent the type of SchedCandidate found within a single queue.
-  enum CandResult {
-    NoCand, NodeOrder, SingleExcess, SingleCritical, SingleMax, MultiPressure,
-    BestCost, Weak};
+        SchedCandidate() = default;
+    };
+    /// Represent the type of SchedCandidate found within a single queue.
+    enum CandResult {
+        NoCand, NodeOrder, SingleExcess, SingleCritical, SingleMax, MultiPressure,
+        BestCost, Weak
+    };
 
-  /// Each Scheduling boundary is associated with ready queues. It tracks the
-  /// current cycle in whichever direction at has moved, and maintains the state
-  /// of "hazards" and other interlocks at the current cycle.
-  struct VLIWSchedBoundary {
+    /// Each Scheduling boundary is associated with ready queues. It tracks the
+    /// current cycle in whichever direction at has moved, and maintains the state
+    /// of "hazards" and other interlocks at the current cycle.
+    struct VLIWSchedBoundary {
+        VLIWMachineScheduler *DAG = nullptr;
+        const TargetSchedModel *SchedModel = nullptr;
+
+        ReadyQueue Available;
+        ReadyQueue Pending;
+        bool CheckPending = false;
+
+        ScheduleHazardRecognizer *HazardRec = nullptr;
+        VLIWResourceModel *ResourceModel = nullptr;
+
+        unsigned CurrCycle = 0;
+        unsigned IssueCount = 0;
+        unsigned CriticalPathLength = 0;
+
+        /// MinReadyCycle - Cycle of the soonest available instruction.
+        unsigned MinReadyCycle = std::numeric_limits<unsigned>::max();
+
+        // Remember the greatest min operand latency.
+        unsigned MaxMinLatency = 0;
+
+        /// Pending queues extend the ready queues with the same ID and the
+        /// PendingFlag set.
+        VLIWSchedBoundary(unsigned ID, const Twine &Name)
+            : Available(ID, Name+".A"),
+              Pending(ID << ConvergingVLIWScheduler::LogMaxQID, Name+".P") {}
+
+        ~VLIWSchedBoundary() {
+            delete ResourceModel;
+            delete HazardRec;
+        }
+
+        void init(VLIWMachineScheduler *dag, const TargetSchedModel *smodel) {
+            DAG = dag;
+            SchedModel = smodel;
+            CurrCycle = 0;
+            IssueCount = 0;
+            // Initialize the critical path length limit, which used by the scheduling
+            // cost model to determine the value for scheduling an instruction. We use
+            // a slightly different heuristic for small and large functions. For small
+            // functions, it's important to use the height/depth of the instruction.
+            // For large functions, prioritizing by height or depth increases spills.
+            CriticalPathLength = DAG->getBBSize() / SchedModel->getIssueWidth();
+            if (DAG->getBBSize() < 50)
+                // We divide by two as a cheap and simple heuristic to reduce the
+                // critcal path length, which increases the priority of using the graph
+                // height/depth in the scheduler's cost computation.
+                CriticalPathLength >>= 1;
+            else {
+                // For large basic blocks, we prefer a larger critical path length to
+                // decrease the priority of using the graph height/depth.
+                unsigned MaxPath = 0;
+                for (auto &SU : DAG->SUnits)
+                    MaxPath = std::max(MaxPath, isTop() ? SU.getHeight() : SU.getDepth());
+                CriticalPathLength = std::max(CriticalPathLength, MaxPath) + 1;
+            }
+        }
+
+        bool isTop() const {
+            return Available.getID() == ConvergingVLIWScheduler::TopQID;
+        }
+
+        bool checkHazard(SUnit *SU);
+
+        void releaseNode(SUnit *SU, unsigned ReadyCycle);
+
+        void bumpCycle();
+
+        void bumpNode(SUnit *SU);
+
+        void releasePending();
+
+        void removeReady(SUnit *SU);
+
+        SUnit *pickOnlyChoice();
+
+        bool isLatencyBound(SUnit *SU) {
+            if (CurrCycle >= CriticalPathLength)
+                return true;
+            unsigned PathLength = isTop() ? SU->getHeight() : SU->getDepth();
+            return CriticalPathLength - CurrCycle <= PathLength;
+        }
+    };
+
     VLIWMachineScheduler *DAG = nullptr;
     const TargetSchedModel *SchedModel = nullptr;
 
-    ReadyQueue Available;
-    ReadyQueue Pending;
-    bool CheckPending = false;
+    // State of the top and bottom scheduled instruction boundaries.
+    VLIWSchedBoundary Top;
+    VLIWSchedBoundary Bot;
 
-    ScheduleHazardRecognizer *HazardRec = nullptr;
-    VLIWResourceModel *ResourceModel = nullptr;
-
-    unsigned CurrCycle = 0;
-    unsigned IssueCount = 0;
-    unsigned CriticalPathLength = 0;
-
-    /// MinReadyCycle - Cycle of the soonest available instruction.
-    unsigned MinReadyCycle = std::numeric_limits<unsigned>::max();
-
-    // Remember the greatest min operand latency.
-    unsigned MaxMinLatency = 0;
-
-    /// Pending queues extend the ready queues with the same ID and the
-    /// PendingFlag set.
-    VLIWSchedBoundary(unsigned ID, const Twine &Name)
-        : Available(ID, Name+".A"),
-          Pending(ID << ConvergingVLIWScheduler::LogMaxQID, Name+".P") {}
-
-    ~VLIWSchedBoundary() {
-      delete ResourceModel;
-      delete HazardRec;
-    }
-
-    void init(VLIWMachineScheduler *dag, const TargetSchedModel *smodel) {
-      DAG = dag;
-      SchedModel = smodel;
-      CurrCycle = 0;
-      IssueCount = 0;
-      // Initialize the critical path length limit, which used by the scheduling
-      // cost model to determine the value for scheduling an instruction. We use
-      // a slightly different heuristic for small and large functions. For small
-      // functions, it's important to use the height/depth of the instruction.
-      // For large functions, prioritizing by height or depth increases spills.
-      CriticalPathLength = DAG->getBBSize() / SchedModel->getIssueWidth();
-      if (DAG->getBBSize() < 50)
-        // We divide by two as a cheap and simple heuristic to reduce the
-        // critcal path length, which increases the priority of using the graph
-        // height/depth in the scheduler's cost computation.
-        CriticalPathLength >>= 1;
-      else {
-        // For large basic blocks, we prefer a larger critical path length to
-        // decrease the priority of using the graph height/depth.
-        unsigned MaxPath = 0;
-        for (auto &SU : DAG->SUnits)
-          MaxPath = std::max(MaxPath, isTop() ? SU.getHeight() : SU.getDepth());
-        CriticalPathLength = std::max(CriticalPathLength, MaxPath) + 1;
-      }
-    }
-
-    bool isTop() const {
-      return Available.getID() == ConvergingVLIWScheduler::TopQID;
-    }
-
-    bool checkHazard(SUnit *SU);
-
-    void releaseNode(SUnit *SU, unsigned ReadyCycle);
-
-    void bumpCycle();
-
-    void bumpNode(SUnit *SU);
-
-    void releasePending();
-
-    void removeReady(SUnit *SU);
-
-    SUnit *pickOnlyChoice();
-
-    bool isLatencyBound(SUnit *SU) {
-      if (CurrCycle >= CriticalPathLength)
-        return true;
-      unsigned PathLength = isTop() ? SU->getHeight() : SU->getDepth();
-      return CriticalPathLength - CurrCycle <= PathLength;
-    }
-  };
-
-  VLIWMachineScheduler *DAG = nullptr;
-  const TargetSchedModel *SchedModel = nullptr;
-
-  // State of the top and bottom scheduled instruction boundaries.
-  VLIWSchedBoundary Top;
-  VLIWSchedBoundary Bot;
-
-  /// List of pressure sets that have a high pressure level in the region.
-  std::vector<bool> HighPressureSets;
+    /// List of pressure sets that have a high pressure level in the region.
+    std::vector<bool> HighPressureSets;
 
 public:
-  /// SUnit::NodeQueueId: 0 (none), 1 (top), 2 (bot), 3 (both)
-  enum {
-    TopQID = 1,
-    BotQID = 2,
-    LogMaxQID = 2
-  };
+    /// SUnit::NodeQueueId: 0 (none), 1 (top), 2 (bot), 3 (both)
+    enum {
+        TopQID = 1,
+        BotQID = 2,
+        LogMaxQID = 2
+    };
 
-  ConvergingVLIWScheduler() : Top(TopQID, "TopQ"), Bot(BotQID, "BotQ") {}
+    ConvergingVLIWScheduler() : Top(TopQID, "TopQ"), Bot(BotQID, "BotQ") {}
 
-  void initialize(ScheduleDAGMI *dag) override;
+    void initialize(ScheduleDAGMI *dag) override;
 
-  SUnit *pickNode(bool &IsTopNode) override;
+    SUnit *pickNode(bool &IsTopNode) override;
 
-  void schedNode(SUnit *SU, bool IsTopNode) override;
+    void schedNode(SUnit *SU, bool IsTopNode) override;
 
-  void releaseTopNode(SUnit *SU) override;
+    void releaseTopNode(SUnit *SU) override;
 
-  void releaseBottomNode(SUnit *SU) override;
+    void releaseBottomNode(SUnit *SU) override;
 
-  unsigned reportPackets() {
-    return Top.ResourceModel->getTotalPackets() +
-           Bot.ResourceModel->getTotalPackets();
-  }
+    unsigned reportPackets() {
+        return Top.ResourceModel->getTotalPackets() +
+               Bot.ResourceModel->getTotalPackets();
+    }
 
 protected:
-  SUnit *pickNodeBidrectional(bool &IsTopNode);
+    SUnit *pickNodeBidrectional(bool &IsTopNode);
 
-  int pressureChange(const SUnit *SU, bool isBotUp);
+    int pressureChange(const SUnit *SU, bool isBotUp);
 
-  int SchedulingCost(ReadyQueue &Q,
-                     SUnit *SU, SchedCandidate &Candidate,
-                     RegPressureDelta &Delta, bool verbose);
+    int SchedulingCost(ReadyQueue &Q,
+                       SUnit *SU, SchedCandidate &Candidate,
+                       RegPressureDelta &Delta, bool verbose);
 
-  CandResult pickNodeFromQueue(VLIWSchedBoundary &Zone,
-                               const RegPressureTracker &RPTracker,
-                               SchedCandidate &Candidate);
+    CandResult pickNodeFromQueue(VLIWSchedBoundary &Zone,
+                                 const RegPressureTracker &RPTracker,
+                                 SchedCandidate &Candidate);
 #ifndef NDEBUG
-  void traceCandidate(const char *Label, const ReadyQueue &Q, SUnit *SU,
-                      int Cost, PressureChange P = PressureChange());
+    void traceCandidate(const char *Label, const ReadyQueue &Q, SUnit *SU,
+                        int Cost, PressureChange P = PressureChange());
 
-  void readyQueueVerboseDump(const RegPressureTracker &RPTracker,
-                             SchedCandidate &Candidate, ReadyQueue &Q);
+    void readyQueueVerboseDump(const RegPressureTracker &RPTracker,
+                               SchedCandidate &Candidate, ReadyQueue &Q);
 #endif
 };
 

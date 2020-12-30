@@ -31,52 +31,56 @@ class Type;
 
 /// Helper class that handles loading Metadatas and keeping them available.
 class MetadataLoader {
-  class MetadataLoaderImpl;
-  std::unique_ptr<MetadataLoaderImpl> Pimpl;
-  Error parseMetadata(bool ModuleLevel);
+    class MetadataLoaderImpl;
+    std::unique_ptr<MetadataLoaderImpl> Pimpl;
+    Error parseMetadata(bool ModuleLevel);
 
 public:
-  ~MetadataLoader();
-  MetadataLoader(BitstreamCursor &Stream, Module &TheModule,
-                 BitcodeReaderValueList &ValueList, bool IsImporting,
-                 std::function<Type *(unsigned)> getTypeByID);
-  MetadataLoader &operator=(MetadataLoader &&);
-  MetadataLoader(MetadataLoader &&);
+    ~MetadataLoader();
+    MetadataLoader(BitstreamCursor &Stream, Module &TheModule,
+                   BitcodeReaderValueList &ValueList, bool IsImporting,
+                   std::function<Type *(unsigned)> getTypeByID);
+    MetadataLoader &operator=(MetadataLoader &&);
+    MetadataLoader(MetadataLoader &&);
 
-  // Parse a module metadata block
-  Error parseModuleMetadata() { return parseMetadata(true); }
+    // Parse a module metadata block
+    Error parseModuleMetadata() {
+        return parseMetadata(true);
+    }
 
-  // Parse a function metadata block
-  Error parseFunctionMetadata() { return parseMetadata(false); }
+    // Parse a function metadata block
+    Error parseFunctionMetadata() {
+        return parseMetadata(false);
+    }
 
-  /// Set the mode to strip TBAA metadata on load.
-  void setStripTBAA(bool StripTBAA = true);
+    /// Set the mode to strip TBAA metadata on load.
+    void setStripTBAA(bool StripTBAA = true);
 
-  /// Return true if the Loader is stripping TBAA metadata.
-  bool isStrippingTBAA();
+    /// Return true if the Loader is stripping TBAA metadata.
+    bool isStrippingTBAA();
 
-  // Return true there are remaining unresolved forward references.
-  bool hasFwdRefs() const;
+    // Return true there are remaining unresolved forward references.
+    bool hasFwdRefs() const;
 
-  /// Return the given metadata, creating a replaceable forward reference if
-  /// necessary.
-  Metadata *getMetadataFwdRefOrLoad(unsigned Idx);
+    /// Return the given metadata, creating a replaceable forward reference if
+    /// necessary.
+    Metadata *getMetadataFwdRefOrLoad(unsigned Idx);
 
-  /// Return the DISubprogram metadata for a Function if any, null otherwise.
-  DISubprogram *lookupSubprogramForFunction(Function *F);
+    /// Return the DISubprogram metadata for a Function if any, null otherwise.
+    DISubprogram *lookupSubprogramForFunction(Function *F);
 
-  /// Parse a `METADATA_ATTACHMENT` block for a function.
-  Error parseMetadataAttachment(
-      Function &F, const SmallVectorImpl<Instruction *> &InstructionList);
+    /// Parse a `METADATA_ATTACHMENT` block for a function.
+    Error parseMetadataAttachment(
+        Function &F, const SmallVectorImpl<Instruction *> &InstructionList);
 
-  /// Parse a `METADATA_KIND` block for the current module.
-  Error parseMetadataKinds();
+    /// Parse a `METADATA_KIND` block for the current module.
+    Error parseMetadataKinds();
 
-  unsigned size() const;
-  void shrinkTo(unsigned N);
+    unsigned size() const;
+    void shrinkTo(unsigned N);
 
-  /// Perform bitcode upgrades on llvm.dbg.* calls.
-  void upgradeDebugIntrinsics(Function &F);
+    /// Perform bitcode upgrades on llvm.dbg.* calls.
+    void upgradeDebugIntrinsics(Function &F);
 };
 }
 

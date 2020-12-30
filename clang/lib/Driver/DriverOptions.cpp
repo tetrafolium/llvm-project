@@ -33,23 +33,24 @@ namespace {
 
 class DriverOptTable : public OptTable {
 public:
-  DriverOptTable()
-    : OptTable(InfoTable) {}
+    DriverOptTable()
+        : OptTable(InfoTable) {}
 };
 
 }
 
 const llvm::opt::OptTable &clang::driver::getDriverOptTable() {
-  static const DriverOptTable *Table = []() {
-    auto Result = std::make_unique<DriverOptTable>();
-    // Options.inc is included in DriverOptions.cpp, and calls OptTable's
-    // addValues function.
-    // Opt is a variable used in the code fragment in Options.inc.
-    OptTable &Opt = *Result;
+    static const DriverOptTable *Table = []() {
+        auto Result = std::make_unique<DriverOptTable>();
+        // Options.inc is included in DriverOptions.cpp, and calls OptTable's
+        // addValues function.
+        // Opt is a variable used in the code fragment in Options.inc.
+        OptTable &Opt = *Result;
 #define OPTTABLE_ARG_INIT
 #include "clang/Driver/Options.inc"
 #undef OPTTABLE_ARG_INIT
-    return Result.release();
-  }();
-  return *Table;
+        return Result.release();
+    }
+    ();
+    return *Table;
 }

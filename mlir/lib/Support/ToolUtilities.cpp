@@ -21,28 +21,28 @@ LogicalResult
 mlir::splitAndProcessBuffer(std::unique_ptr<llvm::MemoryBuffer> originalBuffer,
                             ChunkBufferHandler processChunkBuffer,
                             raw_ostream &os) {
-  const char splitMarker[] = "// -----";
+    const char splitMarker[] = "// -----";
 
-  auto *origMemBuffer = originalBuffer.get();
-  SmallVector<StringRef, 8> sourceBuffers;
-  origMemBuffer->getBuffer().split(sourceBuffers, splitMarker);
+    auto *origMemBuffer = originalBuffer.get();
+    SmallVector<StringRef, 8> sourceBuffers;
+    origMemBuffer->getBuffer().split(sourceBuffers, splitMarker);
 
-  // Add the original buffer to the source manager.
-  llvm::SourceMgr fileSourceMgr;
-  fileSourceMgr.AddNewSourceBuffer(std::move(originalBuffer), llvm::SMLoc());
+    // Add the original buffer to the source manager.
+    llvm::SourceMgr fileSourceMgr;
+    fileSourceMgr.AddNewSourceBuffer(std::move(originalBuffer), llvm::SMLoc());
 
-  // Process each chunk in turn.
-  bool hadFailure = false;
-  for (auto &subBuffer : sourceBuffers) {
-    auto splitLoc = llvm::SMLoc::getFromPointer(subBuffer.data());
-    unsigned splitLine = fileSourceMgr.getLineAndColumn(splitLoc).first;
-    auto subMemBuffer = llvm::MemoryBuffer::getMemBufferCopy(
-        subBuffer, origMemBuffer->getBufferIdentifier() +
-                       Twine(" split at line #") + Twine(splitLine));
-    if (failed(processChunkBuffer(std::move(subMemBuffer), os)))
-      hadFailure = true;
-  }
+    // Process each chunk in turn.
+    bool hadFailure = false;
+    for (auto &subBuffer : sourceBuffers) {
+        auto splitLoc = llvm::SMLoc::getFromPointer(subBuffer.data());
+        unsigned splitLine = fileSourceMgr.getLineAndColumn(splitLoc).first;
+        auto subMemBuffer = llvm::MemoryBuffer::getMemBufferCopy(
+                                subBuffer, origMemBuffer->getBufferIdentifier() +
+                                Twine(" split at line #") + Twine(splitLine));
+        if (failed(processChunkBuffer(std::move(subMemBuffer), os)))
+            hadFailure = true;
+    }
 
-  // If any fails, then return a failure of the tool.
-  return failure(hadFailure);
+    // If any fails, then return a failure of the tool.
+    return failure(hadFailure);
 }

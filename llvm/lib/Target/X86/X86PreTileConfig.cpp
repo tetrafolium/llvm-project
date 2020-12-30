@@ -55,31 +55,31 @@ using namespace llvm;
 namespace {
 
 class X86PreTileConfig : public MachineFunctionPass {
-  // context
-  MachineFunction *MF = nullptr;
-  const X86Subtarget *ST = nullptr;
-  const TargetRegisterInfo *TRI;
-  const TargetInstrInfo *TII;
-  MachineDominatorTree *DomTree = nullptr;
-  MachineRegisterInfo *MRI = nullptr;
+    // context
+    MachineFunction *MF = nullptr;
+    const X86Subtarget *ST = nullptr;
+    const TargetRegisterInfo *TRI;
+    const TargetInstrInfo *TII;
+    MachineDominatorTree *DomTree = nullptr;
+    MachineRegisterInfo *MRI = nullptr;
 
-  MachineInstr *getTileConfigPoint();
+    MachineInstr *getTileConfigPoint();
 
 public:
-  X86PreTileConfig() : MachineFunctionPass(ID) {}
+    X86PreTileConfig() : MachineFunctionPass(ID) {}
 
-  /// Return the pass name.
-  StringRef getPassName() const override {
-    return "Tile Register Pre-configure";
-  }
+    /// Return the pass name.
+    StringRef getPassName() const override {
+        return "Tile Register Pre-configure";
+    }
 
-  /// X86PreTileConfig analysis usage.
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    /// X86PreTileConfig analysis usage.
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-  /// Perform register allocation.
-  bool runOnMachineFunction(MachineFunction &mf) override;
+    /// Perform register allocation.
+    bool runOnMachineFunction(MachineFunction &mf) override;
 
-  static char ID;
+    static char ID;
 };
 
 } // end anonymous namespace
@@ -93,171 +93,172 @@ INITIALIZE_PASS_END(X86PreTileConfig, "tilepreconfig",
                     "Tile Register Configure", false, false)
 
 void X86PreTileConfig::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesAll();
-  AU.addRequired<MachineDominatorTree>();
-  MachineFunctionPass::getAnalysisUsage(AU);
+    AU.setPreservesAll();
+    AU.addRequired<MachineDominatorTree>();
+    MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 static Register buildConfigMI(MachineBasicBlock::iterator MI, int FrameIdx,
                               const TargetInstrInfo *TII,
                               MachineRegisterInfo *MRI,
                               const X86Subtarget *ST) {
-  auto *MBB = MI->getParent();
+    auto *MBB = MI->getParent();
 
-  // FIXME: AMX should assume AVX512 enabled.
-  if (ST->hasAVX512()) {
-    // Zero stack slot.
-    Register Zmm = MRI->createVirtualRegister(&X86::VR512RegClass);
-    BuildMI(*MBB, MI, DebugLoc(), TII->get(X86::VPXORDZrr), Zmm)
+    // FIXME: AMX should assume AVX512 enabled.
+    if (ST->hasAVX512()) {
+        // Zero stack slot.
+        Register Zmm = MRI->createVirtualRegister(&X86::VR512RegClass);
+        BuildMI(*MBB, MI, DebugLoc(), TII->get(X86::VPXORDZrr), Zmm)
         .addReg(Zmm, RegState::Undef)
         .addReg(Zmm, RegState::Undef);
-    addFrameReference(BuildMI(*MBB, MI, DebugLoc(), TII->get(X86::VMOVUPSZmr)),
-                      FrameIdx)
+        addFrameReference(BuildMI(*MBB, MI, DebugLoc(), TII->get(X86::VMOVUPSZmr)),
+                          FrameIdx)
         .addReg(Zmm);
-  }
+    }
 
-  // build psuedo ldtilecfg
-  Register VReg = MRI->createVirtualRegister(&X86::TILECFGRegClass);
+    // build psuedo ldtilecfg
+    Register VReg = MRI->createVirtualRegister(&X86::TILECFGRegClass);
 
-  addFrameReference(
-      BuildMI(*MBB, MI, DebugLoc(), TII->get(X86::PLDTILECFG), VReg), FrameIdx);
+    addFrameReference(
+        BuildMI(*MBB, MI, DebugLoc(), TII->get(X86::PLDTILECFG), VReg), FrameIdx);
 
-  return VReg;
+    return VReg;
 }
 
 static ShapeT getShape(const MachineInstr &MI, MachineRegisterInfo *MRI) {
-  unsigned Opcode = MI.getOpcode();
-  switch (Opcode) {
-  default:
-    llvm_unreachable("Unexpected machine instruction on tile");
-  case X86::PTILELOADDV:
-  case X86::PTDPBSSDV:
-    MachineOperand &MO1 = const_cast<MachineOperand &>(MI.getOperand(1));
-    MachineOperand &MO2 = const_cast<MachineOperand &>(MI.getOperand(2));
-    ShapeT Shape(&MO1, &MO2, MRI);
-    return Shape;
-  }
+    unsigned Opcode = MI.getOpcode();
+    switch (Opcode) {
+    default:
+        llvm_unreachable("Unexpected machine instruction on tile");
+    case X86::PTILELOADDV:
+    case X86::PTDPBSSDV:
+        MachineOperand &MO1 = const_cast<MachineOperand &>(MI.getOperand(1));
+        MachineOperand &MO2 = const_cast<MachineOperand &>(MI.getOperand(2));
+        ShapeT Shape(&MO1, &MO2, MRI);
+        return Shape;
+    }
 }
 
 MachineInstr *X86PreTileConfig::getTileConfigPoint() {
-  DenseMap<Register, ShapeT> PhysShapeInfo;
-  MachineBasicBlock *MBB = nullptr;
-  DenseSet<const MachineInstr *> MIs;
-  for (unsigned i = 0, e = MRI->getNumVirtRegs(); i != e; ++i) {
-    Register VirtReg = Register::index2VirtReg(i);
-    if (MRI->reg_nodbg_empty(VirtReg))
-      continue;
-    const TargetRegisterClass &RC = *MRI->getRegClass(VirtReg);
-    if (RC.getID() != X86::TILERegClassID)
-      continue;
+    DenseMap<Register, ShapeT> PhysShapeInfo;
+    MachineBasicBlock *MBB = nullptr;
+    DenseSet<const MachineInstr *> MIs;
+    for (unsigned i = 0, e = MRI->getNumVirtRegs(); i != e; ++i) {
+        Register VirtReg = Register::index2VirtReg(i);
+        if (MRI->reg_nodbg_empty(VirtReg))
+            continue;
+        const TargetRegisterClass &RC = *MRI->getRegClass(VirtReg);
+        if (RC.getID() != X86::TILERegClassID)
+            continue;
 
-    // Find the common dominator for all MI that define tile register.
-    for (const MachineOperand &MO : MRI->def_operands(VirtReg)) {
-      if (MO.isUndef())
-        continue;
-      const auto *MI = MO.getParent();
-      // PHI or IMPLICIT_DEF instructiion.
-      // There must be a input tile before PHI instruction.
-      if (MI->isTransient())
-        continue;
-      if (!MBB)
-        MBB = const_cast<MachineBasicBlock *>(MI->getParent());
-      MBB = DomTree->findNearestCommonDominator(
-          MBB, const_cast<MachineBasicBlock *>(MI->getParent()));
+        // Find the common dominator for all MI that define tile register.
+        for (const MachineOperand &MO : MRI->def_operands(VirtReg)) {
+            if (MO.isUndef())
+                continue;
+            const auto *MI = MO.getParent();
+            // PHI or IMPLICIT_DEF instructiion.
+            // There must be a input tile before PHI instruction.
+            if (MI->isTransient())
+                continue;
+            if (!MBB)
+                MBB = const_cast<MachineBasicBlock *>(MI->getParent());
+            MBB = DomTree->findNearestCommonDominator(
+                      MBB, const_cast<MachineBasicBlock *>(MI->getParent()));
 
-      // Collect the instructions that define shape.
-      ShapeT Shape = getShape(*MI, MRI);
-      std::array<MachineOperand *, 2> ShapeMOs = {Shape.getRow(),
-                                                  Shape.getCol()};
-      for (auto *ShapeMO : ShapeMOs) {
-        Register ShapeReg = ShapeMO->getReg();
-        for (const MachineOperand &MO : MRI->def_operands(ShapeReg)) {
-          const auto *ShapeMI = MO.getParent();
-          MIs.insert(ShapeMI);
+            // Collect the instructions that define shape.
+            ShapeT Shape = getShape(*MI, MRI);
+            std::array<MachineOperand *, 2> ShapeMOs = {Shape.getRow(),
+                                                        Shape.getCol()
+                                                       };
+            for (auto *ShapeMO : ShapeMOs) {
+                Register ShapeReg = ShapeMO->getReg();
+                for (const MachineOperand &MO : MRI->def_operands(ShapeReg)) {
+                    const auto *ShapeMI = MO.getParent();
+                    MIs.insert(ShapeMI);
+                }
+            }
         }
-      }
     }
-  }
-  if (!MBB)
-    return nullptr;
-  // This pass is before the pass of eliminating PHI node, so it
-  // is in SSA form.
-  assert(MRI->isSSA() && "Not SSA form in pre-tile config");
-  // Shape def should dominate tile config MBB.
-  //    def s           s1    s2
-  //     / \             \   /
-  //    /   \             \ /
-  //  conf               s3=phi(s1,s2)
-  //                       |
-  //                       c
-  //
-  for (const auto *MI : MIs) {
-    const MachineBasicBlock *ShapeMBB = MI->getParent();
-    if (DomTree->dominates(ShapeMBB, MBB))
-      continue;
-    if (MI->isMoveImmediate())
-      continue;
-    report_fatal_error(MF->getName() + ": Failed to config tile register, "
-                                       "please define the shape earlier");
-  }
+    if (!MBB)
+        return nullptr;
+    // This pass is before the pass of eliminating PHI node, so it
+    // is in SSA form.
+    assert(MRI->isSSA() && "Not SSA form in pre-tile config");
+    // Shape def should dominate tile config MBB.
+    //    def s           s1    s2
+    //     / \             \   /
+    //    /   \             \ /
+    //  conf               s3=phi(s1,s2)
+    //                       |
+    //                       c
+    //
+    for (const auto *MI : MIs) {
+        const MachineBasicBlock *ShapeMBB = MI->getParent();
+        if (DomTree->dominates(ShapeMBB, MBB))
+            continue;
+        if (MI->isMoveImmediate())
+            continue;
+        report_fatal_error(MF->getName() + ": Failed to config tile register, "
+                           "please define the shape earlier");
+    }
 
-  // ldtilecfg should be inserted after the MI that define the shape.
-  MachineBasicBlock::reverse_instr_iterator I, E;
-  for (I = MBB->instr_rbegin(), E = MBB->instr_rend(); I != E; ++I) {
-    auto *MI = &*I;
-    if (MIs.count(MI) && (!MI->isMoveImmediate()))
-      break;
-  }
-  MachineBasicBlock::iterator MII;
-  if (I == E)
-    MII = MBB->getFirstNonPHI();
-  else {
-    MII = MachineBasicBlock::iterator(&*I);
-    MII++;
-  }
-  return &*MII;
+    // ldtilecfg should be inserted after the MI that define the shape.
+    MachineBasicBlock::reverse_instr_iterator I, E;
+    for (I = MBB->instr_rbegin(), E = MBB->instr_rend(); I != E; ++I) {
+        auto *MI = &*I;
+        if (MIs.count(MI) && (!MI->isMoveImmediate()))
+            break;
+    }
+    MachineBasicBlock::iterator MII;
+    if (I == E)
+        MII = MBB->getFirstNonPHI();
+    else {
+        MII = MachineBasicBlock::iterator(&*I);
+        MII++;
+    }
+    return &*MII;
 }
 
 static void addTileCFGUse(MachineFunction &MF, Register CFG) {
-  for (MachineBasicBlock &MBB : MF) {
+    for (MachineBasicBlock &MBB : MF) {
 
-    // Traverse the basic block.
-    for (MachineInstr &MI : MBB) {
-      unsigned Opcode = MI.getOpcode();
-      switch (Opcode) {
-      default:
-        break;
-      case X86::PTILELOADDV:
-      case X86::PTILESTOREDV:
-      case X86::PTDPBSSDV:
-        unsigned NumOperands = MI.getNumOperands();
-        MI.RemoveOperand(NumOperands - 1);
-        MI.addOperand(MF, MachineOperand::CreateReg(CFG, false));
-        break;
-      }
+        // Traverse the basic block.
+        for (MachineInstr &MI : MBB) {
+            unsigned Opcode = MI.getOpcode();
+            switch (Opcode) {
+            default:
+                break;
+            case X86::PTILELOADDV:
+            case X86::PTILESTOREDV:
+            case X86::PTDPBSSDV:
+                unsigned NumOperands = MI.getNumOperands();
+                MI.RemoveOperand(NumOperands - 1);
+                MI.addOperand(MF, MachineOperand::CreateReg(CFG, false));
+                break;
+            }
+        }
     }
-  }
 }
 
 bool X86PreTileConfig::runOnMachineFunction(MachineFunction &mf) {
-  MF = &mf;
-  MRI = &mf.getRegInfo();
-  ST = &mf.getSubtarget<X86Subtarget>();
-  TRI = ST->getRegisterInfo();
-  TII = mf.getSubtarget().getInstrInfo();
-  DomTree = &getAnalysis<MachineDominatorTree>();
+    MF = &mf;
+    MRI = &mf.getRegInfo();
+    ST = &mf.getSubtarget<X86Subtarget>();
+    TRI = ST->getRegisterInfo();
+    TII = mf.getSubtarget().getInstrInfo();
+    DomTree = &getAnalysis<MachineDominatorTree>();
 
-  MachineInstr *MI = getTileConfigPoint();
-  if (!MI)
-    return false;
-  unsigned Size = ST->getTileConfigSize();
-  Align Alignment = ST->getTileConfigAlignment();
-  int SS = mf.getFrameInfo().CreateStackObject(Size, Alignment, false);
-  Register CFG = buildConfigMI(MI, SS, TII, MRI, ST);
-  addTileCFGUse(mf, CFG);
-  return true;
+    MachineInstr *MI = getTileConfigPoint();
+    if (!MI)
+        return false;
+    unsigned Size = ST->getTileConfigSize();
+    Align Alignment = ST->getTileConfigAlignment();
+    int SS = mf.getFrameInfo().CreateStackObject(Size, Alignment, false);
+    Register CFG = buildConfigMI(MI, SS, TII, MRI, ST);
+    addTileCFGUse(mf, CFG);
+    return true;
 }
 
 FunctionPass *llvm::createX86PreTileConfigPass() {
-  return new X86PreTileConfig();
+    return new X86PreTileConfig();
 }

@@ -48,42 +48,42 @@ class ObjectLayer;
 /// getConstructors/getDestructors functions.
 class CtorDtorIterator {
 public:
-  /// Accessor for an element of the global_ctors/global_dtors array.
-  ///
-  ///   This class provides a read-only view of the element with any casts on
-  /// the function stripped away.
-  struct Element {
-    Element(unsigned Priority, Function *Func, Value *Data)
-      : Priority(Priority), Func(Func), Data(Data) {}
+    /// Accessor for an element of the global_ctors/global_dtors array.
+    ///
+    ///   This class provides a read-only view of the element with any casts on
+    /// the function stripped away.
+    struct Element {
+        Element(unsigned Priority, Function *Func, Value *Data)
+            : Priority(Priority), Func(Func), Data(Data) {}
 
-    unsigned Priority;
-    Function *Func;
-    Value *Data;
-  };
+        unsigned Priority;
+        Function *Func;
+        Value *Data;
+    };
 
-  /// Construct an iterator instance. If End is true then this iterator
-  ///        acts as the end of the range, otherwise it is the beginning.
-  CtorDtorIterator(const GlobalVariable *GV, bool End);
+    /// Construct an iterator instance. If End is true then this iterator
+    ///        acts as the end of the range, otherwise it is the beginning.
+    CtorDtorIterator(const GlobalVariable *GV, bool End);
 
-  /// Test iterators for equality.
-  bool operator==(const CtorDtorIterator &Other) const;
+    /// Test iterators for equality.
+    bool operator==(const CtorDtorIterator &Other) const;
 
-  /// Test iterators for inequality.
-  bool operator!=(const CtorDtorIterator &Other) const;
+    /// Test iterators for inequality.
+    bool operator!=(const CtorDtorIterator &Other) const;
 
-  /// Pre-increment iterator.
-  CtorDtorIterator& operator++();
+    /// Pre-increment iterator.
+    CtorDtorIterator& operator++();
 
-  /// Post-increment iterator.
-  CtorDtorIterator operator++(int);
+    /// Post-increment iterator.
+    CtorDtorIterator operator++(int);
 
-  /// Dereference iterator. The resulting value provides a read-only view
-  ///        of this element of the global_ctors/global_dtors list.
-  Element operator*() const;
+    /// Dereference iterator. The resulting value provides a read-only view
+    ///        of this element of the global_ctors/global_dtors list.
+    Element operator*() const;
 
 private:
-  const ConstantArray *InitList;
-  unsigned I;
+    const ConstantArray *InitList;
+    unsigned I;
 };
 
 /// Create an iterator range over the entries of the llvm.global_ctors
@@ -98,61 +98,67 @@ iterator_range<CtorDtorIterator> getDestructors(const Module &M);
 /// have initialization effects.
 class StaticInitGVIterator {
 public:
-  StaticInitGVIterator() = default;
+    StaticInitGVIterator() = default;
 
-  StaticInitGVIterator(Module &M)
-      : I(M.global_values().begin()), E(M.global_values().end()),
-        ObjFmt(Triple(M.getTargetTriple()).getObjectFormat()) {
-    if (I != E) {
-      if (!isStaticInitGlobal(*I))
+    StaticInitGVIterator(Module &M)
+        : I(M.global_values().begin()), E(M.global_values().end()),
+          ObjFmt(Triple(M.getTargetTriple()).getObjectFormat()) {
+        if (I != E) {
+            if (!isStaticInitGlobal(*I))
+                moveToNextStaticInitGlobal();
+        } else
+            I = E = Module::global_value_iterator();
+    }
+
+    bool operator==(const StaticInitGVIterator &O) const {
+        return I == O.I;
+    }
+    bool operator!=(const StaticInitGVIterator &O) const {
+        return I != O.I;
+    }
+
+    StaticInitGVIterator &operator++() {
+        assert(I != E && "Increment past end of range");
         moveToNextStaticInitGlobal();
-    } else
-      I = E = Module::global_value_iterator();
-  }
+        return *this;
+    }
 
-  bool operator==(const StaticInitGVIterator &O) const { return I == O.I; }
-  bool operator!=(const StaticInitGVIterator &O) const { return I != O.I; }
-
-  StaticInitGVIterator &operator++() {
-    assert(I != E && "Increment past end of range");
-    moveToNextStaticInitGlobal();
-    return *this;
-  }
-
-  GlobalValue &operator*() { return *I; }
+    GlobalValue &operator*() {
+        return *I;
+    }
 
 private:
-  bool isStaticInitGlobal(GlobalValue &GV);
-  void moveToNextStaticInitGlobal() {
-    ++I;
-    while (I != E && !isStaticInitGlobal(*I))
-      ++I;
-    if (I == E)
-      I = E = Module::global_value_iterator();
-  }
+    bool isStaticInitGlobal(GlobalValue &GV);
+    void moveToNextStaticInitGlobal() {
+        ++I;
+        while (I != E && !isStaticInitGlobal(*I))
+            ++I;
+        if (I == E)
+            I = E = Module::global_value_iterator();
+    }
 
-  Module::global_value_iterator I, E;
-  Triple::ObjectFormatType ObjFmt;
+    Module::global_value_iterator I, E;
+    Triple::ObjectFormatType ObjFmt;
 };
 
 /// Create an iterator range over the GlobalValues that contribute to static
 /// initialization.
 inline iterator_range<StaticInitGVIterator> getStaticInitGVs(Module &M) {
-  return make_range(StaticInitGVIterator(M), StaticInitGVIterator());
+    return make_range(StaticInitGVIterator(M), StaticInitGVIterator());
 }
 
 class CtorDtorRunner {
 public:
-  CtorDtorRunner(JITDylib &JD) : JD(JD) {}
-  void add(iterator_range<CtorDtorIterator> CtorDtors);
-  Error run();
+    CtorDtorRunner(JITDylib &JD) : JD(JD) {}
+    void add(iterator_range<CtorDtorIterator> CtorDtors);
+    Error run();
 
 private:
-  using CtorDtorList = std::vector<SymbolStringPtr>;
-  using CtorDtorPriorityMap = std::map<unsigned, CtorDtorList>;
+    using CtorDtorList = std::vector<SymbolStringPtr>;
+    using CtorDtorPriorityMap = std::map<unsigned, CtorDtorList>;
 
-  JITDylib &JD;
-  CtorDtorPriorityMap CtorDtorsByPriority;
+    JITDylib &JD;
+    CtorDtorPriorityMap CtorDtorsByPriority;
 };
 
 /// Support class for static dtor execution. For hosted (in-process) JITs
@@ -172,42 +178,42 @@ private:
 /// called.
 class LocalCXXRuntimeOverridesBase {
 public:
-  /// Run any destructors recorded by the overriden __cxa_atexit function
-  /// (CXAAtExitOverride).
-  void runDestructors();
+    /// Run any destructors recorded by the overriden __cxa_atexit function
+    /// (CXAAtExitOverride).
+    void runDestructors();
 
 protected:
-  template <typename PtrTy> JITTargetAddress toTargetAddress(PtrTy *P) {
-    return static_cast<JITTargetAddress>(reinterpret_cast<uintptr_t>(P));
-  }
+    template <typename PtrTy> JITTargetAddress toTargetAddress(PtrTy *P) {
+        return static_cast<JITTargetAddress>(reinterpret_cast<uintptr_t>(P));
+    }
 
-  using DestructorPtr = void (*)(void *);
-  using CXXDestructorDataPair = std::pair<DestructorPtr, void *>;
-  using CXXDestructorDataPairList = std::vector<CXXDestructorDataPair>;
-  CXXDestructorDataPairList DSOHandleOverride;
-  static int CXAAtExitOverride(DestructorPtr Destructor, void *Arg,
-                               void *DSOHandle);
+    using DestructorPtr = void (*)(void *);
+    using CXXDestructorDataPair = std::pair<DestructorPtr, void *>;
+    using CXXDestructorDataPairList = std::vector<CXXDestructorDataPair>;
+    CXXDestructorDataPairList DSOHandleOverride;
+    static int CXAAtExitOverride(DestructorPtr Destructor, void *Arg,
+                                 void *DSOHandle);
 };
 
 class LocalCXXRuntimeOverrides : public LocalCXXRuntimeOverridesBase {
 public:
-  Error enable(JITDylib &JD, MangleAndInterner &Mangler);
+    Error enable(JITDylib &JD, MangleAndInterner &Mangler);
 };
 
 /// An interface for Itanium __cxa_atexit interposer implementations.
 class ItaniumCXAAtExitSupport {
 public:
-  struct AtExitRecord {
-    void (*F)(void *);
-    void *Ctx;
-  };
+    struct AtExitRecord {
+        void (*F)(void *);
+        void *Ctx;
+    };
 
-  void registerAtExit(void (*F)(void *), void *Ctx, void *DSOHandle);
-  void runAtExits(void *DSOHandle);
+    void registerAtExit(void (*F)(void *), void *Ctx, void *DSOHandle);
+    void runAtExits(void *DSOHandle);
 
 private:
-  std::mutex AtExitsMutex;
-  DenseMap<void *, std::vector<AtExitRecord>> AtExitRecords;
+    std::mutex AtExitsMutex;
+    DenseMap<void *, std::vector<AtExitRecord>> AtExitRecords;
 };
 
 /// A utility class to expose symbols found via dlsym to the JIT.
@@ -217,40 +223,40 @@ private:
 /// passes the 'Allow' predicate will be added to the JITDylib.
 class DynamicLibrarySearchGenerator : public DefinitionGenerator {
 public:
-  using SymbolPredicate = std::function<bool(const SymbolStringPtr &)>;
+    using SymbolPredicate = std::function<bool(const SymbolStringPtr &)>;
 
-  /// Create a DynamicLibrarySearchGenerator that searches for symbols in the
-  /// given sys::DynamicLibrary.
-  ///
-  /// If the Allow predicate is given then only symbols matching the predicate
-  /// will be searched for. If the predicate is not given then all symbols will
-  /// be searched for.
-  DynamicLibrarySearchGenerator(sys::DynamicLibrary Dylib, char GlobalPrefix,
-                                SymbolPredicate Allow = SymbolPredicate());
+    /// Create a DynamicLibrarySearchGenerator that searches for symbols in the
+    /// given sys::DynamicLibrary.
+    ///
+    /// If the Allow predicate is given then only symbols matching the predicate
+    /// will be searched for. If the predicate is not given then all symbols will
+    /// be searched for.
+    DynamicLibrarySearchGenerator(sys::DynamicLibrary Dylib, char GlobalPrefix,
+                                  SymbolPredicate Allow = SymbolPredicate());
 
-  /// Permanently loads the library at the given path and, on success, returns
-  /// a DynamicLibrarySearchGenerator that will search it for symbol definitions
-  /// in the library. On failure returns the reason the library failed to load.
-  static Expected<std::unique_ptr<DynamicLibrarySearchGenerator>>
-  Load(const char *FileName, char GlobalPrefix,
-       SymbolPredicate Allow = SymbolPredicate());
+    /// Permanently loads the library at the given path and, on success, returns
+    /// a DynamicLibrarySearchGenerator that will search it for symbol definitions
+    /// in the library. On failure returns the reason the library failed to load.
+    static Expected<std::unique_ptr<DynamicLibrarySearchGenerator>>
+            Load(const char *FileName, char GlobalPrefix,
+                 SymbolPredicate Allow = SymbolPredicate());
 
-  /// Creates a DynamicLibrarySearchGenerator that searches for symbols in
-  /// the current process.
-  static Expected<std::unique_ptr<DynamicLibrarySearchGenerator>>
-  GetForCurrentProcess(char GlobalPrefix,
-                       SymbolPredicate Allow = SymbolPredicate()) {
-    return Load(nullptr, GlobalPrefix, std::move(Allow));
-  }
+    /// Creates a DynamicLibrarySearchGenerator that searches for symbols in
+    /// the current process.
+    static Expected<std::unique_ptr<DynamicLibrarySearchGenerator>>
+            GetForCurrentProcess(char GlobalPrefix,
+    SymbolPredicate Allow = SymbolPredicate()) {
+        return Load(nullptr, GlobalPrefix, std::move(Allow));
+    }
 
-  Error tryToGenerate(LookupState &LS, LookupKind K, JITDylib &JD,
-                      JITDylibLookupFlags JDLookupFlags,
-                      const SymbolLookupSet &Symbols) override;
+    Error tryToGenerate(LookupState &LS, LookupKind K, JITDylib &JD,
+                        JITDylibLookupFlags JDLookupFlags,
+                        const SymbolLookupSet &Symbols) override;
 
 private:
-  sys::DynamicLibrary Dylib;
-  SymbolPredicate Allow;
-  char GlobalPrefix;
+    sys::DynamicLibrary Dylib;
+    SymbolPredicate Allow;
+    char GlobalPrefix;
 };
 
 /// A utility class to expose symbols from a static library.
@@ -260,39 +266,39 @@ private:
 /// the containing object being added to the JITDylib.
 class StaticLibraryDefinitionGenerator : public DefinitionGenerator {
 public:
-  /// Try to create a StaticLibraryDefinitionGenerator from the given path.
-  ///
-  /// This call will succeed if the file at the given path is a static library
-  /// is a valid archive, otherwise it will return an error.
-  static Expected<std::unique_ptr<StaticLibraryDefinitionGenerator>>
-  Load(ObjectLayer &L, const char *FileName);
+    /// Try to create a StaticLibraryDefinitionGenerator from the given path.
+    ///
+    /// This call will succeed if the file at the given path is a static library
+    /// is a valid archive, otherwise it will return an error.
+    static Expected<std::unique_ptr<StaticLibraryDefinitionGenerator>>
+            Load(ObjectLayer &L, const char *FileName);
 
-  /// Try to create a StaticLibraryDefinitionGenerator from the given path.
-  ///
-  /// This call will succeed if the file at the given path is a static library
-  /// or a MachO universal binary containing a static library that is compatible
-  /// with the given triple. Otherwise it will return an error.
-  static Expected<std::unique_ptr<StaticLibraryDefinitionGenerator>>
-  Load(ObjectLayer &L, const char *FileName, const Triple &TT);
+    /// Try to create a StaticLibraryDefinitionGenerator from the given path.
+    ///
+    /// This call will succeed if the file at the given path is a static library
+    /// or a MachO universal binary containing a static library that is compatible
+    /// with the given triple. Otherwise it will return an error.
+    static Expected<std::unique_ptr<StaticLibraryDefinitionGenerator>>
+            Load(ObjectLayer &L, const char *FileName, const Triple &TT);
 
-  /// Try to create a StaticLibrarySearchGenerator from the given memory buffer.
-  /// This call will succeed if the buffer contains a valid archive, otherwise
-  /// it will return an error.
-  static Expected<std::unique_ptr<StaticLibraryDefinitionGenerator>>
-  Create(ObjectLayer &L, std::unique_ptr<MemoryBuffer> ArchiveBuffer);
+    /// Try to create a StaticLibrarySearchGenerator from the given memory buffer.
+    /// This call will succeed if the buffer contains a valid archive, otherwise
+    /// it will return an error.
+    static Expected<std::unique_ptr<StaticLibraryDefinitionGenerator>>
+            Create(ObjectLayer &L, std::unique_ptr<MemoryBuffer> ArchiveBuffer);
 
-  Error tryToGenerate(LookupState &LS, LookupKind K, JITDylib &JD,
-                      JITDylibLookupFlags JDLookupFlags,
-                      const SymbolLookupSet &Symbols) override;
+    Error tryToGenerate(LookupState &LS, LookupKind K, JITDylib &JD,
+                        JITDylibLookupFlags JDLookupFlags,
+                        const SymbolLookupSet &Symbols) override;
 
 private:
-  StaticLibraryDefinitionGenerator(ObjectLayer &L,
-                                   std::unique_ptr<MemoryBuffer> ArchiveBuffer,
-                                   Error &Err);
+    StaticLibraryDefinitionGenerator(ObjectLayer &L,
+                                     std::unique_ptr<MemoryBuffer> ArchiveBuffer,
+                                     Error &Err);
 
-  ObjectLayer &L;
-  std::unique_ptr<MemoryBuffer> ArchiveBuffer;
-  std::unique_ptr<object::Archive> Archive;
+    ObjectLayer &L;
+    std::unique_ptr<MemoryBuffer> ArchiveBuffer;
+    std::unique_ptr<object::Archive> Archive;
 };
 
 } // end namespace orc

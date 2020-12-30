@@ -6,5 +6,5 @@
  */
 static __isl_give isl_basic_map *bset_to_bmap(__isl_take isl_basic_set *bset)
 {
-	return (isl_basic_map *) bset;
+    return (isl_basic_map *) bset;
 }

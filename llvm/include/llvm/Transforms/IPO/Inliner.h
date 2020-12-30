@@ -28,56 +28,56 @@ class ProfileSummaryInfo;
 /// inlining operations that do not depend on the policy. It contains the core
 /// bottom-up inlining infrastructure that specific inliner passes use.
 struct LegacyInlinerBase : public CallGraphSCCPass {
-  explicit LegacyInlinerBase(char &ID);
-  explicit LegacyInlinerBase(char &ID, bool InsertLifetime);
+    explicit LegacyInlinerBase(char &ID);
+    explicit LegacyInlinerBase(char &ID, bool InsertLifetime);
 
-  /// For this class, we declare that we require and preserve the call graph.
-  /// If the derived class implements this method, it should always explicitly
-  /// call the implementation here.
-  void getAnalysisUsage(AnalysisUsage &Info) const override;
+    /// For this class, we declare that we require and preserve the call graph.
+    /// If the derived class implements this method, it should always explicitly
+    /// call the implementation here.
+    void getAnalysisUsage(AnalysisUsage &Info) const override;
 
-  using llvm::Pass::doInitialization;
+    using llvm::Pass::doInitialization;
 
-  bool doInitialization(CallGraph &CG) override;
+    bool doInitialization(CallGraph &CG) override;
 
-  /// Main run interface method, this implements the interface required by the
-  /// Pass class.
-  bool runOnSCC(CallGraphSCC &SCC) override;
+    /// Main run interface method, this implements the interface required by the
+    /// Pass class.
+    bool runOnSCC(CallGraphSCC &SCC) override;
 
-  using llvm::Pass::doFinalization;
+    using llvm::Pass::doFinalization;
 
-  /// Remove now-dead linkonce functions at the end of processing to avoid
-  /// breaking the SCC traversal.
-  bool doFinalization(CallGraph &CG) override;
+    /// Remove now-dead linkonce functions at the end of processing to avoid
+    /// breaking the SCC traversal.
+    bool doFinalization(CallGraph &CG) override;
 
-  /// This method must be implemented by the subclass to determine the cost of
-  /// inlining the specified call site.  If the cost returned is greater than
-  /// the current inline threshold, the call site is not inlined.
-  virtual InlineCost getInlineCost(CallBase &CB) = 0;
+    /// This method must be implemented by the subclass to determine the cost of
+    /// inlining the specified call site.  If the cost returned is greater than
+    /// the current inline threshold, the call site is not inlined.
+    virtual InlineCost getInlineCost(CallBase &CB) = 0;
 
-  /// Remove dead functions.
-  ///
-  /// This also includes a hack in the form of the 'AlwaysInlineOnly' flag
-  /// which restricts it to deleting functions with an 'AlwaysInline'
-  /// attribute. This is useful for the InlineAlways pass that only wants to
-  /// deal with that subset of the functions.
-  bool removeDeadFunctions(CallGraph &CG, bool AlwaysInlineOnly = false);
+    /// Remove dead functions.
+    ///
+    /// This also includes a hack in the form of the 'AlwaysInlineOnly' flag
+    /// which restricts it to deleting functions with an 'AlwaysInline'
+    /// attribute. This is useful for the InlineAlways pass that only wants to
+    /// deal with that subset of the functions.
+    bool removeDeadFunctions(CallGraph &CG, bool AlwaysInlineOnly = false);
 
-  /// This function performs the main work of the pass.  The default of
-  /// Inlinter::runOnSCC() calls skipSCC() before calling this method, but
-  /// derived classes which cannot be skipped can override that method and call
-  /// this function unconditionally.
-  bool inlineCalls(CallGraphSCC &SCC);
+    /// This function performs the main work of the pass.  The default of
+    /// Inlinter::runOnSCC() calls skipSCC() before calling this method, but
+    /// derived classes which cannot be skipped can override that method and call
+    /// this function unconditionally.
+    bool inlineCalls(CallGraphSCC &SCC);
 
 private:
-  // Insert @llvm.lifetime intrinsics.
-  bool InsertLifetime = true;
+    // Insert @llvm.lifetime intrinsics.
+    bool InsertLifetime = true;
 
 protected:
-  AssumptionCacheTracker *ACT;
-  ProfileSummaryInfo *PSI;
-  std::function<const TargetLibraryInfo &(Function &)> GetTLI;
-  ImportedFunctionsInliningStatistics ImportedFunctionsStats;
+    AssumptionCacheTracker *ACT;
+    ProfileSummaryInfo *PSI;
+    std::function<const TargetLibraryInfo &(Function &)> GetTLI;
+    ImportedFunctionsInliningStatistics ImportedFunctionsStats;
 };
 
 /// The inliner pass for the new pass manager.
@@ -96,19 +96,19 @@ protected:
 /// passes be composed to achieve the same end result.
 class InlinerPass : public PassInfoMixin<InlinerPass> {
 public:
-  InlinerPass() = default;
-  ~InlinerPass();
-  InlinerPass(InlinerPass &&Arg)
-      : ImportedFunctionsStats(std::move(Arg.ImportedFunctionsStats)) {}
+    InlinerPass() = default;
+    ~InlinerPass();
+    InlinerPass(InlinerPass &&Arg)
+        : ImportedFunctionsStats(std::move(Arg.ImportedFunctionsStats)) {}
 
-  PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
-                        LazyCallGraph &CG, CGSCCUpdateResult &UR);
+    PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
+                          LazyCallGraph &CG, CGSCCUpdateResult &UR);
 
 private:
-  InlineAdvisor &getAdvisor(const ModuleAnalysisManagerCGSCCProxy::Result &MAM,
-                            FunctionAnalysisManager &FAM, Module &M);
-  std::unique_ptr<ImportedFunctionsInliningStatistics> ImportedFunctionsStats;
-  Optional<DefaultInlineAdvisor> OwnedDefaultAdvisor;
+    InlineAdvisor &getAdvisor(const ModuleAnalysisManagerCGSCCProxy::Result &MAM,
+                              FunctionAnalysisManager &FAM, Module &M);
+    std::unique_ptr<ImportedFunctionsInliningStatistics> ImportedFunctionsStats;
+    Optional<DefaultInlineAdvisor> OwnedDefaultAdvisor;
 };
 
 /// Module pass, wrapping the inliner pass. This works in conjunction with the
@@ -119,29 +119,31 @@ private:
 class ModuleInlinerWrapperPass
     : public PassInfoMixin<ModuleInlinerWrapperPass> {
 public:
-  ModuleInlinerWrapperPass(
-      InlineParams Params = getInlineParams(), bool Debugging = false,
-      InliningAdvisorMode Mode = InliningAdvisorMode::Default,
-      unsigned MaxDevirtIterations = 0);
-  ModuleInlinerWrapperPass(ModuleInlinerWrapperPass &&Arg) = default;
+    ModuleInlinerWrapperPass(
+        InlineParams Params = getInlineParams(), bool Debugging = false,
+        InliningAdvisorMode Mode = InliningAdvisorMode::Default,
+        unsigned MaxDevirtIterations = 0);
+    ModuleInlinerWrapperPass(ModuleInlinerWrapperPass &&Arg) = default;
 
-  PreservedAnalyses run(Module &, ModuleAnalysisManager &);
+    PreservedAnalyses run(Module &, ModuleAnalysisManager &);
 
-  /// Allow adding more CGSCC passes, besides inlining. This should be called
-  /// before run is called, as part of pass pipeline building.
-  CGSCCPassManager &getPM() { return PM; }
+    /// Allow adding more CGSCC passes, besides inlining. This should be called
+    /// before run is called, as part of pass pipeline building.
+    CGSCCPassManager &getPM() {
+        return PM;
+    }
 
-  /// Allow adding module-level analyses benefiting the contained CGSCC passes.
-  template <class T> void addRequiredModuleAnalysis() {
-    MPM.addPass(RequireAnalysisPass<T, Module>());
-  }
+    /// Allow adding module-level analyses benefiting the contained CGSCC passes.
+    template <class T> void addRequiredModuleAnalysis() {
+        MPM.addPass(RequireAnalysisPass<T, Module>());
+    }
 
 private:
-  const InlineParams Params;
-  const InliningAdvisorMode Mode;
-  const unsigned MaxDevirtIterations;
-  CGSCCPassManager PM;
-  ModulePassManager MPM;
+    const InlineParams Params;
+    const InliningAdvisorMode Mode;
+    const unsigned MaxDevirtIterations;
+    CGSCCPassManager PM;
+    ModulePassManager MPM;
 };
 } // end namespace llvm
 

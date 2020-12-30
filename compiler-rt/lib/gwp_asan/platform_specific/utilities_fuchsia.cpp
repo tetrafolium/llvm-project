@@ -13,7 +13,7 @@
 
 namespace gwp_asan {
 void die(const char *Message) {
-  __sanitizer_log_write(Message, strlen(Message));
-  __builtin_trap();
+    __sanitizer_log_write(Message, strlen(Message));
+    __builtin_trap();
 }
 } // namespace gwp_asan

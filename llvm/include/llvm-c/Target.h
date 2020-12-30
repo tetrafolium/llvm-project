@@ -129,14 +129,14 @@ static inline void LLVMInitializeAllDisassemblers(void) {
     initialize the native target corresponding to the host.  This is useful
     for JIT applications to ensure that the target gets linked in correctly. */
 static inline LLVMBool LLVMInitializeNativeTarget(void) {
-  /* If we have a native target, initialize it to ensure it is linked in. */
+    /* If we have a native target, initialize it to ensure it is linked in. */
 #ifdef LLVM_NATIVE_TARGET
-  LLVM_NATIVE_TARGETINFO();
-  LLVM_NATIVE_TARGET();
-  LLVM_NATIVE_TARGETMC();
-  return 0;
+    LLVM_NATIVE_TARGETINFO();
+    LLVM_NATIVE_TARGET();
+    LLVM_NATIVE_TARGETMC();
+    return 0;
 #else
-  return 1;
+    return 1;
 #endif
 }
 
@@ -145,10 +145,10 @@ static inline LLVMBool LLVMInitializeNativeTarget(void) {
     host. */
 static inline LLVMBool LLVMInitializeNativeAsmParser(void) {
 #ifdef LLVM_NATIVE_ASMPARSER
-  LLVM_NATIVE_ASMPARSER();
-  return 0;
+    LLVM_NATIVE_ASMPARSER();
+    return 0;
 #else
-  return 1;
+    return 1;
 #endif
 }
 
@@ -157,10 +157,10 @@ static inline LLVMBool LLVMInitializeNativeAsmParser(void) {
     the host. */
 static inline LLVMBool LLVMInitializeNativeAsmPrinter(void) {
 #ifdef LLVM_NATIVE_ASMPRINTER
-  LLVM_NATIVE_ASMPRINTER();
-  return 0;
+    LLVM_NATIVE_ASMPRINTER();
+    return 0;
 #else
-  return 1;
+    return 1;
 #endif
 }
 
@@ -169,10 +169,10 @@ static inline LLVMBool LLVMInitializeNativeAsmPrinter(void) {
     to the host. */
 static inline LLVMBool LLVMInitializeNativeDisassembler(void) {
 #ifdef LLVM_NATIVE_DISASSEMBLER
-  LLVM_NATIVE_DISASSEMBLER();
-  return 0;
+    LLVM_NATIVE_DISASSEMBLER();
+    return 0;
 #else
-  return 1;
+    return 1;
 #endif
 }
 
@@ -242,7 +242,7 @@ LLVMTypeRef LLVMIntPtrTypeInContext(LLVMContextRef C, LLVMTargetDataRef TD);
     This version allows the address space to be specified.
     See the method llvm::DataLayout::getIntPtrType. */
 LLVMTypeRef LLVMIntPtrTypeForASInContext(LLVMContextRef C, LLVMTargetDataRef TD,
-                                         unsigned AS);
+        unsigned AS);
 
 /** Computes the size of a type in bytes for a target.
     See the method llvm::DataLayout::getTypeSizeInBits. */

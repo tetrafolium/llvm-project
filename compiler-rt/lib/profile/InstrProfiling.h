@@ -22,7 +22,7 @@ enum ValueKind {
 
 typedef void *IntPtrT;
 typedef struct COMPILER_RT_ALIGNAS(INSTR_PROF_DATA_ALIGNMENT)
-    __llvm_profile_data {
+__llvm_profile_data {
 #define INSTR_PROF_DATA(Type, LLVMType, Name, Initializer) Type Name;
 #include "profile/InstrProfData.inc"
 } __llvm_profile_data;
@@ -130,11 +130,11 @@ int __llvm_profile_check_compatibility(const char *Profile,
 void INSTR_PROF_VALUE_PROF_FUNC(
 #define VALUE_PROF_FUNC_PARAM(ArgType, ArgName, ArgLLVMType) ArgType ArgName
 #include "profile/InstrProfData.inc"
-    );
+);
 
 void __llvm_profile_instrument_target_value(uint64_t TargetValue, void *Data,
-                                            uint32_t CounterIndex,
-                                            uint64_t CounterValue);
+        uint32_t CounterIndex,
+        uint64_t CounterValue);
 
 /*!
  * \brief Write instrumentation data to the current file.

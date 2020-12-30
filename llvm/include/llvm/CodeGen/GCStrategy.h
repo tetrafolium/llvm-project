@@ -65,58 +65,66 @@ class Type;
 /// be immutable.
 class GCStrategy {
 private:
-  friend class GCModuleInfo;
+    friend class GCModuleInfo;
 
-  std::string Name;
+    std::string Name;
 
 protected:
-  bool UseStatepoints = false; /// Uses gc.statepoints as opposed to gc.roots,
-                               /// if set, none of the other options can be
-                               /// anything but their default values.
+    bool UseStatepoints = false; /// Uses gc.statepoints as opposed to gc.roots,
+    /// if set, none of the other options can be
+    /// anything but their default values.
 
-  bool NeededSafePoints = false;    ///< if set, calls are inferred to be safepoints
-  bool UsesMetadata = false;     ///< If set, backend must emit metadata tables.
+    bool NeededSafePoints = false;    ///< if set, calls are inferred to be safepoints
+    bool UsesMetadata = false;     ///< If set, backend must emit metadata tables.
 
 public:
-  GCStrategy();
-  virtual ~GCStrategy() = default;
+    GCStrategy();
+    virtual ~GCStrategy() = default;
 
-  /// Return the name of the GC strategy.  This is the value of the collector
-  /// name string specified on functions which use this strategy.
-  const std::string &getName() const { return Name; }
+    /// Return the name of the GC strategy.  This is the value of the collector
+    /// name string specified on functions which use this strategy.
+    const std::string &getName() const {
+        return Name;
+    }
 
-  /// Returns true if this strategy is expecting the use of gc.statepoints,
-  /// and false otherwise.
-  bool useStatepoints() const { return UseStatepoints; }
+    /// Returns true if this strategy is expecting the use of gc.statepoints,
+    /// and false otherwise.
+    bool useStatepoints() const {
+        return UseStatepoints;
+    }
 
-  /** @name Statepoint Specific Properties */
-  ///@{
+    /** @name Statepoint Specific Properties */
+    ///@{
 
-  /// If the type specified can be reliably distinguished, returns true for
-  /// pointers to GC managed locations and false for pointers to non-GC
-  /// managed locations.  Note a GCStrategy can always return 'None' (i.e. an
-  /// empty optional indicating it can't reliably distinguish.
-  virtual Optional<bool> isGCManagedPointer(const Type *Ty) const {
-    return None;
-  }
-  ///@}
+    /// If the type specified can be reliably distinguished, returns true for
+    /// pointers to GC managed locations and false for pointers to non-GC
+    /// managed locations.  Note a GCStrategy can always return 'None' (i.e. an
+    /// empty optional indicating it can't reliably distinguish.
+    virtual Optional<bool> isGCManagedPointer(const Type *Ty) const {
+        return None;
+    }
+    ///@}
 
-  /** @name GCRoot Specific Properties
-   * These properties and overrides only apply to collector strategies using
-   * GCRoot.
-   */
-  ///@{
+    /** @name GCRoot Specific Properties
+     * These properties and overrides only apply to collector strategies using
+     * GCRoot.
+     */
+    ///@{
 
-  /// True if safe points need to be inferred on call sites
-  bool needsSafePoints() const { return NeededSafePoints; }
+    /// True if safe points need to be inferred on call sites
+    bool needsSafePoints() const {
+        return NeededSafePoints;
+    }
 
-  /// If set, appropriate metadata tables must be emitted by the back-end
-  /// (assembler, JIT, or otherwise). For statepoint, this method is
-  /// currently unsupported.  The stackmap information can be found in the
-  /// StackMap section as described in the documentation.
-  bool usesMetadata() const { return UsesMetadata; }
+    /// If set, appropriate metadata tables must be emitted by the back-end
+    /// (assembler, JIT, or otherwise). For statepoint, this method is
+    /// currently unsupported.  The stackmap information can be found in the
+    /// StackMap section as described in the documentation.
+    bool usesMetadata() const {
+        return UsesMetadata;
+    }
 
-  ///@}
+    ///@}
 };
 
 /// Subclasses of GCStrategy are made available for use during compilation by

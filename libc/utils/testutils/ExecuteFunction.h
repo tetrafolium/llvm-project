@@ -16,28 +16,32 @@ namespace testutils {
 
 class FunctionCaller {
 public:
-  virtual ~FunctionCaller() {}
-  virtual void operator()() = 0;
+    virtual ~FunctionCaller() {}
+    virtual void operator()() = 0;
 };
 
 struct ProcessStatus {
-  int PlatformDefined;
-  const char *failure = nullptr;
+    int PlatformDefined;
+    const char *failure = nullptr;
 
-  static constexpr uintptr_t timeout = -1L;
+    static constexpr uintptr_t timeout = -1L;
 
-  static ProcessStatus Error(const char *error) { return {0, error}; }
-  static ProcessStatus TimedOut() {
-    return {0, reinterpret_cast<const char *>(timeout)};
-  }
+    static ProcessStatus Error(const char *error) {
+        return {0, error};
+    }
+    static ProcessStatus TimedOut() {
+        return {0, reinterpret_cast<const char *>(timeout)};
+    }
 
-  bool timedOut() const {
-    return failure == reinterpret_cast<const char *>(timeout);
-  }
-  const char *getError() const { return timedOut() ? nullptr : failure; }
-  bool exitedNormally() const;
-  int getExitCode() const;
-  int getFatalSignal() const;
+    bool timedOut() const {
+        return failure == reinterpret_cast<const char *>(timeout);
+    }
+    const char *getError() const {
+        return timedOut() ? nullptr : failure;
+    }
+    bool exitedNormally() const;
+    int getExitCode() const;
+    int getFatalSignal() const;
 };
 
 ProcessStatus invokeInSubprocess(FunctionCaller *Func, unsigned TimeoutMS = -1);

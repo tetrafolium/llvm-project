@@ -29,7 +29,7 @@ AnalysisManager::AnalysisManager(ASTContext &ASTCtx, Preprocessor &PP,
           // Adding LoopExit elements to the CFG is a requirement for loop
           // unrolling.
           Options.ShouldIncludeLoopExitInCFG ||
-            Options.ShouldUnrollLoops,
+          Options.ShouldUnrollLoops,
           Options.ShouldIncludeScopesInCFG,
           Options.ShouldSynthesizeBodies,
           Options.ShouldConditionalizeStaticInitializers,
@@ -42,25 +42,25 @@ AnalysisManager::AnalysisManager(ASTContext &ASTCtx, Preprocessor &PP,
       PathConsumers(PDC), CreateStoreMgr(storemgr),
       CreateConstraintMgr(constraintmgr), CheckerMgr(checkerMgr),
       options(Options) {
-  AnaCtxMgr.getCFGBuildOptions().setAllAlwaysAdd();
-  AnaCtxMgr.getCFGBuildOptions().OmitImplicitValueInitializers = true;
-  AnaCtxMgr.getCFGBuildOptions().AddCXXDefaultInitExprInAggregates =
-      Options.ShouldIncludeDefaultInitForAggregates;
+    AnaCtxMgr.getCFGBuildOptions().setAllAlwaysAdd();
+    AnaCtxMgr.getCFGBuildOptions().OmitImplicitValueInitializers = true;
+    AnaCtxMgr.getCFGBuildOptions().AddCXXDefaultInitExprInAggregates =
+        Options.ShouldIncludeDefaultInitForAggregates;
 }
 
 AnalysisManager::~AnalysisManager() {
-  FlushDiagnostics();
-  for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
-       E = PathConsumers.end(); I != E; ++I) {
-    delete *I;
-  }
+    FlushDiagnostics();
+    for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
+            E = PathConsumers.end(); I != E; ++I) {
+        delete *I;
+    }
 }
 
 void AnalysisManager::FlushDiagnostics() {
-  PathDiagnosticConsumer::FilesMade filesMade;
-  for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
-       E = PathConsumers.end();
-       I != E; ++I) {
-    (*I)->FlushDiagnostics(&filesMade);
-  }
+    PathDiagnosticConsumer::FilesMade filesMade;
+    for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
+            E = PathConsumers.end();
+            I != E; ++I) {
+        (*I)->FlushDiagnostics(&filesMade);
+    }
 }

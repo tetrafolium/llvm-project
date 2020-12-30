@@ -20,12 +20,12 @@ namespace lldb_private {
 
 // ARM shifter types
 enum ARM_ShifterType {
-  SRType_LSL,
-  SRType_LSR,
-  SRType_ASR,
-  SRType_ROR,
-  SRType_RRX,
-  SRType_Invalid
+    SRType_LSL,
+    SRType_LSR,
+    SRType_ASR,
+    SRType_ROR,
+    SRType_RRX,
+    SRType_Invalid
 };
 
 // ARM conditions          // Meaning (integer)         Meaning (floating-point)
@@ -50,102 +50,102 @@ enum ARM_ShifterType {
   0x7 // No overflow               Not unordered                 V == 0
 #define COND_HI                                                                \
   0x8 // Unsigned higher           Greater than, or unordered    C == 1 and Z ==
-      // 0
+// 0
 #define COND_LS                                                                \
   0x9 // Unsigned lower or same    Less than or equal            C == 0 or Z ==
-      // 1
+// 1
 #define COND_GE                                                                \
   0xA // Greater than or equal     Greater than or equal         N == V
 #define COND_LT                                                                \
   0xB // Less than                 Less than, or unordered       N != V
 #define COND_GT                                                                \
   0xC // Greater than              Greater than                  Z == 0 and N ==
-      // V
+// V
 #define COND_LE                                                                \
   0xD // Less than or equal        <, ==, or unordered           Z == 1 or N !=
-      // V
+// V
 #define COND_AL                                                                \
   0xE // Always (unconditional)    Always (unconditional)        Any
 #define COND_UNCOND 0xF
 
 static inline const char *ARMCondCodeToString(uint32_t CC) {
-  switch (CC) {
-  case COND_EQ:
-    return "eq";
-  case COND_NE:
-    return "ne";
-  case COND_HS:
-    return "hs";
-  case COND_LO:
-    return "lo";
-  case COND_MI:
-    return "mi";
-  case COND_PL:
-    return "pl";
-  case COND_VS:
-    return "vs";
-  case COND_VC:
-    return "vc";
-  case COND_HI:
-    return "hi";
-  case COND_LS:
-    return "ls";
-  case COND_GE:
-    return "ge";
-  case COND_LT:
-    return "lt";
-  case COND_GT:
-    return "gt";
-  case COND_LE:
-    return "le";
-  case COND_AL:
-    return "al";
-  }
-  llvm_unreachable("Unknown condition code");
+    switch (CC) {
+    case COND_EQ:
+        return "eq";
+    case COND_NE:
+        return "ne";
+    case COND_HS:
+        return "hs";
+    case COND_LO:
+        return "lo";
+    case COND_MI:
+        return "mi";
+    case COND_PL:
+        return "pl";
+    case COND_VS:
+        return "vs";
+    case COND_VC:
+        return "vc";
+    case COND_HI:
+        return "hi";
+    case COND_LS:
+        return "ls";
+    case COND_GE:
+        return "ge";
+    case COND_LT:
+        return "lt";
+    case COND_GT:
+        return "gt";
+    case COND_LE:
+        return "le";
+    case COND_AL:
+        return "al";
+    }
+    llvm_unreachable("Unknown condition code");
 }
 
 static inline bool ARMConditionPassed(const uint32_t condition,
                                       const uint32_t cpsr) {
-  const uint32_t cpsr_n = (cpsr >> 31) & 1u; // Negative condition code flag
-  const uint32_t cpsr_z = (cpsr >> 30) & 1u; // Zero condition code flag
-  const uint32_t cpsr_c = (cpsr >> 29) & 1u; // Carry condition code flag
-  const uint32_t cpsr_v = (cpsr >> 28) & 1u; // Overflow condition code flag
+    const uint32_t cpsr_n = (cpsr >> 31) & 1u; // Negative condition code flag
+    const uint32_t cpsr_z = (cpsr >> 30) & 1u; // Zero condition code flag
+    const uint32_t cpsr_c = (cpsr >> 29) & 1u; // Carry condition code flag
+    const uint32_t cpsr_v = (cpsr >> 28) & 1u; // Overflow condition code flag
 
-  switch (condition) {
-  case COND_EQ:
-    return (cpsr_z == 1);
-  case COND_NE:
-    return (cpsr_z == 0);
-  case COND_CS:
-    return (cpsr_c == 1);
-  case COND_CC:
-    return (cpsr_c == 0);
-  case COND_MI:
-    return (cpsr_n == 1);
-  case COND_PL:
-    return (cpsr_n == 0);
-  case COND_VS:
-    return (cpsr_v == 1);
-  case COND_VC:
-    return (cpsr_v == 0);
-  case COND_HI:
-    return ((cpsr_c == 1) && (cpsr_z == 0));
-  case COND_LS:
-    return ((cpsr_c == 0) || (cpsr_z == 1));
-  case COND_GE:
-    return (cpsr_n == cpsr_v);
-  case COND_LT:
-    return (cpsr_n != cpsr_v);
-  case COND_GT:
-    return ((cpsr_z == 0) && (cpsr_n == cpsr_v));
-  case COND_LE:
-    return ((cpsr_z == 1) || (cpsr_n != cpsr_v));
-  case COND_AL:
-  case COND_UNCOND:
-  default:
-    return true;
-  }
-  return false;
+    switch (condition) {
+    case COND_EQ:
+        return (cpsr_z == 1);
+    case COND_NE:
+        return (cpsr_z == 0);
+    case COND_CS:
+        return (cpsr_c == 1);
+    case COND_CC:
+        return (cpsr_c == 0);
+    case COND_MI:
+        return (cpsr_n == 1);
+    case COND_PL:
+        return (cpsr_n == 0);
+    case COND_VS:
+        return (cpsr_v == 1);
+    case COND_VC:
+        return (cpsr_v == 0);
+    case COND_HI:
+        return ((cpsr_c == 1) && (cpsr_z == 0));
+    case COND_LS:
+        return ((cpsr_c == 0) || (cpsr_z == 1));
+    case COND_GE:
+        return (cpsr_n == cpsr_v);
+    case COND_LT:
+        return (cpsr_n != cpsr_v);
+    case COND_GT:
+        return ((cpsr_z == 0) && (cpsr_n == cpsr_v));
+    case COND_LE:
+        return ((cpsr_z == 1) || (cpsr_n != cpsr_v));
+    case COND_AL:
+    case COND_UNCOND:
+    default:
+        return true;
+    }
+    return false;
 }
 
 // Bit positions for CPSR

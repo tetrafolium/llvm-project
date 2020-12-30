@@ -15,41 +15,41 @@ namespace lldb {
 
 class LLDB_API SBThreadCollection {
 public:
-  SBThreadCollection();
+    SBThreadCollection();
 
-  SBThreadCollection(const SBThreadCollection &rhs);
+    SBThreadCollection(const SBThreadCollection &rhs);
 
-  const SBThreadCollection &operator=(const SBThreadCollection &rhs);
+    const SBThreadCollection &operator=(const SBThreadCollection &rhs);
 
-  ~SBThreadCollection();
+    ~SBThreadCollection();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  size_t GetSize();
+    size_t GetSize();
 
-  lldb::SBThread GetThreadAtIndex(size_t idx);
+    lldb::SBThread GetThreadAtIndex(size_t idx);
 
 protected:
-  // Mimic shared pointer...
-  lldb_private::ThreadCollection *get() const;
+    // Mimic shared pointer...
+    lldb_private::ThreadCollection *get() const;
 
-  lldb_private::ThreadCollection *operator->() const;
+    lldb_private::ThreadCollection *operator->() const;
 
-  lldb::ThreadCollectionSP &operator*();
+    lldb::ThreadCollectionSP &operator*();
 
-  const lldb::ThreadCollectionSP &operator*() const;
+    const lldb::ThreadCollectionSP &operator*() const;
 
-  SBThreadCollection(const lldb::ThreadCollectionSP &threads);
+    SBThreadCollection(const lldb::ThreadCollectionSP &threads);
 
-  void SetOpaque(const lldb::ThreadCollectionSP &threads);
+    void SetOpaque(const lldb::ThreadCollectionSP &threads);
 
 private:
-  friend class SBProcess;
-  friend class SBThread;
+    friend class SBProcess;
+    friend class SBThread;
 
-  lldb::ThreadCollectionSP m_opaque_sp;
+    lldb::ThreadCollectionSP m_opaque_sp;
 };
 
 } // namespace lldb

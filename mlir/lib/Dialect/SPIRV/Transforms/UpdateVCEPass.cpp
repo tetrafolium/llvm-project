@@ -28,7 +28,7 @@ namespace {
 /// Pass to deduce minimal version/extension/capability requirements for a
 /// spirv::ModuleOp.
 class UpdateVCEPass final : public SPIRVUpdateVCEBase<UpdateVCEPass> {
-  void runOnOperation() override;
+    void runOnOperation() override;
 };
 } // namespace
 
@@ -43,21 +43,21 @@ static LogicalResult checkAndUpdateExtensionRequirements(
     Operation *op, const spirv::TargetEnv &targetEnv,
     const spirv::SPIRVType::ExtensionArrayRefVector &candidates,
     llvm::SetVector<spirv::Extension> &deducedExtensions) {
-  for (const auto &ors : candidates) {
-    if (Optional<spirv::Extension> chosen = targetEnv.allows(ors)) {
-      deducedExtensions.insert(*chosen);
-    } else {
-      SmallVector<StringRef, 4> extStrings;
-      for (spirv::Extension ext : ors)
-        extStrings.push_back(spirv::stringifyExtension(ext));
+    for (const auto &ors : candidates) {
+        if (Optional<spirv::Extension> chosen = targetEnv.allows(ors)) {
+            deducedExtensions.insert(*chosen);
+        } else {
+            SmallVector<StringRef, 4> extStrings;
+            for (spirv::Extension ext : ors)
+                extStrings.push_back(spirv::stringifyExtension(ext));
 
-      return op->emitError("'")
-             << op->getName() << "' requires at least one extension in ["
-             << llvm::join(extStrings, ", ")
-             << "] but none allowed in target environment";
+            return op->emitError("'")
+                   << op->getName() << "' requires at least one extension in ["
+                   << llvm::join(extStrings, ", ")
+                   << "] but none allowed in target environment";
+        }
     }
-  }
-  return success();
+    return success();
 }
 
 /// Checks that `candidates`capability requirements are possible to be satisfied
@@ -71,108 +71,108 @@ static LogicalResult checkAndUpdateCapabilityRequirements(
     Operation *op, const spirv::TargetEnv &targetEnv,
     const spirv::SPIRVType::CapabilityArrayRefVector &candidates,
     llvm::SetVector<spirv::Capability> &deducedCapabilities) {
-  for (const auto &ors : candidates) {
-    if (Optional<spirv::Capability> chosen = targetEnv.allows(ors)) {
-      deducedCapabilities.insert(*chosen);
-    } else {
-      SmallVector<StringRef, 4> capStrings;
-      for (spirv::Capability cap : ors)
-        capStrings.push_back(spirv::stringifyCapability(cap));
+    for (const auto &ors : candidates) {
+        if (Optional<spirv::Capability> chosen = targetEnv.allows(ors)) {
+            deducedCapabilities.insert(*chosen);
+        } else {
+            SmallVector<StringRef, 4> capStrings;
+            for (spirv::Capability cap : ors)
+                capStrings.push_back(spirv::stringifyCapability(cap));
 
-      return op->emitError("'")
-             << op->getName() << "' requires at least one capability in ["
-             << llvm::join(capStrings, ", ")
-             << "] but none allowed in target environment";
+            return op->emitError("'")
+                   << op->getName() << "' requires at least one capability in ["
+                   << llvm::join(capStrings, ", ")
+                   << "] but none allowed in target environment";
+        }
     }
-  }
-  return success();
+    return success();
 }
 
 void UpdateVCEPass::runOnOperation() {
-  spirv::ModuleOp module = getOperation();
+    spirv::ModuleOp module = getOperation();
 
-  spirv::TargetEnvAttr targetAttr = spirv::lookupTargetEnv(module);
-  if (!targetAttr) {
-    module.emitError("missing 'spv.target_env' attribute");
-    return signalPassFailure();
-  }
-
-  spirv::TargetEnv targetEnv(targetAttr);
-  spirv::Version allowedVersion = targetAttr.getVersion();
-
-  spirv::Version deducedVersion = spirv::Version::V_1_0;
-  llvm::SetVector<spirv::Extension> deducedExtensions;
-  llvm::SetVector<spirv::Capability> deducedCapabilities;
-
-  // Walk each SPIR-V op to deduce the minimal version/extension/capability
-  // requirements.
-  WalkResult walkResult = module.walk([&](Operation *op) -> WalkResult {
-    // Op min version requirements
-    if (auto minVersion = dyn_cast<spirv::QueryMinVersionInterface>(op)) {
-      deducedVersion = std::max(deducedVersion, minVersion.getMinVersion());
-      if (deducedVersion > allowedVersion) {
-        return op->emitError("'") << op->getName() << "' requires min version "
-                                  << spirv::stringifyVersion(deducedVersion)
-                                  << " but target environment allows up to "
-                                  << spirv::stringifyVersion(allowedVersion);
-      }
+    spirv::TargetEnvAttr targetAttr = spirv::lookupTargetEnv(module);
+    if (!targetAttr) {
+        module.emitError("missing 'spv.target_env' attribute");
+        return signalPassFailure();
     }
 
-    // Op extension requirements
-    if (auto extensions = dyn_cast<spirv::QueryExtensionInterface>(op))
-      if (failed(checkAndUpdateExtensionRequirements(
-              op, targetEnv, extensions.getExtensions(), deducedExtensions)))
-        return WalkResult::interrupt();
+    spirv::TargetEnv targetEnv(targetAttr);
+    spirv::Version allowedVersion = targetAttr.getVersion();
 
-    // Op capability requirements
-    if (auto capabilities = dyn_cast<spirv::QueryCapabilityInterface>(op))
-      if (failed(checkAndUpdateCapabilityRequirements(
-              op, targetEnv, capabilities.getCapabilities(),
-              deducedCapabilities)))
-        return WalkResult::interrupt();
+    spirv::Version deducedVersion = spirv::Version::V_1_0;
+    llvm::SetVector<spirv::Extension> deducedExtensions;
+    llvm::SetVector<spirv::Capability> deducedCapabilities;
 
-    SmallVector<Type, 4> valueTypes;
-    valueTypes.append(op->operand_type_begin(), op->operand_type_end());
-    valueTypes.append(op->result_type_begin(), op->result_type_end());
+    // Walk each SPIR-V op to deduce the minimal version/extension/capability
+    // requirements.
+    WalkResult walkResult = module.walk([&](Operation *op) -> WalkResult {
+        // Op min version requirements
+        if (auto minVersion = dyn_cast<spirv::QueryMinVersionInterface>(op)) {
+            deducedVersion = std::max(deducedVersion, minVersion.getMinVersion());
+            if (deducedVersion > allowedVersion) {
+                return op->emitError("'") << op->getName() << "' requires min version "
+                                          << spirv::stringifyVersion(deducedVersion)
+                                          << " but target environment allows up to "
+                                          << spirv::stringifyVersion(allowedVersion);
+            }
+        }
 
-    // Special treatment for global variables, whose type requirements are
-    // conveyed by type attributes.
-    if (auto globalVar = dyn_cast<spirv::GlobalVariableOp>(op))
-      valueTypes.push_back(globalVar.type());
+        // Op extension requirements
+        if (auto extensions = dyn_cast<spirv::QueryExtensionInterface>(op))
+            if (failed(checkAndUpdateExtensionRequirements(
+                           op, targetEnv, extensions.getExtensions(), deducedExtensions)))
+                return WalkResult::interrupt();
 
-    // Requirements from values' types
-    SmallVector<ArrayRef<spirv::Extension>, 4> typeExtensions;
-    SmallVector<ArrayRef<spirv::Capability>, 8> typeCapabilities;
-    for (Type valueType : valueTypes) {
-      typeExtensions.clear();
-      valueType.cast<spirv::SPIRVType>().getExtensions(typeExtensions);
-      if (failed(checkAndUpdateExtensionRequirements(
-              op, targetEnv, typeExtensions, deducedExtensions)))
-        return WalkResult::interrupt();
+        // Op capability requirements
+        if (auto capabilities = dyn_cast<spirv::QueryCapabilityInterface>(op))
+            if (failed(checkAndUpdateCapabilityRequirements(
+                           op, targetEnv, capabilities.getCapabilities(),
+                           deducedCapabilities)))
+                return WalkResult::interrupt();
 
-      typeCapabilities.clear();
-      valueType.cast<spirv::SPIRVType>().getCapabilities(typeCapabilities);
-      if (failed(checkAndUpdateCapabilityRequirements(
-              op, targetEnv, typeCapabilities, deducedCapabilities)))
-        return WalkResult::interrupt();
-    }
+        SmallVector<Type, 4> valueTypes;
+        valueTypes.append(op->operand_type_begin(), op->operand_type_end());
+        valueTypes.append(op->result_type_begin(), op->result_type_end());
 
-    return WalkResult::advance();
-  });
+        // Special treatment for global variables, whose type requirements are
+        // conveyed by type attributes.
+        if (auto globalVar = dyn_cast<spirv::GlobalVariableOp>(op))
+            valueTypes.push_back(globalVar.type());
 
-  if (walkResult.wasInterrupted())
-    return signalPassFailure();
+        // Requirements from values' types
+        SmallVector<ArrayRef<spirv::Extension>, 4> typeExtensions;
+        SmallVector<ArrayRef<spirv::Capability>, 8> typeCapabilities;
+        for (Type valueType : valueTypes) {
+            typeExtensions.clear();
+            valueType.cast<spirv::SPIRVType>().getExtensions(typeExtensions);
+            if (failed(checkAndUpdateExtensionRequirements(
+                           op, targetEnv, typeExtensions, deducedExtensions)))
+                return WalkResult::interrupt();
 
-  // TODO: verify that the deduced version is consistent with
-  // SPIR-V ops' maximal version requirements.
+            typeCapabilities.clear();
+            valueType.cast<spirv::SPIRVType>().getCapabilities(typeCapabilities);
+            if (failed(checkAndUpdateCapabilityRequirements(
+                           op, targetEnv, typeCapabilities, deducedCapabilities)))
+                return WalkResult::interrupt();
+        }
 
-  auto triple = spirv::VerCapExtAttr::get(
-      deducedVersion, deducedCapabilities.getArrayRef(),
-      deducedExtensions.getArrayRef(), &getContext());
-  module->setAttr(spirv::ModuleOp::getVCETripleAttrName(), triple);
+        return WalkResult::advance();
+    });
+
+    if (walkResult.wasInterrupted())
+        return signalPassFailure();
+
+    // TODO: verify that the deduced version is consistent with
+    // SPIR-V ops' maximal version requirements.
+
+    auto triple = spirv::VerCapExtAttr::get(
+                      deducedVersion, deducedCapabilities.getArrayRef(),
+                      deducedExtensions.getArrayRef(), &getContext());
+    module->setAttr(spirv::ModuleOp::getVCETripleAttrName(), triple);
 }
 
 std::unique_ptr<OperationPass<spirv::ModuleOp>>
 mlir::spirv::createUpdateVersionCapabilityExtensionPass() {
-  return std::make_unique<UpdateVCEPass>();
+    return std::make_unique<UpdateVCEPass>();
 }

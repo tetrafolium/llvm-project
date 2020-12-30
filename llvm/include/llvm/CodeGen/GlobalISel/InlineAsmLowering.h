@@ -26,40 +26,42 @@ class TargetLowering;
 class Value;
 
 class InlineAsmLowering {
-  const TargetLowering *TLI;
+    const TargetLowering *TLI;
 
-  virtual void anchor();
+    virtual void anchor();
 
 public:
-  /// Lower the given inline asm call instruction
-  /// \p GetOrCreateVRegs is a callback to materialize a register for the
-  /// input and output operands of the inline asm
-  /// \return True if the lowering succeeds, false otherwise.
-  bool lowerInlineAsm(MachineIRBuilder &MIRBuilder, const CallBase &CB,
-                      std::function<ArrayRef<Register>(const Value &Val)>
-                          GetOrCreateVRegs) const;
+    /// Lower the given inline asm call instruction
+    /// \p GetOrCreateVRegs is a callback to materialize a register for the
+    /// input and output operands of the inline asm
+    /// \return True if the lowering succeeds, false otherwise.
+    bool lowerInlineAsm(MachineIRBuilder &MIRBuilder, const CallBase &CB,
+                        std::function<ArrayRef<Register>(const Value &Val)>
+                        GetOrCreateVRegs) const;
 
-  /// Lower the specified operand into the Ops vector.
-  /// \p Val is the IR input value to be lowered
-  /// \p Constraint is the user supplied constraint string
-  /// \p Ops is the vector to be filled with the lowered operands
-  /// \return True if the lowering succeeds, false otherwise.
-  virtual bool lowerAsmOperandForConstraint(Value *Val, StringRef Constraint,
-                                            std::vector<MachineOperand> &Ops,
-                                            MachineIRBuilder &MIRBuilder) const;
+    /// Lower the specified operand into the Ops vector.
+    /// \p Val is the IR input value to be lowered
+    /// \p Constraint is the user supplied constraint string
+    /// \p Ops is the vector to be filled with the lowered operands
+    /// \return True if the lowering succeeds, false otherwise.
+    virtual bool lowerAsmOperandForConstraint(Value *Val, StringRef Constraint,
+            std::vector<MachineOperand> &Ops,
+            MachineIRBuilder &MIRBuilder) const;
 
 protected:
-  /// Getter for generic TargetLowering class.
-  const TargetLowering *getTLI() const { return TLI; }
+    /// Getter for generic TargetLowering class.
+    const TargetLowering *getTLI() const {
+        return TLI;
+    }
 
-  /// Getter for target specific TargetLowering class.
-  template <class XXXTargetLowering> const XXXTargetLowering *getTLI() const {
-    return static_cast<const XXXTargetLowering *>(TLI);
-  }
+    /// Getter for target specific TargetLowering class.
+    template <class XXXTargetLowering> const XXXTargetLowering *getTLI() const {
+        return static_cast<const XXXTargetLowering *>(TLI);
+    }
 
 public:
-  InlineAsmLowering(const TargetLowering *TLI) : TLI(TLI) {}
-  virtual ~InlineAsmLowering() = default;
+    InlineAsmLowering(const TargetLowering *TLI) : TLI(TLI) {}
+    virtual ~InlineAsmLowering() = default;
 };
 
 } // end namespace llvm

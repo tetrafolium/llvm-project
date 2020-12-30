@@ -30,44 +30,48 @@ namespace mca {
 /// This is a convenience struct to hold the parameters necessary for creating
 /// the pre-built "default" out-of-order pipeline.
 struct PipelineOptions {
-  PipelineOptions(unsigned UOPQSize, unsigned DecThr, unsigned DW, unsigned RFS,
-                  unsigned LQS, unsigned SQS, bool NoAlias,
-                  bool ShouldEnableBottleneckAnalysis = false)
-      : MicroOpQueueSize(UOPQSize), DecodersThroughput(DecThr),
-        DispatchWidth(DW), RegisterFileSize(RFS), LoadQueueSize(LQS),
-        StoreQueueSize(SQS), AssumeNoAlias(NoAlias),
-        EnableBottleneckAnalysis(ShouldEnableBottleneckAnalysis) {}
-  unsigned MicroOpQueueSize;
-  unsigned DecodersThroughput; // Instructions per cycle.
-  unsigned DispatchWidth;
-  unsigned RegisterFileSize;
-  unsigned LoadQueueSize;
-  unsigned StoreQueueSize;
-  bool AssumeNoAlias;
-  bool EnableBottleneckAnalysis;
+    PipelineOptions(unsigned UOPQSize, unsigned DecThr, unsigned DW, unsigned RFS,
+                    unsigned LQS, unsigned SQS, bool NoAlias,
+                    bool ShouldEnableBottleneckAnalysis = false)
+        : MicroOpQueueSize(UOPQSize), DecodersThroughput(DecThr),
+          DispatchWidth(DW), RegisterFileSize(RFS), LoadQueueSize(LQS),
+          StoreQueueSize(SQS), AssumeNoAlias(NoAlias),
+          EnableBottleneckAnalysis(ShouldEnableBottleneckAnalysis) {}
+    unsigned MicroOpQueueSize;
+    unsigned DecodersThroughput; // Instructions per cycle.
+    unsigned DispatchWidth;
+    unsigned RegisterFileSize;
+    unsigned LoadQueueSize;
+    unsigned StoreQueueSize;
+    bool AssumeNoAlias;
+    bool EnableBottleneckAnalysis;
 };
 
 class Context {
-  SmallVector<std::unique_ptr<HardwareUnit>, 4> Hardware;
-  const MCRegisterInfo &MRI;
-  const MCSubtargetInfo &STI;
+    SmallVector<std::unique_ptr<HardwareUnit>, 4> Hardware;
+    const MCRegisterInfo &MRI;
+    const MCSubtargetInfo &STI;
 
 public:
-  Context(const MCRegisterInfo &R, const MCSubtargetInfo &S) : MRI(R), STI(S) {}
-  Context(const Context &C) = delete;
-  Context &operator=(const Context &C) = delete;
+    Context(const MCRegisterInfo &R, const MCSubtargetInfo &S) : MRI(R), STI(S) {}
+    Context(const Context &C) = delete;
+    Context &operator=(const Context &C) = delete;
 
-  const MCRegisterInfo &getMCRegisterInfo() const { return MRI; }
-  const MCSubtargetInfo &getMCSubtargetInfo() const { return STI; }
+    const MCRegisterInfo &getMCRegisterInfo() const {
+        return MRI;
+    }
+    const MCSubtargetInfo &getMCSubtargetInfo() const {
+        return STI;
+    }
 
-  void addHardwareUnit(std::unique_ptr<HardwareUnit> H) {
-    Hardware.push_back(std::move(H));
-  }
+    void addHardwareUnit(std::unique_ptr<HardwareUnit> H) {
+        Hardware.push_back(std::move(H));
+    }
 
-  /// Construct a basic pipeline for simulating an out-of-order pipeline.
-  /// This pipeline consists of Fetch, Dispatch, Execute, and Retire stages.
-  std::unique_ptr<Pipeline> createDefaultPipeline(const PipelineOptions &Opts,
-                                                  SourceMgr &SrcMgr);
+    /// Construct a basic pipeline for simulating an out-of-order pipeline.
+    /// This pipeline consists of Fetch, Dispatch, Execute, and Retire stages.
+    std::unique_ptr<Pipeline> createDefaultPipeline(const PipelineOptions &Opts,
+            SourceMgr &SrcMgr);
 };
 
 } // namespace mca

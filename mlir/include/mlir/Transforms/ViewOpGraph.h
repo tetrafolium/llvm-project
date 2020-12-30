@@ -33,8 +33,8 @@ raw_ostream &writeGraph(raw_ostream &os, Block &block, bool shortNames = false,
 
 /// Creates a pass to print op graphs.
 std::unique_ptr<OperationPass<ModuleOp>>
-createPrintOpGraphPass(raw_ostream &os = llvm::errs(), bool shortNames = false,
-                       const Twine &title = "");
+                                      createPrintOpGraphPass(raw_ostream &os = llvm::errs(), bool shortNames = false,
+                                              const Twine &title = "");
 
 } // end namespace mlir
 

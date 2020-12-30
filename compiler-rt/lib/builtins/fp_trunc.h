@@ -67,19 +67,19 @@ static const int dstSigBits = 10;
 // from the representation of floating-point data as integer values follow.
 
 static __inline src_rep_t srcToRep(src_t x) {
-  const union {
-    src_t f;
-    src_rep_t i;
-  } rep = {.f = x};
-  return rep.i;
+    const union {
+        src_t f;
+        src_rep_t i;
+    } rep = {.f = x};
+    return rep.i;
 }
 
 static __inline dst_t dstFromRep(dst_rep_t x) {
-  const union {
-    dst_t f;
-    dst_rep_t i;
-  } rep = {.i = x};
-  return rep.f;
+    const union {
+        dst_t f;
+        dst_rep_t i;
+    } rep = {.i = x};
+    return rep.f;
 }
 
 #endif // FP_TRUNC_HEADER

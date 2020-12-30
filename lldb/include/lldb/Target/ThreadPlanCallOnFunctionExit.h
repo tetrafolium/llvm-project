@@ -21,32 +21,32 @@ namespace lldb_private {
 
 class ThreadPlanCallOnFunctionExit : public ThreadPlan {
 public:
-  /// Definition for the callback made when the currently executing thread
-  /// finishes executing its function.
-  using Callback = std::function<void()>;
+    /// Definition for the callback made when the currently executing thread
+    /// finishes executing its function.
+    using Callback = std::function<void()>;
 
-  ThreadPlanCallOnFunctionExit(Thread &thread, const Callback &callback);
+    ThreadPlanCallOnFunctionExit(Thread &thread, const Callback &callback);
 
-  void DidPush() override;
+    void DidPush() override;
 
-  // ThreadPlan API
+    // ThreadPlan API
 
-  void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
+    void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
 
-  bool ValidatePlan(Stream *error) override;
+    bool ValidatePlan(Stream *error) override;
 
-  bool ShouldStop(Event *event_ptr) override;
+    bool ShouldStop(Event *event_ptr) override;
 
-  bool WillStop() override;
+    bool WillStop() override;
 
 protected:
-  bool DoPlanExplainsStop(Event *event_ptr) override;
+    bool DoPlanExplainsStop(Event *event_ptr) override;
 
-  lldb::StateType GetPlanRunState() override;
+    lldb::StateType GetPlanRunState() override;
 
 private:
-  Callback m_callback;
-  lldb::ThreadPlanSP m_step_out_threadplan_sp;
+    Callback m_callback;
+    lldb::ThreadPlanSP m_step_out_threadplan_sp;
 };
 }
 

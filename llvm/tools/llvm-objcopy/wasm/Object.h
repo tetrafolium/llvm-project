@@ -20,24 +20,24 @@ namespace objcopy {
 namespace wasm {
 
 struct Section {
-  // For now, each section is only an opaque binary blob with no distinction
-  // between custom and known sections.
-  uint8_t SectionType;
-  StringRef Name;
-  ArrayRef<uint8_t> Contents;
+    // For now, each section is only an opaque binary blob with no distinction
+    // between custom and known sections.
+    uint8_t SectionType;
+    StringRef Name;
+    ArrayRef<uint8_t> Contents;
 };
 
 struct Object {
-  llvm::wasm::WasmObjectHeader Header;
-  // For now don't discriminate between kinds of sections.
-  std::vector<Section> Sections;
+    llvm::wasm::WasmObjectHeader Header;
+    // For now don't discriminate between kinds of sections.
+    std::vector<Section> Sections;
 
-  void addSectionWithOwnedContents(Section NewSection,
-                                   std::unique_ptr<MemoryBuffer> &&Content);
-  void removeSections(function_ref<bool(const Section &)> ToRemove);
+    void addSectionWithOwnedContents(Section NewSection,
+                                     std::unique_ptr<MemoryBuffer> &&Content);
+    void removeSections(function_ref<bool(const Section &)> ToRemove);
 
 private:
-  std::vector<std::unique_ptr<MemoryBuffer>> OwnedContents;
+    std::vector<std::unique_ptr<MemoryBuffer>> OwnedContents;
 };
 
 } // end namespace wasm

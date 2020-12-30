@@ -20,19 +20,19 @@ namespace modernize {
 
 class PassByValueCheck : public ClangTidyCheck {
 public:
-  PassByValueCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    PassByValueCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  utils::IncludeInserter Inserter;
-  const bool ValuesOnly;
+    utils::IncludeInserter Inserter;
+    const bool ValuesOnly;
 };
 
 } // namespace modernize

@@ -17,19 +17,19 @@ namespace tidy {
 namespace cert {
 
 void LimitedRandomnessCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(callExpr(callee(functionDecl(namedDecl(hasName("::rand")),
-                                                  parameterCountIs(0))))
-                         .bind("randomGenerator"),
-                     this);
+    Finder->addMatcher(callExpr(callee(functionDecl(namedDecl(hasName("::rand")),
+                                       parameterCountIs(0))))
+                       .bind("randomGenerator"),
+                       this);
 }
 
 void LimitedRandomnessCheck::check(const MatchFinder::MatchResult &Result) {
-  std::string msg = "";
-  if (getLangOpts().CPlusPlus)
-    msg = "; use C++11 random library instead";
+    std::string msg = "";
+    if (getLangOpts().CPlusPlus)
+        msg = "; use C++11 random library instead";
 
-  const auto *MatchedDecl = Result.Nodes.getNodeAs<CallExpr>("randomGenerator");
-  diag(MatchedDecl->getBeginLoc(), "rand() has limited randomness" + msg);
+    const auto *MatchedDecl = Result.Nodes.getNodeAs<CallExpr>("randomGenerator");
+    diag(MatchedDecl->getBeginLoc(), "rand() has limited randomness" + msg);
 }
 
 } // namespace cert

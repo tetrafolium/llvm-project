@@ -42,23 +42,23 @@ namespace readability {
 /// means that braces will be added to all statements (not having them already).
 class BracesAroundStatementsCheck : public ClangTidyCheck {
 public:
-  BracesAroundStatementsCheck(StringRef Name, ClangTidyContext *Context);
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void onEndOfTranslationUnit() override;
+    BracesAroundStatementsCheck(StringRef Name, ClangTidyContext *Context);
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void onEndOfTranslationUnit() override;
 
 private:
-  bool checkStmt(const ast_matchers::MatchFinder::MatchResult &Result,
-                 const Stmt *S, SourceLocation StartLoc,
-                 SourceLocation EndLocHint = SourceLocation());
-  template <typename IfOrWhileStmt>
-  SourceLocation findRParenLoc(const IfOrWhileStmt *S, const SourceManager &SM,
-                               const ASTContext *Context);
+    bool checkStmt(const ast_matchers::MatchFinder::MatchResult &Result,
+                   const Stmt *S, SourceLocation StartLoc,
+                   SourceLocation EndLocHint = SourceLocation());
+    template <typename IfOrWhileStmt>
+    SourceLocation findRParenLoc(const IfOrWhileStmt *S, const SourceManager &SM,
+                                 const ASTContext *Context);
 
 private:
-  std::set<const Stmt *> ForceBracesStmts;
-  const unsigned ShortStatementLines;
+    std::set<const Stmt *> ForceBracesStmts;
+    const unsigned ShortStatementLines;
 };
 
 } // namespace readability

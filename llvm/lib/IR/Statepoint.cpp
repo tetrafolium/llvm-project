@@ -18,27 +18,27 @@
 using namespace llvm;
 
 bool llvm::isStatepointDirectiveAttr(Attribute Attr) {
-  return Attr.hasAttribute("statepoint-id") ||
-         Attr.hasAttribute("statepoint-num-patch-bytes");
+    return Attr.hasAttribute("statepoint-id") ||
+           Attr.hasAttribute("statepoint-num-patch-bytes");
 }
 
 StatepointDirectives
 llvm::parseStatepointDirectivesFromAttrs(AttributeList AS) {
-  StatepointDirectives Result;
+    StatepointDirectives Result;
 
-  Attribute AttrID =
-      AS.getAttribute(AttributeList::FunctionIndex, "statepoint-id");
-  uint64_t StatepointID;
-  if (AttrID.isStringAttribute())
-    if (!AttrID.getValueAsString().getAsInteger(10, StatepointID))
-      Result.StatepointID = StatepointID;
+    Attribute AttrID =
+        AS.getAttribute(AttributeList::FunctionIndex, "statepoint-id");
+    uint64_t StatepointID;
+    if (AttrID.isStringAttribute())
+        if (!AttrID.getValueAsString().getAsInteger(10, StatepointID))
+            Result.StatepointID = StatepointID;
 
-  uint32_t NumPatchBytes;
-  Attribute AttrNumPatchBytes = AS.getAttribute(AttributeList::FunctionIndex,
-                                                "statepoint-num-patch-bytes");
-  if (AttrNumPatchBytes.isStringAttribute())
-    if (!AttrNumPatchBytes.getValueAsString().getAsInteger(10, NumPatchBytes))
-      Result.NumPatchBytes = NumPatchBytes;
+    uint32_t NumPatchBytes;
+    Attribute AttrNumPatchBytes = AS.getAttribute(AttributeList::FunctionIndex,
+                                  "statepoint-num-patch-bytes");
+    if (AttrNumPatchBytes.isStringAttribute())
+        if (!AttrNumPatchBytes.getValueAsString().getAsInteger(10, NumPatchBytes))
+            Result.NumPatchBytes = NumPatchBytes;
 
-  return Result;
+    return Result;
 }

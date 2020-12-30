@@ -14,26 +14,26 @@
 
 class SymbolVendorMacOSX : public lldb_private::SymbolVendor {
 public:
-  // Static Functions
-  static void Initialize();
+    // Static Functions
+    static void Initialize();
 
-  static void Terminate();
+    static void Terminate();
 
-  static lldb_private::ConstString GetPluginNameStatic();
+    static lldb_private::ConstString GetPluginNameStatic();
 
-  static const char *GetPluginDescriptionStatic();
+    static const char *GetPluginDescriptionStatic();
 
-  static lldb_private::SymbolVendor *
-  CreateInstance(const lldb::ModuleSP &module_sp,
-                 lldb_private::Stream *feedback_strm);
+    static lldb_private::SymbolVendor *
+    CreateInstance(const lldb::ModuleSP &module_sp,
+                   lldb_private::Stream *feedback_strm);
 
-  // Constructors and Destructors
-  SymbolVendorMacOSX(const lldb::ModuleSP &module_sp);
+    // Constructors and Destructors
+    SymbolVendorMacOSX(const lldb::ModuleSP &module_sp);
 
-  // PluginInterface protocol
-  lldb_private::ConstString GetPluginName() override;
+    // PluginInterface protocol
+    lldb_private::ConstString GetPluginName() override;
 
-  uint32_t GetPluginVersion() override;
+    uint32_t GetPluginVersion() override;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_SYMBOLVENDOR_MACOSX_SYMBOLVENDORMACOSX_H

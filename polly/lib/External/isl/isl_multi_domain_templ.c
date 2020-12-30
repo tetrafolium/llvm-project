@@ -17,26 +17,26 @@
  */
 __isl_give isl_set *FN(MULTI(BASE),domain)(__isl_take MULTI(BASE) *multi)
 {
-	int i;
-	isl_set *dom;
+    int i;
+    isl_set *dom;
 
-	if (!multi)
-		return NULL;
+    if (!multi)
+        return NULL;
 
-	if (FN(MULTI(BASE),has_explicit_domain)(multi)) {
-		dom = FN(MULTI(BASE),get_explicit_domain)(multi);
-		FN(MULTI(BASE),free)(multi);
-		return dom;
-	}
+    if (FN(MULTI(BASE),has_explicit_domain)(multi)) {
+        dom = FN(MULTI(BASE),get_explicit_domain)(multi);
+        FN(MULTI(BASE),free)(multi);
+        return dom;
+    }
 
-	dom = isl_set_universe(FN(MULTI(BASE),get_domain_space)(multi));
-	for (i = 0; i < multi->n; ++i) {
-		isl_set *dom_i;
+    dom = isl_set_universe(FN(MULTI(BASE),get_domain_space)(multi));
+    for (i = 0; i < multi->n; ++i) {
+        isl_set *dom_i;
 
-		dom_i = FN(EL,domain)(FN(FN(MULTI(BASE),get),BASE)(multi, i));
-		dom = isl_set_intersect(dom, dom_i);
-	}
+        dom_i = FN(EL,domain)(FN(FN(MULTI(BASE),get),BASE)(multi, i));
+        dom = isl_set_intersect(dom, dom_i);
+    }
 
-	FN(MULTI(BASE),free)(multi);
-	return dom;
+    FN(MULTI(BASE),free)(multi);
+    return dom;
 }

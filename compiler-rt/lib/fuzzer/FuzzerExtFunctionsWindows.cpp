@@ -58,12 +58,12 @@ extern "C" {
 
 template <typename T>
 static T *GetFnPtr(T *Fun, T *FunDef, const char *FnName, bool WarnIfMissing) {
-  if (Fun == FunDef) {
-    if (WarnIfMissing)
-      Printf("WARNING: Failed to find function \"%s\".\n", FnName);
-    return nullptr;
-  }
-  return Fun;
+    if (Fun == FunDef) {
+        if (WarnIfMissing)
+            Printf("WARNING: Failed to find function \"%s\".\n", FnName);
+        return nullptr;
+    }
+    return Fun;
 }
 
 namespace fuzzer {

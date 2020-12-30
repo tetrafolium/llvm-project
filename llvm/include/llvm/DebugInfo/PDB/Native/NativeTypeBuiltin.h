@@ -20,27 +20,27 @@ class NativeSession;
 
 class NativeTypeBuiltin : public NativeRawSymbol {
 public:
-  NativeTypeBuiltin(NativeSession &PDBSession, SymIndexId Id,
-                    codeview::ModifierOptions Mods, PDB_BuiltinType T,
-                    uint64_t L);
-  ~NativeTypeBuiltin() override;
+    NativeTypeBuiltin(NativeSession &PDBSession, SymIndexId Id,
+                      codeview::ModifierOptions Mods, PDB_BuiltinType T,
+                      uint64_t L);
+    ~NativeTypeBuiltin() override;
 
-  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-            PdbSymbolIdField RecurseIdFields) const override;
+    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+              PdbSymbolIdField RecurseIdFields) const override;
 
-  PDB_SymType getSymTag() const override;
+    PDB_SymType getSymTag() const override;
 
-  PDB_BuiltinType getBuiltinType() const override;
-  bool isConstType() const override;
-  uint64_t getLength() const override;
-  bool isUnalignedType() const override;
-  bool isVolatileType() const override;
+    PDB_BuiltinType getBuiltinType() const override;
+    bool isConstType() const override;
+    uint64_t getLength() const override;
+    bool isUnalignedType() const override;
+    bool isVolatileType() const override;
 
 protected:
-  NativeSession &Session;
-  codeview::ModifierOptions Mods;
-  PDB_BuiltinType Type;
-  uint64_t Length;
+    NativeSession &Session;
+    codeview::ModifierOptions Mods;
+    PDB_BuiltinType Type;
+    uint64_t Length;
 };
 
 } // namespace pdb

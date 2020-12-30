@@ -15,11 +15,11 @@
 namespace Fortran::semantics {
 class NamelistChecker : public virtual BaseChecker {
 public:
-  NamelistChecker(SemanticsContext &context) : context_{context} {}
-  void Leave(const parser::NamelistStmt &);
+    NamelistChecker(SemanticsContext &context) : context_{context} {}
+    void Leave(const parser::NamelistStmt &);
 
 private:
-  SemanticsContext &context_;
+    SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_NAMELIST_H_

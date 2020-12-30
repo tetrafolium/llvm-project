@@ -22,27 +22,27 @@
 struct llvm_regex;
 
 namespace llvm {
-  class StringRef;
-  template<typename T> class SmallVectorImpl;
+class StringRef;
+template<typename T> class SmallVectorImpl;
 
-  class Regex {
-  public:
+class Regex {
+public:
     enum RegexFlags : unsigned {
-      NoFlags = 0,
-      /// Compile for matching that ignores upper/lower case distinctions.
-      IgnoreCase = 1,
-      /// Compile for newline-sensitive matching. With this flag '[^' bracket
-      /// expressions and '.' never match newline. A ^ anchor matches the
-      /// null string after any newline in the string in addition to its normal
-      /// function, and the $ anchor matches the null string before any
-      /// newline in the string in addition to its normal function.
-      Newline = 2,
-      /// By default, the POSIX extended regular expression (ERE) syntax is
-      /// assumed. Pass this flag to turn on basic regular expressions (BRE)
-      /// instead.
-      BasicRegex = 4,
+        NoFlags = 0,
+        /// Compile for matching that ignores upper/lower case distinctions.
+        IgnoreCase = 1,
+        /// Compile for newline-sensitive matching. With this flag '[^' bracket
+        /// expressions and '.' never match newline. A ^ anchor matches the
+        /// null string after any newline in the string in addition to its normal
+        /// function, and the $ anchor matches the null string before any
+        /// newline in the string in addition to its normal function.
+        Newline = 2,
+        /// By default, the POSIX extended regular expression (ERE) syntax is
+        /// assumed. Pass this flag to turn on basic regular expressions (BRE)
+        /// instead.
+        BasicRegex = 4,
 
-      LLVM_MARK_AS_BITMASK_ENUM(BasicRegex)
+        LLVM_MARK_AS_BITMASK_ENUM(BasicRegex)
     };
 
     Regex();
@@ -54,9 +54,9 @@ namespace llvm {
     Regex(StringRef Regex, unsigned Flags);
     Regex(const Regex &) = delete;
     Regex &operator=(Regex regex) {
-      std::swap(preg, regex.preg);
-      std::swap(error, regex.error);
-      return *this;
+        std::swap(preg, regex.preg);
+        std::swap(error, regex.error);
+        return *this;
     }
     Regex(Regex &&regex);
     ~Regex();
@@ -64,7 +64,9 @@ namespace llvm {
     /// isValid - returns the error encountered during regex compilation, if
     /// any.
     bool isValid(std::string &Error) const;
-    bool isValid() const { return !error; }
+    bool isValid() const {
+        return !error;
+    }
 
     /// getNumMatches - In a valid regex, return the number of parenthesized
     /// matches it contains.  The number filled in by match will include this
@@ -104,10 +106,10 @@ namespace llvm {
     /// Turn String into a regex by escaping its special characters.
     static std::string escape(StringRef String);
 
-  private:
+private:
     struct llvm_regex *preg;
     int error;
-  };
+};
 }
 
 #endif // LLVM_SUPPORT_REGEX_H

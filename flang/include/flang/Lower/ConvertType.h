@@ -81,7 +81,7 @@ template <common::TypeCategory TC, int KIND>
 inline mlir::Type translateDesignatorToFIRType(
     mlir::MLIRContext *ctxt, common::IntrinsicTypeDefaultKinds const &defaults,
     const evaluate::Designator<evaluate::Type<TC, KIND>> &) {
-  return getFIRType(ctxt, defaults, TC, KIND);
+    return getFIRType(ctxt, defaults, TC, KIND);
 }
 
 /// Translate a Fortran::evaluate::Designator<> to an mlir::Type.
@@ -89,7 +89,7 @@ template <common::TypeCategory TC>
 inline mlir::Type translateDesignatorToFIRType(
     mlir::MLIRContext *ctxt, common::IntrinsicTypeDefaultKinds const &defaults,
     const evaluate::Designator<evaluate::SomeKind<TC>> &) {
-  return getFIRType(ctxt, defaults, TC);
+    return getFIRType(ctxt, defaults, TC);
 }
 
 /// Translate a SomeExpr to an mlir::Type.

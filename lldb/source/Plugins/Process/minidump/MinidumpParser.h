@@ -35,77 +35,79 @@ namespace minidump {
 
 // Describes a range of memory captured in the Minidump
 struct Range {
-  lldb::addr_t start; // virtual address of the beginning of the range
-  // range_ref - absolute pointer to the first byte of the range and size
-  llvm::ArrayRef<uint8_t> range_ref;
+    lldb::addr_t start; // virtual address of the beginning of the range
+    // range_ref - absolute pointer to the first byte of the range and size
+    llvm::ArrayRef<uint8_t> range_ref;
 
-  Range(lldb::addr_t start, llvm::ArrayRef<uint8_t> range_ref)
-      : start(start), range_ref(range_ref) {}
+    Range(lldb::addr_t start, llvm::ArrayRef<uint8_t> range_ref)
+        : start(start), range_ref(range_ref) {}
 
-  friend bool operator==(const Range &lhs, const Range &rhs) {
-    return lhs.start == rhs.start && lhs.range_ref == rhs.range_ref;
-  }
+    friend bool operator==(const Range &lhs, const Range &rhs) {
+        return lhs.start == rhs.start && lhs.range_ref == rhs.range_ref;
+    }
 };
 
 class MinidumpParser {
 public:
-  static llvm::Expected<MinidumpParser>
-  Create(const lldb::DataBufferSP &data_buf_sp);
+    static llvm::Expected<MinidumpParser>
+    Create(const lldb::DataBufferSP &data_buf_sp);
 
-  llvm::ArrayRef<uint8_t> GetData();
+    llvm::ArrayRef<uint8_t> GetData();
 
-  llvm::ArrayRef<uint8_t> GetStream(StreamType stream_type);
+    llvm::ArrayRef<uint8_t> GetStream(StreamType stream_type);
 
-  UUID GetModuleUUID(const minidump::Module *module);
+    UUID GetModuleUUID(const minidump::Module *module);
 
-  llvm::ArrayRef<minidump::Thread> GetThreads();
+    llvm::ArrayRef<minidump::Thread> GetThreads();
 
-  llvm::ArrayRef<uint8_t> GetThreadContext(const LocationDescriptor &location);
+    llvm::ArrayRef<uint8_t> GetThreadContext(const LocationDescriptor &location);
 
-  llvm::ArrayRef<uint8_t> GetThreadContext(const minidump::Thread &td);
+    llvm::ArrayRef<uint8_t> GetThreadContext(const minidump::Thread &td);
 
-  llvm::ArrayRef<uint8_t> GetThreadContextWow64(const minidump::Thread &td);
+    llvm::ArrayRef<uint8_t> GetThreadContextWow64(const minidump::Thread &td);
 
-  ArchSpec GetArchitecture();
+    ArchSpec GetArchitecture();
 
-  const MinidumpMiscInfo *GetMiscInfo();
+    const MinidumpMiscInfo *GetMiscInfo();
 
-  llvm::Optional<LinuxProcStatus> GetLinuxProcStatus();
+    llvm::Optional<LinuxProcStatus> GetLinuxProcStatus();
 
-  llvm::Optional<lldb::pid_t> GetPid();
+    llvm::Optional<lldb::pid_t> GetPid();
 
-  llvm::ArrayRef<minidump::Module> GetModuleList();
+    llvm::ArrayRef<minidump::Module> GetModuleList();
 
-  // There are cases in which there is more than one record in the ModuleList
-  // for the same module name.(e.g. when the binary has non contiguous segments)
-  // So this function returns a filtered module list - if it finds records that
-  // have the same name, it keeps the copy with the lowest load address.
-  std::vector<const minidump::Module *> GetFilteredModuleList();
+    // There are cases in which there is more than one record in the ModuleList
+    // for the same module name.(e.g. when the binary has non contiguous segments)
+    // So this function returns a filtered module list - if it finds records that
+    // have the same name, it keeps the copy with the lowest load address.
+    std::vector<const minidump::Module *> GetFilteredModuleList();
 
-  const llvm::minidump::ExceptionStream *GetExceptionStream();
+    const llvm::minidump::ExceptionStream *GetExceptionStream();
 
-  llvm::Optional<Range> FindMemoryRange(lldb::addr_t addr);
+    llvm::Optional<Range> FindMemoryRange(lldb::addr_t addr);
 
-  llvm::ArrayRef<uint8_t> GetMemory(lldb::addr_t addr, size_t size);
+    llvm::ArrayRef<uint8_t> GetMemory(lldb::addr_t addr, size_t size);
 
-  /// Returns a list of memory regions and a flag indicating whether the list is
-  /// complete (includes all regions mapped into the process memory).
-  std::pair<MemoryRegionInfos, bool> BuildMemoryRegions();
+    /// Returns a list of memory regions and a flag indicating whether the list is
+    /// complete (includes all regions mapped into the process memory).
+    std::pair<MemoryRegionInfos, bool> BuildMemoryRegions();
 
-  static llvm::StringRef GetStreamTypeAsString(StreamType stream_type);
+    static llvm::StringRef GetStreamTypeAsString(StreamType stream_type);
 
-  llvm::object::MinidumpFile &GetMinidumpFile() { return *m_file; }
+    llvm::object::MinidumpFile &GetMinidumpFile() {
+        return *m_file;
+    }
 
-  static MemoryRegionInfo GetMemoryRegionInfo(const MemoryRegionInfos &regions,
-                                              lldb::addr_t load_addr);
+    static MemoryRegionInfo GetMemoryRegionInfo(const MemoryRegionInfos &regions,
+            lldb::addr_t load_addr);
 
 private:
-  MinidumpParser(lldb::DataBufferSP data_sp,
-                 std::unique_ptr<llvm::object::MinidumpFile> file);
+    MinidumpParser(lldb::DataBufferSP data_sp,
+                   std::unique_ptr<llvm::object::MinidumpFile> file);
 
-  lldb::DataBufferSP m_data_sp;
-  std::unique_ptr<llvm::object::MinidumpFile> m_file;
-  ArchSpec m_arch;
+    lldb::DataBufferSP m_data_sp;
+    std::unique_ptr<llvm::object::MinidumpFile> m_file;
+    ArchSpec m_arch;
 };
 
 } // end namespace minidump

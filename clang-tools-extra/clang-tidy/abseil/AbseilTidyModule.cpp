@@ -34,48 +34,48 @@ namespace abseil {
 
 class AbseilModule : public ClangTidyModule {
 public:
-  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<DurationAdditionCheck>(
-        "abseil-duration-addition");
-    CheckFactories.registerCheck<DurationComparisonCheck>(
-        "abseil-duration-comparison");
-    CheckFactories.registerCheck<DurationConversionCastCheck>(
-        "abseil-duration-conversion-cast");
-    CheckFactories.registerCheck<DurationDivisionCheck>(
-        "abseil-duration-division");
-    CheckFactories.registerCheck<DurationFactoryFloatCheck>(
-        "abseil-duration-factory-float");
-    CheckFactories.registerCheck<DurationFactoryScaleCheck>(
-        "abseil-duration-factory-scale");
-    CheckFactories.registerCheck<DurationSubtractionCheck>(
-        "abseil-duration-subtraction");
-    CheckFactories.registerCheck<DurationUnnecessaryConversionCheck>(
-        "abseil-duration-unnecessary-conversion");
-    CheckFactories.registerCheck<FasterStrsplitDelimiterCheck>(
-        "abseil-faster-strsplit-delimiter");
-    CheckFactories.registerCheck<NoInternalDependenciesCheck>(
-        "abseil-no-internal-dependencies");
-    CheckFactories.registerCheck<NoNamespaceCheck>("abseil-no-namespace");
-    CheckFactories.registerCheck<RedundantStrcatCallsCheck>(
-        "abseil-redundant-strcat-calls");
-    CheckFactories.registerCheck<StrCatAppendCheck>(
-        "abseil-str-cat-append");
-    CheckFactories.registerCheck<StringFindStartswithCheck>(
-        "abseil-string-find-startswith");
-    CheckFactories.registerCheck<StringFindStrContainsCheck>(
-        "abseil-string-find-str-contains");
-    CheckFactories.registerCheck<TimeComparisonCheck>(
-        "abseil-time-comparison");
-    CheckFactories.registerCheck<TimeSubtractionCheck>(
-        "abseil-time-subtraction");
-    CheckFactories.registerCheck<UpgradeDurationConversionsCheck>(
-        "abseil-upgrade-duration-conversions");
-  }
+    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+        CheckFactories.registerCheck<DurationAdditionCheck>(
+            "abseil-duration-addition");
+        CheckFactories.registerCheck<DurationComparisonCheck>(
+            "abseil-duration-comparison");
+        CheckFactories.registerCheck<DurationConversionCastCheck>(
+            "abseil-duration-conversion-cast");
+        CheckFactories.registerCheck<DurationDivisionCheck>(
+            "abseil-duration-division");
+        CheckFactories.registerCheck<DurationFactoryFloatCheck>(
+            "abseil-duration-factory-float");
+        CheckFactories.registerCheck<DurationFactoryScaleCheck>(
+            "abseil-duration-factory-scale");
+        CheckFactories.registerCheck<DurationSubtractionCheck>(
+            "abseil-duration-subtraction");
+        CheckFactories.registerCheck<DurationUnnecessaryConversionCheck>(
+            "abseil-duration-unnecessary-conversion");
+        CheckFactories.registerCheck<FasterStrsplitDelimiterCheck>(
+            "abseil-faster-strsplit-delimiter");
+        CheckFactories.registerCheck<NoInternalDependenciesCheck>(
+            "abseil-no-internal-dependencies");
+        CheckFactories.registerCheck<NoNamespaceCheck>("abseil-no-namespace");
+        CheckFactories.registerCheck<RedundantStrcatCallsCheck>(
+            "abseil-redundant-strcat-calls");
+        CheckFactories.registerCheck<StrCatAppendCheck>(
+            "abseil-str-cat-append");
+        CheckFactories.registerCheck<StringFindStartswithCheck>(
+            "abseil-string-find-startswith");
+        CheckFactories.registerCheck<StringFindStrContainsCheck>(
+            "abseil-string-find-str-contains");
+        CheckFactories.registerCheck<TimeComparisonCheck>(
+            "abseil-time-comparison");
+        CheckFactories.registerCheck<TimeSubtractionCheck>(
+            "abseil-time-subtraction");
+        CheckFactories.registerCheck<UpgradeDurationConversionsCheck>(
+            "abseil-upgrade-duration-conversions");
+    }
 };
 
 // Register the AbseilModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<AbseilModule> X("abseil-module",
-                                                    "Add Abseil checks.");
+        "Add Abseil checks.");
 
 } // namespace abseil
 

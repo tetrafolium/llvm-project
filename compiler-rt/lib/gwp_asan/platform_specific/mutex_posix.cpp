@@ -13,18 +13,20 @@
 
 namespace gwp_asan {
 void Mutex::lock() {
-  int Status = pthread_mutex_lock(&Mu);
-  assert(Status == 0);
-  // Remove warning for non-debug builds.
-  (void)Status;
+    int Status = pthread_mutex_lock(&Mu);
+    assert(Status == 0);
+    // Remove warning for non-debug builds.
+    (void)Status;
 }
 
-bool Mutex::tryLock() { return pthread_mutex_trylock(&Mu) == 0; }
+bool Mutex::tryLock() {
+    return pthread_mutex_trylock(&Mu) == 0;
+}
 
 void Mutex::unlock() {
-  int Status = pthread_mutex_unlock(&Mu);
-  assert(Status == 0);
-  // Remove warning for non-debug builds.
-  (void)Status;
+    int Status = pthread_mutex_unlock(&Mu);
+    assert(Status == 0);
+    // Remove warning for non-debug builds.
+    (void)Status;
 }
 } // namespace gwp_asan

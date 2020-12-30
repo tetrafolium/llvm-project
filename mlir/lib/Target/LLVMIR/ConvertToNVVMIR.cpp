@@ -30,87 +30,88 @@ using namespace mlir;
 static llvm::Value *createIntrinsicCall(llvm::IRBuilder<> &builder,
                                         llvm::Intrinsic::ID intrinsic,
                                         ArrayRef<llvm::Value *> args = {}) {
-  llvm::Module *module = builder.GetInsertBlock()->getModule();
-  llvm::Function *fn = llvm::Intrinsic::getDeclaration(module, intrinsic);
-  return builder.CreateCall(fn, args);
+    llvm::Module *module = builder.GetInsertBlock()->getModule();
+    llvm::Function *fn = llvm::Intrinsic::getDeclaration(module, intrinsic);
+    return builder.CreateCall(fn, args);
 }
 
 static llvm::Intrinsic::ID getShflBflyIntrinsicId(llvm::Type *resultType,
-                                                  bool withPredicate) {
-  if (withPredicate) {
-    resultType = cast<llvm::StructType>(resultType)->getElementType(0);
-    return resultType->isFloatTy() ? llvm::Intrinsic::nvvm_shfl_sync_bfly_f32p
-                                   : llvm::Intrinsic::nvvm_shfl_sync_bfly_i32p;
-  }
-  return resultType->isFloatTy() ? llvm::Intrinsic::nvvm_shfl_sync_bfly_f32
-                                 : llvm::Intrinsic::nvvm_shfl_sync_bfly_i32;
+        bool withPredicate) {
+    if (withPredicate) {
+        resultType = cast<llvm::StructType>(resultType)->getElementType(0);
+        return resultType->isFloatTy() ? llvm::Intrinsic::nvvm_shfl_sync_bfly_f32p
+               : llvm::Intrinsic::nvvm_shfl_sync_bfly_i32p;
+    }
+    return resultType->isFloatTy() ? llvm::Intrinsic::nvvm_shfl_sync_bfly_f32
+           : llvm::Intrinsic::nvvm_shfl_sync_bfly_i32;
 }
 
 namespace {
 class ModuleTranslation : public LLVM::ModuleTranslation {
 public:
-  using LLVM::ModuleTranslation::ModuleTranslation;
+    using LLVM::ModuleTranslation::ModuleTranslation;
 
 protected:
-  LogicalResult convertOperation(Operation &opInst,
-                                 llvm::IRBuilder<> &builder) override {
+    LogicalResult convertOperation(Operation &opInst,
+                                   llvm::IRBuilder<> &builder) override {
 
 #include "mlir/Dialect/LLVMIR/NVVMConversions.inc"
 
-    return LLVM::ModuleTranslation::convertOperation(opInst, builder);
-  }
+        return LLVM::ModuleTranslation::convertOperation(opInst, builder);
+    }
 
-  /// Allow access to the constructor.
-  friend LLVM::ModuleTranslation;
+    /// Allow access to the constructor.
+    friend LLVM::ModuleTranslation;
 };
 } // namespace
 
 std::unique_ptr<llvm::Module>
 mlir::translateModuleToNVVMIR(Operation *m, llvm::LLVMContext &llvmContext,
                               StringRef name) {
-  auto llvmModule = LLVM::ModuleTranslation::translateModule<ModuleTranslation>(
-      m, llvmContext, name);
-  if (!llvmModule)
-    return llvmModule;
+    auto llvmModule = LLVM::ModuleTranslation::translateModule<ModuleTranslation>(
+                          m, llvmContext, name);
+    if (!llvmModule)
+        return llvmModule;
 
-  // Insert the nvvm.annotations kernel so that the NVVM backend recognizes the
-  // function as a kernel.
-  for (auto func :
-       ModuleTranslation::getModuleBody(m).getOps<LLVM::LLVMFuncOp>()) {
-    if (!gpu::GPUDialect::isKernel(func))
-      continue;
+    // Insert the nvvm.annotations kernel so that the NVVM backend recognizes the
+    // function as a kernel.
+    for (auto func :
+            ModuleTranslation::getModuleBody(m).getOps<LLVM::LLVMFuncOp>()) {
+        if (!gpu::GPUDialect::isKernel(func))
+            continue;
 
-    auto *llvmFunc = llvmModule->getFunction(func.getName());
+        auto *llvmFunc = llvmModule->getFunction(func.getName());
 
-    llvm::Metadata *llvmMetadata[] = {
-        llvm::ValueAsMetadata::get(llvmFunc),
-        llvm::MDString::get(llvmModule->getContext(), "kernel"),
-        llvm::ValueAsMetadata::get(llvm::ConstantInt::get(
-            llvm::Type::getInt32Ty(llvmModule->getContext()), 1))};
-    llvm::MDNode *llvmMetadataNode =
-        llvm::MDNode::get(llvmModule->getContext(), llvmMetadata);
-    llvmModule->getOrInsertNamedMetadata("nvvm.annotations")
+        llvm::Metadata *llvmMetadata[] = {
+            llvm::ValueAsMetadata::get(llvmFunc),
+            llvm::MDString::get(llvmModule->getContext(), "kernel"),
+            llvm::ValueAsMetadata::get(llvm::ConstantInt::get(
+                                           llvm::Type::getInt32Ty(llvmModule->getContext()), 1))
+        };
+        llvm::MDNode *llvmMetadataNode =
+            llvm::MDNode::get(llvmModule->getContext(), llvmMetadata);
+        llvmModule->getOrInsertNamedMetadata("nvvm.annotations")
         ->addOperand(llvmMetadataNode);
-  }
+    }
 
-  return llvmModule;
+    return llvmModule;
 }
 
 namespace mlir {
 void registerToNVVMIRTranslation() {
-  TranslateFromMLIRRegistration registration(
-      "mlir-to-nvvmir",
-      [](ModuleOp module, raw_ostream &output) {
+    TranslateFromMLIRRegistration registration(
+        "mlir-to-nvvmir",
+    [](ModuleOp module, raw_ostream &output) {
         llvm::LLVMContext llvmContext;
         auto llvmModule = mlir::translateModuleToNVVMIR(module, llvmContext);
         if (!llvmModule)
-          return failure();
+            return failure();
 
         llvmModule->print(output, nullptr);
         return success();
-      },
-      [](DialectRegistry &registry) {
+    },
+    [](DialectRegistry &registry) {
         registry.insert<LLVM::LLVMDialect, NVVM::NVVMDialect>();
-      });
+    });
 }
 } // namespace mlir

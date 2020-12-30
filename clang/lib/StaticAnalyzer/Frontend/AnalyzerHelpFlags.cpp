@@ -26,43 +26,43 @@ using namespace clang;
 using namespace ento;
 
 void ento::printCheckerHelp(raw_ostream &out, CompilerInstance &CI) {
-  out << "OVERVIEW: Clang Static Analyzer Checkers List\n\n";
-  out << "USAGE: -analyzer-checker <CHECKER or PACKAGE,...>\n\n";
+    out << "OVERVIEW: Clang Static Analyzer Checkers List\n\n";
+    out << "USAGE: -analyzer-checker <CHECKER or PACKAGE,...>\n\n";
 
-  auto CheckerMgr = std::make_unique<CheckerManager>(
-      *CI.getAnalyzerOpts(), CI.getLangOpts(), CI.getDiagnostics(),
-      CI.getFrontendOpts().Plugins);
+    auto CheckerMgr = std::make_unique<CheckerManager>(
+                          *CI.getAnalyzerOpts(), CI.getLangOpts(), CI.getDiagnostics(),
+                          CI.getFrontendOpts().Plugins);
 
-  CheckerMgr->getCheckerRegistryData().printCheckerWithDescList(
-      *CI.getAnalyzerOpts(), out);
+    CheckerMgr->getCheckerRegistryData().printCheckerWithDescList(
+        *CI.getAnalyzerOpts(), out);
 }
 
 void ento::printEnabledCheckerList(raw_ostream &out, CompilerInstance &CI) {
-  out << "OVERVIEW: Clang Static Analyzer Enabled Checkers List\n\n";
+    out << "OVERVIEW: Clang Static Analyzer Enabled Checkers List\n\n";
 
-  auto CheckerMgr = std::make_unique<CheckerManager>(
-      *CI.getAnalyzerOpts(), CI.getLangOpts(), CI.getDiagnostics(),
-      CI.getFrontendOpts().Plugins);
+    auto CheckerMgr = std::make_unique<CheckerManager>(
+                          *CI.getAnalyzerOpts(), CI.getLangOpts(), CI.getDiagnostics(),
+                          CI.getFrontendOpts().Plugins);
 
-  CheckerMgr->getCheckerRegistryData().printEnabledCheckerList(out);
+    CheckerMgr->getCheckerRegistryData().printEnabledCheckerList(out);
 }
 
 void ento::printCheckerConfigList(raw_ostream &out, CompilerInstance &CI) {
 
-  auto CheckerMgr = std::make_unique<CheckerManager>(
-      *CI.getAnalyzerOpts(), CI.getLangOpts(), CI.getDiagnostics(),
-      CI.getFrontendOpts().Plugins);
+    auto CheckerMgr = std::make_unique<CheckerManager>(
+                          *CI.getAnalyzerOpts(), CI.getLangOpts(), CI.getDiagnostics(),
+                          CI.getFrontendOpts().Plugins);
 
-  CheckerMgr->getCheckerRegistryData().printCheckerOptionList(
-      *CI.getAnalyzerOpts(), out);
+    CheckerMgr->getCheckerRegistryData().printCheckerOptionList(
+        *CI.getAnalyzerOpts(), out);
 }
 
 void ento::printAnalyzerConfigList(raw_ostream &out) {
-  // FIXME: This message sounds scary, should be scary, but incorrectly states
-  // that all configs are super dangerous. In reality, many of them should be
-  // accessible to the user. We should create a user-facing subset of config
-  // options under a different frontend flag.
-  out << R"(
+    // FIXME: This message sounds scary, should be scary, but incorrectly states
+    // that all configs are super dangerous. In reality, many of them should be
+    // accessible to the user. We should create a user-facing subset of config
+    // options under a different frontend flag.
+    out << R"(
 OVERVIEW: Clang Static Analyzer -analyzer-config Option List
 
 The following list of configurations are meant for development purposes only, as
@@ -84,7 +84,7 @@ OPTIONS:
                   (StringRef(#TYPE) == "StringRef" ? "string" : #TYPE ) +      \
                   ") " DESC                                                    \
                   " (default: " #DEFAULT_VAL ")").str()                        \
-    },
+},
 
 #define ANALYZER_OPTION_DEPENDS_ON_USER_MODE(TYPE, NAME, CMDFLAG, DESC,        \
                                              SHALLOW_VAL, DEEP_VAL)            \
@@ -99,17 +99,17 @@ OPTIONS:
 #include "clang/StaticAnalyzer/Core/AnalyzerOptions.def"
 #undef ANALYZER_OPTION
 #undef ANALYZER_OPTION_DEPENDS_ON_USER_MODE
-  };
+};
 
-  llvm::sort(PrintableOptions, [](const OptionAndDescriptionTy &LHS,
-                                  const OptionAndDescriptionTy &RHS) {
+llvm::sort(PrintableOptions, [](const OptionAndDescriptionTy &LHS,
+const OptionAndDescriptionTy &RHS) {
     return LHS.first < RHS.first;
-  });
+});
 
-  for (const auto &Pair : PrintableOptions) {
+for (const auto &Pair : PrintableOptions) {
     AnalyzerOptions::printFormattedEntry(out, Pair, /*InitialPad*/ 2,
                                          /*EntryWidth*/ 30,
                                          /*MinLineWidth*/ 70);
     out << "\n\n";
-  }
+}
 }

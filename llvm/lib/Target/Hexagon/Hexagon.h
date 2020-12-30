@@ -15,11 +15,11 @@
 #define LLVM_LIB_TARGET_HEXAGON_HEXAGON_H
 
 namespace llvm {
-  class HexagonTargetMachine;
-  class ImmutablePass;
+class HexagonTargetMachine;
+class ImmutablePass;
 
-  /// Creates a Hexagon-specific Target Transformation Info pass.
-  ImmutablePass *createHexagonTargetTransformInfoPass(const HexagonTargetMachine *TM);
+/// Creates a Hexagon-specific Target Transformation Info pass.
+ImmutablePass *createHexagonTargetTransformInfoPass(const HexagonTargetMachine *TM);
 } // end namespace llvm;
 
 #endif

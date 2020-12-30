@@ -25,54 +25,56 @@ namespace llvm {
 /// predecessor iterator queries.  This is useful for code that repeatedly
 /// wants the predecessor list for the same blocks.
 class PredIteratorCache {
-  /// BlockToPredsMap - Pointer to null-terminated list.
-  mutable DenseMap<BasicBlock *, BasicBlock **> BlockToPredsMap;
-  mutable DenseMap<BasicBlock *, unsigned> BlockToPredCountMap;
+    /// BlockToPredsMap - Pointer to null-terminated list.
+    mutable DenseMap<BasicBlock *, BasicBlock **> BlockToPredsMap;
+    mutable DenseMap<BasicBlock *, unsigned> BlockToPredCountMap;
 
-  /// Memory - This is the space that holds cached preds.
-  BumpPtrAllocator Memory;
+    /// Memory - This is the space that holds cached preds.
+    BumpPtrAllocator Memory;
 
 private:
-  /// GetPreds - Get a cached list for the null-terminated predecessor list of
-  /// the specified block.  This can be used in a loop like this:
-  ///   for (BasicBlock **PI = PredCache->GetPreds(BB); *PI; ++PI)
-  ///      use(*PI);
-  /// instead of:
-  /// for (pred_iterator PI = pred_begin(BB), E = pred_end(BB); PI != E; ++PI)
-  BasicBlock **GetPreds(BasicBlock *BB) {
-    BasicBlock **&Entry = BlockToPredsMap[BB];
-    if (Entry)
-      return Entry;
+    /// GetPreds - Get a cached list for the null-terminated predecessor list of
+    /// the specified block.  This can be used in a loop like this:
+    ///   for (BasicBlock **PI = PredCache->GetPreds(BB); *PI; ++PI)
+    ///      use(*PI);
+    /// instead of:
+    /// for (pred_iterator PI = pred_begin(BB), E = pred_end(BB); PI != E; ++PI)
+    BasicBlock **GetPreds(BasicBlock *BB) {
+        BasicBlock **&Entry = BlockToPredsMap[BB];
+        if (Entry)
+            return Entry;
 
-    SmallVector<BasicBlock *, 32> PredCache(pred_begin(BB), pred_end(BB));
-    PredCache.push_back(nullptr); // null terminator.
+        SmallVector<BasicBlock *, 32> PredCache(pred_begin(BB), pred_end(BB));
+        PredCache.push_back(nullptr); // null terminator.
 
-    BlockToPredCountMap[BB] = PredCache.size() - 1;
+        BlockToPredCountMap[BB] = PredCache.size() - 1;
 
-    Entry = Memory.Allocate<BasicBlock *>(PredCache.size());
-    std::copy(PredCache.begin(), PredCache.end(), Entry);
-    return Entry;
-  }
+        Entry = Memory.Allocate<BasicBlock *>(PredCache.size());
+        std::copy(PredCache.begin(), PredCache.end(), Entry);
+        return Entry;
+    }
 
-  unsigned GetNumPreds(BasicBlock *BB) const {
-    auto Result = BlockToPredCountMap.find(BB);
-    if (Result != BlockToPredCountMap.end())
-      return Result->second;
-    return BlockToPredCountMap[BB] = pred_size(BB);
-  }
+    unsigned GetNumPreds(BasicBlock *BB) const {
+        auto Result = BlockToPredCountMap.find(BB);
+        if (Result != BlockToPredCountMap.end())
+            return Result->second;
+        return BlockToPredCountMap[BB] = pred_size(BB);
+    }
 
 public:
-  size_t size(BasicBlock *BB) const { return GetNumPreds(BB); }
-  ArrayRef<BasicBlock *> get(BasicBlock *BB) {
-    return makeArrayRef(GetPreds(BB), GetNumPreds(BB));
-  }
+    size_t size(BasicBlock *BB) const {
+        return GetNumPreds(BB);
+    }
+    ArrayRef<BasicBlock *> get(BasicBlock *BB) {
+        return makeArrayRef(GetPreds(BB), GetNumPreds(BB));
+    }
 
-  /// clear - Remove all information.
-  void clear() {
-    BlockToPredsMap.clear();
-    BlockToPredCountMap.clear();
-    Memory.Reset();
-  }
+    /// clear - Remove all information.
+    void clear() {
+        BlockToPredsMap.clear();
+        BlockToPredCountMap.clear();
+        Memory.Reset();
+    }
 };
 
 } // end namespace llvm

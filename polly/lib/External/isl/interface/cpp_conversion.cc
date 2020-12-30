@@ -21,13 +21,13 @@
  */
 void cpp_conversion_generator::cast(const isl_class &clazz, const char *to)
 {
-	string name = cpp_generator::type2cpp(clazz);
+    string name = cpp_generator::type2cpp(clazz);
 
-	if (!clazz.is_type_subclass())
-		return;
+    if (!clazz.is_type_subclass())
+        return;
 
-	cast(classes[clazz.superclass_name], to);
-	printf(".as<%s%s>()", to, name.c_str());
+    cast(classes[clazz.superclass_name], to);
+    printf(".as<%s%s>()", to, name.c_str());
 }
 
 /* Print a function called "function" for converting objects of
@@ -37,17 +37,17 @@ void cpp_conversion_generator::cast(const isl_class &clazz, const char *to)
  * needs to be converted back to the subclass.
  */
 void cpp_conversion_generator::convert(const isl_class &clazz,
-	const char *from, const char *to, const char *function)
+                                       const char *from, const char *to, const char *function)
 {
-	string name = cpp_generator::type2cpp(clazz);
+    string name = cpp_generator::type2cpp(clazz);
 
-	printf("%s%s %s(%s%s obj) {\n",
-		to, name.c_str(), function, from, name.c_str());
-	printf("\t""return %s""manage(obj.copy())", to);
-	cast(clazz, to);
-	printf(";\n");
-	printf("}\n");
-	printf("\n");
+    printf("%s%s %s(%s%s obj) {\n",
+           to, name.c_str(), function, from, name.c_str());
+    printf("\t""return %s""manage(obj.copy())", to);
+    cast(clazz, to);
+    printf(";\n");
+    printf("}\n");
+    printf("\n");
 }
 
 /* Print functions for converting objects of "clazz"
@@ -67,8 +67,8 @@ void cpp_conversion_generator::convert(const isl_class &clazz,
  */
 void cpp_conversion_generator::print(const isl_class &clazz)
 {
-	convert(clazz, "", "checked::", "check");
-	convert(clazz, "checked::", "", "uncheck");
+    convert(clazz, "", "checked::", "check");
+    convert(clazz, "checked::", "", "uncheck");
 }
 
 /* Generate conversion functions for converting objects between
@@ -77,10 +77,10 @@ void cpp_conversion_generator::print(const isl_class &clazz)
  */
 void cpp_conversion_generator::generate()
 {
-	map<string, isl_class>::iterator ci;
+    map<string, isl_class>::iterator ci;
 
-	printf("namespace isl {\n\n");
-	for (ci = classes.begin(); ci != classes.end(); ++ci)
-		print(ci->second);
-	printf("} // namespace isl\n");
+    printf("namespace isl {\n\n");
+    for (ci = classes.begin(); ci != classes.end(); ++ci)
+        print(ci->second);
+    printf("} // namespace isl\n");
 }

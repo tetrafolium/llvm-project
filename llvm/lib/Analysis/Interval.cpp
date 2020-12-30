@@ -23,18 +23,18 @@ using namespace llvm;
 //===----------------------------------------------------------------------===//
 
 void Interval::print(raw_ostream &OS) const {
-  OS << "-------------------------------------------------------------\n"
+    OS << "-------------------------------------------------------------\n"
        << "Interval Contents:\n";
 
-  // Print out all of the basic blocks in the interval...
-  for (const BasicBlock *Node : Nodes)
-    OS << *Node << "\n";
+    // Print out all of the basic blocks in the interval...
+    for (const BasicBlock *Node : Nodes)
+        OS << *Node << "\n";
 
-  OS << "Interval Predecessors:\n";
-  for (const BasicBlock *Predecessor : Predecessors)
-    OS << *Predecessor << "\n";
+    OS << "Interval Predecessors:\n";
+    for (const BasicBlock *Predecessor : Predecessors)
+        OS << *Predecessor << "\n";
 
-  OS << "Interval Successors:\n";
-  for (const BasicBlock *Successor : Successors)
-    OS << *Successor << "\n";
+    OS << "Interval Successors:\n";
+    for (const BasicBlock *Successor : Successors)
+        OS << *Successor << "\n";
 }

@@ -17,56 +17,56 @@
 
 class RegisterContextPOSIX_ppc64le : public lldb_private::RegisterContext {
 public:
-  RegisterContextPOSIX_ppc64le(
-      lldb_private::Thread &thread, uint32_t concrete_frame_idx,
-      lldb_private::RegisterInfoInterface *register_info);
+    RegisterContextPOSIX_ppc64le(
+        lldb_private::Thread &thread, uint32_t concrete_frame_idx,
+        lldb_private::RegisterInfoInterface *register_info);
 
-  void InvalidateAllRegisters() override;
+    void InvalidateAllRegisters() override;
 
-  size_t GetRegisterCount() override;
+    size_t GetRegisterCount() override;
 
-  virtual size_t GetGPRSize();
+    virtual size_t GetGPRSize();
 
-  virtual unsigned GetRegisterSize(unsigned reg);
+    virtual unsigned GetRegisterSize(unsigned reg);
 
-  virtual unsigned GetRegisterOffset(unsigned reg);
+    virtual unsigned GetRegisterOffset(unsigned reg);
 
-  const lldb_private::RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
+    const lldb_private::RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
 
-  size_t GetRegisterSetCount() override;
+    size_t GetRegisterSetCount() override;
 
-  const lldb_private::RegisterSet *GetRegisterSet(size_t set) override;
+    const lldb_private::RegisterSet *GetRegisterSet(size_t set) override;
 
-  const char *GetRegisterName(unsigned reg);
+    const char *GetRegisterName(unsigned reg);
 
 protected:
-  // 64-bit general purpose registers.
-  uint64_t m_gpr_ppc64le[k_num_gpr_registers_ppc64le];
+    // 64-bit general purpose registers.
+    uint64_t m_gpr_ppc64le[k_num_gpr_registers_ppc64le];
 
-  // floating-point registers including extended register.
-  uint64_t m_fpr_ppc64le[k_num_fpr_registers_ppc64le];
+    // floating-point registers including extended register.
+    uint64_t m_fpr_ppc64le[k_num_fpr_registers_ppc64le];
 
-  // VMX registers.
-  uint64_t m_vmx_ppc64le[k_num_vmx_registers_ppc64le * 2];
+    // VMX registers.
+    uint64_t m_vmx_ppc64le[k_num_vmx_registers_ppc64le * 2];
 
-  // VSX registers.
-  uint64_t m_vsx_ppc64le[k_num_vsx_registers_ppc64le * 2];
+    // VSX registers.
+    uint64_t m_vsx_ppc64le[k_num_vsx_registers_ppc64le * 2];
 
-  std::unique_ptr<lldb_private::RegisterInfoInterface> m_register_info_up;
+    std::unique_ptr<lldb_private::RegisterInfoInterface> m_register_info_up;
 
-  // Determines if an extended register set is supported on the processor
-  // running the inferior process.
-  virtual bool IsRegisterSetAvailable(size_t set_index);
+    // Determines if an extended register set is supported on the processor
+    // running the inferior process.
+    virtual bool IsRegisterSetAvailable(size_t set_index);
 
-  virtual const lldb_private::RegisterInfo *GetRegisterInfo();
+    virtual const lldb_private::RegisterInfo *GetRegisterInfo();
 
-  bool IsGPR(unsigned reg);
+    bool IsGPR(unsigned reg);
 
-  bool IsFPR(unsigned reg);
+    bool IsFPR(unsigned reg);
 
-  bool IsVMX(unsigned reg);
+    bool IsVMX(unsigned reg);
 
-  bool IsVSX(unsigned reg);
+    bool IsVSX(unsigned reg);
 
 };
 

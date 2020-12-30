@@ -24,51 +24,55 @@ class raw_ostream;
 
 namespace sys {
 
-  /// This class encapsulates the notion of a memory block which has an address
-  /// and a size. It is used by the Memory class (a friend) as the result of
-  /// various memory allocation operations.
-  /// @see Memory
-  /// Memory block abstraction.
-  class MemoryBlock {
-  public:
+/// This class encapsulates the notion of a memory block which has an address
+/// and a size. It is used by the Memory class (a friend) as the result of
+/// various memory allocation operations.
+/// @see Memory
+/// Memory block abstraction.
+class MemoryBlock {
+public:
     MemoryBlock() : Address(nullptr), AllocatedSize(0) {}
     MemoryBlock(void *addr, size_t allocatedSize)
         : Address(addr), AllocatedSize(allocatedSize) {}
-    void *base() const { return Address; }
+    void *base() const {
+        return Address;
+    }
     /// The size as it was allocated. This is always greater or equal to the
     /// size that was originally requested.
-    size_t allocatedSize() const { return AllocatedSize; }
-  
-  private:
+    size_t allocatedSize() const {
+        return AllocatedSize;
+    }
+
+private:
     void *Address;    ///< Address of first byte of memory area
     size_t AllocatedSize; ///< Size, in bytes of the memory area
     unsigned Flags = 0;
     friend class Memory;
-  };
+};
 
-  /// This class provides various memory handling functions that manipulate
-  /// MemoryBlock instances.
-  /// @since 1.4
-  /// An abstraction for memory operations.
-  class Memory {
-  public:
+/// This class provides various memory handling functions that manipulate
+/// MemoryBlock instances.
+/// @since 1.4
+/// An abstraction for memory operations.
+class Memory {
+public:
     enum ProtectionFlags {
-      MF_READ = 0x1000000,
-      MF_WRITE = 0x2000000,
-      MF_EXEC = 0x4000000,
-      MF_RWE_MASK = 0x7000000,
+        MF_READ = 0x1000000,
+        MF_WRITE = 0x2000000,
+        MF_EXEC = 0x4000000,
+        MF_RWE_MASK = 0x7000000,
 
-      /// The \p MF_HUGE_HINT flag is used to indicate that the request for
-      /// a memory block should be satisfied with large pages if possible.
-      /// This is only a hint and small pages will be used as fallback.
-      ///
-      /// The presence or absence of this flag in the returned memory block
-      /// is (at least currently) *not* a reliable indicator that the memory
-      /// block will use or will not use large pages. On some systems a request
-      /// without this flag can be backed by large pages without this flag being
-      /// set, and on some other systems a request with this flag can fallback
-      /// to small pages without this flag being cleared.
-      MF_HUGE_HINT = 0x0000001
+        /// The \p MF_HUGE_HINT flag is used to indicate that the request for
+        /// a memory block should be satisfied with large pages if possible.
+        /// This is only a hint and small pages will be used as fallback.
+        ///
+        /// The presence or absence of this flag in the returned memory block
+        /// is (at least currently) *not* a reliable indicator that the memory
+        /// block will use or will not use large pages. On some systems a request
+        /// without this flag can be backed by large pages without this flag being
+        /// set, and on some other systems a request with this flag can fallback
+        /// to small pages without this flag being cleared.
+        MF_HUGE_HINT = 0x0000001
     };
 
     /// This method allocates a block of memory that is suitable for loading
@@ -127,48 +131,54 @@ namespace sys {
     ///
     /// Set memory protection state.
     static std::error_code protectMappedMemory(const MemoryBlock &Block,
-                                               unsigned Flags);
+            unsigned Flags);
 
     /// InvalidateInstructionCache - Before the JIT can run a block of code
     /// that has been emitted it must invalidate the instruction cache on some
     /// platforms.
     static void InvalidateInstructionCache(const void *Addr, size_t Len);
-  };
+};
 
-  /// Owning version of MemoryBlock.
-  class OwningMemoryBlock {
-  public:
+/// Owning version of MemoryBlock.
+class OwningMemoryBlock {
+public:
     OwningMemoryBlock() = default;
     explicit OwningMemoryBlock(MemoryBlock M) : M(M) {}
     OwningMemoryBlock(OwningMemoryBlock &&Other) {
-      M = Other.M;
-      Other.M = MemoryBlock();
+        M = Other.M;
+        Other.M = MemoryBlock();
     }
     OwningMemoryBlock& operator=(OwningMemoryBlock &&Other) {
-      M = Other.M;
-      Other.M = MemoryBlock();
-      return *this;
+        M = Other.M;
+        Other.M = MemoryBlock();
+        return *this;
     }
     ~OwningMemoryBlock() {
-      Memory::releaseMappedMemory(M);
+        Memory::releaseMappedMemory(M);
     }
-    void *base() const { return M.base(); }
+    void *base() const {
+        return M.base();
+    }
     /// The size as it was allocated. This is always greater or equal to the
     /// size that was originally requested.
-    size_t allocatedSize() const { return M.allocatedSize(); }
-    MemoryBlock getMemoryBlock() const { return M; }
-  private:
+    size_t allocatedSize() const {
+        return M.allocatedSize();
+    }
+    MemoryBlock getMemoryBlock() const {
+        return M;
+    }
+private:
     MemoryBlock M;
-  };
+};
 
 #ifndef NDEBUG
-  /// Debugging output for Memory::ProtectionFlags.
-  raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF);
+/// Debugging output for Memory::ProtectionFlags.
+raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF);
 
-  /// Debugging output for MemoryBlock.
-  raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB);
+/// Debugging output for MemoryBlock.
+raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB);
 #endif // ifndef NDEBUG
-  }    // end namespace sys
-  }    // end namespace llvm
+}    // end namespace sys
+}    // end namespace llvm
 
 #endif

@@ -26,17 +26,17 @@ using llvm::APSInt;
 
 namespace {
 class MmapWriteExecChecker : public Checker<check::PreCall> {
-  CallDescription MmapFn;
-  CallDescription MprotectFn;
-  static int ProtWrite;
-  static int ProtExec;
-  static int ProtRead;
-  mutable std::unique_ptr<BugType> BT;
+    CallDescription MmapFn;
+    CallDescription MprotectFn;
+    static int ProtWrite;
+    static int ProtExec;
+    static int ProtRead;
+    mutable std::unique_ptr<BugType> BT;
 public:
-  MmapWriteExecChecker() : MmapFn("mmap", 6), MprotectFn("mprotect", 3) {}
-  void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
-  int ProtExecOv;
-  int ProtReadOv;
+    MmapWriteExecChecker() : MmapFn("mmap", 6), MprotectFn("mprotect", 3) {}
+    void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
+    int ProtExecOv;
+    int ProtReadOv;
 };
 }
 
@@ -45,49 +45,49 @@ int MmapWriteExecChecker::ProtExec  = 0x04;
 int MmapWriteExecChecker::ProtRead  = 0x01;
 
 void MmapWriteExecChecker::checkPreCall(const CallEvent &Call,
-                                         CheckerContext &C) const {
-  if (Call.isCalled(MmapFn) || Call.isCalled(MprotectFn)) {
-    SVal ProtVal = Call.getArgSVal(2);
-    Optional<nonloc::ConcreteInt> ProtLoc = ProtVal.getAs<nonloc::ConcreteInt>();
-    int64_t Prot = ProtLoc->getValue().getSExtValue();
-    if (ProtExecOv != ProtExec)
-      ProtExec = ProtExecOv;
-    if (ProtReadOv != ProtRead)
-      ProtRead = ProtReadOv;
+                                        CheckerContext &C) const {
+    if (Call.isCalled(MmapFn) || Call.isCalled(MprotectFn)) {
+        SVal ProtVal = Call.getArgSVal(2);
+        Optional<nonloc::ConcreteInt> ProtLoc = ProtVal.getAs<nonloc::ConcreteInt>();
+        int64_t Prot = ProtLoc->getValue().getSExtValue();
+        if (ProtExecOv != ProtExec)
+            ProtExec = ProtExecOv;
+        if (ProtReadOv != ProtRead)
+            ProtRead = ProtReadOv;
 
-    // Wrong settings
-    if (ProtRead == ProtExec)
-      return;
+        // Wrong settings
+        if (ProtRead == ProtExec)
+            return;
 
-    if ((Prot & (ProtWrite | ProtExec)) == (ProtWrite | ProtExec)) {
-      if (!BT)
-        BT.reset(new BugType(this, "W^X check fails, Write Exec prot flags set", "Security"));
+        if ((Prot & (ProtWrite | ProtExec)) == (ProtWrite | ProtExec)) {
+            if (!BT)
+                BT.reset(new BugType(this, "W^X check fails, Write Exec prot flags set", "Security"));
 
-      ExplodedNode *N = C.generateNonFatalErrorNode();
-      if (!N)
-        return;
+            ExplodedNode *N = C.generateNonFatalErrorNode();
+            if (!N)
+                return;
 
-      auto Report = std::make_unique<PathSensitiveBugReport>(
-          *BT, "Both PROT_WRITE and PROT_EXEC flags are set. This can "
-               "lead to exploitable memory regions, which could be overwritten "
-               "with malicious code", N);
-      Report->addRange(Call.getArgSourceRange(2));
-      C.emitReport(std::move(Report));
+            auto Report = std::make_unique<PathSensitiveBugReport>(
+                              *BT, "Both PROT_WRITE and PROT_EXEC flags are set. This can "
+                              "lead to exploitable memory regions, which could be overwritten "
+                              "with malicious code", N);
+            Report->addRange(Call.getArgSourceRange(2));
+            C.emitReport(std::move(Report));
+        }
     }
-  }
 }
 
 void ento::registerMmapWriteExecChecker(CheckerManager &mgr) {
-  MmapWriteExecChecker *Mwec =
-      mgr.registerChecker<MmapWriteExecChecker>();
-  Mwec->ProtExecOv =
-    mgr.getAnalyzerOptions()
-      .getCheckerIntegerOption(Mwec, "MmapProtExec");
-  Mwec->ProtReadOv =
-    mgr.getAnalyzerOptions()
-      .getCheckerIntegerOption(Mwec, "MmapProtRead");
+    MmapWriteExecChecker *Mwec =
+        mgr.registerChecker<MmapWriteExecChecker>();
+    Mwec->ProtExecOv =
+        mgr.getAnalyzerOptions()
+        .getCheckerIntegerOption(Mwec, "MmapProtExec");
+    Mwec->ProtReadOv =
+        mgr.getAnalyzerOptions()
+        .getCheckerIntegerOption(Mwec, "MmapProtRead");
 }
 
 bool ento::shouldRegisterMmapWriteExecChecker(const CheckerManager &mgr) {
-  return true;
+    return true;
 }

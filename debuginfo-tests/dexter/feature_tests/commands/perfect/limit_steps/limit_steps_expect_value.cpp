@@ -7,11 +7,11 @@
 // CHECK: limit_steps_expect_value.cpp
 
 int main() {
-  int i = 0;
-  i = 1;    // DexLabel('from')
-  i = 2;
-  i = 3;
-  return 0; // DexLabel('long_range')
+    int i = 0;
+    i = 1;    // DexLabel('from')
+    i = 2;
+    i = 3;
+    return 0; // DexLabel('long_range')
 }
 
 // DexLimitSteps('i', '0', from_line='from', to_line='long_range')

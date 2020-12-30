@@ -24,15 +24,15 @@ slurp_head64(const void **pptr, uint32_t *nbytes)
     uint32_t off = (uintptr_t) *pptr % 8;
     if (likely(off != 0))
     {
-	/* Get rid of bytes 0..off-1 */
-	const unsigned char *ptr64 = align_ptr(*pptr, 8);
-	uint64_t mask = ALL_ONES << (CHAR_BIT * off);
-	uint64_t val = load64(ptr64) & mask;
-	/* Fold 64-bit sum to 33 bits */
-	sum = val >> 32;
-	sum += (uint32_t) val;
-	*pptr = ptr64 + 8;
-	*nbytes -= 8 - off;
+        /* Get rid of bytes 0..off-1 */
+        const unsigned char *ptr64 = align_ptr(*pptr, 8);
+        uint64_t mask = ALL_ONES << (CHAR_BIT * off);
+        uint64_t val = load64(ptr64) & mask;
+        /* Fold 64-bit sum to 33 bits */
+        sum = val >> 32;
+        sum += (uint32_t) val;
+        *pptr = ptr64 + 8;
+        *nbytes -= 8 - off;
     }
     return sum;
 }
@@ -44,13 +44,13 @@ slurp_tail64(uint64_t sum, const void *ptr, uint32_t nbytes)
     Assert(nbytes < 8);
     if (likely(nbytes != 0))
     {
-	/* Get rid of bytes 7..nbytes */
-	uint64_t mask = ALL_ONES >> (CHAR_BIT * (8 - nbytes));
-	Assert(__builtin_popcountl(mask) / CHAR_BIT == nbytes);
-	uint64_t val = load64(ptr) & mask;
-	sum += val >> 32;
-	sum += (uint32_t) val;
-	nbytes = 0;
+        /* Get rid of bytes 7..nbytes */
+        uint64_t mask = ALL_ONES >> (CHAR_BIT * (8 - nbytes));
+        Assert(__builtin_popcountl(mask) / CHAR_BIT == nbytes);
+        uint64_t val = load64(ptr) & mask;
+        sum += val >> 32;
+        sum += (uint32_t) val;
+        nbytes = 0;
     }
     Assert(nbytes == 0);
     return sum;
@@ -64,9 +64,9 @@ __chksum_aarch64_simd(const void *ptr, unsigned int nbytes)
 
     if (unlikely(nbytes < 50))
     {
-	sum = slurp_small(ptr, nbytes);
-	swap = false;
-	goto fold;
+        sum = slurp_small(ptr, nbytes);
+        swap = false;
+        goto fold;
     }
 
     /* 8-byte align pointer */
@@ -84,15 +84,15 @@ __chksum_aarch64_simd(const void *ptr, unsigned int nbytes)
     /* Sum groups of 64 bytes */
     for (uint32_t i = 0; i < nbytes / 64; i++)
     {
-	uint32x4_t vtmp0 = vld1q_u32(ptr32);
-	uint32x4_t vtmp1 = vld1q_u32(ptr32 + 4);
-	uint32x4_t vtmp2 = vld1q_u32(ptr32 + 8);
-	uint32x4_t vtmp3 = vld1q_u32(ptr32 + 12);
-	vsum0 = vpadalq_u32(vsum0, vtmp0);
-	vsum1 = vpadalq_u32(vsum1, vtmp1);
-	vsum2 = vpadalq_u32(vsum2, vtmp2);
-	vsum3 = vpadalq_u32(vsum3, vtmp3);
-	ptr32 += 16;
+        uint32x4_t vtmp0 = vld1q_u32(ptr32);
+        uint32x4_t vtmp1 = vld1q_u32(ptr32 + 4);
+        uint32x4_t vtmp2 = vld1q_u32(ptr32 + 8);
+        uint32x4_t vtmp3 = vld1q_u32(ptr32 + 12);
+        vsum0 = vpadalq_u32(vsum0, vtmp0);
+        vsum1 = vpadalq_u32(vsum1, vtmp1);
+        vsum2 = vpadalq_u32(vsum2, vtmp2);
+        vsum3 = vpadalq_u32(vsum3, vtmp3);
+        ptr32 += 16;
     }
     nbytes %= 64;
 
@@ -103,12 +103,12 @@ __chksum_aarch64_simd(const void *ptr, unsigned int nbytes)
     /* Add any trailing group of 32 bytes */
     if (nbytes & 32)
     {
-	uint32x4_t vtmp0 = vld1q_u32(ptr32);
-	uint32x4_t vtmp1 = vld1q_u32(ptr32 + 4);
-	vsum0 = vpadalq_u32(vsum0, vtmp0);
-	vsum1 = vpadalq_u32(vsum1, vtmp1);
-	ptr32 += 8;
-	nbytes -= 32;
+        uint32x4_t vtmp0 = vld1q_u32(ptr32);
+        uint32x4_t vtmp1 = vld1q_u32(ptr32 + 4);
+        vsum0 = vpadalq_u32(vsum0, vtmp0);
+        vsum1 = vpadalq_u32(vsum1, vtmp1);
+        ptr32 += 8;
+        nbytes -= 32;
     }
     Assert(nbytes < 32);
 
@@ -118,20 +118,20 @@ __chksum_aarch64_simd(const void *ptr, unsigned int nbytes)
     /* Add any trailing group of 16 bytes */
     if (nbytes & 16)
     {
-	uint32x4_t vtmp = vld1q_u32(ptr32);
-	vsum0 = vpadalq_u32(vsum0, vtmp);
-	ptr32 += 4;
-	nbytes -= 16;
+        uint32x4_t vtmp = vld1q_u32(ptr32);
+        vsum0 = vpadalq_u32(vsum0, vtmp);
+        ptr32 += 4;
+        nbytes -= 16;
     }
     Assert(nbytes < 16);
 
     /* Add any trailing group of 8 bytes */
     if (nbytes & 8)
     {
-	uint32x2_t vtmp = vld1_u32(ptr32);
-	vsum0 = vaddw_u32(vsum0, vtmp);
-	ptr32 += 2;
-	nbytes -= 8;
+        uint32x2_t vtmp = vld1_u32(ptr32);
+        vsum0 = vaddw_u32(vsum0, vtmp);
+        ptr32 += 2;
+        nbytes -= 8;
     }
     Assert(nbytes < 8);
 

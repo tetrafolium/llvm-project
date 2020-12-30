@@ -15,24 +15,24 @@ class ThreadKDP;
 
 class RegisterContextKDP_x86_64 : public RegisterContextDarwin_x86_64 {
 public:
-  RegisterContextKDP_x86_64(ThreadKDP &thread, uint32_t concrete_frame_idx);
+    RegisterContextKDP_x86_64(ThreadKDP &thread, uint32_t concrete_frame_idx);
 
-  virtual ~RegisterContextKDP_x86_64();
+    virtual ~RegisterContextKDP_x86_64();
 
 protected:
-  int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) override;
+    int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) override;
 
-  int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) override;
+    int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) override;
 
-  int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) override;
+    int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) override;
 
-  int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) override;
+    int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) override;
 
-  int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) override;
+    int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) override;
 
-  int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) override;
+    int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) override;
 
-  ThreadKDP &m_kdp_thread;
+    ThreadKDP &m_kdp_thread;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_MACOSX_KERNEL_REGISTERCONTEXTKDP_X86_64_H

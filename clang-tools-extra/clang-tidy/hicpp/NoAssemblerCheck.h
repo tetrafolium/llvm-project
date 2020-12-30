@@ -21,10 +21,10 @@ namespace hicpp {
 /// http://clang.llvm.org/extra/clang-tidy/checks/hicpp-no-assembler.html
 class NoAssemblerCheck : public ClangTidyCheck {
 public:
-  NoAssemblerCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    NoAssemblerCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace hicpp

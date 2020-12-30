@@ -26,16 +26,16 @@ using namespace sys;
 ThreadLocalImpl::ThreadLocalImpl() : data() { }
 ThreadLocalImpl::~ThreadLocalImpl() { }
 void ThreadLocalImpl::setInstance(const void* d) {
-  static_assert(sizeof(d) <= sizeof(data), "size too big");
-  void **pd = reinterpret_cast<void**>(&data);
-  *pd = const_cast<void*>(d);
+    static_assert(sizeof(d) <= sizeof(data), "size too big");
+    void **pd = reinterpret_cast<void**>(&data);
+    *pd = const_cast<void*>(d);
 }
 void *ThreadLocalImpl::getInstance() {
-  void **pd = reinterpret_cast<void**>(&data);
-  return *pd;
+    void **pd = reinterpret_cast<void**>(&data);
+    return *pd;
 }
 void ThreadLocalImpl::removeInstance() {
-  setInstance(nullptr);
+    setInstance(nullptr);
 }
 }
 #elif defined(LLVM_ON_UNIX)

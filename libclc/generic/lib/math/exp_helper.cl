@@ -36,14 +36,14 @@ _CLC_DEF double __clc_exp_helper(double x, double x_min, double x_max, double r,
 
     // 6 term tail of Taylor expansion of e^r
     double z2 = r * fma(r,
-	                fma(r,
-		            fma(r,
-			        fma(r,
-			            fma(r, 0x1.6c16c16c16c17p-10, 0x1.1111111111111p-7),
-			            0x1.5555555555555p-5),
-			        0x1.5555555555555p-3),
-		            0x1.0000000000000p-1),
-		        1.0);
+                        fma(r,
+                            fma(r,
+                                fma(r,
+                                    fma(r, 0x1.6c16c16c16c17p-10, 0x1.1111111111111p-7),
+                                    0x1.5555555555555p-5),
+                                0x1.5555555555555p-3),
+                            0x1.0000000000000p-1),
+                        1.0);
 
     double2 tv = USE_TABLE(two_to_jby64_ep_tbl, j);
     z2 = fma(tv.s0 + tv.s1, z2, tv.s1) + tv.s0;

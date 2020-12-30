@@ -10,12 +10,12 @@
 #define LLDB_TOOLS_DEBUGSERVER_SOURCE_MACOSX_DARWINLOG_DARWINLOGTYPES_H
 
 enum FilterTarget {
-  eFilterTargetInvalid,
-  eFilterTargetActivity,
-  eFilterTargetActivityChain,
-  eFilterTargetCategory,
-  eFilterTargetMessage,
-  eFilterTargetSubsystem
+    eFilterTargetInvalid,
+    eFilterTargetActivity,
+    eFilterTargetActivityChain,
+    eFilterTargetCategory,
+    eFilterTargetMessage,
+    eFilterTargetSubsystem
 };
 
 #endif // LLDB_TOOLS_DEBUGSERVER_SOURCE_MACOSX_DARWINLOG_DARWINLOGTYPES_H

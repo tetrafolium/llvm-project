@@ -25,31 +25,31 @@ static cl::list<std::string> PerfTraceFilenames(
              "`script` command(the raw perf.data should be profiled with -b)"));
 
 static cl::list<std::string>
-    BinaryFilenames("binary", cl::value_desc("binary"), cl::OneOrMore,
-                    llvm::cl::MiscFlags::CommaSeparated,
-                    cl::desc("Path of profiled binary files"));
+BinaryFilenames("binary", cl::value_desc("binary"), cl::OneOrMore,
+                llvm::cl::MiscFlags::CommaSeparated,
+                cl::desc("Path of profiled binary files"));
 
 using namespace llvm;
 using namespace sampleprof;
 
 int main(int argc, const char *argv[]) {
-  InitLLVM X(argc, argv);
+    InitLLVM X(argc, argv);
 
-  // Initialize targets and assembly printers/parsers.
-  InitializeAllTargetInfos();
-  InitializeAllTargetMCs();
-  InitializeAllDisassemblers();
+    // Initialize targets and assembly printers/parsers.
+    InitializeAllTargetInfos();
+    InitializeAllTargetMCs();
+    InitializeAllDisassemblers();
 
-  cl::ParseCommandLineOptions(argc, argv, "llvm SPGO profile generator\n");
+    cl::ParseCommandLineOptions(argc, argv, "llvm SPGO profile generator\n");
 
-  // Load binaries and parse perf events and samples
-  PerfReader Reader(BinaryFilenames);
-  Reader.parsePerfTraces(PerfTraceFilenames);
+    // Load binaries and parse perf events and samples
+    PerfReader Reader(BinaryFilenames);
+    Reader.parsePerfTraces(PerfTraceFilenames);
 
-  std::unique_ptr<ProfileGenerator> Generator = ProfileGenerator::create(
-      Reader.getBinarySampleCounters(), Reader.getPerfScriptType());
-  Generator->generateProfile();
-  Generator->write();
+    std::unique_ptr<ProfileGenerator> Generator = ProfileGenerator::create(
+                Reader.getBinarySampleCounters(), Reader.getPerfScriptType());
+    Generator->generateProfile();
+    Generator->write();
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

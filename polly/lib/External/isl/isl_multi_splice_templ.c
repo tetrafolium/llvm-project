@@ -36,28 +36,28 @@
  * and then apply range_splice.
  */
 __isl_give MULTI(BASE) *FN(MULTI(BASE),splice)(
-	__isl_take MULTI(BASE) *multi1, unsigned in_pos, unsigned out_pos,
-	__isl_take MULTI(BASE) *multi2)
+    __isl_take MULTI(BASE) *multi1, unsigned in_pos, unsigned out_pos,
+    __isl_take MULTI(BASE) *multi2)
 {
-	isl_size n_in1;
-	isl_size n_in2;
+    isl_size n_in1;
+    isl_size n_in2;
 
-	n_in1 = FN(MULTI(BASE),dim)(multi1, isl_dim_in);
-	n_in2 = FN(MULTI(BASE),dim)(multi2, isl_dim_in);
-	if (n_in1 < 0 || n_in2 < 0)
-		goto error;
+    n_in1 = FN(MULTI(BASE),dim)(multi1, isl_dim_in);
+    n_in2 = FN(MULTI(BASE),dim)(multi2, isl_dim_in);
+    if (n_in1 < 0 || n_in2 < 0)
+        goto error;
 
-	if (FN(MULTI(BASE),check_range)(multi1, isl_dim_in, in_pos, 0) < 0)
-		goto error;
+    if (FN(MULTI(BASE),check_range)(multi1, isl_dim_in, in_pos, 0) < 0)
+        goto error;
 
-	multi1 = FN(MULTI(BASE),insert_dims)(multi1, isl_dim_in, in_pos, n_in2);
-	multi2 = FN(MULTI(BASE),insert_dims)(multi2, isl_dim_in, n_in2,
-						n_in1 - in_pos);
-	multi2 = FN(MULTI(BASE),insert_dims)(multi2, isl_dim_in, 0, in_pos);
+    multi1 = FN(MULTI(BASE),insert_dims)(multi1, isl_dim_in, in_pos, n_in2);
+    multi2 = FN(MULTI(BASE),insert_dims)(multi2, isl_dim_in, n_in2,
+                                         n_in1 - in_pos);
+    multi2 = FN(MULTI(BASE),insert_dims)(multi2, isl_dim_in, 0, in_pos);
 
-	return FN(MULTI(BASE),range_splice)(multi1, out_pos, multi2);
+    return FN(MULTI(BASE),range_splice)(multi1, out_pos, multi2);
 error:
-	FN(MULTI(BASE),free)(multi1);
-	FN(MULTI(BASE),free)(multi2);
-	return NULL;
+    FN(MULTI(BASE),free)(multi1);
+    FN(MULTI(BASE),free)(multi2);
+    return NULL;
 }

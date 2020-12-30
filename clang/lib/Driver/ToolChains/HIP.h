@@ -19,36 +19,38 @@ namespace driver {
 namespace tools {
 
 namespace AMDGCN {
-  // Construct command for creating HIP fatbin.
-  void constructHIPFatbinCommand(Compilation &C, const JobAction &JA,
-                  StringRef OutputFileName, const InputInfoList &Inputs,
-                  const llvm::opt::ArgList &TCArgs, const Tool& T);
+// Construct command for creating HIP fatbin.
+void constructHIPFatbinCommand(Compilation &C, const JobAction &JA,
+                               StringRef OutputFileName, const InputInfoList &Inputs,
+                               const llvm::opt::ArgList &TCArgs, const Tool& T);
 
 // Runs llvm-link/opt/llc/lld, which links multiple LLVM bitcode, together with
 // device library, then compiles it to ISA in a shared object.
 class LLVM_LIBRARY_VISIBILITY Linker : public Tool {
 public:
-  Linker(const ToolChain &TC) : Tool("AMDGCN::Linker", "amdgcn-link", TC) {}
+    Linker(const ToolChain &TC) : Tool("AMDGCN::Linker", "amdgcn-link", TC) {}
 
-  bool hasIntegratedCPP() const override { return false; }
+    bool hasIntegratedCPP() const override {
+        return false;
+    }
 
-  void ConstructJob(Compilation &C, const JobAction &JA,
-                    const InputInfo &Output, const InputInfoList &Inputs,
-                    const llvm::opt::ArgList &TCArgs,
-                    const char *LinkingOutput) const override;
+    void ConstructJob(Compilation &C, const JobAction &JA,
+                      const InputInfo &Output, const InputInfoList &Inputs,
+                      const llvm::opt::ArgList &TCArgs,
+                      const char *LinkingOutput) const override;
 
 private:
 
-  void constructLldCommand(Compilation &C, const JobAction &JA,
-                           const InputInfoList &Inputs, const InputInfo &Output,
-                           const llvm::opt::ArgList &Args) const;
+    void constructLldCommand(Compilation &C, const JobAction &JA,
+                             const InputInfoList &Inputs, const InputInfo &Output,
+                             const llvm::opt::ArgList &Args) const;
 
-  // Construct command for creating Object from HIP fatbin.
-  void constructGenerateObjFileFromHIPFatBinary(Compilation &C,
-                                                const InputInfo &Output,
-                                                const InputInfoList &Inputs,
-                                                const llvm::opt::ArgList &Args,
-                                                const JobAction &JA) const;
+    // Construct command for creating Object from HIP fatbin.
+    void constructGenerateObjFileFromHIPFatBinary(Compilation &C,
+            const InputInfo &Output,
+            const InputInfoList &Inputs,
+            const llvm::opt::ArgList &Args,
+            const JobAction &JA) const;
 };
 
 } // end namespace AMDGCN
@@ -58,53 +60,69 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY HIPToolChain final : public ROCMToolChain {
 public:
-  HIPToolChain(const Driver &D, const llvm::Triple &Triple,
-                const ToolChain &HostTC, const llvm::opt::ArgList &Args);
+    HIPToolChain(const Driver &D, const llvm::Triple &Triple,
+                 const ToolChain &HostTC, const llvm::opt::ArgList &Args);
 
-  const llvm::Triple *getAuxTriple() const override {
-    return &HostTC.getTriple();
-  }
+    const llvm::Triple *getAuxTriple() const override {
+        return &HostTC.getTriple();
+    }
 
-  llvm::opt::DerivedArgList *
-  TranslateArgs(const llvm::opt::DerivedArgList &Args, StringRef BoundArch,
-                Action::OffloadKind DeviceOffloadKind) const override;
-  void addClangTargetOptions(const llvm::opt::ArgList &DriverArgs,
-                             llvm::opt::ArgStringList &CC1Args,
-                             Action::OffloadKind DeviceOffloadKind) const override;
+    llvm::opt::DerivedArgList *
+    TranslateArgs(const llvm::opt::DerivedArgList &Args, StringRef BoundArch,
+                  Action::OffloadKind DeviceOffloadKind) const override;
+    void addClangTargetOptions(const llvm::opt::ArgList &DriverArgs,
+                               llvm::opt::ArgStringList &CC1Args,
+                               Action::OffloadKind DeviceOffloadKind) const override;
 
-  bool useIntegratedAs() const override { return true; }
-  bool isCrossCompiling() const override { return true; }
-  bool isPICDefault() const override { return false; }
-  bool isPIEDefault() const override { return false; }
-  bool isPICDefaultForced() const override { return false; }
-  bool SupportsProfiling() const override { return false; }
-  bool IsMathErrnoDefault() const override { return false; }
+    bool useIntegratedAs() const override {
+        return true;
+    }
+    bool isCrossCompiling() const override {
+        return true;
+    }
+    bool isPICDefault() const override {
+        return false;
+    }
+    bool isPIEDefault() const override {
+        return false;
+    }
+    bool isPICDefaultForced() const override {
+        return false;
+    }
+    bool SupportsProfiling() const override {
+        return false;
+    }
+    bool IsMathErrnoDefault() const override {
+        return false;
+    }
 
-  void addClangWarningOptions(llvm::opt::ArgStringList &CC1Args) const override;
-  CXXStdlibType GetCXXStdlibType(const llvm::opt::ArgList &Args) const override;
-  void
-  AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                            llvm::opt::ArgStringList &CC1Args) const override;
-  void AddClangCXXStdlibIncludeArgs(
-      const llvm::opt::ArgList &Args,
-      llvm::opt::ArgStringList &CC1Args) const override;
-  void AddIAMCUIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+    void addClangWarningOptions(llvm::opt::ArgStringList &CC1Args) const override;
+    CXXStdlibType GetCXXStdlibType(const llvm::opt::ArgList &Args) const override;
+    void
+    AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                              llvm::opt::ArgStringList &CC1Args) const override;
+    void AddClangCXXStdlibIncludeArgs(
+        const llvm::opt::ArgList &Args,
+        llvm::opt::ArgStringList &CC1Args) const override;
+    void AddIAMCUIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                             llvm::opt::ArgStringList &CC1Args) const override;
+    void AddHIPIncludeArgs(const llvm::opt::ArgList &DriverArgs,
                            llvm::opt::ArgStringList &CC1Args) const override;
-  void AddHIPIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                         llvm::opt::ArgStringList &CC1Args) const override;
 
-  SanitizerMask getSupportedSanitizers() const override;
+    SanitizerMask getSupportedSanitizers() const override;
 
-  VersionTuple
-  computeMSVCVersion(const Driver *D,
-                     const llvm::opt::ArgList &Args) const override;
+    VersionTuple
+    computeMSVCVersion(const Driver *D,
+                       const llvm::opt::ArgList &Args) const override;
 
-  unsigned GetDefaultDwarfVersion() const override { return 4; }
+    unsigned GetDefaultDwarfVersion() const override {
+        return 4;
+    }
 
-  const ToolChain &HostTC;
+    const ToolChain &HostTC;
 
 protected:
-  Tool *buildLinker() const override;
+    Tool *buildLinker() const override;
 };
 
 } // end namespace toolchains

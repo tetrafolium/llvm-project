@@ -21,16 +21,16 @@
 #include <stdlib.h>
 
 static llvm::ManagedStatic<lldb_private::SystemLifetimeManager>
-    g_debugger_lifetime;
+g_debugger_lifetime;
 
 static void display_usage(const char *progname) {
-  fprintf(stderr, "Usage:\n"
-                  "  %s v[ersion]\n"
-                  "  %s g[dbserver] [options]\n"
-                  "  %s p[latform] [options]\n"
-                  "Invoke subcommand for additional help\n",
-          progname, progname, progname);
-  exit(0);
+    fprintf(stderr, "Usage:\n"
+            "  %s v[ersion]\n"
+            "  %s g[dbserver] [options]\n"
+            "  %s p[latform] [options]\n"
+            "Invoke subcommand for additional help\n",
+            progname, progname, progname);
+    exit(0);
 }
 
 // Forward declarations of subcommand main methods.
@@ -39,44 +39,46 @@ int main_platform(int argc, char *argv[]);
 
 namespace llgs {
 static void initialize() {
-  if (auto e = g_debugger_lifetime->Initialize(
-          std::make_unique<SystemInitializerLLGS>(), nullptr))
-    llvm::consumeError(std::move(e));
+    if (auto e = g_debugger_lifetime->Initialize(
+                     std::make_unique<SystemInitializerLLGS>(), nullptr))
+        llvm::consumeError(std::move(e));
 }
 
-static void terminate_debugger() { g_debugger_lifetime->Terminate(); }
+static void terminate_debugger() {
+    g_debugger_lifetime->Terminate();
+}
 } // namespace llgs
 
 // main
 int main(int argc, char *argv[]) {
-  llvm::InitLLVM IL(argc, argv, /*InstallPipeSignalExitHandler=*/false);
-  llvm::StringRef ToolName = argv[0];
-  llvm::sys::PrintStackTraceOnErrorSignal(ToolName);
-  llvm::PrettyStackTraceProgram X(argc, argv);
+    llvm::InitLLVM IL(argc, argv, /*InstallPipeSignalExitHandler=*/false);
+    llvm::StringRef ToolName = argv[0];
+    llvm::sys::PrintStackTraceOnErrorSignal(ToolName);
+    llvm::PrettyStackTraceProgram X(argc, argv);
 
-  int option_error = 0;
-  const char *progname = argv[0];
-  if (argc < 2) {
-    display_usage(progname);
-    exit(option_error);
-  }
+    int option_error = 0;
+    const char *progname = argv[0];
+    if (argc < 2) {
+        display_usage(progname);
+        exit(option_error);
+    }
 
-  switch (argv[1][0]) {
-  case 'g':
-    llgs::initialize();
-    main_gdbserver(argc, argv);
-    llgs::terminate_debugger();
-    break;
-  case 'p':
-    llgs::initialize();
-    main_platform(argc, argv);
-    llgs::terminate_debugger();
-    break;
-  case 'v':
-    fprintf(stderr, "%s\n", lldb_private::GetVersion());
-    break;
-  default:
-    display_usage(progname);
-    exit(option_error);
-  }
+    switch (argv[1][0]) {
+    case 'g':
+        llgs::initialize();
+        main_gdbserver(argc, argv);
+        llgs::terminate_debugger();
+        break;
+    case 'p':
+        llgs::initialize();
+        main_platform(argc, argv);
+        llgs::terminate_debugger();
+        break;
+    case 'v':
+        fprintf(stderr, "%s\n", lldb_private::GetVersion());
+        break;
+    default:
+        display_usage(progname);
+        exit(option_error);
+    }
 }

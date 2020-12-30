@@ -25,37 +25,37 @@ class HeaderMapCollector;
 /// preprocessing period.
 class FindAllMacros : public clang::PPCallbacks {
 public:
-  explicit FindAllMacros(SymbolReporter *Reporter, SourceManager *SM,
-                         HeaderMapCollector *Collector = nullptr)
-      : Reporter(Reporter), SM(SM), Collector(Collector) {}
+    explicit FindAllMacros(SymbolReporter *Reporter, SourceManager *SM,
+                           HeaderMapCollector *Collector = nullptr)
+        : Reporter(Reporter), SM(SM), Collector(Collector) {}
 
-  void MacroDefined(const Token &MacroNameTok,
-                    const MacroDirective *MD) override;
+    void MacroDefined(const Token &MacroNameTok,
+                      const MacroDirective *MD) override;
 
-  void MacroExpands(const Token &MacroNameTok, const MacroDefinition &MD,
-                    SourceRange Range, const MacroArgs *Args) override;
+    void MacroExpands(const Token &MacroNameTok, const MacroDefinition &MD,
+                      SourceRange Range, const MacroArgs *Args) override;
 
-  void Ifdef(SourceLocation Loc, const Token &MacroNameTok,
-             const MacroDefinition &MD) override;
+    void Ifdef(SourceLocation Loc, const Token &MacroNameTok,
+               const MacroDefinition &MD) override;
 
-  void Ifndef(SourceLocation Loc, const Token &MacroNameTok,
-              const MacroDefinition &MD) override;
+    void Ifndef(SourceLocation Loc, const Token &MacroNameTok,
+                const MacroDefinition &MD) override;
 
-  void EndOfMainFile() override;
+    void EndOfMainFile() override;
 
 private:
-  llvm::Optional<SymbolInfo> CreateMacroSymbol(const Token &MacroNameTok,
-                                               const MacroInfo *MD);
-  // Not a callback, just a common path for all usage types.
-  void MacroUsed(const Token &Name, const MacroDefinition &MD);
+    llvm::Optional<SymbolInfo> CreateMacroSymbol(const Token &MacroNameTok,
+            const MacroInfo *MD);
+    // Not a callback, just a common path for all usage types.
+    void MacroUsed(const Token &Name, const MacroDefinition &MD);
 
-  SymbolInfo::SignalMap FileSymbols;
-  // Reporter for SymbolInfo.
-  SymbolReporter *const Reporter;
-  SourceManager *const SM;
-  // A remapping header file collector allowing clients to include a different
-  // header.
-  HeaderMapCollector *const Collector;
+    SymbolInfo::SignalMap FileSymbols;
+    // Reporter for SymbolInfo.
+    SymbolReporter *const Reporter;
+    SourceManager *const SM;
+    // A remapping header file collector allowing clients to include a different
+    // header.
+    HeaderMapCollector *const Collector;
 };
 
 } // namespace find_all_symbols

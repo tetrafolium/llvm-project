@@ -5,7 +5,7 @@
  *
  * Written by Sven Verdoolaege, INRIA Saclay - Ile-de-France,
  * Parc Club Orsay Universite, ZAC des vignes, 4 rue Jacques Monod,
- * 91893 Orsay, France 
+ * 91893 Orsay, France
  */
 
 #include <isl_map_private.h>
@@ -67,45 +67,45 @@
 /* Add the given prefix to all named isl_dim_set dimensions in "space".
  */
 static __isl_give isl_space *isl_space_prefix(__isl_take isl_space *space,
-	const char *prefix)
+        const char *prefix)
 {
-	int i;
-	isl_ctx *ctx;
-	isl_size nvar;
-	size_t prefix_len = strlen(prefix);
+    int i;
+    isl_ctx *ctx;
+    isl_size nvar;
+    size_t prefix_len = strlen(prefix);
 
-	if (!space)
-		return NULL;
+    if (!space)
+        return NULL;
 
-	ctx = isl_space_get_ctx(space);
-	nvar = isl_space_dim(space, isl_dim_set);
-	if (nvar < 0)
-		return isl_space_free(space);
+    ctx = isl_space_get_ctx(space);
+    nvar = isl_space_dim(space, isl_dim_set);
+    if (nvar < 0)
+        return isl_space_free(space);
 
-	for (i = 0; i < nvar; ++i) {
-		const char *name;
-		char *prefix_name;
+    for (i = 0; i < nvar; ++i) {
+        const char *name;
+        char *prefix_name;
 
-		name = isl_space_get_dim_name(space, isl_dim_set, i);
-		if (!name)
-			continue;
+        name = isl_space_get_dim_name(space, isl_dim_set, i);
+        if (!name)
+            continue;
 
-		prefix_name = isl_alloc_array(ctx, char,
-					      prefix_len + strlen(name) + 1);
-		if (!prefix_name)
-			goto error;
-		memcpy(prefix_name, prefix, prefix_len);
-		strcpy(prefix_name + prefix_len, name);
+        prefix_name = isl_alloc_array(ctx, char,
+                                      prefix_len + strlen(name) + 1);
+        if (!prefix_name)
+            goto error;
+        memcpy(prefix_name, prefix, prefix_len);
+        strcpy(prefix_name + prefix_len, name);
 
-		space = isl_space_set_dim_name(space,
-						isl_dim_set, i, prefix_name);
-		free(prefix_name);
-	}
+        space = isl_space_set_dim_name(space,
+                                       isl_dim_set, i, prefix_name);
+        free(prefix_name);
+    }
 
-	return space;
+    return space;
 error:
-	isl_space_free(space);
-	return NULL;
+    isl_space_free(space);
+    return NULL;
 }
 
 /* Given a dimension specification of the solutions space, construct
@@ -123,59 +123,59 @@ error:
  */
 static __isl_give isl_space *isl_space_coefficients(__isl_take isl_space *space)
 {
-	isl_space *space_param;
-	isl_size nvar;
-	isl_size nparam;
+    isl_space *space_param;
+    isl_size nvar;
+    isl_size nparam;
 
-	nvar = isl_space_dim(space, isl_dim_set);
-	nparam = isl_space_dim(space, isl_dim_param);
-	if (nvar < 0 || nparam < 0)
-		return isl_space_free(space);
-	space_param = isl_space_copy(space);
-	space_param = isl_space_drop_dims(space_param, isl_dim_set, 0, nvar);
-	space_param = isl_space_move_dims(space_param, isl_dim_set, 0,
-				 isl_dim_param, 0, nparam);
-	space_param = isl_space_prefix(space_param, "c_");
-	space_param = isl_space_insert_dims(space_param, isl_dim_set, 0, 1);
-	space_param = isl_space_set_dim_name(space_param,
-				isl_dim_set, 0, "c_cst");
-	space = isl_space_drop_dims(space, isl_dim_param, 0, nparam);
-	space = isl_space_prefix(space, "c_");
-	space = isl_space_join(isl_space_from_domain(space_param),
-			   isl_space_from_range(space));
-	space = isl_space_wrap(space);
-	space = isl_space_set_tuple_name(space, isl_dim_set, "coefficients");
+    nvar = isl_space_dim(space, isl_dim_set);
+    nparam = isl_space_dim(space, isl_dim_param);
+    if (nvar < 0 || nparam < 0)
+        return isl_space_free(space);
+    space_param = isl_space_copy(space);
+    space_param = isl_space_drop_dims(space_param, isl_dim_set, 0, nvar);
+    space_param = isl_space_move_dims(space_param, isl_dim_set, 0,
+                                      isl_dim_param, 0, nparam);
+    space_param = isl_space_prefix(space_param, "c_");
+    space_param = isl_space_insert_dims(space_param, isl_dim_set, 0, 1);
+    space_param = isl_space_set_dim_name(space_param,
+                                         isl_dim_set, 0, "c_cst");
+    space = isl_space_drop_dims(space, isl_dim_param, 0, nparam);
+    space = isl_space_prefix(space, "c_");
+    space = isl_space_join(isl_space_from_domain(space_param),
+                           isl_space_from_range(space));
+    space = isl_space_wrap(space);
+    space = isl_space_set_tuple_name(space, isl_dim_set, "coefficients");
 
-	return space;
+    return space;
 }
 
 /* Drop the given prefix from all named dimensions of type "type" in "space".
  */
 static __isl_give isl_space *isl_space_unprefix(__isl_take isl_space *space,
-	enum isl_dim_type type, const char *prefix)
+        enum isl_dim_type type, const char *prefix)
 {
-	int i;
-	isl_size n;
-	size_t prefix_len = strlen(prefix);
+    int i;
+    isl_size n;
+    size_t prefix_len = strlen(prefix);
 
-	n = isl_space_dim(space, type);
-	if (n < 0)
-		return isl_space_free(space);
+    n = isl_space_dim(space, type);
+    if (n < 0)
+        return isl_space_free(space);
 
-	for (i = 0; i < n; ++i) {
-		const char *name;
+    for (i = 0; i < n; ++i) {
+        const char *name;
 
-		name = isl_space_get_dim_name(space, type, i);
-		if (!name)
-			continue;
-		if (strncmp(name, prefix, prefix_len))
-			continue;
+        name = isl_space_get_dim_name(space, type, i);
+        if (!name)
+            continue;
+        if (strncmp(name, prefix, prefix_len))
+            continue;
 
-		space = isl_space_set_dim_name(space,
-						type, i, name + prefix_len);
-	}
+        space = isl_space_set_dim_name(space,
+                                       type, i, name + prefix_len);
+    }
 
-	return space;
+    return space;
 }
 
 /* Given a dimension specification of the space of coefficients, construct
@@ -193,32 +193,32 @@ static __isl_give isl_space *isl_space_unprefix(__isl_take isl_space *space,
  */
 static __isl_give isl_space *isl_space_solutions(__isl_take isl_space *space)
 {
-	isl_size nparam;
+    isl_size nparam;
 
-	space = isl_space_unwrap(space);
-	space = isl_space_drop_dims(space, isl_dim_in, 0, 1);
-	space = isl_space_unprefix(space, isl_dim_in, "c_");
-	space = isl_space_unprefix(space, isl_dim_out, "c_");
-	nparam = isl_space_dim(space, isl_dim_in);
-	if (nparam < 0)
-		return isl_space_free(space);
-	space = isl_space_move_dims(space,
-				    isl_dim_param, 0, isl_dim_in, 0, nparam);
-	space = isl_space_range(space);
+    space = isl_space_unwrap(space);
+    space = isl_space_drop_dims(space, isl_dim_in, 0, 1);
+    space = isl_space_unprefix(space, isl_dim_in, "c_");
+    space = isl_space_unprefix(space, isl_dim_out, "c_");
+    nparam = isl_space_dim(space, isl_dim_in);
+    if (nparam < 0)
+        return isl_space_free(space);
+    space = isl_space_move_dims(space,
+                                isl_dim_param, 0, isl_dim_in, 0, nparam);
+    space = isl_space_range(space);
 
-	return space;
+    return space;
 }
 
 /* Return the rational universe basic set in the given space.
  */
 static __isl_give isl_basic_set *rational_universe(__isl_take isl_space *space)
 {
-	isl_basic_set *bset;
+    isl_basic_set *bset;
 
-	bset = isl_basic_set_universe(space);
-	bset = isl_basic_set_set_rational(bset);
+    bset = isl_basic_set_universe(space);
+    bset = isl_basic_set_set_rational(bset);
 
-	return bset;
+    return bset;
 }
 
 /* Compute the dual of "bset" by applying Farkas' lemma.
@@ -235,83 +235,83 @@ static __isl_give isl_basic_set *rational_universe(__isl_take isl_space *space)
  * specifically and return the universe basic set.
  */
 static __isl_give isl_basic_set *farkas(__isl_take isl_basic_set *bset,
-	int shift)
+                                        int shift)
 {
-	int i, j, k;
-	isl_ctx *ctx;
-	isl_space *space;
-	isl_basic_set *dual = NULL;
-	isl_size total;
+    int i, j, k;
+    isl_ctx *ctx;
+    isl_space *space;
+    isl_basic_set *dual = NULL;
+    isl_size total;
 
-	total = isl_basic_set_dim(bset, isl_dim_all);
-	if (total < 0)
-		return isl_basic_set_free(bset);
+    total = isl_basic_set_dim(bset, isl_dim_all);
+    if (total < 0)
+        return isl_basic_set_free(bset);
 
-	ctx = isl_basic_set_get_ctx(bset);
-	space = isl_space_set_alloc(ctx, 0, total + shift);
-	if (isl_basic_set_plain_is_empty(bset)) {
-		isl_basic_set_free(bset);
-		return rational_universe(space);
-	}
+    ctx = isl_basic_set_get_ctx(bset);
+    space = isl_space_set_alloc(ctx, 0, total + shift);
+    if (isl_basic_set_plain_is_empty(bset)) {
+        isl_basic_set_free(bset);
+        return rational_universe(space);
+    }
 
-	dual = isl_basic_set_alloc_space(space, bset->n_eq + bset->n_ineq,
-					total, bset->n_ineq + (shift > 0));
-	dual = isl_basic_set_set_rational(dual);
+    dual = isl_basic_set_alloc_space(space, bset->n_eq + bset->n_ineq,
+                                     total, bset->n_ineq + (shift > 0));
+    dual = isl_basic_set_set_rational(dual);
 
-	for (i = 0; i < bset->n_eq + bset->n_ineq; ++i) {
-		k = isl_basic_set_alloc_div(dual);
-		if (k < 0)
-			goto error;
-		isl_int_set_si(dual->div[k][0], 0);
-	}
+    for (i = 0; i < bset->n_eq + bset->n_ineq; ++i) {
+        k = isl_basic_set_alloc_div(dual);
+        if (k < 0)
+            goto error;
+        isl_int_set_si(dual->div[k][0], 0);
+    }
 
-	for (i = 0; i < total; ++i) {
-		k = isl_basic_set_alloc_equality(dual);
-		if (k < 0)
-			goto error;
-		isl_seq_clr(dual->eq[k], 1 + shift + total);
-		isl_int_set_si(dual->eq[k][1 + shift + i], -1);
-		for (j = 0; j < bset->n_eq; ++j)
-			isl_int_set(dual->eq[k][1 + shift + total + j],
-				    bset->eq[j][1 + i]);
-		for (j = 0; j < bset->n_ineq; ++j)
-			isl_int_set(dual->eq[k][1 + shift + total + bset->n_eq + j],
-				    bset->ineq[j][1 + i]);
-	}
+    for (i = 0; i < total; ++i) {
+        k = isl_basic_set_alloc_equality(dual);
+        if (k < 0)
+            goto error;
+        isl_seq_clr(dual->eq[k], 1 + shift + total);
+        isl_int_set_si(dual->eq[k][1 + shift + i], -1);
+        for (j = 0; j < bset->n_eq; ++j)
+            isl_int_set(dual->eq[k][1 + shift + total + j],
+                        bset->eq[j][1 + i]);
+        for (j = 0; j < bset->n_ineq; ++j)
+            isl_int_set(dual->eq[k][1 + shift + total + bset->n_eq + j],
+                        bset->ineq[j][1 + i]);
+    }
 
-	for (i = 0; i < bset->n_ineq; ++i) {
-		k = isl_basic_set_alloc_inequality(dual);
-		if (k < 0)
-			goto error;
-		isl_seq_clr(dual->ineq[k],
-			    1 + shift + total + bset->n_eq + bset->n_ineq);
-		isl_int_set_si(dual->ineq[k][1 + shift + total + bset->n_eq + i], 1);
-	}
+    for (i = 0; i < bset->n_ineq; ++i) {
+        k = isl_basic_set_alloc_inequality(dual);
+        if (k < 0)
+            goto error;
+        isl_seq_clr(dual->ineq[k],
+                    1 + shift + total + bset->n_eq + bset->n_ineq);
+        isl_int_set_si(dual->ineq[k][1 + shift + total + bset->n_eq + i], 1);
+    }
 
-	if (shift > 0) {
-		k = isl_basic_set_alloc_inequality(dual);
-		if (k < 0)
-			goto error;
-		isl_seq_clr(dual->ineq[k], 2 + total);
-		isl_int_set_si(dual->ineq[k][1], 1);
-		for (j = 0; j < bset->n_eq; ++j)
-			isl_int_neg(dual->ineq[k][2 + total + j],
-				    bset->eq[j][0]);
-		for (j = 0; j < bset->n_ineq; ++j)
-			isl_int_neg(dual->ineq[k][2 + total + bset->n_eq + j],
-				    bset->ineq[j][0]);
-	}
+    if (shift > 0) {
+        k = isl_basic_set_alloc_inequality(dual);
+        if (k < 0)
+            goto error;
+        isl_seq_clr(dual->ineq[k], 2 + total);
+        isl_int_set_si(dual->ineq[k][1], 1);
+        for (j = 0; j < bset->n_eq; ++j)
+            isl_int_neg(dual->ineq[k][2 + total + j],
+                        bset->eq[j][0]);
+        for (j = 0; j < bset->n_ineq; ++j)
+            isl_int_neg(dual->ineq[k][2 + total + bset->n_eq + j],
+                        bset->ineq[j][0]);
+    }
 
-	dual = isl_basic_set_remove_divs(dual);
-	dual = isl_basic_set_simplify(dual);
-	dual = isl_basic_set_finalize(dual);
+    dual = isl_basic_set_remove_divs(dual);
+    dual = isl_basic_set_simplify(dual);
+    dual = isl_basic_set_finalize(dual);
 
-	isl_basic_set_free(bset);
-	return dual;
+    isl_basic_set_free(bset);
+    return dual;
 error:
-	isl_basic_set_free(bset);
-	isl_basic_set_free(dual);
-	return NULL;
+    isl_basic_set_free(bset);
+    isl_basic_set_free(dual);
+    return NULL;
 }
 
 /* Construct a basic set containing the tuples of coefficients of all
@@ -319,23 +319,23 @@ error:
  * the space of input and output and without any further decomposition.
  */
 static __isl_give isl_basic_set *isl_basic_set_coefficients_base(
-	__isl_take isl_basic_set *bset)
+    __isl_take isl_basic_set *bset)
 {
-	return farkas(bset, 1);
+    return farkas(bset, 1);
 }
 
 /* Return the inverse mapping of "morph".
  */
 static __isl_give isl_mat *peek_inv(__isl_keep isl_morph *morph)
 {
-	return morph ? morph->inv : NULL;
+    return morph ? morph->inv : NULL;
 }
 
 /* Return a copy of the inverse mapping of "morph".
  */
 static __isl_give isl_mat *get_inv(__isl_keep isl_morph *morph)
 {
-	return isl_mat_copy(peek_inv(morph));
+    return isl_mat_copy(peek_inv(morph));
 }
 
 /* Information about a single factor within isl_basic_set_coefficients_product.
@@ -353,13 +353,13 @@ static __isl_give isl_mat *get_inv(__isl_keep isl_morph *morph)
  * to the current vertex.
  */
 struct isl_coefficients_factor_data {
-	isl_basic_set *coeff;
-	int start;
-	int dim;
-	int n_line;
-	int n_ray;
-	int n_vertex;
-	int pos;
+    isl_basic_set *coeff;
+    int start;
+    int dim;
+    int n_line;
+    int n_ray;
+    int n_vertex;
+    int pos;
 };
 
 /* Internal data structure for isl_basic_set_coefficients_product.
@@ -370,41 +370,41 @@ struct isl_coefficients_factor_data {
  * "factors" contains information about the individual "n" factors.
  */
 struct isl_coefficients_product_data {
-	int n;
-	int pos;
-	int start_next;
-	struct isl_coefficients_factor_data *factors;
+    int n;
+    int pos;
+    int start_next;
+    struct isl_coefficients_factor_data *factors;
 };
 
 /* Initialize the internal data structure for
  * isl_basic_set_coefficients_product.
  */
 static isl_stat isl_coefficients_product_data_init(isl_ctx *ctx,
-	struct isl_coefficients_product_data *data, int n)
+        struct isl_coefficients_product_data *data, int n)
 {
-	data->n = n;
-	data->pos = 0;
-	data->start_next = 0;
-	data->factors = isl_calloc_array(ctx,
-					struct isl_coefficients_factor_data, n);
-	if (!data->factors)
-		return isl_stat_error;
-	return isl_stat_ok;
+    data->n = n;
+    data->pos = 0;
+    data->start_next = 0;
+    data->factors = isl_calloc_array(ctx,
+                                     struct isl_coefficients_factor_data, n);
+    if (!data->factors)
+        return isl_stat_error;
+    return isl_stat_ok;
 }
 
 /* Free all memory allocated in "data".
  */
 static void isl_coefficients_product_data_clear(
-	struct isl_coefficients_product_data *data)
+    struct isl_coefficients_product_data *data)
 {
-	int i;
+    int i;
 
-	if (data->factors) {
-		for (i = 0; i < data->n; ++i) {
-			isl_basic_set_free(data->factors[i].coeff);
-		}
-	}
-	free(data->factors);
+    if (data->factors) {
+        for (i = 0; i < data->n; ++i) {
+            isl_basic_set_free(data->factors[i].coeff);
+        }
+    }
+    free(data->factors);
 }
 
 /* Does inequality "ineq" in the (dual) basic set "bset" represent a ray?
@@ -413,7 +413,7 @@ static void isl_coefficients_product_data_clear(
  */
 static int is_ray(__isl_keep isl_basic_set *bset, int ineq)
 {
-	return isl_int_is_zero(bset->ineq[ineq][1]);
+    return isl_int_is_zero(bset->ineq[ineq][1]);
 }
 
 /* isl_factorizer_every_factor_basic_set callback that
@@ -423,39 +423,39 @@ static int is_ray(__isl_keep isl_basic_set *bset, int ineq)
  * when combining the results over the different factors.
  */
 static isl_bool isl_basic_set_coefficients_factor(
-	__isl_keep isl_basic_set *bset, void *user)
+    __isl_keep isl_basic_set *bset, void *user)
 {
-	struct isl_coefficients_product_data *data = user;
-	isl_basic_set *coeff;
-	isl_size n_eq, n_ineq, dim;
-	int i, n_ray, n_vertex;
+    struct isl_coefficients_product_data *data = user;
+    isl_basic_set *coeff;
+    isl_size n_eq, n_ineq, dim;
+    int i, n_ray, n_vertex;
 
-	coeff = isl_basic_set_coefficients_base(isl_basic_set_copy(bset));
-	data->factors[data->pos].coeff = coeff;
-	if (!coeff)
-		return isl_bool_error;
+    coeff = isl_basic_set_coefficients_base(isl_basic_set_copy(bset));
+    data->factors[data->pos].coeff = coeff;
+    if (!coeff)
+        return isl_bool_error;
 
-	dim = isl_basic_set_dim(bset, isl_dim_set);
-	n_eq = isl_basic_set_n_equality(coeff);
-	n_ineq = isl_basic_set_n_inequality(coeff);
-	if (dim < 0 || n_eq < 0 || n_ineq < 0)
-		return isl_bool_error;
-	n_ray = n_vertex = 0;
-	for (i = 0; i < n_ineq; ++i) {
-		if (is_ray(coeff, i))
-			n_ray++;
-		else
-			n_vertex++;
-	}
-	data->factors[data->pos].start = data->start_next;
-	data->factors[data->pos].dim = dim;
-	data->factors[data->pos].n_line = n_eq;
-	data->factors[data->pos].n_ray = n_ray;
-	data->factors[data->pos].n_vertex = n_vertex;
-	data->pos++;
-	data->start_next += dim;
+    dim = isl_basic_set_dim(bset, isl_dim_set);
+    n_eq = isl_basic_set_n_equality(coeff);
+    n_ineq = isl_basic_set_n_inequality(coeff);
+    if (dim < 0 || n_eq < 0 || n_ineq < 0)
+        return isl_bool_error;
+    n_ray = n_vertex = 0;
+    for (i = 0; i < n_ineq; ++i) {
+        if (is_ray(coeff, i))
+            n_ray++;
+        else
+            n_vertex++;
+    }
+    data->factors[data->pos].start = data->start_next;
+    data->factors[data->pos].dim = dim;
+    data->factors[data->pos].n_line = n_eq;
+    data->factors[data->pos].n_ray = n_ray;
+    data->factors[data->pos].n_vertex = n_vertex;
+    data->pos++;
+    data->start_next += dim;
 
-	return isl_bool_true;
+    return isl_bool_true;
 }
 
 /* Clear an entry in the product, given that there is a "total" number
@@ -463,25 +463,25 @@ static isl_bool isl_basic_set_coefficients_factor(
  */
 static void clear_entry(isl_int *entry, int total)
 {
-	isl_seq_clr(entry, 1 + 1 + total);
+    isl_seq_clr(entry, 1 + 1 + total);
 }
 
 /* Set the part of the entry corresponding to factor "data",
  * from the factor coefficients in "src".
  */
 static void set_factor(isl_int *entry, isl_int *src,
-	struct isl_coefficients_factor_data *data)
+                       struct isl_coefficients_factor_data *data)
 {
-	isl_seq_cpy(entry + 1 + 1 + data->start, src + 1 + 1, data->dim);
+    isl_seq_cpy(entry + 1 + 1 + data->start, src + 1 + 1, data->dim);
 }
 
 /* Set the part of the entry corresponding to factor "data",
  * from the factor coefficients in "src" multiplied by "f".
  */
 static void scale_factor(isl_int *entry, isl_int *src, isl_int f,
-	struct isl_coefficients_factor_data *data)
+                         struct isl_coefficients_factor_data *data)
 {
-	isl_seq_scale(entry + 1 + 1 + data->start, src + 1 + 1, f, data->dim);
+    isl_seq_scale(entry + 1 + 1 + data->start, src + 1 + 1, f, data->dim);
 }
 
 /* Add all lines from the given factor to "bset",
@@ -489,21 +489,21 @@ static void scale_factor(isl_int *entry, isl_int *src, isl_int f,
  * (other than that of the constant term).
  */
 static __isl_give isl_basic_set *add_lines(__isl_take isl_basic_set *bset,
-	struct isl_coefficients_factor_data *factor, int total)
+        struct isl_coefficients_factor_data *factor, int total)
 {
-	int i;
+    int i;
 
-	for (i = 0; i < factor->n_line; ++i) {
-		int k;
+    for (i = 0; i < factor->n_line; ++i) {
+        int k;
 
-		k = isl_basic_set_alloc_equality(bset);
-		if (k < 0)
-			return isl_basic_set_free(bset);
-		clear_entry(bset->eq[k], total);
-		set_factor(bset->eq[k], factor->coeff->eq[i], factor);
-	}
+        k = isl_basic_set_alloc_equality(bset);
+        if (k < 0)
+            return isl_basic_set_free(bset);
+        clear_entry(bset->eq[k], total);
+        set_factor(bset->eq[k], factor->coeff->eq[i], factor);
+    }
 
-	return bset;
+    return bset;
 }
 
 /* Add all rays (other than lines) from the given factor to "bset",
@@ -511,25 +511,25 @@ static __isl_give isl_basic_set *add_lines(__isl_take isl_basic_set *bset,
  * (other than that of the constant term).
  */
 static __isl_give isl_basic_set *add_rays(__isl_take isl_basic_set *bset,
-	struct isl_coefficients_factor_data *data, int total)
+        struct isl_coefficients_factor_data *data, int total)
 {
-	int i;
-	int n_ineq = data->n_ray + data->n_vertex;
+    int i;
+    int n_ineq = data->n_ray + data->n_vertex;
 
-	for (i = 0; i < n_ineq; ++i) {
-		int k;
+    for (i = 0; i < n_ineq; ++i) {
+        int k;
 
-		if (!is_ray(data->coeff, i))
-			continue;
+        if (!is_ray(data->coeff, i))
+            continue;
 
-		k = isl_basic_set_alloc_inequality(bset);
-		if (k < 0)
-			return isl_basic_set_free(bset);
-		clear_entry(bset->ineq[k], total);
-		set_factor(bset->ineq[k], data->coeff->ineq[i], data);
-	}
+        k = isl_basic_set_alloc_inequality(bset);
+        if (k < 0)
+            return isl_basic_set_free(bset);
+        clear_entry(bset->ineq[k], total);
+        set_factor(bset->ineq[k], data->coeff->ineq[i], data);
+    }
 
-	return bset;
+    return bset;
 }
 
 /* Move to the first vertex of the given factor starting
@@ -537,19 +537,19 @@ static __isl_give isl_basic_set *add_rays(__isl_take isl_basic_set *bset,
  * returning 1 if a vertex is found.
  */
 static int factor_first_vertex(struct isl_coefficients_factor_data *factor,
-	int start)
+                               int start)
 {
-	int j;
-	int n = factor->n_ray + factor->n_vertex;
+    int j;
+    int n = factor->n_ray + factor->n_vertex;
 
-	for (j = start; j < n; ++j) {
-		if (is_ray(factor->coeff, j))
-			continue;
-		factor->pos = j;
-		return 1;
-	}
+    for (j = start; j < n; ++j) {
+        if (is_ray(factor->coeff, j))
+            continue;
+        factor->pos = j;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /* Move to the first constraint in each factor starting at "first"
@@ -558,10 +558,10 @@ static int factor_first_vertex(struct isl_coefficients_factor_data *factor,
  */
 static void first_vertex(struct isl_coefficients_product_data *data, int first)
 {
-	int i;
+    int i;
 
-	for (i = first; i < data->n; ++i)
-		factor_first_vertex(&data->factors[i], 0);
+    for (i = first; i < data->n; ++i)
+        factor_first_vertex(&data->factors[i], 0);
 }
 
 /* Move to the next vertex in the product.
@@ -575,18 +575,18 @@ static void first_vertex(struct isl_coefficients_product_data *data, int first)
  */
 static int next_vertex(struct isl_coefficients_product_data *data)
 {
-	int i;
+    int i;
 
-	for (i = data->n - 1; i >= 0; --i) {
-		struct isl_coefficients_factor_data *factor = &data->factors[i];
+    for (i = data->n - 1; i >= 0; --i) {
+        struct isl_coefficients_factor_data *factor = &data->factors[i];
 
-		if (!factor_first_vertex(factor, factor->pos + 1))
-			continue;
-		first_vertex(data, i + 1);
-		return 1;
-	}
+        if (!factor_first_vertex(factor, factor->pos + 1))
+            continue;
+        first_vertex(data, i + 1);
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /* Add a vertex to the product "bset" combining the currently selected
@@ -600,40 +600,40 @@ static int next_vertex(struct isl_coefficients_product_data *data)
  * then scale the numerators to this shared denominator.
  */
 static __isl_give isl_basic_set *add_vertex(__isl_take isl_basic_set *bset,
-	struct isl_coefficients_product_data *data)
+        struct isl_coefficients_product_data *data)
 {
-	int i;
-	int k;
-	isl_int lcm, f;
+    int i;
+    int k;
+    isl_int lcm, f;
 
-	k = isl_basic_set_alloc_inequality(bset);
-	if (k < 0)
-		return isl_basic_set_free(bset);
+    k = isl_basic_set_alloc_inequality(bset);
+    if (k < 0)
+        return isl_basic_set_free(bset);
 
-	isl_int_init(lcm);
-	isl_int_init(f);
-	isl_int_set_si(lcm, 1);
-	for (i = 0; i < data->n; ++i) {
-		struct isl_coefficients_factor_data *factor = &data->factors[i];
-		isl_basic_set *coeff = factor->coeff;
-		int pos = factor->pos;
-		isl_int_lcm(lcm, lcm, coeff->ineq[pos][1]);
-	}
-	isl_int_set_si(bset->ineq[k][0], 0);
-	isl_int_set(bset->ineq[k][1], lcm);
+    isl_int_init(lcm);
+    isl_int_init(f);
+    isl_int_set_si(lcm, 1);
+    for (i = 0; i < data->n; ++i) {
+        struct isl_coefficients_factor_data *factor = &data->factors[i];
+        isl_basic_set *coeff = factor->coeff;
+        int pos = factor->pos;
+        isl_int_lcm(lcm, lcm, coeff->ineq[pos][1]);
+    }
+    isl_int_set_si(bset->ineq[k][0], 0);
+    isl_int_set(bset->ineq[k][1], lcm);
 
-	for (i = 0; i < data->n; ++i) {
-		struct isl_coefficients_factor_data *factor = &data->factors[i];
-		isl_basic_set *coeff = factor->coeff;
-		int pos = factor->pos;
-		isl_int_divexact(f, lcm, coeff->ineq[pos][1]);
-		scale_factor(bset->ineq[k], coeff->ineq[pos], f, factor);
-	}
+    for (i = 0; i < data->n; ++i) {
+        struct isl_coefficients_factor_data *factor = &data->factors[i];
+        isl_basic_set *coeff = factor->coeff;
+        int pos = factor->pos;
+        isl_int_divexact(f, lcm, coeff->ineq[pos][1]);
+        scale_factor(bset->ineq[k], coeff->ineq[pos], f, factor);
+    }
 
-	isl_int_clear(f);
-	isl_int_clear(lcm);
+    isl_int_clear(f);
+    isl_int_clear(lcm);
 
-	return bset;
+    return bset;
 }
 
 /* Combine the duals of the factors in the factorization of a basic set
@@ -672,45 +672,45 @@ static __isl_give isl_basic_set *add_vertex(__isl_take isl_basic_set *bset,
  * all combinations have been considered.
  */
 static __isl_give isl_basic_set *construct_product(isl_ctx *ctx,
-	struct isl_coefficients_product_data *data)
+        struct isl_coefficients_product_data *data)
 {
-	int i;
-	int n_line, n_ray, n_vertex;
-	int total;
-	isl_space *space;
-	isl_basic_set *product;
+    int i;
+    int n_line, n_ray, n_vertex;
+    int total;
+    isl_space *space;
+    isl_basic_set *product;
 
-	if (!data->factors)
-		return NULL;
+    if (!data->factors)
+        return NULL;
 
-	total = data->start_next;
+    total = data->start_next;
 
-	n_line = 0;
-	n_ray = 0;
-	n_vertex = 1;
-	for (i = 0; i < data->n; ++i) {
-		n_line += data->factors[i].n_line;
-		n_ray += data->factors[i].n_ray;
-		n_vertex *= data->factors[i].n_vertex;
-	}
+    n_line = 0;
+    n_ray = 0;
+    n_vertex = 1;
+    for (i = 0; i < data->n; ++i) {
+        n_line += data->factors[i].n_line;
+        n_ray += data->factors[i].n_ray;
+        n_vertex *= data->factors[i].n_vertex;
+    }
 
-	space = isl_space_set_alloc(ctx, 0, 1 + total);
-	if (n_vertex == 0)
-		return rational_universe(space);
-	product = isl_basic_set_alloc_space(space, 0, n_line, n_ray + n_vertex);
-	product = isl_basic_set_set_rational(product);
+    space = isl_space_set_alloc(ctx, 0, 1 + total);
+    if (n_vertex == 0)
+        return rational_universe(space);
+    product = isl_basic_set_alloc_space(space, 0, n_line, n_ray + n_vertex);
+    product = isl_basic_set_set_rational(product);
 
-	for (i = 0; i < data->n; ++i)
-		product = add_lines(product, &data->factors[i], total);
-	for (i = 0; i < data->n; ++i)
-		product = add_rays(product, &data->factors[i], total);
+    for (i = 0; i < data->n; ++i)
+        product = add_lines(product, &data->factors[i], total);
+    for (i = 0; i < data->n; ++i)
+        product = add_rays(product, &data->factors[i], total);
 
-	first_vertex(data, 0);
-	do {
-		product = add_vertex(product, data);
-	} while (next_vertex(data));
+    first_vertex(data, 0);
+    do {
+        product = add_vertex(product, data);
+    } while (next_vertex(data));
 
-	return product;
+    return product;
 }
 
 /* Given a factorization "f" of a basic set,
@@ -725,26 +725,26 @@ static __isl_give isl_basic_set *construct_product(isl_ctx *ctx,
  * then combine the results.
  */
 static __isl_give isl_basic_set *isl_basic_set_coefficients_product(
-	__isl_take isl_factorizer *f)
+    __isl_take isl_factorizer *f)
 {
-	struct isl_coefficients_product_data data;
-	isl_ctx *ctx;
-	isl_basic_set *coeff;
-	isl_bool every;
+    struct isl_coefficients_product_data data;
+    isl_ctx *ctx;
+    isl_basic_set *coeff;
+    isl_bool every;
 
-	ctx = isl_factorizer_get_ctx(f);
-	if (isl_coefficients_product_data_init(ctx, &data, f->n_group) < 0)
-		f = isl_factorizer_free(f);
-	every = isl_factorizer_every_factor_basic_set(f,
-			&isl_basic_set_coefficients_factor, &data);
-	isl_factorizer_free(f);
-	if (every >= 0)
-		coeff = construct_product(ctx, &data);
-	else
-		coeff = NULL;
-	isl_coefficients_product_data_clear(&data);
+    ctx = isl_factorizer_get_ctx(f);
+    if (isl_coefficients_product_data_init(ctx, &data, f->n_group) < 0)
+        f = isl_factorizer_free(f);
+    every = isl_factorizer_every_factor_basic_set(f,
+            &isl_basic_set_coefficients_factor, &data);
+    isl_factorizer_free(f);
+    if (every >= 0)
+        coeff = construct_product(ctx, &data);
+    else
+        coeff = NULL;
+    isl_coefficients_product_data_clear(&data);
 
-	return coeff;
+    return coeff;
 }
 
 /* Given a factorization "f" of a basic set,
@@ -763,35 +763,35 @@ static __isl_give isl_basic_set *isl_basic_set_coefficients_product(
  * if U is not the identity matrix.
  */
 static __isl_give isl_basic_set *isl_basic_set_coefficients_morphed_product(
-	__isl_take isl_factorizer *f)
+    __isl_take isl_factorizer *f)
 {
-	isl_bool is_identity;
-	isl_space *space;
-	isl_mat *inv;
-	isl_multi_aff *ma;
-	isl_basic_set *coeff;
+    isl_bool is_identity;
+    isl_space *space;
+    isl_mat *inv;
+    isl_multi_aff *ma;
+    isl_basic_set *coeff;
 
-	if (!f)
-		goto error;
-	is_identity = isl_mat_is_scaled_identity(peek_inv(f->morph));
-	if (is_identity < 0)
-		goto error;
-	if (is_identity)
-		return isl_basic_set_coefficients_product(f);
+    if (!f)
+        goto error;
+    is_identity = isl_mat_is_scaled_identity(peek_inv(f->morph));
+    if (is_identity < 0)
+        goto error;
+    if (is_identity)
+        return isl_basic_set_coefficients_product(f);
 
-	inv = get_inv(f->morph);
-	inv = isl_mat_transpose(inv);
-	inv = isl_mat_lin_to_aff(inv);
+    inv = get_inv(f->morph);
+    inv = isl_mat_transpose(inv);
+    inv = isl_mat_lin_to_aff(inv);
 
-	coeff = isl_basic_set_coefficients_product(f);
-	space = isl_space_map_from_set(isl_basic_set_get_space(coeff));
-	ma = isl_multi_aff_from_aff_mat(space, inv);
-	coeff = isl_basic_set_preimage_multi_aff(coeff, ma);
+    coeff = isl_basic_set_coefficients_product(f);
+    space = isl_space_map_from_set(isl_basic_set_get_space(coeff));
+    ma = isl_multi_aff_from_aff_mat(space, inv);
+    coeff = isl_basic_set_preimage_multi_aff(coeff, ma);
 
-	return coeff;
+    return coeff;
 error:
-	isl_factorizer_free(f);
-	return NULL;
+    isl_factorizer_free(f);
+    return NULL;
 }
 
 /* Construct a basic set containing the tuples of coefficients of all
@@ -811,52 +811,52 @@ error:
  * Otherwise, compute the results for the input basic set as a whole.
  */
 static __isl_give isl_basic_set *basic_set_coefficients(
-	__isl_take isl_basic_set *bset)
+    __isl_take isl_basic_set *bset)
 {
-	isl_factorizer *f;
-	isl_size nparam;
+    isl_factorizer *f;
+    isl_size nparam;
 
-	nparam = isl_basic_set_dim(bset, isl_dim_param);
-	if (nparam < 0)
-		return isl_basic_set_free(bset);
-	bset = isl_basic_set_move_dims(bset, isl_dim_set, 0,
-					    isl_dim_param, 0, nparam);
+    nparam = isl_basic_set_dim(bset, isl_dim_param);
+    if (nparam < 0)
+        return isl_basic_set_free(bset);
+    bset = isl_basic_set_move_dims(bset, isl_dim_set, 0,
+                                   isl_dim_param, 0, nparam);
 
-	f = isl_basic_set_factorizer(bset);
-	if (!f)
-		return isl_basic_set_free(bset);
-	if (f->n_group > 0) {
-		isl_basic_set_free(bset);
-		return isl_basic_set_coefficients_morphed_product(f);
-	}
-	isl_factorizer_free(f);
-	return isl_basic_set_coefficients_base(bset);
+    f = isl_basic_set_factorizer(bset);
+    if (!f)
+        return isl_basic_set_free(bset);
+    if (f->n_group > 0) {
+        isl_basic_set_free(bset);
+        return isl_basic_set_coefficients_morphed_product(f);
+    }
+    isl_factorizer_free(f);
+    return isl_basic_set_coefficients_base(bset);
 }
 
 /* Construct a basic set containing the tuples of coefficients of all
  * valid affine constraints on the given basic set.
  */
 __isl_give isl_basic_set *isl_basic_set_coefficients(
-	__isl_take isl_basic_set *bset)
+    __isl_take isl_basic_set *bset)
 {
-	isl_space *space;
+    isl_space *space;
 
-	if (!bset)
-		return NULL;
-	if (bset->n_div)
-		isl_die(bset->ctx, isl_error_invalid,
-			"input set not allowed to have local variables",
-			goto error);
+    if (!bset)
+        return NULL;
+    if (bset->n_div)
+        isl_die(bset->ctx, isl_error_invalid,
+                "input set not allowed to have local variables",
+                goto error);
 
-	space = isl_basic_set_get_space(bset);
-	space = isl_space_coefficients(space);
+    space = isl_basic_set_get_space(bset);
+    space = isl_space_coefficients(space);
 
-	bset = basic_set_coefficients(bset);
-	bset = isl_basic_set_reset_space(bset, space);
-	return bset;
+    bset = basic_set_coefficients(bset);
+    bset = isl_basic_set_reset_space(bset, space);
+    return bset;
 error:
-	isl_basic_set_free(bset);
-	return NULL;
+    isl_basic_set_free(bset);
+    return NULL;
 }
 
 /* Construct a basic set containing the elements that satisfy all
@@ -864,26 +864,26 @@ error:
  * contained in the given basic set.
  */
 __isl_give isl_basic_set *isl_basic_set_solutions(
-	__isl_take isl_basic_set *bset)
+    __isl_take isl_basic_set *bset)
 {
-	isl_space *space;
+    isl_space *space;
 
-	if (!bset)
-		return NULL;
-	if (bset->n_div)
-		isl_die(bset->ctx, isl_error_invalid,
-			"input set not allowed to have local variables",
-			goto error);
+    if (!bset)
+        return NULL;
+    if (bset->n_div)
+        isl_die(bset->ctx, isl_error_invalid,
+                "input set not allowed to have local variables",
+                goto error);
 
-	space = isl_basic_set_get_space(bset);
-	space = isl_space_solutions(space);
+    space = isl_basic_set_get_space(bset);
+    space = isl_space_solutions(space);
 
-	bset = farkas(bset, -1);
-	bset = isl_basic_set_reset_space(bset, space);
-	return bset;
+    bset = farkas(bset, -1);
+    bset = isl_basic_set_reset_space(bset, space);
+    return bset;
 error:
-	isl_basic_set_free(bset);
-	return NULL;
+    isl_basic_set_free(bset);
+    return NULL;
 }
 
 /* Construct a basic set containing the tuples of coefficients of all
@@ -891,47 +891,47 @@ error:
  */
 __isl_give isl_basic_set *isl_set_coefficients(__isl_take isl_set *set)
 {
-	int i;
-	isl_basic_set *coeff;
+    int i;
+    isl_basic_set *coeff;
 
-	if (!set)
-		return NULL;
-	if (set->n == 0) {
-		isl_space *space = isl_set_get_space(set);
-		space = isl_space_coefficients(space);
-		isl_set_free(set);
-		return rational_universe(space);
-	}
+    if (!set)
+        return NULL;
+    if (set->n == 0) {
+        isl_space *space = isl_set_get_space(set);
+        space = isl_space_coefficients(space);
+        isl_set_free(set);
+        return rational_universe(space);
+    }
 
-	coeff = isl_basic_set_coefficients(isl_basic_set_copy(set->p[0]));
+    coeff = isl_basic_set_coefficients(isl_basic_set_copy(set->p[0]));
 
-	for (i = 1; i < set->n; ++i) {
-		isl_basic_set *bset, *coeff_i;
-		bset = isl_basic_set_copy(set->p[i]);
-		coeff_i = isl_basic_set_coefficients(bset);
-		coeff = isl_basic_set_intersect(coeff, coeff_i);
-	}
+    for (i = 1; i < set->n; ++i) {
+        isl_basic_set *bset, *coeff_i;
+        bset = isl_basic_set_copy(set->p[i]);
+        coeff_i = isl_basic_set_coefficients(bset);
+        coeff = isl_basic_set_intersect(coeff, coeff_i);
+    }
 
-	isl_set_free(set);
-	return coeff;
+    isl_set_free(set);
+    return coeff;
 }
 
 /* Wrapper around isl_basic_set_coefficients for use
  * as a isl_basic_set_list_map callback.
  */
 static __isl_give isl_basic_set *coefficients_wrap(
-	__isl_take isl_basic_set *bset, void *user)
+    __isl_take isl_basic_set *bset, void *user)
 {
-	return isl_basic_set_coefficients(bset);
+    return isl_basic_set_coefficients(bset);
 }
 
 /* Replace the elements of "list" by the result of applying
  * isl_basic_set_coefficients to them.
  */
 __isl_give isl_basic_set_list *isl_basic_set_list_coefficients(
-	__isl_take isl_basic_set_list *list)
+    __isl_take isl_basic_set_list *list)
 {
-	return isl_basic_set_list_map(list, &coefficients_wrap, NULL);
+    return isl_basic_set_list_map(list, &coefficients_wrap, NULL);
 }
 
 /* Construct a basic set containing the elements that satisfy all
@@ -940,27 +940,27 @@ __isl_give isl_basic_set_list *isl_basic_set_list_coefficients(
  */
 __isl_give isl_basic_set *isl_set_solutions(__isl_take isl_set *set)
 {
-	int i;
-	isl_basic_set *sol;
+    int i;
+    isl_basic_set *sol;
 
-	if (!set)
-		return NULL;
-	if (set->n == 0) {
-		isl_space *space = isl_set_get_space(set);
-		space = isl_space_solutions(space);
-		isl_set_free(set);
-		return rational_universe(space);
-	}
+    if (!set)
+        return NULL;
+    if (set->n == 0) {
+        isl_space *space = isl_set_get_space(set);
+        space = isl_space_solutions(space);
+        isl_set_free(set);
+        return rational_universe(space);
+    }
 
-	sol = isl_basic_set_solutions(isl_basic_set_copy(set->p[0]));
+    sol = isl_basic_set_solutions(isl_basic_set_copy(set->p[0]));
 
-	for (i = 1; i < set->n; ++i) {
-		isl_basic_set *bset, *sol_i;
-		bset = isl_basic_set_copy(set->p[i]);
-		sol_i = isl_basic_set_solutions(bset);
-		sol = isl_basic_set_intersect(sol, sol_i);
-	}
+    for (i = 1; i < set->n; ++i) {
+        isl_basic_set *bset, *sol_i;
+        bset = isl_basic_set_copy(set->p[i]);
+        sol_i = isl_basic_set_solutions(bset);
+        sol = isl_basic_set_intersect(sol, sol_i);
+    }
 
-	isl_set_free(set);
-	return sol;
+    isl_set_free(set);
+    return sol;
 }

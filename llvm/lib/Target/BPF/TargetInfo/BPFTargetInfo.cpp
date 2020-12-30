@@ -12,24 +12,26 @@
 using namespace llvm;
 
 Target &llvm::getTheBPFleTarget() {
-  static Target TheBPFleTarget;
-  return TheBPFleTarget;
+    static Target TheBPFleTarget;
+    return TheBPFleTarget;
 }
 Target &llvm::getTheBPFbeTarget() {
-  static Target TheBPFbeTarget;
-  return TheBPFbeTarget;
+    static Target TheBPFbeTarget;
+    return TheBPFbeTarget;
 }
 Target &llvm::getTheBPFTarget() {
-  static Target TheBPFTarget;
-  return TheBPFTarget;
+    static Target TheBPFTarget;
+    return TheBPFTarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeBPFTargetInfo() {
-  TargetRegistry::RegisterTarget(getTheBPFTarget(), "bpf", "BPF (host endian)",
-                                 "BPF", [](Triple::ArchType) { return false; },
-                                 true);
-  RegisterTarget<Triple::bpfel, /*HasJIT=*/true> X(
-      getTheBPFleTarget(), "bpfel", "BPF (little endian)", "BPF");
-  RegisterTarget<Triple::bpfeb, /*HasJIT=*/true> Y(getTheBPFbeTarget(), "bpfeb",
-                                                   "BPF (big endian)", "BPF");
+    TargetRegistry::RegisterTarget(getTheBPFTarget(), "bpf", "BPF (host endian)",
+    "BPF", [](Triple::ArchType) {
+        return false;
+    },
+    true);
+    RegisterTarget<Triple::bpfel, /*HasJIT=*/true> X(
+                       getTheBPFleTarget(), "bpfel", "BPF (little endian)", "BPF");
+    RegisterTarget<Triple::bpfeb, /*HasJIT=*/true> Y(getTheBPFbeTarget(), "bpfeb",
+                   "BPF (big endian)", "BPF");
 }

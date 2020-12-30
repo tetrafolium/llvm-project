@@ -18,35 +18,35 @@ namespace lldb_private {
 
 class DynamicLoaderWindowsDYLD : public DynamicLoader {
 public:
-  DynamicLoaderWindowsDYLD(Process *process);
+    DynamicLoaderWindowsDYLD(Process *process);
 
-  ~DynamicLoaderWindowsDYLD() override;
+    ~DynamicLoaderWindowsDYLD() override;
 
-  static void Initialize();
-  static void Terminate();
-  static ConstString GetPluginNameStatic();
-  static const char *GetPluginDescriptionStatic();
+    static void Initialize();
+    static void Terminate();
+    static ConstString GetPluginNameStatic();
+    static const char *GetPluginDescriptionStatic();
 
-  static DynamicLoader *CreateInstance(Process *process, bool force);
+    static DynamicLoader *CreateInstance(Process *process, bool force);
 
-  void OnLoadModule(lldb::ModuleSP module_sp, const ModuleSpec module_spec,
-                    lldb::addr_t module_addr);
-  void OnUnloadModule(lldb::addr_t module_addr);
+    void OnLoadModule(lldb::ModuleSP module_sp, const ModuleSpec module_spec,
+                      lldb::addr_t module_addr);
+    void OnUnloadModule(lldb::addr_t module_addr);
 
-  void DidAttach() override;
-  void DidLaunch() override;
-  Status CanLoadImage() override;
-  lldb::ThreadPlanSP GetStepThroughTrampolinePlan(Thread &thread,
-                                                  bool stop) override;
+    void DidAttach() override;
+    void DidLaunch() override;
+    Status CanLoadImage() override;
+    lldb::ThreadPlanSP GetStepThroughTrampolinePlan(Thread &thread,
+            bool stop) override;
 
-  ConstString GetPluginName() override;
-  uint32_t GetPluginVersion() override;
+    ConstString GetPluginName() override;
+    uint32_t GetPluginVersion() override;
 
 protected:
-  lldb::addr_t GetLoadAddress(lldb::ModuleSP executable);
+    lldb::addr_t GetLoadAddress(lldb::ModuleSP executable);
 
 private:
-  std::map<lldb::ModuleSP, lldb::addr_t> m_loaded_modules;
+    std::map<lldb::ModuleSP, lldb::addr_t> m_loaded_modules;
 };
 
 } // namespace lldb_private

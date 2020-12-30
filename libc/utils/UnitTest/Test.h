@@ -27,13 +27,13 @@ class RunContext;
 // false conditions. Hence, it is more appropriate to use the other comparison
 // conditions for such cases.
 enum TestCondition {
-  Cond_None,
-  Cond_EQ,
-  Cond_NE,
-  Cond_LT,
-  Cond_LE,
-  Cond_GT,
-  Cond_GE,
+    Cond_None,
+    Cond_EQ,
+    Cond_NE,
+    Cond_LT,
+    Cond_LE,
+    Cond_GT,
+    Cond_GE,
 };
 
 namespace internal {
@@ -46,89 +46,95 @@ bool test(RunContext *Ctx, TestCondition Cond, ValType LHS, ValType RHS,
 } // namespace internal
 
 struct MatcherBase {
-  virtual ~MatcherBase() {}
-  virtual void explainError(testutils::StreamWrapper &OS) {
-    OS << "unknown error\n";
-  }
+    virtual ~MatcherBase() {}
+    virtual void explainError(testutils::StreamWrapper &OS) {
+        OS << "unknown error\n";
+    }
 };
 
-template <typename T> struct Matcher : public MatcherBase { bool match(T &t); };
+template <typename T> struct Matcher : public MatcherBase {
+    bool match(T &t);
+};
 
 // NOTE: One should not create instances and call methods on them directly. One
 // should use the macros TEST or TEST_F to write test cases.
 class Test {
 private:
-  Test *Next = nullptr;
-  RunContext *Ctx = nullptr;
+    Test *Next = nullptr;
+    RunContext *Ctx = nullptr;
 
-  void setContext(RunContext *C) { Ctx = C; }
+    void setContext(RunContext *C) {
+        Ctx = C;
+    }
 
 public:
-  virtual ~Test() {}
-  virtual void SetUp() {}
-  virtual void TearDown() {}
+    virtual ~Test() {}
+    virtual void SetUp() {}
+    virtual void TearDown() {}
 
-  static int runTests();
+    static int runTests();
 
 protected:
-  static void addTest(Test *T);
+    static void addTest(Test *T);
 
-  // We make use of a template function, with |LHS| and |RHS| as explicit
-  // parameters, for enhanced type checking. Other gtest like unittest
-  // frameworks have a similar function which takes a boolean argument
-  // instead of the explicit |LHS| and |RHS| arguments. This boolean argument
-  // is the result of the |Cond| operation on |LHS| and |RHS|. Though not bad,
-  // |Cond| on mismatched |LHS| and |RHS| types can potentially succeed because
-  // of type promotion.
-  template <typename ValType,
-            cpp::EnableIfType<cpp::IsIntegral<ValType>::Value, int> = 0>
-  bool test(TestCondition Cond, ValType LHS, ValType RHS, const char *LHSStr,
-            const char *RHSStr, const char *File, unsigned long Line) {
-    return internal::test(Ctx, Cond, LHS, RHS, LHSStr, RHSStr, File, Line);
-  }
+    // We make use of a template function, with |LHS| and |RHS| as explicit
+    // parameters, for enhanced type checking. Other gtest like unittest
+    // frameworks have a similar function which takes a boolean argument
+    // instead of the explicit |LHS| and |RHS| arguments. This boolean argument
+    // is the result of the |Cond| operation on |LHS| and |RHS|. Though not bad,
+    // |Cond| on mismatched |LHS| and |RHS| types can potentially succeed because
+    // of type promotion.
+    template <typename ValType,
+              cpp::EnableIfType<cpp::IsIntegral<ValType>::Value, int> = 0>
+    bool test(TestCondition Cond, ValType LHS, ValType RHS, const char *LHSStr,
+              const char *RHSStr, const char *File, unsigned long Line) {
+        return internal::test(Ctx, Cond, LHS, RHS, LHSStr, RHSStr, File, Line);
+    }
 
-  template <
-      typename ValType,
-      cpp::EnableIfType<cpp::IsPointerType<ValType>::Value, ValType> = nullptr>
-  bool test(TestCondition Cond, ValType LHS, ValType RHS, const char *LHSStr,
-            const char *RHSStr, const char *File, unsigned long Line) {
-    return internal::test(Ctx, Cond, (unsigned long long)LHS,
-                          (unsigned long long)RHS, LHSStr, RHSStr, File, Line);
-  }
+    template <
+        typename ValType,
+        cpp::EnableIfType<cpp::IsPointerType<ValType>::Value, ValType> = nullptr>
+    bool test(TestCondition Cond, ValType LHS, ValType RHS, const char *LHSStr,
+              const char *RHSStr, const char *File, unsigned long Line) {
+        return internal::test(Ctx, Cond, (unsigned long long)LHS,
+                              (unsigned long long)RHS, LHSStr, RHSStr, File, Line);
+    }
 
-  bool testStrEq(const char *LHS, const char *RHS, const char *LHSStr,
-                 const char *RHSStr, const char *File, unsigned long Line);
+    bool testStrEq(const char *LHS, const char *RHS, const char *LHSStr,
+                   const char *RHSStr, const char *File, unsigned long Line);
 
-  bool testStrNe(const char *LHS, const char *RHS, const char *LHSStr,
-                 const char *RHSStr, const char *File, unsigned long Line);
+    bool testStrNe(const char *LHS, const char *RHS, const char *LHSStr,
+                   const char *RHSStr, const char *File, unsigned long Line);
 
-  bool testMatch(bool MatchResult, MatcherBase &Matcher, const char *LHSStr,
-                 const char *RHSStr, const char *File, unsigned long Line);
+    bool testMatch(bool MatchResult, MatcherBase &Matcher, const char *LHSStr,
+                   const char *RHSStr, const char *File, unsigned long Line);
 
-  bool testProcessExits(testutils::FunctionCaller *Func, int ExitCode,
-                        const char *LHSStr, const char *RHSStr,
-                        const char *File, unsigned long Line);
+    bool testProcessExits(testutils::FunctionCaller *Func, int ExitCode,
+                          const char *LHSStr, const char *RHSStr,
+                          const char *File, unsigned long Line);
 
-  bool testProcessKilled(testutils::FunctionCaller *Func, int Signal,
-                         const char *LHSStr, const char *RHSStr,
-                         const char *File, unsigned long Line);
+    bool testProcessKilled(testutils::FunctionCaller *Func, int Signal,
+                           const char *LHSStr, const char *RHSStr,
+                           const char *File, unsigned long Line);
 
-  template <typename Func> testutils::FunctionCaller *createCallable(Func f) {
-    struct Callable : public testutils::FunctionCaller {
-      Func f;
-      Callable(Func f) : f(f) {}
-      void operator()() override { f(); }
-    };
+    template <typename Func> testutils::FunctionCaller *createCallable(Func f) {
+        struct Callable : public testutils::FunctionCaller {
+            Func f;
+            Callable(Func f) : f(f) {}
+            void operator()() override {
+                f();
+            }
+        };
 
-    return new Callable(f);
-  }
+        return new Callable(f);
+    }
 
 private:
-  virtual void Run() = 0;
-  virtual const char *getName() const = 0;
+    virtual void Run() = 0;
+    virtual const char *getName() const = 0;
 
-  static Test *Start;
-  static Test *End;
+    static Test *Start;
+    static Test *End;
 };
 
 } // namespace testing

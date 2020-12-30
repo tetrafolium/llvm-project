@@ -22,6 +22,6 @@
 using namespace clang_fuzzer;
 
 DEFINE_BINARY_PROTO_FUZZER(const Function& input) {
-  auto S = FunctionToString(input);
-  HandleCXX(S, "./test.cc", GetCLArgs());
+    auto S = FunctionToString(input);
+    HandleCXX(S, "./test.cc", GetCLArgs());
 }

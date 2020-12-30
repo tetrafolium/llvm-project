@@ -20,38 +20,44 @@
 namespace llvm {
 
 class VETargetMachine : public LLVMTargetMachine {
-  std::unique_ptr<TargetLoweringObjectFile> TLOF;
-  VESubtarget Subtarget;
-  // Hold Strings that can be free'd all together with VETargetMachine
-  //   e.g.: "GCC_except_tableXX" string.
-  std::list<std::string> StrList;
+    std::unique_ptr<TargetLoweringObjectFile> TLOF;
+    VESubtarget Subtarget;
+    // Hold Strings that can be free'd all together with VETargetMachine
+    //   e.g.: "GCC_except_tableXX" string.
+    std::list<std::string> StrList;
 
 public:
-  VETargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                  StringRef FS, const TargetOptions &Options,
-                  Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                  CodeGenOpt::Level OL, bool JIT);
-  ~VETargetMachine() override;
+    VETargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                    StringRef FS, const TargetOptions &Options,
+                    Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                    CodeGenOpt::Level OL, bool JIT);
+    ~VETargetMachine() override;
 
-  const VESubtarget *getSubtargetImpl() const { return &Subtarget; }
-  const VESubtarget *getSubtargetImpl(const Function &) const override {
-    return &Subtarget;
-  }
-  std::list<std::string> *getStrList() const {
-    return const_cast<std::list<std::string> *>(&StrList);
-  }
+    const VESubtarget *getSubtargetImpl() const {
+        return &Subtarget;
+    }
+    const VESubtarget *getSubtargetImpl(const Function &) const override {
+        return &Subtarget;
+    }
+    std::list<std::string> *getStrList() const {
+        return const_cast<std::list<std::string> *>(&StrList);
+    }
 
-  // Pass Pipeline Configuration
-  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
-  TargetLoweringObjectFile *getObjFileLowering() const override {
-    return TLOF.get();
-  }
+    // Pass Pipeline Configuration
+    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+    TargetLoweringObjectFile *getObjFileLowering() const override {
+        return TLOF.get();
+    }
 
-  bool isMachineVerifierClean() const override { return false; }
+    bool isMachineVerifierClean() const override {
+        return false;
+    }
 
-  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+    TargetTransformInfo getTargetTransformInfo(const Function &F) override;
 
-  unsigned getSjLjDataSize() const override { return 64; }
+    unsigned getSjLjDataSize() const override {
+        return 64;
+    }
 };
 
 } // namespace llvm

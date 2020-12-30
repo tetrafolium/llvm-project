@@ -22,8 +22,8 @@ namespace targets {
 
 /// Information about a specific microcontroller.
 struct LLVM_LIBRARY_VISIBILITY MCUInfo {
-  const char *Name;
-  const char *DefineName;
+    const char *Name;
+    const char *DefineName;
 };
 
 // This list should be kept up-to-date with AVRDevices.td in LLVM.
@@ -283,37 +283,40 @@ static constexpr llvm::StringLiteral ValidFamilyNames[] = {
     "avr1",      "avr2",      "avr25",     "avr3",      "avr31",
     "avr35",     "avr4",      "avr5",      "avr51",     "avr6",
     "avrxmega1", "avrxmega2", "avrxmega3", "avrxmega4", "avrxmega5",
-    "avrxmega6", "avrxmega7", "avrtiny"};
+    "avrxmega6", "avrxmega7", "avrtiny"
+};
 
 bool AVRTargetInfo::isValidCPUName(StringRef Name) const {
-  bool IsFamily =
-      llvm::find(ValidFamilyNames, Name) != std::end(ValidFamilyNames);
+    bool IsFamily =
+        llvm::find(ValidFamilyNames, Name) != std::end(ValidFamilyNames);
 
-  bool IsMCU =
-      llvm::find_if(AVRMcus, [&](const MCUInfo &Info) {
+    bool IsMCU =
+    llvm::find_if(AVRMcus, [&](const MCUInfo &Info) {
         return Info.Name == Name;
-      }) != std::end(AVRMcus);
-  return IsFamily || IsMCU;
+    }) != std::end(AVRMcus);
+    return IsFamily || IsMCU;
 }
 
 void AVRTargetInfo::fillValidCPUList(SmallVectorImpl<StringRef> &Values) const {
-  Values.append(std::begin(ValidFamilyNames), std::end(ValidFamilyNames));
-  for (const MCUInfo &Info : AVRMcus)
-    Values.push_back(Info.Name);
+    Values.append(std::begin(ValidFamilyNames), std::end(ValidFamilyNames));
+    for (const MCUInfo &Info : AVRMcus)
+        Values.push_back(Info.Name);
 }
 
 void AVRTargetInfo::getTargetDefines(const LangOptions &Opts,
                                      MacroBuilder &Builder) const {
-  Builder.defineMacro("AVR");
-  Builder.defineMacro("__AVR");
-  Builder.defineMacro("__AVR__");
-  Builder.defineMacro("__ELF__");
+    Builder.defineMacro("AVR");
+    Builder.defineMacro("__AVR");
+    Builder.defineMacro("__AVR__");
+    Builder.defineMacro("__ELF__");
 
-  if (!this->CPU.empty()) {
-    auto It = llvm::find_if(
-        AVRMcus, [&](const MCUInfo &Info) { return Info.Name == this->CPU; });
+    if (!this->CPU.empty()) {
+        auto It = llvm::find_if(
+        AVRMcus, [&](const MCUInfo &Info) {
+            return Info.Name == this->CPU;
+        });
 
-    if (It != std::end(AVRMcus))
-      Builder.defineMacro(It->DefineName);
-  }
+        if (It != std::end(AVRMcus))
+            Builder.defineMacro(It->DefineName);
+    }
 }

@@ -23,15 +23,15 @@ namespace zircon {
 /// http://clang.llvm.org/extra/clang-tidy/checks/zircon-temporary-objects.html
 class TemporaryObjectsCheck : public ClangTidyCheck {
 public:
-  TemporaryObjectsCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context),
-        Names(utils::options::parseStringList(Options.get("Names", ""))) {}
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    TemporaryObjectsCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context),
+          Names(utils::options::parseStringList(Options.get("Names", ""))) {}
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  std::vector<std::string> Names;
+    std::vector<std::string> Names;
 };
 
 } // namespace zircon

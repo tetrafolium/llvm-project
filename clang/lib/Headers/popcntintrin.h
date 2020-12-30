@@ -32,7 +32,7 @@
 static __inline__ int __DEFAULT_FN_ATTRS_CONSTEXPR
 _mm_popcnt_u32(unsigned int __A)
 {
-  return __builtin_popcount(__A);
+    return __builtin_popcount(__A);
 }
 
 #ifdef __x86_64__
@@ -49,7 +49,7 @@ _mm_popcnt_u32(unsigned int __A)
 static __inline__ long long __DEFAULT_FN_ATTRS_CONSTEXPR
 _mm_popcnt_u64(unsigned long long __A)
 {
-  return __builtin_popcountll(__A);
+    return __builtin_popcountll(__A);
 }
 #endif /* __x86_64__ */
 

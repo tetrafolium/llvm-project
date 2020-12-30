@@ -30,28 +30,28 @@ using namespace llvm;
 
 namespace {
 struct UnifyLoopExitsLegacyPass : public FunctionPass {
-  static char ID;
-  UnifyLoopExitsLegacyPass() : FunctionPass(ID) {
-    initializeUnifyLoopExitsLegacyPassPass(*PassRegistry::getPassRegistry());
-  }
+    static char ID;
+    UnifyLoopExitsLegacyPass() : FunctionPass(ID) {
+        initializeUnifyLoopExitsLegacyPassPass(*PassRegistry::getPassRegistry());
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequiredID(LowerSwitchID);
-    AU.addRequired<LoopInfoWrapperPass>();
-    AU.addRequired<DominatorTreeWrapperPass>();
-    AU.addPreservedID(LowerSwitchID);
-    AU.addPreserved<LoopInfoWrapperPass>();
-    AU.addPreserved<DominatorTreeWrapperPass>();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addRequiredID(LowerSwitchID);
+        AU.addRequired<LoopInfoWrapperPass>();
+        AU.addRequired<DominatorTreeWrapperPass>();
+        AU.addPreservedID(LowerSwitchID);
+        AU.addPreserved<LoopInfoWrapperPass>();
+        AU.addPreserved<DominatorTreeWrapperPass>();
+    }
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 };
 } // namespace
 
 char UnifyLoopExitsLegacyPass::ID = 0;
 
 FunctionPass *llvm::createUnifyLoopExitsPass() {
-  return new UnifyLoopExitsLegacyPass();
+    return new UnifyLoopExitsLegacyPass();
 }
 
 INITIALIZE_PASS_BEGIN(UnifyLoopExitsLegacyPass, "unify-loop-exits",
@@ -83,163 +83,163 @@ INITIALIZE_PASS_END(UnifyLoopExitsLegacyPass, "unify-loop-exits",
 static void restoreSSA(const DominatorTree &DT, const Loop *L,
                        const SetVector<BasicBlock *> &Incoming,
                        BasicBlock *LoopExitBlock) {
-  using InstVector = SmallVector<Instruction *, 8>;
-  using IIMap = MapVector<Instruction *, InstVector>;
-  IIMap ExternalUsers;
-  for (auto BB : L->blocks()) {
-    for (auto &I : *BB) {
-      for (auto &U : I.uses()) {
-        auto UserInst = cast<Instruction>(U.getUser());
-        auto UserBlock = UserInst->getParent();
-        if (UserBlock == LoopExitBlock)
-          continue;
-        if (L->contains(UserBlock))
-          continue;
-        LLVM_DEBUG(dbgs() << "added ext use for " << I.getName() << "("
-                          << BB->getName() << ")"
-                          << ": " << UserInst->getName() << "("
-                          << UserBlock->getName() << ")"
-                          << "\n");
-        ExternalUsers[&I].push_back(UserInst);
-      }
-    }
-  }
-
-  for (auto II : ExternalUsers) {
-    // For each Def used outside the loop, create NewPhi in
-    // LoopExitBlock. NewPhi receives Def only along exiting blocks that
-    // dominate it, while the remaining values are undefined since those paths
-    // didn't exist in the original CFG.
-    auto Def = II.first;
-    LLVM_DEBUG(dbgs() << "externally used: " << Def->getName() << "\n");
-    auto NewPhi = PHINode::Create(Def->getType(), Incoming.size(),
-                                  Def->getName() + ".moved",
-                                  LoopExitBlock->getTerminator());
-    for (auto In : Incoming) {
-      LLVM_DEBUG(dbgs() << "predecessor " << In->getName() << ": ");
-      if (Def->getParent() == In || DT.dominates(Def, In)) {
-        LLVM_DEBUG(dbgs() << "dominated\n");
-        NewPhi->addIncoming(Def, In);
-      } else {
-        LLVM_DEBUG(dbgs() << "not dominated\n");
-        NewPhi->addIncoming(UndefValue::get(Def->getType()), In);
-      }
+    using InstVector = SmallVector<Instruction *, 8>;
+    using IIMap = MapVector<Instruction *, InstVector>;
+    IIMap ExternalUsers;
+    for (auto BB : L->blocks()) {
+        for (auto &I : *BB) {
+            for (auto &U : I.uses()) {
+                auto UserInst = cast<Instruction>(U.getUser());
+                auto UserBlock = UserInst->getParent();
+                if (UserBlock == LoopExitBlock)
+                    continue;
+                if (L->contains(UserBlock))
+                    continue;
+                LLVM_DEBUG(dbgs() << "added ext use for " << I.getName() << "("
+                           << BB->getName() << ")"
+                           << ": " << UserInst->getName() << "("
+                           << UserBlock->getName() << ")"
+                           << "\n");
+                ExternalUsers[&I].push_back(UserInst);
+            }
+        }
     }
 
-    LLVM_DEBUG(dbgs() << "external users:");
-    for (auto U : II.second) {
-      LLVM_DEBUG(dbgs() << " " << U->getName());
-      U->replaceUsesOfWith(Def, NewPhi);
+    for (auto II : ExternalUsers) {
+        // For each Def used outside the loop, create NewPhi in
+        // LoopExitBlock. NewPhi receives Def only along exiting blocks that
+        // dominate it, while the remaining values are undefined since those paths
+        // didn't exist in the original CFG.
+        auto Def = II.first;
+        LLVM_DEBUG(dbgs() << "externally used: " << Def->getName() << "\n");
+        auto NewPhi = PHINode::Create(Def->getType(), Incoming.size(),
+                                      Def->getName() + ".moved",
+                                      LoopExitBlock->getTerminator());
+        for (auto In : Incoming) {
+            LLVM_DEBUG(dbgs() << "predecessor " << In->getName() << ": ");
+            if (Def->getParent() == In || DT.dominates(Def, In)) {
+                LLVM_DEBUG(dbgs() << "dominated\n");
+                NewPhi->addIncoming(Def, In);
+            } else {
+                LLVM_DEBUG(dbgs() << "not dominated\n");
+                NewPhi->addIncoming(UndefValue::get(Def->getType()), In);
+            }
+        }
+
+        LLVM_DEBUG(dbgs() << "external users:");
+        for (auto U : II.second) {
+            LLVM_DEBUG(dbgs() << " " << U->getName());
+            U->replaceUsesOfWith(Def, NewPhi);
+        }
+        LLVM_DEBUG(dbgs() << "\n");
     }
-    LLVM_DEBUG(dbgs() << "\n");
-  }
 }
 
 static bool unifyLoopExits(DominatorTree &DT, LoopInfo &LI, Loop *L) {
-  // To unify the loop exits, we need a list of the exiting blocks as
-  // well as exit blocks. The functions for locating these lists both
-  // traverse the entire loop body. It is more efficient to first
-  // locate the exiting blocks and then examine their successors to
-  // locate the exit blocks.
-  SetVector<BasicBlock *> ExitingBlocks;
-  SetVector<BasicBlock *> Exits;
+    // To unify the loop exits, we need a list of the exiting blocks as
+    // well as exit blocks. The functions for locating these lists both
+    // traverse the entire loop body. It is more efficient to first
+    // locate the exiting blocks and then examine their successors to
+    // locate the exit blocks.
+    SetVector<BasicBlock *> ExitingBlocks;
+    SetVector<BasicBlock *> Exits;
 
-  // We need SetVectors, but the Loop API takes a vector, so we use a temporary.
-  SmallVector<BasicBlock *, 8> Temp;
-  L->getExitingBlocks(Temp);
-  for (auto BB : Temp) {
-    ExitingBlocks.insert(BB);
-    for (auto S : successors(BB)) {
-      auto SL = LI.getLoopFor(S);
-      // A successor is not an exit if it is directly or indirectly in the
-      // current loop.
-      if (SL == L || L->contains(SL))
-        continue;
-      Exits.insert(S);
+    // We need SetVectors, but the Loop API takes a vector, so we use a temporary.
+    SmallVector<BasicBlock *, 8> Temp;
+    L->getExitingBlocks(Temp);
+    for (auto BB : Temp) {
+        ExitingBlocks.insert(BB);
+        for (auto S : successors(BB)) {
+            auto SL = LI.getLoopFor(S);
+            // A successor is not an exit if it is directly or indirectly in the
+            // current loop.
+            if (SL == L || L->contains(SL))
+                continue;
+            Exits.insert(S);
+        }
     }
-  }
 
-  LLVM_DEBUG(
-      dbgs() << "Found exit blocks:";
-      for (auto Exit : Exits) {
-        dbgs() << " " << Exit->getName();
-      }
-      dbgs() << "\n";
+    LLVM_DEBUG(
+        dbgs() << "Found exit blocks:";
+    for (auto Exit : Exits) {
+    dbgs() << " " << Exit->getName();
+    }
+    dbgs() << "\n";
 
-      dbgs() << "Found exiting blocks:";
-      for (auto EB : ExitingBlocks) {
-        dbgs() << " " << EB->getName();
-      }
-      dbgs() << "\n";);
+           dbgs() << "Found exiting blocks:";
+    for (auto EB : ExitingBlocks) {
+    dbgs() << " " << EB->getName();
+    }
+    dbgs() << "\n";);
 
-  if (Exits.size() <= 1) {
-    LLVM_DEBUG(dbgs() << "loop does not have multiple exits; nothing to do\n");
-    return false;
-  }
+    if (Exits.size() <= 1) {
+        LLVM_DEBUG(dbgs() << "loop does not have multiple exits; nothing to do\n");
+        return false;
+    }
 
-  SmallVector<BasicBlock *, 8> GuardBlocks;
-  DomTreeUpdater DTU(DT, DomTreeUpdater::UpdateStrategy::Eager);
-  auto LoopExitBlock = CreateControlFlowHub(&DTU, GuardBlocks, ExitingBlocks,
-                                            Exits, "loop.exit");
+    SmallVector<BasicBlock *, 8> GuardBlocks;
+    DomTreeUpdater DTU(DT, DomTreeUpdater::UpdateStrategy::Eager);
+    auto LoopExitBlock = CreateControlFlowHub(&DTU, GuardBlocks, ExitingBlocks,
+                         Exits, "loop.exit");
 
-  restoreSSA(DT, L, ExitingBlocks, LoopExitBlock);
+    restoreSSA(DT, L, ExitingBlocks, LoopExitBlock);
 
 #if defined(EXPENSIVE_CHECKS)
-  assert(DT.verify(DominatorTree::VerificationLevel::Full));
+    assert(DT.verify(DominatorTree::VerificationLevel::Full));
 #else
-  assert(DT.verify(DominatorTree::VerificationLevel::Fast));
+    assert(DT.verify(DominatorTree::VerificationLevel::Fast));
 #endif // EXPENSIVE_CHECKS
-  L->verifyLoop();
+    L->verifyLoop();
 
-  // The guard blocks were created outside the loop, so they need to become
-  // members of the parent loop.
-  if (auto ParentLoop = L->getParentLoop()) {
-    for (auto G : GuardBlocks) {
-      ParentLoop->addBasicBlockToLoop(G, LI);
+    // The guard blocks were created outside the loop, so they need to become
+    // members of the parent loop.
+    if (auto ParentLoop = L->getParentLoop()) {
+        for (auto G : GuardBlocks) {
+            ParentLoop->addBasicBlockToLoop(G, LI);
+        }
+        ParentLoop->verifyLoop();
     }
-    ParentLoop->verifyLoop();
-  }
 
 #if defined(EXPENSIVE_CHECKS)
-  LI.verify(DT);
+    LI.verify(DT);
 #endif // EXPENSIVE_CHECKS
 
-  return true;
+    return true;
 }
 
 static bool runImpl(LoopInfo &LI, DominatorTree &DT) {
 
-  bool Changed = false;
-  auto Loops = LI.getLoopsInPreorder();
-  for (auto L : Loops) {
-    LLVM_DEBUG(dbgs() << "Loop: " << L->getHeader()->getName() << " (depth: "
-                      << LI.getLoopDepth(L->getHeader()) << ")\n");
-    Changed |= unifyLoopExits(DT, LI, L);
-  }
-  return Changed;
+    bool Changed = false;
+    auto Loops = LI.getLoopsInPreorder();
+    for (auto L : Loops) {
+        LLVM_DEBUG(dbgs() << "Loop: " << L->getHeader()->getName() << " (depth: "
+                   << LI.getLoopDepth(L->getHeader()) << ")\n");
+        Changed |= unifyLoopExits(DT, LI, L);
+    }
+    return Changed;
 }
 
 bool UnifyLoopExitsLegacyPass::runOnFunction(Function &F) {
-  LLVM_DEBUG(dbgs() << "===== Unifying loop exits in function " << F.getName()
-                    << "\n");
-  auto &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-  auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    LLVM_DEBUG(dbgs() << "===== Unifying loop exits in function " << F.getName()
+               << "\n");
+    auto &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+    auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
 
-  return runImpl(LI, DT);
+    return runImpl(LI, DT);
 }
 
 namespace llvm {
 
 PreservedAnalyses UnifyLoopExitsPass::run(Function &F,
-                                          FunctionAnalysisManager &AM) {
-  auto &LI = AM.getResult<LoopAnalysis>(F);
-  auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
+        FunctionAnalysisManager &AM) {
+    auto &LI = AM.getResult<LoopAnalysis>(F);
+    auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
 
-  if (!runImpl(LI, DT))
-    return PreservedAnalyses::all();
-  PreservedAnalyses PA;
-  PA.preserve<LoopAnalysis>();
-  PA.preserve<DominatorTreeAnalysis>();
-  return PA;
+    if (!runImpl(LI, DT))
+        return PreservedAnalyses::all();
+    PreservedAnalyses PA;
+    PA.preserve<LoopAnalysis>();
+    PA.preserve<DominatorTreeAnalysis>();
+    return PA;
 }
 } // namespace llvm

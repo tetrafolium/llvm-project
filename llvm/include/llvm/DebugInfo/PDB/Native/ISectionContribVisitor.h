@@ -17,10 +17,10 @@ struct SectionContrib2;
 
 class ISectionContribVisitor {
 public:
-  virtual ~ISectionContribVisitor() = default;
+    virtual ~ISectionContribVisitor() = default;
 
-  virtual void visit(const SectionContrib &C) = 0;
-  virtual void visit(const SectionContrib2 &C) = 0;
+    virtual void visit(const SectionContrib &C) = 0;
+    virtual void visit(const SectionContrib2 &C) = 0;
 };
 
 } // end namespace pdb

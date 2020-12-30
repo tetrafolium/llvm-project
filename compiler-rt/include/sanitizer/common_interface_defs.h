@@ -25,17 +25,17 @@ extern "C" {
 #endif
 // Arguments for __sanitizer_sandbox_on_notify() below.
 typedef struct {
-  // Enable sandbox support in sanitizer coverage.
-  int coverage_sandboxed;
-  // File descriptor to write coverage data to. If -1 is passed, a file will
-  // be pre-opened by __sanitizer_sandobx_on_notify(). This field has no
-  // effect if coverage_sandboxed == 0.
-  intptr_t coverage_fd;
-  // If non-zero, split the coverage data into well-formed blocks. This is
-  // useful when coverage_fd is a socket descriptor. Each block will contain
-  // a header, allowing data from multiple processes to be sent over the same
-  // socket.
-  unsigned int coverage_max_block_size;
+    // Enable sandbox support in sanitizer coverage.
+    int coverage_sandboxed;
+    // File descriptor to write coverage data to. If -1 is passed, a file will
+    // be pre-opened by __sanitizer_sandobx_on_notify(). This field has no
+    // effect if coverage_sandboxed == 0.
+    intptr_t coverage_fd;
+    // If non-zero, split the coverage data into well-formed blocks. This is
+    // useful when coverage_fd is a socket descriptor. Each block will contain
+    // a header, allowing data from multiple processes to be sent over the same
+    // socket.
+    unsigned int coverage_max_block_size;
 } __sanitizer_sandbox_arguments;
 
 // Tell the tools to write their reports to "path.<pid>" instead of stderr.
@@ -155,9 +155,9 @@ int __sanitizer_acquire_crash_state();
 /// \param old_mid Old middle of memory region.
 /// \param new_mid New middle of memory region.
 void __sanitizer_annotate_contiguous_container(const void *beg,
-                                               const void *end,
-                                               const void *old_mid,
-                                               const void *new_mid);
+        const void *end,
+        const void *old_mid,
+        const void *new_mid);
 
 /// Returns true if the contiguous container <c>[beg, end)</c> is properly
 /// poisoned.
@@ -176,7 +176,7 @@ void __sanitizer_annotate_contiguous_container(const void *beg,
 /// \returns True if the contiguous container <c>[beg, end)</c> is properly
 ///  poisoned.
 int __sanitizer_verify_contiguous_container(const void *beg, const void *mid,
-                                            const void *end);
+        const void *end);
 
 /// Similar to <c>__sanitizer_verify_contiguous_container()</c> but also
 /// returns the address of the first improperly poisoned byte.
@@ -189,8 +189,8 @@ int __sanitizer_verify_contiguous_container(const void *beg, const void *mid,
 ///
 /// \returns The bad address or NULL.
 const void *__sanitizer_contiguous_container_find_bad_address(const void *beg,
-                                                              const void *mid,
-                                                              const void *end);
+        const void *mid,
+        const void *end);
 
 /// Prints the stack trace leading to this call (useful for calling from the
 /// debugger).
@@ -245,7 +245,7 @@ void __sanitizer_weak_hook_memcmp(void *called_pc, const void *s1,
 /// \param n Number of bytes to compare.
 /// \param result Value returned by the intercepted function.
 void __sanitizer_weak_hook_strncmp(void *called_pc, const char *s1,
-                                  const char *s2, size_t n, int result);
+                                   const char *s2, size_t n, int result);
 
 /// Interceptor hook for <c>strncasecmp()</c>.
 ///
@@ -347,8 +347,8 @@ void __sanitizer_finish_switch_fiber(void *fake_stack_save,
 // Get full module name and calculate pc offset within it.
 // Returns 1 if pc belongs to some module, 0 if module was not found.
 int __sanitizer_get_module_and_offset_for_pc(void *pc, char *module_path,
-                                             size_t module_path_len,
-                                             void **pc_offset);
+        size_t module_path_len,
+        void **pc_offset);
 
 #ifdef __cplusplus
 }  // extern "C"

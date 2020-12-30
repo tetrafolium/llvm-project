@@ -39,7 +39,7 @@ extern int const __kmp_version_minor;
 extern int const __kmp_version_build;
 extern int const __kmp_openmp_version;
 extern char const
-    __kmp_copyright[]; // Old variable, kept for compatibility with ITC and ITP.
+__kmp_copyright[]; // Old variable, kept for compatibility with ITC and ITP.
 extern char const __kmp_version_copyright[];
 extern char const __kmp_version_lib_ver[];
 extern char const __kmp_version_lib_type[];

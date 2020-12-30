@@ -17,12 +17,12 @@ namespace tidy {
 namespace cppcoreguidelines {
 
 void ProTypeConstCastCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(cxxConstCastExpr().bind("cast"), this);
+    Finder->addMatcher(cxxConstCastExpr().bind("cast"), this);
 }
 
 void ProTypeConstCastCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *MatchedCast = Result.Nodes.getNodeAs<CXXConstCastExpr>("cast");
-  diag(MatchedCast->getOperatorLoc(), "do not use const_cast");
+    const auto *MatchedCast = Result.Nodes.getNodeAs<CXXConstCastExpr>("cast");
+    diag(MatchedCast->getOperatorLoc(), "do not use const_cast");
 }
 
 } // namespace cppcoreguidelines

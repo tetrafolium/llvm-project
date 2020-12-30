@@ -44,23 +44,23 @@ class Value;
 namespace reassociate {
 
 struct ValueEntry {
-  unsigned Rank;
-  Value *Op;
+    unsigned Rank;
+    Value *Op;
 
-  ValueEntry(unsigned R, Value *O) : Rank(R), Op(O) {}
+    ValueEntry(unsigned R, Value *O) : Rank(R), Op(O) {}
 };
 
 inline bool operator<(const ValueEntry &LHS, const ValueEntry &RHS) {
-  return LHS.Rank > RHS.Rank; // Sort so that highest rank goes to start.
+    return LHS.Rank > RHS.Rank; // Sort so that highest rank goes to start.
 }
 
 /// Utility class representing a base and exponent pair which form one
 /// factor of some product.
 struct Factor {
-  Value *Base;
-  unsigned Power;
+    Value *Base;
+    unsigned Power;
 
-  Factor(Value *Base, unsigned Power) : Base(Base), Power(Power) {}
+    Factor(Value *Base, unsigned Power) : Base(Base), Power(Power) {}
 };
 
 class XorOpnd;
@@ -70,62 +70,64 @@ class XorOpnd;
 /// Reassociate commutative expressions.
 class ReassociatePass : public PassInfoMixin<ReassociatePass> {
 public:
-  using OrderedSet =
-      SetVector<AssertingVH<Instruction>, std::deque<AssertingVH<Instruction>>>;
+    using OrderedSet =
+        SetVector<AssertingVH<Instruction>, std::deque<AssertingVH<Instruction>>>;
 
 protected:
-  DenseMap<BasicBlock *, unsigned> RankMap;
-  DenseMap<AssertingVH<Value>, unsigned> ValueRankMap;
-  OrderedSet RedoInsts;
+    DenseMap<BasicBlock *, unsigned> RankMap;
+    DenseMap<AssertingVH<Value>, unsigned> ValueRankMap;
+    OrderedSet RedoInsts;
 
-  // Arbitrary, but prevents quadratic behavior.
-  static const unsigned GlobalReassociateLimit = 10;
-  static const unsigned NumBinaryOps =
-      Instruction::BinaryOpsEnd - Instruction::BinaryOpsBegin;
+    // Arbitrary, but prevents quadratic behavior.
+    static const unsigned GlobalReassociateLimit = 10;
+    static const unsigned NumBinaryOps =
+        Instruction::BinaryOpsEnd - Instruction::BinaryOpsBegin;
 
-  struct PairMapValue {
-    WeakVH Value1;
-    WeakVH Value2;
-    unsigned Score;
-    bool isValid() const { return Value1 && Value2; }
-  };
-  DenseMap<std::pair<Value *, Value *>, PairMapValue> PairMap[NumBinaryOps];
+    struct PairMapValue {
+        WeakVH Value1;
+        WeakVH Value2;
+        unsigned Score;
+        bool isValid() const {
+            return Value1 && Value2;
+        }
+    };
+    DenseMap<std::pair<Value *, Value *>, PairMapValue> PairMap[NumBinaryOps];
 
-  bool MadeChange;
+    bool MadeChange;
 
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 
 private:
-  void BuildRankMap(Function &F, ReversePostOrderTraversal<Function *> &RPOT);
-  unsigned getRank(Value *V);
-  void canonicalizeOperands(Instruction *I);
-  void ReassociateExpression(BinaryOperator *I);
-  void RewriteExprTree(BinaryOperator *I,
+    void BuildRankMap(Function &F, ReversePostOrderTraversal<Function *> &RPOT);
+    unsigned getRank(Value *V);
+    void canonicalizeOperands(Instruction *I);
+    void ReassociateExpression(BinaryOperator *I);
+    void RewriteExprTree(BinaryOperator *I,
+                         SmallVectorImpl<reassociate::ValueEntry> &Ops);
+    Value *OptimizeExpression(BinaryOperator *I,
+                              SmallVectorImpl<reassociate::ValueEntry> &Ops);
+    Value *OptimizeAdd(Instruction *I,
                        SmallVectorImpl<reassociate::ValueEntry> &Ops);
-  Value *OptimizeExpression(BinaryOperator *I,
-                            SmallVectorImpl<reassociate::ValueEntry> &Ops);
-  Value *OptimizeAdd(Instruction *I,
-                     SmallVectorImpl<reassociate::ValueEntry> &Ops);
-  Value *OptimizeXor(Instruction *I,
-                     SmallVectorImpl<reassociate::ValueEntry> &Ops);
-  bool CombineXorOpnd(Instruction *I, reassociate::XorOpnd *Opnd1,
-                      APInt &ConstOpnd, Value *&Res);
-  bool CombineXorOpnd(Instruction *I, reassociate::XorOpnd *Opnd1,
-                      reassociate::XorOpnd *Opnd2, APInt &ConstOpnd,
-                      Value *&Res);
-  Value *buildMinimalMultiplyDAG(IRBuilderBase &Builder,
-                                 SmallVectorImpl<reassociate::Factor> &Factors);
-  Value *OptimizeMul(BinaryOperator *I,
-                     SmallVectorImpl<reassociate::ValueEntry> &Ops);
-  Value *RemoveFactorFromExpression(Value *V, Value *Factor);
-  void EraseInst(Instruction *I);
-  void RecursivelyEraseDeadInsts(Instruction *I, OrderedSet &Insts);
-  void OptimizeInst(Instruction *I);
-  Instruction *canonicalizeNegFPConstantsForOp(Instruction *I, Instruction *Op,
-                                               Value *OtherOp);
-  Instruction *canonicalizeNegFPConstants(Instruction *I);
-  void BuildPairMap(ReversePostOrderTraversal<Function *> &RPOT);
+    Value *OptimizeXor(Instruction *I,
+                       SmallVectorImpl<reassociate::ValueEntry> &Ops);
+    bool CombineXorOpnd(Instruction *I, reassociate::XorOpnd *Opnd1,
+                        APInt &ConstOpnd, Value *&Res);
+    bool CombineXorOpnd(Instruction *I, reassociate::XorOpnd *Opnd1,
+                        reassociate::XorOpnd *Opnd2, APInt &ConstOpnd,
+                        Value *&Res);
+    Value *buildMinimalMultiplyDAG(IRBuilderBase &Builder,
+                                   SmallVectorImpl<reassociate::Factor> &Factors);
+    Value *OptimizeMul(BinaryOperator *I,
+                       SmallVectorImpl<reassociate::ValueEntry> &Ops);
+    Value *RemoveFactorFromExpression(Value *V, Value *Factor);
+    void EraseInst(Instruction *I);
+    void RecursivelyEraseDeadInsts(Instruction *I, OrderedSet &Insts);
+    void OptimizeInst(Instruction *I);
+    Instruction *canonicalizeNegFPConstantsForOp(Instruction *I, Instruction *Op,
+            Value *OtherOp);
+    Instruction *canonicalizeNegFPConstants(Instruction *I);
+    void BuildPairMap(ReversePostOrderTraversal<Function *> &RPOT);
 };
 
 } // end namespace llvm

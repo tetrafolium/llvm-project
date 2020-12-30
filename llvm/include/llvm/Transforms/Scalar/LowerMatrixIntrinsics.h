@@ -18,12 +18,14 @@
 namespace llvm {
 class LowerMatrixIntrinsicsPass
     : public PassInfoMixin<LowerMatrixIntrinsicsPass> {
-  bool Minimal;
+    bool Minimal;
 
 public:
-  LowerMatrixIntrinsicsPass(bool Minimal = false) : Minimal(Minimal) {}
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    LowerMatrixIntrinsicsPass(bool Minimal = false) : Minimal(Minimal) {}
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 };
 } // namespace llvm
 

@@ -26,10 +26,10 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-branch-clone.html
 class BranchCloneCheck : public ClangTidyCheck {
 public:
-  BranchCloneCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    BranchCloneCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace bugprone

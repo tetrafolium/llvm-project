@@ -26,22 +26,22 @@ namespace __asan {
 // Return true if we can quickly decide that the region is unpoisoned.
 // We assume that a redzone is at least 16 bytes.
 static inline bool QuickCheckForUnpoisonedRegion(uptr beg, uptr size) {
-  if (size == 0) return true;
-  if (size <= 32)
-    return !AddressIsPoisoned(beg) &&
-           !AddressIsPoisoned(beg + size - 1) &&
-           !AddressIsPoisoned(beg + size / 2);
-  if (size <= 64)
-    return !AddressIsPoisoned(beg) &&
-           !AddressIsPoisoned(beg + size / 4) &&
-           !AddressIsPoisoned(beg + size - 1) &&
-           !AddressIsPoisoned(beg + 3 * size / 4) &&
-           !AddressIsPoisoned(beg + size / 2);
-  return false;
+    if (size == 0) return true;
+    if (size <= 32)
+        return !AddressIsPoisoned(beg) &&
+               !AddressIsPoisoned(beg + size - 1) &&
+               !AddressIsPoisoned(beg + size / 2);
+    if (size <= 64)
+        return !AddressIsPoisoned(beg) &&
+               !AddressIsPoisoned(beg + size / 4) &&
+               !AddressIsPoisoned(beg + size - 1) &&
+               !AddressIsPoisoned(beg + 3 * size / 4) &&
+               !AddressIsPoisoned(beg + size / 2);
+    return false;
 }
 
 struct AsanInterceptorContext {
-  const char *interceptor_name;
+    const char *interceptor_name;
 };
 
 // We implement ACCESS_MEMORY_RANGE, ASAN_READ_RANGE,
@@ -130,7 +130,7 @@ struct AsanInterceptorContext {
 // Macro is used to avoid creation of new frames.
 static inline bool RangesOverlap(const char *offset1, uptr length1,
                                  const char *offset2, uptr length2) {
-  return !((offset1 + length1 <= offset2) || (offset2 + length2 <= offset1));
+    return !((offset1 + length1 <= offset2) || (offset2 + length2 <= offset1));
 }
 #define CHECK_RANGES_OVERLAP(name, _offset1, length1, _offset2, length2)   \
   do {                                                                     \

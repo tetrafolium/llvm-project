@@ -331,9 +331,9 @@ ITT_INLINE long __TBB_machine_fetchadd4(volatile void* ptr, long addend)
 {
     long result;
     __asm__ __volatile__("lock\nxadd %0,%1"
-                          : "=r"(result),"=m"(*(volatile int*)ptr)
-                          : "0"(addend), "m"(*(volatile int*)ptr)
-                          : "memory");
+                         : "=r"(result),"=m"(*(volatile int*)ptr)
+                         : "0"(addend), "m"(*(volatile int*)ptr)
+                         : "memory");
     return result;
 }
 #elif ITT_ARCH == ITT_ARCH_ARM || ITT_ARCH == ITT_ARCH_PPC64 ||                \

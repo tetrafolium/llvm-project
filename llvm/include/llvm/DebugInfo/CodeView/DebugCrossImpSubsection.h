@@ -26,18 +26,18 @@ namespace llvm {
 namespace codeview {
 
 struct CrossModuleImportItem {
-  const CrossModuleImport *Header = nullptr;
-  FixedStreamArray<support::ulittle32_t> Imports;
+    const CrossModuleImport *Header = nullptr;
+    FixedStreamArray<support::ulittle32_t> Imports;
 };
 
 } // end namespace codeview
 
 template <> struct VarStreamArrayExtractor<codeview::CrossModuleImportItem> {
 public:
-  using ContextType = void;
+    using ContextType = void;
 
-  Error operator()(BinaryStreamRef Stream, uint32_t &Len,
-                   codeview::CrossModuleImportItem &Item);
+    Error operator()(BinaryStreamRef Stream, uint32_t &Len,
+                     codeview::CrossModuleImportItem &Item);
 };
 
 namespace codeview {
@@ -45,46 +45,50 @@ namespace codeview {
 class DebugStringTableSubsection;
 
 class DebugCrossModuleImportsSubsectionRef final : public DebugSubsectionRef {
-  using ReferenceArray = VarStreamArray<CrossModuleImportItem>;
-  using Iterator = ReferenceArray::Iterator;
+    using ReferenceArray = VarStreamArray<CrossModuleImportItem>;
+    using Iterator = ReferenceArray::Iterator;
 
 public:
-  DebugCrossModuleImportsSubsectionRef()
-      : DebugSubsectionRef(DebugSubsectionKind::CrossScopeImports) {}
+    DebugCrossModuleImportsSubsectionRef()
+        : DebugSubsectionRef(DebugSubsectionKind::CrossScopeImports) {}
 
-  static bool classof(const DebugSubsectionRef *S) {
-    return S->kind() == DebugSubsectionKind::CrossScopeImports;
-  }
+    static bool classof(const DebugSubsectionRef *S) {
+        return S->kind() == DebugSubsectionKind::CrossScopeImports;
+    }
 
-  Error initialize(BinaryStreamReader Reader);
-  Error initialize(BinaryStreamRef Stream);
+    Error initialize(BinaryStreamReader Reader);
+    Error initialize(BinaryStreamRef Stream);
 
-  Iterator begin() const { return References.begin(); }
-  Iterator end() const { return References.end(); }
+    Iterator begin() const {
+        return References.begin();
+    }
+    Iterator end() const {
+        return References.end();
+    }
 
 private:
-  ReferenceArray References;
+    ReferenceArray References;
 };
 
 class DebugCrossModuleImportsSubsection final : public DebugSubsection {
 public:
-  explicit DebugCrossModuleImportsSubsection(
-      DebugStringTableSubsection &Strings)
-      : DebugSubsection(DebugSubsectionKind::CrossScopeImports),
-        Strings(Strings) {}
+    explicit DebugCrossModuleImportsSubsection(
+        DebugStringTableSubsection &Strings)
+        : DebugSubsection(DebugSubsectionKind::CrossScopeImports),
+          Strings(Strings) {}
 
-  static bool classof(const DebugSubsection *S) {
-    return S->kind() == DebugSubsectionKind::CrossScopeImports;
-  }
+    static bool classof(const DebugSubsection *S) {
+        return S->kind() == DebugSubsectionKind::CrossScopeImports;
+    }
 
-  void addImport(StringRef Module, uint32_t ImportId);
+    void addImport(StringRef Module, uint32_t ImportId);
 
-  uint32_t calculateSerializedSize() const override;
-  Error commit(BinaryStreamWriter &Writer) const override;
+    uint32_t calculateSerializedSize() const override;
+    Error commit(BinaryStreamWriter &Writer) const override;
 
 private:
-  DebugStringTableSubsection &Strings;
-  StringMap<std::vector<support::ulittle32_t>> Mappings;
+    DebugStringTableSubsection &Strings;
+    StringMap<std::vector<support::ulittle32_t>> Mappings;
 };
 
 } // end namespace codeview

@@ -42,7 +42,7 @@ const uint32_t g_gp_regnums_mips[] = {
 };
 
 static_assert((sizeof(g_gp_regnums_mips) / sizeof(g_gp_regnums_mips[0])) - 1 ==
-                  k_num_gpr_registers_mips,
+              k_num_gpr_registers_mips,
               "g_gp_regnums_mips has wrong number of register infos");
 // mips floating point registers.
 const uint32_t g_fp_regnums_mips[] = {
@@ -59,7 +59,7 @@ const uint32_t g_fp_regnums_mips[] = {
 };
 
 static_assert((sizeof(g_fp_regnums_mips) / sizeof(g_fp_regnums_mips[0])) - 1 ==
-                  k_num_fpr_registers_mips,
+              k_num_fpr_registers_mips,
               "g_fp_regnums_mips has wrong number of register infos");
 
 // mips MSA registers.
@@ -78,8 +78,8 @@ const uint32_t g_msa_regnums_mips[] = {
 };
 
 static_assert((sizeof(g_msa_regnums_mips) / sizeof(g_msa_regnums_mips[0])) -
-                      1 ==
-                  k_num_msa_registers_mips,
+              1 ==
+              k_num_msa_registers_mips,
               "g_msa_regnums_mips has wrong number of register infos");
 
 // Number of register sets provided by this context.
@@ -87,17 +87,20 @@ constexpr size_t k_num_register_sets = 3;
 
 // Register sets for mips.
 static const RegisterSet g_reg_sets_mips[k_num_register_sets] = {
-    {"General Purpose Registers", "gpr", k_num_gpr_registers_mips,
-     g_gp_regnums_mips},
-    {"Floating Point Registers", "fpu", k_num_fpr_registers_mips,
-     g_fp_regnums_mips},
-    {"MSA Registers", "msa", k_num_msa_registers_mips, g_msa_regnums_mips}};
+    {   "General Purpose Registers", "gpr", k_num_gpr_registers_mips,
+        g_gp_regnums_mips
+    },
+    {   "Floating Point Registers", "fpu", k_num_fpr_registers_mips,
+        g_fp_regnums_mips
+    },
+    {"MSA Registers", "msa", k_num_msa_registers_mips, g_msa_regnums_mips}
+};
 
 uint32_t GetUserRegisterInfoCount(bool msa_present) {
-  if (msa_present)
-    return static_cast<uint32_t>(k_num_user_registers_mips);
-  return static_cast<uint32_t>(k_num_user_registers_mips -
-                               k_num_msa_registers_mips);
+    if (msa_present)
+        return static_cast<uint32_t>(k_num_user_registers_mips);
+    return static_cast<uint32_t>(k_num_user_registers_mips -
+                                 k_num_msa_registers_mips);
 }
 
 RegisterContextLinux_mips::RegisterContextLinux_mips(
@@ -106,44 +109,44 @@ RegisterContextLinux_mips::RegisterContextLinux_mips(
       m_user_register_count(GetUserRegisterInfoCount(msa_present)) {}
 
 size_t RegisterContextLinux_mips::GetGPRSize() const {
-  return sizeof(GPR_linux_mips);
+    return sizeof(GPR_linux_mips);
 }
 
 const RegisterInfo *RegisterContextLinux_mips::GetRegisterInfo() const {
-  switch (m_target_arch.GetMachine()) {
-  case llvm::Triple::mips:
-  case llvm::Triple::mipsel:
-    return g_register_infos_mips;
-  default:
-    assert(false && "Unhandled target architecture.");
-    return nullptr;
-  }
-}
-
-const RegisterSet * 
-RegisterContextLinux_mips::GetRegisterSet(size_t set) const {
-  if (set >= k_num_register_sets)
-    return nullptr;
-  switch (m_target_arch.GetMachine()) {
+    switch (m_target_arch.GetMachine()) {
     case llvm::Triple::mips:
     case llvm::Triple::mipsel:
-      return &g_reg_sets_mips[set];
+        return g_register_infos_mips;
     default:
-      assert(false && "Unhandled target architecture.");
-      return nullptr;
-  }
+        assert(false && "Unhandled target architecture.");
+        return nullptr;
+    }
+}
+
+const RegisterSet *
+RegisterContextLinux_mips::GetRegisterSet(size_t set) const {
+    if (set >= k_num_register_sets)
+        return nullptr;
+    switch (m_target_arch.GetMachine()) {
+    case llvm::Triple::mips:
+    case llvm::Triple::mipsel:
+        return &g_reg_sets_mips[set];
+    default:
+        assert(false && "Unhandled target architecture.");
+        return nullptr;
+    }
 }
 
 size_t
 RegisterContextLinux_mips::GetRegisterSetCount() const {
-  return k_num_register_sets;
+    return k_num_register_sets;
 }
 
 uint32_t RegisterContextLinux_mips::GetRegisterCount() const {
-  return static_cast<uint32_t>(sizeof(g_register_infos_mips) /
-                               sizeof(g_register_infos_mips[0]));
+    return static_cast<uint32_t>(sizeof(g_register_infos_mips) /
+                                 sizeof(g_register_infos_mips[0]));
 }
 
 uint32_t RegisterContextLinux_mips::GetUserRegisterCount() const {
-  return static_cast<uint32_t>(m_user_register_count);
+    return static_cast<uint32_t>(m_user_register_count);
 }

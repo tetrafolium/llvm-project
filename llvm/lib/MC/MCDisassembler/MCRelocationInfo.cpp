@@ -18,13 +18,13 @@ MCRelocationInfo::~MCRelocationInfo() = default;
 
 const MCExpr *
 MCRelocationInfo::createExprForCAPIVariantKind(const MCExpr *SubExpr,
-                                               unsigned VariantKind) {
-  if (VariantKind != LLVMDisassembler_VariantKind_None)
-    return nullptr;
-  return SubExpr;
+        unsigned VariantKind) {
+    if (VariantKind != LLVMDisassembler_VariantKind_None)
+        return nullptr;
+    return SubExpr;
 }
 
 MCRelocationInfo *llvm::createMCRelocationInfo(const Triple &TT,
-                                               MCContext &Ctx) {
-  return new MCRelocationInfo(Ctx);
+        MCContext &Ctx) {
+    return new MCRelocationInfo(Ctx);
 }

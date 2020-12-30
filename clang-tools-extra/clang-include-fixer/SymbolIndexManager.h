@@ -32,31 +32,31 @@ namespace include_fixer {
 /// to an identifier in the source code from multiple symbol databases.
 class SymbolIndexManager {
 public:
-  void addSymbolIndex(std::function<std::unique_ptr<SymbolIndex>()> F) {
+    void addSymbolIndex(std::function<std::unique_ptr<SymbolIndex>()> F) {
 #if LLVM_ENABLE_THREADS
-    auto Strategy = std::launch::async;
+        auto Strategy = std::launch::async;
 #else
-    auto Strategy = std::launch::deferred;
+        auto Strategy = std::launch::deferred;
 #endif
-    SymbolIndices.push_back(std::async(Strategy, F));
-  }
+        SymbolIndices.push_back(std::async(Strategy, F));
+    }
 
-  /// Search for header files to be included for an identifier.
-  /// \param Identifier The identifier being searched for. May or may not be
-  ///                   fully qualified.
-  /// \param IsNestedSearch Whether searching nested classes. If true, the
-  ///        method tries to strip identifier name parts from the end until it
-  ///        finds the corresponding candidates in database (e.g for identifier
-  ///        "b::foo", the method will try to find "b" if it fails to find
-  ///        "b::foo").
-  ///
-  /// \returns A list of symbol candidates.
-  std::vector<find_all_symbols::SymbolInfo>
-  search(llvm::StringRef Identifier, bool IsNestedSearch = true,
-         llvm::StringRef FileName = "") const;
+    /// Search for header files to be included for an identifier.
+    /// \param Identifier The identifier being searched for. May or may not be
+    ///                   fully qualified.
+    /// \param IsNestedSearch Whether searching nested classes. If true, the
+    ///        method tries to strip identifier name parts from the end until it
+    ///        finds the corresponding candidates in database (e.g for identifier
+    ///        "b::foo", the method will try to find "b" if it fails to find
+    ///        "b::foo").
+    ///
+    /// \returns A list of symbol candidates.
+    std::vector<find_all_symbols::SymbolInfo>
+    search(llvm::StringRef Identifier, bool IsNestedSearch = true,
+           llvm::StringRef FileName = "") const;
 
 private:
-  std::vector<std::shared_future<std::unique_ptr<SymbolIndex>>> SymbolIndices;
+    std::vector<std::shared_future<std::unique_ptr<SymbolIndex>>> SymbolIndices;
 };
 
 } // namespace include_fixer

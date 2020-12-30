@@ -21,7 +21,7 @@
 #   include <cxxabi.h>
 #   include "support/runtime/new_handler_fallback.ipp"
 #elif defined(__GLIBCXX__)
-    // nothing to do
+// nothing to do
 #else
 #   include "support/runtime/new_handler_fallback.ipp"
 #endif
@@ -30,7 +30,7 @@ namespace std
 {
 
 #ifndef __GLIBCXX__
-const nothrow_t nothrow{};
+const nothrow_t nothrow {};
 #endif
 
 #ifndef LIBSTDCXX
@@ -178,7 +178,7 @@ operator new(std::size_t size, std::align_val_t alignment) _THROW_BAD_ALLOC
     if (size == 0)
         size = 1;
     if (static_cast<size_t>(alignment) < sizeof(void*))
-      alignment = std::align_val_t(sizeof(void*));
+        alignment = std::align_val_t(sizeof(void*));
 
     // Try allocating memory. If allocation fails and there is a new_handler,
     // call it to try free up memory, and try again until it succeeds, or until

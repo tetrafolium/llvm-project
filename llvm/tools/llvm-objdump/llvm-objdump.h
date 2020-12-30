@@ -58,51 +58,53 @@ typedef std::function<bool(llvm::object::SectionRef const &)> FilterPredicate;
 /// predicate.
 class SectionFilterIterator {
 public:
-  SectionFilterIterator(FilterPredicate P,
-                        llvm::object::section_iterator const &I,
-                        llvm::object::section_iterator const &E)
-      : Predicate(std::move(P)), Iterator(I), End(E) {
-    ScanPredicate();
-  }
-  const llvm::object::SectionRef &operator*() const { return *Iterator; }
-  SectionFilterIterator &operator++() {
-    ++Iterator;
-    ScanPredicate();
-    return *this;
-  }
-  bool operator!=(SectionFilterIterator const &Other) const {
-    return Iterator != Other.Iterator;
-  }
+    SectionFilterIterator(FilterPredicate P,
+                          llvm::object::section_iterator const &I,
+                          llvm::object::section_iterator const &E)
+        : Predicate(std::move(P)), Iterator(I), End(E) {
+        ScanPredicate();
+    }
+    const llvm::object::SectionRef &operator*() const {
+        return *Iterator;
+    }
+    SectionFilterIterator &operator++() {
+        ++Iterator;
+        ScanPredicate();
+        return *this;
+    }
+    bool operator!=(SectionFilterIterator const &Other) const {
+        return Iterator != Other.Iterator;
+    }
 
 private:
-  void ScanPredicate() {
-    while (Iterator != End && !Predicate(*Iterator)) {
-      ++Iterator;
+    void ScanPredicate() {
+        while (Iterator != End && !Predicate(*Iterator)) {
+            ++Iterator;
+        }
     }
-  }
-  FilterPredicate Predicate;
-  llvm::object::section_iterator Iterator;
-  llvm::object::section_iterator End;
+    FilterPredicate Predicate;
+    llvm::object::section_iterator Iterator;
+    llvm::object::section_iterator End;
 };
 
 /// Creates an iterator range of SectionFilterIterators for a given Object and
 /// predicate.
 class SectionFilter {
 public:
-  SectionFilter(FilterPredicate P, llvm::object::ObjectFile const &O)
-      : Predicate(std::move(P)), Object(O) {}
-  SectionFilterIterator begin() {
-    return SectionFilterIterator(Predicate, Object.section_begin(),
-                                 Object.section_end());
-  }
-  SectionFilterIterator end() {
-    return SectionFilterIterator(Predicate, Object.section_end(),
-                                 Object.section_end());
-  }
+    SectionFilter(FilterPredicate P, llvm::object::ObjectFile const &O)
+        : Predicate(std::move(P)), Object(O) {}
+    SectionFilterIterator begin() {
+        return SectionFilterIterator(Predicate, Object.section_begin(),
+                                     Object.section_end());
+    }
+    SectionFilterIterator end() {
+        return SectionFilterIterator(Predicate, Object.section_end(),
+                                     Object.section_end());
+    }
 
 private:
-  FilterPredicate Predicate;
-  llvm::object::ObjectFile const &Object;
+    FilterPredicate Predicate;
+    llvm::object::ObjectFile const &Object;
 };
 
 // Various helper functions.
@@ -129,15 +131,15 @@ void printSymbol(const object::ObjectFile *O, const object::SymbolRef &Symbol,
                  StringRef ArchitectureName, bool DumpDynamic);
 LLVM_ATTRIBUTE_NORETURN void reportError(StringRef File, Twine Message);
 LLVM_ATTRIBUTE_NORETURN void reportError(Error E, StringRef FileName,
-                                         StringRef ArchiveName = "",
-                                         StringRef ArchitectureName = "");
+        StringRef ArchiveName = "",
+        StringRef ArchitectureName = "");
 void reportWarning(Twine Message, StringRef File);
 
 template <typename T, typename... Ts>
 T unwrapOrError(Expected<T> EO, Ts &&... Args) {
-  if (EO)
-    return std::move(*EO);
-  reportError(EO.takeError(), std::forward<Ts>(Args)...);
+    if (EO)
+        return std::move(*EO);
+    reportError(EO.takeError(), std::forward<Ts>(Args)...);
 }
 
 std::string getFileNameForError(const object::Archive::Child &C,

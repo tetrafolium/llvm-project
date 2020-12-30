@@ -48,9 +48,9 @@ LLVMDisasmContextRef LLVMCreateDisasm(const char *TripleName, void *DisInfo,
  * to calling LLVMCreateDisasmCPUFeatures() with an empty feature set.
  */
 LLVMDisasmContextRef LLVMCreateDisasmCPU(const char *Triple, const char *CPU,
-                                         void *DisInfo, int TagType,
-                                         LLVMOpInfoCallback GetOpInfo,
-                                         LLVMSymbolLookupCallback SymbolLookUp);
+        void *DisInfo, int TagType,
+        LLVMOpInfoCallback GetOpInfo,
+        LLVMSymbolLookupCallback SymbolLookUp);
 
 /**
  * Create a disassembler for the TripleName, a specific CPU and specific feature
@@ -79,7 +79,7 @@ int LLVMSetDisasmOptions(LLVMDisasmContextRef DC, uint64_t Options);
 #define LLVMDisassembler_Option_AsmPrinterVariant 4
 /* The option to set comment on instructions */
 #define LLVMDisassembler_Option_SetInstrComments 8
-  /* The option to print latency information alongside instructions */
+/* The option to print latency information alongside instructions */
 #define LLVMDisassembler_Option_PrintLatency 16
 
 /**

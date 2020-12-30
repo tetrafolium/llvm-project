@@ -14,27 +14,27 @@ namespace llvm {
 namespace libc_benchmarks {
 
 void checkRequirements() {
-  const auto &CpuInfo = benchmark::CPUInfo::Get();
-  if (CpuInfo.scaling_enabled)
-    report_fatal_error(
-        "CPU scaling is enabled, the benchmark real time measurements may be "
-        "noisy and will incur extra overhead.");
+    const auto &CpuInfo = benchmark::CPUInfo::Get();
+    if (CpuInfo.scaling_enabled)
+        report_fatal_error(
+            "CPU scaling is enabled, the benchmark real time measurements may be "
+            "noisy and will incur extra overhead.");
 }
 
 HostState HostState::get() {
-  const auto &CpuInfo = benchmark::CPUInfo::Get();
-  HostState H;
-  H.CpuFrequency = CpuInfo.cycles_per_second;
-  H.CpuName = llvm::sys::getHostCPUName().str();
-  for (const auto &BenchmarkCacheInfo : CpuInfo.caches) {
-    CacheInfo CI;
-    CI.Type = BenchmarkCacheInfo.type;
-    CI.Level = BenchmarkCacheInfo.level;
-    CI.Size = BenchmarkCacheInfo.size;
-    CI.NumSharing = BenchmarkCacheInfo.num_sharing;
-    H.Caches.push_back(std::move(CI));
-  }
-  return H;
+    const auto &CpuInfo = benchmark::CPUInfo::Get();
+    HostState H;
+    H.CpuFrequency = CpuInfo.cycles_per_second;
+    H.CpuName = llvm::sys::getHostCPUName().str();
+    for (const auto &BenchmarkCacheInfo : CpuInfo.caches) {
+        CacheInfo CI;
+        CI.Type = BenchmarkCacheInfo.type;
+        CI.Level = BenchmarkCacheInfo.level;
+        CI.Size = BenchmarkCacheInfo.size;
+        CI.NumSharing = BenchmarkCacheInfo.num_sharing;
+        H.Caches.push_back(std::move(CI));
+    }
+    return H;
 }
 
 } // namespace libc_benchmarks

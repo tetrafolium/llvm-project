@@ -22,10 +22,10 @@ namespace cert {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cert-err34-c.html
 class StrToNumCheck : public ClangTidyCheck {
 public:
-  StrToNumCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    StrToNumCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace cert

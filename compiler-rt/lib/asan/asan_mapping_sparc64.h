@@ -62,38 +62,38 @@
 namespace __asan {
 
 static inline bool AddrIsInLowMem(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return a <= kLowMemEnd;
+    PROFILE_ASAN_MAPPING();
+    return a <= kLowMemEnd;
 }
 
 static inline bool AddrIsInLowShadow(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return a >= kLowShadowBeg && a <= kLowShadowEnd;
+    PROFILE_ASAN_MAPPING();
+    return a >= kLowShadowBeg && a <= kLowShadowEnd;
 }
 
 static inline bool AddrIsInMidMem(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return false;
+    PROFILE_ASAN_MAPPING();
+    return false;
 }
 
 static inline bool AddrIsInMidShadow(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return false;
+    PROFILE_ASAN_MAPPING();
+    return false;
 }
 
 static inline bool AddrIsInHighMem(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return kHighMemBeg && a >= kHighMemBeg && a <= kHighMemEnd;
+    PROFILE_ASAN_MAPPING();
+    return kHighMemBeg && a >= kHighMemBeg && a <= kHighMemEnd;
 }
 
 static inline bool AddrIsInHighShadow(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return kHighMemBeg && a >= kHighShadowBeg && a <= kHighShadowEnd;
+    PROFILE_ASAN_MAPPING();
+    return kHighMemBeg && a >= kHighShadowBeg && a <= kHighShadowEnd;
 }
 
 static inline bool AddrIsInShadowGap(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return a >= kShadowGapBeg && a <= kShadowGapEnd;
+    PROFILE_ASAN_MAPPING();
+    return a >= kShadowGapBeg && a <= kShadowGapEnd;
 }
 
 }  // namespace __asan

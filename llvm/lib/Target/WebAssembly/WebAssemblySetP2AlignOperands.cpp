@@ -27,21 +27,21 @@ using namespace llvm;
 namespace {
 class WebAssemblySetP2AlignOperands final : public MachineFunctionPass {
 public:
-  static char ID; // Pass identification, replacement for typeid
-  WebAssemblySetP2AlignOperands() : MachineFunctionPass(ID) {}
+    static char ID; // Pass identification, replacement for typeid
+    WebAssemblySetP2AlignOperands() : MachineFunctionPass(ID) {}
 
-  StringRef getPassName() const override {
-    return "WebAssembly Set p2align Operands";
-  }
+    StringRef getPassName() const override {
+        return "WebAssembly Set p2align Operands";
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesCFG();
-    AU.addPreserved<MachineBlockFrequencyInfo>();
-    AU.addPreservedID(MachineDominatorsID);
-    MachineFunctionPass::getAnalysisUsage(AU);
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesCFG();
+        AU.addPreserved<MachineBlockFrequencyInfo>();
+        AU.addPreservedID(MachineDominatorsID);
+        MachineFunctionPass::getAnalysisUsage(AU);
+    }
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 };
 } // end anonymous namespace
 
@@ -51,47 +51,47 @@ INITIALIZE_PASS(WebAssemblySetP2AlignOperands, DEBUG_TYPE,
                 false, false)
 
 FunctionPass *llvm::createWebAssemblySetP2AlignOperands() {
-  return new WebAssemblySetP2AlignOperands();
+    return new WebAssemblySetP2AlignOperands();
 }
 
 static void rewriteP2Align(MachineInstr &MI, unsigned OperandNo) {
-  assert(MI.getOperand(OperandNo).getImm() == 0 &&
-         "ISel should set p2align operands to 0");
-  assert(MI.hasOneMemOperand() &&
-         "Load and store instructions have exactly one mem operand");
-  assert((*MI.memoperands_begin())->getSize() ==
-             (UINT64_C(1) << WebAssembly::GetDefaultP2Align(MI.getOpcode())) &&
-         "Default p2align value should be natural");
-  assert(MI.getDesc().OpInfo[OperandNo].OperandType ==
-             WebAssembly::OPERAND_P2ALIGN &&
-         "Load and store instructions should have a p2align operand");
-  uint64_t P2Align = Log2((*MI.memoperands_begin())->getAlign());
+    assert(MI.getOperand(OperandNo).getImm() == 0 &&
+           "ISel should set p2align operands to 0");
+    assert(MI.hasOneMemOperand() &&
+           "Load and store instructions have exactly one mem operand");
+    assert((*MI.memoperands_begin())->getSize() ==
+           (UINT64_C(1) << WebAssembly::GetDefaultP2Align(MI.getOpcode())) &&
+           "Default p2align value should be natural");
+    assert(MI.getDesc().OpInfo[OperandNo].OperandType ==
+           WebAssembly::OPERAND_P2ALIGN &&
+           "Load and store instructions should have a p2align operand");
+    uint64_t P2Align = Log2((*MI.memoperands_begin())->getAlign());
 
-  // WebAssembly does not currently support supernatural alignment.
-  P2Align = std::min(P2Align,
-                     uint64_t(WebAssembly::GetDefaultP2Align(MI.getOpcode())));
+    // WebAssembly does not currently support supernatural alignment.
+    P2Align = std::min(P2Align,
+                       uint64_t(WebAssembly::GetDefaultP2Align(MI.getOpcode())));
 
-  MI.getOperand(OperandNo).setImm(P2Align);
+    MI.getOperand(OperandNo).setImm(P2Align);
 }
 
 bool WebAssemblySetP2AlignOperands::runOnMachineFunction(MachineFunction &MF) {
-  LLVM_DEBUG({
-    dbgs() << "********** Set p2align Operands **********\n"
-           << "********** Function: " << MF.getName() << '\n';
-  });
+    LLVM_DEBUG({
+        dbgs() << "********** Set p2align Operands **********\n"
+               << "********** Function: " << MF.getName() << '\n';
+    });
 
-  bool Changed = false;
+    bool Changed = false;
 
-  for (auto &MBB : MF) {
-    for (auto &MI : MBB) {
-      int16_t P2AlignOpNum = WebAssembly::getNamedOperandIdx(
-          MI.getOpcode(), WebAssembly::OpName::p2align);
-      if (P2AlignOpNum != -1) {
-        rewriteP2Align(MI, P2AlignOpNum);
-        Changed = true;
-      }
+    for (auto &MBB : MF) {
+        for (auto &MI : MBB) {
+            int16_t P2AlignOpNum = WebAssembly::getNamedOperandIdx(
+                                       MI.getOpcode(), WebAssembly::OpName::p2align);
+            if (P2AlignOpNum != -1) {
+                rewriteP2Align(MI, P2AlignOpNum);
+                Changed = true;
+            }
+        }
     }
-  }
 
-  return Changed;
+    return Changed;
 }

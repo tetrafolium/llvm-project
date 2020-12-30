@@ -64,5 +64,5 @@ static const TagNameItem tagData[] = {
 };
 
 const TagNameMap llvm::ARMBuildAttrs::ARMAttributeTags(tagData,
-                                                       sizeof(tagData) /
-                                                           sizeof(TagNameItem));
+        sizeof(tagData) /
+        sizeof(TagNameItem));

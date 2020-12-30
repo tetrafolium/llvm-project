@@ -35,60 +35,60 @@ class ModulePass;
 
 FunctionPass *createPPCCTRLoops();
 #ifndef NDEBUG
-  FunctionPass *createPPCCTRLoopsVerify();
+FunctionPass *createPPCCTRLoopsVerify();
 #endif
-  FunctionPass *createPPCLoopInstrFormPrepPass(PPCTargetMachine &TM);
-  FunctionPass *createPPCTOCRegDepsPass();
-  FunctionPass *createPPCEarlyReturnPass();
-  FunctionPass *createPPCVSXCopyPass();
-  FunctionPass *createPPCVSXFMAMutatePass();
-  FunctionPass *createPPCVSXSwapRemovalPass();
-  FunctionPass *createPPCReduceCRLogicalsPass();
-  FunctionPass *createPPCMIPeepholePass();
-  FunctionPass *createPPCBranchSelectionPass();
-  FunctionPass *createPPCBranchCoalescingPass();
-  FunctionPass *createPPCISelDag(PPCTargetMachine &TM, CodeGenOpt::Level OL);
-  FunctionPass *createPPCTLSDynamicCallPass();
-  FunctionPass *createPPCBoolRetToIntPass();
-  FunctionPass *createPPCExpandISELPass();
-  FunctionPass *createPPCPreEmitPeepholePass();
-  void LowerPPCMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
-                                    AsmPrinter &AP);
-  bool LowerPPCMachineOperandToMCOperand(const MachineOperand &MO,
-                                         MCOperand &OutMO, AsmPrinter &AP);
+FunctionPass *createPPCLoopInstrFormPrepPass(PPCTargetMachine &TM);
+FunctionPass *createPPCTOCRegDepsPass();
+FunctionPass *createPPCEarlyReturnPass();
+FunctionPass *createPPCVSXCopyPass();
+FunctionPass *createPPCVSXFMAMutatePass();
+FunctionPass *createPPCVSXSwapRemovalPass();
+FunctionPass *createPPCReduceCRLogicalsPass();
+FunctionPass *createPPCMIPeepholePass();
+FunctionPass *createPPCBranchSelectionPass();
+FunctionPass *createPPCBranchCoalescingPass();
+FunctionPass *createPPCISelDag(PPCTargetMachine &TM, CodeGenOpt::Level OL);
+FunctionPass *createPPCTLSDynamicCallPass();
+FunctionPass *createPPCBoolRetToIntPass();
+FunctionPass *createPPCExpandISELPass();
+FunctionPass *createPPCPreEmitPeepholePass();
+void LowerPPCMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
+                                  AsmPrinter &AP);
+bool LowerPPCMachineOperandToMCOperand(const MachineOperand &MO,
+                                       MCOperand &OutMO, AsmPrinter &AP);
 
-  void initializePPCCTRLoopsPass(PassRegistry&);
+void initializePPCCTRLoopsPass(PassRegistry&);
 #ifndef NDEBUG
-  void initializePPCCTRLoopsVerifyPass(PassRegistry&);
+void initializePPCCTRLoopsVerifyPass(PassRegistry&);
 #endif
-  void initializePPCLoopInstrFormPrepPass(PassRegistry&);
-  void initializePPCTOCRegDepsPass(PassRegistry&);
-  void initializePPCEarlyReturnPass(PassRegistry&);
-  void initializePPCVSXCopyPass(PassRegistry&);
-  void initializePPCVSXFMAMutatePass(PassRegistry&);
-  void initializePPCVSXSwapRemovalPass(PassRegistry&);
-  void initializePPCReduceCRLogicalsPass(PassRegistry&);
-  void initializePPCBSelPass(PassRegistry&);
-  void initializePPCBranchCoalescingPass(PassRegistry&);
-  void initializePPCBoolRetToIntPass(PassRegistry&);
-  void initializePPCExpandISELPass(PassRegistry &);
-  void initializePPCPreEmitPeepholePass(PassRegistry &);
-  void initializePPCTLSDynamicCallPass(PassRegistry &);
-  void initializePPCMIPeepholePass(PassRegistry&);
+void initializePPCLoopInstrFormPrepPass(PassRegistry&);
+void initializePPCTOCRegDepsPass(PassRegistry&);
+void initializePPCEarlyReturnPass(PassRegistry&);
+void initializePPCVSXCopyPass(PassRegistry&);
+void initializePPCVSXFMAMutatePass(PassRegistry&);
+void initializePPCVSXSwapRemovalPass(PassRegistry&);
+void initializePPCReduceCRLogicalsPass(PassRegistry&);
+void initializePPCBSelPass(PassRegistry&);
+void initializePPCBranchCoalescingPass(PassRegistry&);
+void initializePPCBoolRetToIntPass(PassRegistry&);
+void initializePPCExpandISELPass(PassRegistry &);
+void initializePPCPreEmitPeepholePass(PassRegistry &);
+void initializePPCTLSDynamicCallPass(PassRegistry &);
+void initializePPCMIPeepholePass(PassRegistry&);
 
-  extern char &PPCVSXFMAMutateID;
+extern char &PPCVSXFMAMutateID;
 
-  ModulePass *createPPCLowerMASSVEntriesPass();
-  void initializePPCLowerMASSVEntriesPass(PassRegistry &);
-  extern char &PPCLowerMASSVEntriesID;
+ModulePass *createPPCLowerMASSVEntriesPass();
+void initializePPCLowerMASSVEntriesPass(PassRegistry &);
+extern char &PPCLowerMASSVEntriesID;
 
-  InstructionSelector *
-  createPPCInstructionSelector(const PPCTargetMachine &, const PPCSubtarget &,
-                               const PPCRegisterBankInfo &);
-  namespace PPCII {
+InstructionSelector *
+createPPCInstructionSelector(const PPCTargetMachine &, const PPCSubtarget &,
+                             const PPCRegisterBankInfo &);
+namespace PPCII {
 
-  /// Target Operand Flag enum.
-  enum TOF {
+/// Target Operand Flag enum.
+enum TOF {
     //===------------------------------------------------------------------===//
     // PPC Specific MachineOperand flags.
     MO_NO_FLAG,
@@ -160,8 +160,8 @@ FunctionPass *createPPCCTRLoops();
 
     // Symbol for VK_PPC_TLS fixup attached to an ADD instruction
     MO_TLS = 8 << 8
-  };
-  } // end namespace PPCII
+};
+} // end namespace PPCII
 
 } // end namespace llvm;
 

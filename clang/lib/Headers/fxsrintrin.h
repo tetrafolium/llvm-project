@@ -29,7 +29,7 @@
 static __inline__ void __DEFAULT_FN_ATTRS
 _fxsave(void *__p)
 {
-  __builtin_ia32_fxsave(__p);
+    __builtin_ia32_fxsave(__p);
 }
 
 /// Restores the XMM, MMX, MXCSR and x87 FPU registers from the 512-byte
@@ -47,7 +47,7 @@ _fxsave(void *__p)
 static __inline__ void __DEFAULT_FN_ATTRS
 _fxrstor(void *__p)
 {
-  __builtin_ia32_fxrstor(__p);
+    __builtin_ia32_fxrstor(__p);
 }
 
 #ifdef __x86_64__
@@ -64,7 +64,7 @@ _fxrstor(void *__p)
 static __inline__ void __DEFAULT_FN_ATTRS
 _fxsave64(void *__p)
 {
-  __builtin_ia32_fxsave64(__p);
+    __builtin_ia32_fxsave64(__p);
 }
 
 /// Restores the XMM, MMX, MXCSR and x87 FPU registers from the 512-byte
@@ -82,7 +82,7 @@ _fxsave64(void *__p)
 static __inline__ void __DEFAULT_FN_ATTRS
 _fxrstor64(void *__p)
 {
-  __builtin_ia32_fxrstor64(__p);
+    __builtin_ia32_fxrstor64(__p);
 }
 #endif
 

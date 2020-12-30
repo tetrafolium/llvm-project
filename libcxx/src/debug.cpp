@@ -23,12 +23,12 @@
 _LIBCPP_BEGIN_NAMESPACE_STD
 
 std::string __libcpp_debug_info::what() const {
-  string msg = __file_;
-  msg += ":" + to_string(__line_) + ": _LIBCPP_ASSERT '";
-  msg += __pred_;
-  msg += "' failed. ";
-  msg += __msg_;
-  return msg;
+    string msg = __file_;
+    msg += ":" + to_string(__line_) + ": _LIBCPP_ASSERT '";
+    msg += __pred_;
+    msg += "' failed. ";
+    msg += __msg_;
+    return msg;
 }
 _LIBCPP_NORETURN void __libcpp_abort_debug_function(__libcpp_debug_info const& info) {
     std::fprintf(stderr, "%s\n", info.what().c_str());
@@ -36,11 +36,11 @@ _LIBCPP_NORETURN void __libcpp_abort_debug_function(__libcpp_debug_info const& i
 }
 
 _LIBCPP_SAFE_STATIC __libcpp_debug_function_type
-    __libcpp_debug_function = __libcpp_abort_debug_function;
+__libcpp_debug_function = __libcpp_abort_debug_function;
 
 bool __libcpp_set_debug_function(__libcpp_debug_function_type __func) {
-  __libcpp_debug_function = __func;
-  return true;
+    __libcpp_debug_function = __func;
+    return true;
 }
 
 _LIBCPP_FUNC_VIS
@@ -200,7 +200,7 @@ __libcpp_db::__insert_c(void* __c, __libcpp_db::_InsertConstruct *__fn)
     __c_node* p = __cbeg_[hc];
     void *buf = malloc(sizeof(__c_node));
     if (buf == nullptr)
-      __throw_bad_alloc();
+        __throw_bad_alloc();
     __cbeg_[hc] = __fn(buf, __c, p);
 
     ++__csz_;
@@ -490,7 +490,7 @@ __c_node::__add(__i_node* i)
         if (nc == 0)
             nc = 1;
         __i_node** beg =
-           static_cast<__i_node**>(malloc(nc * sizeof(__i_node*)));
+            static_cast<__i_node**>(malloc(nc * sizeof(__i_node*)));
         if (beg == nullptr)
             __throw_bad_alloc();
 
@@ -536,7 +536,7 @@ __libcpp_db::__insert_iterator(void* __i)
     size_t hi = hash<void*>()(__i) % static_cast<size_t>(__iend_ - __ibeg_);
     __i_node* p = __ibeg_[hi];
     __i_node* r = __ibeg_[hi] =
-      static_cast<__i_node*>(malloc(sizeof(__i_node)));
+                      static_cast<__i_node*>(malloc(sizeof(__i_node)));
     if (r == nullptr)
         __throw_bad_alloc();
 

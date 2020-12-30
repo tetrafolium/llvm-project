@@ -28,25 +28,25 @@ namespace process_linux {
 
 #if defined(__arm64__) || defined(__aarch64__)
 class SingleStepWorkaround {
-  ::pid_t m_tid;
-  cpu_set_t m_original_set;
+    ::pid_t m_tid;
+    cpu_set_t m_original_set;
 
-  SingleStepWorkaround(const SingleStepWorkaround &) = delete;
-  void operator=(const SingleStepWorkaround &) = delete;
+    SingleStepWorkaround(const SingleStepWorkaround &) = delete;
+    void operator=(const SingleStepWorkaround &) = delete;
 
 public:
-  SingleStepWorkaround(::pid_t tid, cpu_set_t original_set)
-      : m_tid(tid), m_original_set(original_set) {}
-  ~SingleStepWorkaround();
+    SingleStepWorkaround(::pid_t tid, cpu_set_t original_set)
+        : m_tid(tid), m_original_set(original_set) {}
+    ~SingleStepWorkaround();
 
-  static std::unique_ptr<SingleStepWorkaround> Get(::pid_t tid);
+    static std::unique_ptr<SingleStepWorkaround> Get(::pid_t tid);
 };
 #else
 class SingleStepWorkaround {
 public:
-  static std::unique_ptr<SingleStepWorkaround> Get(::pid_t tid) {
-    return nullptr;
-  }
+    static std::unique_ptr<SingleStepWorkaround> Get(::pid_t tid) {
+        return nullptr;
+    }
 };
 #endif
 

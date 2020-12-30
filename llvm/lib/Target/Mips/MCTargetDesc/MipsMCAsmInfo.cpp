@@ -20,34 +20,34 @@ void MipsMCAsmInfo::anchor() { }
 
 MipsMCAsmInfo::MipsMCAsmInfo(const Triple &TheTriple,
                              const MCTargetOptions &Options) {
-  IsLittleEndian = TheTriple.isLittleEndian();
+    IsLittleEndian = TheTriple.isLittleEndian();
 
-  MipsABIInfo ABI = MipsABIInfo::computeTargetABI(TheTriple, "", Options);
+    MipsABIInfo ABI = MipsABIInfo::computeTargetABI(TheTriple, "", Options);
 
-  if (TheTriple.isMIPS64() && !ABI.IsN32())
-    CodePointerSize = CalleeSaveStackSlotSize = 8;
+    if (TheTriple.isMIPS64() && !ABI.IsN32())
+        CodePointerSize = CalleeSaveStackSlotSize = 8;
 
-  if (ABI.IsO32())
-    PrivateGlobalPrefix = "$";
-  else if (ABI.IsN32() || ABI.IsN64())
-    PrivateGlobalPrefix = ".L";
-  PrivateLabelPrefix = PrivateGlobalPrefix;
+    if (ABI.IsO32())
+        PrivateGlobalPrefix = "$";
+    else if (ABI.IsN32() || ABI.IsN64())
+        PrivateGlobalPrefix = ".L";
+    PrivateLabelPrefix = PrivateGlobalPrefix;
 
-  AlignmentIsInBytes          = false;
-  Data16bitsDirective         = "\t.2byte\t";
-  Data32bitsDirective         = "\t.4byte\t";
-  Data64bitsDirective         = "\t.8byte\t";
-  CommentString               = "#";
-  ZeroDirective               = "\t.space\t";
-  GPRel32Directive            = "\t.gpword\t";
-  GPRel64Directive            = "\t.gpdword\t";
-  DTPRel32Directive           = "\t.dtprelword\t";
-  DTPRel64Directive           = "\t.dtpreldword\t";
-  TPRel32Directive            = "\t.tprelword\t";
-  TPRel64Directive            = "\t.tpreldword\t";
-  UseAssignmentForEHBegin = true;
-  SupportsDebugInformation = true;
-  ExceptionsType = ExceptionHandling::DwarfCFI;
-  DwarfRegNumForCFI = true;
-  HasMipsExpressions = true;
+    AlignmentIsInBytes          = false;
+    Data16bitsDirective         = "\t.2byte\t";
+    Data32bitsDirective         = "\t.4byte\t";
+    Data64bitsDirective         = "\t.8byte\t";
+    CommentString               = "#";
+    ZeroDirective               = "\t.space\t";
+    GPRel32Directive            = "\t.gpword\t";
+    GPRel64Directive            = "\t.gpdword\t";
+    DTPRel32Directive           = "\t.dtprelword\t";
+    DTPRel64Directive           = "\t.dtpreldword\t";
+    TPRel32Directive            = "\t.tprelword\t";
+    TPRel64Directive            = "\t.tpreldword\t";
+    UseAssignmentForEHBegin = true;
+    SupportsDebugInformation = true;
+    ExceptionsType = ExceptionHandling::DwarfCFI;
+    DwarfRegNumForCFI = true;
+    HasMipsExpressions = true;
 }

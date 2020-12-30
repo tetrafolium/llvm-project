@@ -18,52 +18,52 @@ namespace clang {
 
 /// A module file extension used for testing purposes.
 class TestModuleFileExtension : public ModuleFileExtension {
-  std::string BlockName;
-  unsigned MajorVersion;
-  unsigned MinorVersion;
-  bool Hashed;
-  std::string UserInfo;
+    std::string BlockName;
+    unsigned MajorVersion;
+    unsigned MinorVersion;
+    bool Hashed;
+    std::string UserInfo;
 
-  class Writer : public ModuleFileExtensionWriter {
-  public:
-    Writer(ModuleFileExtension *Ext) : ModuleFileExtensionWriter(Ext) { }
-    ~Writer() override;
+    class Writer : public ModuleFileExtensionWriter {
+    public:
+        Writer(ModuleFileExtension *Ext) : ModuleFileExtensionWriter(Ext) { }
+        ~Writer() override;
 
-    void writeExtensionContents(Sema &SemaRef,
-                                llvm::BitstreamWriter &Stream) override;
-  };
+        void writeExtensionContents(Sema &SemaRef,
+                                    llvm::BitstreamWriter &Stream) override;
+    };
 
-  class Reader : public ModuleFileExtensionReader {
-    llvm::BitstreamCursor Stream;
+    class Reader : public ModuleFileExtensionReader {
+        llvm::BitstreamCursor Stream;
 
-  public:
-    ~Reader() override;
+    public:
+        ~Reader() override;
 
-    Reader(ModuleFileExtension *Ext, const llvm::BitstreamCursor &InStream);
-  };
+        Reader(ModuleFileExtension *Ext, const llvm::BitstreamCursor &InStream);
+    };
 
 public:
-  TestModuleFileExtension(StringRef BlockName,
-                          unsigned MajorVersion,
-                          unsigned MinorVersion,
-                          bool Hashed,
-                          StringRef UserInfo)
-    : BlockName(BlockName),
-      MajorVersion(MajorVersion), MinorVersion(MinorVersion),
-      Hashed(Hashed), UserInfo(UserInfo) { }
-  ~TestModuleFileExtension() override;
+    TestModuleFileExtension(StringRef BlockName,
+                            unsigned MajorVersion,
+                            unsigned MinorVersion,
+                            bool Hashed,
+                            StringRef UserInfo)
+        : BlockName(BlockName),
+          MajorVersion(MajorVersion), MinorVersion(MinorVersion),
+          Hashed(Hashed), UserInfo(UserInfo) { }
+    ~TestModuleFileExtension() override;
 
-  ModuleFileExtensionMetadata getExtensionMetadata() const override;
+    ModuleFileExtensionMetadata getExtensionMetadata() const override;
 
-  llvm::hash_code hashExtension(llvm::hash_code Code) const override;
+    llvm::hash_code hashExtension(llvm::hash_code Code) const override;
 
-  std::unique_ptr<ModuleFileExtensionWriter>
-  createExtensionWriter(ASTWriter &Writer) override;
+    std::unique_ptr<ModuleFileExtensionWriter>
+    createExtensionWriter(ASTWriter &Writer) override;
 
-  std::unique_ptr<ModuleFileExtensionReader>
-  createExtensionReader(const ModuleFileExtensionMetadata &Metadata,
-                        ASTReader &Reader, serialization::ModuleFile &Mod,
-                        const llvm::BitstreamCursor &Stream) override;
+    std::unique_ptr<ModuleFileExtensionReader>
+    createExtensionReader(const ModuleFileExtensionMetadata &Metadata,
+                          ASTReader &Reader, serialization::ModuleFile &Mod,
+                          const llvm::BitstreamCursor &Stream) override;
 };
 
 } // end namespace clang

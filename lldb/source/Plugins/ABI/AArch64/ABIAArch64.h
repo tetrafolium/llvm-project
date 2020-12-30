@@ -13,17 +13,17 @@
 
 class ABIAArch64: public lldb_private::MCBasedABI {
 public:
-  static void Initialize();
-  static void Terminate();
+    static void Initialize();
+    static void Terminate();
 
 protected:
-  std::pair<uint32_t, uint32_t>
-  GetEHAndDWARFNums(llvm::StringRef name) override;
+    std::pair<uint32_t, uint32_t>
+    GetEHAndDWARFNums(llvm::StringRef name) override;
 
-  std::string GetMCName(std::string reg) override;
+    std::string GetMCName(std::string reg) override;
 
-  uint32_t GetGenericNum(llvm::StringRef name) override;
+    uint32_t GetGenericNum(llvm::StringRef name) override;
 
-  using lldb_private::MCBasedABI::MCBasedABI;
+    using lldb_private::MCBasedABI::MCBasedABI;
 };
 #endif

@@ -27,8 +27,8 @@ namespace transformer {
 using RangeSelector = MatchConsumer<CharSourceRange>;
 
 inline RangeSelector charRange(CharSourceRange R) {
-  return [R](const ast_matchers::MatchFinder::MatchResult &)
-             -> Expected<CharSourceRange> { return R; };
+    return [R](const ast_matchers::MatchFinder::MatchResult &)
+           -> Expected<CharSourceRange> { return R; };
 }
 
 /// Selects from the start of \p Begin and to the end of \p End.
@@ -39,12 +39,12 @@ RangeSelector encloseNodes(std::string BeginID, std::string EndID);
 
 /// DEPRECATED. Use `enclose`.
 inline RangeSelector range(RangeSelector Begin, RangeSelector End) {
-  return enclose(std::move(Begin), std::move(End));
+    return enclose(std::move(Begin), std::move(End));
 }
 
 /// DEPRECATED. Use `encloseNodes`.
 inline RangeSelector range(std::string BeginID, std::string EndID) {
-  return encloseNodes(std::move(BeginID), std::move(EndID));
+    return encloseNodes(std::move(BeginID), std::move(EndID));
 }
 
 /// Selects the (empty) range [B,B) when \p Selector selects the range [B,E).
@@ -58,7 +58,7 @@ RangeSelector after(RangeSelector Selector);
 
 /// Selects the range between `R1` and `R2.
 inline RangeSelector between(RangeSelector R1, RangeSelector R2) {
-  return enclose(after(std::move(R1)), before(std::move(R2)));
+    return enclose(after(std::move(R1)), before(std::move(R2)));
 }
 
 /// Selects a node, including trailing semicolon, if any (for declarations and

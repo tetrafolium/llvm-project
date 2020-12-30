@@ -17,54 +17,54 @@ using namespace llvm;
 AMDGPUMCAsmInfo::AMDGPUMCAsmInfo(const Triple &TT,
                                  const MCTargetOptions &Options)
     : MCAsmInfoELF() {
-  CodePointerSize = (TT.getArch() == Triple::amdgcn) ? 8 : 4;
-  StackGrowsUp = true;
-  HasSingleParameterDotFile = false;
-  //===------------------------------------------------------------------===//
-  MinInstAlignment = 4;
+    CodePointerSize = (TT.getArch() == Triple::amdgcn) ? 8 : 4;
+    StackGrowsUp = true;
+    HasSingleParameterDotFile = false;
+    //===------------------------------------------------------------------===//
+    MinInstAlignment = 4;
 
-  // This is the maximum instruction encoded size for gfx10. With a known
-  // subtarget, it can be reduced to 8 bytes.
-  MaxInstLength = (TT.getArch() == Triple::amdgcn) ? 20 : 16;
-  SeparatorString = "\n";
-  CommentString = ";";
-  PrivateLabelPrefix = "";
-  InlineAsmStart = ";#ASMSTART";
-  InlineAsmEnd = ";#ASMEND";
+    // This is the maximum instruction encoded size for gfx10. With a known
+    // subtarget, it can be reduced to 8 bytes.
+    MaxInstLength = (TT.getArch() == Triple::amdgcn) ? 20 : 16;
+    SeparatorString = "\n";
+    CommentString = ";";
+    PrivateLabelPrefix = "";
+    InlineAsmStart = ";#ASMSTART";
+    InlineAsmEnd = ";#ASMEND";
 
-  //===--- Data Emission Directives -------------------------------------===//
-  SunStyleELFSectionSwitchSyntax = true;
-  UsesELFSectionDirectiveForBSS = true;
+    //===--- Data Emission Directives -------------------------------------===//
+    SunStyleELFSectionSwitchSyntax = true;
+    UsesELFSectionDirectiveForBSS = true;
 
-  //===--- Global Variable Emission Directives --------------------------===//
-  HasAggressiveSymbolFolding = true;
-  COMMDirectiveAlignmentIsInBytes = false;
-  HasNoDeadStrip = true;
-  //===--- Dwarf Emission Directives -----------------------------------===//
-  SupportsDebugInformation = true;
-  DwarfRegNumForCFI = true;
+    //===--- Global Variable Emission Directives --------------------------===//
+    HasAggressiveSymbolFolding = true;
+    COMMDirectiveAlignmentIsInBytes = false;
+    HasNoDeadStrip = true;
+    //===--- Dwarf Emission Directives -----------------------------------===//
+    SupportsDebugInformation = true;
+    DwarfRegNumForCFI = true;
 
-  UseIntegratedAssembler = false;
+    UseIntegratedAssembler = false;
 }
 
 bool AMDGPUMCAsmInfo::shouldOmitSectionDirective(StringRef SectionName) const {
-  return SectionName == ".hsatext" || SectionName == ".hsadata_global_agent" ||
-         SectionName == ".hsadata_global_program" ||
-         SectionName == ".hsarodata_readonly_agent" ||
-         MCAsmInfo::shouldOmitSectionDirective(SectionName);
+    return SectionName == ".hsatext" || SectionName == ".hsadata_global_agent" ||
+           SectionName == ".hsadata_global_program" ||
+           SectionName == ".hsarodata_readonly_agent" ||
+           MCAsmInfo::shouldOmitSectionDirective(SectionName);
 }
 
 unsigned AMDGPUMCAsmInfo::getMaxInstLength(const MCSubtargetInfo *STI) const {
-  if (!STI || STI->getTargetTriple().getArch() == Triple::r600)
-    return MaxInstLength;
+    if (!STI || STI->getTargetTriple().getArch() == Triple::r600)
+        return MaxInstLength;
 
-  // Maximum for NSA encoded images
-  if (STI->getFeatureBits()[AMDGPU::FeatureNSAEncoding])
-    return 20;
+    // Maximum for NSA encoded images
+    if (STI->getFeatureBits()[AMDGPU::FeatureNSAEncoding])
+        return 20;
 
-  // 64-bit instruction with 32-bit literal.
-  if (STI->getFeatureBits()[AMDGPU::FeatureVOP3Literal])
-    return 12;
+    // 64-bit instruction with 32-bit literal.
+    if (STI->getFeatureBits()[AMDGPU::FeatureVOP3Literal])
+        return 12;
 
-  return 8;
+    return 8;
 }

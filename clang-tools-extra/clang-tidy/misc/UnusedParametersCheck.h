@@ -19,20 +19,20 @@ namespace misc {
 /// turned on.
 class UnusedParametersCheck : public ClangTidyCheck {
 public:
-  UnusedParametersCheck(StringRef Name, ClangTidyContext *Context);
-  ~UnusedParametersCheck();
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    UnusedParametersCheck(StringRef Name, ClangTidyContext *Context);
+    ~UnusedParametersCheck();
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-  const bool StrictMode;
-  class IndexerVisitor;
-  std::unique_ptr<IndexerVisitor> Indexer;
+    const bool StrictMode;
+    class IndexerVisitor;
+    std::unique_ptr<IndexerVisitor> Indexer;
 
-  void
-  warnOnUnusedParameter(const ast_matchers::MatchFinder::MatchResult &Result,
-                        const FunctionDecl *Function, unsigned ParamIndex);
+    void
+    warnOnUnusedParameter(const ast_matchers::MatchFinder::MatchResult &Result,
+                          const FunctionDecl *Function, unsigned ParamIndex);
 };
 
 } // namespace misc

@@ -16,7 +16,7 @@ class OwningRewritePatternList;
 
 /// Collect a set of patterns to convert from the AVX512 dialect to LLVM.
 void populateAVX512ToLLVMConversionPatterns(LLVMTypeConverter &converter,
-                                            OwningRewritePatternList &patterns);
+        OwningRewritePatternList &patterns);
 
 } // namespace mlir
 

@@ -26,38 +26,38 @@
 using namespace Fortran::frontend;
 
 int fc1_main(llvm::ArrayRef<const char *> argv, const char *argv0) {
-  // Create CompilerInstance
-  std::unique_ptr<CompilerInstance> flang(new CompilerInstance());
+    // Create CompilerInstance
+    std::unique_ptr<CompilerInstance> flang(new CompilerInstance());
 
-  // Create DiagnosticsEngine for the frontend driver
-  flang->CreateDiagnostics();
-  if (!flang->HasDiagnostics())
-    return 1;
+    // Create DiagnosticsEngine for the frontend driver
+    flang->CreateDiagnostics();
+    if (!flang->HasDiagnostics())
+        return 1;
 
-  // We will buffer diagnostics from argument parsing so that we can output
-  // them using a well formed diagnostic object.
-  TextDiagnosticBuffer *diagsBuffer = new TextDiagnosticBuffer;
+    // We will buffer diagnostics from argument parsing so that we can output
+    // them using a well formed diagnostic object.
+    TextDiagnosticBuffer *diagsBuffer = new TextDiagnosticBuffer;
 
-  // Create CompilerInvocation - use a dedicated instance of DiagnosticsEngine
-  // for parsing the arguments
-  llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(
-      new clang::DiagnosticIDs());
-  llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> diagOpts =
-      new clang::DiagnosticOptions();
-  clang::DiagnosticsEngine diags(diagID, &*diagOpts, diagsBuffer);
-  bool success =
-      CompilerInvocation::CreateFromArgs(flang->invocation(), argv, diags);
+    // Create CompilerInvocation - use a dedicated instance of DiagnosticsEngine
+    // for parsing the arguments
+    llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagID(
+        new clang::DiagnosticIDs());
+    llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> diagOpts =
+        new clang::DiagnosticOptions();
+    clang::DiagnosticsEngine diags(diagID, &*diagOpts, diagsBuffer);
+    bool success =
+        CompilerInvocation::CreateFromArgs(flang->invocation(), argv, diags);
 
-  diagsBuffer->FlushDiagnostics(flang->diagnostics());
+    diagsBuffer->FlushDiagnostics(flang->diagnostics());
 
-  if (!success)
-    return 1;
+    if (!success)
+        return 1;
 
-  // Execute the frontend actions.
-  success = ExecuteCompilerInvocation(flang.get());
+    // Execute the frontend actions.
+    success = ExecuteCompilerInvocation(flang.get());
 
-  // Delete output files to free Compiler Instance
-  flang->ClearOutputFiles(/*EraseFiles=*/false);
+    // Delete output files to free Compiler Instance
+    flang->ClearOutputFiles(/*EraseFiles=*/false);
 
-  return !success;
+    return !success;
 }

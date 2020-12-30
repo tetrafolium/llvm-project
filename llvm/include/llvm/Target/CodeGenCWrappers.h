@@ -23,41 +23,41 @@
 namespace llvm {
 
 inline Optional<CodeModel::Model> unwrap(LLVMCodeModel Model, bool &JIT) {
-  JIT = false;
-  switch (Model) {
-  case LLVMCodeModelJITDefault:
-    JIT = true;
-    LLVM_FALLTHROUGH;
-  case LLVMCodeModelDefault:
-    return None;
-  case LLVMCodeModelTiny:
-    return CodeModel::Tiny;
-  case LLVMCodeModelSmall:
+    JIT = false;
+    switch (Model) {
+    case LLVMCodeModelJITDefault:
+        JIT = true;
+        LLVM_FALLTHROUGH;
+    case LLVMCodeModelDefault:
+        return None;
+    case LLVMCodeModelTiny:
+        return CodeModel::Tiny;
+    case LLVMCodeModelSmall:
+        return CodeModel::Small;
+    case LLVMCodeModelKernel:
+        return CodeModel::Kernel;
+    case LLVMCodeModelMedium:
+        return CodeModel::Medium;
+    case LLVMCodeModelLarge:
+        return CodeModel::Large;
+    }
     return CodeModel::Small;
-  case LLVMCodeModelKernel:
-    return CodeModel::Kernel;
-  case LLVMCodeModelMedium:
-    return CodeModel::Medium;
-  case LLVMCodeModelLarge:
-    return CodeModel::Large;
-  }
-  return CodeModel::Small;
 }
 
 inline LLVMCodeModel wrap(CodeModel::Model Model) {
-  switch (Model) {
-  case CodeModel::Tiny:
-    return LLVMCodeModelTiny;
-  case CodeModel::Small:
-    return LLVMCodeModelSmall;
-  case CodeModel::Kernel:
-    return LLVMCodeModelKernel;
-  case CodeModel::Medium:
-    return LLVMCodeModelMedium;
-  case CodeModel::Large:
-    return LLVMCodeModelLarge;
-  }
-  llvm_unreachable("Bad CodeModel!");
+    switch (Model) {
+    case CodeModel::Tiny:
+        return LLVMCodeModelTiny;
+    case CodeModel::Small:
+        return LLVMCodeModelSmall;
+    case CodeModel::Kernel:
+        return LLVMCodeModelKernel;
+    case CodeModel::Medium:
+        return LLVMCodeModelMedium;
+    case CodeModel::Large:
+        return LLVMCodeModelLarge;
+    }
+    llvm_unreachable("Bad CodeModel!");
 }
 } // namespace llvm
 

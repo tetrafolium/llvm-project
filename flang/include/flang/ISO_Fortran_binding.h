@@ -99,9 +99,9 @@ typedef signed char CFI_type_t;
 
 /* 18.5.2 per-dimension information */
 typedef struct CFI_dim_t {
-  CFI_index_t lower_bound;
-  CFI_index_t extent; /* == -1 for assumed size */
-  CFI_index_t sm; /* memory stride in bytes */
+    CFI_index_t lower_bound;
+    CFI_index_t extent; /* == -1 for assumed size */
+    CFI_index_t sm; /* memory stride in bytes */
 } CFI_dim_t;
 
 #ifdef __cplusplus
@@ -111,28 +111,36 @@ namespace cfi_internal {
 // care of getting the memory storage. Note that it already contains one element
 // because a struct cannot be empty.
 template <typename T> struct FlexibleArray : T {
-  T &operator[](int index) { return *(this + index); }
-  const T &operator[](int index) const { return *(this + index); }
-  operator T *() { return this; }
-  operator const T *() const { return this; }
+    T &operator[](int index) {
+        return *(this + index);
+    }
+    const T &operator[](int index) const {
+        return *(this + index);
+    }
+    operator T *() {
+        return this;
+    }
+    operator const T *() const {
+        return this;
+    }
 };
 } // namespace cfi_internal
 #endif
 
 /* 18.5.3 generic data descriptor */
 typedef struct CFI_cdesc_t {
-  /* These three members must appear first, in exactly this order. */
-  void *base_addr;
-  size_t elem_len; /* element size in bytes */
-  int version; /* == CFI_VERSION */
-  CFI_rank_t rank; /* [0 .. CFI_MAX_RANK] */
-  CFI_type_t type;
-  CFI_attribute_t attribute;
-  unsigned char f18Addendum;
+    /* These three members must appear first, in exactly this order. */
+    void *base_addr;
+    size_t elem_len; /* element size in bytes */
+    int version; /* == CFI_VERSION */
+    CFI_rank_t rank; /* [0 .. CFI_MAX_RANK] */
+    CFI_type_t type;
+    CFI_attribute_t attribute;
+    unsigned char f18Addendum;
 #ifdef __cplusplus
-  cfi_internal::FlexibleArray<CFI_dim_t> dim;
+    cfi_internal::FlexibleArray<CFI_dim_t> dim;
 #else
-  CFI_dim_t dim[]; /* must appear last */
+    CFI_dim_t dim[]; /* must appear last */
 #endif
 } CFI_cdesc_t;
 
@@ -142,8 +150,8 @@ typedef struct CFI_cdesc_t {
 // that contain an emulated flexible array.
 namespace cfi_internal {
 template <int r> struct CdescStorage : public CFI_cdesc_t {
-  static_assert((r > 1 && r <= CFI_MAX_RANK), "CFI_INVALID_RANK");
-  CFI_dim_t dim[r - 1];
+    static_assert((r > 1 && r <= CFI_MAX_RANK), "CFI_INVALID_RANK");
+    CFI_dim_t dim[r - 1];
 };
 template <> struct CdescStorage<1> : public CFI_cdesc_t {};
 template <> struct CdescStorage<0> : public CFI_cdesc_t {};
@@ -163,16 +171,16 @@ extern "C" {
 #endif
 void *CFI_address(const CFI_cdesc_t *, const CFI_index_t subscripts[]);
 int CFI_allocate(CFI_cdesc_t *, const CFI_index_t lower_bounds[],
-    const CFI_index_t upper_bounds[], size_t elem_len);
+                 const CFI_index_t upper_bounds[], size_t elem_len);
 int CFI_deallocate(CFI_cdesc_t *);
 int CFI_establish(CFI_cdesc_t *, void *base_addr, CFI_attribute_t, CFI_type_t,
-    size_t elem_len, CFI_rank_t, const CFI_index_t extents[]);
+                  size_t elem_len, CFI_rank_t, const CFI_index_t extents[]);
 int CFI_is_contiguous(const CFI_cdesc_t *);
 int CFI_section(CFI_cdesc_t *, const CFI_cdesc_t *source,
-    const CFI_index_t lower_bounds[], const CFI_index_t upper_bounds[],
-    const CFI_index_t strides[]);
+                const CFI_index_t lower_bounds[], const CFI_index_t upper_bounds[],
+                const CFI_index_t strides[]);
 int CFI_select_part(CFI_cdesc_t *, const CFI_cdesc_t *source,
-    size_t displacement, size_t elem_len);
+                    size_t displacement, size_t elem_len);
 int CFI_setpointer(
     CFI_cdesc_t *, const CFI_cdesc_t *source, const CFI_index_t lower_bounds[]);
 #ifdef __cplusplus

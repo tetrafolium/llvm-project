@@ -42,9 +42,9 @@ _CLC_OVERLOAD _CLC_DEF float exp2(float x) {
     tt  = t*t;
     float v = mad(tt,
                   -mad(tt,
-		       mad(tt,
-		           mad(tt,
-			       mad(tt, 0x1.637698p-25f, -0x1.bbd41cp-20f),
+                       mad(tt,
+                           mad(tt,
+                               mad(tt, 0x1.637698p-25f, -0x1.bbd41cp-20f),
                                0x1.1566aap-14f),
                            -0x1.6c16c2p-9f),
                        0x1.555556p-3f),
@@ -76,7 +76,7 @@ _CLC_OVERLOAD _CLC_DEF double exp2(double x) {
     const double R_1_BY_64 = 1.0 / 64.0;
 
     int n = convert_int(x * 64.0);
-    double r = R_LN2 * fma(-R_1_BY_64, (double)n, x); 
+    double r = R_LN2 * fma(-R_1_BY_64, (double)n, x);
     return __clc_exp_helper(x, -1074.0, 1024.0, r, n);
 }
 

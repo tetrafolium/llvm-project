@@ -28,7 +28,7 @@ using namespace llvm;
 using namespace llvm::codeview;
 
 TypeIndex AppendingTypeTableBuilder::nextTypeIndex() const {
-  return TypeIndex::fromArrayIndex(SeenRecords.size());
+    return TypeIndex::fromArrayIndex(SeenRecords.size());
 }
 
 AppendingTypeTableBuilder::AppendingTypeTableBuilder(BumpPtrAllocator &Storage)
@@ -37,76 +37,82 @@ AppendingTypeTableBuilder::AppendingTypeTableBuilder(BumpPtrAllocator &Storage)
 AppendingTypeTableBuilder::~AppendingTypeTableBuilder() = default;
 
 Optional<TypeIndex> AppendingTypeTableBuilder::getFirst() {
-  if (empty())
-    return None;
+    if (empty())
+        return None;
 
-  return TypeIndex(TypeIndex::FirstNonSimpleIndex);
+    return TypeIndex(TypeIndex::FirstNonSimpleIndex);
 }
 
 Optional<TypeIndex> AppendingTypeTableBuilder::getNext(TypeIndex Prev) {
-  if (++Prev == nextTypeIndex())
-    return None;
-  return Prev;
+    if (++Prev == nextTypeIndex())
+        return None;
+    return Prev;
 }
 
-CVType AppendingTypeTableBuilder::getType(TypeIndex Index){
-  return CVType(SeenRecords[Index.toArrayIndex()]);
+CVType AppendingTypeTableBuilder::getType(TypeIndex Index) {
+    return CVType(SeenRecords[Index.toArrayIndex()]);
 }
 
 StringRef AppendingTypeTableBuilder::getTypeName(TypeIndex Index) {
-  llvm_unreachable("Method not implemented");
+    llvm_unreachable("Method not implemented");
 }
 
 bool AppendingTypeTableBuilder::contains(TypeIndex Index) {
-  if (Index.isSimple() || Index.isNoneType())
-    return false;
+    if (Index.isSimple() || Index.isNoneType())
+        return false;
 
-  return Index.toArrayIndex() < SeenRecords.size();
+    return Index.toArrayIndex() < SeenRecords.size();
 }
 
-uint32_t AppendingTypeTableBuilder::size() { return SeenRecords.size(); }
+uint32_t AppendingTypeTableBuilder::size() {
+    return SeenRecords.size();
+}
 
-uint32_t AppendingTypeTableBuilder::capacity() { return SeenRecords.size(); }
+uint32_t AppendingTypeTableBuilder::capacity() {
+    return SeenRecords.size();
+}
 
 ArrayRef<ArrayRef<uint8_t>> AppendingTypeTableBuilder::records() const {
-  return SeenRecords;
+    return SeenRecords;
 }
 
-void AppendingTypeTableBuilder::reset() { SeenRecords.clear(); }
+void AppendingTypeTableBuilder::reset() {
+    SeenRecords.clear();
+}
 
 static ArrayRef<uint8_t> stabilize(BumpPtrAllocator &RecordStorage,
                                    ArrayRef<uint8_t> Record) {
-  uint8_t *Stable = RecordStorage.Allocate<uint8_t>(Record.size());
-  memcpy(Stable, Record.data(), Record.size());
-  return ArrayRef<uint8_t>(Stable, Record.size());
+    uint8_t *Stable = RecordStorage.Allocate<uint8_t>(Record.size());
+    memcpy(Stable, Record.data(), Record.size());
+    return ArrayRef<uint8_t>(Stable, Record.size());
 }
 
 TypeIndex
 AppendingTypeTableBuilder::insertRecordBytes(ArrayRef<uint8_t> &Record) {
-  TypeIndex NewTI = nextTypeIndex();
-  Record = stabilize(RecordStorage, Record);
-  SeenRecords.push_back(Record);
-  return NewTI;
+    TypeIndex NewTI = nextTypeIndex();
+    Record = stabilize(RecordStorage, Record);
+    SeenRecords.push_back(Record);
+    return NewTI;
 }
 
 TypeIndex
 AppendingTypeTableBuilder::insertRecord(ContinuationRecordBuilder &Builder) {
-  TypeIndex TI;
-  auto Fragments = Builder.end(nextTypeIndex());
-  assert(!Fragments.empty());
-  for (auto C : Fragments)
-    TI = insertRecordBytes(C.RecordData);
-  return TI;
+    TypeIndex TI;
+    auto Fragments = Builder.end(nextTypeIndex());
+    assert(!Fragments.empty());
+    for (auto C : Fragments)
+        TI = insertRecordBytes(C.RecordData);
+    return TI;
 }
 
 bool AppendingTypeTableBuilder::replaceType(TypeIndex &Index, CVType Data,
-                                            bool Stabilize) {
-  assert(Index.toArrayIndex() < SeenRecords.size() &&
-         "This function cannot be used to insert records!");
+        bool Stabilize) {
+    assert(Index.toArrayIndex() < SeenRecords.size() &&
+           "This function cannot be used to insert records!");
 
-  ArrayRef<uint8_t> Record = Data.data();
-  if (Stabilize)
-    Record = stabilize(RecordStorage, Record);
-  SeenRecords[Index.toArrayIndex()] = Record;
-  return true;
+    ArrayRef<uint8_t> Record = Data.data();
+    if (Stabilize)
+        Record = stabilize(RecordStorage, Record);
+    SeenRecords[Index.toArrayIndex()] = Record;
+    return true;
 }

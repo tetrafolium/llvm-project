@@ -4,5 +4,5 @@
  */
 static __isl_give isl_set *set_from_map(__isl_take isl_map *map)
 {
-	return (isl_set *) map;
+    return (isl_set *) map;
 }

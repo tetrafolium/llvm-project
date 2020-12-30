@@ -22,11 +22,11 @@ using namespace llvm;
 using namespace lldb_private;
 
 enum ActionType {
-  PrintRecords,
-  DumpJSON,
-  GenOptionDefs,
-  GenPropertyDefs,
-  GenPropertyEnumDefs,
+    PrintRecords,
+    DumpJSON,
+    GenOptionDefs,
+    GenPropertyDefs,
+    GenPropertyEnumDefs,
 };
 
 static cl::opt<ActionType> Action(
@@ -43,34 +43,34 @@ static cl::opt<ActionType> Action(
                           "Generate lldb property enum definitions")));
 
 static bool LLDBTableGenMain(raw_ostream &OS, RecordKeeper &Records) {
-  switch (Action) {
-  case PrintRecords:
-    OS << Records; // No argument, dump all contents
-    break;
-  case DumpJSON:
-    EmitJSON(Records, OS);
-    break;
-  case GenOptionDefs:
-    EmitOptionDefs(Records, OS);
-    break;
-  case GenPropertyDefs:
-    EmitPropertyDefs(Records, OS);
-    break;
-  case GenPropertyEnumDefs:
-    EmitPropertyEnumDefs(Records, OS);
-    break;
-  }
-  return false;
+    switch (Action) {
+    case PrintRecords:
+        OS << Records; // No argument, dump all contents
+        break;
+    case DumpJSON:
+        EmitJSON(Records, OS);
+        break;
+    case GenOptionDefs:
+        EmitOptionDefs(Records, OS);
+        break;
+    case GenPropertyDefs:
+        EmitPropertyDefs(Records, OS);
+        break;
+    case GenPropertyEnumDefs:
+        EmitPropertyEnumDefs(Records, OS);
+        break;
+    }
+    return false;
 }
 
 int main(int argc, char **argv) {
-  sys::PrintStackTraceOnErrorSignal(argv[0]);
-  PrettyStackTraceProgram X(argc, argv);
-  cl::ParseCommandLineOptions(argc, argv);
+    sys::PrintStackTraceOnErrorSignal(argv[0]);
+    PrettyStackTraceProgram X(argc, argv);
+    cl::ParseCommandLineOptions(argc, argv);
 
-  llvm_shutdown_obj Y;
+    llvm_shutdown_obj Y;
 
-  return TableGenMain(argv[0], &LLDBTableGenMain);
+    return TableGenMain(argv[0], &LLDBTableGenMain);
 }
 
 #ifdef __has_feature
@@ -78,6 +78,8 @@ int main(int argc, char **argv) {
 #include <sanitizer/lsan_interface.h>
 // Disable LeakSanitizer for this binary as it has too many leaks that are not
 // very interesting to fix. See compiler-rt/include/sanitizer/lsan_interface.h .
-int __lsan_is_turned_off() { return 1; }
+int __lsan_is_turned_off() {
+    return 1;
+}
 #endif // __has_feature(address_sanitizer)
 #endif // defined(__has_feature)

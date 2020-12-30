@@ -98,8 +98,8 @@ _CLC_DEF float __clc_tanf_piby4(float x, int regn)
     float a = mad(r, -0.0172032480471481694693109f, 0.385296071263995406715129f);
 
     float b = mad(r,
-	          mad(r, 0.01844239256901656082986661f, -0.51396505478854532132342f),
-	          1.15588821434688393452299f);
+                  mad(r, 0.01844239256901656082986661f, -0.51396505478854532132342f),
+                  1.15588821434688393452299f);
 
     float t = mad(x*r, native_divide(a, b), x);
     float tr = -MATH_RECIP(t);
@@ -350,8 +350,12 @@ _CLC_DEF void __clc_remainder_piby2_medium(double x, double *r, double *rr, int 
     double pm = p_ht + p_mh;
     double t = p_mh - (pm - p_ht);
     double pt = p_th + t + p_mt + p_tt;
-    t = ph + pm; pm = pm - (t - ph); ph = t;
-    t = pm + pt; pt = pt - (t - pm); pm = t;
+    t = ph + pm;
+    pm = pm - (t - ph);
+    ph = t;
+    t = pm + pt;
+    pt = pt - (t - pm);
+    pm = t;
 
     // Subtract from x
     t = x + ph;
@@ -481,8 +485,14 @@ _CLC_DEF void __clc_remainder_piby2_large(double x, double *r, double *rr, int *
 
     // Shift out remaining integer part
     f3 -= di;
-    s = f3 + f2; t = f2 - (s - f3); f3 = s; f2 = t;
-    s = f2 + f1; t = f1 - (s - f2); f2 = s; f1 = t;
+    s = f3 + f2;
+    t = f2 - (s - f3);
+    f3 = s;
+    f2 = t;
+    s = f2 + f1;
+    t = f1 - (s - f2);
+    f2 = s;
+    f1 = t;
     f1 += f0;
 
     // Subtract 1 if fraction is >= 0.5, and update regn
@@ -491,7 +501,10 @@ _CLC_DEF void __clc_remainder_piby2_large(double x, double *r, double *rr, int *
     f3 -= (float)g;
 
     // Shift up bits
-    s = f3 + f2; t = f2 -(s - f3); f3 = s; f2 = t + f1;
+    s = f3 + f2;
+    t = f2 -(s - f3);
+    f3 = s;
+    f2 = t + f1;
 
     // Multiply precise fraction by pi/2 to get radians
     const double p2h = 7074237752028440.0 / 0x1.0p+52;

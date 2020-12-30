@@ -16,38 +16,38 @@ namespace tidy {
 namespace fuchsia {
 
 void DefaultArgumentsDeclarationsCheck::registerMatchers(MatchFinder *Finder) {
-  // Declaring default parameters is disallowed.
-  Finder->addMatcher(parmVarDecl(hasDefaultArgument()).bind("decl"), this);
+    // Declaring default parameters is disallowed.
+    Finder->addMatcher(parmVarDecl(hasDefaultArgument()).bind("decl"), this);
 }
 
 void DefaultArgumentsDeclarationsCheck::check(
     const MatchFinder::MatchResult &Result) {
-  const auto *D = Result.Nodes.getNodeAs<ParmVarDecl>("decl");
-  if (!D)
-    return;
+    const auto *D = Result.Nodes.getNodeAs<ParmVarDecl>("decl");
+    if (!D)
+        return;
 
-  SourceRange DefaultArgRange = D->getDefaultArgRange();
+    SourceRange DefaultArgRange = D->getDefaultArgRange();
 
-  if (DefaultArgRange.getEnd() != D->getEndLoc())
-    return;
+    if (DefaultArgRange.getEnd() != D->getEndLoc())
+        return;
 
-  if (DefaultArgRange.getBegin().isMacroID()) {
+    if (DefaultArgRange.getBegin().isMacroID()) {
+        diag(D->getBeginLoc(),
+             "declaring a parameter with a default argument is disallowed");
+        return;
+    }
+
+    SourceLocation StartLocation =
+        D->getName().empty() ? D->getBeginLoc() : D->getLocation();
+
+    SourceRange RemovalRange(
+        Lexer::getLocForEndOfToken(StartLocation, 0, *Result.SourceManager,
+                                   Result.Context->getLangOpts()),
+        DefaultArgRange.getEnd());
+
     diag(D->getBeginLoc(),
-         "declaring a parameter with a default argument is disallowed");
-    return;
-  }
-
-  SourceLocation StartLocation =
-      D->getName().empty() ? D->getBeginLoc() : D->getLocation();
-
-  SourceRange RemovalRange(
-      Lexer::getLocForEndOfToken(StartLocation, 0, *Result.SourceManager,
-                                 Result.Context->getLangOpts()),
-      DefaultArgRange.getEnd());
-
-  diag(D->getBeginLoc(),
-       "declaring a parameter with a default argument is disallowed")
-      << D << FixItHint::CreateRemoval(RemovalRange);
+         "declaring a parameter with a default argument is disallowed")
+            << D << FixItHint::CreateRemoval(RemovalRange);
 }
 
 } // namespace fuchsia

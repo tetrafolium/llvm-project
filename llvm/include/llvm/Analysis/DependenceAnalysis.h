@@ -45,72 +45,77 @@
 #include "llvm/Pass.h"
 
 namespace llvm {
-  class AAResults;
-  template <typename T> class ArrayRef;
-  class Loop;
-  class LoopInfo;
-  class ScalarEvolution;
-  class SCEV;
-  class SCEVConstant;
-  class raw_ostream;
+class AAResults;
+template <typename T> class ArrayRef;
+class Loop;
+class LoopInfo;
+class ScalarEvolution;
+class SCEV;
+class SCEVConstant;
+class raw_ostream;
 
-  /// Dependence - This class represents a dependence between two memory
-  /// memory references in a function. It contains minimal information and
-  /// is used in the very common situation where the compiler is unable to
-  /// determine anything beyond the existence of a dependence; that is, it
-  /// represents a confused dependence (see also FullDependence). In most
-  /// cases (for output, flow, and anti dependences), the dependence implies
-  /// an ordering, where the source must precede the destination; in contrast,
-  /// input dependences are unordered.
-  ///
-  /// When a dependence graph is built, each Dependence will be a member of
-  /// the set of predecessor edges for its destination instruction and a set
-  /// if successor edges for its source instruction. These sets are represented
-  /// as singly-linked lists, with the "next" fields stored in the dependence
-  /// itelf.
-  class Dependence {
-  protected:
+/// Dependence - This class represents a dependence between two memory
+/// memory references in a function. It contains minimal information and
+/// is used in the very common situation where the compiler is unable to
+/// determine anything beyond the existence of a dependence; that is, it
+/// represents a confused dependence (see also FullDependence). In most
+/// cases (for output, flow, and anti dependences), the dependence implies
+/// an ordering, where the source must precede the destination; in contrast,
+/// input dependences are unordered.
+///
+/// When a dependence graph is built, each Dependence will be a member of
+/// the set of predecessor edges for its destination instruction and a set
+/// if successor edges for its source instruction. These sets are represented
+/// as singly-linked lists, with the "next" fields stored in the dependence
+/// itelf.
+class Dependence {
+protected:
     Dependence(Dependence &&) = default;
     Dependence &operator=(Dependence &&) = default;
 
-  public:
+public:
     Dependence(Instruction *Source,
                Instruction *Destination) :
-      Src(Source),
-      Dst(Destination),
-      NextPredecessor(nullptr),
-      NextSuccessor(nullptr) {}
+        Src(Source),
+        Dst(Destination),
+        NextPredecessor(nullptr),
+        NextSuccessor(nullptr) {}
     virtual ~Dependence() {}
 
     /// Dependence::DVEntry - Each level in the distance/direction vector
     /// has a direction (or perhaps a union of several directions), and
     /// perhaps a distance.
     struct DVEntry {
-      enum { NONE = 0,
-             LT = 1,
-             EQ = 2,
-             LE = 3,
-             GT = 4,
-             NE = 5,
-             GE = 6,
-             ALL = 7 };
-      unsigned char Direction : 3; // Init to ALL, then refine.
-      bool Scalar    : 1; // Init to true.
-      bool PeelFirst : 1; // Peeling the first iteration will break dependence.
-      bool PeelLast  : 1; // Peeling the last iteration will break the dependence.
-      bool Splitable : 1; // Splitting the loop will break dependence.
-      const SCEV *Distance; // NULL implies no distance available.
-      DVEntry() : Direction(ALL), Scalar(true), PeelFirst(false),
-                  PeelLast(false), Splitable(false), Distance(nullptr) { }
+        enum { NONE = 0,
+               LT = 1,
+               EQ = 2,
+               LE = 3,
+               GT = 4,
+               NE = 5,
+               GE = 6,
+               ALL = 7
+             };
+        unsigned char Direction : 3; // Init to ALL, then refine.
+        bool Scalar    : 1; // Init to true.
+        bool PeelFirst : 1; // Peeling the first iteration will break dependence.
+        bool PeelLast  : 1; // Peeling the last iteration will break the dependence.
+        bool Splitable : 1; // Splitting the loop will break dependence.
+        const SCEV *Distance; // NULL implies no distance available.
+        DVEntry() : Direction(ALL), Scalar(true), PeelFirst(false),
+            PeelLast(false), Splitable(false), Distance(nullptr) { }
     };
 
     /// getSrc - Returns the source instruction for this dependence.
     ///
-    Instruction *getSrc() const { return Src; }
+    Instruction *getSrc() const {
+        return Src;
+    }
 
     /// getDst - Returns the destination instruction for this dependence.
     ///
-    Instruction *getDst() const { return Dst; }
+    Instruction *getDst() const {
+        return Dst;
+    }
 
     /// isInput - Returns true if this is an input dependence.
     ///
@@ -130,48 +135,70 @@ namespace llvm {
 
     /// isOrdered - Returns true if dependence is Output, Flow, or Anti
     ///
-    bool isOrdered() const { return isOutput() || isFlow() || isAnti(); }
+    bool isOrdered() const {
+        return isOutput() || isFlow() || isAnti();
+    }
 
     /// isUnordered - Returns true if dependence is Input
     ///
-    bool isUnordered() const { return isInput(); }
+    bool isUnordered() const {
+        return isInput();
+    }
 
     /// isLoopIndependent - Returns true if this is a loop-independent
     /// dependence.
-    virtual bool isLoopIndependent() const { return true; }
+    virtual bool isLoopIndependent() const {
+        return true;
+    }
 
     /// isConfused - Returns true if this dependence is confused
     /// (the compiler understands nothing and makes worst-case
     /// assumptions).
-    virtual bool isConfused() const { return true; }
+    virtual bool isConfused() const {
+        return true;
+    }
 
     /// isConsistent - Returns true if this dependence is consistent
     /// (occurs every time the source and destination are executed).
-    virtual bool isConsistent() const { return false; }
+    virtual bool isConsistent() const {
+        return false;
+    }
 
     /// getLevels - Returns the number of common loops surrounding the
     /// source and destination of the dependence.
-    virtual unsigned getLevels() const { return 0; }
+    virtual unsigned getLevels() const {
+        return 0;
+    }
 
     /// getDirection - Returns the direction associated with a particular
     /// level.
-    virtual unsigned getDirection(unsigned Level) const { return DVEntry::ALL; }
+    virtual unsigned getDirection(unsigned Level) const {
+        return DVEntry::ALL;
+    }
 
     /// getDistance - Returns the distance (or NULL) associated with a
     /// particular level.
-    virtual const SCEV *getDistance(unsigned Level) const { return nullptr; }
+    virtual const SCEV *getDistance(unsigned Level) const {
+        return nullptr;
+    }
 
     /// isPeelFirst - Returns true if peeling the first iteration from
     /// this loop will break this dependence.
-    virtual bool isPeelFirst(unsigned Level) const { return false; }
+    virtual bool isPeelFirst(unsigned Level) const {
+        return false;
+    }
 
     /// isPeelLast - Returns true if peeling the last iteration from
     /// this loop will break this dependence.
-    virtual bool isPeelLast(unsigned Level) const { return false; }
+    virtual bool isPeelLast(unsigned Level) const {
+        return false;
+    }
 
     /// isSplitable - Returns true if splitting this loop will break
     /// the dependence.
-    virtual bool isSplitable(unsigned Level) const { return false; }
+    virtual bool isSplitable(unsigned Level) const {
+        return false;
+    }
 
     /// isScalar - Returns true if a particular level is scalar; that is,
     /// if no subscript in the source or destination mention the induction
@@ -180,59 +207,75 @@ namespace llvm {
 
     /// getNextPredecessor - Returns the value of the NextPredecessor
     /// field.
-    const Dependence *getNextPredecessor() const { return NextPredecessor; }
+    const Dependence *getNextPredecessor() const {
+        return NextPredecessor;
+    }
 
     /// getNextSuccessor - Returns the value of the NextSuccessor
     /// field.
-    const Dependence *getNextSuccessor() const { return NextSuccessor; }
+    const Dependence *getNextSuccessor() const {
+        return NextSuccessor;
+    }
 
     /// setNextPredecessor - Sets the value of the NextPredecessor
     /// field.
-    void setNextPredecessor(const Dependence *pred) { NextPredecessor = pred; }
+    void setNextPredecessor(const Dependence *pred) {
+        NextPredecessor = pred;
+    }
 
     /// setNextSuccessor - Sets the value of the NextSuccessor
     /// field.
-    void setNextSuccessor(const Dependence *succ) { NextSuccessor = succ; }
+    void setNextSuccessor(const Dependence *succ) {
+        NextSuccessor = succ;
+    }
 
     /// dump - For debugging purposes, dumps a dependence to OS.
     ///
     void dump(raw_ostream &OS) const;
 
-  private:
+private:
     Instruction *Src, *Dst;
     const Dependence *NextPredecessor, *NextSuccessor;
     friend class DependenceInfo;
-  };
+};
 
-  /// FullDependence - This class represents a dependence between two memory
-  /// references in a function. It contains detailed information about the
-  /// dependence (direction vectors, etc.) and is used when the compiler is
-  /// able to accurately analyze the interaction of the references; that is,
-  /// it is not a confused dependence (see Dependence). In most cases
-  /// (for output, flow, and anti dependences), the dependence implies an
-  /// ordering, where the source must precede the destination; in contrast,
-  /// input dependences are unordered.
-  class FullDependence final : public Dependence {
-  public:
+/// FullDependence - This class represents a dependence between two memory
+/// references in a function. It contains detailed information about the
+/// dependence (direction vectors, etc.) and is used when the compiler is
+/// able to accurately analyze the interaction of the references; that is,
+/// it is not a confused dependence (see Dependence). In most cases
+/// (for output, flow, and anti dependences), the dependence implies an
+/// ordering, where the source must precede the destination; in contrast,
+/// input dependences are unordered.
+class FullDependence final : public Dependence {
+public:
     FullDependence(Instruction *Src, Instruction *Dst, bool LoopIndependent,
                    unsigned Levels);
 
     /// isLoopIndependent - Returns true if this is a loop-independent
     /// dependence.
-    bool isLoopIndependent() const override { return LoopIndependent; }
+    bool isLoopIndependent() const override {
+        return LoopIndependent;
+    }
 
     /// isConfused - Returns true if this dependence is confused
     /// (the compiler understands nothing and makes worst-case
     /// assumptions).
-    bool isConfused() const override { return false; }
+    bool isConfused() const override {
+        return false;
+    }
 
     /// isConsistent - Returns true if this dependence is consistent
     /// (occurs every time the source and destination are executed).
-    bool isConsistent() const override { return Consistent; }
+    bool isConsistent() const override {
+        return Consistent;
+    }
 
     /// getLevels - Returns the number of common loops surrounding the
     /// source and destination of the dependence.
-    unsigned getLevels() const override { return Levels; }
+    unsigned getLevels() const override {
+        return Levels;
+    }
 
     /// getDirection - Returns the direction associated with a particular
     /// level.
@@ -259,18 +302,18 @@ namespace llvm {
     /// variable associated with the loop at this level.
     bool isScalar(unsigned Level) const override;
 
-  private:
+private:
     unsigned short Levels;
     bool LoopIndependent;
     bool Consistent; // Init to true, then refine.
     std::unique_ptr<DVEntry[]> DV;
     friend class DependenceInfo;
-  };
+};
 
-  /// DependenceInfo - This class is the main dependence-analysis driver.
-  ///
-  class DependenceInfo {
-  public:
+/// DependenceInfo - This class is the main dependence-analysis driver.
+///
+class DependenceInfo {
+public:
     DependenceInfo(Function *F, AAResults *AA, ScalarEvolution *SE,
                    LoopInfo *LI)
         : AA(AA), SE(SE), LI(LI), F(F) {}
@@ -331,9 +374,11 @@ namespace llvm {
     /// both loops.
     const SCEV *getSplitIteration(const Dependence &Dep, unsigned Level);
 
-    Function *getFunction() const { return F; }
+    Function *getFunction() const {
+        return F;
+    }
 
-  private:
+private:
     AAResults *AA;
     ScalarEvolution *SE;
     LoopInfo *LI;
@@ -343,27 +388,27 @@ namespace llvm {
     /// a pair of potentially multi-dimensional array references. We use a
     /// vector of them to guide subscript partitioning.
     struct Subscript {
-      const SCEV *Src;
-      const SCEV *Dst;
-      enum ClassificationKind { ZIV, SIV, RDIV, MIV, NonLinear } Classification;
-      SmallBitVector Loops;
-      SmallBitVector GroupLoops;
-      SmallBitVector Group;
+        const SCEV *Src;
+        const SCEV *Dst;
+        enum ClassificationKind { ZIV, SIV, RDIV, MIV, NonLinear } Classification;
+        SmallBitVector Loops;
+        SmallBitVector GroupLoops;
+        SmallBitVector Group;
     };
 
     struct CoefficientInfo {
-      const SCEV *Coeff;
-      const SCEV *PosPart;
-      const SCEV *NegPart;
-      const SCEV *Iterations;
+        const SCEV *Coeff;
+        const SCEV *PosPart;
+        const SCEV *NegPart;
+        const SCEV *Iterations;
     };
 
     struct BoundInfo {
-      const SCEV *Iterations;
-      const SCEV *Upper[8];
-      const SCEV *Lower[8];
-      unsigned char Direction;
-      unsigned char DirSet;
+        const SCEV *Iterations;
+        const SCEV *Upper[8];
+        const SCEV *Lower[8];
+        unsigned char Direction;
+        unsigned char DirSet;
     };
 
     /// Constraint - This private class represents a constraint, as defined
@@ -383,77 +428,87 @@ namespace llvm {
     ///   5) Empty - No dependence is possible.
     class Constraint {
     private:
-      enum ConstraintKind { Empty, Point, Distance, Line, Any } Kind;
-      ScalarEvolution *SE;
-      const SCEV *A;
-      const SCEV *B;
-      const SCEV *C;
-      const Loop *AssociatedLoop;
+        enum ConstraintKind { Empty, Point, Distance, Line, Any } Kind;
+        ScalarEvolution *SE;
+        const SCEV *A;
+        const SCEV *B;
+        const SCEV *C;
+        const Loop *AssociatedLoop;
 
     public:
-      /// isEmpty - Return true if the constraint is of kind Empty.
-      bool isEmpty() const { return Kind == Empty; }
+        /// isEmpty - Return true if the constraint is of kind Empty.
+        bool isEmpty() const {
+            return Kind == Empty;
+        }
 
-      /// isPoint - Return true if the constraint is of kind Point.
-      bool isPoint() const { return Kind == Point; }
+        /// isPoint - Return true if the constraint is of kind Point.
+        bool isPoint() const {
+            return Kind == Point;
+        }
 
-      /// isDistance - Return true if the constraint is of kind Distance.
-      bool isDistance() const { return Kind == Distance; }
+        /// isDistance - Return true if the constraint is of kind Distance.
+        bool isDistance() const {
+            return Kind == Distance;
+        }
 
-      /// isLine - Return true if the constraint is of kind Line.
-      /// Since Distance's can also be represented as Lines, we also return
-      /// true if the constraint is of kind Distance.
-      bool isLine() const { return Kind == Line || Kind == Distance; }
+        /// isLine - Return true if the constraint is of kind Line.
+        /// Since Distance's can also be represented as Lines, we also return
+        /// true if the constraint is of kind Distance.
+        bool isLine() const {
+            return Kind == Line || Kind == Distance;
+        }
 
-      /// isAny - Return true if the constraint is of kind Any;
-      bool isAny() const { return Kind == Any; }
+        /// isAny - Return true if the constraint is of kind Any;
+        bool isAny() const {
+            return Kind == Any;
+        }
 
-      /// getX - If constraint is a point <X, Y>, returns X.
-      /// Otherwise assert.
-      const SCEV *getX() const;
+        /// getX - If constraint is a point <X, Y>, returns X.
+        /// Otherwise assert.
+        const SCEV *getX() const;
 
-      /// getY - If constraint is a point <X, Y>, returns Y.
-      /// Otherwise assert.
-      const SCEV *getY() const;
+        /// getY - If constraint is a point <X, Y>, returns Y.
+        /// Otherwise assert.
+        const SCEV *getY() const;
 
-      /// getA - If constraint is a line AX + BY = C, returns A.
-      /// Otherwise assert.
-      const SCEV *getA() const;
+        /// getA - If constraint is a line AX + BY = C, returns A.
+        /// Otherwise assert.
+        const SCEV *getA() const;
 
-      /// getB - If constraint is a line AX + BY = C, returns B.
-      /// Otherwise assert.
-      const SCEV *getB() const;
+        /// getB - If constraint is a line AX + BY = C, returns B.
+        /// Otherwise assert.
+        const SCEV *getB() const;
 
-      /// getC - If constraint is a line AX + BY = C, returns C.
-      /// Otherwise assert.
-      const SCEV *getC() const;
+        /// getC - If constraint is a line AX + BY = C, returns C.
+        /// Otherwise assert.
+        const SCEV *getC() const;
 
-      /// getD - If constraint is a distance, returns D.
-      /// Otherwise assert.
-      const SCEV *getD() const;
+        /// getD - If constraint is a distance, returns D.
+        /// Otherwise assert.
+        const SCEV *getD() const;
 
-      /// getAssociatedLoop - Returns the loop associated with this constraint.
-      const Loop *getAssociatedLoop() const;
+        /// getAssociatedLoop - Returns the loop associated with this constraint.
+        const Loop *getAssociatedLoop() const;
 
-      /// setPoint - Change a constraint to Point.
-      void setPoint(const SCEV *X, const SCEV *Y, const Loop *CurrentLoop);
+        /// setPoint - Change a constraint to Point.
+        void setPoint(const SCEV *X, const SCEV *Y, const Loop *CurrentLoop);
 
-      /// setLine - Change a constraint to Line.
-      void setLine(const SCEV *A, const SCEV *B,
-                   const SCEV *C, const Loop *CurrentLoop);
+        /// setLine - Change a constraint to Line.
+        void setLine(const SCEV *A, const SCEV *B,
+                     const SCEV *C, const Loop *CurrentLoop);
 
-      /// setDistance - Change a constraint to Distance.
-      void setDistance(const SCEV *D, const Loop *CurrentLoop);
+        /// setDistance - Change a constraint to Distance.
+        void setDistance(const SCEV *D, const Loop *CurrentLoop);
 
-      /// setEmpty - Change a constraint to Empty.
-      void setEmpty();
+        /// setEmpty - Change a constraint to Empty.
+        void setEmpty();
 
-      /// setAny - Change a constraint to Any.
-      void setAny(ScalarEvolution *SE);
+        /// setAny - Change a constraint to Any.
+        void setAny(ScalarEvolution *SE);
 
-      /// dump - For debugging purposes. Dumps the constraint
-      /// out to OS.
-      void dump(raw_ostream &OS) const;
+        /// dump - For debugging purposes. Dumps the constraint
+        /// out to OS.
+        void dump(raw_ostream &OS) const;
     };
 
     /// establishNestingLevels - Examines the loop nesting of the Src and Dst
@@ -588,10 +643,10 @@ namespace llvm {
     /// and classifies it as either ZIV, SIV, RDIV, MIV, or Nonlinear.
     /// Collects the associated loops in a set.
     Subscript::ClassificationKind classifyPair(const SCEV *Src,
-                                           const Loop *SrcLoopNest,
-                                           const SCEV *Dst,
-                                           const Loop *DstLoopNest,
-                                           SmallBitVector &Loops);
+            const Loop *SrcLoopNest,
+            const SCEV *Dst,
+            const Loop *DstLoopNest,
+            SmallBitVector &Loops);
 
     /// testZIV - Tests the ZIV subscript pair (Src and Dst) for dependence.
     /// Returns true if any possible dependence is disproved.
@@ -951,33 +1006,33 @@ namespace llvm {
     /// checkDstSubscript to avoid duplicate code
     bool checkSubscript(const SCEV *Expr, const Loop *LoopNest,
                         SmallBitVector &Loops, bool IsSrc);
-  }; // class DependenceInfo
+}; // class DependenceInfo
 
-  /// AnalysisPass to compute dependence information in a function
-  class DependenceAnalysis : public AnalysisInfoMixin<DependenceAnalysis> {
-  public:
+/// AnalysisPass to compute dependence information in a function
+class DependenceAnalysis : public AnalysisInfoMixin<DependenceAnalysis> {
+public:
     typedef DependenceInfo Result;
     Result run(Function &F, FunctionAnalysisManager &FAM);
 
-  private:
+private:
     static AnalysisKey Key;
     friend struct AnalysisInfoMixin<DependenceAnalysis>;
-  }; // class DependenceAnalysis
+}; // class DependenceAnalysis
 
-  /// Printer pass to dump DA results.
-  struct DependenceAnalysisPrinterPass
-      : public PassInfoMixin<DependenceAnalysisPrinterPass> {
+/// Printer pass to dump DA results.
+struct DependenceAnalysisPrinterPass
+    : public PassInfoMixin<DependenceAnalysisPrinterPass> {
     DependenceAnalysisPrinterPass(raw_ostream &OS) : OS(OS) {}
 
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM);
 
-  private:
+private:
     raw_ostream &OS;
-  }; // class DependenceAnalysisPrinterPass
+}; // class DependenceAnalysisPrinterPass
 
-  /// Legacy pass manager pass to access dependence information
-  class DependenceAnalysisWrapperPass : public FunctionPass {
-  public:
+/// Legacy pass manager pass to access dependence information
+class DependenceAnalysisWrapperPass : public FunctionPass {
+public:
     static char ID; // Class identification, replacement for typeinfo
     DependenceAnalysisWrapperPass();
 
@@ -987,13 +1042,13 @@ namespace llvm {
     void print(raw_ostream &, const Module * = nullptr) const override;
     DependenceInfo &getDI() const;
 
-  private:
+private:
     std::unique_ptr<DependenceInfo> info;
-  }; // class DependenceAnalysisWrapperPass
+}; // class DependenceAnalysisWrapperPass
 
-  /// createDependenceAnalysisPass - This creates an instance of the
-  /// DependenceAnalysis wrapper pass.
-  FunctionPass *createDependenceAnalysisWrapperPass();
+/// createDependenceAnalysisPass - This creates an instance of the
+/// DependenceAnalysis wrapper pass.
+FunctionPass *createDependenceAnalysisWrapperPass();
 
 } // namespace llvm
 

@@ -28,36 +28,36 @@ using scf::ParallelOp;
 /// is beneficial if the loop will almost always have the constant bound and
 /// that version can be fully unrolled and vectorized.
 static void specializeParallelLoopForUnrolling(ParallelOp op) {
-  SmallVector<int64_t, 2> constantIndices;
-  constantIndices.reserve(op.upperBound().size());
-  for (auto bound : op.upperBound()) {
-    auto minOp = bound.getDefiningOp<AffineMinOp>();
-    if (!minOp)
-      return;
-    int64_t minConstant = std::numeric_limits<int64_t>::max();
-    for (AffineExpr expr : minOp.map().getResults()) {
-      if (auto constantIndex = expr.dyn_cast<AffineConstantExpr>())
-        minConstant = std::min(minConstant, constantIndex.getValue());
+    SmallVector<int64_t, 2> constantIndices;
+    constantIndices.reserve(op.upperBound().size());
+    for (auto bound : op.upperBound()) {
+        auto minOp = bound.getDefiningOp<AffineMinOp>();
+        if (!minOp)
+            return;
+        int64_t minConstant = std::numeric_limits<int64_t>::max();
+        for (AffineExpr expr : minOp.map().getResults()) {
+            if (auto constantIndex = expr.dyn_cast<AffineConstantExpr>())
+                minConstant = std::min(minConstant, constantIndex.getValue());
+        }
+        if (minConstant == std::numeric_limits<int64_t>::max())
+            return;
+        constantIndices.push_back(minConstant);
     }
-    if (minConstant == std::numeric_limits<int64_t>::max())
-      return;
-    constantIndices.push_back(minConstant);
-  }
 
-  OpBuilder b(op);
-  BlockAndValueMapping map;
-  Value cond;
-  for (auto bound : llvm::zip(op.upperBound(), constantIndices)) {
-    Value constant = b.create<ConstantIndexOp>(op.getLoc(), std::get<1>(bound));
-    Value cmp = b.create<CmpIOp>(op.getLoc(), CmpIPredicate::eq,
-                                 std::get<0>(bound), constant);
-    cond = cond ? b.create<AndOp>(op.getLoc(), cond, cmp) : cmp;
-    map.map(std::get<0>(bound), constant);
-  }
-  auto ifOp = b.create<scf::IfOp>(op.getLoc(), cond, /*withElseRegion=*/true);
-  ifOp.getThenBodyBuilder().clone(*op.getOperation(), map);
-  ifOp.getElseBodyBuilder().clone(*op.getOperation());
-  op.erase();
+    OpBuilder b(op);
+    BlockAndValueMapping map;
+    Value cond;
+    for (auto bound : llvm::zip(op.upperBound(), constantIndices)) {
+        Value constant = b.create<ConstantIndexOp>(op.getLoc(), std::get<1>(bound));
+        Value cmp = b.create<CmpIOp>(op.getLoc(), CmpIPredicate::eq,
+                                     std::get<0>(bound), constant);
+        cond = cond ? b.create<AndOp>(op.getLoc(), cond, cmp) : cmp;
+        map.map(std::get<0>(bound), constant);
+    }
+    auto ifOp = b.create<scf::IfOp>(op.getLoc(), cond, /*withElseRegion=*/true);
+    ifOp.getThenBodyBuilder().clone(*op.getOperation(), map);
+    ifOp.getElseBodyBuilder().clone(*op.getOperation());
+    op.erase();
 }
 
 /// Rewrite a for loop with bounds defined by an affine.min with a constant into
@@ -65,51 +65,55 @@ static void specializeParallelLoopForUnrolling(ParallelOp op) {
 /// beneficial if the loop will almost always have the constant bound and that
 /// version can be fully unrolled and vectorized.
 static void specializeForLoopForUnrolling(ForOp op) {
-  auto bound = op.upperBound();
-  auto minOp = bound.getDefiningOp<AffineMinOp>();
-  if (!minOp)
-    return;
-  int64_t minConstant = std::numeric_limits<int64_t>::max();
-  for (AffineExpr expr : minOp.map().getResults()) {
-    if (auto constantIndex = expr.dyn_cast<AffineConstantExpr>())
-      minConstant = std::min(minConstant, constantIndex.getValue());
-  }
-  if (minConstant == std::numeric_limits<int64_t>::max())
-    return;
+    auto bound = op.upperBound();
+    auto minOp = bound.getDefiningOp<AffineMinOp>();
+    if (!minOp)
+        return;
+    int64_t minConstant = std::numeric_limits<int64_t>::max();
+    for (AffineExpr expr : minOp.map().getResults()) {
+        if (auto constantIndex = expr.dyn_cast<AffineConstantExpr>())
+            minConstant = std::min(minConstant, constantIndex.getValue());
+    }
+    if (minConstant == std::numeric_limits<int64_t>::max())
+        return;
 
-  OpBuilder b(op);
-  BlockAndValueMapping map;
-  Value constant = b.create<ConstantIndexOp>(op.getLoc(), minConstant);
-  Value cond =
-      b.create<CmpIOp>(op.getLoc(), CmpIPredicate::eq, bound, constant);
-  map.map(bound, constant);
-  auto ifOp = b.create<scf::IfOp>(op.getLoc(), cond, /*withElseRegion=*/true);
-  ifOp.getThenBodyBuilder().clone(*op.getOperation(), map);
-  ifOp.getElseBodyBuilder().clone(*op.getOperation());
-  op.erase();
+    OpBuilder b(op);
+    BlockAndValueMapping map;
+    Value constant = b.create<ConstantIndexOp>(op.getLoc(), minConstant);
+    Value cond =
+        b.create<CmpIOp>(op.getLoc(), CmpIPredicate::eq, bound, constant);
+    map.map(bound, constant);
+    auto ifOp = b.create<scf::IfOp>(op.getLoc(), cond, /*withElseRegion=*/true);
+    ifOp.getThenBodyBuilder().clone(*op.getOperation(), map);
+    ifOp.getElseBodyBuilder().clone(*op.getOperation());
+    op.erase();
 }
 
 namespace {
 struct ParallelLoopSpecialization
     : public SCFParallelLoopSpecializationBase<ParallelLoopSpecialization> {
-  void runOnFunction() override {
-    getFunction().walk(
-        [](ParallelOp op) { specializeParallelLoopForUnrolling(op); });
-  }
+    void runOnFunction() override {
+        getFunction().walk(
+        [](ParallelOp op) {
+            specializeParallelLoopForUnrolling(op);
+        });
+    }
 };
 
 struct ForLoopSpecialization
     : public SCFForLoopSpecializationBase<ForLoopSpecialization> {
-  void runOnFunction() override {
-    getFunction().walk([](ForOp op) { specializeForLoopForUnrolling(op); });
-  }
+    void runOnFunction() override {
+        getFunction().walk([](ForOp op) {
+            specializeForLoopForUnrolling(op);
+        });
+    }
 };
 } // namespace
 
 std::unique_ptr<Pass> mlir::createParallelLoopSpecializationPass() {
-  return std::make_unique<ParallelLoopSpecialization>();
+    return std::make_unique<ParallelLoopSpecialization>();
 }
 
 std::unique_ptr<Pass> mlir::createForLoopSpecializationPass() {
-  return std::make_unique<ForLoopSpecialization>();
+    return std::make_unique<ForLoopSpecialization>();
 }

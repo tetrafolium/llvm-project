@@ -30,12 +30,12 @@
 #endif
 
 struct MappingDesc {
-  uptr start;
-  uptr end;
-  enum Type {
-    INVALID, APP, SHADOW, ORIGIN
-  } type;
-  const char *name;
+    uptr start;
+    uptr end;
+    enum Type {
+        INVALID, APP, SHADOW, ORIGIN
+    } type;
+    const char *name;
 };
 
 
@@ -58,7 +58,8 @@ const MappingDesc kMemoryLayout[] = {
     {0x00a000000000ULL, 0x00a200000000ULL, MappingDesc::ORIGIN, "origin-1"},
     {0x00a200000000ULL, 0x00c000000000ULL, MappingDesc::APP, "app-2"},
     {0x00c000000000ULL, 0x00e200000000ULL, MappingDesc::INVALID, "invalid"},
-    {0x00e200000000ULL, 0x00ffffffffffULL, MappingDesc::APP, "app-3"}};
+    {0x00e200000000ULL, 0x00ffffffffffULL, MappingDesc::APP, "app-3"}
+};
 
 #define MEM_TO_SHADOW(mem) (((uptr)(mem)) ^ 0x8000000000ULL)
 #define SHADOW_TO_ORIGIN(shadow) (((uptr)(shadow)) + 0x2000000000ULL)
@@ -166,7 +167,8 @@ const MappingDesc kMemoryLayout[] = {
     {0x180200000000ULL, 0x1C0000000000ULL, MappingDesc::INVALID, "invalid"},
     {0x1C0000000000ULL, 0x2C0200000000ULL, MappingDesc::ORIGIN, "origin"},
     {0x2C0200000000ULL, 0x300000000000ULL, MappingDesc::INVALID, "invalid"},
-    {0x300000000000ULL, 0x800000000000ULL, MappingDesc::APP, "high memory"}};
+    {0x300000000000ULL, 0x800000000000ULL, MappingDesc::APP, "high memory"}
+};
 
 // Various kernels use different low end ranges but we can combine them into one
 // big range. They also use different high end ranges but we can map them all to
@@ -189,7 +191,8 @@ const MappingDesc kMemoryLayout[] = {
     {0x180000000000ULL, 0x1C0000000000ULL, MappingDesc::INVALID, "invalid"},
     {0x1C0000000000ULL, 0x2C0000000000ULL, MappingDesc::ORIGIN, "origin"},
     {0x2C0000000000ULL, 0x440000000000ULL, MappingDesc::INVALID, "invalid"},
-    {0x440000000000ULL, 0x500000000000ULL, MappingDesc::APP, "high memory"}};
+    {0x440000000000ULL, 0x500000000000ULL, MappingDesc::APP, "high memory"}
+};
 
 #define MEM_TO_SHADOW(mem) \
   ((((uptr)(mem)) & ~0xC00000000000ULL) + 0x080000000000ULL)
@@ -206,7 +209,8 @@ const MappingDesc kMemoryLayout[] = {
     {0x310000000000ULL, 0x380000000000ULL, MappingDesc::INVALID, "invalid"},
     {0x380000000000ULL, 0x590000000000ULL, MappingDesc::ORIGIN, "origin"},
     {0x590000000000ULL, 0x600000000000ULL, MappingDesc::INVALID, "invalid"},
-    {0x600000000000ULL, 0x800000000000ULL, MappingDesc::APP, "high memory"}};
+    {0x600000000000ULL, 0x800000000000ULL, MappingDesc::APP, "high memory"}
+};
 
 // Maps low and high app ranges to contiguous space with zero base:
 //   Low:  0000 0000 0000 - 00ff ffff ffff  ->  2000 0000 0000 - 20ff ffff ffff
@@ -226,7 +230,8 @@ const MappingDesc kMemoryLayout[] = {
     {0x000000000000ULL, 0x200000000000ULL, MappingDesc::INVALID, "invalid"},
     {0x200000000000ULL, 0x400000000000ULL, MappingDesc::SHADOW, "shadow"},
     {0x400000000000ULL, 0x600000000000ULL, MappingDesc::ORIGIN, "origin"},
-    {0x600000000000ULL, 0x800000000000ULL, MappingDesc::APP, "app"}};
+    {0x600000000000ULL, 0x800000000000ULL, MappingDesc::APP, "app"}
+};
 
 #define MEM_TO_SHADOW(mem) (((uptr)(mem)) & ~0x400000000000ULL)
 #define SHADOW_TO_ORIGIN(mem) (((uptr)(mem)) + 0x200000000000ULL)
@@ -248,7 +253,8 @@ const MappingDesc kMemoryLayout[] = {
     {0x510000000000ULL, 0x600000000000ULL, MappingDesc::APP, "app-2"},
     {0x600000000000ULL, 0x610000000000ULL, MappingDesc::ORIGIN, "origin-1"},
     {0x610000000000ULL, 0x700000000000ULL, MappingDesc::INVALID, "invalid"},
-    {0x700000000000ULL, 0x800000000000ULL, MappingDesc::APP, "app-3"}};
+    {0x700000000000ULL, 0x800000000000ULL, MappingDesc::APP, "app-3"}
+};
 #define MEM_TO_SHADOW(mem) (((uptr)(mem)) ^ 0x500000000000ULL)
 #define SHADOW_TO_ORIGIN(mem) (((uptr)(mem)) + 0x100000000000ULL)
 #endif  // MSAN_LINUX_X86_64_OLD_MAPPING
@@ -270,11 +276,11 @@ inline bool addr_is_type(uptr addr, MappingDesc::Type mapping_type) {
 #ifdef __clang__
 #pragma unroll
 #endif
-  for (unsigned i = 0; i < kMemoryLayoutSize; ++i)
-    if (kMemoryLayout[i].type == mapping_type &&
-        addr >= kMemoryLayout[i].start && addr < kMemoryLayout[i].end)
-      return true;
-  return false;
+    for (unsigned i = 0; i < kMemoryLayoutSize; ++i)
+        if (kMemoryLayout[i].type == mapping_type &&
+                addr >= kMemoryLayout[i].start && addr < kMemoryLayout[i].end)
+            return true;
+    return false;
 }
 
 #define MEM_IS_APP(mem) addr_is_type((uptr)(mem), MappingDesc::APP)
@@ -320,8 +326,12 @@ void ExitSymbolizer();
 bool IsInSymbolizer();
 
 struct SymbolizerScope {
-  SymbolizerScope() { EnterSymbolizer(); }
-  ~SymbolizerScope() { ExitSymbolizer(); }
+    SymbolizerScope() {
+        EnterSymbolizer();
+    }
+    ~SymbolizerScope() {
+        ExitSymbolizer();
+    }
 };
 
 void PrintWarning(uptr pc, uptr bp);
@@ -376,13 +386,17 @@ const int STACK_TRACE_TAG_POISON = StackTrace::TAG_CUSTOM + 1;
   }
 
 class ScopedThreadLocalStateBackup {
- public:
-  ScopedThreadLocalStateBackup() { Backup(); }
-  ~ScopedThreadLocalStateBackup() { Restore(); }
-  void Backup();
-  void Restore();
- private:
-  u64 va_arg_overflow_size_tls;
+public:
+    ScopedThreadLocalStateBackup() {
+        Backup();
+    }
+    ~ScopedThreadLocalStateBackup() {
+        Restore();
+    }
+    void Backup();
+    void Restore();
+private:
+    u64 va_arg_overflow_size_tls;
 };
 
 void MsanTSDInit(void (*destructor)(void *tsd));

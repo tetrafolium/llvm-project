@@ -18,5 +18,5 @@
  */
 __isl_give UNION *FN(FN(UNION,from),BASE)(__isl_take EL *el)
 {
-	return FN(FN(UNION,from),PW_BASE)(FN(FN(PW,from),BASE)(el));
+    return FN(FN(UNION,from),PW_BASE)(FN(FN(PW,from),BASE)(el));
 }

@@ -16,41 +16,41 @@ namespace lldb {
 
 class LLDB_API SBSymbolContextList {
 public:
-  SBSymbolContextList();
+    SBSymbolContextList();
 
-  SBSymbolContextList(const lldb::SBSymbolContextList &rhs);
+    SBSymbolContextList(const lldb::SBSymbolContextList &rhs);
 
-  ~SBSymbolContextList();
+    ~SBSymbolContextList();
 
-  const lldb::SBSymbolContextList &
-  operator=(const lldb::SBSymbolContextList &rhs);
+    const lldb::SBSymbolContextList &
+    operator=(const lldb::SBSymbolContextList &rhs);
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  uint32_t GetSize() const;
+    uint32_t GetSize() const;
 
-  lldb::SBSymbolContext GetContextAtIndex(uint32_t idx);
+    lldb::SBSymbolContext GetContextAtIndex(uint32_t idx);
 
-  bool GetDescription(lldb::SBStream &description);
+    bool GetDescription(lldb::SBStream &description);
 
-  void Append(lldb::SBSymbolContext &sc);
+    void Append(lldb::SBSymbolContext &sc);
 
-  void Append(lldb::SBSymbolContextList &sc_list);
+    void Append(lldb::SBSymbolContextList &sc_list);
 
-  void Clear();
+    void Clear();
 
 protected:
-  friend class SBModule;
-  friend class SBTarget;
+    friend class SBModule;
+    friend class SBTarget;
 
-  lldb_private::SymbolContextList *operator->() const;
+    lldb_private::SymbolContextList *operator->() const;
 
-  lldb_private::SymbolContextList &operator*() const;
+    lldb_private::SymbolContextList &operator*() const;
 
 private:
-  std::unique_ptr<lldb_private::SymbolContextList> m_opaque_up;
+    std::unique_ptr<lldb_private::SymbolContextList> m_opaque_up;
 };
 
 } // namespace lldb

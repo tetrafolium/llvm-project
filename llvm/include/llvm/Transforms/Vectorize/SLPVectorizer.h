@@ -56,100 +56,100 @@ class BoUpSLP;
 } // end namespace slpvectorizer
 
 struct SLPVectorizerPass : public PassInfoMixin<SLPVectorizerPass> {
-  using StoreList = SmallVector<StoreInst *, 8>;
-  using StoreListMap = MapVector<Value *, StoreList>;
-  using GEPList = SmallVector<GetElementPtrInst *, 8>;
-  using GEPListMap = MapVector<Value *, GEPList>;
+    using StoreList = SmallVector<StoreInst *, 8>;
+    using StoreListMap = MapVector<Value *, StoreList>;
+    using GEPList = SmallVector<GetElementPtrInst *, 8>;
+    using GEPListMap = MapVector<Value *, GEPList>;
 
-  ScalarEvolution *SE = nullptr;
-  TargetTransformInfo *TTI = nullptr;
-  TargetLibraryInfo *TLI = nullptr;
-  AAResults *AA = nullptr;
-  LoopInfo *LI = nullptr;
-  DominatorTree *DT = nullptr;
-  AssumptionCache *AC = nullptr;
-  DemandedBits *DB = nullptr;
-  const DataLayout *DL = nullptr;
+    ScalarEvolution *SE = nullptr;
+    TargetTransformInfo *TTI = nullptr;
+    TargetLibraryInfo *TLI = nullptr;
+    AAResults *AA = nullptr;
+    LoopInfo *LI = nullptr;
+    DominatorTree *DT = nullptr;
+    AssumptionCache *AC = nullptr;
+    DemandedBits *DB = nullptr;
+    const DataLayout *DL = nullptr;
 
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-  // Glue for old PM.
-  bool runImpl(Function &F, ScalarEvolution *SE_, TargetTransformInfo *TTI_,
-               TargetLibraryInfo *TLI_, AAResults *AA_, LoopInfo *LI_,
-               DominatorTree *DT_, AssumptionCache *AC_, DemandedBits *DB_,
-               OptimizationRemarkEmitter *ORE_);
+    // Glue for old PM.
+    bool runImpl(Function &F, ScalarEvolution *SE_, TargetTransformInfo *TTI_,
+                 TargetLibraryInfo *TLI_, AAResults *AA_, LoopInfo *LI_,
+                 DominatorTree *DT_, AssumptionCache *AC_, DemandedBits *DB_,
+                 OptimizationRemarkEmitter *ORE_);
 
 private:
-  /// Collect store and getelementptr instructions and organize them
-  /// according to the underlying object of their pointer operands. We sort the
-  /// instructions by their underlying objects to reduce the cost of
-  /// consecutive access queries.
-  ///
-  /// TODO: We can further reduce this cost if we flush the chain creation
-  ///       every time we run into a memory barrier.
-  void collectSeedInstructions(BasicBlock *BB);
+    /// Collect store and getelementptr instructions and organize them
+    /// according to the underlying object of their pointer operands. We sort the
+    /// instructions by their underlying objects to reduce the cost of
+    /// consecutive access queries.
+    ///
+    /// TODO: We can further reduce this cost if we flush the chain creation
+    ///       every time we run into a memory barrier.
+    void collectSeedInstructions(BasicBlock *BB);
 
-  /// Try to vectorize a chain that starts at two arithmetic instrs.
-  bool tryToVectorizePair(Value *A, Value *B, slpvectorizer::BoUpSLP &R);
+    /// Try to vectorize a chain that starts at two arithmetic instrs.
+    bool tryToVectorizePair(Value *A, Value *B, slpvectorizer::BoUpSLP &R);
 
-  /// Try to vectorize a list of operands.
-  /// When \p InsertUses is provided and its entries are non-zero
-  /// then users of \p VL are known to be InsertElement instructions
-  /// each associated with same VL entry index. Their cost is then
-  /// used to adjust cost of the vectorization assuming instcombine pass
-  /// then optimizes ExtractElement-InsertElement sequence.
-  /// \returns true if a value was vectorized.
-  bool tryToVectorizeList(ArrayRef<Value *> VL, slpvectorizer::BoUpSLP &R,
-                          bool AllowReorder = false,
-                          ArrayRef<Value *> InsertUses = None);
+    /// Try to vectorize a list of operands.
+    /// When \p InsertUses is provided and its entries are non-zero
+    /// then users of \p VL are known to be InsertElement instructions
+    /// each associated with same VL entry index. Their cost is then
+    /// used to adjust cost of the vectorization assuming instcombine pass
+    /// then optimizes ExtractElement-InsertElement sequence.
+    /// \returns true if a value was vectorized.
+    bool tryToVectorizeList(ArrayRef<Value *> VL, slpvectorizer::BoUpSLP &R,
+                            bool AllowReorder = false,
+                            ArrayRef<Value *> InsertUses = None);
 
-  /// Try to vectorize a chain that may start at the operands of \p I.
-  bool tryToVectorize(Instruction *I, slpvectorizer::BoUpSLP &R);
+    /// Try to vectorize a chain that may start at the operands of \p I.
+    bool tryToVectorize(Instruction *I, slpvectorizer::BoUpSLP &R);
 
-  /// Vectorize the store instructions collected in Stores.
-  bool vectorizeStoreChains(slpvectorizer::BoUpSLP &R);
+    /// Vectorize the store instructions collected in Stores.
+    bool vectorizeStoreChains(slpvectorizer::BoUpSLP &R);
 
-  /// Vectorize the index computations of the getelementptr instructions
-  /// collected in GEPs.
-  bool vectorizeGEPIndices(BasicBlock *BB, slpvectorizer::BoUpSLP &R);
+    /// Vectorize the index computations of the getelementptr instructions
+    /// collected in GEPs.
+    bool vectorizeGEPIndices(BasicBlock *BB, slpvectorizer::BoUpSLP &R);
 
-  /// Try to find horizontal reduction or otherwise vectorize a chain of binary
-  /// operators.
-  bool vectorizeRootInstruction(PHINode *P, Value *V, BasicBlock *BB,
-                                slpvectorizer::BoUpSLP &R,
-                                TargetTransformInfo *TTI);
+    /// Try to find horizontal reduction or otherwise vectorize a chain of binary
+    /// operators.
+    bool vectorizeRootInstruction(PHINode *P, Value *V, BasicBlock *BB,
+                                  slpvectorizer::BoUpSLP &R,
+                                  TargetTransformInfo *TTI);
 
-  /// Try to vectorize trees that start at insertvalue instructions.
-  bool vectorizeInsertValueInst(InsertValueInst *IVI, BasicBlock *BB,
-                                slpvectorizer::BoUpSLP &R);
-
-  /// Try to vectorize trees that start at insertelement instructions.
-  bool vectorizeInsertElementInst(InsertElementInst *IEI, BasicBlock *BB,
+    /// Try to vectorize trees that start at insertvalue instructions.
+    bool vectorizeInsertValueInst(InsertValueInst *IVI, BasicBlock *BB,
                                   slpvectorizer::BoUpSLP &R);
 
-  /// Try to vectorize trees that start at compare instructions.
-  bool vectorizeCmpInst(CmpInst *CI, BasicBlock *BB, slpvectorizer::BoUpSLP &R);
+    /// Try to vectorize trees that start at insertelement instructions.
+    bool vectorizeInsertElementInst(InsertElementInst *IEI, BasicBlock *BB,
+                                    slpvectorizer::BoUpSLP &R);
 
-  /// Tries to vectorize constructs started from CmpInst, InsertValueInst or
-  /// InsertElementInst instructions.
-  bool vectorizeSimpleInstructions(SmallVectorImpl<Instruction *> &Instructions,
-                                   BasicBlock *BB, slpvectorizer::BoUpSLP &R);
+    /// Try to vectorize trees that start at compare instructions.
+    bool vectorizeCmpInst(CmpInst *CI, BasicBlock *BB, slpvectorizer::BoUpSLP &R);
 
-  /// Scan the basic block and look for patterns that are likely to start
-  /// a vectorization chain.
-  bool vectorizeChainsInBlock(BasicBlock *BB, slpvectorizer::BoUpSLP &R);
+    /// Tries to vectorize constructs started from CmpInst, InsertValueInst or
+    /// InsertElementInst instructions.
+    bool vectorizeSimpleInstructions(SmallVectorImpl<Instruction *> &Instructions,
+                                     BasicBlock *BB, slpvectorizer::BoUpSLP &R);
 
-  bool vectorizeStoreChain(ArrayRef<Value *> Chain, slpvectorizer::BoUpSLP &R,
-                           unsigned Idx);
+    /// Scan the basic block and look for patterns that are likely to start
+    /// a vectorization chain.
+    bool vectorizeChainsInBlock(BasicBlock *BB, slpvectorizer::BoUpSLP &R);
 
-  bool vectorizeStores(ArrayRef<StoreInst *> Stores, slpvectorizer::BoUpSLP &R);
+    bool vectorizeStoreChain(ArrayRef<Value *> Chain, slpvectorizer::BoUpSLP &R,
+                             unsigned Idx);
 
-  /// The store instructions in a basic block organized by base pointer.
-  StoreListMap Stores;
+    bool vectorizeStores(ArrayRef<StoreInst *> Stores, slpvectorizer::BoUpSLP &R);
 
-  /// The getelementptr instructions in a basic block organized by base pointer.
-  GEPListMap GEPs;
+    /// The store instructions in a basic block organized by base pointer.
+    StoreListMap Stores;
+
+    /// The getelementptr instructions in a basic block organized by base pointer.
+    GEPListMap GEPs;
 };
 
 } // end namespace llvm

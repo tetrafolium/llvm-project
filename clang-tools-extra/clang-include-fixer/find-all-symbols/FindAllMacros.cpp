@@ -23,47 +23,47 @@ namespace find_all_symbols {
 llvm::Optional<SymbolInfo>
 FindAllMacros::CreateMacroSymbol(const Token &MacroNameTok,
                                  const MacroInfo *info) {
-  std::string FilePath =
-      getIncludePath(*SM, info->getDefinitionLoc(), Collector);
-  if (FilePath.empty())
-    return llvm::None;
-  return SymbolInfo(MacroNameTok.getIdentifierInfo()->getName(),
-                    SymbolInfo::SymbolKind::Macro, FilePath, {});
+    std::string FilePath =
+        getIncludePath(*SM, info->getDefinitionLoc(), Collector);
+    if (FilePath.empty())
+        return llvm::None;
+    return SymbolInfo(MacroNameTok.getIdentifierInfo()->getName(),
+                      SymbolInfo::SymbolKind::Macro, FilePath, {});
 }
 
 void FindAllMacros::MacroDefined(const Token &MacroNameTok,
                                  const MacroDirective *MD) {
-  if (auto Symbol = CreateMacroSymbol(MacroNameTok, MD->getMacroInfo()))
-    ++FileSymbols[*Symbol].Seen;
+    if (auto Symbol = CreateMacroSymbol(MacroNameTok, MD->getMacroInfo()))
+        ++FileSymbols[*Symbol].Seen;
 }
 
 void FindAllMacros::MacroUsed(const Token &Name, const MacroDefinition &MD) {
-  if (!MD || !SM->isInMainFile(SM->getExpansionLoc(Name.getLocation())))
-    return;
-  if (auto Symbol = CreateMacroSymbol(Name, MD.getMacroInfo()))
-    ++FileSymbols[*Symbol].Used;
+    if (!MD || !SM->isInMainFile(SM->getExpansionLoc(Name.getLocation())))
+        return;
+    if (auto Symbol = CreateMacroSymbol(Name, MD.getMacroInfo()))
+        ++FileSymbols[*Symbol].Used;
 }
 
 void FindAllMacros::MacroExpands(const Token &MacroNameTok,
                                  const MacroDefinition &MD, SourceRange Range,
                                  const MacroArgs *Args) {
-  MacroUsed(MacroNameTok, MD);
+    MacroUsed(MacroNameTok, MD);
 }
 
 void FindAllMacros::Ifdef(SourceLocation Loc, const Token &MacroNameTok,
                           const MacroDefinition &MD) {
-  MacroUsed(MacroNameTok, MD);
+    MacroUsed(MacroNameTok, MD);
 }
 
 void FindAllMacros::Ifndef(SourceLocation Loc, const Token &MacroNameTok,
                            const MacroDefinition &MD) {
-  MacroUsed(MacroNameTok, MD);
+    MacroUsed(MacroNameTok, MD);
 }
 
 void FindAllMacros::EndOfMainFile() {
-  Reporter->reportSymbols(SM->getFileEntryForID(SM->getMainFileID())->getName(),
-                          FileSymbols);
-  FileSymbols.clear();
+    Reporter->reportSymbols(SM->getFileEntryForID(SM->getMainFileID())->getName(),
+                            FileSymbols);
+    FileSymbols.clear();
 }
 
 } // namespace find_all_symbols

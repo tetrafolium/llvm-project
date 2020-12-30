@@ -26,20 +26,20 @@ namespace modernize {
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-use-emplace.html
 class UseEmplaceCheck : public ClangTidyCheck {
 public:
-  UseEmplaceCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus11;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    UseEmplaceCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus11;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-  const bool IgnoreImplicitConstructors;
-  const std::vector<std::string> ContainersWithPushBack;
-  const std::vector<std::string> SmartPointers;
-  const std::vector<std::string> TupleTypes;
-  const std::vector<std::string> TupleMakeFunctions;
+    const bool IgnoreImplicitConstructors;
+    const std::vector<std::string> ContainersWithPushBack;
+    const std::vector<std::string> SmartPointers;
+    const std::vector<std::string> TupleTypes;
+    const std::vector<std::string> TupleMakeFunctions;
 };
 
 } // namespace modernize

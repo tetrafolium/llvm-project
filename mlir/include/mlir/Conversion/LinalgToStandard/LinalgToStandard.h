@@ -32,20 +32,20 @@ namespace linalg {
 // IndexedGenericOp, for which omre specialized patterns are provided.
 class LinalgOpToLibraryCallRewrite : public RewritePattern {
 public:
-  LinalgOpToLibraryCallRewrite()
-      : RewritePattern(/*benefit=*/1, MatchAnyOpTypeTag()) {}
+    LinalgOpToLibraryCallRewrite()
+        : RewritePattern(/*benefit=*/1, MatchAnyOpTypeTag()) {}
 
-  LogicalResult matchAndRewrite(Operation *op,
-                                PatternRewriter &rewriter) const override;
+    LogicalResult matchAndRewrite(Operation *op,
+                                  PatternRewriter &rewriter) const override;
 };
 
 /// Rewrite pattern specialization for CopyOp, kicks in when both input and
 /// output permutations are left unspecified or are the identity.
 class CopyOpToLibraryCallRewrite : public OpRewritePattern<CopyOp> {
 public:
-  using OpRewritePattern<CopyOp>::OpRewritePattern;
-  LogicalResult matchAndRewrite(CopyOp op,
-                                PatternRewriter &rewriter) const override;
+    using OpRewritePattern<CopyOp>::OpRewritePattern;
+    LogicalResult matchAndRewrite(CopyOp op,
+                                  PatternRewriter &rewriter) const override;
 };
 
 /// Rewrite CopyOp with permutations into a sequence of TransposeOp and
@@ -53,9 +53,9 @@ public:
 /// LinalgConversion<CopyOp> to create a path to the LLVM dialect.
 class CopyTransposeRewrite : public OpRewritePattern<CopyOp> {
 public:
-  using OpRewritePattern<CopyOp>::OpRewritePattern;
-  LogicalResult matchAndRewrite(CopyOp op,
-                                PatternRewriter &rewriter) const override;
+    using OpRewritePattern<CopyOp>::OpRewritePattern;
+    LogicalResult matchAndRewrite(CopyOp op,
+                                  PatternRewriter &rewriter) const override;
 };
 
 /// Conversion pattern specialization for IndexedGenericOp, has special handling
@@ -63,9 +63,9 @@ public:
 class IndexedGenericOpToLibraryCallRewrite
     : public OpRewritePattern<IndexedGenericOp> {
 public:
-  using OpRewritePattern<IndexedGenericOp>::OpRewritePattern;
-  LogicalResult matchAndRewrite(IndexedGenericOp op,
-                                PatternRewriter &rewriter) const override;
+    using OpRewritePattern<IndexedGenericOp>::OpRewritePattern;
+    LogicalResult matchAndRewrite(IndexedGenericOp op,
+                                  PatternRewriter &rewriter) const override;
 };
 
 /// Populate the given list with patterns that convert from Linalg to Standard.

@@ -64,16 +64,16 @@ typedef int (*LLVMOpInfoCallback)(void *DisInfo, uint64_t PC,
  * operands like "_foo@GOT", ":lower16:_foo", etc.
  */
 struct LLVMOpInfoSymbol1 {
-  uint64_t Present;  /* 1 if this symbol is present */
-  const char *Name;  /* symbol name if not NULL */
-  uint64_t Value;    /* symbol value if name is NULL */
+    uint64_t Present;  /* 1 if this symbol is present */
+    const char *Name;  /* symbol name if not NULL */
+    uint64_t Value;    /* symbol value if name is NULL */
 };
 
 struct LLVMOpInfo1 {
-  struct LLVMOpInfoSymbol1 AddSymbol;
-  struct LLVMOpInfoSymbol1 SubtractSymbol;
-  uint64_t Value;
-  uint64_t VariantKind;
+    struct LLVMOpInfoSymbol1 AddSymbol;
+    struct LLVMOpInfoSymbol1 SubtractSymbol;
+    uint64_t Value;
+    uint64_t VariantKind;
 };
 
 /**
@@ -110,10 +110,10 @@ struct LLVMOpInfo1 {
  * to NULL.
  */
 typedef const char *(*LLVMSymbolLookupCallback)(void *DisInfo,
-                                                uint64_t ReferenceValue,
-                                                uint64_t *ReferenceType,
-                                                uint64_t ReferencePC,
-                                                const char **ReferenceName);
+        uint64_t ReferenceValue,
+        uint64_t *ReferenceType,
+        uint64_t ReferencePC,
+        const char **ReferenceName);
 /**
  * The reference types on input and output.
  */

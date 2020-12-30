@@ -31,54 +31,54 @@ HistoryThread::HistoryThread(lldb_private::Process &process, lldb::tid_t tid,
       m_pcs(pcs), m_extended_unwind_token(LLDB_INVALID_ADDRESS), m_queue_name(),
       m_thread_name(), m_originating_unique_thread_id(tid),
       m_queue_id(LLDB_INVALID_QUEUE_ID) {
-  m_unwinder_up =
-      std::make_unique<HistoryUnwind>(*this, pcs, pcs_are_call_addresses);
-  Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_OBJECT));
-  LLDB_LOGF(log, "%p HistoryThread::HistoryThread", static_cast<void *>(this));
+    m_unwinder_up =
+        std::make_unique<HistoryUnwind>(*this, pcs, pcs_are_call_addresses);
+    Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_OBJECT));
+    LLDB_LOGF(log, "%p HistoryThread::HistoryThread", static_cast<void *>(this));
 }
 
 //  Destructor
 
 HistoryThread::~HistoryThread() {
-  Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_OBJECT));
-  LLDB_LOGF(log, "%p HistoryThread::~HistoryThread (tid=0x%" PRIx64 ")",
-            static_cast<void *>(this), GetID());
-  DestroyThread();
+    Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_OBJECT));
+    LLDB_LOGF(log, "%p HistoryThread::~HistoryThread (tid=0x%" PRIx64 ")",
+              static_cast<void *>(this), GetID());
+    DestroyThread();
 }
 
 lldb::RegisterContextSP HistoryThread::GetRegisterContext() {
-  RegisterContextSP rctx;
-  if (m_pcs.size() > 0) {
-    rctx = std::make_shared<RegisterContextHistory>(
-        *this, 0, GetProcess()->GetAddressByteSize(), m_pcs[0]);
-  }
-  return rctx;
+    RegisterContextSP rctx;
+    if (m_pcs.size() > 0) {
+        rctx = std::make_shared<RegisterContextHistory>(
+                   *this, 0, GetProcess()->GetAddressByteSize(), m_pcs[0]);
+    }
+    return rctx;
 }
 
 lldb::RegisterContextSP
 HistoryThread::CreateRegisterContextForFrame(StackFrame *frame) {
-  return m_unwinder_up->CreateRegisterContextForFrame(frame);
+    return m_unwinder_up->CreateRegisterContextForFrame(frame);
 }
 
 lldb::StackFrameListSP HistoryThread::GetStackFrameList() {
-  // FIXME do not throw away the lock after we acquire it..
-  std::unique_lock<std::mutex> lock(m_framelist_mutex);
-  lock.unlock();
-  if (m_framelist.get() == nullptr) {
-    m_framelist =
-        std::make_shared<StackFrameList>(*this, StackFrameListSP(), true);
-  }
+    // FIXME do not throw away the lock after we acquire it..
+    std::unique_lock<std::mutex> lock(m_framelist_mutex);
+    lock.unlock();
+    if (m_framelist.get() == nullptr) {
+        m_framelist =
+            std::make_shared<StackFrameList>(*this, StackFrameListSP(), true);
+    }
 
-  return m_framelist;
+    return m_framelist;
 }
 
 uint32_t HistoryThread::GetExtendedBacktraceOriginatingIndexID() {
-  if (m_originating_unique_thread_id != LLDB_INVALID_THREAD_ID) {
-    if (GetProcess()->HasAssignedIndexIDToThread(
-            m_originating_unique_thread_id)) {
-      return GetProcess()->AssignIndexIDToThread(
-          m_originating_unique_thread_id);
+    if (m_originating_unique_thread_id != LLDB_INVALID_THREAD_ID) {
+        if (GetProcess()->HasAssignedIndexIDToThread(
+                    m_originating_unique_thread_id)) {
+            return GetProcess()->AssignIndexIDToThread(
+                       m_originating_unique_thread_id);
+        }
     }
-  }
-  return LLDB_INVALID_THREAD_ID;
+    return LLDB_INVALID_THREAD_ID;
 }

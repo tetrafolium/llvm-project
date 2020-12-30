@@ -15,7 +15,7 @@
 #   include <android/api-level.h>
 #   if __ANDROID_API__ >= 21
 #       include <syslog.h>
-        extern "C" void android_set_abort_message(const char* msg);
+extern "C" void android_set_abort_message(const char* msg);
 #   else
 #       include <assert.h>
 #   endif // __ANDROID_API__ >= 21

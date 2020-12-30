@@ -48,15 +48,15 @@ static ManagedStatic<std::vector<std::string>> CurrentDebugType;
 /// specified on the command line, or if none was specified on the command line
 /// with the -debug-only=X option.
 bool isCurrentDebugType(const char *DebugType) {
-  if (CurrentDebugType->empty())
-    return true;
-  // See if DebugType is in list. Note: do not use find() as that forces us to
-  // unnecessarily create an std::string instance.
-  for (auto &d : *CurrentDebugType) {
-    if (d == DebugType)
-      return true;
-  }
-  return false;
+    if (CurrentDebugType->empty())
+        return true;
+    // See if DebugType is in list. Note: do not use find() as that forces us to
+    // unnecessarily create an std::string instance.
+    for (auto &d : *CurrentDebugType) {
+        if (d == DebugType)
+            return true;
+    }
+    return false;
 }
 
 /// Set the current debug type, as if the -debug-only=X
@@ -66,13 +66,13 @@ bool isCurrentDebugType(const char *DebugType) {
 void setCurrentDebugTypes(const char **Types, unsigned Count);
 
 void setCurrentDebugType(const char *Type) {
-  setCurrentDebugTypes(&Type, 1);
+    setCurrentDebugTypes(&Type, 1);
 }
 
 void setCurrentDebugTypes(const char **Types, unsigned Count) {
-  CurrentDebugType->clear();
-  for (size_t T = 0; T < Count; ++T)
-    CurrentDebugType->push_back(Types[T]);
+    CurrentDebugType->clear();
+    for (size_t T = 0; T < Count; ++T)
+        CurrentDebugType->push_back(Types[T]);
 }
 } // namespace llvm
 
@@ -98,15 +98,15 @@ DebugBufferSize("debug-buffer-size",
 namespace {
 
 struct DebugOnlyOpt {
-  void operator=(const std::string &Val) const {
-    if (Val.empty())
-      return;
-    DebugFlag = true;
-    SmallVector<StringRef,8> dbgTypes;
-    StringRef(Val).split(dbgTypes, ',', -1, false);
-    for (auto dbgType : dbgTypes)
-      CurrentDebugType->push_back(std::string(dbgType));
-  }
+    void operator=(const std::string &Val) const {
+        if (Val.empty())
+            return;
+        DebugFlag = true;
+        SmallVector<StringRef,8> dbgTypes;
+        StringRef(Val).split(dbgTypes, ',', -1, false);
+        for (auto dbgType : dbgTypes)
+            CurrentDebugType->push_back(std::string(dbgType));
+    }
 };
 
 }
@@ -119,43 +119,43 @@ DebugOnly("debug-only", cl::desc("Enable a specific type of debug output (comma 
           cl::location(DebugOnlyOptLoc), cl::ValueRequired);
 // Signal handlers - dump debug output on termination.
 static void debug_user_sig_handler(void *Cookie) {
-  // This is a bit sneaky.  Since this is under #ifndef NDEBUG, we
-  // know that debug mode is enabled and dbgs() really is a
-  // circular_raw_ostream.  If NDEBUG is defined, then dbgs() ==
-  // errs() but this will never be invoked.
-  llvm::circular_raw_ostream &dbgout =
-      static_cast<circular_raw_ostream &>(llvm::dbgs());
-  dbgout.flushBufferWithBanner();
+    // This is a bit sneaky.  Since this is under #ifndef NDEBUG, we
+    // know that debug mode is enabled and dbgs() really is a
+    // circular_raw_ostream.  If NDEBUG is defined, then dbgs() ==
+    // errs() but this will never be invoked.
+    llvm::circular_raw_ostream &dbgout =
+        static_cast<circular_raw_ostream &>(llvm::dbgs());
+    dbgout.flushBufferWithBanner();
 }
 
 /// dbgs - Return a circular-buffered debug stream.
 raw_ostream &llvm::dbgs() {
-  // Do one-time initialization in a thread-safe way.
-  static struct dbgstream {
-    circular_raw_ostream strm;
+    // Do one-time initialization in a thread-safe way.
+    static struct dbgstream {
+        circular_raw_ostream strm;
 
-    dbgstream() :
-        strm(errs(), "*** Debug Log Output ***\n",
-             (!EnableDebugBuffering || !DebugFlag) ? 0 : DebugBufferSize) {
-      if (EnableDebugBuffering && DebugFlag && DebugBufferSize != 0)
-        // TODO: Add a handler for SIGUSER1-type signals so the user can
-        // force a debug dump.
-        sys::AddSignalHandler(&debug_user_sig_handler, nullptr);
-      // Otherwise we've already set the debug stream buffer size to
-      // zero, disabling buffering so it will output directly to errs().
-    }
-  } thestrm;
+        dbgstream() :
+            strm(errs(), "*** Debug Log Output ***\n",
+                 (!EnableDebugBuffering || !DebugFlag) ? 0 : DebugBufferSize) {
+            if (EnableDebugBuffering && DebugFlag && DebugBufferSize != 0)
+                // TODO: Add a handler for SIGUSER1-type signals so the user can
+                // force a debug dump.
+                sys::AddSignalHandler(&debug_user_sig_handler, nullptr);
+            // Otherwise we've already set the debug stream buffer size to
+            // zero, disabling buffering so it will output directly to errs().
+        }
+    } thestrm;
 
-  return thestrm.strm;
+    return thestrm.strm;
 }
 
 #else
 // Avoid "has no symbols" warning.
 namespace llvm {
-  /// dbgs - Return errs().
-  raw_ostream &dbgs() {
+/// dbgs - Return errs().
+raw_ostream &dbgs() {
     return errs();
-  }
+}
 }
 
 #endif

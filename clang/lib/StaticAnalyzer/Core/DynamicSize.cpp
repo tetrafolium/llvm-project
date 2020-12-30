@@ -24,47 +24,47 @@ namespace ento {
 
 DefinedOrUnknownSVal getDynamicSize(ProgramStateRef State, const MemRegion *MR,
                                     SValBuilder &SVB) {
-  return MR->getMemRegionManager().getStaticSize(MR, SVB);
+    return MR->getMemRegionManager().getStaticSize(MR, SVB);
 }
 
 DefinedOrUnknownSVal getDynamicElementCount(ProgramStateRef State,
-                                            const MemRegion *MR,
-                                            SValBuilder &SVB,
-                                            QualType ElementTy) {
-  MemRegionManager &MemMgr = MR->getMemRegionManager();
-  ASTContext &Ctx = MemMgr.getContext();
+        const MemRegion *MR,
+        SValBuilder &SVB,
+        QualType ElementTy) {
+    MemRegionManager &MemMgr = MR->getMemRegionManager();
+    ASTContext &Ctx = MemMgr.getContext();
 
-  DefinedOrUnknownSVal Size = getDynamicSize(State, MR, SVB);
-  SVal ElementSizeV = SVB.makeIntVal(
-      Ctx.getTypeSizeInChars(ElementTy).getQuantity(), SVB.getArrayIndexType());
+    DefinedOrUnknownSVal Size = getDynamicSize(State, MR, SVB);
+    SVal ElementSizeV = SVB.makeIntVal(
+                            Ctx.getTypeSizeInChars(ElementTy).getQuantity(), SVB.getArrayIndexType());
 
-  SVal DivisionV =
-      SVB.evalBinOp(State, BO_Div, Size, ElementSizeV, SVB.getArrayIndexType());
+    SVal DivisionV =
+        SVB.evalBinOp(State, BO_Div, Size, ElementSizeV, SVB.getArrayIndexType());
 
-  return DivisionV.castAs<DefinedOrUnknownSVal>();
+    return DivisionV.castAs<DefinedOrUnknownSVal>();
 }
 
 SVal getDynamicSizeWithOffset(ProgramStateRef State, const SVal &BufV) {
-  SValBuilder &SvalBuilder = State->getStateManager().getSValBuilder();
-  const MemRegion *MRegion = BufV.getAsRegion();
-  if (!MRegion)
-    return UnknownVal();
-  RegionOffset Offset = MRegion->getAsOffset();
-  if (Offset.hasSymbolicOffset())
-    return UnknownVal();
-  const MemRegion *BaseRegion = MRegion->getBaseRegion();
-  if (!BaseRegion)
-    return UnknownVal();
+    SValBuilder &SvalBuilder = State->getStateManager().getSValBuilder();
+    const MemRegion *MRegion = BufV.getAsRegion();
+    if (!MRegion)
+        return UnknownVal();
+    RegionOffset Offset = MRegion->getAsOffset();
+    if (Offset.hasSymbolicOffset())
+        return UnknownVal();
+    const MemRegion *BaseRegion = MRegion->getBaseRegion();
+    if (!BaseRegion)
+        return UnknownVal();
 
-  NonLoc OffsetInBytes = SvalBuilder.makeArrayIndex(
-      Offset.getOffset() /
-      MRegion->getMemRegionManager().getContext().getCharWidth());
-  DefinedOrUnknownSVal ExtentInBytes =
-      getDynamicSize(State, BaseRegion, SvalBuilder);
+    NonLoc OffsetInBytes = SvalBuilder.makeArrayIndex(
+                               Offset.getOffset() /
+                               MRegion->getMemRegionManager().getContext().getCharWidth());
+    DefinedOrUnknownSVal ExtentInBytes =
+        getDynamicSize(State, BaseRegion, SvalBuilder);
 
-  return SvalBuilder.evalBinOp(State, BinaryOperator::Opcode::BO_Sub,
-                               ExtentInBytes, OffsetInBytes,
-                               SvalBuilder.getArrayIndexType());
+    return SvalBuilder.evalBinOp(State, BinaryOperator::Opcode::BO_Sub,
+                                 ExtentInBytes, OffsetInBytes,
+                                 SvalBuilder.getArrayIndexType());
 }
 
 } // namespace ento

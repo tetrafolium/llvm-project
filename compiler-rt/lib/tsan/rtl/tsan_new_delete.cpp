@@ -61,37 +61,37 @@ DECLARE_REAL(void, free, void *ptr)
 SANITIZER_INTERFACE_ATTRIBUTE
 void *operator new(__sanitizer::uptr size);
 void *operator new(__sanitizer::uptr size) {
-  OPERATOR_NEW_BODY(_Znwm, false /*nothrow*/);
+    OPERATOR_NEW_BODY(_Znwm, false /*nothrow*/);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void *operator new[](__sanitizer::uptr size);
 void *operator new[](__sanitizer::uptr size) {
-  OPERATOR_NEW_BODY(_Znam, false /*nothrow*/);
+    OPERATOR_NEW_BODY(_Znam, false /*nothrow*/);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void *operator new(__sanitizer::uptr size, std::nothrow_t const&);
 void *operator new(__sanitizer::uptr size, std::nothrow_t const&) {
-  OPERATOR_NEW_BODY(_ZnwmRKSt9nothrow_t, true /*nothrow*/);
+    OPERATOR_NEW_BODY(_ZnwmRKSt9nothrow_t, true /*nothrow*/);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void *operator new[](__sanitizer::uptr size, std::nothrow_t const&);
 void *operator new[](__sanitizer::uptr size, std::nothrow_t const&) {
-  OPERATOR_NEW_BODY(_ZnamRKSt9nothrow_t, true /*nothrow*/);
+    OPERATOR_NEW_BODY(_ZnamRKSt9nothrow_t, true /*nothrow*/);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void *operator new(__sanitizer::uptr size, std::align_val_t align);
 void *operator new(__sanitizer::uptr size, std::align_val_t align) {
-  OPERATOR_NEW_BODY_ALIGN(_ZnwmSt11align_val_t, false /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(_ZnwmSt11align_val_t, false /*nothrow*/);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void *operator new[](__sanitizer::uptr size, std::align_val_t align);
 void *operator new[](__sanitizer::uptr size, std::align_val_t align) {
-  OPERATOR_NEW_BODY_ALIGN(_ZnamSt11align_val_t, false /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(_ZnamSt11align_val_t, false /*nothrow*/);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
@@ -99,8 +99,8 @@ void *operator new(__sanitizer::uptr size, std::align_val_t align,
                    std::nothrow_t const&);
 void *operator new(__sanitizer::uptr size, std::align_val_t align,
                    std::nothrow_t const&) {
-  OPERATOR_NEW_BODY_ALIGN(_ZnwmSt11align_val_tRKSt9nothrow_t,
-                          true /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(_ZnwmSt11align_val_tRKSt9nothrow_t,
+                            true /*nothrow*/);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
@@ -108,8 +108,8 @@ void *operator new[](__sanitizer::uptr size, std::align_val_t align,
                      std::nothrow_t const&);
 void *operator new[](__sanitizer::uptr size, std::align_val_t align,
                      std::nothrow_t const&) {
-  OPERATOR_NEW_BODY_ALIGN(_ZnamSt11align_val_tRKSt9nothrow_t,
-                          true /*nothrow*/);
+    OPERATOR_NEW_BODY_ALIGN(_ZnamSt11align_val_tRKSt9nothrow_t,
+                            true /*nothrow*/);
 }
 
 #define OPERATOR_DELETE_BODY(mangled_name) \
@@ -123,55 +123,55 @@ void *operator new[](__sanitizer::uptr size, std::align_val_t align,
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete(void *ptr) NOEXCEPT;
 void operator delete(void *ptr) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdlPv);
+    OPERATOR_DELETE_BODY(_ZdlPv);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete[](void *ptr) NOEXCEPT;
 void operator delete[](void *ptr) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdaPv);
+    OPERATOR_DELETE_BODY(_ZdaPv);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete(void *ptr, std::nothrow_t const&);
 void operator delete(void *ptr, std::nothrow_t const&) {
-  OPERATOR_DELETE_BODY(_ZdlPvRKSt9nothrow_t);
+    OPERATOR_DELETE_BODY(_ZdlPvRKSt9nothrow_t);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete[](void *ptr, std::nothrow_t const&);
 void operator delete[](void *ptr, std::nothrow_t const&) {
-  OPERATOR_DELETE_BODY(_ZdaPvRKSt9nothrow_t);
+    OPERATOR_DELETE_BODY(_ZdaPvRKSt9nothrow_t);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete(void *ptr, __sanitizer::uptr size) NOEXCEPT;
 void operator delete(void *ptr, __sanitizer::uptr size) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdlPvm);
+    OPERATOR_DELETE_BODY(_ZdlPvm);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete[](void *ptr, __sanitizer::uptr size) NOEXCEPT;
 void operator delete[](void *ptr, __sanitizer::uptr size) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdaPvm);
+    OPERATOR_DELETE_BODY(_ZdaPvm);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete(void *ptr, std::align_val_t align) NOEXCEPT;
 void operator delete(void *ptr, std::align_val_t align) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdlPvSt11align_val_t);
+    OPERATOR_DELETE_BODY(_ZdlPvSt11align_val_t);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete[](void *ptr, std::align_val_t align) NOEXCEPT;
 void operator delete[](void *ptr, std::align_val_t align) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdaPvSt11align_val_t);
+    OPERATOR_DELETE_BODY(_ZdaPvSt11align_val_t);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
 void operator delete(void *ptr, std::align_val_t align, std::nothrow_t const&);
 void operator delete(void *ptr, std::align_val_t align, std::nothrow_t const&) {
-  OPERATOR_DELETE_BODY(_ZdlPvSt11align_val_tRKSt9nothrow_t);
+    OPERATOR_DELETE_BODY(_ZdlPvSt11align_val_tRKSt9nothrow_t);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
@@ -179,7 +179,7 @@ void operator delete[](void *ptr, std::align_val_t align,
                        std::nothrow_t const&);
 void operator delete[](void *ptr, std::align_val_t align,
                        std::nothrow_t const&) {
-  OPERATOR_DELETE_BODY(_ZdaPvSt11align_val_tRKSt9nothrow_t);
+    OPERATOR_DELETE_BODY(_ZdaPvSt11align_val_tRKSt9nothrow_t);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
@@ -187,7 +187,7 @@ void operator delete(void *ptr, __sanitizer::uptr size,
                      std::align_val_t align) NOEXCEPT;
 void operator delete(void *ptr, __sanitizer::uptr size,
                      std::align_val_t align) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdlPvmSt11align_val_t);
+    OPERATOR_DELETE_BODY(_ZdlPvmSt11align_val_t);
 }
 
 SANITIZER_INTERFACE_ATTRIBUTE
@@ -195,5 +195,5 @@ void operator delete[](void *ptr, __sanitizer::uptr size,
                        std::align_val_t align) NOEXCEPT;
 void operator delete[](void *ptr, __sanitizer::uptr size,
                        std::align_val_t align) NOEXCEPT {
-  OPERATOR_DELETE_BODY(_ZdaPvmSt11align_val_t);
+    OPERATOR_DELETE_BODY(_ZdaPvmSt11align_val_t);
 }

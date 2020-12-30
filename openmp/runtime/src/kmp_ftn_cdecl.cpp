@@ -25,10 +25,10 @@
 char const __kmp_version_ftncdecl[] =
     KMP_VERSION_PREFIX "Fortran __cdecl OMP support: "
 #ifdef KMP_FTN_ENTRIES
-                       "yes";
+    "yes";
 #define FTN_STDCALL /* no stdcall */
 #include "kmp_ftn_os.h"
 #include "kmp_ftn_entry.h"
 #else
-                       "no";
+    "no";
 #endif /* KMP_FTN_ENTRIES */

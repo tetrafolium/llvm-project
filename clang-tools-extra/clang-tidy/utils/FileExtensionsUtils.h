@@ -35,17 +35,21 @@ bool isSpellingLocInHeaderFile(SourceLocation Loc, SourceManager &SM,
 
 /// Returns recommended default value for the list of header file
 /// extensions.
-inline StringRef defaultHeaderFileExtensions() { return ";h;hh;hpp;hxx"; }
+inline StringRef defaultHeaderFileExtensions() {
+    return ";h;hh;hpp;hxx";
+}
 
 /// Returns recommended default value for the list of implementation file
 /// extensions.
 inline StringRef defaultImplementationFileExtensions() {
-  return "c;cc;cpp;cxx";
+    return "c;cc;cpp;cxx";
 }
 
 /// Returns recommended default value for the list of file extension
 /// delimiters.
-inline StringRef defaultFileExtensionDelimiters() { return ",;"; }
+inline StringRef defaultFileExtensionDelimiters() {
+    return ",;";
+}
 
 /// Parses header file extensions from a semicolon-separated list.
 bool parseFileExtensions(StringRef AllFileExtensions,

@@ -135,7 +135,7 @@ const CXXBaseSpecifier *getCursorCXXBaseSpecifier(CXCursor C);
 
 /// Create a preprocessing directive cursor.
 CXCursor MakePreprocessingDirectiveCursor(SourceRange Range,
-                                          CXTranslationUnit TU);
+        CXTranslationUnit TU);
 
 /// Unpack a given preprocessing directive to retrieve its source range.
 SourceRange getCursorPreprocessingDirective(CXCursor C);
@@ -164,35 +164,37 @@ CXCursor MakeMacroExpansionCursor(MacroDefinitionRecord *, SourceLocation Loc,
 /// created for identifiers inside macro definitions, if these identifiers are
 /// macro names.
 class MacroExpansionCursor {
-  CXCursor C;
+    CXCursor C;
 
-  bool isPseudo() const { return C.data[1] != nullptr; }
-  const MacroDefinitionRecord *getAsMacroDefinition() const {
-    assert(isPseudo());
-    return static_cast<const MacroDefinitionRecord *>(C.data[0]);
-  }
-  const MacroExpansion *getAsMacroExpansion() const {
-    assert(!isPseudo());
-    return static_cast<const MacroExpansion *>(C.data[0]);
-  }
-  SourceLocation getPseudoLoc() const {
-    assert(isPseudo());
-    return SourceLocation::getFromPtrEncoding(C.data[1]);
-  }
+    bool isPseudo() const {
+        return C.data[1] != nullptr;
+    }
+    const MacroDefinitionRecord *getAsMacroDefinition() const {
+        assert(isPseudo());
+        return static_cast<const MacroDefinitionRecord *>(C.data[0]);
+    }
+    const MacroExpansion *getAsMacroExpansion() const {
+        assert(!isPseudo());
+        return static_cast<const MacroExpansion *>(C.data[0]);
+    }
+    SourceLocation getPseudoLoc() const {
+        assert(isPseudo());
+        return SourceLocation::getFromPtrEncoding(C.data[1]);
+    }
 
 public:
-  MacroExpansionCursor(CXCursor C) : C(C) {
-    assert(C.kind == CXCursor_MacroExpansion);
-  }
+    MacroExpansionCursor(CXCursor C) : C(C) {
+        assert(C.kind == CXCursor_MacroExpansion);
+    }
 
-  const IdentifierInfo *getName() const;
-  const MacroDefinitionRecord *getDefinition() const;
-  SourceRange getSourceRange() const;
+    const IdentifierInfo *getName() const;
+    const MacroDefinitionRecord *getDefinition() const;
+    SourceRange getSourceRange() const;
 };
 
 /// Unpack a given macro expansion cursor to retrieve its info.
 static inline MacroExpansionCursor getCursorMacroExpansion(CXCursor C) {
-  return C;
+    return C;
 }
 
 /// Create an inclusion directive cursor.
@@ -226,8 +228,8 @@ CXCursor MakeCursorOverloadedDeclRef(TemplateName Template,
 
 /// Internal storage for an overloaded declaration reference cursor;
 typedef llvm::PointerUnion<const OverloadExpr *, const Decl *,
-                           OverloadedTemplateStorage *>
-    OverloadedDeclRefStorage;
+        OverloadedTemplateStorage *>
+        OverloadedDeclRefStorage;
 
 /// Unpack an overloaded declaration reference into an expression,
 /// declaration, or template name along with the source location.
@@ -257,19 +259,19 @@ void disposeOverridenCXCursorsPool(void *pool);
 /// points to one.
 std::pair<int, SourceLocation> getSelectorIdentifierIndexAndLoc(CXCursor);
 static inline int getSelectorIdentifierIndex(CXCursor cursor) {
-  return getSelectorIdentifierIndexAndLoc(cursor).first;
+    return getSelectorIdentifierIndexAndLoc(cursor).first;
 }
 static inline SourceLocation getSelectorIdentifierLoc(CXCursor cursor) {
-  return getSelectorIdentifierIndexAndLoc(cursor).second;
+    return getSelectorIdentifierIndexAndLoc(cursor).second;
 }
 
 CXCursor getSelectorIdentifierCursor(int SelIdx, CXCursor cursor);
 
 static inline CXCursor getTypeRefedCallExprCursor(CXCursor cursor) {
-  CXCursor newCursor = cursor;
-  if (cursor.kind == CXCursor_CallExpr)
-    newCursor.xdata = 1;
-  return newCursor;
+    CXCursor newCursor = cursor;
+    if (cursor.kind == CXCursor_CallExpr)
+        newCursor.xdata = 1;
+    return newCursor;
 }
 
 CXCursor getTypeRefCursor(CXCursor cursor);
@@ -281,7 +283,9 @@ bool getDeclCursorUSR(const Decl *D, SmallVectorImpl<char> &Buf);
 
 bool operator==(CXCursor X, CXCursor Y);
 
-inline bool operator!=(CXCursor X, CXCursor Y) { return !(X == Y); }
+inline bool operator!=(CXCursor X, CXCursor Y) {
+    return !(X == Y);
+}
 
 /// Return true if the cursor represents a declaration that is the
 /// first in a declaration group.

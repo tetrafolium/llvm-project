@@ -29,10 +29,10 @@ OMPGeneralSchedulingType polly::PollyScheduling;
 int polly::PollyChunkSize;
 
 static cl::opt<int, true>
-    XPollyNumThreads("polly-num-threads",
-                     cl::desc("Number of threads to use (0 = auto)"),
-                     cl::Hidden, cl::location(polly::PollyNumThreads),
-                     cl::init(0), cl::cat(PollyCategory));
+XPollyNumThreads("polly-num-threads",
+                 cl::desc("Number of threads to use (0 = auto)"),
+                 cl::Hidden, cl::location(polly::PollyNumThreads),
+                 cl::init(0), cl::cat(PollyCategory));
 
 static cl::opt<OMPGeneralSchedulingType, true> XPollyScheduling(
     "polly-scheduling",
@@ -50,10 +50,10 @@ static cl::opt<OMPGeneralSchedulingType, true> XPollyScheduling(
     cl::cat(PollyCategory));
 
 static cl::opt<int, true>
-    XPollyChunkSize("polly-scheduling-chunksize",
-                    cl::desc("Chunksize to use by the OpenMP runtime calls"),
-                    cl::Hidden, cl::location(polly::PollyChunkSize),
-                    cl::init(0), cl::Optional, cl::cat(PollyCategory));
+XPollyChunkSize("polly-scheduling-chunksize",
+                cl::desc("Chunksize to use by the OpenMP runtime calls"),
+                cl::Hidden, cl::location(polly::PollyChunkSize),
+                cl::init(0), cl::Optional, cl::cat(PollyCategory));
 
 // We generate a loop of either of the following structures:
 //
@@ -85,168 +85,168 @@ Value *polly::createLoop(Value *LB, Value *UB, Value *Stride,
                          ICmpInst::Predicate Predicate,
                          ScopAnnotator *Annotator, bool Parallel, bool UseGuard,
                          bool LoopVectDisabled) {
-  Function *F = Builder.GetInsertBlock()->getParent();
-  LLVMContext &Context = F->getContext();
+    Function *F = Builder.GetInsertBlock()->getParent();
+    LLVMContext &Context = F->getContext();
 
-  assert(LB->getType() == UB->getType() && "Types of loop bounds do not match");
-  IntegerType *LoopIVType = dyn_cast<IntegerType>(UB->getType());
-  assert(LoopIVType && "UB is not integer?");
+    assert(LB->getType() == UB->getType() && "Types of loop bounds do not match");
+    IntegerType *LoopIVType = dyn_cast<IntegerType>(UB->getType());
+    assert(LoopIVType && "UB is not integer?");
 
-  BasicBlock *BeforeBB = Builder.GetInsertBlock();
-  BasicBlock *GuardBB =
-      UseGuard ? BasicBlock::Create(Context, "polly.loop_if", F) : nullptr;
-  BasicBlock *HeaderBB = BasicBlock::Create(Context, "polly.loop_header", F);
-  BasicBlock *PreHeaderBB =
-      BasicBlock::Create(Context, "polly.loop_preheader", F);
+    BasicBlock *BeforeBB = Builder.GetInsertBlock();
+    BasicBlock *GuardBB =
+        UseGuard ? BasicBlock::Create(Context, "polly.loop_if", F) : nullptr;
+    BasicBlock *HeaderBB = BasicBlock::Create(Context, "polly.loop_header", F);
+    BasicBlock *PreHeaderBB =
+        BasicBlock::Create(Context, "polly.loop_preheader", F);
 
-  // Update LoopInfo
-  Loop *OuterLoop = LI.getLoopFor(BeforeBB);
-  Loop *NewLoop = LI.AllocateLoop();
+    // Update LoopInfo
+    Loop *OuterLoop = LI.getLoopFor(BeforeBB);
+    Loop *NewLoop = LI.AllocateLoop();
 
-  if (OuterLoop)
-    OuterLoop->addChildLoop(NewLoop);
-  else
-    LI.addTopLevelLoop(NewLoop);
+    if (OuterLoop)
+        OuterLoop->addChildLoop(NewLoop);
+    else
+        LI.addTopLevelLoop(NewLoop);
 
-  if (OuterLoop) {
+    if (OuterLoop) {
+        if (GuardBB)
+            OuterLoop->addBasicBlockToLoop(GuardBB, LI);
+        OuterLoop->addBasicBlockToLoop(PreHeaderBB, LI);
+    }
+
+    NewLoop->addBasicBlockToLoop(HeaderBB, LI);
+
+    // Notify the annotator (if present) that we have a new loop, but only
+    // after the header block is set.
+    if (Annotator)
+        Annotator->pushLoop(NewLoop, Parallel);
+
+    // ExitBB
+    ExitBB = SplitBlock(BeforeBB, &*Builder.GetInsertPoint(), &DT, &LI);
+    ExitBB->setName("polly.loop_exit");
+
+    // BeforeBB
+    if (GuardBB) {
+        BeforeBB->getTerminator()->setSuccessor(0, GuardBB);
+        DT.addNewBlock(GuardBB, BeforeBB);
+
+        // GuardBB
+        Builder.SetInsertPoint(GuardBB);
+        Value *LoopGuard;
+        LoopGuard = Builder.CreateICmp(Predicate, LB, UB);
+        LoopGuard->setName("polly.loop_guard");
+        Builder.CreateCondBr(LoopGuard, PreHeaderBB, ExitBB);
+        DT.addNewBlock(PreHeaderBB, GuardBB);
+    } else {
+        BeforeBB->getTerminator()->setSuccessor(0, PreHeaderBB);
+        DT.addNewBlock(PreHeaderBB, BeforeBB);
+    }
+
+    // PreHeaderBB
+    Builder.SetInsertPoint(PreHeaderBB);
+    Builder.CreateBr(HeaderBB);
+
+    // HeaderBB
+    DT.addNewBlock(HeaderBB, PreHeaderBB);
+    Builder.SetInsertPoint(HeaderBB);
+    PHINode *IV = Builder.CreatePHI(LoopIVType, 2, "polly.indvar");
+    IV->addIncoming(LB, PreHeaderBB);
+    Stride = Builder.CreateZExtOrBitCast(Stride, LoopIVType);
+    Value *IncrementedIV = Builder.CreateNSWAdd(IV, Stride, "polly.indvar_next");
+    Value *LoopCondition =
+        Builder.CreateICmp(Predicate, IncrementedIV, UB, "polly.loop_cond");
+
+    // Create the loop latch and annotate it as such.
+    BranchInst *B = Builder.CreateCondBr(LoopCondition, HeaderBB, ExitBB);
+    if (Annotator)
+        Annotator->annotateLoopLatch(B, NewLoop, Parallel, LoopVectDisabled);
+
+    IV->addIncoming(IncrementedIV, HeaderBB);
     if (GuardBB)
-      OuterLoop->addBasicBlockToLoop(GuardBB, LI);
-    OuterLoop->addBasicBlockToLoop(PreHeaderBB, LI);
-  }
+        DT.changeImmediateDominator(ExitBB, GuardBB);
+    else
+        DT.changeImmediateDominator(ExitBB, HeaderBB);
 
-  NewLoop->addBasicBlockToLoop(HeaderBB, LI);
-
-  // Notify the annotator (if present) that we have a new loop, but only
-  // after the header block is set.
-  if (Annotator)
-    Annotator->pushLoop(NewLoop, Parallel);
-
-  // ExitBB
-  ExitBB = SplitBlock(BeforeBB, &*Builder.GetInsertPoint(), &DT, &LI);
-  ExitBB->setName("polly.loop_exit");
-
-  // BeforeBB
-  if (GuardBB) {
-    BeforeBB->getTerminator()->setSuccessor(0, GuardBB);
-    DT.addNewBlock(GuardBB, BeforeBB);
-
-    // GuardBB
-    Builder.SetInsertPoint(GuardBB);
-    Value *LoopGuard;
-    LoopGuard = Builder.CreateICmp(Predicate, LB, UB);
-    LoopGuard->setName("polly.loop_guard");
-    Builder.CreateCondBr(LoopGuard, PreHeaderBB, ExitBB);
-    DT.addNewBlock(PreHeaderBB, GuardBB);
-  } else {
-    BeforeBB->getTerminator()->setSuccessor(0, PreHeaderBB);
-    DT.addNewBlock(PreHeaderBB, BeforeBB);
-  }
-
-  // PreHeaderBB
-  Builder.SetInsertPoint(PreHeaderBB);
-  Builder.CreateBr(HeaderBB);
-
-  // HeaderBB
-  DT.addNewBlock(HeaderBB, PreHeaderBB);
-  Builder.SetInsertPoint(HeaderBB);
-  PHINode *IV = Builder.CreatePHI(LoopIVType, 2, "polly.indvar");
-  IV->addIncoming(LB, PreHeaderBB);
-  Stride = Builder.CreateZExtOrBitCast(Stride, LoopIVType);
-  Value *IncrementedIV = Builder.CreateNSWAdd(IV, Stride, "polly.indvar_next");
-  Value *LoopCondition =
-      Builder.CreateICmp(Predicate, IncrementedIV, UB, "polly.loop_cond");
-
-  // Create the loop latch and annotate it as such.
-  BranchInst *B = Builder.CreateCondBr(LoopCondition, HeaderBB, ExitBB);
-  if (Annotator)
-    Annotator->annotateLoopLatch(B, NewLoop, Parallel, LoopVectDisabled);
-
-  IV->addIncoming(IncrementedIV, HeaderBB);
-  if (GuardBB)
-    DT.changeImmediateDominator(ExitBB, GuardBB);
-  else
-    DT.changeImmediateDominator(ExitBB, HeaderBB);
-
-  // The loop body should be added here.
-  Builder.SetInsertPoint(HeaderBB->getFirstNonPHI());
-  return IV;
+    // The loop body should be added here.
+    Builder.SetInsertPoint(HeaderBB->getFirstNonPHI());
+    return IV;
 }
 
 Value *ParallelLoopGenerator::createParallelLoop(
     Value *LB, Value *UB, Value *Stride, SetVector<Value *> &UsedValues,
     ValueMapT &Map, BasicBlock::iterator *LoopBody) {
 
-  AllocaInst *Struct = storeValuesIntoStruct(UsedValues);
-  BasicBlock::iterator BeforeLoop = Builder.GetInsertPoint();
+    AllocaInst *Struct = storeValuesIntoStruct(UsedValues);
+    BasicBlock::iterator BeforeLoop = Builder.GetInsertPoint();
 
-  Value *IV;
-  Function *SubFn;
-  std::tie(IV, SubFn) = createSubFn(Stride, Struct, UsedValues, Map);
-  *LoopBody = Builder.GetInsertPoint();
-  Builder.SetInsertPoint(&*BeforeLoop);
+    Value *IV;
+    Function *SubFn;
+    std::tie(IV, SubFn) = createSubFn(Stride, Struct, UsedValues, Map);
+    *LoopBody = Builder.GetInsertPoint();
+    Builder.SetInsertPoint(&*BeforeLoop);
 
-  Value *SubFnParam = Builder.CreateBitCast(Struct, Builder.getInt8PtrTy(),
-                                            "polly.par.userContext");
+    Value *SubFnParam = Builder.CreateBitCast(Struct, Builder.getInt8PtrTy(),
+                        "polly.par.userContext");
 
-  // Add one as the upper bound provided by OpenMP is a < comparison
-  // whereas the codegenForSequential function creates a <= comparison.
-  UB = Builder.CreateAdd(UB, ConstantInt::get(LongType, 1));
+    // Add one as the upper bound provided by OpenMP is a < comparison
+    // whereas the codegenForSequential function creates a <= comparison.
+    UB = Builder.CreateAdd(UB, ConstantInt::get(LongType, 1));
 
-  // Execute the prepared subfunction in parallel.
-  deployParallelExecution(SubFn, SubFnParam, LB, UB, Stride);
+    // Execute the prepared subfunction in parallel.
+    deployParallelExecution(SubFn, SubFnParam, LB, UB, Stride);
 
-  return IV;
+    return IV;
 }
 
 Function *ParallelLoopGenerator::createSubFnDefinition() {
-  Function *F = Builder.GetInsertBlock()->getParent();
-  Function *SubFn = prepareSubFnDefinition(F);
+    Function *F = Builder.GetInsertBlock()->getParent();
+    Function *SubFn = prepareSubFnDefinition(F);
 
-  // Certain backends (e.g., NVPTX) do not support '.'s in function names.
-  // Hence, we ensure that all '.'s are replaced by '_'s.
-  std::string FunctionName = SubFn->getName().str();
-  std::replace(FunctionName.begin(), FunctionName.end(), '.', '_');
-  SubFn->setName(FunctionName);
+    // Certain backends (e.g., NVPTX) do not support '.'s in function names.
+    // Hence, we ensure that all '.'s are replaced by '_'s.
+    std::string FunctionName = SubFn->getName().str();
+    std::replace(FunctionName.begin(), FunctionName.end(), '.', '_');
+    SubFn->setName(FunctionName);
 
-  // Do not run any polly pass on the new function.
-  SubFn->addFnAttr(PollySkipFnAttr);
+    // Do not run any polly pass on the new function.
+    SubFn->addFnAttr(PollySkipFnAttr);
 
-  return SubFn;
+    return SubFn;
 }
 
 AllocaInst *
 ParallelLoopGenerator::storeValuesIntoStruct(SetVector<Value *> &Values) {
-  SmallVector<Type *, 8> Members;
+    SmallVector<Type *, 8> Members;
 
-  for (Value *V : Values)
-    Members.push_back(V->getType());
+    for (Value *V : Values)
+        Members.push_back(V->getType());
 
-  const DataLayout &DL = Builder.GetInsertBlock()->getModule()->getDataLayout();
+    const DataLayout &DL = Builder.GetInsertBlock()->getModule()->getDataLayout();
 
-  // We do not want to allocate the alloca inside any loop, thus we allocate it
-  // in the entry block of the function and use annotations to denote the actual
-  // live span (similar to clang).
-  BasicBlock &EntryBB = Builder.GetInsertBlock()->getParent()->getEntryBlock();
-  Instruction *IP = &*EntryBB.getFirstInsertionPt();
-  StructType *Ty = StructType::get(Builder.getContext(), Members);
-  AllocaInst *Struct = new AllocaInst(Ty, DL.getAllocaAddrSpace(), nullptr,
-                                      "polly.par.userContext", IP);
+    // We do not want to allocate the alloca inside any loop, thus we allocate it
+    // in the entry block of the function and use annotations to denote the actual
+    // live span (similar to clang).
+    BasicBlock &EntryBB = Builder.GetInsertBlock()->getParent()->getEntryBlock();
+    Instruction *IP = &*EntryBB.getFirstInsertionPt();
+    StructType *Ty = StructType::get(Builder.getContext(), Members);
+    AllocaInst *Struct = new AllocaInst(Ty, DL.getAllocaAddrSpace(), nullptr,
+                                        "polly.par.userContext", IP);
 
-  for (unsigned i = 0; i < Values.size(); i++) {
-    Value *Address = Builder.CreateStructGEP(Ty, Struct, i);
-    Address->setName("polly.subfn.storeaddr." + Values[i]->getName());
-    Builder.CreateStore(Values[i], Address);
-  }
+    for (unsigned i = 0; i < Values.size(); i++) {
+        Value *Address = Builder.CreateStructGEP(Ty, Struct, i);
+        Address->setName("polly.subfn.storeaddr." + Values[i]->getName());
+        Builder.CreateStore(Values[i], Address);
+    }
 
-  return Struct;
+    return Struct;
 }
 
 void ParallelLoopGenerator::extractValuesFromStruct(
     SetVector<Value *> OldValues, Type *Ty, Value *Struct, ValueMapT &Map) {
-  for (unsigned i = 0; i < OldValues.size(); i++) {
-    Value *Address = Builder.CreateStructGEP(Ty, Struct, i);
-    Value *NewValue = Builder.CreateLoad(Address);
-    NewValue->setName("polly.subfunc.arg." + OldValues[i]->getName());
-    Map[OldValues[i]] = NewValue;
-  }
+    for (unsigned i = 0; i < OldValues.size(); i++) {
+        Value *Address = Builder.CreateStructGEP(Ty, Struct, i);
+        Value *NewValue = Builder.CreateLoad(Address);
+        NewValue->setName("polly.subfunc.arg." + OldValues[i]->getName());
+        Map[OldValues[i]] = NewValue;
+    }
 }

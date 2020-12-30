@@ -21,68 +21,74 @@ namespace clang {
 namespace ento {
 
 class SimpleConstraintManager : public ConstraintManager {
-  ExprEngine *EE;
-  SValBuilder &SVB;
+    ExprEngine *EE;
+    SValBuilder &SVB;
 
 public:
-  SimpleConstraintManager(ExprEngine *exprengine, SValBuilder &SB)
-      : EE(exprengine), SVB(SB) {}
+    SimpleConstraintManager(ExprEngine *exprengine, SValBuilder &SB)
+        : EE(exprengine), SVB(SB) {}
 
-  ~SimpleConstraintManager() override;
+    ~SimpleConstraintManager() override;
 
-  //===------------------------------------------------------------------===//
-  // Implementation for interface from ConstraintManager.
-  //===------------------------------------------------------------------===//
+    //===------------------------------------------------------------------===//
+    // Implementation for interface from ConstraintManager.
+    //===------------------------------------------------------------------===//
 
-  /// Ensures that the DefinedSVal conditional is expressed as a NonLoc by
-  /// creating boolean casts to handle Loc's.
-  ProgramStateRef assume(ProgramStateRef State, DefinedSVal Cond,
-                         bool Assumption) override;
+    /// Ensures that the DefinedSVal conditional is expressed as a NonLoc by
+    /// creating boolean casts to handle Loc's.
+    ProgramStateRef assume(ProgramStateRef State, DefinedSVal Cond,
+                           bool Assumption) override;
 
-  ProgramStateRef assumeInclusiveRange(ProgramStateRef State, NonLoc Value,
-                                       const llvm::APSInt &From,
-                                       const llvm::APSInt &To,
-                                       bool InRange) override;
+    ProgramStateRef assumeInclusiveRange(ProgramStateRef State, NonLoc Value,
+                                         const llvm::APSInt &From,
+                                         const llvm::APSInt &To,
+                                         bool InRange) override;
 
 protected:
-  //===------------------------------------------------------------------===//
-  // Interface that subclasses must implement.
-  //===------------------------------------------------------------------===//
+    //===------------------------------------------------------------------===//
+    // Interface that subclasses must implement.
+    //===------------------------------------------------------------------===//
 
-  /// Given a symbolic expression that can be reasoned about, assume that it is
-  /// true/false and generate the new program state.
-  virtual ProgramStateRef assumeSym(ProgramStateRef State, SymbolRef Sym,
-                                    bool Assumption) = 0;
+    /// Given a symbolic expression that can be reasoned about, assume that it is
+    /// true/false and generate the new program state.
+    virtual ProgramStateRef assumeSym(ProgramStateRef State, SymbolRef Sym,
+                                      bool Assumption) = 0;
 
-  /// Given a symbolic expression within the range [From, To], assume that it is
-  /// true/false and generate the new program state.
-  /// This function is used to handle case ranges produced by a language
-  /// extension for switch case statements.
-  virtual ProgramStateRef assumeSymInclusiveRange(ProgramStateRef State,
-                                                  SymbolRef Sym,
-                                                  const llvm::APSInt &From,
-                                                  const llvm::APSInt &To,
-                                                  bool InRange) = 0;
+    /// Given a symbolic expression within the range [From, To], assume that it is
+    /// true/false and generate the new program state.
+    /// This function is used to handle case ranges produced by a language
+    /// extension for switch case statements.
+    virtual ProgramStateRef assumeSymInclusiveRange(ProgramStateRef State,
+            SymbolRef Sym,
+            const llvm::APSInt &From,
+            const llvm::APSInt &To,
+            bool InRange) = 0;
 
-  /// Given a symbolic expression that cannot be reasoned about, assume that
-  /// it is zero/nonzero and add it directly to the solver state.
-  virtual ProgramStateRef assumeSymUnsupported(ProgramStateRef State,
-                                               SymbolRef Sym,
-                                               bool Assumption) = 0;
+    /// Given a symbolic expression that cannot be reasoned about, assume that
+    /// it is zero/nonzero and add it directly to the solver state.
+    virtual ProgramStateRef assumeSymUnsupported(ProgramStateRef State,
+            SymbolRef Sym,
+            bool Assumption) = 0;
 
-  //===------------------------------------------------------------------===//
-  // Internal implementation.
-  //===------------------------------------------------------------------===//
+    //===------------------------------------------------------------------===//
+    // Internal implementation.
+    //===------------------------------------------------------------------===//
 
-  SValBuilder &getSValBuilder() const { return SVB; }
-  BasicValueFactory &getBasicVals() const { return SVB.getBasicValueFactory(); }
-  SymbolManager &getSymbolManager() const { return SVB.getSymbolManager(); }
+    SValBuilder &getSValBuilder() const {
+        return SVB;
+    }
+    BasicValueFactory &getBasicVals() const {
+        return SVB.getBasicValueFactory();
+    }
+    SymbolManager &getSymbolManager() const {
+        return SVB.getSymbolManager();
+    }
 
 private:
-  ProgramStateRef assume(ProgramStateRef State, NonLoc Cond, bool Assumption);
+    ProgramStateRef assume(ProgramStateRef State, NonLoc Cond, bool Assumption);
 
-  ProgramStateRef assumeAux(ProgramStateRef State, NonLoc Cond,
-                            bool Assumption);
+    ProgramStateRef assumeAux(ProgramStateRef State, NonLoc Cond,
+                              bool Assumption);
 };
 
 } // end namespace ento

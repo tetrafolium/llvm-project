@@ -27,13 +27,13 @@ namespace tooling {
 /// \endcode
 class CompilationDatabasePlugin {
 public:
-  virtual ~CompilationDatabasePlugin();
+    virtual ~CompilationDatabasePlugin();
 
-  /// Loads a compilation database from a build directory.
-  ///
-  /// \see CompilationDatabase::loadFromDirectory().
-  virtual std::unique_ptr<CompilationDatabase>
-  loadFromDirectory(StringRef Directory, std::string &ErrorMessage) = 0;
+    /// Loads a compilation database from a build directory.
+    ///
+    /// \see CompilationDatabase::loadFromDirectory().
+    virtual std::unique_ptr<CompilationDatabase>
+    loadFromDirectory(StringRef Directory, std::string &ErrorMessage) = 0;
 };
 
 using CompilationDatabasePluginRegistry =

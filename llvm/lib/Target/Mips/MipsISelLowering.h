@@ -52,216 +52,216 @@ class MipsTargetMachine;
 class TargetLibraryInfo;
 class TargetRegisterClass;
 
-  namespace MipsISD {
+namespace MipsISD {
 
-    enum NodeType : unsigned {
-      // Start the numbering from where ISD NodeType finishes.
-      FIRST_NUMBER = ISD::BUILTIN_OP_END,
+enum NodeType : unsigned {
+    // Start the numbering from where ISD NodeType finishes.
+    FIRST_NUMBER = ISD::BUILTIN_OP_END,
 
-      // Jump and link (call)
-      JmpLink,
+    // Jump and link (call)
+    JmpLink,
 
-      // Tail call
-      TailCall,
+    // Tail call
+    TailCall,
 
-      // Get the Highest (63-48) 16 bits from a 64-bit immediate
-      Highest,
+    // Get the Highest (63-48) 16 bits from a 64-bit immediate
+    Highest,
 
-      // Get the Higher (47-32) 16 bits from a 64-bit immediate
-      Higher,
+    // Get the Higher (47-32) 16 bits from a 64-bit immediate
+    Higher,
 
-      // Get the High 16 bits from a 32/64-bit immediate
-      // No relation with Mips Hi register
-      Hi,
+    // Get the High 16 bits from a 32/64-bit immediate
+    // No relation with Mips Hi register
+    Hi,
 
-      // Get the Lower 16 bits from a 32/64-bit immediate
-      // No relation with Mips Lo register
-      Lo,
+    // Get the Lower 16 bits from a 32/64-bit immediate
+    // No relation with Mips Lo register
+    Lo,
 
-      // Get the High 16 bits from a 32 bit immediate for accessing the GOT.
-      GotHi,
+    // Get the High 16 bits from a 32 bit immediate for accessing the GOT.
+    GotHi,
 
-      // Get the High 16 bits from a 32-bit immediate for accessing TLS.
-      TlsHi,
+    // Get the High 16 bits from a 32-bit immediate for accessing TLS.
+    TlsHi,
 
-      // Handle gp_rel (small data/bss sections) relocation.
-      GPRel,
+    // Handle gp_rel (small data/bss sections) relocation.
+    GPRel,
 
-      // Thread Pointer
-      ThreadPointer,
+    // Thread Pointer
+    ThreadPointer,
 
-      // Vector Floating Point Multiply and Subtract
-      FMS,
+    // Vector Floating Point Multiply and Subtract
+    FMS,
 
-      // Floating Point Branch Conditional
-      FPBrcond,
+    // Floating Point Branch Conditional
+    FPBrcond,
 
-      // Floating Point Compare
-      FPCmp,
+    // Floating Point Compare
+    FPCmp,
 
-      // Floating point select
-      FSELECT,
+    // Floating point select
+    FSELECT,
 
-      // Node used to generate an MTC1 i32 to f64 instruction
-      MTC1_D64,
+    // Node used to generate an MTC1 i32 to f64 instruction
+    MTC1_D64,
 
-      // Floating Point Conditional Moves
-      CMovFP_T,
-      CMovFP_F,
+    // Floating Point Conditional Moves
+    CMovFP_T,
+    CMovFP_F,
 
-      // FP-to-int truncation node.
-      TruncIntFP,
+    // FP-to-int truncation node.
+    TruncIntFP,
 
-      // Return
-      Ret,
+    // Return
+    Ret,
 
-      // Interrupt, exception, error trap Return
-      ERet,
+    // Interrupt, exception, error trap Return
+    ERet,
 
-      // Software Exception Return.
-      EH_RETURN,
+    // Software Exception Return.
+    EH_RETURN,
 
-      // Node used to extract integer from accumulator.
-      MFHI,
-      MFLO,
+    // Node used to extract integer from accumulator.
+    MFHI,
+    MFLO,
 
-      // Node used to insert integers to accumulator.
-      MTLOHI,
+    // Node used to insert integers to accumulator.
+    MTLOHI,
 
-      // Mult nodes.
-      Mult,
-      Multu,
+    // Mult nodes.
+    Mult,
+    Multu,
 
-      // MAdd/Sub nodes
-      MAdd,
-      MAddu,
-      MSub,
-      MSubu,
+    // MAdd/Sub nodes
+    MAdd,
+    MAddu,
+    MSub,
+    MSubu,
 
-      // DivRem(u)
-      DivRem,
-      DivRemU,
-      DivRem16,
-      DivRemU16,
+    // DivRem(u)
+    DivRem,
+    DivRemU,
+    DivRem16,
+    DivRemU16,
 
-      BuildPairF64,
-      ExtractElementF64,
+    BuildPairF64,
+    ExtractElementF64,
 
-      Wrapper,
+    Wrapper,
 
-      DynAlloc,
+    DynAlloc,
 
-      Sync,
+    Sync,
 
-      Ext,
-      Ins,
-      CIns,
+    Ext,
+    Ins,
+    CIns,
 
-      // EXTR.W instrinsic nodes.
-      EXTP,
-      EXTPDP,
-      EXTR_S_H,
-      EXTR_W,
-      EXTR_R_W,
-      EXTR_RS_W,
-      SHILO,
-      MTHLIP,
+    // EXTR.W instrinsic nodes.
+    EXTP,
+    EXTPDP,
+    EXTR_S_H,
+    EXTR_W,
+    EXTR_R_W,
+    EXTR_RS_W,
+    SHILO,
+    MTHLIP,
 
-      // DPA.W intrinsic nodes.
-      MULSAQ_S_W_PH,
-      MAQ_S_W_PHL,
-      MAQ_S_W_PHR,
-      MAQ_SA_W_PHL,
-      MAQ_SA_W_PHR,
-      DPAU_H_QBL,
-      DPAU_H_QBR,
-      DPSU_H_QBL,
-      DPSU_H_QBR,
-      DPAQ_S_W_PH,
-      DPSQ_S_W_PH,
-      DPAQ_SA_L_W,
-      DPSQ_SA_L_W,
-      DPA_W_PH,
-      DPS_W_PH,
-      DPAQX_S_W_PH,
-      DPAQX_SA_W_PH,
-      DPAX_W_PH,
-      DPSX_W_PH,
-      DPSQX_S_W_PH,
-      DPSQX_SA_W_PH,
-      MULSA_W_PH,
+    // DPA.W intrinsic nodes.
+    MULSAQ_S_W_PH,
+    MAQ_S_W_PHL,
+    MAQ_S_W_PHR,
+    MAQ_SA_W_PHL,
+    MAQ_SA_W_PHR,
+    DPAU_H_QBL,
+    DPAU_H_QBR,
+    DPSU_H_QBL,
+    DPSU_H_QBR,
+    DPAQ_S_W_PH,
+    DPSQ_S_W_PH,
+    DPAQ_SA_L_W,
+    DPSQ_SA_L_W,
+    DPA_W_PH,
+    DPS_W_PH,
+    DPAQX_S_W_PH,
+    DPAQX_SA_W_PH,
+    DPAX_W_PH,
+    DPSX_W_PH,
+    DPSQX_S_W_PH,
+    DPSQX_SA_W_PH,
+    MULSA_W_PH,
 
-      MULT,
-      MULTU,
-      MADD_DSP,
-      MADDU_DSP,
-      MSUB_DSP,
-      MSUBU_DSP,
+    MULT,
+    MULTU,
+    MADD_DSP,
+    MADDU_DSP,
+    MSUB_DSP,
+    MSUBU_DSP,
 
-      // DSP shift nodes.
-      SHLL_DSP,
-      SHRA_DSP,
-      SHRL_DSP,
+    // DSP shift nodes.
+    SHLL_DSP,
+    SHRA_DSP,
+    SHRL_DSP,
 
-      // DSP setcc and select_cc nodes.
-      SETCC_DSP,
-      SELECT_CC_DSP,
+    // DSP setcc and select_cc nodes.
+    SETCC_DSP,
+    SELECT_CC_DSP,
 
-      // Vector comparisons.
-      // These take a vector and return a boolean.
-      VALL_ZERO,
-      VANY_ZERO,
-      VALL_NONZERO,
-      VANY_NONZERO,
+    // Vector comparisons.
+    // These take a vector and return a boolean.
+    VALL_ZERO,
+    VANY_ZERO,
+    VALL_NONZERO,
+    VANY_NONZERO,
 
-      // These take a vector and return a vector bitmask.
-      VCEQ,
-      VCLE_S,
-      VCLE_U,
-      VCLT_S,
-      VCLT_U,
+    // These take a vector and return a vector bitmask.
+    VCEQ,
+    VCLE_S,
+    VCLE_U,
+    VCLT_S,
+    VCLT_U,
 
-      // Vector Shuffle with mask as an operand
-      VSHF,  // Generic shuffle
-      SHF,   // 4-element set shuffle.
-      ILVEV, // Interleave even elements
-      ILVOD, // Interleave odd elements
-      ILVL,  // Interleave left elements
-      ILVR,  // Interleave right elements
-      PCKEV, // Pack even elements
-      PCKOD, // Pack odd elements
+    // Vector Shuffle with mask as an operand
+    VSHF,  // Generic shuffle
+    SHF,   // 4-element set shuffle.
+    ILVEV, // Interleave even elements
+    ILVOD, // Interleave odd elements
+    ILVL,  // Interleave left elements
+    ILVR,  // Interleave right elements
+    PCKEV, // Pack even elements
+    PCKOD, // Pack odd elements
 
-      // Vector Lane Copy
-      INSVE, // Copy element from one vector to another
+    // Vector Lane Copy
+    INSVE, // Copy element from one vector to another
 
-      // Combined (XOR (OR $a, $b), -1)
-      VNOR,
+    // Combined (XOR (OR $a, $b), -1)
+    VNOR,
 
-      // Extended vector element extraction
-      VEXTRACT_SEXT_ELT,
-      VEXTRACT_ZEXT_ELT,
+    // Extended vector element extraction
+    VEXTRACT_SEXT_ELT,
+    VEXTRACT_ZEXT_ELT,
 
-      // Load/Store Left/Right nodes.
-      LWL = ISD::FIRST_TARGET_MEMORY_OPCODE,
-      LWR,
-      SWL,
-      SWR,
-      LDL,
-      LDR,
-      SDL,
-      SDR
-    };
+    // Load/Store Left/Right nodes.
+    LWL = ISD::FIRST_TARGET_MEMORY_OPCODE,
+    LWR,
+    SWL,
+    SWR,
+    LDL,
+    LDR,
+    SDL,
+    SDR
+};
 
-  } // ene namespace MipsISD
+} // ene namespace MipsISD
 
-  //===--------------------------------------------------------------------===//
-  // TargetLowering Implementation
-  //===--------------------------------------------------------------------===//
+//===--------------------------------------------------------------------===//
+// TargetLowering Implementation
+//===--------------------------------------------------------------------===//
 
-  class MipsTargetLowering : public TargetLowering  {
+class MipsTargetLowering : public TargetLowering  {
     bool isMicroMips;
 
-  public:
+public:
     explicit MipsTargetLowering(const MipsTargetMachine &TM,
                                 const MipsSubtarget &STI);
 
@@ -274,7 +274,7 @@ class TargetRegisterClass;
                              const TargetLibraryInfo *libInfo) const override;
 
     MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override {
-      return MVT::i32;
+        return MVT::i32;
     }
 
     EVT getTypeForExtReturn(LLVMContext &Context, EVT VT,
@@ -304,14 +304,14 @@ class TargetRegisterClass;
     /// Return the correct alignment for the current calling convention.
     Align getABIAlignmentForCallingConv(Type *ArgTy,
                                         DataLayout DL) const override {
-      const Align ABIAlign = DL.getABITypeAlign(ArgTy);
-      if (ArgTy->isVectorTy())
-        return std::min(ABIAlign, Align(8));
-      return ABIAlign;
+        const Align ABIAlign = DL.getABITypeAlign(ArgTy);
+        if (ArgTy->isVectorTy())
+            return std::min(ABIAlign, Align(8));
+        return ABIAlign;
     }
 
     ISD::NodeType getExtendForAtomicOps() const override {
-      return ISD::SIGN_EXTEND;
+        return ISD::SIGN_EXTEND;
     }
 
     /// LowerOperation - Provide custom lowering hooks for some operations.
@@ -349,25 +349,25 @@ class TargetRegisterClass;
     /// exception address on entry to an EH pad.
     Register
     getExceptionPointerRegister(const Constant *PersonalityFn) const override {
-      return ABI.IsN64() ? Mips::A0_64 : Mips::A0;
+        return ABI.IsN64() ? Mips::A0_64 : Mips::A0;
     }
 
     /// If a physical register, this returns the register that receives the
     /// exception typeid on entry to a landing pad.
     Register
     getExceptionSelectorRegister(const Constant *PersonalityFn) const override {
-      return ABI.IsN64() ? Mips::A1_64 : Mips::A1;
+        return ABI.IsN64() ? Mips::A1_64 : Mips::A1;
     }
 
     bool isJumpTableRelative() const override {
-      return getTargetMachine().isPositionIndependent();
+        return getTargetMachine().isPositionIndependent();
     }
 
-   CCAssignFn *CCAssignFnForCall() const;
+    CCAssignFn *CCAssignFnForCall() const;
 
-   CCAssignFn *CCAssignFnForReturn() const;
+    CCAssignFn *CCAssignFnForReturn() const;
 
-  protected:
+protected:
     SDValue getGlobalReg(SelectionDAG &DAG, EVT Ty) const;
 
     // This method creates the following nodes, which are necessary for
@@ -377,16 +377,16 @@ class TargetRegisterClass;
     template <class NodeTy>
     SDValue getAddrLocal(NodeTy *N, const SDLoc &DL, EVT Ty, SelectionDAG &DAG,
                          bool IsN32OrN64) const {
-      unsigned GOTFlag = IsN32OrN64 ? MipsII::MO_GOT_PAGE : MipsII::MO_GOT;
-      SDValue GOT = DAG.getNode(MipsISD::Wrapper, DL, Ty, getGlobalReg(DAG, Ty),
-                                getTargetNode(N, Ty, DAG, GOTFlag));
-      SDValue Load =
-          DAG.getLoad(Ty, DL, DAG.getEntryNode(), GOT,
-                      MachinePointerInfo::getGOT(DAG.getMachineFunction()));
-      unsigned LoFlag = IsN32OrN64 ? MipsII::MO_GOT_OFST : MipsII::MO_ABS_LO;
-      SDValue Lo = DAG.getNode(MipsISD::Lo, DL, Ty,
-                               getTargetNode(N, Ty, DAG, LoFlag));
-      return DAG.getNode(ISD::ADD, DL, Ty, Load, Lo);
+        unsigned GOTFlag = IsN32OrN64 ? MipsII::MO_GOT_PAGE : MipsII::MO_GOT;
+        SDValue GOT = DAG.getNode(MipsISD::Wrapper, DL, Ty, getGlobalReg(DAG, Ty),
+                                  getTargetNode(N, Ty, DAG, GOTFlag));
+        SDValue Load =
+            DAG.getLoad(Ty, DL, DAG.getEntryNode(), GOT,
+                        MachinePointerInfo::getGOT(DAG.getMachineFunction()));
+        unsigned LoFlag = IsN32OrN64 ? MipsII::MO_GOT_OFST : MipsII::MO_ABS_LO;
+        SDValue Lo = DAG.getNode(MipsISD::Lo, DL, Ty,
+                                 getTargetNode(N, Ty, DAG, LoFlag));
+        return DAG.getNode(ISD::ADD, DL, Ty, Load, Lo);
     }
 
     // This method creates the following nodes, which are necessary for
@@ -397,9 +397,9 @@ class TargetRegisterClass;
     SDValue getAddrGlobal(NodeTy *N, const SDLoc &DL, EVT Ty, SelectionDAG &DAG,
                           unsigned Flag, SDValue Chain,
                           const MachinePointerInfo &PtrInfo) const {
-      SDValue Tgt = DAG.getNode(MipsISD::Wrapper, DL, Ty, getGlobalReg(DAG, Ty),
-                                getTargetNode(N, Ty, DAG, Flag));
-      return DAG.getLoad(Ty, DL, Chain, Tgt, PtrInfo);
+        SDValue Tgt = DAG.getNode(MipsISD::Wrapper, DL, Ty, getGlobalReg(DAG, Ty),
+                                  getTargetNode(N, Ty, DAG, Flag));
+        return DAG.getLoad(Ty, DL, Chain, Tgt, PtrInfo);
     }
 
     // This method creates the following nodes, which are necessary for
@@ -411,12 +411,12 @@ class TargetRegisterClass;
                                   SelectionDAG &DAG, unsigned HiFlag,
                                   unsigned LoFlag, SDValue Chain,
                                   const MachinePointerInfo &PtrInfo) const {
-      SDValue Hi = DAG.getNode(MipsISD::GotHi, DL, Ty,
-                               getTargetNode(N, Ty, DAG, HiFlag));
-      Hi = DAG.getNode(ISD::ADD, DL, Ty, Hi, getGlobalReg(DAG, Ty));
-      SDValue Wrapper = DAG.getNode(MipsISD::Wrapper, DL, Ty, Hi,
-                                    getTargetNode(N, Ty, DAG, LoFlag));
-      return DAG.getLoad(Ty, DL, Chain, Wrapper, PtrInfo);
+        SDValue Hi = DAG.getNode(MipsISD::GotHi, DL, Ty,
+                                 getTargetNode(N, Ty, DAG, HiFlag));
+        Hi = DAG.getNode(ISD::ADD, DL, Ty, Hi, getGlobalReg(DAG, Ty));
+        SDValue Wrapper = DAG.getNode(MipsISD::Wrapper, DL, Ty, Hi,
+                                      getTargetNode(N, Ty, DAG, LoFlag));
+        return DAG.getLoad(Ty, DL, Chain, Wrapper, PtrInfo);
     }
 
     // This method creates the following nodes, which are necessary for
@@ -428,42 +428,42 @@ class TargetRegisterClass;
     template <class NodeTy>
     SDValue getAddrNonPIC(NodeTy *N, const SDLoc &DL, EVT Ty,
                           SelectionDAG &DAG) const {
-      SDValue Hi = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_HI);
-      SDValue Lo = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_LO);
-      return DAG.getNode(ISD::ADD, DL, Ty,
-                         DAG.getNode(MipsISD::Hi, DL, Ty, Hi),
-                         DAG.getNode(MipsISD::Lo, DL, Ty, Lo));
-   }
+        SDValue Hi = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_HI);
+        SDValue Lo = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_LO);
+        return DAG.getNode(ISD::ADD, DL, Ty,
+                           DAG.getNode(MipsISD::Hi, DL, Ty, Hi),
+                           DAG.getNode(MipsISD::Lo, DL, Ty, Lo));
+    }
 
-   // This method creates the following nodes, which are necessary for
-   // computing a symbol's address in non-PIC mode for N64.
-   //
-   // (add (shl (add (shl (add %highest(sym), %higher(sim)), 16), %high(sym)),
-   //            16), %lo(%sym))
-   //
-   // FIXME: This method is not efficent for (micro)MIPS64R6.
-   template <class NodeTy>
-   SDValue getAddrNonPICSym64(NodeTy *N, const SDLoc &DL, EVT Ty,
-                          SelectionDAG &DAG) const {
-      SDValue Hi = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_HI);
-      SDValue Lo = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_LO);
+    // This method creates the following nodes, which are necessary for
+    // computing a symbol's address in non-PIC mode for N64.
+    //
+    // (add (shl (add (shl (add %highest(sym), %higher(sim)), 16), %high(sym)),
+    //            16), %lo(%sym))
+    //
+    // FIXME: This method is not efficent for (micro)MIPS64R6.
+    template <class NodeTy>
+    SDValue getAddrNonPICSym64(NodeTy *N, const SDLoc &DL, EVT Ty,
+                               SelectionDAG &DAG) const {
+        SDValue Hi = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_HI);
+        SDValue Lo = getTargetNode(N, Ty, DAG, MipsII::MO_ABS_LO);
 
-      SDValue Highest =
-          DAG.getNode(MipsISD::Highest, DL, Ty,
-                      getTargetNode(N, Ty, DAG, MipsII::MO_HIGHEST));
-      SDValue Higher = getTargetNode(N, Ty, DAG, MipsII::MO_HIGHER);
-      SDValue HigherPart =
-          DAG.getNode(ISD::ADD, DL, Ty, Highest,
-                      DAG.getNode(MipsISD::Higher, DL, Ty, Higher));
-      SDValue Cst = DAG.getConstant(16, DL, MVT::i32);
-      SDValue Shift = DAG.getNode(ISD::SHL, DL, Ty, HigherPart, Cst);
-      SDValue Add = DAG.getNode(ISD::ADD, DL, Ty, Shift,
-                                DAG.getNode(MipsISD::Hi, DL, Ty, Hi));
-      SDValue Shift2 = DAG.getNode(ISD::SHL, DL, Ty, Add, Cst);
+        SDValue Highest =
+            DAG.getNode(MipsISD::Highest, DL, Ty,
+                        getTargetNode(N, Ty, DAG, MipsII::MO_HIGHEST));
+        SDValue Higher = getTargetNode(N, Ty, DAG, MipsII::MO_HIGHER);
+        SDValue HigherPart =
+            DAG.getNode(ISD::ADD, DL, Ty, Highest,
+                        DAG.getNode(MipsISD::Higher, DL, Ty, Higher));
+        SDValue Cst = DAG.getConstant(16, DL, MVT::i32);
+        SDValue Shift = DAG.getNode(ISD::SHL, DL, Ty, HigherPart, Cst);
+        SDValue Add = DAG.getNode(ISD::ADD, DL, Ty, Shift,
+                                  DAG.getNode(MipsISD::Hi, DL, Ty, Hi));
+        SDValue Shift2 = DAG.getNode(ISD::SHL, DL, Ty, Add, Cst);
 
-      return DAG.getNode(ISD::ADD, DL, Ty, Shift2,
-                         DAG.getNode(MipsISD::Lo, DL, Ty, Lo));
-   }
+        return DAG.getNode(ISD::ADD, DL, Ty, Shift2,
+                           DAG.getNode(MipsISD::Lo, DL, Ty, Lo));
+    }
 
     // This method creates the following nodes, which are necessary for
     // computing a symbol's address using gp-relative addressing:
@@ -472,11 +472,11 @@ class TargetRegisterClass;
     template <class NodeTy>
     SDValue getAddrGPRel(NodeTy *N, const SDLoc &DL, EVT Ty,
                          SelectionDAG &DAG, bool IsN64) const {
-      SDValue GPRel = getTargetNode(N, Ty, DAG, MipsII::MO_GPREL);
-      return DAG.getNode(
-          ISD::ADD, DL, Ty,
-          DAG.getRegister(IsN64 ? Mips::GP_64 : Mips::GP, Ty),
-          DAG.getNode(MipsISD::GPRel, DL, DAG.getVTList(Ty), GPRel));
+        SDValue GPRel = getTargetNode(N, Ty, DAG, MipsII::MO_GPREL);
+        return DAG.getNode(
+                   ISD::ADD, DL, Ty,
+                   DAG.getRegister(IsN64 ? Mips::GP_64 : Mips::GP, Ty),
+                   DAG.getNode(MipsISD::GPRel, DL, DAG.getVTList(Ty), GPRel));
     }
 
     /// This function fills Ops, which is the list of operands that will later
@@ -489,7 +489,7 @@ class TargetRegisterClass;
                 bool IsCallReloc, CallLoweringInfo &CLI, SDValue Callee,
                 SDValue Chain) const;
 
-  protected:
+protected:
     SDValue lowerLOAD(SDValue Op, SelectionDAG &DAG) const;
     SDValue lowerSTORE(SDValue Op, SelectionDAG &DAG) const;
 
@@ -498,7 +498,7 @@ class TargetRegisterClass;
     // Cache the ABI from the TargetMachine, we use it everywhere.
     const MipsABIInfo &ABI;
 
-  private:
+private:
     // Create a TargetGlobalAddress node.
     SDValue getTargetNode(GlobalAddressSDNode *N, EVT Ty, SelectionDAG &DAG,
                           unsigned Flag) const;
@@ -618,7 +618,7 @@ class TargetRegisterClass;
     /// Examine constraint string and operand type and determine a weight value.
     /// The operand object must already have been set up with the operand type.
     ConstraintWeight getSingleConstraintMatchWeight(
-      AsmOperandInfo &info, const char *constraint) const override;
+        AsmOperandInfo &info, const char *constraint) const override;
 
     /// This function parses registers that appear in inline-asm constraints.
     /// It returns pair (0, 0) on failure.
@@ -640,13 +640,13 @@ class TargetRegisterClass;
 
     unsigned
     getInlineAsmMemConstraint(StringRef ConstraintCode) const override {
-      if (ConstraintCode == "o")
-        return InlineAsm::Constraint_o;
-      if (ConstraintCode == "R")
-        return InlineAsm::Constraint_R;
-      if (ConstraintCode == "ZC")
-        return InlineAsm::Constraint_ZC;
-      return TargetLowering::getInlineAsmMemConstraint(ConstraintCode);
+        if (ConstraintCode == "o")
+            return InlineAsm::Constraint_o;
+        if (ConstraintCode == "R")
+            return InlineAsm::Constraint_R;
+        if (ConstraintCode == "ZC")
+            return InlineAsm::Constraint_ZC;
+        return TargetLowering::getInlineAsmMemConstraint(ConstraintCode);
     }
 
     bool isLegalAddressingMode(const DataLayout &DL, const AddrMode &AM,
@@ -668,25 +668,25 @@ class TargetRegisterClass;
     bool useSoftFloat() const override;
 
     bool shouldInsertFencesForAtomic(const Instruction *I) const override {
-      return true;
+        return true;
     }
 
     /// Emit a sign-extension using sll/sra, seb, or seh appropriately.
     MachineBasicBlock *emitSignExtendToI32InReg(MachineInstr &MI,
-                                                MachineBasicBlock *BB,
-                                                unsigned Size, unsigned DstReg,
-                                                unsigned SrcRec) const;
+            MachineBasicBlock *BB,
+            unsigned Size, unsigned DstReg,
+            unsigned SrcRec) const;
 
     MachineBasicBlock *emitAtomicBinary(MachineInstr &MI,
                                         MachineBasicBlock *BB) const;
     MachineBasicBlock *emitAtomicBinaryPartword(MachineInstr &MI,
-                                                MachineBasicBlock *BB,
-                                                unsigned Size) const;
+            MachineBasicBlock *BB,
+            unsigned Size) const;
     MachineBasicBlock *emitAtomicCmpSwap(MachineInstr &MI,
                                          MachineBasicBlock *BB) const;
     MachineBasicBlock *emitAtomicCmpSwapPartword(MachineInstr &MI,
-                                                 MachineBasicBlock *BB,
-                                                 unsigned Size) const;
+            MachineBasicBlock *BB,
+            unsigned Size) const;
     MachineBasicBlock *emitSEL_D(MachineInstr &MI, MachineBasicBlock *BB) const;
     MachineBasicBlock *emitPseudoSELECT(MachineInstr &MI, MachineBasicBlock *BB,
                                         bool isFPCmp, unsigned Opc) const;
@@ -696,15 +696,15 @@ class TargetRegisterClass;
     MachineBasicBlock *emitLDR_D(MachineInstr &MI, MachineBasicBlock *BB) const;
     MachineBasicBlock *emitSTR_W(MachineInstr &MI, MachineBasicBlock *BB) const;
     MachineBasicBlock *emitSTR_D(MachineInstr &MI, MachineBasicBlock *BB) const;
-  };
+};
 
-  /// Create MipsTargetLowering objects.
-  const MipsTargetLowering *
-  createMips16TargetLowering(const MipsTargetMachine &TM,
-                             const MipsSubtarget &STI);
-  const MipsTargetLowering *
-  createMipsSETargetLowering(const MipsTargetMachine &TM,
-                             const MipsSubtarget &STI);
+/// Create MipsTargetLowering objects.
+const MipsTargetLowering *
+createMips16TargetLowering(const MipsTargetMachine &TM,
+                           const MipsSubtarget &STI);
+const MipsTargetLowering *
+createMipsSETargetLowering(const MipsTargetMachine &TM,
+                           const MipsSubtarget &STI);
 
 namespace Mips {
 

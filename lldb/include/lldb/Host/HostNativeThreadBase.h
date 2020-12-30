@@ -22,31 +22,31 @@ namespace lldb_private {
 #endif
 
 class HostNativeThreadBase {
-  friend class ThreadLauncher;
-  HostNativeThreadBase(const HostNativeThreadBase &) = delete;
-  const HostNativeThreadBase &operator=(const HostNativeThreadBase &) = delete;
+    friend class ThreadLauncher;
+    HostNativeThreadBase(const HostNativeThreadBase &) = delete;
+    const HostNativeThreadBase &operator=(const HostNativeThreadBase &) = delete;
 
 public:
-  HostNativeThreadBase();
-  explicit HostNativeThreadBase(lldb::thread_t thread);
-  virtual ~HostNativeThreadBase() {}
+    HostNativeThreadBase();
+    explicit HostNativeThreadBase(lldb::thread_t thread);
+    virtual ~HostNativeThreadBase() {}
 
-  virtual Status Join(lldb::thread_result_t *result) = 0;
-  virtual Status Cancel() = 0;
-  virtual bool IsJoinable() const;
-  virtual void Reset();
-  virtual bool EqualsThread(lldb::thread_t thread) const;
-  lldb::thread_t Release();
+    virtual Status Join(lldb::thread_result_t *result) = 0;
+    virtual Status Cancel() = 0;
+    virtual bool IsJoinable() const;
+    virtual void Reset();
+    virtual bool EqualsThread(lldb::thread_t thread) const;
+    lldb::thread_t Release();
 
-  lldb::thread_t GetSystemHandle() const;
-  lldb::thread_result_t GetResult() const;
+    lldb::thread_t GetSystemHandle() const;
+    lldb::thread_result_t GetResult() const;
 
 protected:
-  static lldb::thread_result_t THREAD_ROUTINE
-  ThreadCreateTrampoline(lldb::thread_arg_t arg);
+    static lldb::thread_result_t THREAD_ROUTINE
+    ThreadCreateTrampoline(lldb::thread_arg_t arg);
 
-  lldb::thread_t m_thread;
-  lldb::thread_result_t m_result;
+    lldb::thread_t m_thread;
+    lldb::thread_result_t m_result;
 };
 }
 

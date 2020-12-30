@@ -21,22 +21,22 @@ namespace toolchains {
 /// all subcommands. See http://tce.cs.tut.fi for our peculiar target.
 class LLVM_LIBRARY_VISIBILITY TCEToolChain : public ToolChain {
 public:
-  TCEToolChain(const Driver &D, const llvm::Triple &Triple,
-               const llvm::opt::ArgList &Args);
-  ~TCEToolChain() override;
+    TCEToolChain(const Driver &D, const llvm::Triple &Triple,
+                 const llvm::opt::ArgList &Args);
+    ~TCEToolChain() override;
 
-  bool IsMathErrnoDefault() const override;
-  bool isPICDefault() const override;
-  bool isPIEDefault() const override;
-  bool isPICDefaultForced() const override;
+    bool IsMathErrnoDefault() const override;
+    bool isPICDefault() const override;
+    bool isPIEDefault() const override;
+    bool isPICDefaultForced() const override;
 };
 
 /// Toolchain for little endian TCE cores.
 class LLVM_LIBRARY_VISIBILITY TCELEToolChain : public TCEToolChain {
 public:
-  TCELEToolChain(const Driver &D, const llvm::Triple &Triple,
-                 const llvm::opt::ArgList &Args);
-  ~TCELEToolChain() override;
+    TCELEToolChain(const Driver &D, const llvm::Triple &Triple,
+                   const llvm::opt::ArgList &Args);
+    ~TCELEToolChain() override;
 };
 
 } // end namespace toolchains

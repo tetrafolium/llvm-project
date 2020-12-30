@@ -19,47 +19,47 @@ namespace {
 class RemoveCstrBroadcastableOp
     : public OpRewritePattern<shape::CstrBroadcastableOp> {
 public:
-  using OpRewritePattern::OpRewritePattern;
+    using OpRewritePattern::OpRewritePattern;
 
-  LogicalResult matchAndRewrite(shape::CstrBroadcastableOp op,
-                                PatternRewriter &rewriter) const override {
-    rewriter.replaceOpWithNewOp<shape::ConstWitnessOp>(op.getOperation(), true);
-    return success();
-  }
+    LogicalResult matchAndRewrite(shape::CstrBroadcastableOp op,
+                                  PatternRewriter &rewriter) const override {
+        rewriter.replaceOpWithNewOp<shape::ConstWitnessOp>(op.getOperation(), true);
+        return success();
+    }
 };
 
 class RemoveCstrEqOp : public OpRewritePattern<shape::CstrEqOp> {
 public:
-  using OpRewritePattern::OpRewritePattern;
+    using OpRewritePattern::OpRewritePattern;
 
-  LogicalResult matchAndRewrite(shape::CstrEqOp op,
-                                PatternRewriter &rewriter) const override {
-    rewriter.replaceOpWithNewOp<shape::ConstWitnessOp>(op.getOperation(), true);
-    return success();
-  }
+    LogicalResult matchAndRewrite(shape::CstrEqOp op,
+                                  PatternRewriter &rewriter) const override {
+        rewriter.replaceOpWithNewOp<shape::ConstWitnessOp>(op.getOperation(), true);
+        return success();
+    }
 };
 
 /// Removal pass.
 class RemoveShapeConstraintsPass
     : public RemoveShapeConstraintsBase<RemoveShapeConstraintsPass> {
 
-  void runOnFunction() override {
-    MLIRContext &ctx = getContext();
+    void runOnFunction() override {
+        MLIRContext &ctx = getContext();
 
-    OwningRewritePatternList patterns;
-    populateRemoveShapeConstraintsPatterns(patterns, &ctx);
+        OwningRewritePatternList patterns;
+        populateRemoveShapeConstraintsPatterns(patterns, &ctx);
 
-    applyPatternsAndFoldGreedily(getFunction(), std::move(patterns));
-  }
+        applyPatternsAndFoldGreedily(getFunction(), std::move(patterns));
+    }
 };
 
 } // namespace
 
 void mlir::populateRemoveShapeConstraintsPatterns(
     OwningRewritePatternList &patterns, MLIRContext *ctx) {
-  patterns.insert<RemoveCstrBroadcastableOp, RemoveCstrEqOp>(ctx);
+    patterns.insert<RemoveCstrBroadcastableOp, RemoveCstrEqOp>(ctx);
 }
 
 std::unique_ptr<FunctionPass> mlir::createRemoveShapeConstraintsPass() {
-  return std::make_unique<RemoveShapeConstraintsPass>();
+    return std::make_unique<RemoveShapeConstraintsPass>();
 }

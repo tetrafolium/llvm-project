@@ -25,67 +25,71 @@ namespace remarks {
 
 class EndOfFileError : public ErrorInfo<EndOfFileError> {
 public:
-  static char ID;
+    static char ID;
 
-  EndOfFileError() {}
+    EndOfFileError() {}
 
-  void log(raw_ostream &OS) const override { OS << "End of file reached."; }
-  std::error_code convertToErrorCode() const override {
-    return inconvertibleErrorCode();
-  }
+    void log(raw_ostream &OS) const override {
+        OS << "End of file reached.";
+    }
+    std::error_code convertToErrorCode() const override {
+        return inconvertibleErrorCode();
+    }
 };
 
 /// Parser used to parse a raw buffer to remarks::Remark objects.
 struct RemarkParser {
-  /// The format of the parser.
-  Format ParserFormat;
-  /// Path to prepend when opening an external remark file.
-  std::string ExternalFilePrependPath;
+    /// The format of the parser.
+    Format ParserFormat;
+    /// Path to prepend when opening an external remark file.
+    std::string ExternalFilePrependPath;
 
-  RemarkParser(Format ParserFormat) : ParserFormat(ParserFormat) {}
+    RemarkParser(Format ParserFormat) : ParserFormat(ParserFormat) {}
 
-  /// If no error occurs, this returns a valid Remark object.
-  /// If an error of type EndOfFileError occurs, it is safe to recover from it
-  /// by stopping the parsing.
-  /// If any other error occurs, it should be propagated to the user.
-  /// The pointer should never be null.
-  virtual Expected<std::unique_ptr<Remark>> next() = 0;
+    /// If no error occurs, this returns a valid Remark object.
+    /// If an error of type EndOfFileError occurs, it is safe to recover from it
+    /// by stopping the parsing.
+    /// If any other error occurs, it should be propagated to the user.
+    /// The pointer should never be null.
+    virtual Expected<std::unique_ptr<Remark>> next() = 0;
 
-  virtual ~RemarkParser() = default;
+    virtual ~RemarkParser() = default;
 };
 
 /// In-memory representation of the string table parsed from a buffer (e.g. the
 /// remarks section).
 struct ParsedStringTable {
-  /// The buffer mapped from the section contents.
-  StringRef Buffer;
-  /// This object has high changes to be std::move'd around, so don't use a
-  /// SmallVector for once.
-  std::vector<size_t> Offsets;
+    /// The buffer mapped from the section contents.
+    StringRef Buffer;
+    /// This object has high changes to be std::move'd around, so don't use a
+    /// SmallVector for once.
+    std::vector<size_t> Offsets;
 
-  ParsedStringTable(StringRef Buffer);
-  /// Disable copy.
-  ParsedStringTable(const ParsedStringTable &) = delete;
-  ParsedStringTable &operator=(const ParsedStringTable &) = delete;
-  /// Should be movable.
-  ParsedStringTable(ParsedStringTable &&) = default;
-  ParsedStringTable &operator=(ParsedStringTable &&) = default;
+    ParsedStringTable(StringRef Buffer);
+    /// Disable copy.
+    ParsedStringTable(const ParsedStringTable &) = delete;
+    ParsedStringTable &operator=(const ParsedStringTable &) = delete;
+    /// Should be movable.
+    ParsedStringTable(ParsedStringTable &&) = default;
+    ParsedStringTable &operator=(ParsedStringTable &&) = default;
 
-  size_t size() const { return Offsets.size(); }
-  Expected<StringRef> operator[](size_t Index) const;
+    size_t size() const {
+        return Offsets.size();
+    }
+    Expected<StringRef> operator[](size_t Index) const;
 };
 
 Expected<std::unique_ptr<RemarkParser>> createRemarkParser(Format ParserFormat,
-                                                           StringRef Buf);
+                                     StringRef Buf);
 
 Expected<std::unique_ptr<RemarkParser>>
-createRemarkParser(Format ParserFormat, StringRef Buf,
-                   ParsedStringTable StrTab);
+                                     createRemarkParser(Format ParserFormat, StringRef Buf,
+                                             ParsedStringTable StrTab);
 
 Expected<std::unique_ptr<RemarkParser>>
-createRemarkParserFromMeta(Format ParserFormat, StringRef Buf,
-                           Optional<ParsedStringTable> StrTab = None,
-                           Optional<StringRef> ExternalFilePrependPath = None);
+                                     createRemarkParserFromMeta(Format ParserFormat, StringRef Buf,
+                                             Optional<ParsedStringTable> StrTab = None,
+                                             Optional<StringRef> ExternalFilePrependPath = None);
 
 } // end namespace remarks
 } // end namespace llvm

@@ -17,23 +17,25 @@ namespace lldb_private {
 class ModuleDependencyCollectorAdaptor
     : public clang::ModuleDependencyCollector {
 public:
-  ModuleDependencyCollectorAdaptor(
-      std::shared_ptr<llvm::FileCollectorBase> file_collector)
-      : clang::ModuleDependencyCollector(""), m_file_collector(file_collector) {
-  }
+    ModuleDependencyCollectorAdaptor(
+        std::shared_ptr<llvm::FileCollectorBase> file_collector)
+        : clang::ModuleDependencyCollector(""), m_file_collector(file_collector) {
+    }
 
-  void addFile(llvm::StringRef Filename,
-               llvm::StringRef FileDst = {}) override {
-    if (m_file_collector)
-      m_file_collector->addFile(Filename);
-  }
+    void addFile(llvm::StringRef Filename,
+                 llvm::StringRef FileDst = {}) override {
+        if (m_file_collector)
+            m_file_collector->addFile(Filename);
+    }
 
-  bool insertSeen(llvm::StringRef Filename) override { return false; }
-  void addFileMapping(llvm::StringRef VPath, llvm::StringRef RPath) override {}
-  void writeFileMap() override {}
+    bool insertSeen(llvm::StringRef Filename) override {
+        return false;
+    }
+    void addFileMapping(llvm::StringRef VPath, llvm::StringRef RPath) override {}
+    void writeFileMap() override {}
 
 private:
-  std::shared_ptr<llvm::FileCollectorBase> m_file_collector;
+    std::shared_ptr<llvm::FileCollectorBase> m_file_collector;
 };
 } // namespace lldb_private
 

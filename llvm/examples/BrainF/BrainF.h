@@ -26,11 +26,11 @@ using namespace llvm;
 /// parsing so they don't have to be passed around
 /// as much.
 class BrainF {
-  public:
+public:
     /// Options for how BrainF should compile
     enum CompileFlags {
-      flag_off         = 0,
-      flag_arraybounds = 1
+        flag_off         = 0,
+        flag_arraybounds = 1
     };
 
     /// This is the main method.  It parses BrainF from in1
@@ -42,17 +42,17 @@ class BrainF {
     Module *parse(std::istream *in1, int mem, CompileFlags cf,
                   LLVMContext& C);
 
-  protected:
+protected:
     /// The different symbols in the BrainF language
     enum Symbol {
-      SYM_NONE,
-      SYM_READ,
-      SYM_WRITE,
-      SYM_MOVE,
-      SYM_CHANGE,
-      SYM_LOOP,
-      SYM_ENDLOOP,
-      SYM_EOF
+        SYM_NONE,
+        SYM_READ,
+        SYM_WRITE,
+        SYM_MOVE,
+        SYM_CHANGE,
+        SYM_LOOP,
+        SYM_ENDLOOP,
+        SYM_EOF
     };
 
     /// Names of the different parts of the language.

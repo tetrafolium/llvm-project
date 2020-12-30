@@ -23,23 +23,23 @@ class MachineInstr;
 class SUnit;
 
 class MultiHazardRecognizer : public ScheduleHazardRecognizer {
-  SmallVector<std::unique_ptr<ScheduleHazardRecognizer>, 4> Recognizers;
+    SmallVector<std::unique_ptr<ScheduleHazardRecognizer>, 4> Recognizers;
 
 public:
-  MultiHazardRecognizer() = default;
-  void AddHazardRecognizer(std::unique_ptr<ScheduleHazardRecognizer> &&);
+    MultiHazardRecognizer() = default;
+    void AddHazardRecognizer(std::unique_ptr<ScheduleHazardRecognizer> &&);
 
-  bool atIssueLimit() const override;
-  HazardType getHazardType(SUnit *, int Stalls = 0) override;
-  void Reset() override;
-  void EmitInstruction(SUnit *) override;
-  void EmitInstruction(MachineInstr *) override;
-  unsigned PreEmitNoops(SUnit *) override;
-  unsigned PreEmitNoops(MachineInstr *) override;
-  bool ShouldPreferAnother(SUnit *) override;
-  void AdvanceCycle() override;
-  void RecedeCycle() override;
-  void EmitNoop() override;
+    bool atIssueLimit() const override;
+    HazardType getHazardType(SUnit *, int Stalls = 0) override;
+    void Reset() override;
+    void EmitInstruction(SUnit *) override;
+    void EmitInstruction(MachineInstr *) override;
+    unsigned PreEmitNoops(SUnit *) override;
+    unsigned PreEmitNoops(MachineInstr *) override;
+    bool ShouldPreferAnother(SUnit *) override;
+    void AdvanceCycle() override;
+    void RecedeCycle() override;
+    void EmitNoop() override;
 };
 
 } // end namespace llvm

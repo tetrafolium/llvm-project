@@ -43,21 +43,21 @@ using namespace llvm;
 STATISTIC(NumNoops, "Number of noops inserted");
 
 namespace {
-  class PostRAHazardRecognizer : public MachineFunctionPass {
+class PostRAHazardRecognizer : public MachineFunctionPass {
 
-  public:
+public:
     static char ID;
     PostRAHazardRecognizer() : MachineFunctionPass(ID) {}
 
     void getAnalysisUsage(AnalysisUsage &AU) const override {
-      AU.setPreservesCFG();
-      MachineFunctionPass::getAnalysisUsage(AU);
+        AU.setPreservesCFG();
+        MachineFunctionPass::getAnalysisUsage(AU);
     }
 
     bool runOnMachineFunction(MachineFunction &Fn) override;
 
-  };
-  char PostRAHazardRecognizer::ID = 0;
+};
+char PostRAHazardRecognizer::ID = 0;
 
 }
 
@@ -67,30 +67,30 @@ INITIALIZE_PASS(PostRAHazardRecognizer, DEBUG_TYPE,
                 "Post RA hazard recognizer", false, false)
 
 bool PostRAHazardRecognizer::runOnMachineFunction(MachineFunction &Fn) {
-  const TargetInstrInfo *TII = Fn.getSubtarget().getInstrInfo();
-  std::unique_ptr<ScheduleHazardRecognizer> HazardRec(
-      TII->CreateTargetPostRAHazardRecognizer(Fn));
+    const TargetInstrInfo *TII = Fn.getSubtarget().getInstrInfo();
+    std::unique_ptr<ScheduleHazardRecognizer> HazardRec(
+        TII->CreateTargetPostRAHazardRecognizer(Fn));
 
-  // Return if the target has not implemented a hazard recognizer.
-  if (!HazardRec.get())
-    return false;
+    // Return if the target has not implemented a hazard recognizer.
+    if (!HazardRec.get())
+        return false;
 
-  // Loop over all of the basic blocks
-  for (auto &MBB : Fn) {
-    // We do not call HazardRec->reset() here to make sure we are handling noop
-    // hazards at the start of basic blocks.
-    for (MachineInstr &MI : MBB) {
-      // If we need to emit noops prior to this instruction, then do so.
-      unsigned NumPreNoops = HazardRec->PreEmitNoops(&MI);
-      HazardRec->EmitNoops(NumPreNoops);
-      TII->insertNoops(MBB, MachineBasicBlock::iterator(MI), NumPreNoops);
-      NumNoops += NumPreNoops;
+    // Loop over all of the basic blocks
+    for (auto &MBB : Fn) {
+        // We do not call HazardRec->reset() here to make sure we are handling noop
+        // hazards at the start of basic blocks.
+        for (MachineInstr &MI : MBB) {
+            // If we need to emit noops prior to this instruction, then do so.
+            unsigned NumPreNoops = HazardRec->PreEmitNoops(&MI);
+            HazardRec->EmitNoops(NumPreNoops);
+            TII->insertNoops(MBB, MachineBasicBlock::iterator(MI), NumPreNoops);
+            NumNoops += NumPreNoops;
 
-      HazardRec->EmitInstruction(&MI);
-      if (HazardRec->atIssueLimit()) {
-        HazardRec->AdvanceCycle();
-      }
+            HazardRec->EmitInstruction(&MI);
+            if (HazardRec->atIssueLimit()) {
+                HazardRec->AdvanceCycle();
+            }
+        }
     }
-  }
-  return true;
+    return true;
 }

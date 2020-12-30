@@ -28,25 +28,25 @@ namespace misc {
 // due to not warning on throwing string literals.
 class ThrowByValueCatchByReferenceCheck : public ClangTidyCheck {
 public:
-  ThrowByValueCatchByReferenceCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    ThrowByValueCatchByReferenceCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void diagnoseThrowLocations(const CXXThrowExpr *throwExpr);
-  void diagnoseCatchLocations(const CXXCatchStmt *catchStmt,
-                              ASTContext &context);
-  bool isFunctionParameter(const DeclRefExpr *declRefExpr);
-  bool isCatchVariable(const DeclRefExpr *declRefExpr);
-  bool isFunctionOrCatchVar(const DeclRefExpr *declRefExpr);
-  const bool CheckAnonymousTemporaries;
-  const bool WarnOnLargeObject;
-  const uint64_t MaxSizeOptions; // The raw value read from the options.
-  uint64_t MaxSize; // No `const` because we have to set it in two steps.
+    void diagnoseThrowLocations(const CXXThrowExpr *throwExpr);
+    void diagnoseCatchLocations(const CXXCatchStmt *catchStmt,
+                                ASTContext &context);
+    bool isFunctionParameter(const DeclRefExpr *declRefExpr);
+    bool isCatchVariable(const DeclRefExpr *declRefExpr);
+    bool isFunctionOrCatchVar(const DeclRefExpr *declRefExpr);
+    const bool CheckAnonymousTemporaries;
+    const bool WarnOnLargeObject;
+    const uint64_t MaxSizeOptions; // The raw value read from the options.
+    uint64_t MaxSize; // No `const` because we have to set it in two steps.
 };
 
 } // namespace misc

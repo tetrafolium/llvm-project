@@ -17,58 +17,58 @@ using namespace lld;
 using namespace lld::macho;
 
 void MergedOutputSection::mergeInput(InputSection *input) {
-  if (inputs.empty()) {
-    align = input->align;
-    flags = input->flags;
-  } else {
-    mergeFlags(input->flags);
-    align = std::max(align, input->align);
-  }
+    if (inputs.empty()) {
+        align = input->align;
+        flags = input->flags;
+    } else {
+        mergeFlags(input->flags);
+        align = std::max(align, input->align);
+    }
 
-  inputs.push_back(input);
-  input->parent = this;
+    inputs.push_back(input);
+    input->parent = this;
 }
 
 void MergedOutputSection::finalize() {
-  uint64_t isecAddr = addr;
-  uint64_t isecFileOff = fileOff;
-  for (InputSection *isec : inputs) {
-    isecAddr = alignTo(isecAddr, isec->align);
-    isecFileOff = alignTo(isecFileOff, isec->align);
-    isec->outSecOff = isecAddr - addr;
-    isec->outSecFileOff = isecFileOff - fileOff;
-    isecAddr += isec->getSize();
-    isecFileOff += isec->getFileSize();
-  }
-  size = isecAddr - addr;
-  fileSize = isecFileOff - fileOff;
+    uint64_t isecAddr = addr;
+    uint64_t isecFileOff = fileOff;
+    for (InputSection *isec : inputs) {
+        isecAddr = alignTo(isecAddr, isec->align);
+        isecFileOff = alignTo(isecFileOff, isec->align);
+        isec->outSecOff = isecAddr - addr;
+        isec->outSecFileOff = isecFileOff - fileOff;
+        isecAddr += isec->getSize();
+        isecFileOff += isec->getFileSize();
+    }
+    size = isecAddr - addr;
+    fileSize = isecFileOff - fileOff;
 }
 
 void MergedOutputSection::writeTo(uint8_t *buf) const {
-  for (InputSection *isec : inputs) {
-    isec->writeTo(buf + isec->outSecFileOff);
-  }
+    for (InputSection *isec : inputs) {
+        isec->writeTo(buf + isec->outSecFileOff);
+    }
 }
 
 // TODO: this is most likely wrong; reconsider how section flags
 // are actually merged. The logic presented here was written without
 // any form of informed research.
 void MergedOutputSection::mergeFlags(uint32_t inputFlags) {
-  uint8_t sectionFlag = MachO::SECTION_TYPE & inputFlags;
-  if (sectionFlag != (MachO::SECTION_TYPE & flags))
-    error("Cannot add merge section; inconsistent type flags " +
-          Twine(sectionFlag));
+    uint8_t sectionFlag = MachO::SECTION_TYPE & inputFlags;
+    if (sectionFlag != (MachO::SECTION_TYPE & flags))
+        error("Cannot add merge section; inconsistent type flags " +
+              Twine(sectionFlag));
 
-  uint32_t inconsistentFlags =
-      MachO::S_ATTR_DEBUG | MachO::S_ATTR_STRIP_STATIC_SYMS |
-      MachO::S_ATTR_NO_DEAD_STRIP | MachO::S_ATTR_LIVE_SUPPORT;
-  if ((inputFlags ^ flags) & inconsistentFlags)
-    error("Cannot add merge section; cannot merge inconsistent flags");
+    uint32_t inconsistentFlags =
+        MachO::S_ATTR_DEBUG | MachO::S_ATTR_STRIP_STATIC_SYMS |
+        MachO::S_ATTR_NO_DEAD_STRIP | MachO::S_ATTR_LIVE_SUPPORT;
+    if ((inputFlags ^ flags) & inconsistentFlags)
+        error("Cannot add merge section; cannot merge inconsistent flags");
 
-  // Negate pure instruction presence if any section isn't pure.
-  uint32_t pureMask = ~MachO::S_ATTR_PURE_INSTRUCTIONS | (inputFlags & flags);
+    // Negate pure instruction presence if any section isn't pure.
+    uint32_t pureMask = ~MachO::S_ATTR_PURE_INSTRUCTIONS | (inputFlags & flags);
 
-  // Merge the rest
-  flags |= inputFlags;
-  flags &= pureMask;
+    // Merge the rest
+    flags |= inputFlags;
+    flags &= pureMask;
 }

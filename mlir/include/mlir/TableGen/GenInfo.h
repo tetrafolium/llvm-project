@@ -27,33 +27,37 @@ using GenFunction = std::function<bool(const llvm::RecordKeeper &recordKeeper,
 /// mlir-tblgen, description, and generator function).
 class GenInfo {
 public:
-  /// GenInfo constructor should not be invoked directly, instead use
-  /// GenRegistration or registerGen.
-  GenInfo(StringRef arg, StringRef description, GenFunction generator)
-      : arg(arg), description(description), generator(generator) {}
+    /// GenInfo constructor should not be invoked directly, instead use
+    /// GenRegistration or registerGen.
+    GenInfo(StringRef arg, StringRef description, GenFunction generator)
+        : arg(arg), description(description), generator(generator) {}
 
-  /// Invokes the generator and returns whether the generator failed.
-  bool invoke(const llvm::RecordKeeper &recordKeeper, raw_ostream &os) const {
-    assert(generator && "Cannot call generator with null generator");
-    return generator(recordKeeper, os);
-  }
+    /// Invokes the generator and returns whether the generator failed.
+    bool invoke(const llvm::RecordKeeper &recordKeeper, raw_ostream &os) const {
+        assert(generator && "Cannot call generator with null generator");
+        return generator(recordKeeper, os);
+    }
 
-  /// Returns the command line option that may be passed to 'mlir-tblgen' to
-  /// invoke this generator.
-  StringRef getGenArgument() const { return arg; }
+    /// Returns the command line option that may be passed to 'mlir-tblgen' to
+    /// invoke this generator.
+    StringRef getGenArgument() const {
+        return arg;
+    }
 
-  /// Returns a description for the generator.
-  StringRef getGenDescription() const { return description; }
+    /// Returns a description for the generator.
+    StringRef getGenDescription() const {
+        return description;
+    }
 
 private:
-  // The argument with which to invoke the generator via mlir-tblgen.
-  StringRef arg;
+    // The argument with which to invoke the generator via mlir-tblgen.
+    StringRef arg;
 
-  // Description of the generator.
-  StringRef description;
+    // Description of the generator.
+    StringRef description;
 
-  // Generator function.
-  GenFunction generator;
+    // Generator function.
+    GenFunction generator;
 };
 
 /// GenRegistration provides a global initializer that registers a generator
@@ -64,7 +68,7 @@ private:
 ///   // At namespace scope.
 ///   static GenRegistration Print("print", "Print records", [](...){...});
 struct GenRegistration {
-  GenRegistration(StringRef arg, StringRef description, GenFunction function);
+    GenRegistration(StringRef arg, StringRef description, GenFunction function);
 };
 
 } // end namespace mlir

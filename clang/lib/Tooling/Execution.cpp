@@ -16,80 +16,80 @@ namespace clang {
 namespace tooling {
 
 llvm::cl::opt<std::string>
-    ExecutorName("executor", llvm::cl::desc("The name of the executor to use."),
-                 llvm::cl::init("standalone"));
+ExecutorName("executor", llvm::cl::desc("The name of the executor to use."),
+             llvm::cl::init("standalone"));
 
 void InMemoryToolResults::addResult(StringRef Key, StringRef Value) {
-  KVResults.push_back({Strings.save(Key), Strings.save(Value)});
+    KVResults.push_back({Strings.save(Key), Strings.save(Value)});
 }
 
 std::vector<std::pair<llvm::StringRef, llvm::StringRef>>
 InMemoryToolResults::AllKVResults() {
-  return KVResults;
+    return KVResults;
 }
 
 void InMemoryToolResults::forEachResult(
     llvm::function_ref<void(StringRef Key, StringRef Value)> Callback) {
-  for (const auto &KV : KVResults) {
-    Callback(KV.first, KV.second);
-  }
+    for (const auto &KV : KVResults) {
+        Callback(KV.first, KV.second);
+    }
 }
 
 void ExecutionContext::reportResult(StringRef Key, StringRef Value) {
-  Results->addResult(Key, Value);
+    Results->addResult(Key, Value);
 }
 
 llvm::Error
 ToolExecutor::execute(std::unique_ptr<FrontendActionFactory> Action) {
-  return execute(std::move(Action), ArgumentsAdjuster());
+    return execute(std::move(Action), ArgumentsAdjuster());
 }
 
 llvm::Error ToolExecutor::execute(std::unique_ptr<FrontendActionFactory> Action,
                                   ArgumentsAdjuster Adjuster) {
-  std::vector<
-      std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
-      Actions;
-  Actions.emplace_back(std::move(Action), std::move(Adjuster));
-  return execute(Actions);
+    std::vector<
+    std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
+            Actions;
+    Actions.emplace_back(std::move(Action), std::move(Adjuster));
+    return execute(Actions);
 }
 
 namespace internal {
 llvm::Expected<std::unique_ptr<ToolExecutor>>
-createExecutorFromCommandLineArgsImpl(int &argc, const char **argv,
-                                      llvm::cl::OptionCategory &Category,
-                                      const char *Overview) {
-  auto OptionsParser =
-      CommonOptionsParser::create(argc, argv, Category, llvm::cl::ZeroOrMore,
-                                  /*Overview=*/Overview);
-  if (!OptionsParser)
-    return OptionsParser.takeError();
-  for (const auto &TEPlugin : ToolExecutorPluginRegistry::entries()) {
-    if (TEPlugin.getName() != ExecutorName) {
-      continue;
+        createExecutorFromCommandLineArgsImpl(int &argc, const char **argv,
+                llvm::cl::OptionCategory &Category,
+const char *Overview) {
+    auto OptionsParser =
+        CommonOptionsParser::create(argc, argv, Category, llvm::cl::ZeroOrMore,
+                                    /*Overview=*/Overview);
+    if (!OptionsParser)
+        return OptionsParser.takeError();
+    for (const auto &TEPlugin : ToolExecutorPluginRegistry::entries()) {
+        if (TEPlugin.getName() != ExecutorName) {
+            continue;
+        }
+        std::unique_ptr<ToolExecutorPlugin> Plugin(TEPlugin.instantiate());
+        llvm::Expected<std::unique_ptr<ToolExecutor>> Executor =
+                    Plugin->create(*OptionsParser);
+        if (!Executor) {
+            return llvm::make_error<llvm::StringError>(
+                       llvm::Twine("Failed to create '") + TEPlugin.getName() +
+                       "': " + llvm::toString(Executor.takeError()) + "\n",
+                       llvm::inconvertibleErrorCode());
+        }
+        return std::move(*Executor);
     }
-    std::unique_ptr<ToolExecutorPlugin> Plugin(TEPlugin.instantiate());
-    llvm::Expected<std::unique_ptr<ToolExecutor>> Executor =
-        Plugin->create(*OptionsParser);
-    if (!Executor) {
-      return llvm::make_error<llvm::StringError>(
-          llvm::Twine("Failed to create '") + TEPlugin.getName() +
-              "': " + llvm::toString(Executor.takeError()) + "\n",
-          llvm::inconvertibleErrorCode());
-    }
-    return std::move(*Executor);
-  }
-  return llvm::make_error<llvm::StringError>(
-      llvm::Twine("Executor \"") + ExecutorName + "\" is not registered.",
-      llvm::inconvertibleErrorCode());
+    return llvm::make_error<llvm::StringError>(
+               llvm::Twine("Executor \"") + ExecutorName + "\" is not registered.",
+               llvm::inconvertibleErrorCode());
 }
 } // end namespace internal
 
 llvm::Expected<std::unique_ptr<ToolExecutor>>
-createExecutorFromCommandLineArgs(int &argc, const char **argv,
-                                  llvm::cl::OptionCategory &Category,
-                                  const char *Overview) {
-  return internal::createExecutorFromCommandLineArgsImpl(argc, argv, Category,
-                                                         Overview);
+        createExecutorFromCommandLineArgs(int &argc, const char **argv,
+                llvm::cl::OptionCategory &Category,
+const char *Overview) {
+    return internal::createExecutorFromCommandLineArgsImpl(argc, argv, Category,
+            Overview);
 }
 
 // This anchor is used to force the linker to link in the generated object file

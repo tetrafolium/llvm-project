@@ -21,92 +21,92 @@ namespace clang {
 /// Describes the different kinds of linkage
 /// (C++ [basic.link], C99 6.2.2) that an entity may have.
 enum Linkage : unsigned char {
-  /// No linkage, which means that the entity is unique and
-  /// can only be referred to from within its scope.
-  NoLinkage = 0,
+    /// No linkage, which means that the entity is unique and
+    /// can only be referred to from within its scope.
+    NoLinkage = 0,
 
-  /// Internal linkage, which indicates that the entity can
-  /// be referred to from within the translation unit (but not other
-  /// translation units).
-  InternalLinkage,
+    /// Internal linkage, which indicates that the entity can
+    /// be referred to from within the translation unit (but not other
+    /// translation units).
+    InternalLinkage,
 
-  /// External linkage within a unique namespace.
-  ///
-  /// From the language perspective, these entities have external
-  /// linkage. However, since they reside in an anonymous namespace,
-  /// their names are unique to this translation unit, which is
-  /// equivalent to having internal linkage from the code-generation
-  /// point of view.
-  UniqueExternalLinkage,
+    /// External linkage within a unique namespace.
+    ///
+    /// From the language perspective, these entities have external
+    /// linkage. However, since they reside in an anonymous namespace,
+    /// their names are unique to this translation unit, which is
+    /// equivalent to having internal linkage from the code-generation
+    /// point of view.
+    UniqueExternalLinkage,
 
-  /// No linkage according to the standard, but is visible from other
-  /// translation units because of types defined in a inline function.
-  VisibleNoLinkage,
+    /// No linkage according to the standard, but is visible from other
+    /// translation units because of types defined in a inline function.
+    VisibleNoLinkage,
 
-  /// Internal linkage according to the Modules TS, but can be referred
-  /// to from other translation units indirectly through inline functions and
-  /// templates in the module interface.
-  ModuleInternalLinkage,
+    /// Internal linkage according to the Modules TS, but can be referred
+    /// to from other translation units indirectly through inline functions and
+    /// templates in the module interface.
+    ModuleInternalLinkage,
 
-  /// Module linkage, which indicates that the entity can be referred
-  /// to from other translation units within the same module, and indirectly
-  /// from arbitrary other translation units through inline functions and
-  /// templates in the module interface.
-  ModuleLinkage,
+    /// Module linkage, which indicates that the entity can be referred
+    /// to from other translation units within the same module, and indirectly
+    /// from arbitrary other translation units through inline functions and
+    /// templates in the module interface.
+    ModuleLinkage,
 
-  /// External linkage, which indicates that the entity can
-  /// be referred to from other translation units.
-  ExternalLinkage
+    /// External linkage, which indicates that the entity can
+    /// be referred to from other translation units.
+    ExternalLinkage
 };
 
 /// Describes the different kinds of language linkage
 /// (C++ [dcl.link]) that an entity may have.
 enum LanguageLinkage {
-  CLanguageLinkage,
-  CXXLanguageLinkage,
-  NoLanguageLinkage
+    CLanguageLinkage,
+    CXXLanguageLinkage,
+    NoLanguageLinkage
 };
 
 /// A more specific kind of linkage than enum Linkage.
 ///
 /// This is relevant to CodeGen and AST file reading.
 enum GVALinkage {
-  GVA_Internal,
-  GVA_AvailableExternally,
-  GVA_DiscardableODR,
-  GVA_StrongExternal,
-  GVA_StrongODR
+    GVA_Internal,
+    GVA_AvailableExternally,
+    GVA_DiscardableODR,
+    GVA_StrongExternal,
+    GVA_StrongODR
 };
 
 inline bool isDiscardableGVALinkage(GVALinkage L) {
-  return L <= GVA_DiscardableODR;
+    return L <= GVA_DiscardableODR;
 }
 
 /// Do we know that this will be the only definition of this symbol (excluding
 /// inlining-only definitions)?
 inline bool isUniqueGVALinkage(GVALinkage L) {
-  return L == GVA_Internal || L == GVA_StrongExternal;
+    return L == GVA_Internal || L == GVA_StrongExternal;
 }
 
 inline bool isExternallyVisible(Linkage L) {
-  return L >= VisibleNoLinkage;
+    return L >= VisibleNoLinkage;
 }
 
 inline Linkage getFormalLinkage(Linkage L) {
-  switch (L) {
-  case UniqueExternalLinkage:
-    return ExternalLinkage;
-  case VisibleNoLinkage:
-    return NoLinkage;
-  case ModuleInternalLinkage:
-    return InternalLinkage;
-  default:
-    return L;
-  }
+    switch (L) {
+    case UniqueExternalLinkage:
+        return ExternalLinkage;
+    case VisibleNoLinkage:
+        return NoLinkage;
+    case ModuleInternalLinkage:
+        return InternalLinkage;
+    default:
+        return L;
+    }
 }
 
 inline bool isExternalFormalLinkage(Linkage L) {
-  return getFormalLinkage(L) == ExternalLinkage;
+    return getFormalLinkage(L) == ExternalLinkage;
 }
 
 /// Compute the minimum linkage given two linkages.
@@ -118,15 +118,15 @@ inline bool isExternalFormalLinkage(Linkage L) {
 /// special cases for when VisibleNoLinkage would lose the visible bit and
 /// become NoLinkage.
 inline Linkage minLinkage(Linkage L1, Linkage L2) {
-  if (L2 == VisibleNoLinkage)
-    std::swap(L1, L2);
-  if (L1 == VisibleNoLinkage) {
-    if (L2 == InternalLinkage)
-      return NoLinkage;
-    if (L2 == UniqueExternalLinkage)
-      return NoLinkage;
-  }
-  return L1 < L2 ? L1 : L2;
+    if (L2 == VisibleNoLinkage)
+        std::swap(L1, L2);
+    if (L1 == VisibleNoLinkage) {
+        if (L2 == InternalLinkage)
+            return NoLinkage;
+        if (L2 == UniqueExternalLinkage)
+            return NoLinkage;
+    }
+    return L1 < L2 ? L1 : L2;
 }
 
 } // namespace clang

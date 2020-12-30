@@ -81,7 +81,8 @@ OptionCategory Features("clangd feature options");
 OptionCategory Misc("clangd miscellaneous options");
 OptionCategory Protocol("clangd protocol and logging options");
 const OptionCategory *ClangdCategories[] = {&Features, &Protocol,
-                                            &CompileCommands, &Misc};
+                                            &CompileCommands, &Misc
+                                           };
 
 enum CompileArgsFrom { LSPCompileArgs, FilesystemCompileArgs };
 opt<CompileArgsFrom> CompileArgsFrom{
@@ -502,7 +503,7 @@ opt<bool> CollectMainFileRefs{
 };
 
 #if defined(__GLIBC__) && CLANGD_MALLOC_TRIM
-opt<bool> EnableMallocTrim{
+opt<bool> EnableMallocTrim {
     "malloc-trim",
     cat(Misc),
     desc("Release memory periodically via malloc_trim(3)."),
@@ -510,22 +511,24 @@ opt<bool> EnableMallocTrim{
 };
 
 std::function<void()> getMemoryCleanupFunction() {
-  if (!EnableMallocTrim)
-    return nullptr;
-  // Leave a few MB at the top of the heap: it is insignificant
-  // and will most likely be needed by the main thread
-  constexpr size_t MallocTrimPad = 20'000'000;
-  return []() {
-    if (malloc_trim(MallocTrimPad))
-      vlog("Released memory via malloc_trim");
-  };
+    if (!EnableMallocTrim)
+        return nullptr;
+    // Leave a few MB at the top of the heap: it is insignificant
+    // and will most likely be needed by the main thread
+    constexpr size_t MallocTrimPad = 20'000'000;
+    return []() {
+        if (malloc_trim(MallocTrimPad))
+            vlog("Released memory via malloc_trim");
+    };
 }
 #else
-std::function<void()> getMemoryCleanupFunction() { return nullptr; }
+std::function<void()> getMemoryCleanupFunction() {
+    return nullptr;
+}
 #endif
 
 #if CLANGD_ENABLE_REMOTE
-opt<std::string> RemoteIndexAddress{
+opt<std::string> RemoteIndexAddress {
     "remote-index-address",
     cat(Features),
     desc("Address of the remote index server"),
@@ -545,36 +548,36 @@ opt<std::string> ProjectRoot{
 /// C:\clangd-test\a.cpp on Windows and /clangd-test/a.cpp on Unix.
 class TestScheme : public URIScheme {
 public:
-  llvm::Expected<std::string>
-  getAbsolutePath(llvm::StringRef /*Authority*/, llvm::StringRef Body,
-                  llvm::StringRef /*HintPath*/) const override {
-    using namespace llvm::sys;
-    // Still require "/" in body to mimic file scheme, as we want lengths of an
-    // equivalent URI in both schemes to be the same.
-    if (!Body.startswith("/"))
-      return error(
-          "Expect URI body to be an absolute path starting with '/': {0}",
-          Body);
-    Body = Body.ltrim('/');
-    llvm::SmallString<16> Path(Body);
-    path::native(Path);
-    fs::make_absolute(TestScheme::TestDir, Path);
-    return std::string(Path);
-  }
+    llvm::Expected<std::string>
+    getAbsolutePath(llvm::StringRef /*Authority*/, llvm::StringRef Body,
+                    llvm::StringRef /*HintPath*/) const override {
+        using namespace llvm::sys;
+        // Still require "/" in body to mimic file scheme, as we want lengths of an
+        // equivalent URI in both schemes to be the same.
+        if (!Body.startswith("/"))
+            return error(
+                       "Expect URI body to be an absolute path starting with '/': {0}",
+                       Body);
+        Body = Body.ltrim('/');
+        llvm::SmallString<16> Path(Body);
+        path::native(Path);
+        fs::make_absolute(TestScheme::TestDir, Path);
+        return std::string(Path);
+    }
 
-  llvm::Expected<URI>
-  uriFromAbsolutePath(llvm::StringRef AbsolutePath) const override {
-    llvm::StringRef Body = AbsolutePath;
-    if (!Body.consume_front(TestScheme::TestDir))
-      return error("Path {0} doesn't start with root {1}", AbsolutePath,
-                   TestDir);
+    llvm::Expected<URI>
+    uriFromAbsolutePath(llvm::StringRef AbsolutePath) const override {
+        llvm::StringRef Body = AbsolutePath;
+        if (!Body.consume_front(TestScheme::TestDir))
+            return error("Path {0} doesn't start with root {1}", AbsolutePath,
+                         TestDir);
 
-    return URI("test", /*Authority=*/"",
-               llvm::sys::path::convert_to_slash(Body));
-  }
+        return URI("test", /*Authority=*/"",
+                   llvm::sys::path::convert_to_slash(Body));
+    }
 
 private:
-  const static char TestDir[];
+    const static char TestDir[];
 };
 
 #ifdef _WIN32
@@ -586,47 +589,47 @@ const char TestScheme::TestDir[] = "/clangd-test";
 std::unique_ptr<SymbolIndex>
 loadExternalIndex(const Config::ExternalIndexSpec &External,
                   AsyncTaskRunner &Tasks) {
-  switch (External.Kind) {
-  case Config::ExternalIndexSpec::Server:
-    log("Associating {0} with remote index at {1}.", External.MountPoint,
-        External.Location);
-    return remote::getClient(External.Location, External.MountPoint);
-  case Config::ExternalIndexSpec::File:
-    log("Associating {0} with monolithic index at {1}.", External.MountPoint,
-        External.Location);
-    auto NewIndex = std::make_unique<SwapIndex>(std::make_unique<MemIndex>());
-    Tasks.runAsync("Load-index:" + External.Location,
-                   [File = External.Location, PlaceHolder = NewIndex.get()] {
-                     if (auto Idx = loadIndex(File, /*UseDex=*/true))
-                       PlaceHolder->reset(std::move(Idx));
-                   });
-    return std::move(NewIndex);
-  }
-  llvm_unreachable("Invalid ExternalIndexKind.");
+    switch (External.Kind) {
+    case Config::ExternalIndexSpec::Server:
+        log("Associating {0} with remote index at {1}.", External.MountPoint,
+            External.Location);
+        return remote::getClient(External.Location, External.MountPoint);
+    case Config::ExternalIndexSpec::File:
+        log("Associating {0} with monolithic index at {1}.", External.MountPoint,
+            External.Location);
+        auto NewIndex = std::make_unique<SwapIndex>(std::make_unique<MemIndex>());
+        Tasks.runAsync("Load-index:" + External.Location,
+        [File = External.Location, PlaceHolder = NewIndex.get()] {
+            if (auto Idx = loadIndex(File, /*UseDex=*/true))
+                PlaceHolder->reset(std::move(Idx));
+        });
+        return std::move(NewIndex);
+    }
+    llvm_unreachable("Invalid ExternalIndexKind.");
 }
 } // namespace
 } // namespace clangd
 } // namespace clang
 
 enum class ErrorResultCode : int {
-  NoShutdownRequest = 1,
-  CantRunAsXPCService = 2,
-  CheckFailed = 3
+    NoShutdownRequest = 1,
+    CantRunAsXPCService = 2,
+    CheckFailed = 3
 };
 
 int main(int argc, char *argv[]) {
-  using namespace clang;
-  using namespace clang::clangd;
+    using namespace clang;
+    using namespace clang::clangd;
 
-  llvm::InitializeAllTargetInfos();
-  llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
-  llvm::sys::SetInterruptFunction(&requestShutdown);
-  llvm::cl::SetVersionPrinter([](llvm::raw_ostream &OS) {
-    OS << clang::getClangToolFullVersion("clangd") << "\n";
-  });
-  const char *FlagsEnvVar = "CLANGD_FLAGS";
-  const char *Overview =
-      R"(clangd is a language server that provides IDE-like features to editors.
+    llvm::InitializeAllTargetInfos();
+    llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+    llvm::sys::SetInterruptFunction(&requestShutdown);
+    llvm::cl::SetVersionPrinter([](llvm::raw_ostream &OS) {
+        OS << clang::getClangToolFullVersion("clangd") << "\n";
+    });
+    const char *FlagsEnvVar = "CLANGD_FLAGS";
+    const char *Overview =
+        R"(clangd is a language server that provides IDE-like features to editors.
 
 It should be used via an editor plugin rather than invoked directly. For more information, see:
 	https://clangd.llvm.org/
@@ -903,15 +906,15 @@ clangd accepts flags on the commandline, and in the CLANGD_FLAGS environment var
     llvm::sys::fs::real_path(CheckFile, Path, /*expand_tilde=*/true);
     log("Entering check mode (no LSP server)");
     return check(Path, TFS, Opts)
-               ? 0
-               : static_cast<int>(ErrorResultCode::CheckFailed);
-  }
+           ? 0
+           : static_cast<int>(ErrorResultCode::CheckFailed);
+}
 
-  // Initialize and run ClangdLSPServer.
-  // Change stdin to binary to not lose \r\n on windows.
-  llvm::sys::ChangeStdinToBinary();
-  std::unique_ptr<Transport> TransportLayer;
-  if (getenv("CLANGD_AS_XPC_SERVICE")) {
+// Initialize and run ClangdLSPServer.
+// Change stdin to binary to not lose \r\n on windows.
+llvm::sys::ChangeStdinToBinary();
+std::unique_ptr<Transport> TransportLayer;
+if (getenv("CLANGD_AS_XPC_SERVICE")) {
 #if CLANGD_BUILD_XPC
     log("Starting LSP over XPC service");
     TransportLayer = newXPCTransport();
@@ -919,38 +922,38 @@ clangd accepts flags on the commandline, and in the CLANGD_FLAGS environment var
     llvm::errs() << "This clangd binary wasn't built with XPC support.\n";
     return static_cast<int>(ErrorResultCode::CantRunAsXPCService);
 #endif
-  } else {
+} else {
     log("Starting LSP over stdin/stdout");
     TransportLayer = newJSONTransport(
-        stdin, llvm::outs(),
-        InputMirrorStream ? InputMirrorStream.getPointer() : nullptr,
-        PrettyPrint, InputStyle);
-  }
-  if (!PathMappingsArg.empty()) {
+                         stdin, llvm::outs(),
+                         InputMirrorStream ? InputMirrorStream.getPointer() : nullptr,
+                         PrettyPrint, InputStyle);
+}
+if (!PathMappingsArg.empty()) {
     auto Mappings = parsePathMappings(PathMappingsArg);
     if (!Mappings) {
-      elog("Invalid -path-mappings: {0}", Mappings.takeError());
-      return 1;
+        elog("Invalid -path-mappings: {0}", Mappings.takeError());
+        return 1;
     }
     TransportLayer = createPathMappingTransport(std::move(TransportLayer),
-                                                std::move(*Mappings));
-  }
+                     std::move(*Mappings));
+}
 
-  ClangdLSPServer LSPServer(*TransportLayer, TFS, Opts);
-  llvm::set_thread_name("clangd.main");
-  int ExitCode = LSPServer.run()
-                     ? 0
-                     : static_cast<int>(ErrorResultCode::NoShutdownRequest);
-  log("LSP finished, exiting with status {0}", ExitCode);
+ClangdLSPServer LSPServer(*TransportLayer, TFS, Opts);
+llvm::set_thread_name("clangd.main");
+int ExitCode = LSPServer.run()
+               ? 0
+               : static_cast<int>(ErrorResultCode::NoShutdownRequest);
+log("LSP finished, exiting with status {0}", ExitCode);
 
-  // There may still be lingering background threads (e.g. slow requests
-  // whose results will be dropped, background index shutting down).
-  //
-  // These should terminate quickly, and ~ClangdLSPServer blocks on them.
-  // However if a bug causes them to run forever, we want to ensure the process
-  // eventually exits. As clangd isn't directly user-facing, an editor can
-  // "leak" clangd processes. Crashing in this case contains the damage.
-  abortAfterTimeout(std::chrono::minutes(5));
+// There may still be lingering background threads (e.g. slow requests
+// whose results will be dropped, background index shutting down).
+//
+// These should terminate quickly, and ~ClangdLSPServer blocks on them.
+// However if a bug causes them to run forever, we want to ensure the process
+// eventually exits. As clangd isn't directly user-facing, an editor can
+// "leak" clangd processes. Crashing in this case contains the damage.
+abortAfterTimeout(std::chrono::minutes(5));
 
-  return ExitCode;
+return ExitCode;
 }

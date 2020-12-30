@@ -23,19 +23,23 @@ RegularExpression::RegularExpression(const RegularExpression &rhs)
 bool RegularExpression::Execute(
     llvm::StringRef str,
     llvm::SmallVectorImpl<llvm::StringRef> *matches) const {
-  if (!IsValid())
-    return false;
-  return m_regex.match(str, matches);
+    if (!IsValid())
+        return false;
+    return m_regex.match(str, matches);
 }
 
-bool RegularExpression::IsValid() const { return m_regex.isValid(); }
+bool RegularExpression::IsValid() const {
+    return m_regex.isValid();
+}
 
-llvm::StringRef RegularExpression::GetText() const { return m_regex_text; }
+llvm::StringRef RegularExpression::GetText() const {
+    return m_regex_text;
+}
 
 llvm::Error RegularExpression::GetError() const {
-  std::string error;
-  if (!m_regex.isValid(error))
-    return llvm::make_error<llvm::StringError>(error,
-                                               llvm::inconvertibleErrorCode());
-  return llvm::Error::success();
+    std::string error;
+    if (!m_regex.isValid(error))
+        return llvm::make_error<llvm::StringError>(error,
+                llvm::inconvertibleErrorCode());
+    return llvm::Error::success();
 }

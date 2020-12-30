@@ -38,7 +38,7 @@
 namespace llvm {
 
 struct MakeGuardsExplicitPass : public PassInfoMixin<MakeGuardsExplicitPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // namespace llvm

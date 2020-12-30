@@ -44,45 +44,47 @@ class Value;
 ///
 /// Constructing this object is O(n) in the size of the function.
 class CodeExtractorAnalysisCache {
-  /// The allocas in the function.
-  SmallVector<AllocaInst *, 16> Allocas;
+    /// The allocas in the function.
+    SmallVector<AllocaInst *, 16> Allocas;
 
-  /// Base memory addresses of load/store instructions, grouped by block.
-  DenseMap<BasicBlock *, DenseSet<Value *>> BaseMemAddrs;
+    /// Base memory addresses of load/store instructions, grouped by block.
+    DenseMap<BasicBlock *, DenseSet<Value *>> BaseMemAddrs;
 
-  /// Blocks which contain instructions which may have unknown side-effects
-  /// on memory.
-  DenseSet<BasicBlock *> SideEffectingBlocks;
+    /// Blocks which contain instructions which may have unknown side-effects
+    /// on memory.
+    DenseSet<BasicBlock *> SideEffectingBlocks;
 
-  void findSideEffectInfoForBlock(BasicBlock &BB);
+    void findSideEffectInfoForBlock(BasicBlock &BB);
 
 public:
-  CodeExtractorAnalysisCache(Function &F);
+    CodeExtractorAnalysisCache(Function &F);
 
-  /// Get the allocas in the function at the time the analysis was created.
-  /// Note that some of these allocas may no longer be present in the function,
-  /// due to \ref CodeExtractor::extractCodeRegion.
-  ArrayRef<AllocaInst *> getAllocas() const { return Allocas; }
+    /// Get the allocas in the function at the time the analysis was created.
+    /// Note that some of these allocas may no longer be present in the function,
+    /// due to \ref CodeExtractor::extractCodeRegion.
+    ArrayRef<AllocaInst *> getAllocas() const {
+        return Allocas;
+    }
 
-  /// Check whether \p BB contains an instruction thought to load from, store
-  /// to, or otherwise clobber the alloca \p Addr.
-  bool doesBlockContainClobberOfAddr(BasicBlock &BB, AllocaInst *Addr) const;
+    /// Check whether \p BB contains an instruction thought to load from, store
+    /// to, or otherwise clobber the alloca \p Addr.
+    bool doesBlockContainClobberOfAddr(BasicBlock &BB, AllocaInst *Addr) const;
 };
 
-  /// Utility class for extracting code into a new function.
-  ///
-  /// This utility provides a simple interface for extracting some sequence of
-  /// code into its own function, replacing it with a call to that function. It
-  /// also provides various methods to query about the nature and result of
-  /// such a transformation.
-  ///
-  /// The rough algorithm used is:
-  /// 1) Find both the inputs and outputs for the extracted region.
-  /// 2) Pass the inputs as arguments, remapping them within the extracted
-  ///    function to arguments.
-  /// 3) Add allocas for any scalar outputs, adding all of the outputs' allocas
-  ///    as arguments, and inserting stores to the arguments for any scalars.
-  class CodeExtractor {
+/// Utility class for extracting code into a new function.
+///
+/// This utility provides a simple interface for extracting some sequence of
+/// code into its own function, replacing it with a call to that function. It
+/// also provides various methods to query about the nature and result of
+/// such a transformation.
+///
+/// The rough algorithm used is:
+/// 1) Find both the inputs and outputs for the extracted region.
+/// 2) Pass the inputs as arguments, remapping them within the extracted
+///    function to arguments.
+/// 3) Add allocas for any scalar outputs, adding all of the outputs' allocas
+///    as arguments, and inserting stores to the arguments for any scalars.
+class CodeExtractor {
     using ValueSet = SetVector<Value *>;
 
     // Various bits of state computed on construction.
@@ -105,7 +107,7 @@ public:
     // label, if non-empty, otherwise "extracted".
     std::string Suffix;
 
-  public:
+public:
     /// Create a code extractor for a sequence of blocks.
     ///
     /// Given a sequence of basic blocks where the first block in the sequence
@@ -150,7 +152,7 @@ public:
     ///
     /// Based on the blocks used when constructing the code extractor,
     /// determine whether it is eligible for extraction.
-    /// 
+    ///
     /// Checks that varargs handling (with vastart and vaend) is only done in
     /// the outlined blocks.
     bool isEligible() const;
@@ -196,12 +198,12 @@ public:
     /// original block will be added to the outline region.
     BasicBlock *findOrCreateBlockForHoisting(BasicBlock *CommonExitBlock);
 
-  private:
+private:
     struct LifetimeMarkerInfo {
-      bool SinkLifeStart = false;
-      bool HoistLifeEnd = false;
-      Instruction *LifeStart = nullptr;
-      Instruction *LifeEnd = nullptr;
+        bool SinkLifeStart = false;
+        bool HoistLifeEnd = false;
+        Instruction *LifeStart = nullptr;
+        Instruction *LifeEnd = nullptr;
     };
 
     LifetimeMarkerInfo
@@ -228,7 +230,7 @@ public:
     CallInst *emitCallAndSwitchStatement(Function *newFunction,
                                          BasicBlock *newHeader,
                                          ValueSet &inputs, ValueSet &outputs);
-  };
+};
 
 } // end namespace llvm
 

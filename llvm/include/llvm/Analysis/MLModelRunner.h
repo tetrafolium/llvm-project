@@ -20,19 +20,19 @@ namespace llvm {
 /// tensorflow "saved model".
 class MLModelRunner {
 public:
-  // Disallows copy and assign.
-  MLModelRunner(const MLModelRunner &) = delete;
-  MLModelRunner &operator=(const MLModelRunner &) = delete;
-  virtual ~MLModelRunner() = default;
+    // Disallows copy and assign.
+    MLModelRunner(const MLModelRunner &) = delete;
+    MLModelRunner &operator=(const MLModelRunner &) = delete;
+    virtual ~MLModelRunner() = default;
 
-  virtual bool run() = 0;
-  virtual void setFeature(FeatureIndex Index, int64_t Value) = 0;
-  virtual int64_t getFeature(int Index) const = 0;
+    virtual bool run() = 0;
+    virtual void setFeature(FeatureIndex Index, int64_t Value) = 0;
+    virtual int64_t getFeature(int Index) const = 0;
 
 protected:
-  MLModelRunner(LLVMContext &Ctx) : Ctx(Ctx) {}
+    MLModelRunner(LLVMContext &Ctx) : Ctx(Ctx) {}
 
-  LLVMContext &Ctx;
+    LLVMContext &Ctx;
 };
 } // namespace llvm
 

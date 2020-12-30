@@ -55,130 +55,136 @@ class raw_ostream;
 
 class DebugCounter {
 public:
-  ~DebugCounter();
+    ~DebugCounter();
 
-  /// Returns a reference to the singleton instance.
-  static DebugCounter &instance();
+    /// Returns a reference to the singleton instance.
+    static DebugCounter &instance();
 
-  // Used by the command line option parser to push a new value it parsed.
-  void push_back(const std::string &);
+    // Used by the command line option parser to push a new value it parsed.
+    void push_back(const std::string &);
 
-  // Register a counter with the specified name.
-  //
-  // FIXME: Currently, counter registration is required to happen before command
-  // line option parsing. The main reason to register counters is to produce a
-  // nice list of them on the command line, but i'm not sure this is worth it.
-  static unsigned registerCounter(StringRef Name, StringRef Desc) {
-    return instance().addCounter(std::string(Name), std::string(Desc));
-  }
-  inline static bool shouldExecute(unsigned CounterName) {
-    if (!isCountingEnabled())
-      return true;
-
-    auto &Us = instance();
-    auto Result = Us.Counters.find(CounterName);
-    if (Result != Us.Counters.end()) {
-      auto &CounterInfo = Result->second;
-      ++CounterInfo.Count;
-
-      // We only execute while the Skip is not smaller than Count,
-      // and the StopAfter + Skip is larger than Count.
-      // Negative counters always execute.
-      if (CounterInfo.Skip < 0)
-        return true;
-      if (CounterInfo.Skip >= CounterInfo.Count)
-        return false;
-      if (CounterInfo.StopAfter < 0)
-        return true;
-      return CounterInfo.StopAfter + CounterInfo.Skip >= CounterInfo.Count;
+    // Register a counter with the specified name.
+    //
+    // FIXME: Currently, counter registration is required to happen before command
+    // line option parsing. The main reason to register counters is to produce a
+    // nice list of them on the command line, but i'm not sure this is worth it.
+    static unsigned registerCounter(StringRef Name, StringRef Desc) {
+        return instance().addCounter(std::string(Name), std::string(Desc));
     }
-    // Didn't find the counter, should we warn?
-    return true;
-  }
+    inline static bool shouldExecute(unsigned CounterName) {
+        if (!isCountingEnabled())
+            return true;
 
-  // Return true if a given counter had values set (either programatically or on
-  // the command line).  This will return true even if those values are
-  // currently in a state where the counter will always execute.
-  static bool isCounterSet(unsigned ID) {
-    return instance().Counters[ID].IsSet;
-  }
+        auto &Us = instance();
+        auto Result = Us.Counters.find(CounterName);
+        if (Result != Us.Counters.end()) {
+            auto &CounterInfo = Result->second;
+            ++CounterInfo.Count;
 
-  // Return the Count for a counter. This only works for set counters.
-  static int64_t getCounterValue(unsigned ID) {
-    auto &Us = instance();
-    auto Result = Us.Counters.find(ID);
-    assert(Result != Us.Counters.end() && "Asking about a non-set counter");
-    return Result->second.Count;
-  }
+            // We only execute while the Skip is not smaller than Count,
+            // and the StopAfter + Skip is larger than Count.
+            // Negative counters always execute.
+            if (CounterInfo.Skip < 0)
+                return true;
+            if (CounterInfo.Skip >= CounterInfo.Count)
+                return false;
+            if (CounterInfo.StopAfter < 0)
+                return true;
+            return CounterInfo.StopAfter + CounterInfo.Skip >= CounterInfo.Count;
+        }
+        // Didn't find the counter, should we warn?
+        return true;
+    }
 
-  // Set a registered counter to a given Count value.
-  static void setCounterValue(unsigned ID, int64_t Count) {
-    auto &Us = instance();
-    Us.Counters[ID].Count = Count;
-  }
+    // Return true if a given counter had values set (either programatically or on
+    // the command line).  This will return true even if those values are
+    // currently in a state where the counter will always execute.
+    static bool isCounterSet(unsigned ID) {
+        return instance().Counters[ID].IsSet;
+    }
 
-  // Dump or print the current counter set into llvm::dbgs().
-  LLVM_DUMP_METHOD void dump() const;
+    // Return the Count for a counter. This only works for set counters.
+    static int64_t getCounterValue(unsigned ID) {
+        auto &Us = instance();
+        auto Result = Us.Counters.find(ID);
+        assert(Result != Us.Counters.end() && "Asking about a non-set counter");
+        return Result->second.Count;
+    }
 
-  void print(raw_ostream &OS) const;
+    // Set a registered counter to a given Count value.
+    static void setCounterValue(unsigned ID, int64_t Count) {
+        auto &Us = instance();
+        Us.Counters[ID].Count = Count;
+    }
 
-  // Get the counter ID for a given named counter, or return 0 if none is found.
-  unsigned getCounterId(const std::string &Name) const {
-    return RegisteredCounters.idFor(Name);
-  }
+    // Dump or print the current counter set into llvm::dbgs().
+    LLVM_DUMP_METHOD void dump() const;
 
-  // Return the number of registered counters.
-  unsigned int getNumCounters() const { return RegisteredCounters.size(); }
+    void print(raw_ostream &OS) const;
 
-  // Return the name and description of the counter with the given ID.
-  std::pair<std::string, std::string> getCounterInfo(unsigned ID) const {
-    return std::make_pair(RegisteredCounters[ID], Counters.lookup(ID).Desc);
-  }
+    // Get the counter ID for a given named counter, or return 0 if none is found.
+    unsigned getCounterId(const std::string &Name) const {
+        return RegisteredCounters.idFor(Name);
+    }
 
-  // Iterate through the registered counters
-  typedef UniqueVector<std::string> CounterVector;
-  CounterVector::const_iterator begin() const {
-    return RegisteredCounters.begin();
-  }
-  CounterVector::const_iterator end() const { return RegisteredCounters.end(); }
+    // Return the number of registered counters.
+    unsigned int getNumCounters() const {
+        return RegisteredCounters.size();
+    }
 
-  // Force-enables counting all DebugCounters.
-  //
-  // Since DebugCounters are incompatible with threading (not only do they not
-  // make sense, but we'll also see data races), this should only be used in
-  // contexts where we're certain we won't spawn threads.
-  static void enableAllCounters() { instance().Enabled = true; }
+    // Return the name and description of the counter with the given ID.
+    std::pair<std::string, std::string> getCounterInfo(unsigned ID) const {
+        return std::make_pair(RegisteredCounters[ID], Counters.lookup(ID).Desc);
+    }
+
+    // Iterate through the registered counters
+    typedef UniqueVector<std::string> CounterVector;
+    CounterVector::const_iterator begin() const {
+        return RegisteredCounters.begin();
+    }
+    CounterVector::const_iterator end() const {
+        return RegisteredCounters.end();
+    }
+
+    // Force-enables counting all DebugCounters.
+    //
+    // Since DebugCounters are incompatible with threading (not only do they not
+    // make sense, but we'll also see data races), this should only be used in
+    // contexts where we're certain we won't spawn threads.
+    static void enableAllCounters() {
+        instance().Enabled = true;
+    }
 
 private:
-  static bool isCountingEnabled() {
+    static bool isCountingEnabled() {
 // Compile to nothing when debugging is off
 #ifdef NDEBUG
-    return false;
+        return false;
 #else
-    return instance().Enabled;
+        return instance().Enabled;
 #endif
-  }
+    }
 
-  unsigned addCounter(const std::string &Name, const std::string &Desc) {
-    unsigned Result = RegisteredCounters.insert(Name);
-    Counters[Result] = {};
-    Counters[Result].Desc = Desc;
-    return Result;
-  }
-  // Struct to store counter info.
-  struct CounterInfo {
-    int64_t Count = 0;
-    int64_t Skip = 0;
-    int64_t StopAfter = -1;
-    bool IsSet = false;
-    std::string Desc;
-  };
-  DenseMap<unsigned, CounterInfo> Counters;
-  CounterVector RegisteredCounters;
+    unsigned addCounter(const std::string &Name, const std::string &Desc) {
+        unsigned Result = RegisteredCounters.insert(Name);
+        Counters[Result] = {};
+        Counters[Result].Desc = Desc;
+        return Result;
+    }
+    // Struct to store counter info.
+    struct CounterInfo {
+        int64_t Count = 0;
+        int64_t Skip = 0;
+        int64_t StopAfter = -1;
+        bool IsSet = false;
+        std::string Desc;
+    };
+    DenseMap<unsigned, CounterInfo> Counters;
+    CounterVector RegisteredCounters;
 
-  // Whether we should do DebugCounting at all. DebugCounters aren't
-  // thread-safe, so this should always be false in multithreaded scenarios.
-  bool Enabled = false;
+    // Whether we should do DebugCounting at all. DebugCounters aren't
+    // thread-safe, so this should always be false in multithreaded scenarios.
+    bool Enabled = false;
 };
 
 #define DEBUG_COUNTER(VARNAME, COUNTERNAME, DESC)                              \

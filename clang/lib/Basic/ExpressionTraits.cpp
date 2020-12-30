@@ -26,11 +26,11 @@ static constexpr const char *ExpressionTraitSpellings[] = {
 };
 
 const char *clang::getTraitName(ExpressionTrait T) {
-  assert(T <= ET_Last && "invalid enum value!");
-  return ExpressionTraitNames[T];
+    assert(T <= ET_Last && "invalid enum value!");
+    return ExpressionTraitNames[T];
 }
 
 const char *clang::getTraitSpelling(ExpressionTrait T) {
-  assert(T <= ET_Last && "invalid enum value!");
-  return ExpressionTraitSpellings[T];
+    assert(T <= ET_Last && "invalid enum value!");
+    return ExpressionTraitSpellings[T];
 }

@@ -25,54 +25,54 @@ void RestrictedIncludesPPCallbacks::InclusionDirective(
     bool IsAngled, CharSourceRange FilenameRange, const FileEntry *File,
     StringRef SearchPath, StringRef RelativePath, const Module *Imported,
     SrcMgr::CharacteristicKind FileType) {
-  if (!Check.contains(FileName) && SrcMgr::isSystem(FileType)) {
-    SmallString<256> FullPath;
-    llvm::sys::path::append(FullPath, SearchPath);
-    llvm::sys::path::append(FullPath, RelativePath);
-    // Bucket the allowed include directives by the id of the file they were
-    // declared in.
-    IncludeDirectives[SM.getFileID(HashLoc)].emplace_back(
-        HashLoc, FilenameRange, FileName, FullPath.str(),
-        SM.isInMainFile(HashLoc));
-  }
+    if (!Check.contains(FileName) && SrcMgr::isSystem(FileType)) {
+        SmallString<256> FullPath;
+        llvm::sys::path::append(FullPath, SearchPath);
+        llvm::sys::path::append(FullPath, RelativePath);
+        // Bucket the allowed include directives by the id of the file they were
+        // declared in.
+        IncludeDirectives[SM.getFileID(HashLoc)].emplace_back(
+            HashLoc, FilenameRange, FileName, FullPath.str(),
+            SM.isInMainFile(HashLoc));
+    }
 }
 
 void RestrictedIncludesPPCallbacks::EndOfMainFile() {
-  for (const auto &Bucket : IncludeDirectives) {
-    const FileIncludes &FileDirectives = Bucket.second;
+    for (const auto &Bucket : IncludeDirectives) {
+        const FileIncludes &FileDirectives = Bucket.second;
 
-    // Emit fixits for all restricted includes.
-    for (const auto &Include : FileDirectives) {
-      // Fetch the length of the include statement from the start to just after
-      // the newline, for finding the end (including the newline).
-      unsigned ToLen = std::strcspn(SM.getCharacterData(Include.Loc), "\n") + 1;
-      CharSourceRange ToRange = CharSourceRange::getCharRange(
-          Include.Loc, Include.Loc.getLocWithOffset(ToLen));
+        // Emit fixits for all restricted includes.
+        for (const auto &Include : FileDirectives) {
+            // Fetch the length of the include statement from the start to just after
+            // the newline, for finding the end (including the newline).
+            unsigned ToLen = std::strcspn(SM.getCharacterData(Include.Loc), "\n") + 1;
+            CharSourceRange ToRange = CharSourceRange::getCharRange(
+                                          Include.Loc, Include.Loc.getLocWithOffset(ToLen));
 
-      if (!Include.IsInMainFile) {
-        auto D = Check.diag(
-            Include.Loc,
-            "system include %0 not allowed, transitively included from %1");
-        D << Include.IncludeFile << SM.getFilename(Include.Loc);
-        D << FixItHint::CreateRemoval(ToRange);
-        continue;
-      }
-      auto D = Check.diag(Include.Loc, "system include %0 not allowed");
-      D << Include.IncludeFile;
-      D << FixItHint::CreateRemoval(ToRange);
+            if (!Include.IsInMainFile) {
+                auto D = Check.diag(
+                             Include.Loc,
+                             "system include %0 not allowed, transitively included from %1");
+                D << Include.IncludeFile << SM.getFilename(Include.Loc);
+                D << FixItHint::CreateRemoval(ToRange);
+                continue;
+            }
+            auto D = Check.diag(Include.Loc, "system include %0 not allowed");
+            D << Include.IncludeFile;
+            D << FixItHint::CreateRemoval(ToRange);
+        }
     }
-  }
 }
 
 void RestrictSystemIncludesCheck::registerPPCallbacks(
     const SourceManager &SM, Preprocessor *PP, Preprocessor *ModuleExpanderPP) {
-  PP->addPPCallbacks(
-      std::make_unique<RestrictedIncludesPPCallbacks>(*this, SM));
+    PP->addPPCallbacks(
+        std::make_unique<RestrictedIncludesPPCallbacks>(*this, SM));
 }
 
 void RestrictSystemIncludesCheck::storeOptions(
     ClangTidyOptions::OptionMap &Opts) {
-  Options.store(Opts, "Includes", AllowedIncludes);
+    Options.store(Opts, "Includes", AllowedIncludes);
 }
 
 } // namespace portability

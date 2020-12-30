@@ -28,15 +28,15 @@ void MachineModuleInfoCOFF::anchor() {}
 
 using PairTy = std::pair<MCSymbol *, MachineModuleInfoImpl::StubValueTy>;
 static int SortSymbolPair(const PairTy *LHS, const PairTy *RHS) {
-  return LHS->first->getName().compare(RHS->first->getName());
+    return LHS->first->getName().compare(RHS->first->getName());
 }
 
 MachineModuleInfoImpl::SymbolListTy MachineModuleInfoImpl::getSortedStubs(
     DenseMap<MCSymbol *, MachineModuleInfoImpl::StubValueTy> &Map) {
-  MachineModuleInfoImpl::SymbolListTy List(Map.begin(), Map.end());
+    MachineModuleInfoImpl::SymbolListTy List(Map.begin(), Map.end());
 
-  array_pod_sort(List.begin(), List.end(), SortSymbolPair);
+    array_pod_sort(List.begin(), List.end(), SortSymbolPair);
 
-  Map.clear();
-  return List;
+    Map.clear();
+    return List;
 }

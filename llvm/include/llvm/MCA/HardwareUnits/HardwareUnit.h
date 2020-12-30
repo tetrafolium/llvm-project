@@ -19,12 +19,12 @@ namespace llvm {
 namespace mca {
 
 class HardwareUnit {
-  HardwareUnit(const HardwareUnit &H) = delete;
-  HardwareUnit &operator=(const HardwareUnit &H) = delete;
+    HardwareUnit(const HardwareUnit &H) = delete;
+    HardwareUnit &operator=(const HardwareUnit &H) = delete;
 
 public:
-  HardwareUnit() = default;
-  virtual ~HardwareUnit();
+    HardwareUnit() = default;
+    virtual ~HardwareUnit();
 };
 
 } // namespace mca

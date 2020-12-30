@@ -19,12 +19,12 @@ namespace abseil {
 
 /// Duration factory and conversion scales
 enum class DurationScale : std::uint8_t {
-  Hours = 0,
-  Minutes,
-  Seconds,
-  Milliseconds,
-  Microseconds,
-  Nanoseconds,
+    Hours = 0,
+    Minutes,
+    Seconds,
+    Milliseconds,
+    Microseconds,
+    Nanoseconds,
 };
 
 /// Given a `Scale`, return the appropriate factory function call for
@@ -98,40 +98,40 @@ bool isInMacro(const ast_matchers::MatchFinder::MatchResult &Result,
 
 AST_MATCHER_FUNCTION(ast_matchers::internal::Matcher<FunctionDecl>,
                      DurationConversionFunction) {
-  using namespace clang::ast_matchers;
-  return functionDecl(
-      hasAnyName("::absl::ToDoubleHours", "::absl::ToDoubleMinutes",
-                 "::absl::ToDoubleSeconds", "::absl::ToDoubleMilliseconds",
-                 "::absl::ToDoubleMicroseconds", "::absl::ToDoubleNanoseconds",
-                 "::absl::ToInt64Hours", "::absl::ToInt64Minutes",
-                 "::absl::ToInt64Seconds", "::absl::ToInt64Milliseconds",
-                 "::absl::ToInt64Microseconds", "::absl::ToInt64Nanoseconds"));
+    using namespace clang::ast_matchers;
+    return functionDecl(
+               hasAnyName("::absl::ToDoubleHours", "::absl::ToDoubleMinutes",
+                          "::absl::ToDoubleSeconds", "::absl::ToDoubleMilliseconds",
+                          "::absl::ToDoubleMicroseconds", "::absl::ToDoubleNanoseconds",
+                          "::absl::ToInt64Hours", "::absl::ToInt64Minutes",
+                          "::absl::ToInt64Seconds", "::absl::ToInt64Milliseconds",
+                          "::absl::ToInt64Microseconds", "::absl::ToInt64Nanoseconds"));
 }
 
 AST_MATCHER_FUNCTION(ast_matchers::internal::Matcher<FunctionDecl>,
                      DurationFactoryFunction) {
-  using namespace clang::ast_matchers;
-  return functionDecl(hasAnyName("::absl::Nanoseconds", "::absl::Microseconds",
-                                 "::absl::Milliseconds", "::absl::Seconds",
-                                 "::absl::Minutes", "::absl::Hours"));
+    using namespace clang::ast_matchers;
+    return functionDecl(hasAnyName("::absl::Nanoseconds", "::absl::Microseconds",
+                                   "::absl::Milliseconds", "::absl::Seconds",
+                                   "::absl::Minutes", "::absl::Hours"));
 }
 
 AST_MATCHER_FUNCTION(ast_matchers::internal::Matcher<FunctionDecl>,
                      TimeConversionFunction) {
-  using namespace clang::ast_matchers;
-  return functionDecl(hasAnyName(
-      "::absl::ToUnixHours", "::absl::ToUnixMinutes", "::absl::ToUnixSeconds",
-      "::absl::ToUnixMillis", "::absl::ToUnixMicros", "::absl::ToUnixNanos"));
+    using namespace clang::ast_matchers;
+    return functionDecl(hasAnyName(
+                            "::absl::ToUnixHours", "::absl::ToUnixMinutes", "::absl::ToUnixSeconds",
+                            "::absl::ToUnixMillis", "::absl::ToUnixMicros", "::absl::ToUnixNanos"));
 }
 
 AST_MATCHER_FUNCTION_P(ast_matchers::internal::Matcher<Stmt>,
                        comparisonOperatorWithCallee,
                        ast_matchers::internal::Matcher<Decl>, funcDecl) {
-  using namespace clang::ast_matchers;
-  return binaryOperator(
-      anyOf(hasOperatorName(">"), hasOperatorName(">="), hasOperatorName("=="),
-            hasOperatorName("<="), hasOperatorName("<")),
-      hasEitherOperand(ignoringImpCasts(callExpr(callee(funcDecl)))));
+    using namespace clang::ast_matchers;
+    return binaryOperator(
+               anyOf(hasOperatorName(">"), hasOperatorName(">="), hasOperatorName("=="),
+                     hasOperatorName("<="), hasOperatorName("<")),
+               hasEitherOperand(ignoringImpCasts(callExpr(callee(funcDecl)))));
 }
 
 } // namespace abseil

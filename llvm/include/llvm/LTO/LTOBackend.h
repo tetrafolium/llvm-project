@@ -64,7 +64,7 @@ bool loadReferencedModules(
     FunctionImporter::ImportMapTy &ImportList,
     MapVector<llvm::StringRef, llvm::BitcodeModule> &ModuleMap,
     std::vector<std::unique_ptr<llvm::MemoryBuffer>>
-        &OwnedImportsLifetimeManager);
+    &OwnedImportsLifetimeManager);
 }
 }
 

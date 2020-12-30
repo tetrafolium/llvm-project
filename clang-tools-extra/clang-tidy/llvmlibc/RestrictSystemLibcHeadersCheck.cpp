@@ -25,21 +25,21 @@ namespace {
 class RestrictedIncludesPPCallbacks
     : public portability::RestrictedIncludesPPCallbacks {
 public:
-  explicit RestrictedIncludesPPCallbacks(
-      RestrictSystemLibcHeadersCheck &Check, const SourceManager &SM,
-      const SmallString<128> CompilerIncudeDir)
-      : portability::RestrictedIncludesPPCallbacks(Check, SM),
-        CompilerIncudeDir(CompilerIncudeDir) {}
+    explicit RestrictedIncludesPPCallbacks(
+        RestrictSystemLibcHeadersCheck &Check, const SourceManager &SM,
+        const SmallString<128> CompilerIncudeDir)
+        : portability::RestrictedIncludesPPCallbacks(Check, SM),
+          CompilerIncudeDir(CompilerIncudeDir) {}
 
-  void InclusionDirective(SourceLocation HashLoc, const Token &IncludeTok,
-                          StringRef FileName, bool IsAngled,
-                          CharSourceRange FilenameRange, const FileEntry *File,
-                          StringRef SearchPath, StringRef RelativePath,
-                          const Module *Imported,
-                          SrcMgr::CharacteristicKind FileType) override;
+    void InclusionDirective(SourceLocation HashLoc, const Token &IncludeTok,
+                            StringRef FileName, bool IsAngled,
+                            CharSourceRange FilenameRange, const FileEntry *File,
+                            StringRef SearchPath, StringRef RelativePath,
+                            const Module *Imported,
+                            SrcMgr::CharacteristicKind FileType) override;
 
 private:
-  const SmallString<128> CompilerIncudeDir;
+    const SmallString<128> CompilerIncudeDir;
 };
 
 } // namespace
@@ -49,21 +49,21 @@ void RestrictedIncludesPPCallbacks::InclusionDirective(
     bool IsAngled, CharSourceRange FilenameRange, const FileEntry *File,
     StringRef SearchPath, StringRef RelativePath, const Module *Imported,
     SrcMgr::CharacteristicKind FileType) {
-  // Compiler provided headers are allowed (e.g stddef.h).
-  if (SrcMgr::isSystem(FileType) && SearchPath == CompilerIncudeDir)
-    return;
-  portability::RestrictedIncludesPPCallbacks::InclusionDirective(
-      HashLoc, IncludeTok, FileName, IsAngled, FilenameRange, File, SearchPath,
-      RelativePath, Imported, FileType);
+    // Compiler provided headers are allowed (e.g stddef.h).
+    if (SrcMgr::isSystem(FileType) && SearchPath == CompilerIncudeDir)
+        return;
+    portability::RestrictedIncludesPPCallbacks::InclusionDirective(
+        HashLoc, IncludeTok, FileName, IsAngled, FilenameRange, File, SearchPath,
+        RelativePath, Imported, FileType);
 }
 
 void RestrictSystemLibcHeadersCheck::registerPPCallbacks(
     const SourceManager &SM, Preprocessor *PP, Preprocessor *ModuleExpanderPP) {
-  SmallString<128> CompilerIncudeDir =
-      StringRef(PP->getHeaderSearchInfo().getHeaderSearchOpts().ResourceDir);
-  llvm::sys::path::append(CompilerIncudeDir, "include");
-  PP->addPPCallbacks(std::make_unique<RestrictedIncludesPPCallbacks>(
-      *this, SM, CompilerIncudeDir));
+    SmallString<128> CompilerIncudeDir =
+        StringRef(PP->getHeaderSearchInfo().getHeaderSearchOpts().ResourceDir);
+    llvm::sys::path::append(CompilerIncudeDir, "include");
+    PP->addPPCallbacks(std::make_unique<RestrictedIncludesPPCallbacks>(
+                           *this, SM, CompilerIncudeDir));
 }
 
 } // namespace llvm_libc

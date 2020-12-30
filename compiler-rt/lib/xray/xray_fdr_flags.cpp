@@ -38,9 +38,9 @@ void registerXRayFDRFlags(FlagParser *P, FDRFlags *F) XRAY_NEVER_INSTRUMENT {
 
 const char *useCompilerDefinedFDRFlags() XRAY_NEVER_INSTRUMENT {
 #ifdef XRAY_FDR_OPTIONS
-  return SANITIZER_STRINGIFY(XRAY_FDR_OPTIONS);
+    return SANITIZER_STRINGIFY(XRAY_FDR_OPTIONS);
 #else
-  return "";
+    return "";
 #endif
 }
 

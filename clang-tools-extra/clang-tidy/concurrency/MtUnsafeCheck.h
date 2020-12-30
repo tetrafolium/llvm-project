@@ -21,19 +21,19 @@ namespace concurrency {
 /// http://clang.llvm.org/extra/clang-tidy/checks/threads-mt-unsafe.html
 class MtUnsafeCheck : public ClangTidyCheck {
 public:
-  MtUnsafeCheck(StringRef Name, ClangTidyContext *Context);
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    MtUnsafeCheck(StringRef Name, ClangTidyContext *Context);
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
-  enum class FunctionSet {
-    Posix,
-    Glibc,
-    Any,
-  };
+    enum class FunctionSet {
+        Posix,
+        Glibc,
+        Any,
+    };
 
 private:
-  const FunctionSet FuncSet;
+    const FunctionSet FuncSet;
 };
 
 } // namespace concurrency

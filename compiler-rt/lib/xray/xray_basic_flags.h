@@ -24,13 +24,15 @@ struct BasicFlags {
 #include "xray_basic_flags.inc"
 #undef XRAY_FLAG
 
-  void setDefaults();
+    void setDefaults();
 };
 
 extern BasicFlags xray_basic_flags_dont_use_directly;
 extern void registerXRayBasicFlags(FlagParser *P, BasicFlags *F);
 const char *useCompilerDefinedBasicFlags();
-inline BasicFlags *basicFlags() { return &xray_basic_flags_dont_use_directly; }
+inline BasicFlags *basicFlags() {
+    return &xray_basic_flags_dont_use_directly;
+}
 
 } // namespace __xray
 

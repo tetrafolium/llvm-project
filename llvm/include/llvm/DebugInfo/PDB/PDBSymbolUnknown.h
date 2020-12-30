@@ -17,11 +17,11 @@ class raw_ostream;
 namespace pdb {
 
 class PDBSymbolUnknown : public PDBSymbol {
-  DECLARE_PDB_SYMBOL_CUSTOM_TYPE(S->getSymTag() == PDB_SymType::None ||
-                                 S->getSymTag() >= PDB_SymType::Max)
+    DECLARE_PDB_SYMBOL_CUSTOM_TYPE(S->getSymTag() == PDB_SymType::None ||
+                                   S->getSymTag() >= PDB_SymType::Max)
 
 public:
-  void dump(PDBSymDumper &Dumper) const override;
+    void dump(PDBSymDumper &Dumper) const override;
 };
 
 } // namespace llvm

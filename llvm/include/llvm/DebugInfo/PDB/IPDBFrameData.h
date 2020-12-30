@@ -19,14 +19,14 @@ namespace pdb {
 /// code block.
 class IPDBFrameData {
 public:
-  virtual ~IPDBFrameData();
+    virtual ~IPDBFrameData();
 
-  virtual uint32_t getAddressOffset() const = 0;
-  virtual uint32_t getAddressSection() const = 0;
-  virtual uint32_t getLengthBlock() const = 0;
-  virtual std::string getProgram() const = 0;
-  virtual uint32_t getRelativeVirtualAddress() const = 0;
-  virtual uint64_t getVirtualAddress() const = 0;
+    virtual uint32_t getAddressOffset() const = 0;
+    virtual uint32_t getAddressSection() const = 0;
+    virtual uint32_t getLengthBlock() const = 0;
+    virtual std::string getProgram() const = 0;
+    virtual uint32_t getRelativeVirtualAddress() const = 0;
+    virtual uint64_t getVirtualAddress() const = 0;
 };
 
 } // namespace pdb

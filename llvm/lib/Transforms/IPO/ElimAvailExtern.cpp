@@ -31,63 +31,63 @@ STATISTIC(NumFunctions, "Number of functions removed");
 STATISTIC(NumVariables, "Number of global variables removed");
 
 static bool eliminateAvailableExternally(Module &M) {
-  bool Changed = false;
+    bool Changed = false;
 
-  // Drop initializers of available externally global variables.
-  for (GlobalVariable &GV : M.globals()) {
-    if (!GV.hasAvailableExternallyLinkage())
-      continue;
-    if (GV.hasInitializer()) {
-      Constant *Init = GV.getInitializer();
-      GV.setInitializer(nullptr);
-      if (isSafeToDestroyConstant(Init))
-        Init->destroyConstant();
+    // Drop initializers of available externally global variables.
+    for (GlobalVariable &GV : M.globals()) {
+        if (!GV.hasAvailableExternallyLinkage())
+            continue;
+        if (GV.hasInitializer()) {
+            Constant *Init = GV.getInitializer();
+            GV.setInitializer(nullptr);
+            if (isSafeToDestroyConstant(Init))
+                Init->destroyConstant();
+        }
+        GV.removeDeadConstantUsers();
+        GV.setLinkage(GlobalValue::ExternalLinkage);
+        NumVariables++;
+        Changed = true;
     }
-    GV.removeDeadConstantUsers();
-    GV.setLinkage(GlobalValue::ExternalLinkage);
-    NumVariables++;
-    Changed = true;
-  }
 
-  // Drop the bodies of available externally functions.
-  for (Function &F : M) {
-    if (!F.hasAvailableExternallyLinkage())
-      continue;
-    if (!F.isDeclaration())
-      // This will set the linkage to external
-      F.deleteBody();
-    F.removeDeadConstantUsers();
-    NumFunctions++;
-    Changed = true;
-  }
+    // Drop the bodies of available externally functions.
+    for (Function &F : M) {
+        if (!F.hasAvailableExternallyLinkage())
+            continue;
+        if (!F.isDeclaration())
+            // This will set the linkage to external
+            F.deleteBody();
+        F.removeDeadConstantUsers();
+        NumFunctions++;
+        Changed = true;
+    }
 
-  return Changed;
+    return Changed;
 }
 
 PreservedAnalyses
 EliminateAvailableExternallyPass::run(Module &M, ModuleAnalysisManager &) {
-  if (!eliminateAvailableExternally(M))
-    return PreservedAnalyses::all();
-  return PreservedAnalyses::none();
+    if (!eliminateAvailableExternally(M))
+        return PreservedAnalyses::all();
+    return PreservedAnalyses::none();
 }
 
 namespace {
 
 struct EliminateAvailableExternallyLegacyPass : public ModulePass {
-  static char ID; // Pass identification, replacement for typeid
+    static char ID; // Pass identification, replacement for typeid
 
-  EliminateAvailableExternallyLegacyPass() : ModulePass(ID) {
-    initializeEliminateAvailableExternallyLegacyPassPass(
-        *PassRegistry::getPassRegistry());
-  }
+    EliminateAvailableExternallyLegacyPass() : ModulePass(ID) {
+        initializeEliminateAvailableExternallyLegacyPassPass(
+            *PassRegistry::getPassRegistry());
+    }
 
-  // run - Do the EliminateAvailableExternally pass on the specified module,
-  // optionally updating the specified callgraph to reflect the changes.
-  bool runOnModule(Module &M) override {
-    if (skipModule(M))
-      return false;
-    return eliminateAvailableExternally(M);
-  }
+    // run - Do the EliminateAvailableExternally pass on the specified module,
+    // optionally updating the specified callgraph to reflect the changes.
+    bool runOnModule(Module &M) override {
+        if (skipModule(M))
+            return false;
+        return eliminateAvailableExternally(M);
+    }
 };
 
 } // end anonymous namespace
@@ -98,5 +98,5 @@ INITIALIZE_PASS(EliminateAvailableExternallyLegacyPass, "elim-avail-extern",
                 "Eliminate Available Externally Globals", false, false)
 
 ModulePass *llvm::createEliminateAvailableExternallyPass() {
-  return new EliminateAvailableExternallyLegacyPass();
+    return new EliminateAvailableExternallyLegacyPass();
 }

@@ -38,23 +38,23 @@ class VarDecl;
 
 namespace consumed {
 
-  class ConsumedStmtVisitor;
+class ConsumedStmtVisitor;
 
-  enum ConsumedState {
+enum ConsumedState {
     // No state information for the given variable.
     CS_None,
 
     CS_Unknown,
     CS_Unconsumed,
     CS_Consumed
-  };
+};
 
-  using OptionalNotes = SmallVector<PartialDiagnosticAt, 1>;
-  using DelayedDiag = std::pair<PartialDiagnosticAt, OptionalNotes>;
-  using DiagList = std::list<DelayedDiag>;
+using OptionalNotes = SmallVector<PartialDiagnosticAt, 1>;
+using DelayedDiag = std::pair<PartialDiagnosticAt, OptionalNotes>;
+using DiagList = std::list<DelayedDiag>;
 
-  class ConsumedWarningsHandlerBase {
-  public:
+class ConsumedWarningsHandlerBase {
+public:
     virtual ~ConsumedWarningsHandlerBase();
 
     /// Emit the warnings and notes left by the analysis.
@@ -80,9 +80,9 @@ namespace consumed {
     /// \param ObservedState -- The state the return value was observed to be
     /// in.
     virtual void warnParamReturnTypestateMismatch(SourceLocation Loc,
-                                                  StringRef VariableName,
-                                                  StringRef ExpectedState,
-                                                  StringRef ObservedState) {}
+            StringRef VariableName,
+            StringRef ExpectedState,
+            StringRef ObservedState) {}
 
     // FIXME: Add documentation.
     virtual void warnParamTypestateMismatch(SourceLocation LOC,
@@ -97,7 +97,7 @@ namespace consumed {
     ///
     /// \param TypeName -- The name of the unconsumable type.
     virtual void warnReturnTypestateForUnconsumableType(SourceLocation Loc,
-                                                        StringRef TypeName) {}
+            StringRef TypeName) {}
 
     /// Warn about return typestate mismatches.
     ///
@@ -109,8 +109,8 @@ namespace consumed {
     /// \param ObservedState -- The state the return value was observed to be
     /// in.
     virtual void warnReturnTypestateMismatch(SourceLocation Loc,
-                                             StringRef ExpectedState,
-                                             StringRef ObservedState) {}
+            StringRef ExpectedState,
+            StringRef ObservedState) {}
 
     /// Warn about use-while-consumed errors.
     /// \param MethodName -- The name of the method that was incorrectly
@@ -120,8 +120,8 @@ namespace consumed {
     ///
     /// \param Loc -- The SourceLocation of the method invocation.
     virtual void warnUseOfTempInInvalidState(StringRef MethodName,
-                                             StringRef State,
-                                             SourceLocation Loc) {}
+            StringRef State,
+            SourceLocation Loc) {}
 
     /// Warn about use-while-consumed errors.
     /// \param MethodName -- The name of the method that was incorrectly
@@ -137,20 +137,20 @@ namespace consumed {
                                        StringRef VariableName,
                                        StringRef State,
                                        SourceLocation Loc) {}
-  };
+};
 
-  class ConsumedStateMap {
+class ConsumedStateMap {
     using VarMapType = llvm::DenseMap<const VarDecl *, ConsumedState>;
     using TmpMapType =
         llvm::DenseMap<const CXXBindTemporaryExpr *, ConsumedState>;
 
-  protected:
+protected:
     bool Reachable = true;
     const Stmt *From = nullptr;
     VarMapType VarMap;
     TmpMapType TmpMap;
 
-  public:
+public:
     ConsumedStateMap() = default;
     ConsumedStateMap(const ConsumedStateMap &Other)
         : Reachable(Other.Reachable), From(Other.From), VarMap(Other.VarMap),
@@ -159,7 +159,7 @@ namespace consumed {
     /// Warn if any of the parameters being tracked are not in the state
     /// they were declared to be in upon return from a function.
     void checkParamsForReturnTypestate(SourceLocation BlameLoc,
-      ConsumedWarningsHandlerBase &WarningsHandler) const;
+                                       ConsumedWarningsHandlerBase &WarningsHandler) const;
 
     /// Clear the TmpMap.
     void clearTemporaries();
@@ -174,11 +174,13 @@ namespace consumed {
     void intersect(const ConsumedStateMap &Other);
 
     void intersectAtLoopHead(const CFGBlock *LoopHead, const CFGBlock *LoopBack,
-      const ConsumedStateMap *LoopBackStates,
-      ConsumedWarningsHandlerBase &WarningsHandler);
+                             const ConsumedStateMap *LoopBackStates,
+                             ConsumedWarningsHandlerBase &WarningsHandler);
 
     /// Return true if this block is reachable.
-    bool isReachable() const { return Reachable; }
+    bool isReachable() const {
+        return Reachable;
+    }
 
     /// Mark the block as unreachable.
     void markUnreachable();
@@ -186,7 +188,9 @@ namespace consumed {
     /// Set the source for a decision about the branching of states.
     /// \param Source -- The statement that was the origin of a branching
     /// decision.
-    void setSource(const Stmt *Source) { this->From = Source; }
+    void setSource(const Stmt *Source) {
+        this->From = Source;
+    }
 
     /// Set the consumed state of a given variable.
     void setState(const VarDecl *Var, ConsumedState State);
@@ -202,20 +206,20 @@ namespace consumed {
     ///
     /// \param Other -- The second map to compare against.
     bool operator!=(const ConsumedStateMap *Other) const;
-  };
+};
 
-  class ConsumedBlockInfo {
+class ConsumedBlockInfo {
     std::vector<std::unique_ptr<ConsumedStateMap>> StateMapsArray;
     std::vector<unsigned int> VisitOrder;
 
-  public:
+public:
     ConsumedBlockInfo() = default;
 
     ConsumedBlockInfo(unsigned int NumBlocks, PostOrderCFGView *SortedGraph)
         : StateMapsArray(NumBlocks), VisitOrder(NumBlocks, 0) {
-      unsigned int VisitOrderCounter = 0;
-      for (const auto BI : *SortedGraph)
-        VisitOrder[BI->getBlockID()] = VisitOrderCounter++;
+        unsigned int VisitOrderCounter = 0;
+        for (const auto BI : *SortedGraph)
+            VisitOrder[BI->getBlockID()] = VisitOrderCounter++;
     }
 
     bool allBackEdgesVisited(const CFGBlock *CurrBlock,
@@ -234,10 +238,10 @@ namespace consumed {
 
     bool isBackEdge(const CFGBlock *From, const CFGBlock *To);
     bool isBackEdgeTarget(const CFGBlock *Block);
-  };
+};
 
-  /// A class that handles the analysis of uniqueness violations.
-  class ConsumedAnalyzer {
+/// A class that handles the analysis of uniqueness violations.
+class ConsumedAnalyzer {
     ConsumedBlockInfo BlockInfo;
     std::unique_ptr<ConsumedStateMap> CurrStates;
 
@@ -248,13 +252,15 @@ namespace consumed {
     bool splitState(const CFGBlock *CurrBlock,
                     const ConsumedStmtVisitor &Visitor);
 
-  public:
+public:
     ConsumedWarningsHandlerBase &WarningsHandler;
 
     ConsumedAnalyzer(ConsumedWarningsHandlerBase &WarningsHandler)
         : WarningsHandler(WarningsHandler) {}
 
-    ConsumedState getExpectedReturnState() const { return ExpectedReturnState; }
+    ConsumedState getExpectedReturnState() const {
+        return ExpectedReturnState;
+    }
 
     /// Check a function's CFG for consumed violations.
     ///
@@ -263,7 +269,7 @@ namespace consumed {
     /// the wrong state a warning is issued.  Each block in the CFG is traversed
     /// exactly once.
     void run(AnalysisDeclContext &AC);
-  };
+};
 
 } // namespace consumed
 

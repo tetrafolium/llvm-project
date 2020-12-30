@@ -17,68 +17,74 @@ namespace lldb_private {
 
 class ProcessTrace : public PostMortemProcess {
 public:
-  static void Initialize();
+    static void Initialize();
 
-  static void Terminate();
+    static void Terminate();
 
-  static ConstString GetPluginNameStatic();
+    static ConstString GetPluginNameStatic();
 
-  static const char *GetPluginDescriptionStatic();
+    static const char *GetPluginDescriptionStatic();
 
-  ProcessTrace(lldb::TargetSP target_sp, lldb::ListenerSP listener_sp);
+    ProcessTrace(lldb::TargetSP target_sp, lldb::ListenerSP listener_sp);
 
-  ~ProcessTrace() override;
+    ~ProcessTrace() override;
 
-  bool CanDebug(lldb::TargetSP target_sp,
-                bool plugin_specified_by_name) override;
+    bool CanDebug(lldb::TargetSP target_sp,
+                  bool plugin_specified_by_name) override;
 
-  void DidAttach(ArchSpec &process_arch) override;
+    void DidAttach(ArchSpec &process_arch) override;
 
-  DynamicLoader *GetDynamicLoader() override { return nullptr; }
+    DynamicLoader *GetDynamicLoader() override {
+        return nullptr;
+    }
 
-  SystemRuntime *GetSystemRuntime() override { return nullptr; }
+    SystemRuntime *GetSystemRuntime() override {
+        return nullptr;
+    }
 
-  ConstString GetPluginName() override;
+    ConstString GetPluginName() override;
 
-  uint32_t GetPluginVersion() override;
+    uint32_t GetPluginVersion() override;
 
-  Status DoDestroy() override;
+    Status DoDestroy() override;
 
-  void RefreshStateAfterStop() override;
+    void RefreshStateAfterStop() override;
 
-  Status WillResume() override {
-    Status error;
-    error.SetErrorStringWithFormat(
-        "error: %s does not support resuming processes",
-        GetPluginName().GetCString());
-    return error;
-  }
+    Status WillResume() override {
+        Status error;
+        error.SetErrorStringWithFormat(
+            "error: %s does not support resuming processes",
+            GetPluginName().GetCString());
+        return error;
+    }
 
-  bool IsAlive() override;
+    bool IsAlive() override;
 
-  bool WarnBeforeDetach() const override { return false; }
+    bool WarnBeforeDetach() const override {
+        return false;
+    }
 
-  size_t ReadMemory(lldb::addr_t addr, void *buf, size_t size,
-                    Status &error) override;
-
-  size_t DoReadMemory(lldb::addr_t addr, void *buf, size_t size,
+    size_t ReadMemory(lldb::addr_t addr, void *buf, size_t size,
                       Status &error) override;
 
-  ArchSpec GetArchitecture();
+    size_t DoReadMemory(lldb::addr_t addr, void *buf, size_t size,
+                        Status &error) override;
 
-  bool GetProcessInfo(ProcessInstanceInfo &info) override;
+    ArchSpec GetArchitecture();
+
+    bool GetProcessInfo(ProcessInstanceInfo &info) override;
 
 protected:
-  void Clear();
+    void Clear();
 
-  bool UpdateThreadList(ThreadList &old_thread_list,
-                        ThreadList &new_thread_list) override;
+    bool UpdateThreadList(ThreadList &old_thread_list,
+                          ThreadList &new_thread_list) override;
 
 private:
-  static lldb::ProcessSP CreateInstance(lldb::TargetSP target_sp,
-                                        lldb::ListenerSP listener_sp,
-                                        const FileSpec *crash_file_path,
-                                        bool can_connect);
+    static lldb::ProcessSP CreateInstance(lldb::TargetSP target_sp,
+                                          lldb::ListenerSP listener_sp,
+                                          const FileSpec *crash_file_path,
+                                          bool can_connect);
 };
 
 } // namespace lldb_private

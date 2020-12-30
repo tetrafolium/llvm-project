@@ -19,34 +19,38 @@
 namespace __sanitizer {
 
 enum PtraceRegistersStatus {
-  REGISTERS_UNAVAILABLE_FATAL = -1,
-  REGISTERS_UNAVAILABLE = 0,
-  REGISTERS_AVAILABLE = 1
+    REGISTERS_UNAVAILABLE_FATAL = -1,
+    REGISTERS_UNAVAILABLE = 0,
+    REGISTERS_AVAILABLE = 1
 };
 
 // Holds the list of suspended threads and provides an interface to dump their
 // register contexts.
 class SuspendedThreadsList {
- public:
-  SuspendedThreadsList() = default;
+public:
+    SuspendedThreadsList() = default;
 
-  // Can't declare pure virtual functions in sanitizer runtimes:
-  // __cxa_pure_virtual might be unavailable. Use UNIMPLEMENTED() instead.
-  virtual PtraceRegistersStatus GetRegistersAndSP(
-      uptr index, InternalMmapVector<uptr> *buffer, uptr *sp) const {
-    UNIMPLEMENTED();
-  }
+    // Can't declare pure virtual functions in sanitizer runtimes:
+    // __cxa_pure_virtual might be unavailable. Use UNIMPLEMENTED() instead.
+    virtual PtraceRegistersStatus GetRegistersAndSP(
+        uptr index, InternalMmapVector<uptr> *buffer, uptr *sp) const {
+        UNIMPLEMENTED();
+    }
 
-  virtual uptr ThreadCount() const { UNIMPLEMENTED(); }
-  virtual tid_t GetThreadID(uptr index) const { UNIMPLEMENTED(); }
+    virtual uptr ThreadCount() const {
+        UNIMPLEMENTED();
+    }
+    virtual tid_t GetThreadID(uptr index) const {
+        UNIMPLEMENTED();
+    }
 
- protected:
-  ~SuspendedThreadsList() {}
+protected:
+    ~SuspendedThreadsList() {}
 
- private:
-  // Prohibit copy and assign.
-  SuspendedThreadsList(const SuspendedThreadsList &) = delete;
-  void operator=(const SuspendedThreadsList &) = delete;
+private:
+    // Prohibit copy and assign.
+    SuspendedThreadsList(const SuspendedThreadsList &) = delete;
+    void operator=(const SuspendedThreadsList &) = delete;
 };
 
 typedef void (*StopTheWorldCallback)(

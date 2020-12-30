@@ -20,23 +20,23 @@ namespace runtime {
 
 void OverloadedUnaryAndCheck::registerMatchers(
     ast_matchers::MatchFinder *Finder) {
-  // Match unary methods that overload operator&.
-  Finder->addMatcher(
-      cxxMethodDecl(parameterCountIs(0), hasOverloadedOperatorName("&"))
-          .bind("overload"),
-      this);
-  // Also match freestanding unary operator& overloads. Be careful not to match
-  // binary methods.
-  Finder->addMatcher(functionDecl(unless(cxxMethodDecl()), parameterCountIs(1),
-                                  hasOverloadedOperatorName("&"))
-                         .bind("overload"),
-                     this);
+    // Match unary methods that overload operator&.
+    Finder->addMatcher(
+        cxxMethodDecl(parameterCountIs(0), hasOverloadedOperatorName("&"))
+        .bind("overload"),
+        this);
+    // Also match freestanding unary operator& overloads. Be careful not to match
+    // binary methods.
+    Finder->addMatcher(functionDecl(unless(cxxMethodDecl()), parameterCountIs(1),
+                                    hasOverloadedOperatorName("&"))
+                       .bind("overload"),
+                       this);
 }
 
 void OverloadedUnaryAndCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *Decl = Result.Nodes.getNodeAs<FunctionDecl>("overload");
-  diag(Decl->getBeginLoc(),
-       "do not overload unary operator&, it is dangerous.");
+    const auto *Decl = Result.Nodes.getNodeAs<FunctionDecl>("overload");
+    diag(Decl->getBeginLoc(),
+         "do not overload unary operator&, it is dangerous.");
 }
 
 } // namespace runtime

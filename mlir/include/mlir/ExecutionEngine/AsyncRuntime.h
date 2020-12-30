@@ -57,11 +57,11 @@ using RefCountedObjPtr = void *;
 
 // Adds references to reference counted runtime object.
 extern "C" MLIR_ASYNCRUNTIME_EXPORT void
-    mlirAsyncRuntimeAddRef(RefCountedObjPtr, int32_t);
+mlirAsyncRuntimeAddRef(RefCountedObjPtr, int32_t);
 
 // Drops references from reference counted runtime object.
 extern "C" MLIR_ASYNCRUNTIME_EXPORT void
-    mlirAsyncRuntimeDropRef(RefCountedObjPtr, int32_t);
+mlirAsyncRuntimeDropRef(RefCountedObjPtr, int32_t);
 
 // Create a new `async.token` in not-ready state.
 extern "C" MLIR_ASYNCRUNTIME_EXPORT AsyncToken *mlirAsyncRuntimeCreateToken();
@@ -87,7 +87,7 @@ mlirAsyncRuntimeAwaitAllInGroup(AsyncGroup *);
 // Executes the task (coro handle + resume function) in one of the threads
 // managed by the runtime.
 extern "C" MLIR_ASYNCRUNTIME_EXPORT void mlirAsyncRuntimeExecute(CoroHandle,
-                                                                 CoroResume);
+        CoroResume);
 
 // Executes the task (coro handle + resume function) in one of the threads
 // managed by the runtime after the token becomes ready.

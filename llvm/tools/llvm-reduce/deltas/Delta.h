@@ -24,61 +24,65 @@
 namespace llvm {
 
 struct Chunk {
-  int begin;
-  int end;
+    int begin;
+    int end;
 
-  /// Helper function to verify if a given Target-index is inside the Chunk
-  bool contains(int Index) const { return Index >= begin && Index <= end; }
+    /// Helper function to verify if a given Target-index is inside the Chunk
+    bool contains(int Index) const {
+        return Index >= begin && Index <= end;
+    }
 
-  void print() const {
-    errs() << "[" << begin;
-    if (end - begin != 0)
-      errs() << "," << end;
-    errs() << "]";
-  }
+    void print() const {
+        errs() << "[" << begin;
+        if (end - begin != 0)
+            errs() << "," << end;
+        errs() << "]";
+    }
 
-  /// Operator when populating CurrentChunks in Generic Delta Pass
-  friend bool operator!=(const Chunk &C1, const Chunk &C2) {
-    return C1.begin != C2.begin || C1.end != C2.end;
-  }
+    /// Operator when populating CurrentChunks in Generic Delta Pass
+    friend bool operator!=(const Chunk &C1, const Chunk &C2) {
+        return C1.begin != C2.begin || C1.end != C2.end;
+    }
 
-  /// Operator used for sets
-  friend bool operator<(const Chunk &C1, const Chunk &C2) {
-    return std::tie(C1.begin, C1.end) < std::tie(C2.begin, C2.end);
-  }
+    /// Operator used for sets
+    friend bool operator<(const Chunk &C1, const Chunk &C2) {
+        return std::tie(C1.begin, C1.end) < std::tie(C2.begin, C2.end);
+    }
 };
 
 /// Provides opaque interface for querying into ChunksToKeep without having to
 /// actually understand what is going on.
 class Oracle {
-  /// Out of all the features that we promised to be,
-  /// how many have we already processed? 1-based!
-  int Index = 1;
+    /// Out of all the features that we promised to be,
+    /// how many have we already processed? 1-based!
+    int Index = 1;
 
-  /// The actual workhorse, contains the knowledge whether or not
-  /// some particular feature should be preserved this time.
-  ArrayRef<Chunk> ChunksToKeep;
+    /// The actual workhorse, contains the knowledge whether or not
+    /// some particular feature should be preserved this time.
+    ArrayRef<Chunk> ChunksToKeep;
 
 public:
-  explicit Oracle(ArrayRef<Chunk> ChunksToKeep_)
-      : ChunksToKeep(ChunksToKeep_) {}
+    explicit Oracle(ArrayRef<Chunk> ChunksToKeep_)
+        : ChunksToKeep(ChunksToKeep_) {}
 
-  /// Should be called for each feature on which we are operating.
-  /// Name is self-explanatory - if returns true, then it should be preserved.
-  bool shouldKeep() {
-    if (ChunksToKeep.empty())
-      return false; // All further features are to be discarded.
+    /// Should be called for each feature on which we are operating.
+    /// Name is self-explanatory - if returns true, then it should be preserved.
+    bool shouldKeep() {
+        if (ChunksToKeep.empty())
+            return false; // All further features are to be discarded.
 
-    // Does the current (front) chunk contain such a feature?
-    bool ShouldKeep = ChunksToKeep.front().contains(Index);
-    auto _ = make_scope_exit([&]() { ++Index; }); // Next time - next feature.
+        // Does the current (front) chunk contain such a feature?
+        bool ShouldKeep = ChunksToKeep.front().contains(Index);
+        auto _ = make_scope_exit([&]() {
+            ++Index;
+        }); // Next time - next feature.
 
-    // Is this the last feature in the chunk?
-    if (ChunksToKeep.front().end == Index)
-      ChunksToKeep = ChunksToKeep.drop_front(); // Onto next chunk.
+        // Is this the last feature in the chunk?
+        if (ChunksToKeep.front().end == Index)
+            ChunksToKeep = ChunksToKeep.drop_front(); // Onto next chunk.
 
-    return ShouldKeep;
-  }
+        return ShouldKeep;
+    }
 };
 
 /// This function implements the Delta Debugging algorithm, it receives a
@@ -104,7 +108,7 @@ public:
 /// the CReduce, Delta, and Lithium projects.
 void runDeltaPass(TestRunner &Test, int Targets,
                   std::function<void(const std::vector<Chunk> &, Module *)>
-                      ExtractChunksFromModule);
+                  ExtractChunksFromModule);
 } // namespace llvm
 
 #endif

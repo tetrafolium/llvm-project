@@ -42,15 +42,15 @@ public:
         __barrier_phase_t const __half_step = __old_phase + 1,
                                 __full_step = __old_phase + 2;
         size_t __current_expected = __expected,
-            __current = hash<thread::id>()(this_thread::get_id()) % ((__expected + 1) >> 1);
+               __current = hash<thread::id>()(this_thread::get_id()) % ((__expected + 1) >> 1);
         for(int __round = 0;; ++__round) {
             if(__current_expected <= 1)
                 return true;
             size_t const __end_node = ((__current_expected + 1) >> 1),
                          __last_node = __end_node - 1;
-            for(;;++__current) {
+            for(;; ++__current) {
                 if(__current == __end_node)
-                __current = 0;
+                    __current = 0;
                 __barrier_phase_t expect = __old_phase;
                 if(__current == __last_node && (__current_expected & 1))
                 {

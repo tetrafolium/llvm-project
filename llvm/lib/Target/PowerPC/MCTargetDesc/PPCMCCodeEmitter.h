@@ -23,107 +23,107 @@
 namespace llvm {
 
 class PPCMCCodeEmitter : public MCCodeEmitter {
-  const MCInstrInfo &MCII;
-  const MCContext &CTX;
-  bool IsLittleEndian;
+    const MCInstrInfo &MCII;
+    const MCContext &CTX;
+    bool IsLittleEndian;
 
 public:
-  PPCMCCodeEmitter(const MCInstrInfo &mcii, MCContext &ctx)
-      : MCII(mcii), CTX(ctx),
-        IsLittleEndian(ctx.getAsmInfo()->isLittleEndian()) {}
-  PPCMCCodeEmitter(const PPCMCCodeEmitter &) = delete;
-  void operator=(const PPCMCCodeEmitter &) = delete;
-  ~PPCMCCodeEmitter() override = default;
+    PPCMCCodeEmitter(const MCInstrInfo &mcii, MCContext &ctx)
+        : MCII(mcii), CTX(ctx),
+          IsLittleEndian(ctx.getAsmInfo()->isLittleEndian()) {}
+    PPCMCCodeEmitter(const PPCMCCodeEmitter &) = delete;
+    void operator=(const PPCMCCodeEmitter &) = delete;
+    ~PPCMCCodeEmitter() override = default;
 
-  unsigned getDirectBrEncoding(const MCInst &MI, unsigned OpNo,
+    unsigned getDirectBrEncoding(const MCInst &MI, unsigned OpNo,
+                                 SmallVectorImpl<MCFixup> &Fixups,
+                                 const MCSubtargetInfo &STI) const;
+    unsigned getCondBrEncoding(const MCInst &MI, unsigned OpNo,
                                SmallVectorImpl<MCFixup> &Fixups,
                                const MCSubtargetInfo &STI) const;
-  unsigned getCondBrEncoding(const MCInst &MI, unsigned OpNo,
-                             SmallVectorImpl<MCFixup> &Fixups,
-                             const MCSubtargetInfo &STI) const;
-  unsigned getAbsDirectBrEncoding(const MCInst &MI, unsigned OpNo,
+    unsigned getAbsDirectBrEncoding(const MCInst &MI, unsigned OpNo,
+                                    SmallVectorImpl<MCFixup> &Fixups,
+                                    const MCSubtargetInfo &STI) const;
+    unsigned getAbsCondBrEncoding(const MCInst &MI, unsigned OpNo,
                                   SmallVectorImpl<MCFixup> &Fixups,
                                   const MCSubtargetInfo &STI) const;
-  unsigned getAbsCondBrEncoding(const MCInst &MI, unsigned OpNo,
+    unsigned getImm16Encoding(const MCInst &MI, unsigned OpNo,
+                              SmallVectorImpl<MCFixup> &Fixups,
+                              const MCSubtargetInfo &STI) const;
+    uint64_t getImm34Encoding(const MCInst &MI, unsigned OpNo,
+                              SmallVectorImpl<MCFixup> &Fixups,
+                              const MCSubtargetInfo &STI,
+                              MCFixupKind Fixup) const;
+    uint64_t getImm34EncodingNoPCRel(const MCInst &MI, unsigned OpNo,
+                                     SmallVectorImpl<MCFixup> &Fixups,
+                                     const MCSubtargetInfo &STI) const;
+    uint64_t getImm34EncodingPCRel(const MCInst &MI, unsigned OpNo,
+                                   SmallVectorImpl<MCFixup> &Fixups,
+                                   const MCSubtargetInfo &STI) const;
+    unsigned getMemRIEncoding(const MCInst &MI, unsigned OpNo,
+                              SmallVectorImpl<MCFixup> &Fixups,
+                              const MCSubtargetInfo &STI) const;
+    unsigned getMemRIXEncoding(const MCInst &MI, unsigned OpNo,
+                               SmallVectorImpl<MCFixup> &Fixups,
+                               const MCSubtargetInfo &STI) const;
+    unsigned getMemRIX16Encoding(const MCInst &MI, unsigned OpNo,
+                                 SmallVectorImpl<MCFixup> &Fixups,
+                                 const MCSubtargetInfo &STI) const;
+    uint64_t getMemRI34PCRelEncoding(const MCInst &MI, unsigned OpNo,
+                                     SmallVectorImpl<MCFixup> &Fixups,
+                                     const MCSubtargetInfo &STI) const;
+    uint64_t getMemRI34Encoding(const MCInst &MI, unsigned OpNo,
                                 SmallVectorImpl<MCFixup> &Fixups,
                                 const MCSubtargetInfo &STI) const;
-  unsigned getImm16Encoding(const MCInst &MI, unsigned OpNo,
-                            SmallVectorImpl<MCFixup> &Fixups,
-                            const MCSubtargetInfo &STI) const;
-  uint64_t getImm34Encoding(const MCInst &MI, unsigned OpNo,
-                            SmallVectorImpl<MCFixup> &Fixups,
-                            const MCSubtargetInfo &STI,
-                            MCFixupKind Fixup) const;
-  uint64_t getImm34EncodingNoPCRel(const MCInst &MI, unsigned OpNo,
-                                   SmallVectorImpl<MCFixup> &Fixups,
-                                   const MCSubtargetInfo &STI) const;
-  uint64_t getImm34EncodingPCRel(const MCInst &MI, unsigned OpNo,
+    unsigned getSPE8DisEncoding(const MCInst &MI, unsigned OpNo,
+                                SmallVectorImpl<MCFixup> &Fixups,
+                                const MCSubtargetInfo &STI) const;
+    unsigned getSPE4DisEncoding(const MCInst &MI, unsigned OpNo,
+                                SmallVectorImpl<MCFixup> &Fixups,
+                                const MCSubtargetInfo &STI) const;
+    unsigned getSPE2DisEncoding(const MCInst &MI, unsigned OpNo,
+                                SmallVectorImpl<MCFixup> &Fixups,
+                                const MCSubtargetInfo &STI) const;
+    unsigned getTLSRegEncoding(const MCInst &MI, unsigned OpNo,
+                               SmallVectorImpl<MCFixup> &Fixups,
+                               const MCSubtargetInfo &STI) const;
+    unsigned getTLSCallEncoding(const MCInst &MI, unsigned OpNo,
+                                SmallVectorImpl<MCFixup> &Fixups,
+                                const MCSubtargetInfo &STI) const;
+    unsigned get_crbitm_encoding(const MCInst &MI, unsigned OpNo,
                                  SmallVectorImpl<MCFixup> &Fixups,
                                  const MCSubtargetInfo &STI) const;
-  unsigned getMemRIEncoding(const MCInst &MI, unsigned OpNo,
-                            SmallVectorImpl<MCFixup> &Fixups,
-                            const MCSubtargetInfo &STI) const;
-  unsigned getMemRIXEncoding(const MCInst &MI, unsigned OpNo,
-                             SmallVectorImpl<MCFixup> &Fixups,
-                             const MCSubtargetInfo &STI) const;
-  unsigned getMemRIX16Encoding(const MCInst &MI, unsigned OpNo,
-                               SmallVectorImpl<MCFixup> &Fixups,
-                               const MCSubtargetInfo &STI) const;
-  uint64_t getMemRI34PCRelEncoding(const MCInst &MI, unsigned OpNo,
-                                   SmallVectorImpl<MCFixup> &Fixups,
-                                   const MCSubtargetInfo &STI) const;
-  uint64_t getMemRI34Encoding(const MCInst &MI, unsigned OpNo,
-                              SmallVectorImpl<MCFixup> &Fixups,
-                              const MCSubtargetInfo &STI) const;
-  unsigned getSPE8DisEncoding(const MCInst &MI, unsigned OpNo,
-                              SmallVectorImpl<MCFixup> &Fixups,
-                              const MCSubtargetInfo &STI) const;
-  unsigned getSPE4DisEncoding(const MCInst &MI, unsigned OpNo,
-                              SmallVectorImpl<MCFixup> &Fixups,
-                              const MCSubtargetInfo &STI) const;
-  unsigned getSPE2DisEncoding(const MCInst &MI, unsigned OpNo,
-                              SmallVectorImpl<MCFixup> &Fixups,
-                              const MCSubtargetInfo &STI) const;
-  unsigned getTLSRegEncoding(const MCInst &MI, unsigned OpNo,
-                             SmallVectorImpl<MCFixup> &Fixups,
-                             const MCSubtargetInfo &STI) const;
-  unsigned getTLSCallEncoding(const MCInst &MI, unsigned OpNo,
-                              SmallVectorImpl<MCFixup> &Fixups,
-                              const MCSubtargetInfo &STI) const;
-  unsigned get_crbitm_encoding(const MCInst &MI, unsigned OpNo,
-                               SmallVectorImpl<MCFixup> &Fixups,
-                               const MCSubtargetInfo &STI) const;
-  unsigned getVSRpEvenEncoding(const MCInst &MI, unsigned OpNo,
-                               SmallVectorImpl<MCFixup> &Fixups,
-                               const MCSubtargetInfo &STI) const;
-
-  /// getMachineOpValue - Return binary encoding of operand. If the machine
-  /// operand requires relocation, record the relocation and return zero.
-  uint64_t getMachineOpValue(const MCInst &MI, const MCOperand &MO,
-                             SmallVectorImpl<MCFixup> &Fixups,
-                             const MCSubtargetInfo &STI) const;
-
-  // getBinaryCodeForInstr - TableGen'erated function for getting the
-  // binary encoding for an instruction.
-  uint64_t getBinaryCodeForInstr(const MCInst &MI,
+    unsigned getVSRpEvenEncoding(const MCInst &MI, unsigned OpNo,
                                  SmallVectorImpl<MCFixup> &Fixups,
                                  const MCSubtargetInfo &STI) const;
 
-  void encodeInstruction(const MCInst &MI, raw_ostream &OS,
-                         SmallVectorImpl<MCFixup> &Fixups,
-                         const MCSubtargetInfo &STI) const override;
+    /// getMachineOpValue - Return binary encoding of operand. If the machine
+    /// operand requires relocation, record the relocation and return zero.
+    uint64_t getMachineOpValue(const MCInst &MI, const MCOperand &MO,
+                               SmallVectorImpl<MCFixup> &Fixups,
+                               const MCSubtargetInfo &STI) const;
 
-  // Get the number of bytes used to encode the given MCInst.
-  unsigned getInstSizeInBytes(const MCInst &MI) const;
+    // getBinaryCodeForInstr - TableGen'erated function for getting the
+    // binary encoding for an instruction.
+    uint64_t getBinaryCodeForInstr(const MCInst &MI,
+                                   SmallVectorImpl<MCFixup> &Fixups,
+                                   const MCSubtargetInfo &STI) const;
 
-  // Is this instruction a prefixed instruction.
-  bool isPrefixedInstruction(const MCInst &MI) const;
+    void encodeInstruction(const MCInst &MI, raw_ostream &OS,
+                           SmallVectorImpl<MCFixup> &Fixups,
+                           const MCSubtargetInfo &STI) const override;
+
+    // Get the number of bytes used to encode the given MCInst.
+    unsigned getInstSizeInBytes(const MCInst &MI) const;
+
+    // Is this instruction a prefixed instruction.
+    bool isPrefixedInstruction(const MCInst &MI) const;
 
 private:
-  FeatureBitset computeAvailableFeatures(const FeatureBitset &FB) const;
-  void
-  verifyInstructionPredicates(const MCInst &MI,
-                              const FeatureBitset &AvailableFeatures) const;
+    FeatureBitset computeAvailableFeatures(const FeatureBitset &FB) const;
+    void
+    verifyInstructionPredicates(const MCInst &MI,
+                                const FeatureBitset &AvailableFeatures) const;
 };
 
 } // namespace llvm

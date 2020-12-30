@@ -15,9 +15,9 @@ namespace lldb_private {
 
 class CommandObjectTrace : public CommandObjectMultiword {
 public:
-  CommandObjectTrace(CommandInterpreter &interpreter);
+    CommandObjectTrace(CommandInterpreter &interpreter);
 
-  ~CommandObjectTrace() override;
+    ~CommandObjectTrace() override;
 };
 
 } // namespace lldb_private

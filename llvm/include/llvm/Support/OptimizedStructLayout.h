@@ -22,7 +22,7 @@
 ///
 /// - First, it does not guarantee that the result is minimal in size.
 ///   There is no known efficient algoorithm to achieve minimality for
-///   unrestricted inputs.  Nonetheless, this algorithm 
+///   unrestricted inputs.  Nonetheless, this algorithm
 ///
 /// - Second, there are other ways that a struct layout could be optimized
 ///   besides space usage, such as locality.  This layout may have a mixed
@@ -42,47 +42,47 @@ namespace llvm {
 
 /// A field in a structure.
 struct OptimizedStructLayoutField {
-  /// A special value for Offset indicating that the field can be moved
-  /// anywhere.
-  static constexpr uint64_t FlexibleOffset = ~(uint64_t)0;
+    /// A special value for Offset indicating that the field can be moved
+    /// anywhere.
+    static constexpr uint64_t FlexibleOffset = ~(uint64_t)0;
 
-  OptimizedStructLayoutField(const void *Id, uint64_t Size, Align Alignment,
-                             uint64_t FixedOffset = FlexibleOffset)
-      : Offset(FixedOffset), Size(Size), Id(Id), Alignment(Alignment) {
-    assert(Size > 0 && "adding an empty field to the layout");
-  }
+    OptimizedStructLayoutField(const void *Id, uint64_t Size, Align Alignment,
+                               uint64_t FixedOffset = FlexibleOffset)
+        : Offset(FixedOffset), Size(Size), Id(Id), Alignment(Alignment) {
+        assert(Size > 0 && "adding an empty field to the layout");
+    }
 
-  /// The offset of this field in the final layout.  If this is
-  /// initialized to FlexibleOffset, layout will overwrite it with
-  /// the assigned offset of the field.
-  uint64_t Offset;
+    /// The offset of this field in the final layout.  If this is
+    /// initialized to FlexibleOffset, layout will overwrite it with
+    /// the assigned offset of the field.
+    uint64_t Offset;
 
-  /// The required size of this field in bytes.  Does not have to be
-  /// a multiple of Alignment.  Must be non-zero.
-  uint64_t Size;
+    /// The required size of this field in bytes.  Does not have to be
+    /// a multiple of Alignment.  Must be non-zero.
+    uint64_t Size;
 
-  /// A opaque value which uniquely identifies this field.
-  const void *Id;
+    /// A opaque value which uniquely identifies this field.
+    const void *Id;
 
-  /// Private scratch space for the algorithm.  The implementation
-  /// must treat this as uninitialized memory on entry.
-  void *Scratch;
+    /// Private scratch space for the algorithm.  The implementation
+    /// must treat this as uninitialized memory on entry.
+    void *Scratch;
 
-  /// The required alignment of this field.
-  Align Alignment;
+    /// The required alignment of this field.
+    Align Alignment;
 
-  /// Return true if this field has been assigned a fixed offset.
-  /// After layout, this will be true of all the fields.
-  bool hasFixedOffset() const {
-    return (Offset != FlexibleOffset);
-  }
+    /// Return true if this field has been assigned a fixed offset.
+    /// After layout, this will be true of all the fields.
+    bool hasFixedOffset() const {
+        return (Offset != FlexibleOffset);
+    }
 
-  /// Given that this field has a fixed offset, return the offset
-  /// of the first byte following it.
-  uint64_t getEndOffset() const {
-    assert(hasFixedOffset());
-    return Offset + Size;
-  }
+    /// Given that this field has a fixed offset, return the offset
+    /// of the first byte following it.
+    uint64_t getEndOffset() const {
+        assert(hasFixedOffset());
+        return Offset + Size;
+    }
 };
 
 /// Compute a layout for a struct containing the given fields, making a
@@ -135,7 +135,7 @@ struct OptimizedStructLayoutField {
 /// alignment.  Note that the total size is not rounded up to a multiple
 /// of the required alignment; clients which require this can do so easily.
 std::pair<uint64_t, Align> performOptimizedStructLayout(
-                        MutableArrayRef<OptimizedStructLayoutField> Fields);
+    MutableArrayRef<OptimizedStructLayoutField> Fields);
 
 } // namespace llvm
 

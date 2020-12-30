@@ -6,5 +6,5 @@
  */
 static __isl_give isl_map *set_to_map(__isl_take isl_set *set)
 {
-	return (isl_map *) set;
+    return (isl_map *) set;
 }

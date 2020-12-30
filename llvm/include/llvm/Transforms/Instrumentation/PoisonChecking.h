@@ -15,8 +15,8 @@
 namespace llvm {
 
 struct PoisonCheckingPass : public PassInfoMixin<PoisonCheckingPass> {
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 }

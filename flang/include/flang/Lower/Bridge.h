@@ -51,64 +51,72 @@ namespace lower {
 /// checking residual to MLIR (FIR dialect) code.
 class LoweringBridge {
 public:
-  /// Create a lowering bridge instance.
-  static LoweringBridge
-  create(const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
-         const Fortran::evaluate::IntrinsicProcTable &intrinsics,
-         const Fortran::parser::AllCookedSources &allCooked) {
-    return LoweringBridge{defaultKinds, intrinsics, allCooked};
-  }
+    /// Create a lowering bridge instance.
+    static LoweringBridge
+    create(const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
+           const Fortran::evaluate::IntrinsicProcTable &intrinsics,
+           const Fortran::parser::AllCookedSources &allCooked) {
+        return LoweringBridge{defaultKinds, intrinsics, allCooked};
+    }
 
-  //===--------------------------------------------------------------------===//
-  // Getters
-  //===--------------------------------------------------------------------===//
+    //===--------------------------------------------------------------------===//
+    // Getters
+    //===--------------------------------------------------------------------===//
 
-  mlir::MLIRContext &getMLIRContext() { return *context.get(); }
-  mlir::ModuleOp &getModule() { return *module.get(); }
-  const Fortran::common::IntrinsicTypeDefaultKinds &getDefaultKinds() const {
-    return defaultKinds;
-  }
-  const Fortran::evaluate::IntrinsicProcTable &getIntrinsicTable() const {
-    return intrinsics;
-  }
-  const Fortran::parser::AllCookedSources *getCookedSource() const {
-    return cooked;
-  }
+    mlir::MLIRContext &getMLIRContext() {
+        return *context.get();
+    }
+    mlir::ModuleOp &getModule() {
+        return *module.get();
+    }
+    const Fortran::common::IntrinsicTypeDefaultKinds &getDefaultKinds() const {
+        return defaultKinds;
+    }
+    const Fortran::evaluate::IntrinsicProcTable &getIntrinsicTable() const {
+        return intrinsics;
+    }
+    const Fortran::parser::AllCookedSources *getCookedSource() const {
+        return cooked;
+    }
 
-  /// Get the kind map.
-  const fir::KindMapping &getKindMap() const { return kindMap; }
+    /// Get the kind map.
+    const fir::KindMapping &getKindMap() const {
+        return kindMap;
+    }
 
-  /// Create a folding context. Careful: this is very expensive.
-  Fortran::evaluate::FoldingContext createFoldingContext() const;
+    /// Create a folding context. Careful: this is very expensive.
+    Fortran::evaluate::FoldingContext createFoldingContext() const;
 
-  bool validModule() { return getModule(); }
+    bool validModule() {
+        return getModule();
+    }
 
-  //===--------------------------------------------------------------------===//
-  // Perform the creation of an mlir::ModuleOp
-  //===--------------------------------------------------------------------===//
+    //===--------------------------------------------------------------------===//
+    // Perform the creation of an mlir::ModuleOp
+    //===--------------------------------------------------------------------===//
 
-  /// Read in an MLIR input file rather than lowering Fortran sources.
-  /// This is intended to be used for testing.
-  void parseSourceFile(llvm::SourceMgr &);
+    /// Read in an MLIR input file rather than lowering Fortran sources.
+    /// This is intended to be used for testing.
+    void parseSourceFile(llvm::SourceMgr &);
 
-  /// Cross the bridge from the Fortran parse-tree, etc. to MLIR dialects
-  void lower(const Fortran::parser::Program &program, fir::NameUniquer &uniquer,
-             const Fortran::semantics::SemanticsContext &semanticsContext);
+    /// Cross the bridge from the Fortran parse-tree, etc. to MLIR dialects
+    void lower(const Fortran::parser::Program &program, fir::NameUniquer &uniquer,
+               const Fortran::semantics::SemanticsContext &semanticsContext);
 
 private:
-  explicit LoweringBridge(
-      const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
-      const Fortran::evaluate::IntrinsicProcTable &intrinsics,
-      const Fortran::parser::AllCookedSources &);
-  LoweringBridge() = delete;
-  LoweringBridge(const LoweringBridge &) = delete;
+    explicit LoweringBridge(
+        const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds,
+        const Fortran::evaluate::IntrinsicProcTable &intrinsics,
+        const Fortran::parser::AllCookedSources &);
+    LoweringBridge() = delete;
+    LoweringBridge(const LoweringBridge &) = delete;
 
-  const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds;
-  const Fortran::evaluate::IntrinsicProcTable &intrinsics;
-  const Fortran::parser::AllCookedSources *cooked;
-  std::unique_ptr<mlir::MLIRContext> context;
-  std::unique_ptr<mlir::ModuleOp> module;
-  fir::KindMapping kindMap;
+    const Fortran::common::IntrinsicTypeDefaultKinds &defaultKinds;
+    const Fortran::evaluate::IntrinsicProcTable &intrinsics;
+    const Fortran::parser::AllCookedSources *cooked;
+    std::unique_ptr<mlir::MLIRContext> context;
+    std::unique_ptr<mlir::ModuleOp> module;
+    fir::KindMapping kindMap;
 };
 
 } // namespace lower

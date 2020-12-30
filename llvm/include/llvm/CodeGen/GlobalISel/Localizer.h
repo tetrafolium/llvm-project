@@ -39,52 +39,54 @@ class TargetTransformInfo;
 /// related predecessor.
 class Localizer : public MachineFunctionPass {
 public:
-  static char ID;
+    static char ID;
 
 private:
-  /// An input function to decide if the pass should run or not
-  /// on the given MachineFunction.
-  std::function<bool(const MachineFunction &)> DoNotRunPass;
+    /// An input function to decide if the pass should run or not
+    /// on the given MachineFunction.
+    std::function<bool(const MachineFunction &)> DoNotRunPass;
 
-  /// MRI contains all the register class/bank information that this
-  /// pass uses and updates.
-  MachineRegisterInfo *MRI;
-  /// TTI used for getting remat costs for instructions.
-  TargetTransformInfo *TTI;
+    /// MRI contains all the register class/bank information that this
+    /// pass uses and updates.
+    MachineRegisterInfo *MRI;
+    /// TTI used for getting remat costs for instructions.
+    TargetTransformInfo *TTI;
 
-  /// Check if \p MOUse is used in the same basic block as \p Def.
-  /// If the use is in the same block, we say it is local.
-  /// When the use is not local, \p InsertMBB will contain the basic
-  /// block when to insert \p Def to have a local use.
-  static bool isLocalUse(MachineOperand &MOUse, const MachineInstr &Def,
-                         MachineBasicBlock *&InsertMBB);
+    /// Check if \p MOUse is used in the same basic block as \p Def.
+    /// If the use is in the same block, we say it is local.
+    /// When the use is not local, \p InsertMBB will contain the basic
+    /// block when to insert \p Def to have a local use.
+    static bool isLocalUse(MachineOperand &MOUse, const MachineInstr &Def,
+                           MachineBasicBlock *&InsertMBB);
 
-  /// Initialize the field members using \p MF.
-  void init(MachineFunction &MF);
+    /// Initialize the field members using \p MF.
+    void init(MachineFunction &MF);
 
-  typedef SmallSetVector<MachineInstr *, 32> LocalizedSetVecT;
+    typedef SmallSetVector<MachineInstr *, 32> LocalizedSetVecT;
 
-  /// Do inter-block localization from the entry block.
-  bool localizeInterBlock(MachineFunction &MF,
-                          LocalizedSetVecT &LocalizedInstrs);
+    /// Do inter-block localization from the entry block.
+    bool localizeInterBlock(MachineFunction &MF,
+                            LocalizedSetVecT &LocalizedInstrs);
 
-  /// Do intra-block localization of already localized instructions.
-  bool localizeIntraBlock(LocalizedSetVecT &LocalizedInstrs);
+    /// Do intra-block localization of already localized instructions.
+    bool localizeIntraBlock(LocalizedSetVecT &LocalizedInstrs);
 
 public:
-  Localizer();
-  Localizer(std::function<bool(const MachineFunction &)>);
+    Localizer();
+    Localizer(std::function<bool(const MachineFunction &)>);
 
-  StringRef getPassName() const override { return "Localizer"; }
+    StringRef getPassName() const override {
+        return "Localizer";
+    }
 
-  MachineFunctionProperties getRequiredProperties() const override {
-    return MachineFunctionProperties()
-        .set(MachineFunctionProperties::Property::IsSSA);
-  }
+    MachineFunctionProperties getRequiredProperties() const override {
+        return MachineFunctionProperties()
+               .set(MachineFunctionProperties::Property::IsSSA);
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 };
 
 } // End namespace llvm.

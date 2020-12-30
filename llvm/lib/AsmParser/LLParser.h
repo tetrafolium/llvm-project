@@ -25,33 +25,33 @@
 #include <map>
 
 namespace llvm {
-  class Module;
-  class Function;
-  class Value;
-  class BasicBlock;
-  class Instruction;
-  class Constant;
-  class GlobalValue;
-  class Comdat;
-  class MDString;
-  class MDNode;
-  struct SlotMapping;
+class Module;
+class Function;
+class Value;
+class BasicBlock;
+class Instruction;
+class Constant;
+class GlobalValue;
+class Comdat;
+class MDString;
+class MDNode;
+struct SlotMapping;
 
-  /// ValID - Represents a reference of a definition of some sort with no type.
-  /// There are several cases where we have to parse the value but where the
-  /// type can depend on later context.  This may either be a numeric reference
-  /// or a symbolic (%var) reference.  This is just a discriminated union.
-  struct ValID {
+/// ValID - Represents a reference of a definition of some sort with no type.
+/// There are several cases where we have to parse the value but where the
+/// type can depend on later context.  This may either be a numeric reference
+/// or a symbolic (%var) reference.  This is just a discriminated union.
+struct ValID {
     enum {
-      t_LocalID, t_GlobalID,           // ID in UIntVal.
-      t_LocalName, t_GlobalName,       // Name in StrVal.
-      t_APSInt, t_APFloat,             // Value in APSIntVal/APFloatVal.
-      t_Null, t_Undef, t_Zero, t_None, t_Poison, // No value.
-      t_EmptyArray,                    // No value:  []
-      t_Constant,                      // Value in ConstantVal.
-      t_InlineAsm,                     // Value in FTy/StrVal/StrVal2/UIntVal.
-      t_ConstantStruct,                // Value in ConstantStructElts.
-      t_PackedConstantStruct           // Value in ConstantStructElts.
+        t_LocalID, t_GlobalID,           // ID in UIntVal.
+        t_LocalName, t_GlobalName,       // Name in StrVal.
+        t_APSInt, t_APFloat,             // Value in APSIntVal/APFloatVal.
+        t_Null, t_Undef, t_Zero, t_None, t_Poison, // No value.
+        t_EmptyArray,                    // No value:  []
+        t_Constant,                      // Value in ConstantVal.
+        t_InlineAsm,                     // Value in FTy/StrVal/StrVal2/UIntVal.
+        t_ConstantStruct,                // Value in ConstantStructElts.
+        t_PackedConstantStruct           // Value in ConstantStructElts.
     } Kind = t_LocalID;
 
     LLLexer::LocTy Loc;
@@ -68,23 +68,23 @@ namespace llvm {
         : Kind(RHS.Kind), Loc(RHS.Loc), UIntVal(RHS.UIntVal), FTy(RHS.FTy),
           StrVal(RHS.StrVal), StrVal2(RHS.StrVal2), APSIntVal(RHS.APSIntVal),
           APFloatVal(RHS.APFloatVal), ConstantVal(RHS.ConstantVal) {
-      assert(!RHS.ConstantStructElts);
+        assert(!RHS.ConstantStructElts);
     }
 
     bool operator<(const ValID &RHS) const {
-      if (Kind == t_LocalID || Kind == t_GlobalID)
-        return UIntVal < RHS.UIntVal;
-      assert((Kind == t_LocalName || Kind == t_GlobalName ||
-              Kind == t_ConstantStruct || Kind == t_PackedConstantStruct) &&
-             "Ordering not defined for this ValID kind yet");
-      return StrVal < RHS.StrVal;
+        if (Kind == t_LocalID || Kind == t_GlobalID)
+            return UIntVal < RHS.UIntVal;
+        assert((Kind == t_LocalName || Kind == t_GlobalName ||
+                Kind == t_ConstantStruct || Kind == t_PackedConstantStruct) &&
+               "Ordering not defined for this ValID kind yet");
+        return StrVal < RHS.StrVal;
     }
-  };
+};
 
-  class LLParser {
-  public:
+class LLParser {
+public:
     typedef LLLexer::LocTy LocTy;
-  private:
+private:
     LLVMContext &Context;
     LLLexer Lex;
     // Module being parsed, null if we are only parsing summary index.
@@ -104,8 +104,8 @@ namespace llvm {
     // which otherwise support RAUW. Instead, we defer resolving MDNode
     // references until the definitions have been processed.
     struct MDRef {
-      SMLoc Loc;
-      unsigned MDKind, MDSlot;
+        SMLoc Loc;
+        unsigned MDKind, MDSlot;
     };
 
     SmallVector<Instruction*, 64> InstsWithTBAATag;
@@ -141,14 +141,14 @@ namespace llvm {
 
     // Summary global value reference information.
     std::map<unsigned, std::vector<std::pair<ValueInfo *, LocTy>>>
-        ForwardRefValueInfos;
+    ForwardRefValueInfos;
     std::map<unsigned, std::vector<std::pair<AliasSummary *, LocTy>>>
-        ForwardRefAliasees;
+    ForwardRefAliasees;
     std::vector<ValueInfo> NumberedValueInfos;
 
     // Summary type id reference information.
     std::map<unsigned, std::vector<std::pair<GlobalValue::GUID *, LocTy>>>
-        ForwardRefTypeIds;
+    ForwardRefTypeIds;
 
     // Map of module ID to path.
     std::map<unsigned, StringRef> ModuleIdMap;
@@ -159,7 +159,7 @@ namespace llvm {
 
     std::string SourceFileName;
 
-  public:
+public:
     LLParser(StringRef F, SourceMgr &SM, SMDiagnostic &Err, Module *M,
              ModuleSummaryIndex *Index, LLVMContext &Context,
              SlotMapping *Slots = nullptr)
@@ -167,18 +167,26 @@ namespace llvm {
           Slots(Slots), BlockAddressPFS(nullptr) {}
     bool Run(
         bool UpgradeDebugInfo, DataLayoutCallbackTy DataLayoutCallback =
-                                   [](StringRef) { return None; });
+    [](StringRef) {
+        return None;
+    });
 
     bool parseStandaloneConstantValue(Constant *&C, const SlotMapping *Slots);
 
     bool parseTypeAtBeginning(Type *&Ty, unsigned &Read,
                               const SlotMapping *Slots);
 
-    LLVMContext &getContext() { return Context; }
+    LLVMContext &getContext() {
+        return Context;
+    }
 
-  private:
-    bool error(LocTy L, const Twine &Msg) const { return Lex.Error(L, Msg); }
-    bool tokError(const Twine &Msg) const { return error(Lex.getLoc(), Msg); }
+private:
+    bool error(LocTy L, const Twine &Msg) const {
+        return Lex.Error(L, Msg);
+    }
+    bool tokError(const Twine &Msg) const {
+        return error(Lex.getLoc(), Msg);
+    }
 
     /// Restore the internal name and slot mappings using the mappings that
     /// were created at an earlier parsing stage.
@@ -198,53 +206,75 @@ namespace llvm {
     // Helper Routines.
     bool parseToken(lltok::Kind T, const char *ErrMsg);
     bool EatIfPresent(lltok::Kind T) {
-      if (Lex.getKind() != T) return false;
-      Lex.Lex();
-      return true;
+        if (Lex.getKind() != T) return false;
+        Lex.Lex();
+        return true;
     }
 
     FastMathFlags EatFastMathFlagsIfPresent() {
-      FastMathFlags FMF;
-      while (true)
-        switch (Lex.getKind()) {
-        case lltok::kw_fast: FMF.setFast();            Lex.Lex(); continue;
-        case lltok::kw_nnan: FMF.setNoNaNs();          Lex.Lex(); continue;
-        case lltok::kw_ninf: FMF.setNoInfs();          Lex.Lex(); continue;
-        case lltok::kw_nsz:  FMF.setNoSignedZeros();   Lex.Lex(); continue;
-        case lltok::kw_arcp: FMF.setAllowReciprocal(); Lex.Lex(); continue;
-        case lltok::kw_contract:
-          FMF.setAllowContract(true);
-          Lex.Lex();
-          continue;
-        case lltok::kw_reassoc: FMF.setAllowReassoc(); Lex.Lex(); continue;
-        case lltok::kw_afn:     FMF.setApproxFunc();   Lex.Lex(); continue;
-        default: return FMF;
-        }
-      return FMF;
+        FastMathFlags FMF;
+        while (true)
+            switch (Lex.getKind()) {
+            case lltok::kw_fast:
+                FMF.setFast();
+                Lex.Lex();
+                continue;
+            case lltok::kw_nnan:
+                FMF.setNoNaNs();
+                Lex.Lex();
+                continue;
+            case lltok::kw_ninf:
+                FMF.setNoInfs();
+                Lex.Lex();
+                continue;
+            case lltok::kw_nsz:
+                FMF.setNoSignedZeros();
+                Lex.Lex();
+                continue;
+            case lltok::kw_arcp:
+                FMF.setAllowReciprocal();
+                Lex.Lex();
+                continue;
+            case lltok::kw_contract:
+                FMF.setAllowContract(true);
+                Lex.Lex();
+                continue;
+            case lltok::kw_reassoc:
+                FMF.setAllowReassoc();
+                Lex.Lex();
+                continue;
+            case lltok::kw_afn:
+                FMF.setApproxFunc();
+                Lex.Lex();
+                continue;
+            default:
+                return FMF;
+            }
+        return FMF;
     }
 
     bool parseOptionalToken(lltok::Kind T, bool &Present,
                             LocTy *Loc = nullptr) {
-      if (Lex.getKind() != T) {
-        Present = false;
-      } else {
-        if (Loc)
-          *Loc = Lex.getLoc();
-        Lex.Lex();
-        Present = true;
-      }
-      return false;
+        if (Lex.getKind() != T) {
+            Present = false;
+        } else {
+            if (Loc)
+                *Loc = Lex.getLoc();
+            Lex.Lex();
+            Present = true;
+        }
+        return false;
     }
     bool parseStringConstant(std::string &Result);
     bool parseUInt32(unsigned &Val);
     bool parseUInt32(unsigned &Val, LocTy &Loc) {
-      Loc = Lex.getLoc();
-      return parseUInt32(Val);
+        Loc = Lex.getLoc();
+        return parseUInt32(Val);
     }
     bool parseUInt64(uint64_t &Val);
     bool parseUInt64(uint64_t &Val, LocTy &Loc) {
-      Loc = Lex.getLoc();
-      return parseUInt64(Val);
+        Loc = Lex.getLoc();
+        return parseUInt64(Val);
     }
     bool parseFlag(unsigned &Val);
 
@@ -255,8 +285,8 @@ namespace llvm {
     bool parseOptionalUnnamedAddr(GlobalVariable::UnnamedAddr &UnnamedAddr);
     bool parseOptionalAddrSpace(unsigned &AddrSpace, unsigned DefaultAS = 0);
     bool parseOptionalProgramAddrSpace(unsigned &AddrSpace) {
-      return parseOptionalAddrSpace(
-          AddrSpace, M->getDataLayout().getProgramAddressSpace());
+        return parseOptionalAddrSpace(
+                   AddrSpace, M->getDataLayout().getProgramAddressSpace());
     };
     bool parseOptionalParamAttrs(AttrBuilder &B);
     bool parseOptionalReturnAttrs(AttrBuilder &B);
@@ -284,12 +314,12 @@ namespace llvm {
     bool parseIndexList(SmallVectorImpl<unsigned> &Indices,
                         bool &AteExtraComma);
     bool parseIndexList(SmallVectorImpl<unsigned> &Indices) {
-      bool AteExtraComma;
-      if (parseIndexList(Indices, AteExtraComma))
-        return true;
-      if (AteExtraComma)
-        return tokError("expected index");
-      return false;
+        bool AteExtraComma;
+        if (parseIndexList(Indices, AteExtraComma))
+            return true;
+        if (AteExtraComma)
+            return tokError("expected index");
+        return false;
     }
 
     // Top-Level Entities
@@ -382,7 +412,7 @@ namespace llvm {
     bool parseWpdRes(WholeProgramDevirtResolution &WPDRes);
     bool parseOptionalResByArg(
         std::map<std::vector<uint64_t>, WholeProgramDevirtResolution::ByArg>
-            &ResByArg);
+        &ResByArg);
     bool parseArgs(std::vector<uint64_t> &Args);
     void addGlobalValueToIndex(std::string Name, GlobalValue::GUID,
                                GlobalValue::LinkageTypes Linkage, unsigned ID,
@@ -391,16 +421,16 @@ namespace llvm {
     // Type Parsing.
     bool parseType(Type *&Result, const Twine &Msg, bool AllowVoid = false);
     bool parseType(Type *&Result, bool AllowVoid = false) {
-      return parseType(Result, "expected type", AllowVoid);
+        return parseType(Result, "expected type", AllowVoid);
     }
     bool parseType(Type *&Result, const Twine &Msg, LocTy &Loc,
                    bool AllowVoid = false) {
-      Loc = Lex.getLoc();
-      return parseType(Result, Msg, AllowVoid);
+        Loc = Lex.getLoc();
+        return parseType(Result, Msg, AllowVoid);
     }
     bool parseType(Type *&Result, LocTy &Loc, bool AllowVoid = false) {
-      Loc = Lex.getLoc();
-      return parseType(Result, AllowVoid);
+        Loc = Lex.getLoc();
+        return parseType(Result, AllowVoid);
     }
     bool parseAnonStructType(Type *&Result, bool Packed);
     bool parseStructBody(SmallVectorImpl<Type *> &Body);
@@ -413,46 +443,48 @@ namespace llvm {
 
     // Function Semantic Analysis.
     class PerFunctionState {
-      LLParser &P;
-      Function &F;
-      std::map<std::string, std::pair<Value*, LocTy> > ForwardRefVals;
-      std::map<unsigned, std::pair<Value*, LocTy> > ForwardRefValIDs;
-      std::vector<Value*> NumberedVals;
+        LLParser &P;
+        Function &F;
+        std::map<std::string, std::pair<Value*, LocTy> > ForwardRefVals;
+        std::map<unsigned, std::pair<Value*, LocTy> > ForwardRefValIDs;
+        std::vector<Value*> NumberedVals;
 
-      /// FunctionNumber - If this is an unnamed function, this is the slot
-      /// number of it, otherwise it is -1.
-      int FunctionNumber;
+        /// FunctionNumber - If this is an unnamed function, this is the slot
+        /// number of it, otherwise it is -1.
+        int FunctionNumber;
     public:
-      PerFunctionState(LLParser &p, Function &f, int functionNumber);
-      ~PerFunctionState();
+        PerFunctionState(LLParser &p, Function &f, int functionNumber);
+        ~PerFunctionState();
 
-      Function &getFunction() const { return F; }
+        Function &getFunction() const {
+            return F;
+        }
 
-      bool finishFunction();
+        bool finishFunction();
 
-      /// GetVal - Get a value with the specified name or ID, creating a
-      /// forward reference record if needed.  This can return null if the value
-      /// exists but does not have the right type.
-      Value *getVal(const std::string &Name, Type *Ty, LocTy Loc, bool IsCall);
-      Value *getVal(unsigned ID, Type *Ty, LocTy Loc, bool IsCall);
+        /// GetVal - Get a value with the specified name or ID, creating a
+        /// forward reference record if needed.  This can return null if the value
+        /// exists but does not have the right type.
+        Value *getVal(const std::string &Name, Type *Ty, LocTy Loc, bool IsCall);
+        Value *getVal(unsigned ID, Type *Ty, LocTy Loc, bool IsCall);
 
-      /// setInstName - After an instruction is parsed and inserted into its
-      /// basic block, this installs its name.
-      bool setInstName(int NameID, const std::string &NameStr, LocTy NameLoc,
-                       Instruction *Inst);
+        /// setInstName - After an instruction is parsed and inserted into its
+        /// basic block, this installs its name.
+        bool setInstName(int NameID, const std::string &NameStr, LocTy NameLoc,
+                         Instruction *Inst);
 
-      /// GetBB - Get a basic block with the specified name or ID, creating a
-      /// forward reference record if needed.  This can return null if the value
-      /// is not a BasicBlock.
-      BasicBlock *getBB(const std::string &Name, LocTy Loc);
-      BasicBlock *getBB(unsigned ID, LocTy Loc);
+        /// GetBB - Get a basic block with the specified name or ID, creating a
+        /// forward reference record if needed.  This can return null if the value
+        /// is not a BasicBlock.
+        BasicBlock *getBB(const std::string &Name, LocTy Loc);
+        BasicBlock *getBB(unsigned ID, LocTy Loc);
 
-      /// DefineBB - Define the specified basic block, which is either named or
-      /// unnamed.  If there is an error, this returns null otherwise it returns
-      /// the block being defined.
-      BasicBlock *defineBB(const std::string &Name, int NameID, LocTy Loc);
+        /// DefineBB - Define the specified basic block, which is either named or
+        /// unnamed.  If there is an error, this returns null otherwise it returns
+        /// the block being defined.
+        BasicBlock *defineBB(const std::string &Name, int NameID, LocTy Loc);
 
-      bool resolveForwardRefBlockAddresses();
+        bool resolveForwardRefBlockAddresses();
     };
 
     bool convertValIDToValue(Type *Ty, ValID &ID, Value *&V,
@@ -464,35 +496,35 @@ namespace llvm {
     bool parseConstantValue(Type *Ty, Constant *&C);
     bool parseValue(Type *Ty, Value *&V, PerFunctionState *PFS);
     bool parseValue(Type *Ty, Value *&V, PerFunctionState &PFS) {
-      return parseValue(Ty, V, &PFS);
+        return parseValue(Ty, V, &PFS);
     }
 
     bool parseValue(Type *Ty, Value *&V, LocTy &Loc, PerFunctionState &PFS) {
-      Loc = Lex.getLoc();
-      return parseValue(Ty, V, &PFS);
+        Loc = Lex.getLoc();
+        return parseValue(Ty, V, &PFS);
     }
 
     bool parseTypeAndValue(Value *&V, PerFunctionState *PFS);
     bool parseTypeAndValue(Value *&V, PerFunctionState &PFS) {
-      return parseTypeAndValue(V, &PFS);
+        return parseTypeAndValue(V, &PFS);
     }
     bool parseTypeAndValue(Value *&V, LocTy &Loc, PerFunctionState &PFS) {
-      Loc = Lex.getLoc();
-      return parseTypeAndValue(V, PFS);
+        Loc = Lex.getLoc();
+        return parseTypeAndValue(V, PFS);
     }
     bool parseTypeAndBasicBlock(BasicBlock *&BB, LocTy &Loc,
                                 PerFunctionState &PFS);
     bool parseTypeAndBasicBlock(BasicBlock *&BB, PerFunctionState &PFS) {
-      LocTy Loc;
-      return parseTypeAndBasicBlock(BB, Loc, PFS);
+        LocTy Loc;
+        return parseTypeAndBasicBlock(BB, Loc, PFS);
     }
 
     struct ParamInfo {
-      LocTy Loc;
-      Value *V;
-      AttributeSet Attrs;
-      ParamInfo(LocTy loc, Value *v, AttributeSet attrs)
-          : Loc(loc), V(v), Attrs(attrs) {}
+        LocTy Loc;
+        Value *V;
+        AttributeSet Attrs;
+        ParamInfo(LocTy loc, Value *v, AttributeSet attrs)
+            : Loc(loc), V(v), Attrs(attrs) {}
     };
     bool parseParameterList(SmallVectorImpl<ParamInfo> &ArgList,
                             PerFunctionState &PFS, bool IsMustTailCall = false,
@@ -539,12 +571,12 @@ namespace llvm {
 
     // Function Parsing.
     struct ArgInfo {
-      LocTy Loc;
-      Type *Ty;
-      AttributeSet Attrs;
-      std::string Name;
-      ArgInfo(LocTy L, Type *ty, AttributeSet Attr, const std::string &N)
-          : Loc(L), Ty(ty), Attrs(Attr), Name(N) {}
+        LocTy Loc;
+        Type *Ty;
+        AttributeSet Attrs;
+        std::string Name;
+        ArgInfo(LocTy L, Type *ty, AttributeSet Attr, const std::string &N)
+            : Loc(L), Ty(ty), Attrs(Attr), Name(N) {}
     };
     bool parseArgumentList(SmallVectorImpl<ArgInfo> &ArgList, bool &IsVarArg);
     bool parseFunctionHeader(Function *&Fn, bool IsDefine);
@@ -605,7 +637,7 @@ namespace llvm {
     bool parseUseListOrderBB();
     bool parseUseListOrderIndexes(SmallVectorImpl<unsigned> &Indexes);
     bool sortUseListOrder(Value *V, ArrayRef<unsigned> Indexes, SMLoc Loc);
-  };
+};
 } // End llvm namespace
 
 #endif

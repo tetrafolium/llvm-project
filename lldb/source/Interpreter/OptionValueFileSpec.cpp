@@ -31,8 +31,8 @@ OptionValueFileSpec::OptionValueFileSpec(const FileSpec &value, bool resolve)
       m_resolve(resolve) {}
 
 OptionValueFileSpec::OptionValueFileSpec(const FileSpec &current_value,
-                                         const FileSpec &default_value,
-                                         bool resolve)
+        const FileSpec &default_value,
+        bool resolve)
     : OptionValue(), m_current_value(current_value),
       m_default_value(default_value), m_data_sp(), m_data_mod_time(),
       m_completion_mask(CommandCompletions::eDiskFileCompletion),
@@ -40,72 +40,72 @@ OptionValueFileSpec::OptionValueFileSpec(const FileSpec &current_value,
 
 void OptionValueFileSpec::DumpValue(const ExecutionContext *exe_ctx,
                                     Stream &strm, uint32_t dump_mask) {
-  if (dump_mask & eDumpOptionType)
-    strm.Printf("(%s)", GetTypeAsCString());
-  if (dump_mask & eDumpOptionValue) {
     if (dump_mask & eDumpOptionType)
-      strm.PutCString(" = ");
+        strm.Printf("(%s)", GetTypeAsCString());
+    if (dump_mask & eDumpOptionValue) {
+        if (dump_mask & eDumpOptionType)
+            strm.PutCString(" = ");
 
-    if (m_current_value) {
-      strm << '"' << m_current_value.GetPath().c_str() << '"';
+        if (m_current_value) {
+            strm << '"' << m_current_value.GetPath().c_str() << '"';
+        }
     }
-  }
 }
 
 Status OptionValueFileSpec::SetValueFromString(llvm::StringRef value,
-                                               VarSetOperationType op) {
-  Status error;
-  switch (op) {
-  case eVarSetOperationClear:
-    Clear();
-    NotifyValueChanged();
-    break;
+        VarSetOperationType op) {
+    Status error;
+    switch (op) {
+    case eVarSetOperationClear:
+        Clear();
+        NotifyValueChanged();
+        break;
 
-  case eVarSetOperationReplace:
-  case eVarSetOperationAssign:
-    if (value.size() > 0) {
-      value = value.trim("\"' \t");
-      m_value_was_set = true;
-      m_current_value.SetFile(value.str(), FileSpec::Style::native);
-      if (m_resolve)
-        FileSystem::Instance().Resolve(m_current_value);
-      m_data_sp.reset();
-      m_data_mod_time = llvm::sys::TimePoint<>();
-      NotifyValueChanged();
-    } else {
-      error.SetErrorString("invalid value string");
+    case eVarSetOperationReplace:
+    case eVarSetOperationAssign:
+        if (value.size() > 0) {
+            value = value.trim("\"' \t");
+            m_value_was_set = true;
+            m_current_value.SetFile(value.str(), FileSpec::Style::native);
+            if (m_resolve)
+                FileSystem::Instance().Resolve(m_current_value);
+            m_data_sp.reset();
+            m_data_mod_time = llvm::sys::TimePoint<>();
+            NotifyValueChanged();
+        } else {
+            error.SetErrorString("invalid value string");
+        }
+        break;
+
+    case eVarSetOperationInsertBefore:
+    case eVarSetOperationInsertAfter:
+    case eVarSetOperationRemove:
+    case eVarSetOperationAppend:
+    case eVarSetOperationInvalid:
+        error = OptionValue::SetValueFromString(value, op);
+        break;
     }
-    break;
-
-  case eVarSetOperationInsertBefore:
-  case eVarSetOperationInsertAfter:
-  case eVarSetOperationRemove:
-  case eVarSetOperationAppend:
-  case eVarSetOperationInvalid:
-    error = OptionValue::SetValueFromString(value, op);
-    break;
-  }
-  return error;
+    return error;
 }
 
 lldb::OptionValueSP OptionValueFileSpec::DeepCopy() const {
-  return OptionValueSP(new OptionValueFileSpec(*this));
+    return OptionValueSP(new OptionValueFileSpec(*this));
 }
 
 void OptionValueFileSpec::AutoComplete(CommandInterpreter &interpreter,
                                        CompletionRequest &request) {
-  CommandCompletions::InvokeCommonCompletionCallbacks(
-      interpreter, m_completion_mask, request, nullptr);
+    CommandCompletions::InvokeCommonCompletionCallbacks(
+        interpreter, m_completion_mask, request, nullptr);
 }
 
 const lldb::DataBufferSP &OptionValueFileSpec::GetFileContents() {
-  if (m_current_value) {
-    const auto file_mod_time = FileSystem::Instance().GetModificationTime(m_current_value);
-    if (m_data_sp && m_data_mod_time == file_mod_time)
-      return m_data_sp;
-    m_data_sp =
-        FileSystem::Instance().CreateDataBuffer(m_current_value.GetPath());
-    m_data_mod_time = file_mod_time;
-  }
-  return m_data_sp;
+    if (m_current_value) {
+        const auto file_mod_time = FileSystem::Instance().GetModificationTime(m_current_value);
+        if (m_data_sp && m_data_mod_time == file_mod_time)
+            return m_data_sp;
+        m_data_sp =
+            FileSystem::Instance().CreateDataBuffer(m_current_value.GetPath());
+        m_data_mod_time = file_mod_time;
+    }
+    return m_data_sp;
 }

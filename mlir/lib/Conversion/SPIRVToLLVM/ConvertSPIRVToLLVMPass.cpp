@@ -24,38 +24,38 @@ namespace {
 /// A pass converting MLIR SPIR-V operations into LLVM dialect.
 class ConvertSPIRVToLLVMPass
     : public ConvertSPIRVToLLVMBase<ConvertSPIRVToLLVMPass> {
-  void runOnOperation() override;
+    void runOnOperation() override;
 };
 } // namespace
 
 void ConvertSPIRVToLLVMPass::runOnOperation() {
-  MLIRContext *context = &getContext();
-  ModuleOp module = getOperation();
-  LLVMTypeConverter converter(&getContext());
+    MLIRContext *context = &getContext();
+    ModuleOp module = getOperation();
+    LLVMTypeConverter converter(&getContext());
 
-  // Encode global variable's descriptor set and binding if they exist.
-  encodeBindAttribute(module);
+    // Encode global variable's descriptor set and binding if they exist.
+    encodeBindAttribute(module);
 
-  OwningRewritePatternList patterns;
+    OwningRewritePatternList patterns;
 
-  populateSPIRVToLLVMTypeConversion(converter);
+    populateSPIRVToLLVMTypeConversion(converter);
 
-  populateSPIRVToLLVMModuleConversionPatterns(context, converter, patterns);
-  populateSPIRVToLLVMConversionPatterns(context, converter, patterns);
-  populateSPIRVToLLVMFunctionConversionPatterns(context, converter, patterns);
+    populateSPIRVToLLVMModuleConversionPatterns(context, converter, patterns);
+    populateSPIRVToLLVMConversionPatterns(context, converter, patterns);
+    populateSPIRVToLLVMFunctionConversionPatterns(context, converter, patterns);
 
-  ConversionTarget target(getContext());
-  target.addIllegalDialect<spirv::SPIRVDialect>();
-  target.addLegalDialect<LLVM::LLVMDialect>();
+    ConversionTarget target(getContext());
+    target.addIllegalDialect<spirv::SPIRVDialect>();
+    target.addLegalDialect<LLVM::LLVMDialect>();
 
-  // Set `ModuleOp` and `ModuleTerminatorOp` as legal for `spv.module`
-  // conversion.
-  target.addLegalOp<ModuleOp>();
-  target.addLegalOp<ModuleTerminatorOp>();
-  if (failed(applyPartialConversion(module, target, std::move(patterns))))
-    signalPassFailure();
+    // Set `ModuleOp` and `ModuleTerminatorOp` as legal for `spv.module`
+    // conversion.
+    target.addLegalOp<ModuleOp>();
+    target.addLegalOp<ModuleTerminatorOp>();
+    if (failed(applyPartialConversion(module, target, std::move(patterns))))
+        signalPassFailure();
 }
 
 std::unique_ptr<OperationPass<ModuleOp>> mlir::createConvertSPIRVToLLVMPass() {
-  return std::make_unique<ConvertSPIRVToLLVMPass>();
+    return std::make_unique<ConvertSPIRVToLLVMPass>();
 }

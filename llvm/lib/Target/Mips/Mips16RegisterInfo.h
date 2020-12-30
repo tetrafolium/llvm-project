@@ -19,26 +19,26 @@ namespace llvm {
 
 class Mips16RegisterInfo : public MipsRegisterInfo {
 public:
-  Mips16RegisterInfo();
+    Mips16RegisterInfo();
 
-  bool requiresRegisterScavenging(const MachineFunction &MF) const override;
+    bool requiresRegisterScavenging(const MachineFunction &MF) const override;
 
-  bool requiresFrameIndexScavenging(const MachineFunction &MF) const override;
+    bool requiresFrameIndexScavenging(const MachineFunction &MF) const override;
 
-  bool useFPForScavengingIndex(const MachineFunction &MF) const override;
+    bool useFPForScavengingIndex(const MachineFunction &MF) const override;
 
-  bool saveScavengerRegister(MachineBasicBlock &MBB,
-                             MachineBasicBlock::iterator I,
-                             MachineBasicBlock::iterator &UseMI,
-                             const TargetRegisterClass *RC,
-                             Register Reg) const override;
+    bool saveScavengerRegister(MachineBasicBlock &MBB,
+                               MachineBasicBlock::iterator I,
+                               MachineBasicBlock::iterator &UseMI,
+                               const TargetRegisterClass *RC,
+                               Register Reg) const override;
 
-  const TargetRegisterClass *intRegClass(unsigned Size) const override;
+    const TargetRegisterClass *intRegClass(unsigned Size) const override;
 
 private:
-  void eliminateFI(MachineBasicBlock::iterator II, unsigned OpNo,
-                   int FrameIndex, uint64_t StackSize,
-                   int64_t SPOffset) const override;
+    void eliminateFI(MachineBasicBlock::iterator II, unsigned OpNo,
+                     int FrameIndex, uint64_t StackSize,
+                     int64_t SPOffset) const override;
 };
 
 } // end namespace llvm

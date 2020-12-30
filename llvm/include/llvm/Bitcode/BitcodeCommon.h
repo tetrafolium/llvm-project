@@ -19,10 +19,10 @@
 namespace llvm {
 
 struct AllocaPackedValues {
-  using Align = Bitfield::Element<unsigned, 0, 5>;
-  using UsedWithInAlloca = Bitfield::Element<bool, Align::NextBit, 1>;
-  using ExplicitType = Bitfield::Element<bool, UsedWithInAlloca::NextBit, 1>;
-  using SwiftError = Bitfield::Element<bool, ExplicitType::NextBit, 1>;
+    using Align = Bitfield::Element<unsigned, 0, 5>;
+    using UsedWithInAlloca = Bitfield::Element<bool, Align::NextBit, 1>;
+    using ExplicitType = Bitfield::Element<bool, UsedWithInAlloca::NextBit, 1>;
+    using SwiftError = Bitfield::Element<bool, ExplicitType::NextBit, 1>;
 };
 
 } // namespace llvm

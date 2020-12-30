@@ -21,9 +21,9 @@
 using namespace llvm;
 
 static Reloc::Model getRelocModel(Optional<Reloc::Model> RM) {
-  if (!RM.hasValue())
-    return Reloc::Static;
-  return *RM;
+    if (!RM.hasValue())
+        return Reloc::Static;
+    return *RM;
 }
 
 /// ARCTargetMachine ctor - Create an ILP32 architecture model
@@ -40,7 +40,7 @@ ARCTargetMachine::ARCTargetMachine(const Target &T, const Triple &TT,
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
       TLOF(std::make_unique<TargetLoweringObjectFileELF>()),
       Subtarget(TT, std::string(CPU), std::string(FS), *this) {
-  initAsmInfo();
+    initAsmInfo();
 }
 
 ARCTargetMachine::~ARCTargetMachine() = default;
@@ -50,30 +50,32 @@ namespace {
 /// ARC Code Generator Pass Configuration Options.
 class ARCPassConfig : public TargetPassConfig {
 public:
-  ARCPassConfig(ARCTargetMachine &TM, PassManagerBase &PM)
-      : TargetPassConfig(TM, PM) {}
+    ARCPassConfig(ARCTargetMachine &TM, PassManagerBase &PM)
+        : TargetPassConfig(TM, PM) {}
 
-  ARCTargetMachine &getARCTargetMachine() const {
-    return getTM<ARCTargetMachine>();
-  }
+    ARCTargetMachine &getARCTargetMachine() const {
+        return getTM<ARCTargetMachine>();
+    }
 
-  bool addInstSelector() override;
-  void addPreEmitPass() override;
-  void addPreRegAlloc() override;
+    bool addInstSelector() override;
+    void addPreEmitPass() override;
+    void addPreRegAlloc() override;
 };
 
 } // end anonymous namespace
 
 TargetPassConfig *ARCTargetMachine::createPassConfig(PassManagerBase &PM) {
-  return new ARCPassConfig(*this, PM);
+    return new ARCPassConfig(*this, PM);
 }
 
 bool ARCPassConfig::addInstSelector() {
-  addPass(createARCISelDag(getARCTargetMachine(), getOptLevel()));
-  return false;
+    addPass(createARCISelDag(getARCTargetMachine(), getOptLevel()));
+    return false;
 }
 
-void ARCPassConfig::addPreEmitPass() { addPass(createARCBranchFinalizePass()); }
+void ARCPassConfig::addPreEmitPass() {
+    addPass(createARCBranchFinalizePass());
+}
 
 void ARCPassConfig::addPreRegAlloc() {
     addPass(createARCExpandPseudosPass());
@@ -82,10 +84,10 @@ void ARCPassConfig::addPreRegAlloc() {
 
 // Force static initialization.
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeARCTarget() {
-  RegisterTargetMachine<ARCTargetMachine> X(getTheARCTarget());
+    RegisterTargetMachine<ARCTargetMachine> X(getTheARCTarget());
 }
 
 TargetTransformInfo
 ARCTargetMachine::getTargetTransformInfo(const Function &F) {
-  return TargetTransformInfo(ARCTTIImpl(this, F));
+    return TargetTransformInfo(ARCTTIImpl(this, F));
 }

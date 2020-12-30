@@ -34,45 +34,46 @@ static const char heatPalette[heatSize][8] = {
     "#f29072", "#f08b6e", "#ef886b", "#ed8366", "#ec7f63", "#e97a5f", "#e8765c",
     "#e57058", "#e36c55", "#e16751", "#de614d", "#dc5d4a", "#d85646", "#d65244",
     "#d24b40", "#d0473d", "#cc403a", "#ca3b37", "#c53334", "#c32e31", "#be242e",
-    "#bb1b2c", "#b70d28"};
+    "#bb1b2c", "#b70d28"
+};
 
 uint64_t
 getNumOfCalls(Function &callerFunction, Function &calledFunction) {
-  uint64_t counter = 0;
-  for (User *U : calledFunction.users()) {
-    if (auto CI = dyn_cast<CallInst>(U)) {
-      if (CI->getCaller() == (&callerFunction)) {
-          counter += 1;
-      }
+    uint64_t counter = 0;
+    for (User *U : calledFunction.users()) {
+        if (auto CI = dyn_cast<CallInst>(U)) {
+            if (CI->getCaller() == (&callerFunction)) {
+                counter += 1;
+            }
+        }
     }
-  }
-  return counter;
+    return counter;
 }
 
 uint64_t getMaxFreq(const Function &F, const BlockFrequencyInfo *BFI) {
-  uint64_t maxFreq = 0;
-  for (const BasicBlock &BB : F) {
-    uint64_t freqVal = BFI->getBlockFreq(&BB).getFrequency();
-    if (freqVal >= maxFreq)
-      maxFreq = freqVal;
-  }
-  return maxFreq;
+    uint64_t maxFreq = 0;
+    for (const BasicBlock &BB : F) {
+        uint64_t freqVal = BFI->getBlockFreq(&BB).getFrequency();
+        if (freqVal >= maxFreq)
+            maxFreq = freqVal;
+    }
+    return maxFreq;
 }
 
 std::string getHeatColor(uint64_t freq, uint64_t maxFreq) {
-  if (freq > maxFreq)
-    freq = maxFreq;
-  double percent = (freq > 0) ? log2(double(freq)) / log2(maxFreq) : 0;
-  return getHeatColor(percent);
+    if (freq > maxFreq)
+        freq = maxFreq;
+    double percent = (freq > 0) ? log2(double(freq)) / log2(maxFreq) : 0;
+    return getHeatColor(percent);
 }
 
 std::string getHeatColor(double percent) {
-  if (percent > 1.0)
-    percent = 1.0;
-  if (percent < 0.0)
-    percent = 0.0;
-  unsigned colorId = unsigned(round(percent * (heatSize - 1.0)));
-  return heatPalette[colorId];
+    if (percent > 1.0)
+        percent = 1.0;
+    if (percent < 0.0)
+        percent = 0.0;
+    unsigned colorId = unsigned(round(percent * (heatSize - 1.0)));
+    return heatPalette[colorId];
 }
 
 } // namespace llvm

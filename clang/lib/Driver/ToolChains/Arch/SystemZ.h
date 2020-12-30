@@ -21,8 +21,8 @@ namespace tools {
 namespace systemz {
 
 enum class FloatABI {
-  Soft,
-  Hard,
+    Soft,
+    Hard,
 };
 
 FloatABI getSystemZFloatABI(const Driver &D, const llvm::opt::ArgList &Args);

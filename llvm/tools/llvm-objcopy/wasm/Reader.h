@@ -17,11 +17,11 @@ namespace wasm {
 
 class Reader {
 public:
-  explicit Reader(const object::WasmObjectFile &O) : WasmObj(O) {}
-  Expected<std::unique_ptr<Object>> create() const;
+    explicit Reader(const object::WasmObjectFile &O) : WasmObj(O) {}
+    Expected<std::unique_ptr<Object>> create() const;
 
 private:
-  const object::WasmObjectFile &WasmObj;
+    const object::WasmObjectFile &WasmObj;
 };
 
 } // end namespace wasm

@@ -294,12 +294,12 @@ typedef uint cl_mem_fence_flags;
 #if defined(__OPENCL_CPP_VERSION__) || (__OPENCL_C_VERSION__ >= CL_VERSION_2_0)
 
 typedef enum memory_scope {
-  memory_scope_work_item = __OPENCL_MEMORY_SCOPE_WORK_ITEM,
-  memory_scope_work_group = __OPENCL_MEMORY_SCOPE_WORK_GROUP,
-  memory_scope_device = __OPENCL_MEMORY_SCOPE_DEVICE,
-  memory_scope_all_svm_devices = __OPENCL_MEMORY_SCOPE_ALL_SVM_DEVICES,
+    memory_scope_work_item = __OPENCL_MEMORY_SCOPE_WORK_ITEM,
+    memory_scope_work_group = __OPENCL_MEMORY_SCOPE_WORK_GROUP,
+    memory_scope_device = __OPENCL_MEMORY_SCOPE_DEVICE,
+    memory_scope_all_svm_devices = __OPENCL_MEMORY_SCOPE_ALL_SVM_DEVICES,
 #if defined(cl_intel_subgroups) || defined(cl_khr_subgroups)
-  memory_scope_sub_group = __OPENCL_MEMORY_SCOPE_SUB_GROUP
+    memory_scope_sub_group = __OPENCL_MEMORY_SCOPE_SUB_GROUP
 #endif
 } memory_scope;
 
@@ -318,11 +318,11 @@ typedef enum memory_scope {
 // enum values aligned with what clang uses in EmitAtomicExpr()
 typedef enum memory_order
 {
-  memory_order_relaxed = __ATOMIC_RELAXED,
-  memory_order_acquire = __ATOMIC_ACQUIRE,
-  memory_order_release = __ATOMIC_RELEASE,
-  memory_order_acq_rel = __ATOMIC_ACQ_REL,
-  memory_order_seq_cst = __ATOMIC_SEQ_CST
+    memory_order_relaxed = __ATOMIC_RELAXED,
+    memory_order_acquire = __ATOMIC_ACQUIRE,
+    memory_order_release = __ATOMIC_RELEASE,
+    memory_order_acq_rel = __ATOMIC_ACQ_REL,
+    memory_order_seq_cst = __ATOMIC_SEQ_CST
 } memory_order;
 
 #endif // defined(__OPENCL_CPP_VERSION__) || (__OPENCL_C_VERSION__ >= CL_VERSION_2_0)
@@ -437,10 +437,10 @@ typedef int clk_profiling_info;
 #define MAX_WORK_DIM 3
 
 typedef struct {
-  unsigned int workDimension;
-  size_t globalWorkOffset[MAX_WORK_DIM];
-  size_t globalWorkSize[MAX_WORK_DIM];
-  size_t localWorkSize[MAX_WORK_DIM];
+    unsigned int workDimension;
+    size_t globalWorkOffset[MAX_WORK_DIM];
+    size_t globalWorkSize[MAX_WORK_DIM];
+    size_t localWorkSize[MAX_WORK_DIM];
 } ndrange_t;
 
 #endif // defined(__OPENCL_CPP_VERSION__) || (__OPENCL_C_VERSION__ >= CL_VERSION_2_0)

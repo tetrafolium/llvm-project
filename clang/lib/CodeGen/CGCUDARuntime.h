@@ -38,63 +38,73 @@ class RValue;
 
 class CGCUDARuntime {
 protected:
-  CodeGenModule &CGM;
+    CodeGenModule &CGM;
 
 public:
-  // Global variable properties that must be passed to CUDA runtime.
-  class DeviceVarFlags {
-  public:
-    enum DeviceVarKind {
-      Variable, // Variable
-      Surface,  // Builtin surface
-      Texture,  // Builtin texture
+    // Global variable properties that must be passed to CUDA runtime.
+    class DeviceVarFlags {
+    public:
+        enum DeviceVarKind {
+            Variable, // Variable
+            Surface,  // Builtin surface
+            Texture,  // Builtin texture
+        };
+
+    private:
+        unsigned Kind : 2;
+        unsigned Extern : 1;
+        unsigned Constant : 1;   // Constant variable.
+        unsigned Normalized : 1; // Normalized texture.
+        int SurfTexType;         // Type of surface/texutre.
+
+    public:
+        DeviceVarFlags(DeviceVarKind K, bool E, bool C, bool N, int T)
+            : Kind(K), Extern(E), Constant(C), Normalized(N), SurfTexType(T) {}
+
+        DeviceVarKind getKind() const {
+            return static_cast<DeviceVarKind>(Kind);
+        }
+        bool isExtern() const {
+            return Extern;
+        }
+        bool isConstant() const {
+            return Constant;
+        }
+        bool isNormalized() const {
+            return Normalized;
+        }
+        int getSurfTexType() const {
+            return SurfTexType;
+        }
     };
 
-  private:
-    unsigned Kind : 2;
-    unsigned Extern : 1;
-    unsigned Constant : 1;   // Constant variable.
-    unsigned Normalized : 1; // Normalized texture.
-    int SurfTexType;         // Type of surface/texutre.
+    CGCUDARuntime(CodeGenModule &CGM) : CGM(CGM) {}
+    virtual ~CGCUDARuntime();
 
-  public:
-    DeviceVarFlags(DeviceVarKind K, bool E, bool C, bool N, int T)
-        : Kind(K), Extern(E), Constant(C), Normalized(N), SurfTexType(T) {}
+    virtual RValue EmitCUDAKernelCallExpr(CodeGenFunction &CGF,
+                                          const CUDAKernelCallExpr *E,
+                                          ReturnValueSlot ReturnValue);
 
-    DeviceVarKind getKind() const { return static_cast<DeviceVarKind>(Kind); }
-    bool isExtern() const { return Extern; }
-    bool isConstant() const { return Constant; }
-    bool isNormalized() const { return Normalized; }
-    int getSurfTexType() const { return SurfTexType; }
-  };
+    /// Emits a kernel launch stub.
+    virtual void emitDeviceStub(CodeGenFunction &CGF, FunctionArgList &Args) = 0;
+    virtual void registerDeviceVar(const VarDecl *VD, llvm::GlobalVariable &Var,
+                                   bool Extern, bool Constant) = 0;
+    virtual void registerDeviceSurf(const VarDecl *VD, llvm::GlobalVariable &Var,
+                                    bool Extern, int Type) = 0;
+    virtual void registerDeviceTex(const VarDecl *VD, llvm::GlobalVariable &Var,
+                                   bool Extern, int Type, bool Normalized) = 0;
 
-  CGCUDARuntime(CodeGenModule &CGM) : CGM(CGM) {}
-  virtual ~CGCUDARuntime();
+    /// Constructs and returns a module initialization function or nullptr if it's
+    /// not needed. Must be called after all kernels have been emitted.
+    virtual llvm::Function *makeModuleCtorFunction() = 0;
 
-  virtual RValue EmitCUDAKernelCallExpr(CodeGenFunction &CGF,
-                                        const CUDAKernelCallExpr *E,
-                                        ReturnValueSlot ReturnValue);
+    /// Returns a module cleanup function or nullptr if it's not needed.
+    /// Must be called after ModuleCtorFunction
+    virtual llvm::Function *makeModuleDtorFunction() = 0;
 
-  /// Emits a kernel launch stub.
-  virtual void emitDeviceStub(CodeGenFunction &CGF, FunctionArgList &Args) = 0;
-  virtual void registerDeviceVar(const VarDecl *VD, llvm::GlobalVariable &Var,
-                                 bool Extern, bool Constant) = 0;
-  virtual void registerDeviceSurf(const VarDecl *VD, llvm::GlobalVariable &Var,
-                                  bool Extern, int Type) = 0;
-  virtual void registerDeviceTex(const VarDecl *VD, llvm::GlobalVariable &Var,
-                                 bool Extern, int Type, bool Normalized) = 0;
-
-  /// Constructs and returns a module initialization function or nullptr if it's
-  /// not needed. Must be called after all kernels have been emitted.
-  virtual llvm::Function *makeModuleCtorFunction() = 0;
-
-  /// Returns a module cleanup function or nullptr if it's not needed.
-  /// Must be called after ModuleCtorFunction
-  virtual llvm::Function *makeModuleDtorFunction() = 0;
-
-  /// Returns function or variable name on device side even if the current
-  /// compilation is for host.
-  virtual std::string getDeviceSideName(const NamedDecl *ND) = 0;
+    /// Returns function or variable name on device side even if the current
+    /// compilation is for host.
+    virtual std::string getDeviceSideName(const NamedDecl *ND) = 0;
 };
 
 /// Creates an instance of a CUDA runtime class.

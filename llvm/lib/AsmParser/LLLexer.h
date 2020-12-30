@@ -20,12 +20,12 @@
 #include <string>
 
 namespace llvm {
-  class Type;
-  class SMDiagnostic;
-  class SourceMgr;
-  class LLVMContext;
+class Type;
+class SMDiagnostic;
+class SourceMgr;
+class LLVMContext;
 
-  class LLLexer {
+class LLLexer {
     const char *CurPtr;
     StringRef CurBuf;
     SMDiagnostic &ErrorInfo;
@@ -45,34 +45,52 @@ namespace llvm {
     // When true, the ':' is treated as a separate token.
     bool IgnoreColonInIdentifiers;
 
-  public:
+public:
     explicit LLLexer(StringRef StartBuf, SourceMgr &SM, SMDiagnostic &,
                      LLVMContext &C);
 
     lltok::Kind Lex() {
-      return CurKind = LexToken();
+        return CurKind = LexToken();
     }
 
     typedef SMLoc LocTy;
-    LocTy getLoc() const { return SMLoc::getFromPointer(TokStart); }
-    lltok::Kind getKind() const { return CurKind; }
-    const std::string &getStrVal() const { return StrVal; }
-    Type *getTyVal() const { return TyVal; }
-    unsigned getUIntVal() const { return UIntVal; }
-    const APSInt &getAPSIntVal() const { return APSIntVal; }
-    const APFloat &getAPFloatVal() const { return APFloatVal; }
+    LocTy getLoc() const {
+        return SMLoc::getFromPointer(TokStart);
+    }
+    lltok::Kind getKind() const {
+        return CurKind;
+    }
+    const std::string &getStrVal() const {
+        return StrVal;
+    }
+    Type *getTyVal() const {
+        return TyVal;
+    }
+    unsigned getUIntVal() const {
+        return UIntVal;
+    }
+    const APSInt &getAPSIntVal() const {
+        return APSIntVal;
+    }
+    const APFloat &getAPFloatVal() const {
+        return APFloatVal;
+    }
 
     void setIgnoreColonInIdentifiers(bool val) {
-      IgnoreColonInIdentifiers = val;
+        IgnoreColonInIdentifiers = val;
     }
 
     bool Error(LocTy ErrorLoc, const Twine &Msg) const;
-    bool Error(const Twine &Msg) const { return Error(getLoc(), Msg); }
+    bool Error(const Twine &Msg) const {
+        return Error(getLoc(), Msg);
+    }
 
     void Warning(LocTy WarningLoc, const Twine &Msg) const;
-    void Warning(const Twine &Msg) const { return Warning(getLoc(), Msg); }
+    void Warning(const Twine &Msg) const {
+        return Warning(getLoc(), Msg);
+    }
 
-  private:
+private:
     lltok::Kind LexToken();
 
     int getNextChar();
@@ -98,7 +116,7 @@ namespace llvm {
     uint64_t HexIntToVal(const char *Buffer, const char *End);
     void HexToIntPair(const char *Buffer, const char *End, uint64_t Pair[2]);
     void FP80HexToIntPair(const char *Buffer, const char *End, uint64_t Pair[2]);
-  };
+};
 } // end namespace llvm
 
 #endif

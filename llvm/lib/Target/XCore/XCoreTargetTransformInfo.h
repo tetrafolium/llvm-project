@@ -25,28 +25,32 @@
 namespace llvm {
 
 class XCoreTTIImpl : public BasicTTIImplBase<XCoreTTIImpl> {
-  typedef BasicTTIImplBase<XCoreTTIImpl> BaseT;
-  typedef TargetTransformInfo TTI;
-  friend BaseT;
+    typedef BasicTTIImplBase<XCoreTTIImpl> BaseT;
+    typedef TargetTransformInfo TTI;
+    friend BaseT;
 
-  const XCoreSubtarget *ST;
-  const XCoreTargetLowering *TLI;
+    const XCoreSubtarget *ST;
+    const XCoreTargetLowering *TLI;
 
-  const XCoreSubtarget *getST() const { return ST; }
-  const XCoreTargetLowering *getTLI() const { return TLI; }
+    const XCoreSubtarget *getST() const {
+        return ST;
+    }
+    const XCoreTargetLowering *getTLI() const {
+        return TLI;
+    }
 
 public:
-  explicit XCoreTTIImpl(const XCoreTargetMachine *TM, const Function &F)
-      : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl()),
-        TLI(ST->getTargetLowering()) {}
+    explicit XCoreTTIImpl(const XCoreTargetMachine *TM, const Function &F)
+        : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl()),
+          TLI(ST->getTargetLowering()) {}
 
-  unsigned getNumberOfRegisters(unsigned ClassID) const {
-    bool Vector = (ClassID == 1);
-    if (Vector) {
-      return 0;
+    unsigned getNumberOfRegisters(unsigned ClassID) const {
+        bool Vector = (ClassID == 1);
+        if (Vector) {
+            return 0;
+        }
+        return 12;
     }
-    return 12;
-  }
 };
 
 } // end namespace llvm

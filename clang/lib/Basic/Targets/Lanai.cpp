@@ -24,7 +24,7 @@ const char *const LanaiTargetInfo::GCCRegNames[] = {
 };
 
 ArrayRef<const char *> LanaiTargetInfo::getGCCRegNames() const {
-  return llvm::makeArrayRef(GCCRegNames);
+    return llvm::makeArrayRef(GCCRegNames);
 }
 
 const TargetInfo::GCCRegAlias LanaiTargetInfo::GCCRegAliases[] = {
@@ -33,38 +33,38 @@ const TargetInfo::GCCRegAlias LanaiTargetInfo::GCCRegAliases[] = {
 };
 
 ArrayRef<TargetInfo::GCCRegAlias> LanaiTargetInfo::getGCCRegAliases() const {
-  return llvm::makeArrayRef(GCCRegAliases);
+    return llvm::makeArrayRef(GCCRegAliases);
 }
 
 bool LanaiTargetInfo::isValidCPUName(StringRef Name) const {
-  return llvm::StringSwitch<bool>(Name).Case("v11", true).Default(false);
+    return llvm::StringSwitch<bool>(Name).Case("v11", true).Default(false);
 }
 void LanaiTargetInfo::fillValidCPUList(
     SmallVectorImpl<StringRef> &Values) const {
-  Values.emplace_back("v11");
+    Values.emplace_back("v11");
 }
 
 bool LanaiTargetInfo::setCPU(const std::string &Name) {
-  CPU = llvm::StringSwitch<CPUKind>(Name).Case("v11", CK_V11).Default(CK_NONE);
+    CPU = llvm::StringSwitch<CPUKind>(Name).Case("v11", CK_V11).Default(CK_NONE);
 
-  return CPU != CK_NONE;
+    return CPU != CK_NONE;
 }
 
 bool LanaiTargetInfo::hasFeature(StringRef Feature) const {
-  return llvm::StringSwitch<bool>(Feature).Case("lanai", true).Default(false);
+    return llvm::StringSwitch<bool>(Feature).Case("lanai", true).Default(false);
 }
 
 void LanaiTargetInfo::getTargetDefines(const LangOptions &Opts,
                                        MacroBuilder &Builder) const {
-  // Define __lanai__ when building for target lanai.
-  Builder.defineMacro("__lanai__");
+    // Define __lanai__ when building for target lanai.
+    Builder.defineMacro("__lanai__");
 
-  // Set define for the CPU specified.
-  switch (CPU) {
-  case CK_V11:
-    Builder.defineMacro("__LANAI_V11__");
-    break;
-  case CK_NONE:
-    llvm_unreachable("Unhandled target CPU");
-  }
+    // Set define for the CPU specified.
+    switch (CPU) {
+    case CK_V11:
+        Builder.defineMacro("__LANAI_V11__");
+        break;
+    case CK_NONE:
+        llvm_unreachable("Unhandled target CPU");
+    }
 }

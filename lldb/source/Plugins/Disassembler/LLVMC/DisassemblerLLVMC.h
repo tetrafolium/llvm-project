@@ -21,65 +21,65 @@ class InstructionLLVMC;
 
 class DisassemblerLLVMC : public lldb_private::Disassembler {
 public:
-  DisassemblerLLVMC(const lldb_private::ArchSpec &arch,
-                    const char *flavor /* = NULL */);
+    DisassemblerLLVMC(const lldb_private::ArchSpec &arch,
+                      const char *flavor /* = NULL */);
 
-  ~DisassemblerLLVMC() override;
+    ~DisassemblerLLVMC() override;
 
-  // Static Functions
-  static void Initialize();
+    // Static Functions
+    static void Initialize();
 
-  static void Terminate();
+    static void Terminate();
 
-  static lldb_private::ConstString GetPluginNameStatic();
+    static lldb_private::ConstString GetPluginNameStatic();
 
-  static lldb_private::Disassembler *
-  CreateInstance(const lldb_private::ArchSpec &arch, const char *flavor);
+    static lldb_private::Disassembler *
+    CreateInstance(const lldb_private::ArchSpec &arch, const char *flavor);
 
-  size_t DecodeInstructions(const lldb_private::Address &base_addr,
-                            const lldb_private::DataExtractor &data,
-                            lldb::offset_t data_offset, size_t num_instructions,
-                            bool append, bool data_from_file) override;
+    size_t DecodeInstructions(const lldb_private::Address &base_addr,
+                              const lldb_private::DataExtractor &data,
+                              lldb::offset_t data_offset, size_t num_instructions,
+                              bool append, bool data_from_file) override;
 
-  // PluginInterface protocol
-  lldb_private::ConstString GetPluginName() override;
+    // PluginInterface protocol
+    lldb_private::ConstString GetPluginName() override;
 
-  uint32_t GetPluginVersion() override;
+    uint32_t GetPluginVersion() override;
 
 protected:
-  friend class InstructionLLVMC;
+    friend class InstructionLLVMC;
 
-  bool FlavorValidForArchSpec(const lldb_private::ArchSpec &arch,
-                              const char *flavor) override;
+    bool FlavorValidForArchSpec(const lldb_private::ArchSpec &arch,
+                                const char *flavor) override;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  int OpInfo(uint64_t PC, uint64_t Offset, uint64_t Size, int TagType,
-             void *TagBug);
+    int OpInfo(uint64_t PC, uint64_t Offset, uint64_t Size, int TagType,
+               void *TagBug);
 
-  const char *SymbolLookup(uint64_t ReferenceValue, uint64_t *ReferenceType,
-                           uint64_t ReferencePC, const char **ReferenceName);
+    const char *SymbolLookup(uint64_t ReferenceValue, uint64_t *ReferenceType,
+                             uint64_t ReferencePC, const char **ReferenceName);
 
-  static int OpInfoCallback(void *DisInfo, uint64_t PC, uint64_t Offset,
-                            uint64_t Size, int TagType, void *TagBug);
+    static int OpInfoCallback(void *DisInfo, uint64_t PC, uint64_t Offset,
+                              uint64_t Size, int TagType, void *TagBug);
 
-  static const char *SymbolLookupCallback(void *DisInfo,
-                                          uint64_t ReferenceValue,
-                                          uint64_t *ReferenceType,
-                                          uint64_t ReferencePC,
-                                          const char **ReferenceName);
+    static const char *SymbolLookupCallback(void *DisInfo,
+                                            uint64_t ReferenceValue,
+                                            uint64_t *ReferenceType,
+                                            uint64_t ReferencePC,
+                                            const char **ReferenceName);
 
-  const lldb_private::ExecutionContext *m_exe_ctx;
-  InstructionLLVMC *m_inst;
-  std::mutex m_mutex;
-  bool m_data_from_file;
+    const lldb_private::ExecutionContext *m_exe_ctx;
+    InstructionLLVMC *m_inst;
+    std::mutex m_mutex;
+    bool m_data_from_file;
 
-  // Since we need to make two actual MC Disassemblers for ARM (ARM & THUMB),
-  // and there's a bit of goo to set up and own in the MC disassembler world,
-  // this class was added to manage the actual disassemblers.
-  class MCDisasmInstance;
-  std::unique_ptr<MCDisasmInstance> m_disasm_up;
-  std::unique_ptr<MCDisasmInstance> m_alternate_disasm_up;
+    // Since we need to make two actual MC Disassemblers for ARM (ARM & THUMB),
+    // and there's a bit of goo to set up and own in the MC disassembler world,
+    // this class was added to manage the actual disassemblers.
+    class MCDisasmInstance;
+    std::unique_ptr<MCDisasmInstance> m_disasm_up;
+    std::unique_ptr<MCDisasmInstance> m_alternate_disasm_up;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_DISASSEMBLER_LLVMC_DISASSEMBLERLLVMC_H

@@ -50,8 +50,8 @@ extern "C" {
  * Does not own the underlying string. This is equivalent to llvm::StringRef.
  */
 struct MlirStringRef {
-  const char *data; /**< Pointer to the first symbol. */
-  size_t length;    /**< Length of the fragment. */
+    const char *data; /**< Pointer to the first symbol. */
+    size_t length;    /**< Length of the fragment. */
 };
 typedef struct MlirStringRef MlirStringRef;
 
@@ -59,11 +59,11 @@ typedef struct MlirStringRef MlirStringRef;
  * not reference to a null-terminated string.
  */
 inline static MlirStringRef mlirStringRefCreate(const char *str,
-                                                size_t length) {
-  MlirStringRef result;
-  result.data = str;
-  result.length = length;
-  return result;
+        size_t length) {
+    MlirStringRef result;
+    result.data = str;
+    result.length = length;
+    return result;
 }
 
 /** Constructs a string reference from a null-terminated C string. Prefer
@@ -91,30 +91,30 @@ typedef void (*MlirStringCallback)(MlirStringRef, void *);
  * Instances of MlirLogicalResult must only be inspected using the associated
  * functions. */
 struct MlirLogicalResult {
-  int8_t value;
+    int8_t value;
 };
 typedef struct MlirLogicalResult MlirLogicalResult;
 
 /// Checks if the given logical result represents a success.
 inline static bool mlirLogicalResultIsSuccess(MlirLogicalResult res) {
-  return res.value != 0;
+    return res.value != 0;
 }
 
 /// Checks if the given logical result represents a failure.
 inline static bool mlirLogicalResultIsFailure(MlirLogicalResult res) {
-  return res.value == 0;
+    return res.value == 0;
 }
 
 /// Creates a logical result representing a success.
 inline static MlirLogicalResult mlirLogicalResultSuccess() {
-  MlirLogicalResult res = {1};
-  return res;
+    MlirLogicalResult res = {1};
+    return res;
 }
 
 /// Creates a logical result representing a failure.
 inline static MlirLogicalResult mlirLogicalResultFailure() {
-  MlirLogicalResult res = {0};
-  return res;
+    MlirLogicalResult res = {0};
+    return res;
 }
 
 #ifdef __cplusplus

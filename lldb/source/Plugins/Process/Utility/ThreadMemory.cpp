@@ -32,66 +32,68 @@ ThreadMemory::ThreadMemory(Process &process, lldb::tid_t tid,
       m_name(std::string(name)), m_queue(std::string(queue)),
       m_register_data_addr(register_data_addr) {}
 
-ThreadMemory::~ThreadMemory() { DestroyThread(); }
+ThreadMemory::~ThreadMemory() {
+    DestroyThread();
+}
 
 void ThreadMemory::WillResume(StateType resume_state) {
-  if (m_backing_thread_sp)
-    m_backing_thread_sp->WillResume(resume_state);
+    if (m_backing_thread_sp)
+        m_backing_thread_sp->WillResume(resume_state);
 }
 
 void ThreadMemory::ClearStackFrames() {
-  if (m_backing_thread_sp)
-    m_backing_thread_sp->ClearStackFrames();
-  Thread::ClearStackFrames();
+    if (m_backing_thread_sp)
+        m_backing_thread_sp->ClearStackFrames();
+    Thread::ClearStackFrames();
 }
 
 RegisterContextSP ThreadMemory::GetRegisterContext() {
-  if (!m_reg_context_sp)
-    m_reg_context_sp = std::make_shared<RegisterContextThreadMemory>(
-        *this, m_register_data_addr);
-  return m_reg_context_sp;
+    if (!m_reg_context_sp)
+        m_reg_context_sp = std::make_shared<RegisterContextThreadMemory>(
+                               *this, m_register_data_addr);
+    return m_reg_context_sp;
 }
 
 RegisterContextSP
 ThreadMemory::CreateRegisterContextForFrame(StackFrame *frame) {
-  uint32_t concrete_frame_idx = 0;
+    uint32_t concrete_frame_idx = 0;
 
-  if (frame)
-    concrete_frame_idx = frame->GetConcreteFrameIndex();
+    if (frame)
+        concrete_frame_idx = frame->GetConcreteFrameIndex();
 
-  if (concrete_frame_idx == 0)
-    return GetRegisterContext();
-  return GetUnwinder().CreateRegisterContextForFrame(frame);
+    if (concrete_frame_idx == 0)
+        return GetRegisterContext();
+    return GetUnwinder().CreateRegisterContextForFrame(frame);
 }
 
 bool ThreadMemory::CalculateStopInfo() {
-  if (m_backing_thread_sp) {
-    lldb::StopInfoSP backing_stop_info_sp(
-        m_backing_thread_sp->GetPrivateStopInfo());
-    if (backing_stop_info_sp &&
-        backing_stop_info_sp->IsValidForOperatingSystemThread(*this)) {
-      backing_stop_info_sp->SetThread(shared_from_this());
-      SetStopInfo(backing_stop_info_sp);
-      return true;
-    }
-  } else {
-    ProcessSP process_sp(GetProcess());
+    if (m_backing_thread_sp) {
+        lldb::StopInfoSP backing_stop_info_sp(
+            m_backing_thread_sp->GetPrivateStopInfo());
+        if (backing_stop_info_sp &&
+                backing_stop_info_sp->IsValidForOperatingSystemThread(*this)) {
+            backing_stop_info_sp->SetThread(shared_from_this());
+            SetStopInfo(backing_stop_info_sp);
+            return true;
+        }
+    } else {
+        ProcessSP process_sp(GetProcess());
 
-    if (process_sp) {
-      OperatingSystem *os = process_sp->GetOperatingSystem();
-      if (os) {
-        SetStopInfo(os->CreateThreadStopReason(this));
-        return true;
-      }
+        if (process_sp) {
+            OperatingSystem *os = process_sp->GetOperatingSystem();
+            if (os) {
+                SetStopInfo(os->CreateThreadStopReason(this));
+                return true;
+            }
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 void ThreadMemory::RefreshStateAfterStop() {
-  if (m_backing_thread_sp)
-    return m_backing_thread_sp->RefreshStateAfterStop();
+    if (m_backing_thread_sp)
+        return m_backing_thread_sp->RefreshStateAfterStop();
 
-  if (m_reg_context_sp)
-    m_reg_context_sp->InvalidateAllRegisters();
+    if (m_reg_context_sp)
+        m_reg_context_sp->InvalidateAllRegisters();
 }

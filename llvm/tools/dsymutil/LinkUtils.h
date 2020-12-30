@@ -24,81 +24,81 @@ namespace llvm {
 namespace dsymutil {
 
 struct LinkOptions {
-  /// Verbosity
-  bool Verbose = false;
+    /// Verbosity
+    bool Verbose = false;
 
-  /// Statistics
-  bool Statistics = false;
+    /// Statistics
+    bool Statistics = false;
 
-  /// Skip emitting output
-  bool NoOutput = false;
+    /// Skip emitting output
+    bool NoOutput = false;
 
-  /// Do not unique types according to ODR
-  bool NoODR = false;
+    /// Do not unique types according to ODR
+    bool NoODR = false;
 
-  /// Update
-  bool Update = false;
+    /// Update
+    bool Update = false;
 
-  /// Minimize
-  bool Minimize = false;
+    /// Minimize
+    bool Minimize = false;
 
-  /// Do not check swiftmodule timestamp
-  bool NoTimestamp = false;
+    /// Do not check swiftmodule timestamp
+    bool NoTimestamp = false;
 
-  /// Number of threads.
-  unsigned Threads = 1;
+    /// Number of threads.
+    unsigned Threads = 1;
 
-  // Output file type.
-  OutputFileType FileType = OutputFileType::Object;
+    // Output file type.
+    OutputFileType FileType = OutputFileType::Object;
 
-  /// The accelerator table kind
-  AccelTableKind TheAccelTableKind;
+    /// The accelerator table kind
+    AccelTableKind TheAccelTableKind;
 
-  /// -oso-prepend-path
-  std::string PrependPath;
+    /// -oso-prepend-path
+    std::string PrependPath;
 
-  /// The -object-prefix-map.
-  std::map<std::string, std::string> ObjectPrefixMap;
+    /// The -object-prefix-map.
+    std::map<std::string, std::string> ObjectPrefixMap;
 
-  /// The Resources directory in the .dSYM bundle.
-  Optional<std::string> ResourceDir;
+    /// The Resources directory in the .dSYM bundle.
+    Optional<std::string> ResourceDir;
 
-  /// Symbol map translator.
-  SymbolMapTranslator Translator;
+    /// Symbol map translator.
+    SymbolMapTranslator Translator;
 
-  /// Virtual File System.
-  llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> VFS =
-      vfs::getRealFileSystem();
+    /// Virtual File System.
+    llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> VFS =
+        vfs::getRealFileSystem();
 
-  /// Fields used for linking and placing remarks into the .dSYM bundle.
-  /// @{
+    /// Fields used for linking and placing remarks into the .dSYM bundle.
+    /// @{
 
-  /// Number of debug maps processed in total.
-  unsigned NumDebugMaps = 0;
+    /// Number of debug maps processed in total.
+    unsigned NumDebugMaps = 0;
 
-  /// -remarks-prepend-path: prepend a path to all the external remark file
-  /// paths found in remark metadata.
-  std::string RemarksPrependPath;
+    /// -remarks-prepend-path: prepend a path to all the external remark file
+    /// paths found in remark metadata.
+    std::string RemarksPrependPath;
 
-  /// The output format of the remarks.
-  remarks::Format RemarksFormat = remarks::Format::Bitstream;
+    /// The output format of the remarks.
+    remarks::Format RemarksFormat = remarks::Format::Bitstream;
 
-  /// @}
+    /// @}
 
-  LinkOptions() = default;
+    LinkOptions() = default;
 };
 
 inline void warn(Twine Warning, Twine Context = {}) {
-  WithColor::warning() << Warning + "\n";
-  if (!Context.isTriviallyEmpty())
-    WithColor::note() << Twine("while processing ") + Context + "\n";
+    WithColor::warning() << Warning + "\n";
+    if (!Context.isTriviallyEmpty())
+        WithColor::note() << Twine("while processing ") + Context + "\n";
 }
 
 inline bool error(Twine Error, Twine Context = {}) {
-  WithColor::error() << Error + "\n";
-  if (!Context.isTriviallyEmpty())
-    WithColor::note() << Twine("while processing ") + Context + "\n";
-  return false;
+    WithColor::error() << Error + "\n";
+    if (!Context.isTriviallyEmpty())
+        WithColor::note() << Twine("while processing ") + Context + "\n";
+    return false;
 }
 
 } // end namespace dsymutil

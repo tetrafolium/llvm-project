@@ -18,47 +18,47 @@ namespace pdb {
 Expected<uint32_t> hashTypeRecord(const llvm::codeview::CVType &Type);
 
 struct TagRecordHash {
-  explicit TagRecordHash(codeview::ClassRecord CR, uint32_t Full,
-                         uint32_t Forward)
-      : FullRecordHash(Full), ForwardDeclHash(Forward), Class(std::move(CR)) {
-    State = 0;
-  }
-
-  explicit TagRecordHash(codeview::EnumRecord ER, uint32_t Full,
-                         uint32_t Forward)
-      : FullRecordHash(Full), ForwardDeclHash(Forward), Enum(std::move(ER)) {
-    State = 1;
-  }
-
-  explicit TagRecordHash(codeview::UnionRecord UR, uint32_t Full,
-                         uint32_t Forward)
-      : FullRecordHash(Full), ForwardDeclHash(Forward), Union(std::move(UR)) {
-    State = 2;
-  }
-
-  uint32_t FullRecordHash;
-  uint32_t ForwardDeclHash;
-
-  codeview::TagRecord &getRecord() {
-    switch (State) {
-    case 0:
-      return Class;
-    case 1:
-      return Enum;
-    case 2:
-      return Union;
+    explicit TagRecordHash(codeview::ClassRecord CR, uint32_t Full,
+                           uint32_t Forward)
+        : FullRecordHash(Full), ForwardDeclHash(Forward), Class(std::move(CR)) {
+        State = 0;
     }
-    llvm_unreachable("unreachable!");
-  }
+
+    explicit TagRecordHash(codeview::EnumRecord ER, uint32_t Full,
+                           uint32_t Forward)
+        : FullRecordHash(Full), ForwardDeclHash(Forward), Enum(std::move(ER)) {
+        State = 1;
+    }
+
+    explicit TagRecordHash(codeview::UnionRecord UR, uint32_t Full,
+                           uint32_t Forward)
+        : FullRecordHash(Full), ForwardDeclHash(Forward), Union(std::move(UR)) {
+        State = 2;
+    }
+
+    uint32_t FullRecordHash;
+    uint32_t ForwardDeclHash;
+
+    codeview::TagRecord &getRecord() {
+        switch (State) {
+        case 0:
+            return Class;
+        case 1:
+            return Enum;
+        case 2:
+            return Union;
+        }
+        llvm_unreachable("unreachable!");
+    }
 
 private:
-  union {
-    codeview::ClassRecord Class;
-    codeview::EnumRecord Enum;
-    codeview::UnionRecord Union;
-  };
+    union {
+        codeview::ClassRecord Class;
+        codeview::EnumRecord Enum;
+        codeview::UnionRecord Union;
+    };
 
-  uint8_t State = 0;
+    uint8_t State = 0;
 };
 
 /// Given a CVType referring to a class, structure, union, or enum, compute

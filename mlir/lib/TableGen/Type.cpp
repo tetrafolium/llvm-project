@@ -19,46 +19,48 @@ using namespace mlir::tblgen;
 
 TypeConstraint::TypeConstraint(const llvm::Record *record)
     : Constraint(Constraint::CK_Type, record) {
-  assert(def->isSubClassOf("TypeConstraint") &&
-         "must be subclass of TableGen 'TypeConstraint' class");
+    assert(def->isSubClassOf("TypeConstraint") &&
+           "must be subclass of TableGen 'TypeConstraint' class");
 }
 
 TypeConstraint::TypeConstraint(const llvm::DefInit *init)
     : TypeConstraint(init->getDef()) {}
 
 bool TypeConstraint::isOptional() const {
-  return def->isSubClassOf("Optional");
+    return def->isSubClassOf("Optional");
 }
 
 bool TypeConstraint::isVariadic() const {
-  return def->isSubClassOf("Variadic");
+    return def->isSubClassOf("Variadic");
 }
 
 // Returns the builder call for this constraint if this is a buildable type,
 // returns None otherwise.
 Optional<StringRef> TypeConstraint::getBuilderCall() const {
-  const llvm::Record *baseType = def;
-  if (isVariableLength())
-    baseType = baseType->getValueAsDef("baseType");
+    const llvm::Record *baseType = def;
+    if (isVariableLength())
+        baseType = baseType->getValueAsDef("baseType");
 
-  // Check to see if this type constraint has a builder call.
-  const llvm::RecordVal *builderCall = baseType->getValue("builderCall");
-  if (!builderCall || !builderCall->getValue())
-    return llvm::None;
-  return TypeSwitch<llvm::Init *, Optional<StringRef>>(builderCall->getValue())
-      .Case<llvm::StringInit>([&](auto *init) {
+    // Check to see if this type constraint has a builder call.
+    const llvm::RecordVal *builderCall = baseType->getValue("builderCall");
+    if (!builderCall || !builderCall->getValue())
+        return llvm::None;
+    return TypeSwitch<llvm::Init *, Optional<StringRef>>(builderCall->getValue())
+    .Case<llvm::StringInit>([&](auto *init) {
         StringRef value = init->getValue();
         return value.empty() ? Optional<StringRef>() : value;
-      })
-      .Default([](auto *) { return llvm::None; });
+    })
+    .Default([](auto *) {
+        return llvm::None;
+    });
 }
 
 Type::Type(const llvm::Record *record) : TypeConstraint(record) {}
 
 StringRef Type::getTypeDescription() const {
-  return def->getValueAsString("typeDescription");
+    return def->getValueAsString("typeDescription");
 }
 
 Dialect Type::getDialect() const {
-  return Dialect(def->getValueAsDef("dialect"));
+    return Dialect(def->getValueAsDef("dialect"));
 }

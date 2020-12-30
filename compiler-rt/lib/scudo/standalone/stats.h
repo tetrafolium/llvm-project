@@ -29,72 +29,82 @@ typedef uptr StatCounters[StatCount];
 // LocalStats::add'ing, this is OK, we will still get a meaningful number.
 class LocalStats {
 public:
-  void initLinkerInitialized() {}
-  void init() { memset(this, 0, sizeof(*this)); }
+    void initLinkerInitialized() {}
+    void init() {
+        memset(this, 0, sizeof(*this));
+    }
 
-  void add(StatType I, uptr V) {
-    V += atomic_load_relaxed(&StatsArray[I]);
-    atomic_store_relaxed(&StatsArray[I], V);
-  }
+    void add(StatType I, uptr V) {
+        V += atomic_load_relaxed(&StatsArray[I]);
+        atomic_store_relaxed(&StatsArray[I], V);
+    }
 
-  void sub(StatType I, uptr V) {
-    V = atomic_load_relaxed(&StatsArray[I]) - V;
-    atomic_store_relaxed(&StatsArray[I], V);
-  }
+    void sub(StatType I, uptr V) {
+        V = atomic_load_relaxed(&StatsArray[I]) - V;
+        atomic_store_relaxed(&StatsArray[I], V);
+    }
 
-  void set(StatType I, uptr V) { atomic_store_relaxed(&StatsArray[I], V); }
+    void set(StatType I, uptr V) {
+        atomic_store_relaxed(&StatsArray[I], V);
+    }
 
-  uptr get(StatType I) const { return atomic_load_relaxed(&StatsArray[I]); }
+    uptr get(StatType I) const {
+        return atomic_load_relaxed(&StatsArray[I]);
+    }
 
-  LocalStats *Next;
-  LocalStats *Prev;
+    LocalStats *Next;
+    LocalStats *Prev;
 
 private:
-  atomic_uptr StatsArray[StatCount];
+    atomic_uptr StatsArray[StatCount];
 };
 
 // Global stats, used for aggregation and querying.
 class GlobalStats : public LocalStats {
 public:
-  void initLinkerInitialized() {}
-  void init() {
-    LocalStats::init();
-    Mutex.init();
-    StatsList = {};
-    initLinkerInitialized();
-  }
-
-  void link(LocalStats *S) {
-    ScopedLock L(Mutex);
-    StatsList.push_back(S);
-  }
-
-  void unlink(LocalStats *S) {
-    ScopedLock L(Mutex);
-    StatsList.remove(S);
-    for (uptr I = 0; I < StatCount; I++)
-      add(static_cast<StatType>(I), S->get(static_cast<StatType>(I)));
-  }
-
-  void get(uptr *S) const {
-    ScopedLock L(Mutex);
-    for (uptr I = 0; I < StatCount; I++)
-      S[I] = LocalStats::get(static_cast<StatType>(I));
-    for (const auto &Stats : StatsList) {
-      for (uptr I = 0; I < StatCount; I++)
-        S[I] += Stats.get(static_cast<StatType>(I));
+    void initLinkerInitialized() {}
+    void init() {
+        LocalStats::init();
+        Mutex.init();
+        StatsList = {};
+        initLinkerInitialized();
     }
-    // All stats must be non-negative.
-    for (uptr I = 0; I < StatCount; I++)
-      S[I] = static_cast<sptr>(S[I]) >= 0 ? S[I] : 0;
-  }
 
-  void disable() { Mutex.lock(); }
-  void enable() { Mutex.unlock(); }
+    void link(LocalStats *S) {
+        ScopedLock L(Mutex);
+        StatsList.push_back(S);
+    }
+
+    void unlink(LocalStats *S) {
+        ScopedLock L(Mutex);
+        StatsList.remove(S);
+        for (uptr I = 0; I < StatCount; I++)
+            add(static_cast<StatType>(I), S->get(static_cast<StatType>(I)));
+    }
+
+    void get(uptr *S) const {
+        ScopedLock L(Mutex);
+        for (uptr I = 0; I < StatCount; I++)
+            S[I] = LocalStats::get(static_cast<StatType>(I));
+        for (const auto &Stats : StatsList) {
+            for (uptr I = 0; I < StatCount; I++)
+                S[I] += Stats.get(static_cast<StatType>(I));
+        }
+        // All stats must be non-negative.
+        for (uptr I = 0; I < StatCount; I++)
+            S[I] = static_cast<sptr>(S[I]) >= 0 ? S[I] : 0;
+    }
+
+    void disable() {
+        Mutex.lock();
+    }
+    void enable() {
+        Mutex.unlock();
+    }
 
 private:
-  mutable HybridMutex Mutex;
-  DoublyLinkedList<LocalStats> StatsList;
+    mutable HybridMutex Mutex;
+    DoublyLinkedList<LocalStats> StatsList;
 };
 
 } // namespace scudo

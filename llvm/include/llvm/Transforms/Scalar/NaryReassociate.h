@@ -101,86 +101,86 @@ class Value;
 
 class NaryReassociatePass : public PassInfoMixin<NaryReassociatePass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-  // Glue for old PM.
-  bool runImpl(Function &F, AssumptionCache *AC_, DominatorTree *DT_,
-               ScalarEvolution *SE_, TargetLibraryInfo *TLI_,
-               TargetTransformInfo *TTI_);
+    // Glue for old PM.
+    bool runImpl(Function &F, AssumptionCache *AC_, DominatorTree *DT_,
+                 ScalarEvolution *SE_, TargetLibraryInfo *TLI_,
+                 TargetTransformInfo *TTI_);
 
 private:
-  // Runs only one iteration of the dominator-based algorithm. See the header
-  // comments for why we need multiple iterations.
-  bool doOneIteration(Function &F);
+    // Runs only one iteration of the dominator-based algorithm. See the header
+    // comments for why we need multiple iterations.
+    bool doOneIteration(Function &F);
 
-  // Reassociates I for better CSE.
-  Instruction *tryReassociate(Instruction *I, const SCEV *&OrigSCEV);
+    // Reassociates I for better CSE.
+    Instruction *tryReassociate(Instruction *I, const SCEV *&OrigSCEV);
 
-  // Reassociate GEP for better CSE.
-  Instruction *tryReassociateGEP(GetElementPtrInst *GEP);
+    // Reassociate GEP for better CSE.
+    Instruction *tryReassociateGEP(GetElementPtrInst *GEP);
 
-  // Try splitting GEP at the I-th index and see whether either part can be
-  // CSE'ed. This is a helper function for tryReassociateGEP.
-  //
-  // \p IndexedType The element type indexed by GEP's I-th index. This is
-  //                equivalent to
-  //                  GEP->getIndexedType(GEP->getPointerOperand(), 0-th index,
-  //                                      ..., i-th index).
-  GetElementPtrInst *tryReassociateGEPAtIndex(GetElementPtrInst *GEP,
-                                              unsigned I, Type *IndexedType);
+    // Try splitting GEP at the I-th index and see whether either part can be
+    // CSE'ed. This is a helper function for tryReassociateGEP.
+    //
+    // \p IndexedType The element type indexed by GEP's I-th index. This is
+    //                equivalent to
+    //                  GEP->getIndexedType(GEP->getPointerOperand(), 0-th index,
+    //                                      ..., i-th index).
+    GetElementPtrInst *tryReassociateGEPAtIndex(GetElementPtrInst *GEP,
+            unsigned I, Type *IndexedType);
 
-  // Given GEP's I-th index = LHS + RHS, see whether &Base[..][LHS][..] or
-  // &Base[..][RHS][..] can be CSE'ed and rewrite GEP accordingly.
-  GetElementPtrInst *tryReassociateGEPAtIndex(GetElementPtrInst *GEP,
-                                              unsigned I, Value *LHS,
-                                              Value *RHS, Type *IndexedType);
+    // Given GEP's I-th index = LHS + RHS, see whether &Base[..][LHS][..] or
+    // &Base[..][RHS][..] can be CSE'ed and rewrite GEP accordingly.
+    GetElementPtrInst *tryReassociateGEPAtIndex(GetElementPtrInst *GEP,
+            unsigned I, Value *LHS,
+            Value *RHS, Type *IndexedType);
 
-  // Reassociate binary operators for better CSE.
-  Instruction *tryReassociateBinaryOp(BinaryOperator *I);
+    // Reassociate binary operators for better CSE.
+    Instruction *tryReassociateBinaryOp(BinaryOperator *I);
 
-  // A helper function for tryReassociateBinaryOp. LHS and RHS are explicitly
-  // passed.
-  Instruction *tryReassociateBinaryOp(Value *LHS, Value *RHS,
-                                      BinaryOperator *I);
-  // Rewrites I to (LHS op RHS) if LHS is computed already.
-  Instruction *tryReassociatedBinaryOp(const SCEV *LHS, Value *RHS,
-                                       BinaryOperator *I);
+    // A helper function for tryReassociateBinaryOp. LHS and RHS are explicitly
+    // passed.
+    Instruction *tryReassociateBinaryOp(Value *LHS, Value *RHS,
+                                        BinaryOperator *I);
+    // Rewrites I to (LHS op RHS) if LHS is computed already.
+    Instruction *tryReassociatedBinaryOp(const SCEV *LHS, Value *RHS,
+                                         BinaryOperator *I);
 
-  // Tries to match Op1 and Op2 by using V.
-  bool matchTernaryOp(BinaryOperator *I, Value *V, Value *&Op1, Value *&Op2);
+    // Tries to match Op1 and Op2 by using V.
+    bool matchTernaryOp(BinaryOperator *I, Value *V, Value *&Op1, Value *&Op2);
 
-  // Gets SCEV for (LHS op RHS).
-  const SCEV *getBinarySCEV(BinaryOperator *I, const SCEV *LHS,
-                            const SCEV *RHS);
+    // Gets SCEV for (LHS op RHS).
+    const SCEV *getBinarySCEV(BinaryOperator *I, const SCEV *LHS,
+                              const SCEV *RHS);
 
-  // Returns the closest dominator of \c Dominatee that computes
-  // \c CandidateExpr. Returns null if not found.
-  Instruction *findClosestMatchingDominator(const SCEV *CandidateExpr,
-                                            Instruction *Dominatee);
+    // Returns the closest dominator of \c Dominatee that computes
+    // \c CandidateExpr. Returns null if not found.
+    Instruction *findClosestMatchingDominator(const SCEV *CandidateExpr,
+            Instruction *Dominatee);
 
-  // GetElementPtrInst implicitly sign-extends an index if the index is shorter
-  // than the pointer size. This function returns whether Index is shorter than
-  // GEP's pointer size, i.e., whether Index needs to be sign-extended in order
-  // to be an index of GEP.
-  bool requiresSignExtension(Value *Index, GetElementPtrInst *GEP);
+    // GetElementPtrInst implicitly sign-extends an index if the index is shorter
+    // than the pointer size. This function returns whether Index is shorter than
+    // GEP's pointer size, i.e., whether Index needs to be sign-extended in order
+    // to be an index of GEP.
+    bool requiresSignExtension(Value *Index, GetElementPtrInst *GEP);
 
-  AssumptionCache *AC;
-  const DataLayout *DL;
-  DominatorTree *DT;
-  ScalarEvolution *SE;
-  TargetLibraryInfo *TLI;
-  TargetTransformInfo *TTI;
+    AssumptionCache *AC;
+    const DataLayout *DL;
+    DominatorTree *DT;
+    ScalarEvolution *SE;
+    TargetLibraryInfo *TLI;
+    TargetTransformInfo *TTI;
 
-  // A lookup table quickly telling which instructions compute the given SCEV.
-  // Note that there can be multiple instructions at different locations
-  // computing to the same SCEV, so we map a SCEV to an instruction list.  For
-  // example,
-  //
-  //   if (p1)
-  //     foo(a + b);
-  //   if (p2)
-  //     bar(a + b);
-  DenseMap<const SCEV *, SmallVector<WeakTrackingVH, 2>> SeenExprs;
+    // A lookup table quickly telling which instructions compute the given SCEV.
+    // Note that there can be multiple instructions at different locations
+    // computing to the same SCEV, so we map a SCEV to an instruction list.  For
+    // example,
+    //
+    //   if (p1)
+    //     foo(a + b);
+    //   if (p2)
+    //     bar(a + b);
+    DenseMap<const SCEV *, SmallVector<WeakTrackingVH, 2>> SeenExprs;
 };
 
 } // end namespace llvm

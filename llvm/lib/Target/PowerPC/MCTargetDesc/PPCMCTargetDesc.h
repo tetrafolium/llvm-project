@@ -43,7 +43,7 @@ MCAsmBackend *createPPCAsmBackend(const Target &T, const MCSubtargetInfo &STI,
 
 /// Construct an PPC ELF object writer.
 std::unique_ptr<MCObjectTargetWriter> createPPCELFObjectWriter(bool Is64Bit,
-                                                               uint8_t OSABI);
+        uint8_t OSABI);
 /// Construct a PPC Mach-O object writer.
 std::unique_ptr<MCObjectTargetWriter>
 createPPCMachObjectWriter(bool Is64Bit, uint32_t CPUType, uint32_t CPUSubtype);
@@ -56,51 +56,51 @@ std::unique_ptr<MCObjectTargetWriter> createPPCXCOFFObjectWriter(bool Is64Bit);
 /// 0x000FFF0, 0x0000FFFF, and 0xFF0000FF are all runs.  0x0F0F0000 is not,
 /// since all 1s are not contiguous.
 static inline bool isRunOfOnes(unsigned Val, unsigned &MB, unsigned &ME) {
-  if (!Val)
-    return false;
+    if (!Val)
+        return false;
 
-  if (isShiftedMask_32(Val)) {
-    // look for the first non-zero bit
-    MB = countLeadingZeros(Val);
-    // look for the first zero bit after the run of ones
-    ME = countLeadingZeros((Val - 1) ^ Val);
-    return true;
-  } else {
-    Val = ~Val; // invert mask
     if (isShiftedMask_32(Val)) {
-      // effectively look for the first zero bit
-      ME = countLeadingZeros(Val) - 1;
-      // effectively look for the first one bit after the run of zeros
-      MB = countLeadingZeros((Val - 1) ^ Val) + 1;
-      return true;
+        // look for the first non-zero bit
+        MB = countLeadingZeros(Val);
+        // look for the first zero bit after the run of ones
+        ME = countLeadingZeros((Val - 1) ^ Val);
+        return true;
+    } else {
+        Val = ~Val; // invert mask
+        if (isShiftedMask_32(Val)) {
+            // effectively look for the first zero bit
+            ME = countLeadingZeros(Val) - 1;
+            // effectively look for the first one bit after the run of zeros
+            MB = countLeadingZeros((Val - 1) ^ Val) + 1;
+            return true;
+        }
     }
-  }
-  // no run present
-  return false;
+    // no run present
+    return false;
 }
 
 static inline bool isRunOfOnes64(uint64_t Val, unsigned &MB, unsigned &ME) {
-  if (!Val)
-    return false;
+    if (!Val)
+        return false;
 
-  if (isShiftedMask_64(Val)) {
-    // look for the first non-zero bit
-    MB = countLeadingZeros(Val);
-    // look for the first zero bit after the run of ones
-    ME = countLeadingZeros((Val - 1) ^ Val);
-    return true;
-  } else {
-    Val = ~Val; // invert mask
     if (isShiftedMask_64(Val)) {
-      // effectively look for the first zero bit
-      ME = countLeadingZeros(Val) - 1;
-      // effectively look for the first one bit after the run of zeros
-      MB = countLeadingZeros((Val - 1) ^ Val) + 1;
-      return true;
+        // look for the first non-zero bit
+        MB = countLeadingZeros(Val);
+        // look for the first zero bit after the run of ones
+        ME = countLeadingZeros((Val - 1) ^ Val);
+        return true;
+    } else {
+        Val = ~Val; // invert mask
+        if (isShiftedMask_64(Val)) {
+            // effectively look for the first zero bit
+            ME = countLeadingZeros(Val) - 1;
+            // effectively look for the first one bit after the run of zeros
+            MB = countLeadingZeros((Val - 1) ^ Val) + 1;
+            return true;
+        }
     }
-  }
-  // no run present
-  return false;
+    // no run present
+    return false;
 }
 
 } // end namespace llvm

@@ -38,7 +38,7 @@
 static __inline__ void __DEFAULT_FN_ATTRS
 _clui (void)
 {
-  __builtin_ia32_clui();
+    __builtin_ia32_clui();
 }
 
 /// Sets the user interrupt flag (UIF). Its effect takes place immediately; a
@@ -59,7 +59,7 @@ _clui (void)
 static __inline__ void __DEFAULT_FN_ATTRS
 _stui (void)
 {
-  __builtin_ia32_stui();
+    __builtin_ia32_stui();
 }
 
 /// Get the current value of the user interrupt flag (UIF). Can be executed
@@ -86,7 +86,7 @@ _stui (void)
 static __inline__ unsigned char __DEFAULT_FN_ATTRS
 _testui (void)
 {
-  return __builtin_ia32_testui();
+    return __builtin_ia32_testui();
 }
 
 /// Send interprocessor user interrupt. Can be executed only if
@@ -140,7 +140,7 @@ _testui (void)
 static __inline__ void __DEFAULT_FN_ATTRS
 _senduipi (unsigned long long __a)
 {
-  __builtin_ia32_senduipi(__a);
+    __builtin_ia32_senduipi(__a);
 }
 
 #endif /* __x86_64__ */

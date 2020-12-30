@@ -90,7 +90,9 @@ typedef __WCHAR_TYPE__ wchar_t;
 #endif
 #ifdef __cplusplus
 #if defined(_MSC_EXTENSIONS) && defined(_NATIVE_NULLPTR_SUPPORTED)
-namespace std { typedef decltype(nullptr) nullptr_t; }
+namespace std {
+typedef decltype(nullptr) nullptr_t;
+}
 using ::std::nullptr_t;
 #endif
 #endif

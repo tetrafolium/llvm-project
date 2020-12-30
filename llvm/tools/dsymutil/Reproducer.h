@@ -18,9 +18,9 @@ namespace dsymutil {
 
 /// The reproducer mode.
 enum class ReproducerMode {
-  Generate,
-  Use,
-  Off,
+    Generate,
+    Use,
+    Off,
 };
 
 /// The reproducer class manages the sate related to reproducers in dsymutil.
@@ -29,17 +29,19 @@ enum class ReproducerMode {
 /// this instance is the real file system.
 class Reproducer {
 public:
-  Reproducer();
-  virtual ~Reproducer();
+    Reproducer();
+    virtual ~Reproducer();
 
-  IntrusiveRefCntPtr<vfs::FileSystem> getVFS() const { return VFS; }
+    IntrusiveRefCntPtr<vfs::FileSystem> getVFS() const {
+        return VFS;
+    }
 
-  /// Create a Reproducer instance based on the given mode.
-  static llvm::Expected<std::unique_ptr<Reproducer>>
-  createReproducer(ReproducerMode Mode, StringRef Root);
+    /// Create a Reproducer instance based on the given mode.
+    static llvm::Expected<std::unique_ptr<Reproducer>>
+            createReproducer(ReproducerMode Mode, StringRef Root);
 
 protected:
-  IntrusiveRefCntPtr<vfs::FileSystem> VFS;
+    IntrusiveRefCntPtr<vfs::FileSystem> VFS;
 };
 
 /// Reproducer instance used to generate a new reproducer. The VFS returned by
@@ -47,15 +49,15 @@ protected:
 /// dsymutil.
 class ReproducerGenerate : public Reproducer {
 public:
-  ReproducerGenerate(std::error_code &EC);
-  ~ReproducerGenerate() override;
+    ReproducerGenerate(std::error_code &EC);
+    ~ReproducerGenerate() override;
 
 private:
-  /// The path to the reproducer.
-  std::string Root;
+    /// The path to the reproducer.
+    std::string Root;
 
-  /// The FileCollector used by the FileCollectorFileSystem.
-  std::shared_ptr<FileCollector> FC;
+    /// The FileCollector used by the FileCollectorFileSystem.
+    std::shared_ptr<FileCollector> FC;
 };
 
 /// Reproducer instance used to use an existing reproducer. The VFS returned by
@@ -63,12 +65,12 @@ private:
 /// counterpart in the reproducer.
 class ReproducerUse : public Reproducer {
 public:
-  ReproducerUse(StringRef Root, std::error_code &EC);
-  ~ReproducerUse() override;
+    ReproducerUse(StringRef Root, std::error_code &EC);
+    ~ReproducerUse() override;
 
 private:
-  /// The path to the reproducer.
-  std::string Root;
+    /// The path to the reproducer.
+    std::string Root;
 };
 
 } // end namespace dsymutil

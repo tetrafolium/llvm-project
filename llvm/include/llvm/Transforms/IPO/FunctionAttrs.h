@@ -29,10 +29,10 @@ class Pass;
 /// The three kinds of memory access relevant to 'readonly' and
 /// 'readnone' attributes.
 enum MemoryAccessKind {
-  MAK_ReadNone = 0,
-  MAK_ReadOnly = 1,
-  MAK_MayWrite = 2,
-  MAK_WriteOnly = 3
+    MAK_ReadNone = 0,
+    MAK_ReadOnly = 1,
+    MAK_MayWrite = 2,
+    MAK_WriteOnly = 3
 };
 
 /// Returns the memory access properties of this copy of the function.
@@ -48,8 +48,8 @@ MemoryAccessKind computeFunctionBodyMemoryAccess(Function &F, AAResults &AAR);
 /// attribute. It also discovers function arguments that are not captured by
 /// the function and marks them with the nocapture attribute.
 struct PostOrderFunctionAttrsPass : PassInfoMixin<PostOrderFunctionAttrsPass> {
-  PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
-                        LazyCallGraph &CG, CGSCCUpdateResult &UR);
+    PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
+                          LazyCallGraph &CG, CGSCCUpdateResult &UR);
 };
 
 /// Create a legacy pass manager instance of a pass to compute function attrs
@@ -69,7 +69,7 @@ Pass *createPostOrderFunctionAttrsLegacyPass();
 class ReversePostOrderFunctionAttrsPass
     : public PassInfoMixin<ReversePostOrderFunctionAttrsPass> {
 public:
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

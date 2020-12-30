@@ -26,10 +26,10 @@ namespace Fortran::semantics {
 class Symbol;
 
 struct SymbolDataInitialization {
-  using Range = common::Interval<common::ConstantSubscript>;
-  explicit SymbolDataInitialization(std::size_t bytes) : image{bytes} {}
-  evaluate::InitialImage image;
-  std::list<Range> inits;
+    using Range = common::Interval<common::ConstantSubscript>;
+    explicit SymbolDataInitialization(std::size_t bytes) : image{bytes} {}
+    evaluate::InitialImage image;
+    std::list<Range> inits;
 };
 
 using DataInitializations = std::map<const Symbol *, SymbolDataInitialization>;
@@ -37,7 +37,7 @@ using DataInitializations = std::map<const Symbol *, SymbolDataInitialization>;
 // Matches DATA statement variables with their values and checks
 // compatibility.
 void AccumulateDataInitializations(DataInitializations &,
-    evaluate::ExpressionAnalyzer &, const parser::DataStmtSet &);
+                                   evaluate::ExpressionAnalyzer &, const parser::DataStmtSet &);
 
 void ConvertToInitializers(
     DataInitializations &, evaluate::ExpressionAnalyzer &);

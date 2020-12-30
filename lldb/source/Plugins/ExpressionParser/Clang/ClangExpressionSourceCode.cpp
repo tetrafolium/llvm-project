@@ -35,7 +35,7 @@ using namespace lldb_private;
 const llvm::StringRef ClangExpressionSourceCode::g_prefix_file_name = PREFIX_NAME;
 
 const char *ClangExpressionSourceCode::g_expression_prefix =
-"#line 1 \"" PREFIX_NAME R"("
+    "#line 1 \"" PREFIX_NAME R"("
 #ifndef offsetof
 #define offsetof(t, d) __builtin_offsetof(t, d)
 #endif

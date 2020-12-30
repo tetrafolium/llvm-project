@@ -29,8 +29,8 @@
 namespace scudo {
 
 enum class Checksum : u8 {
-  BSD = 0,
-  HardwareCRC32 = 1,
+    BSD = 0,
+    HardwareCRC32 = 1,
 };
 
 // BSD checksum, unlike a software CRC32, doesn't use any array lookup. We save
@@ -38,12 +38,12 @@ enum class Checksum : u8 {
 // that do no support hardware CRC32. The checksum itself is 16-bit, which is at
 // odds with CRC32, but enough for our needs.
 inline u16 computeBSDChecksum(u16 Sum, uptr Data) {
-  for (u8 I = 0; I < sizeof(Data); I++) {
-    Sum = static_cast<u16>((Sum >> 1) | ((Sum & 1) << 15));
-    Sum = static_cast<u16>(Sum + (Data & 0xff));
-    Data >>= 8;
-  }
-  return Sum;
+    for (u8 I = 0; I < sizeof(Data); I++) {
+        Sum = static_cast<u16>((Sum >> 1) | ((Sum & 1) << 15));
+        Sum = static_cast<u16>(Sum + (Data & 0xff));
+        Data >>= 8;
+    }
+    return Sum;
 }
 
 bool hasHardwareCRC32();

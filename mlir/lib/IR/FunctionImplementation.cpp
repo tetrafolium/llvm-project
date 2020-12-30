@@ -18,68 +18,68 @@ ParseResult mlir::impl::parseFunctionArgumentList(
     SmallVectorImpl<OpAsmParser::OperandType> &argNames,
     SmallVectorImpl<Type> &argTypes, SmallVectorImpl<NamedAttrList> &argAttrs,
     bool &isVariadic) {
-  if (parser.parseLParen())
-    return failure();
-
-  // The argument list either has to consistently have ssa-id's followed by
-  // types, or just be a type list.  It isn't ok to sometimes have SSA ID's and
-  // sometimes not.
-  auto parseArgument = [&]() -> ParseResult {
-    llvm::SMLoc loc = parser.getCurrentLocation();
-
-    // Parse argument name if present.
-    OpAsmParser::OperandType argument;
-    Type argumentType;
-    if (succeeded(parser.parseOptionalRegionArgument(argument)) &&
-        !argument.name.empty()) {
-      // Reject this if the preceding argument was missing a name.
-      if (argNames.empty() && !argTypes.empty())
-        return parser.emitError(loc, "expected type instead of SSA identifier");
-      argNames.push_back(argument);
-
-      if (parser.parseColonType(argumentType))
+    if (parser.parseLParen())
         return failure();
-    } else if (allowVariadic && succeeded(parser.parseOptionalEllipsis())) {
-      isVariadic = true;
-      return success();
-    } else if (!argNames.empty()) {
-      // Reject this if the preceding argument had a name.
-      return parser.emitError(loc, "expected SSA identifier");
-    } else if (parser.parseType(argumentType)) {
-      return failure();
+
+    // The argument list either has to consistently have ssa-id's followed by
+    // types, or just be a type list.  It isn't ok to sometimes have SSA ID's and
+    // sometimes not.
+    auto parseArgument = [&]() -> ParseResult {
+        llvm::SMLoc loc = parser.getCurrentLocation();
+
+        // Parse argument name if present.
+        OpAsmParser::OperandType argument;
+        Type argumentType;
+        if (succeeded(parser.parseOptionalRegionArgument(argument)) &&
+                !argument.name.empty()) {
+            // Reject this if the preceding argument was missing a name.
+            if (argNames.empty() && !argTypes.empty())
+                return parser.emitError(loc, "expected type instead of SSA identifier");
+            argNames.push_back(argument);
+
+            if (parser.parseColonType(argumentType))
+                return failure();
+        } else if (allowVariadic && succeeded(parser.parseOptionalEllipsis())) {
+            isVariadic = true;
+            return success();
+        } else if (!argNames.empty()) {
+            // Reject this if the preceding argument had a name.
+            return parser.emitError(loc, "expected SSA identifier");
+        } else if (parser.parseType(argumentType)) {
+            return failure();
+        }
+
+        // Add the argument type.
+        argTypes.push_back(argumentType);
+
+        // Parse any argument attributes.
+        NamedAttrList attrs;
+        if (parser.parseOptionalAttrDict(attrs))
+            return failure();
+        if (!allowAttributes && !attrs.empty())
+            return parser.emitError(loc, "expected arguments without attributes");
+        argAttrs.push_back(attrs);
+        return success();
+    };
+
+    // Parse the function arguments.
+    isVariadic = false;
+    if (failed(parser.parseOptionalRParen())) {
+        do {
+            unsigned numTypedArguments = argTypes.size();
+            if (parseArgument())
+                return failure();
+
+            llvm::SMLoc loc = parser.getCurrentLocation();
+            if (argTypes.size() == numTypedArguments &&
+                    succeeded(parser.parseOptionalComma()))
+                return parser.emitError(
+                           loc, "variadic arguments must be in the end of the argument list");
+        } while (succeeded(parser.parseOptionalComma()));
+        parser.parseRParen();
     }
 
-    // Add the argument type.
-    argTypes.push_back(argumentType);
-
-    // Parse any argument attributes.
-    NamedAttrList attrs;
-    if (parser.parseOptionalAttrDict(attrs))
-      return failure();
-    if (!allowAttributes && !attrs.empty())
-      return parser.emitError(loc, "expected arguments without attributes");
-    argAttrs.push_back(attrs);
     return success();
-  };
-
-  // Parse the function arguments.
-  isVariadic = false;
-  if (failed(parser.parseOptionalRParen())) {
-    do {
-      unsigned numTypedArguments = argTypes.size();
-      if (parseArgument())
-        return failure();
-
-      llvm::SMLoc loc = parser.getCurrentLocation();
-      if (argTypes.size() == numTypedArguments &&
-          succeeded(parser.parseOptionalComma()))
-        return parser.emitError(
-            loc, "variadic arguments must be in the end of the argument list");
-    } while (succeeded(parser.parseOptionalComma()));
-    parser.parseRParen();
-  }
-
-  return success();
 }
 
 /// Parse a function result list.
@@ -94,31 +94,31 @@ ParseResult mlir::impl::parseFunctionArgumentList(
 static ParseResult
 parseFunctionResultList(OpAsmParser &parser, SmallVectorImpl<Type> &resultTypes,
                         SmallVectorImpl<NamedAttrList> &resultAttrs) {
-  if (failed(parser.parseOptionalLParen())) {
-    // We already know that there is no `(`, so parse a type.
-    // Because there is no `(`, it cannot be a function type.
-    Type ty;
-    if (parser.parseType(ty))
-      return failure();
-    resultTypes.push_back(ty);
-    resultAttrs.emplace_back();
-    return success();
-  }
-
-  // Special case for an empty set of parens.
-  if (succeeded(parser.parseOptionalRParen()))
-    return success();
-
-  // Parse individual function results.
-  do {
-    resultTypes.emplace_back();
-    resultAttrs.emplace_back();
-    if (parser.parseType(resultTypes.back()) ||
-        parser.parseOptionalAttrDict(resultAttrs.back())) {
-      return failure();
+    if (failed(parser.parseOptionalLParen())) {
+        // We already know that there is no `(`, so parse a type.
+        // Because there is no `(`, it cannot be a function type.
+        Type ty;
+        if (parser.parseType(ty))
+            return failure();
+        resultTypes.push_back(ty);
+        resultAttrs.emplace_back();
+        return success();
     }
-  } while (succeeded(parser.parseOptionalComma()));
-  return parser.parseRParen();
+
+    // Special case for an empty set of parens.
+    if (succeeded(parser.parseOptionalRParen()))
+        return success();
+
+    // Parse individual function results.
+    do {
+        resultTypes.emplace_back();
+        resultAttrs.emplace_back();
+        if (parser.parseType(resultTypes.back()) ||
+                parser.parseOptionalAttrDict(resultAttrs.back())) {
+            return failure();
+        }
+    } while (succeeded(parser.parseOptionalComma()));
+    return parser.parseRParen();
 }
 
 /// Parses a function signature using `parser`. The `allowVariadic` argument
@@ -131,30 +131,30 @@ ParseResult mlir::impl::parseFunctionSignature(
     SmallVectorImpl<Type> &argTypes, SmallVectorImpl<NamedAttrList> &argAttrs,
     bool &isVariadic, SmallVectorImpl<Type> &resultTypes,
     SmallVectorImpl<NamedAttrList> &resultAttrs) {
-  bool allowArgAttrs = true;
-  if (parseFunctionArgumentList(parser, allowArgAttrs, allowVariadic, argNames,
-                                argTypes, argAttrs, isVariadic))
-    return failure();
-  if (succeeded(parser.parseOptionalArrow()))
-    return parseFunctionResultList(parser, resultTypes, resultAttrs);
-  return success();
+    bool allowArgAttrs = true;
+    if (parseFunctionArgumentList(parser, allowArgAttrs, allowVariadic, argNames,
+                                  argTypes, argAttrs, isVariadic))
+        return failure();
+    if (succeeded(parser.parseOptionalArrow()))
+        return parseFunctionResultList(parser, resultTypes, resultAttrs);
+    return success();
 }
 
 void mlir::impl::addArgAndResultAttrs(Builder &builder, OperationState &result,
                                       ArrayRef<NamedAttrList> argAttrs,
                                       ArrayRef<NamedAttrList> resultAttrs) {
-  // Add the attributes to the function arguments.
-  SmallString<8> attrNameBuf;
-  for (unsigned i = 0, e = argAttrs.size(); i != e; ++i)
-    if (!argAttrs[i].empty())
-      result.addAttribute(getArgAttrName(i, attrNameBuf),
-                          builder.getDictionaryAttr(argAttrs[i]));
+    // Add the attributes to the function arguments.
+    SmallString<8> attrNameBuf;
+    for (unsigned i = 0, e = argAttrs.size(); i != e; ++i)
+        if (!argAttrs[i].empty())
+            result.addAttribute(getArgAttrName(i, attrNameBuf),
+                                builder.getDictionaryAttr(argAttrs[i]));
 
-  // Add the attributes to the function results.
-  for (unsigned i = 0, e = resultAttrs.size(); i != e; ++i)
-    if (!resultAttrs[i].empty())
-      result.addAttribute(getResultAttrName(i, attrNameBuf),
-                          builder.getDictionaryAttr(resultAttrs[i]));
+    // Add the attributes to the function results.
+    for (unsigned i = 0, e = resultAttrs.size(); i != e; ++i)
+        if (!resultAttrs[i].empty())
+            result.addAttribute(getResultAttrName(i, attrNameBuf),
+                                builder.getDictionaryAttr(resultAttrs[i]));
 }
 
 /// Parser implementation for function-like operations.  Uses `funcTypeBuilder`
@@ -163,81 +163,81 @@ ParseResult
 mlir::impl::parseFunctionLikeOp(OpAsmParser &parser, OperationState &result,
                                 bool allowVariadic,
                                 mlir::impl::FuncTypeBuilder funcTypeBuilder) {
-  SmallVector<OpAsmParser::OperandType, 4> entryArgs;
-  SmallVector<NamedAttrList, 4> argAttrs;
-  SmallVector<NamedAttrList, 4> resultAttrs;
-  SmallVector<Type, 4> argTypes;
-  SmallVector<Type, 4> resultTypes;
-  auto &builder = parser.getBuilder();
+    SmallVector<OpAsmParser::OperandType, 4> entryArgs;
+    SmallVector<NamedAttrList, 4> argAttrs;
+    SmallVector<NamedAttrList, 4> resultAttrs;
+    SmallVector<Type, 4> argTypes;
+    SmallVector<Type, 4> resultTypes;
+    auto &builder = parser.getBuilder();
 
-  // Parse visibility.
-  impl::parseOptionalVisibilityKeyword(parser, result.attributes);
+    // Parse visibility.
+    impl::parseOptionalVisibilityKeyword(parser, result.attributes);
 
-  // Parse the name as a symbol.
-  StringAttr nameAttr;
-  if (parser.parseSymbolName(nameAttr, SymbolTable::getSymbolAttrName(),
-                             result.attributes))
-    return failure();
+    // Parse the name as a symbol.
+    StringAttr nameAttr;
+    if (parser.parseSymbolName(nameAttr, SymbolTable::getSymbolAttrName(),
+                               result.attributes))
+        return failure();
 
-  // Parse the function signature.
-  auto signatureLocation = parser.getCurrentLocation();
-  bool isVariadic = false;
-  if (parseFunctionSignature(parser, allowVariadic, entryArgs, argTypes,
-                             argAttrs, isVariadic, resultTypes, resultAttrs))
-    return failure();
+    // Parse the function signature.
+    auto signatureLocation = parser.getCurrentLocation();
+    bool isVariadic = false;
+    if (parseFunctionSignature(parser, allowVariadic, entryArgs, argTypes,
+                               argAttrs, isVariadic, resultTypes, resultAttrs))
+        return failure();
 
-  std::string errorMessage;
-  if (auto type = funcTypeBuilder(builder, argTypes, resultTypes,
-                                  impl::VariadicFlag(isVariadic), errorMessage))
-    result.addAttribute(getTypeAttrName(), TypeAttr::get(type));
-  else
-    return parser.emitError(signatureLocation)
-           << "failed to construct function type"
-           << (errorMessage.empty() ? "" : ": ") << errorMessage;
+    std::string errorMessage;
+    if (auto type = funcTypeBuilder(builder, argTypes, resultTypes,
+                                    impl::VariadicFlag(isVariadic), errorMessage))
+        result.addAttribute(getTypeAttrName(), TypeAttr::get(type));
+    else
+        return parser.emitError(signatureLocation)
+               << "failed to construct function type"
+               << (errorMessage.empty() ? "" : ": ") << errorMessage;
 
-  // If function attributes are present, parse them.
-  if (parser.parseOptionalAttrDictWithKeyword(result.attributes))
-    return failure();
+    // If function attributes are present, parse them.
+    if (parser.parseOptionalAttrDictWithKeyword(result.attributes))
+        return failure();
 
-  // Add the attributes to the function arguments.
-  assert(argAttrs.size() == argTypes.size());
-  assert(resultAttrs.size() == resultTypes.size());
-  addArgAndResultAttrs(builder, result, argAttrs, resultAttrs);
+    // Add the attributes to the function arguments.
+    assert(argAttrs.size() == argTypes.size());
+    assert(resultAttrs.size() == resultTypes.size());
+    addArgAndResultAttrs(builder, result, argAttrs, resultAttrs);
 
-  // Parse the optional function body. The printer will not print the body if
-  // its empty, so disallow parsing of empty body in the parser.
-  auto *body = result.addRegion();
-  llvm::SMLoc loc = parser.getCurrentLocation();
-  OptionalParseResult parseResult = parser.parseOptionalRegion(
-      *body, entryArgs, entryArgs.empty() ? ArrayRef<Type>() : argTypes,
-      /*enableNameShadowing=*/false);
-  if (parseResult.hasValue()) {
-    if (failed(*parseResult))
-      return failure();
-    // Function body was parsed, make sure its not empty.
-    if (body->empty())
-      return parser.emitError(loc, "expected non-empty function body");
-  }
-  return success();
+    // Parse the optional function body. The printer will not print the body if
+    // its empty, so disallow parsing of empty body in the parser.
+    auto *body = result.addRegion();
+    llvm::SMLoc loc = parser.getCurrentLocation();
+    OptionalParseResult parseResult = parser.parseOptionalRegion(
+                                          *body, entryArgs, entryArgs.empty() ? ArrayRef<Type>() : argTypes,
+                                          /*enableNameShadowing=*/false);
+    if (parseResult.hasValue()) {
+        if (failed(*parseResult))
+            return failure();
+        // Function body was parsed, make sure its not empty.
+        if (body->empty())
+            return parser.emitError(loc, "expected non-empty function body");
+    }
+    return success();
 }
 
 // Print a function result list.
 static void printFunctionResultList(OpAsmPrinter &p, ArrayRef<Type> types,
                                     ArrayRef<ArrayRef<NamedAttribute>> attrs) {
-  assert(!types.empty() && "Should not be called for empty result list.");
-  auto &os = p.getStream();
-  bool needsParens =
-      types.size() > 1 || types[0].isa<FunctionType>() || !attrs[0].empty();
-  if (needsParens)
-    os << '(';
-  llvm::interleaveComma(
-      llvm::zip(types, attrs), os,
-      [&](const std::tuple<Type, ArrayRef<NamedAttribute>> &t) {
+    assert(!types.empty() && "Should not be called for empty result list.");
+    auto &os = p.getStream();
+    bool needsParens =
+        types.size() > 1 || types[0].isa<FunctionType>() || !attrs[0].empty();
+    if (needsParens)
+        os << '(';
+    llvm::interleaveComma(
+        llvm::zip(types, attrs), os,
+    [&](const std::tuple<Type, ArrayRef<NamedAttribute>> &t) {
         p.printType(std::get<0>(t));
         p.printOptionalAttrDict(std::get<1>(t));
-      });
-  if (needsParens)
-    os << ')';
+    });
+    if (needsParens)
+        os << ')';
 }
 
 /// Print the signature of the function-like operation `op`.  Assumes `op` has
@@ -246,38 +246,38 @@ void mlir::impl::printFunctionSignature(OpAsmPrinter &p, Operation *op,
                                         ArrayRef<Type> argTypes,
                                         bool isVariadic,
                                         ArrayRef<Type> resultTypes) {
-  Region &body = op->getRegion(0);
-  bool isExternal = body.empty();
+    Region &body = op->getRegion(0);
+    bool isExternal = body.empty();
 
-  p << '(';
-  for (unsigned i = 0, e = argTypes.size(); i < e; ++i) {
-    if (i > 0)
-      p << ", ";
+    p << '(';
+    for (unsigned i = 0, e = argTypes.size(); i < e; ++i) {
+        if (i > 0)
+            p << ", ";
 
-    if (!isExternal) {
-      p.printOperand(body.getArgument(i));
-      p << ": ";
+        if (!isExternal) {
+            p.printOperand(body.getArgument(i));
+            p << ": ";
+        }
+
+        p.printType(argTypes[i]);
+        p.printOptionalAttrDict(::mlir::impl::getArgAttrs(op, i));
     }
 
-    p.printType(argTypes[i]);
-    p.printOptionalAttrDict(::mlir::impl::getArgAttrs(op, i));
-  }
+    if (isVariadic) {
+        if (!argTypes.empty())
+            p << ", ";
+        p << "...";
+    }
 
-  if (isVariadic) {
-    if (!argTypes.empty())
-      p << ", ";
-    p << "...";
-  }
+    p << ')';
 
-  p << ')';
-
-  if (!resultTypes.empty()) {
-    p.getStream() << " -> ";
-    SmallVector<ArrayRef<NamedAttribute>, 4> resultAttrs;
-    for (int i = 0, e = resultTypes.size(); i < e; ++i)
-      resultAttrs.push_back(::mlir::impl::getResultAttrs(op, i));
-    printFunctionResultList(p, resultTypes, resultAttrs);
-  }
+    if (!resultTypes.empty()) {
+        p.getStream() << " -> ";
+        SmallVector<ArrayRef<NamedAttribute>, 4> resultAttrs;
+        for (int i = 0, e = resultTypes.size(); i < e; ++i)
+            resultAttrs.push_back(::mlir::impl::getResultAttrs(op, i));
+        printFunctionResultList(p, resultTypes, resultAttrs);
+    }
 }
 
 /// Prints the list of function prefixed with the "attributes" keyword. The
@@ -286,31 +286,32 @@ void mlir::impl::printFunctionSignature(OpAsmPrinter &p, Operation *op,
 /// if all attributes are elided. Assumes `op` has the `FunctionLike` trait and
 /// passed the verification.
 void mlir::impl::printFunctionAttributes(OpAsmPrinter &p, Operation *op,
-                                         unsigned numInputs,
-                                         unsigned numResults,
-                                         ArrayRef<StringRef> elided) {
-  // Print out function attributes, if present.
-  SmallVector<StringRef, 2> ignoredAttrs = {
-      ::mlir::SymbolTable::getSymbolAttrName(), getTypeAttrName()};
-  ignoredAttrs.append(elided.begin(), elided.end());
+        unsigned numInputs,
+        unsigned numResults,
+        ArrayRef<StringRef> elided) {
+    // Print out function attributes, if present.
+    SmallVector<StringRef, 2> ignoredAttrs = {
+        ::mlir::SymbolTable::getSymbolAttrName(), getTypeAttrName()
+    };
+    ignoredAttrs.append(elided.begin(), elided.end());
 
-  SmallString<8> attrNameBuf;
+    SmallString<8> attrNameBuf;
 
-  // Ignore any argument attributes.
-  std::vector<SmallString<8>> argAttrStorage;
-  for (unsigned i = 0; i != numInputs; ++i)
-    if (op->getAttr(getArgAttrName(i, attrNameBuf)))
-      argAttrStorage.emplace_back(attrNameBuf);
-  ignoredAttrs.append(argAttrStorage.begin(), argAttrStorage.end());
+    // Ignore any argument attributes.
+    std::vector<SmallString<8>> argAttrStorage;
+    for (unsigned i = 0; i != numInputs; ++i)
+        if (op->getAttr(getArgAttrName(i, attrNameBuf)))
+            argAttrStorage.emplace_back(attrNameBuf);
+    ignoredAttrs.append(argAttrStorage.begin(), argAttrStorage.end());
 
-  // Ignore any result attributes.
-  std::vector<SmallString<8>> resultAttrStorage;
-  for (unsigned i = 0; i != numResults; ++i)
-    if (op->getAttr(getResultAttrName(i, attrNameBuf)))
-      resultAttrStorage.emplace_back(attrNameBuf);
-  ignoredAttrs.append(resultAttrStorage.begin(), resultAttrStorage.end());
+    // Ignore any result attributes.
+    std::vector<SmallString<8>> resultAttrStorage;
+    for (unsigned i = 0; i != numResults; ++i)
+        if (op->getAttr(getResultAttrName(i, attrNameBuf)))
+            resultAttrStorage.emplace_back(attrNameBuf);
+    ignoredAttrs.append(resultAttrStorage.begin(), resultAttrStorage.end());
 
-  p.printOptionalAttrDictWithKeyword(op->getAttrs(), ignoredAttrs);
+    p.printOptionalAttrDictWithKeyword(op->getAttrs(), ignoredAttrs);
 }
 
 /// Printer implementation for function-like operations.  Accepts lists of
@@ -318,23 +319,23 @@ void mlir::impl::printFunctionAttributes(OpAsmPrinter &p, Operation *op,
 void mlir::impl::printFunctionLikeOp(OpAsmPrinter &p, Operation *op,
                                      ArrayRef<Type> argTypes, bool isVariadic,
                                      ArrayRef<Type> resultTypes) {
-  // Print the operation and the function name.
-  auto funcName =
-      op->getAttrOfType<StringAttr>(SymbolTable::getSymbolAttrName())
-          .getValue();
-  p << op->getName() << ' ';
+    // Print the operation and the function name.
+    auto funcName =
+        op->getAttrOfType<StringAttr>(SymbolTable::getSymbolAttrName())
+        .getValue();
+    p << op->getName() << ' ';
 
-  StringRef visibilityAttrName = SymbolTable::getVisibilityAttrName();
-  if (auto visibility = op->getAttrOfType<StringAttr>(visibilityAttrName))
-    p << visibility.getValue() << ' ';
-  p.printSymbolName(funcName);
+    StringRef visibilityAttrName = SymbolTable::getVisibilityAttrName();
+    if (auto visibility = op->getAttrOfType<StringAttr>(visibilityAttrName))
+        p << visibility.getValue() << ' ';
+    p.printSymbolName(funcName);
 
-  printFunctionSignature(p, op, argTypes, isVariadic, resultTypes);
-  printFunctionAttributes(p, op, argTypes.size(), resultTypes.size(),
-                          {visibilityAttrName});
-  // Print the body if this is not an external function.
-  Region &body = op->getRegion(0);
-  if (!body.empty())
-    p.printRegion(body, /*printEntryBlockArgs=*/false,
-                  /*printBlockTerminators=*/true);
+    printFunctionSignature(p, op, argTypes, isVariadic, resultTypes);
+    printFunctionAttributes(p, op, argTypes.size(), resultTypes.size(),
+    {visibilityAttrName});
+    // Print the body if this is not an external function.
+    Region &body = op->getRegion(0);
+    if (!body.empty())
+        p.printRegion(body, /*printEntryBlockArgs=*/false,
+                      /*printBlockTerminators=*/true);
 }

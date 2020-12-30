@@ -17,9 +17,9 @@ class PDBFile;
 
 class OutputStyle {
 public:
-  virtual ~OutputStyle() {}
+    virtual ~OutputStyle() {}
 
-  virtual Error dump() = 0;
+    virtual Error dump() = 0;
 };
 }
 }

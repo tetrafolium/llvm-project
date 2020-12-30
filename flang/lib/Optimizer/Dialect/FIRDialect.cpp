@@ -15,38 +15,38 @@ using namespace fir;
 
 fir::FIROpsDialect::FIROpsDialect(mlir::MLIRContext *ctx)
     : mlir::Dialect("fir", ctx, mlir::TypeID::get<FIROpsDialect>()) {
-  addTypes<BoxType, BoxCharType, BoxProcType, CharacterType, CplxType, DimsType,
-           FieldType, HeapType, IntType, LenType, LogicalType, PointerType,
-           RealType, RecordType, ReferenceType, SequenceType, TypeDescType>();
-  addAttributes<ClosedIntervalAttr, ExactTypeAttr, LowerBoundAttr,
-                PointIntervalAttr, RealAttr, SubclassAttr, UpperBoundAttr>();
-  addOperations<
+    addTypes<BoxType, BoxCharType, BoxProcType, CharacterType, CplxType, DimsType,
+             FieldType, HeapType, IntType, LenType, LogicalType, PointerType,
+             RealType, RecordType, ReferenceType, SequenceType, TypeDescType>();
+    addAttributes<ClosedIntervalAttr, ExactTypeAttr, LowerBoundAttr,
+                  PointIntervalAttr, RealAttr, SubclassAttr, UpperBoundAttr>();
+    addOperations<
 #define GET_OP_LIST
 #include "flang/Optimizer/Dialect/FIROps.cpp.inc"
-      >();
+    >();
 }
 
 // anchor the class vtable to this compilation unit
 fir::FIROpsDialect::~FIROpsDialect() {
-  // do nothing
+    // do nothing
 }
 
 mlir::Type fir::FIROpsDialect::parseType(mlir::DialectAsmParser &parser) const {
-  return parseFirType(const_cast<FIROpsDialect *>(this), parser);
+    return parseFirType(const_cast<FIROpsDialect *>(this), parser);
 }
 
 void fir::FIROpsDialect::printType(mlir::Type ty,
                                    mlir::DialectAsmPrinter &p) const {
-  return printFirType(const_cast<FIROpsDialect *>(this), ty, p);
+    return printFirType(const_cast<FIROpsDialect *>(this), ty, p);
 }
 
 mlir::Attribute
 fir::FIROpsDialect::parseAttribute(mlir::DialectAsmParser &parser,
                                    mlir::Type type) const {
-  return parseFirAttribute(const_cast<FIROpsDialect *>(this), parser, type);
+    return parseFirAttribute(const_cast<FIROpsDialect *>(this), parser, type);
 }
 
 void fir::FIROpsDialect::printAttribute(mlir::Attribute attr,
                                         mlir::DialectAsmPrinter &p) const {
-  printFirAttribute(const_cast<FIROpsDialect *>(this), attr, p);
+    printFirAttribute(const_cast<FIROpsDialect *>(this), attr, p);
 }

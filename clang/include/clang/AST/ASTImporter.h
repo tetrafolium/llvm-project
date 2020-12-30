@@ -49,8 +49,8 @@ class TagDecl;
 class TranslationUnitDecl;
 class TypeSourceInfo;
 
-  class ImportError : public llvm::ErrorInfo<ImportError> {
-  public:
+class ImportError : public llvm::ErrorInfo<ImportError> {
+public:
     /// \brief Kind of error when importing an AST component.
     enum ErrorKind {
         NameConflict, /// Naming ambiguity (likely ODR violation).
@@ -65,8 +65,8 @@ class TypeSourceInfo;
     ImportError() : Error(Unknown) {}
     ImportError(const ImportError &Other) : Error(Other.Error) {}
     ImportError &operator=(const ImportError &Other) {
-      Error = Other.Error;
-      return *this;
+        Error = Other.Error;
+        return *this;
     }
     ImportError(ErrorKind Error) : Error(Error) { }
 
@@ -74,22 +74,22 @@ class TypeSourceInfo;
 
     void log(raw_ostream &OS) const override;
     std::error_code convertToErrorCode() const override;
-  };
+};
 
-  // \brief Returns with a list of declarations started from the canonical decl
-  // then followed by subsequent decls in the translation unit.
-  // This gives a canonical list for each entry in the redecl chain.
-  // `Decl::redecls()` gives a list of decls which always start from the
-  // previous decl and the next item is actually the previous item in the order
-  // of source locations.  Thus, `Decl::redecls()` gives different lists for
-  // the different entries in a given redecl chain.
-  llvm::SmallVector<Decl*, 2> getCanonicalForwardRedeclChain(Decl* D);
+// \brief Returns with a list of declarations started from the canonical decl
+// then followed by subsequent decls in the translation unit.
+// This gives a canonical list for each entry in the redecl chain.
+// `Decl::redecls()` gives a list of decls which always start from the
+// previous decl and the next item is actually the previous item in the order
+// of source locations.  Thus, `Decl::redecls()` gives different lists for
+// the different entries in a given redecl chain.
+llvm::SmallVector<Decl*, 2> getCanonicalForwardRedeclChain(Decl* D);
 
-  /// Imports selected nodes from one AST context into another context,
-  /// merging AST nodes where appropriate.
-  class ASTImporter {
+/// Imports selected nodes from one AST context into another context,
+/// merging AST nodes where appropriate.
+class ASTImporter {
     friend class ASTNodeImporter;
-  public:
+public:
     using NonEquivalentDeclSet = llvm::DenseSet<std::pair<Decl *, Decl *>>;
     using ImportedCXXBaseSpecifierMap =
         llvm::DenseMap<const CXXBaseSpecifier *, CXXBaseSpecifier *>;
@@ -176,50 +176,50 @@ class TypeSourceInfo;
     // visited declaration.
     class ImportPathTy {
     public:
-      using VecTy = llvm::SmallVector<Decl *, 32>;
+        using VecTy = llvm::SmallVector<Decl *, 32>;
 
-      void push(Decl *D) {
-        Nodes.push_back(D);
-        ++Aux[D];
-      }
+        void push(Decl *D) {
+            Nodes.push_back(D);
+            ++Aux[D];
+        }
 
-      void pop() {
-        if (Nodes.empty())
-          return;
-        --Aux[Nodes.back()];
-        Nodes.pop_back();
-      }
+        void pop() {
+            if (Nodes.empty())
+                return;
+            --Aux[Nodes.back()];
+            Nodes.pop_back();
+        }
 
-      /// Returns true if the last element can be found earlier in the path.
-      bool hasCycleAtBack() const {
-        auto Pos = Aux.find(Nodes.back());
-        return Pos != Aux.end() && Pos->second > 1;
-      }
+        /// Returns true if the last element can be found earlier in the path.
+        bool hasCycleAtBack() const {
+            auto Pos = Aux.find(Nodes.back());
+            return Pos != Aux.end() && Pos->second > 1;
+        }
 
-      using Cycle = llvm::iterator_range<VecTy::const_reverse_iterator>;
-      Cycle getCycleAtBack() const {
-        assert(Nodes.size() >= 2);
-        return Cycle(Nodes.rbegin(),
-                     std::find(Nodes.rbegin() + 1, Nodes.rend(), Nodes.back()) +
+        using Cycle = llvm::iterator_range<VecTy::const_reverse_iterator>;
+        Cycle getCycleAtBack() const {
+            assert(Nodes.size() >= 2);
+            return Cycle(Nodes.rbegin(),
+                         std::find(Nodes.rbegin() + 1, Nodes.rend(), Nodes.back()) +
                          1);
-      }
+        }
 
-      /// Returns the copy of the cycle.
-      VecTy copyCycleAtBack() const {
-        auto R = getCycleAtBack();
-        return VecTy(R.begin(), R.end());
-      }
+        /// Returns the copy of the cycle.
+        VecTy copyCycleAtBack() const {
+            auto R = getCycleAtBack();
+            return VecTy(R.begin(), R.end());
+        }
 
     private:
-      // All nodes of the path.
-      VecTy Nodes;
-      // Auxiliary container to be able to answer "Do we have a cycle ending
-      // at last element?" as fast as possible.
-      // We count each Decl's occurrence over the path.
-      llvm::SmallDenseMap<Decl *, int, 32> Aux;
+        // All nodes of the path.
+        VecTy Nodes;
+        // Auxiliary container to be able to answer "Do we have a cycle ending
+        // at last element?" as fast as possible.
+        // We count each Decl's occurrence over the path.
+        llvm::SmallDenseMap<Decl *, int, 32> Aux;
     };
 
-  private:
+private:
     FileIDImportHandlerType FileIDImportHandler;
 
     std::shared_ptr<ASTImporterSharedState> SharedState = nullptr;
@@ -291,16 +291,18 @@ class TypeSourceInfo;
 
     void AddToLookupTable(Decl *ToD);
 
-  protected:
+protected:
     /// Can be overwritten by subclasses to implement their own import logic.
     /// The overwritten method should call this method if it didn't import the
     /// decl on its own.
     virtual Expected<Decl *> ImportImpl(Decl *From);
 
     /// Used only in unittests to verify the behaviour of the error handling.
-    virtual bool returnWithErrorInTest() { return false; };
+    virtual bool returnWithErrorInTest() {
+        return false;
+    };
 
-  public:
+public:
 
     /// \param ToContext The context we'll be importing into.
     ///
@@ -329,14 +331,18 @@ class TypeSourceInfo;
     /// The imported FileID in the To context and the original FileID in the
     /// From context is passed to it.
     void setFileIDImportHandler(FileIDImportHandlerType H) {
-      FileIDImportHandler = H;
+        FileIDImportHandler = H;
     }
 
     /// Whether the importer will perform a minimal import, creating
     /// to-be-completed forward declarations when possible.
-    bool isMinimalImport() const { return Minimal; }
+    bool isMinimalImport() const {
+        return Minimal;
+    }
 
-    void setODRHandling(ODRHandlingType T) { ODRHandling = T; }
+    void setODRHandling(ODRHandlingType T) {
+        ODRHandling = T;
+    }
 
     /// \brief Import the given object, returns the result.
     ///
@@ -345,10 +351,10 @@ class TypeSourceInfo;
     /// \return Error information (success or error).
     template <typename ImportT>
     LLVM_NODISCARD llvm::Error importInto(ImportT &To, const ImportT &From) {
-      auto ToOrErr = Import(From);
-      if (ToOrErr)
-        To = *ToOrErr;
-      return ToOrErr.takeError();
+        auto ToOrErr = Import(From);
+        if (ToOrErr)
+            To = *ToOrErr;
+        return ToOrErr.takeError();
     }
 
     /// Import cleanup objects owned by ExprWithCleanup.
@@ -382,7 +388,7 @@ class TypeSourceInfo;
     /// error.
     llvm::Expected<Decl *> Import(Decl *FromD);
     llvm::Expected<const Decl *> Import(const Decl *FromD) {
-      return Import(const_cast<Decl *>(FromD));
+        return Import(const_cast<Decl *>(FromD));
     }
 
     /// Return the copy of the given declaration in the "to" context if
@@ -399,13 +405,13 @@ class TypeSourceInfo;
     /// type a null value is returned.
     template <typename DeclT>
     llvm::Optional<DeclT *> getImportedFromDecl(const DeclT *ToD) const {
-      auto FromI = ImportedFromDecls.find(ToD);
-      if (FromI == ImportedFromDecls.end())
-        return {};
-      auto *FromD = dyn_cast<DeclT>(FromI->second);
-      if (!FromD)
-        return {};
-      return FromD;
+        auto FromI = ImportedFromDecls.find(ToD);
+        if (FromI == ImportedFromDecls.end())
+            return {};
+        auto *FromD = dyn_cast<DeclT>(FromI->second);
+        if (!FromD)
+            return {};
+        return FromD;
     }
 
     /// Import the given declaration context from the "from"
@@ -547,16 +553,24 @@ class TypeSourceInfo;
                        NamedDecl **Decls, unsigned NumDecls);
 
     /// Retrieve the context that AST nodes are being imported into.
-    ASTContext &getToContext() const { return ToContext; }
+    ASTContext &getToContext() const {
+        return ToContext;
+    }
 
     /// Retrieve the context that AST nodes are being imported from.
-    ASTContext &getFromContext() const { return FromContext; }
+    ASTContext &getFromContext() const {
+        return FromContext;
+    }
 
     /// Retrieve the file manager that AST nodes are being imported into.
-    FileManager &getToFileManager() const { return ToFileManager; }
+    FileManager &getToFileManager() const {
+        return ToFileManager;
+    }
 
     /// Retrieve the file manager that AST nodes are being imported from.
-    FileManager &getFromFileManager() const { return FromFileManager; }
+    FileManager &getFromFileManager() const {
+        return FromFileManager;
+    }
 
     /// Report a diagnostic in the "to" context.
     DiagnosticBuilder ToDiag(SourceLocation Loc, unsigned DiagID);
@@ -565,7 +579,9 @@ class TypeSourceInfo;
     DiagnosticBuilder FromDiag(SourceLocation Loc, unsigned DiagID);
 
     /// Return the set of declarations that we know are not equivalent.
-    NonEquivalentDeclSet &getNonEquivalentDecls() { return NonEquivalentDecls; }
+    NonEquivalentDeclSet &getNonEquivalentDecls() {
+        return NonEquivalentDecls;
+    }
 
     /// Called for ObjCInterfaceDecl, ObjCProtocolDecl, and TagDecl.
     /// Mark the Decl as complete, filling it in as much as possible.
@@ -590,7 +606,9 @@ class TypeSourceInfo;
     /// happens especially for anonymous structs.  If the original of the second
     /// RecordDecl can be found, we can complete it without the need for
     /// importation, eliminating this loop.
-    virtual Decl *GetOriginalDecl(Decl *To) { return nullptr; }
+    virtual Decl *GetOriginalDecl(Decl *To) {
+        return nullptr;
+    }
 
     /// Return if import of the given declaration has failed and if yes
     /// the kind of the problem. This gives the first error encountered with
@@ -610,7 +628,7 @@ class TypeSourceInfo;
     /// \returns The index of the field in its parent context (starting from 0).
     /// On error `None` is returned (parent context is non-record).
     static llvm::Optional<unsigned> getFieldIndex(Decl *F);
-  };
+};
 
 } // namespace clang
 

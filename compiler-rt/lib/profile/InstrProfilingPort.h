@@ -110,9 +110,9 @@
 #if defined(_WIN32)
 #include <windows.h>
 static inline size_t getpagesize() {
-  SYSTEM_INFO S;
-  GetNativeSystemInfo(&S);
-  return S.dwPageSize;
+    SYSTEM_INFO S;
+    GetNativeSystemInfo(&S);
+    return S.dwPageSize;
 }
 #else /* defined(_WIN32) */
 #include <unistd.h>

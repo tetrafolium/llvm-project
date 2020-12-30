@@ -46,32 +46,34 @@ LogicalResult getIndexSet(MutableArrayRef<Operation *> ops,
 
 /// Encapsulates a memref load or store access information.
 struct MemRefAccess {
-  Value memref;
-  Operation *opInst;
-  SmallVector<Value, 4> indices;
+    Value memref;
+    Operation *opInst;
+    SmallVector<Value, 4> indices;
 
-  /// Constructs a MemRefAccess from a load or store operation.
-  // TODO: add accessors to standard op's load, store, DMA op's to return
-  // MemRefAccess, i.e., loadOp->getAccess(), dmaOp->getRead/WriteAccess.
-  explicit MemRefAccess(Operation *opInst);
+    /// Constructs a MemRefAccess from a load or store operation.
+    // TODO: add accessors to standard op's load, store, DMA op's to return
+    // MemRefAccess, i.e., loadOp->getAccess(), dmaOp->getRead/WriteAccess.
+    explicit MemRefAccess(Operation *opInst);
 
-  // Returns the rank of the memref associated with this access.
-  unsigned getRank() const;
-  // Returns true if this access is of a store op.
-  bool isStore() const;
+    // Returns the rank of the memref associated with this access.
+    unsigned getRank() const;
+    // Returns true if this access is of a store op.
+    bool isStore() const;
 
-  /// Populates 'accessMap' with composition of AffineApplyOps reachable from
-  /// 'indices'.
-  void getAccessMap(AffineValueMap *accessMap) const;
+    /// Populates 'accessMap' with composition of AffineApplyOps reachable from
+    /// 'indices'.
+    void getAccessMap(AffineValueMap *accessMap) const;
 
-  /// Equal if both affine accesses can be proved to be equivalent at compile
-  /// time (considering the memrefs, their respective affine access maps  and
-  /// operands). The equality of access functions + operands is checked by
-  /// subtracting fully composed value maps, and then simplifying the difference
-  /// using the expression flattener.
-  /// TODO: this does not account for aliasing of memrefs.
-  bool operator==(const MemRefAccess &rhs) const;
-  bool operator!=(const MemRefAccess &rhs) const { return !(*this == rhs); }
+    /// Equal if both affine accesses can be proved to be equivalent at compile
+    /// time (considering the memrefs, their respective affine access maps  and
+    /// operands). The equality of access functions + operands is checked by
+    /// subtracting fully composed value maps, and then simplifying the difference
+    /// using the expression flattener.
+    /// TODO: this does not account for aliasing of memrefs.
+    bool operator==(const MemRefAccess &rhs) const;
+    bool operator!=(const MemRefAccess &rhs) const {
+        return !(*this == rhs);
+    }
 };
 
 // DependenceComponent contains state about the direction of a dependence as an
@@ -81,13 +83,13 @@ struct MemRefAccess {
 // Direction vectors components are represented by the interval [lb, ub] with
 // lb < ub. Note that ub/lb == None means unbounded.
 struct DependenceComponent {
-  // The AffineForOp Operation associated with this dependence component.
-  Operation *op;
-  // The lower bound of the dependence distance.
-  Optional<int64_t> lb;
-  // The upper bound of the dependence distance (inclusive).
-  Optional<int64_t> ub;
-  DependenceComponent() : lb(llvm::None), ub(llvm::None) {}
+    // The AffineForOp Operation associated with this dependence component.
+    Operation *op;
+    // The lower bound of the dependence distance.
+    Optional<int64_t> lb;
+    // The upper bound of the dependence distance (inclusive).
+    Optional<int64_t> ub;
+    DependenceComponent() : lb(llvm::None), ub(llvm::None) {}
 };
 
 /// Checks whether two accesses to the same memref access the same element.
@@ -101,12 +103,12 @@ struct DependenceComponent {
 // struct.
 // TODO: Make 'dependenceConstraints' optional arg.
 struct DependenceResult {
-  enum ResultEnum {
-    HasDependence, // A dependence exists between 'srcAccess' and 'dstAccess'.
-    NoDependence,  // No dependence exists between 'srcAccess' and 'dstAccess'.
-    Failure,       // Dependence check failed due to unsupported cases.
-  } value;
-  DependenceResult(ResultEnum v) : value(v) {}
+    enum ResultEnum {
+        HasDependence, // A dependence exists between 'srcAccess' and 'dstAccess'.
+        NoDependence,  // No dependence exists between 'srcAccess' and 'dstAccess'.
+        Failure,       // Dependence check failed due to unsupported cases.
+    } value;
+    DependenceResult(ResultEnum v) : value(v) {}
 };
 
 DependenceResult checkMemrefAccessDependence(
@@ -118,7 +120,7 @@ DependenceResult checkMemrefAccessDependence(
 /// Utility function that returns true if the provided DependenceResult
 /// corresponds to a dependence result.
 inline bool hasDependence(DependenceResult result) {
-  return result.value == DependenceResult::HasDependence;
+    return result.value == DependenceResult::HasDependence;
 }
 
 /// Returns in 'depCompsVec', dependence components for dependences between all

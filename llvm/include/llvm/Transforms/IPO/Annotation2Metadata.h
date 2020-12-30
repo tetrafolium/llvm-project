@@ -22,7 +22,7 @@ class Module;
 
 /// Pass to convert @llvm.global.annotations to !annotation metadata.
 struct Annotation2MetadataPass : public PassInfoMixin<Annotation2MetadataPass> {
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

@@ -44,7 +44,7 @@ void salvageKnowledge(Instruction *I, AssumptionCache *AC = nullptr,
 /// This pass attempts to minimize the number of assume without loosing any
 /// information.
 struct AssumeSimplifyPass : public PassInfoMixin<AssumeSimplifyPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 FunctionPass *createAssumeSimplifyPass();
@@ -52,7 +52,7 @@ FunctionPass *createAssumeSimplifyPass();
 /// This pass will try to build an llvm.assume for every instruction in the
 /// function. Its main purpose is testing.
 struct AssumeBuilderPass : public PassInfoMixin<AssumeBuilderPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // namespace llvm

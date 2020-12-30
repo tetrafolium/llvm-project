@@ -19,62 +19,62 @@ namespace tidy {
 namespace readability {
 
 void DeleteNullPointerCheck::registerMatchers(MatchFinder *Finder) {
-  const auto DeleteExpr =
-      cxxDeleteExpr(has(castExpr(has(declRefExpr(
-                        to(decl(equalsBoundNode("deletedPointer"))))))))
-          .bind("deleteExpr");
+    const auto DeleteExpr =
+        cxxDeleteExpr(has(castExpr(has(declRefExpr(
+                                           to(decl(equalsBoundNode("deletedPointer"))))))))
+        .bind("deleteExpr");
 
-  const auto DeleteMemberExpr =
-      cxxDeleteExpr(has(castExpr(has(memberExpr(hasDeclaration(
-                        fieldDecl(equalsBoundNode("deletedMemberPointer"))))))))
-          .bind("deleteMemberExpr");
+    const auto DeleteMemberExpr =
+        cxxDeleteExpr(has(castExpr(has(memberExpr(hasDeclaration(
+                                           fieldDecl(equalsBoundNode("deletedMemberPointer"))))))))
+        .bind("deleteMemberExpr");
 
-  const auto PointerExpr = ignoringImpCasts(anyOf(
-      declRefExpr(to(decl().bind("deletedPointer"))),
-      memberExpr(hasDeclaration(fieldDecl().bind("deletedMemberPointer")))));
+    const auto PointerExpr = ignoringImpCasts(anyOf(
+                                 declRefExpr(to(decl().bind("deletedPointer"))),
+                                 memberExpr(hasDeclaration(fieldDecl().bind("deletedMemberPointer")))));
 
-  const auto PointerCondition = castExpr(hasCastKind(CK_PointerToBoolean),
-                                         hasSourceExpression(PointerExpr));
-  const auto BinaryPointerCheckCondition = binaryOperator(
-      hasOperands(castExpr(hasCastKind(CK_NullToPointer)), PointerExpr));
+    const auto PointerCondition = castExpr(hasCastKind(CK_PointerToBoolean),
+                                           hasSourceExpression(PointerExpr));
+    const auto BinaryPointerCheckCondition = binaryOperator(
+                hasOperands(castExpr(hasCastKind(CK_NullToPointer)), PointerExpr));
 
-  Finder->addMatcher(
-      traverse(TK_AsIs,
-               ifStmt(hasCondition(
-                          anyOf(PointerCondition, BinaryPointerCheckCondition)),
-                      hasThen(anyOf(DeleteExpr, DeleteMemberExpr,
-                                    compoundStmt(anyOf(has(DeleteExpr),
-                                                       has(DeleteMemberExpr)),
-                                                 statementCountIs(1))
-                                        .bind("compound"))))
-                   .bind("ifWithDelete")),
-      this);
+    Finder->addMatcher(
+        traverse(TK_AsIs,
+                 ifStmt(hasCondition(
+                            anyOf(PointerCondition, BinaryPointerCheckCondition)),
+                        hasThen(anyOf(DeleteExpr, DeleteMemberExpr,
+                                      compoundStmt(anyOf(has(DeleteExpr),
+                                              has(DeleteMemberExpr)),
+                                              statementCountIs(1))
+                                      .bind("compound"))))
+                 .bind("ifWithDelete")),
+        this);
 }
 
 void DeleteNullPointerCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *IfWithDelete = Result.Nodes.getNodeAs<IfStmt>("ifWithDelete");
-  const auto *Compound = Result.Nodes.getNodeAs<CompoundStmt>("compound");
+    const auto *IfWithDelete = Result.Nodes.getNodeAs<IfStmt>("ifWithDelete");
+    const auto *Compound = Result.Nodes.getNodeAs<CompoundStmt>("compound");
 
-  auto Diag = diag(
-      IfWithDelete->getBeginLoc(),
-      "'if' statement is unnecessary; deleting null pointer has no effect");
-  if (IfWithDelete->getElse())
-    return;
-  // FIXME: generate fixit for this case.
+    auto Diag = diag(
+                    IfWithDelete->getBeginLoc(),
+                    "'if' statement is unnecessary; deleting null pointer has no effect");
+    if (IfWithDelete->getElse())
+        return;
+    // FIXME: generate fixit for this case.
 
-  Diag << FixItHint::CreateRemoval(CharSourceRange::getTokenRange(
-      IfWithDelete->getBeginLoc(),
-      utils::lexer::getPreviousToken(IfWithDelete->getThen()->getBeginLoc(),
-                                     *Result.SourceManager,
-                                     Result.Context->getLangOpts())
-          .getLocation()));
+    Diag << FixItHint::CreateRemoval(CharSourceRange::getTokenRange(
+                                         IfWithDelete->getBeginLoc(),
+                                         utils::lexer::getPreviousToken(IfWithDelete->getThen()->getBeginLoc(),
+                                                 *Result.SourceManager,
+                                                 Result.Context->getLangOpts())
+                                         .getLocation()));
 
-  if (Compound) {
-    Diag << FixItHint::CreateRemoval(
-        CharSourceRange::getTokenRange(Compound->getLBracLoc()));
-    Diag << FixItHint::CreateRemoval(
-        CharSourceRange::getTokenRange(Compound->getRBracLoc()));
-  }
+    if (Compound) {
+        Diag << FixItHint::CreateRemoval(
+                 CharSourceRange::getTokenRange(Compound->getLBracLoc()));
+        Diag << FixItHint::CreateRemoval(
+                 CharSourceRange::getTokenRange(Compound->getRBracLoc()));
+    }
 }
 
 } // namespace readability

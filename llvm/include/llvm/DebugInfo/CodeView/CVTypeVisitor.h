@@ -19,12 +19,12 @@ class TypeCollection;
 class TypeVisitorCallbacks;
 
 enum VisitorDataSource {
-  VDS_BytesPresent, // The record bytes are passed into the visitation
-                    // function.  The algorithm should first deserialize them
-                    // before passing them on through the pipeline.
-  VDS_BytesExternal // The record bytes are not present, and it is the
-                    // responsibility of the visitor callback interface to
-                    // supply the bytes.
+    VDS_BytesPresent, // The record bytes are passed into the visitation
+    // function.  The algorithm should first deserialize them
+    // before passing them on through the pipeline.
+    VDS_BytesExternal // The record bytes are not present, and it is the
+    // responsibility of the visitor callback interface to
+    // supply the bytes.
 };
 
 Error visitTypeRecord(CVType &Record, TypeIndex Index,

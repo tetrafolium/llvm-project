@@ -31,92 +31,92 @@ template <> void invalidateParentIListOrdering(BasicBlock *BB);
 template <typename ValueSubClass>
 template <typename TPtr>
 void SymbolTableListTraits<ValueSubClass>::setSymTabObject(TPtr *Dest,
-                                                           TPtr Src) {
-  // Get the old symtab and value list before doing the assignment.
-  ValueSymbolTable *OldST = getSymTab(getListOwner());
+        TPtr Src) {
+    // Get the old symtab and value list before doing the assignment.
+    ValueSymbolTable *OldST = getSymTab(getListOwner());
 
-  // Do it.
-  *Dest = Src;
+    // Do it.
+    *Dest = Src;
 
-  // Get the new SymTab object.
-  ValueSymbolTable *NewST = getSymTab(getListOwner());
+    // Get the new SymTab object.
+    ValueSymbolTable *NewST = getSymTab(getListOwner());
 
-  // If there is nothing to do, quick exit.
-  if (OldST == NewST) return;
+    // If there is nothing to do, quick exit.
+    if (OldST == NewST) return;
 
-  // Move all the elements from the old symtab to the new one.
-  ListTy &ItemList = getList(getListOwner());
-  if (ItemList.empty()) return;
+    // Move all the elements from the old symtab to the new one.
+    ListTy &ItemList = getList(getListOwner());
+    if (ItemList.empty()) return;
 
-  if (OldST) {
-    // Remove all entries from the previous symtab.
-    for (auto I = ItemList.begin(); I != ItemList.end(); ++I)
-      if (I->hasName())
-        OldST->removeValueName(I->getValueName());
-  }
+    if (OldST) {
+        // Remove all entries from the previous symtab.
+        for (auto I = ItemList.begin(); I != ItemList.end(); ++I)
+            if (I->hasName())
+                OldST->removeValueName(I->getValueName());
+    }
 
-  if (NewST) {
-    // Add all of the items to the new symtab.
-    for (auto I = ItemList.begin(); I != ItemList.end(); ++I)
-      if (I->hasName())
-        NewST->reinsertValue(&*I);
-  }
+    if (NewST) {
+        // Add all of the items to the new symtab.
+        for (auto I = ItemList.begin(); I != ItemList.end(); ++I)
+            if (I->hasName())
+                NewST->reinsertValue(&*I);
+    }
 
 }
 
 template <typename ValueSubClass>
 void SymbolTableListTraits<ValueSubClass>::addNodeToList(ValueSubClass *V) {
-  assert(!V->getParent() && "Value already in a container!!");
-  ItemParentClass *Owner = getListOwner();
-  V->setParent(Owner);
-  invalidateParentIListOrdering(Owner);
-  if (V->hasName())
-    if (ValueSymbolTable *ST = getSymTab(Owner))
-      ST->reinsertValue(V);
+    assert(!V->getParent() && "Value already in a container!!");
+    ItemParentClass *Owner = getListOwner();
+    V->setParent(Owner);
+    invalidateParentIListOrdering(Owner);
+    if (V->hasName())
+        if (ValueSymbolTable *ST = getSymTab(Owner))
+            ST->reinsertValue(V);
 }
 
 template <typename ValueSubClass>
 void SymbolTableListTraits<ValueSubClass>::removeNodeFromList(
     ValueSubClass *V) {
-  V->setParent(nullptr);
-  if (V->hasName())
-    if (ValueSymbolTable *ST = getSymTab(getListOwner()))
-      ST->removeValueName(V->getValueName());
+    V->setParent(nullptr);
+    if (V->hasName())
+        if (ValueSymbolTable *ST = getSymTab(getListOwner()))
+            ST->removeValueName(V->getValueName());
 }
 
 template <typename ValueSubClass>
 void SymbolTableListTraits<ValueSubClass>::transferNodesFromList(
     SymbolTableListTraits &L2, iterator first, iterator last) {
-  // Transfering nodes, even within the same BB, invalidates the ordering. The
-  // list that we removed the nodes from still has a valid ordering.
-  ItemParentClass *NewIP = getListOwner();
-  invalidateParentIListOrdering(NewIP);
+    // Transfering nodes, even within the same BB, invalidates the ordering. The
+    // list that we removed the nodes from still has a valid ordering.
+    ItemParentClass *NewIP = getListOwner();
+    invalidateParentIListOrdering(NewIP);
 
-  // Nothing else needs to be done if we're reording nodes within the same list.
-  ItemParentClass *OldIP = L2.getListOwner();
-  if (NewIP == OldIP)
-    return;
+    // Nothing else needs to be done if we're reording nodes within the same list.
+    ItemParentClass *OldIP = L2.getListOwner();
+    if (NewIP == OldIP)
+        return;
 
-  // We only have to update symbol table entries if we are transferring the
-  // instructions to a different symtab object...
-  ValueSymbolTable *NewST = getSymTab(NewIP);
-  ValueSymbolTable *OldST = getSymTab(OldIP);
-  if (NewST != OldST) {
-    for (; first != last; ++first) {
-      ValueSubClass &V = *first;
-      bool HasName = V.hasName();
-      if (OldST && HasName)
-        OldST->removeValueName(V.getValueName());
-      V.setParent(NewIP);
-      if (NewST && HasName)
-        NewST->reinsertValue(&V);
+    // We only have to update symbol table entries if we are transferring the
+    // instructions to a different symtab object...
+    ValueSymbolTable *NewST = getSymTab(NewIP);
+    ValueSymbolTable *OldST = getSymTab(OldIP);
+    if (NewST != OldST) {
+        for (; first != last; ++first) {
+            ValueSubClass &V = *first;
+            bool HasName = V.hasName();
+            if (OldST && HasName)
+                OldST->removeValueName(V.getValueName());
+            V.setParent(NewIP);
+            if (NewST && HasName)
+                NewST->reinsertValue(&V);
+        }
+    } else {
+        // Just transferring between blocks in the same function, simply update the
+        // parent fields in the instructions...
+        for (; first != last; ++first)
+            first->setParent(NewIP);
     }
-  } else {
-    // Just transferring between blocks in the same function, simply update the
-    // parent fields in the instructions...
-    for (; first != last; ++first)
-      first->setParent(NewIP);
-  }
 }
 
 } // End llvm namespace

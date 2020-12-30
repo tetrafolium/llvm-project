@@ -21,42 +21,44 @@
 namespace llvm {
 
 class WebAssemblyTargetMachine final : public LLVMTargetMachine {
-  std::unique_ptr<TargetLoweringObjectFile> TLOF;
-  mutable StringMap<std::unique_ptr<WebAssemblySubtarget>> SubtargetMap;
+    std::unique_ptr<TargetLoweringObjectFile> TLOF;
+    mutable StringMap<std::unique_ptr<WebAssemblySubtarget>> SubtargetMap;
 
 public:
-  WebAssemblyTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                           StringRef FS, const TargetOptions &Options,
-                           Optional<Reloc::Model> RM,
-                           Optional<CodeModel::Model> CM, CodeGenOpt::Level OL,
-                           bool JIT);
+    WebAssemblyTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                             StringRef FS, const TargetOptions &Options,
+                             Optional<Reloc::Model> RM,
+                             Optional<CodeModel::Model> CM, CodeGenOpt::Level OL,
+                             bool JIT);
 
-  ~WebAssemblyTargetMachine() override;
+    ~WebAssemblyTargetMachine() override;
 
-  const WebAssemblySubtarget *getSubtargetImpl() const;
-  const WebAssemblySubtarget *getSubtargetImpl(std::string CPU,
-                                               std::string FS) const;
-  const WebAssemblySubtarget *
-  getSubtargetImpl(const Function &F) const override;
+    const WebAssemblySubtarget *getSubtargetImpl() const;
+    const WebAssemblySubtarget *getSubtargetImpl(std::string CPU,
+            std::string FS) const;
+    const WebAssemblySubtarget *
+    getSubtargetImpl(const Function &F) const override;
 
-  // Pass Pipeline Configuration
-  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+    // Pass Pipeline Configuration
+    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-  TargetLoweringObjectFile *getObjFileLowering() const override {
-    return TLOF.get();
-  }
+    TargetLoweringObjectFile *getObjFileLowering() const override {
+        return TLOF.get();
+    }
 
-  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+    TargetTransformInfo getTargetTransformInfo(const Function &F) override;
 
-  bool usesPhysRegsForValues() const override { return false; }
+    bool usesPhysRegsForValues() const override {
+        return false;
+    }
 
-  yaml::MachineFunctionInfo *createDefaultFuncInfoYAML() const override;
-  yaml::MachineFunctionInfo *
-  convertFuncInfoToYAML(const MachineFunction &MF) const override;
-  bool parseMachineFunctionInfo(const yaml::MachineFunctionInfo &,
-                                PerFunctionMIParsingState &PFS,
-                                SMDiagnostic &Error,
-                                SMRange &SourceRange) const override;
+    yaml::MachineFunctionInfo *createDefaultFuncInfoYAML() const override;
+    yaml::MachineFunctionInfo *
+    convertFuncInfoToYAML(const MachineFunction &MF) const override;
+    bool parseMachineFunctionInfo(const yaml::MachineFunctionInfo &,
+                                  PerFunctionMIParsingState &PFS,
+                                  SMDiagnostic &Error,
+                                  SMRange &SourceRange) const override;
 };
 
 } // end namespace llvm

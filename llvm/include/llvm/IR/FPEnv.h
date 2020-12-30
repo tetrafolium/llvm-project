@@ -29,9 +29,9 @@ namespace fp {
 /// constrained floating point intrinsic. See the LLVM Language Reference Manual
 /// for details.
 enum ExceptionBehavior : uint8_t {
-  ebIgnore,  ///< This corresponds to "fpexcept.ignore".
-  ebMayTrap, ///< This corresponds to "fpexcept.maytrap".
-  ebStrict   ///< This corresponds to "fpexcept.strict".
+    ebIgnore,  ///< This corresponds to "fpexcept.ignore".
+    ebMayTrap, ///< This corresponds to "fpexcept.maytrap".
+    ebStrict   ///< This corresponds to "fpexcept.strict".
 };
 
 }

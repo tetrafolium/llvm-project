@@ -28,56 +28,58 @@ namespace ARM {
 // Arch extension modifiers for CPUs.
 // Note that this is not the same as the AArch64 list
 enum ArchExtKind : uint64_t {
-  AEK_INVALID =     0,
-  AEK_NONE =        1,
-  AEK_CRC =         1 << 1,
-  AEK_CRYPTO =      1 << 2,
-  AEK_FP =          1 << 3,
-  AEK_HWDIVTHUMB =  1 << 4,
-  AEK_HWDIVARM =    1 << 5,
-  AEK_MP =          1 << 6,
-  AEK_SIMD =        1 << 7,
-  AEK_SEC =         1 << 8,
-  AEK_VIRT =        1 << 9,
-  AEK_DSP =         1 << 10,
-  AEK_FP16 =        1 << 11,
-  AEK_RAS =         1 << 12,
-  AEK_DOTPROD =     1 << 13,
-  AEK_SHA2    =     1 << 14,
-  AEK_AES     =     1 << 15,
-  AEK_FP16FML =     1 << 16,
-  AEK_SB      =     1 << 17,
-  AEK_FP_DP   =     1 << 18,
-  AEK_LOB     =     1 << 19,
-  AEK_BF16    =     1 << 20,
-  AEK_I8MM    =     1 << 21,
-  AEK_CDECP0 =      1 << 22,
-  AEK_CDECP1 =      1 << 23,
-  AEK_CDECP2 =      1 << 24,
-  AEK_CDECP3 =      1 << 25,
-  AEK_CDECP4 =      1 << 26,
-  AEK_CDECP5 =      1 << 27,
-  AEK_CDECP6 =      1 << 28,
-  AEK_CDECP7 =      1 << 29,
+    AEK_INVALID =     0,
+    AEK_NONE =        1,
+    AEK_CRC =         1 << 1,
+    AEK_CRYPTO =      1 << 2,
+    AEK_FP =          1 << 3,
+    AEK_HWDIVTHUMB =  1 << 4,
+    AEK_HWDIVARM =    1 << 5,
+    AEK_MP =          1 << 6,
+    AEK_SIMD =        1 << 7,
+    AEK_SEC =         1 << 8,
+    AEK_VIRT =        1 << 9,
+    AEK_DSP =         1 << 10,
+    AEK_FP16 =        1 << 11,
+    AEK_RAS =         1 << 12,
+    AEK_DOTPROD =     1 << 13,
+    AEK_SHA2    =     1 << 14,
+    AEK_AES     =     1 << 15,
+    AEK_FP16FML =     1 << 16,
+    AEK_SB      =     1 << 17,
+    AEK_FP_DP   =     1 << 18,
+    AEK_LOB     =     1 << 19,
+    AEK_BF16    =     1 << 20,
+    AEK_I8MM    =     1 << 21,
+    AEK_CDECP0 =      1 << 22,
+    AEK_CDECP1 =      1 << 23,
+    AEK_CDECP2 =      1 << 24,
+    AEK_CDECP3 =      1 << 25,
+    AEK_CDECP4 =      1 << 26,
+    AEK_CDECP5 =      1 << 27,
+    AEK_CDECP6 =      1 << 28,
+    AEK_CDECP7 =      1 << 29,
 
-  // Unsupported extensions.
-  AEK_OS       =    1ULL << 59,
-  AEK_IWMMXT   =    1ULL << 60,
-  AEK_IWMMXT2  =    1ULL << 61,
-  AEK_MAVERICK =    1ULL << 62,
-  AEK_XSCALE   =    1ULL << 63,
+    // Unsupported extensions.
+    AEK_OS       =    1ULL << 59,
+    AEK_IWMMXT   =    1ULL << 60,
+    AEK_IWMMXT2  =    1ULL << 61,
+    AEK_MAVERICK =    1ULL << 62,
+    AEK_XSCALE   =    1ULL << 63,
 };
 
 // List of Arch Extension names.
 // FIXME: TableGen this.
 struct ExtName {
-  const char *NameCStr;
-  size_t NameLength;
-  uint64_t ID;
-  const char *Feature;
-  const char *NegFeature;
+    const char *NameCStr;
+    size_t NameLength;
+    uint64_t ID;
+    const char *Feature;
+    const char *NegFeature;
 
-  StringRef getName() const { return StringRef(NameCStr, NameLength); }
+    StringRef getName() const {
+        return StringRef(NameCStr, NameLength);
+    }
 };
 
 const ExtName ARCHExtNames[] = {
@@ -90,11 +92,13 @@ const ExtName ARCHExtNames[] = {
 // features they correspond to (use getHWDivFeatures).
 // FIXME: TableGen this.
 const struct {
-  const char *NameCStr;
-  size_t NameLength;
-  uint64_t ID;
+    const char *NameCStr;
+    size_t NameLength;
+    uint64_t ID;
 
-  StringRef getName() const { return StringRef(NameCStr, NameLength); }
+    StringRef getName() const {
+        return StringRef(NameCStr, NameLength);
+    }
 } HWDivNames[] = {
 #define ARM_HW_DIV_NAME(NAME, ID) {NAME, sizeof(NAME) - 1, ID},
 #include "ARMTargetParser.def"
@@ -112,13 +116,15 @@ enum class ArchKind {
 // When this becomes table-generated, we'd probably need two tables.
 // FIXME: TableGen this.
 template <typename T> struct CpuNames {
-  const char *NameCStr;
-  size_t NameLength;
-  T ArchID;
-  bool Default; // is $Name the default CPU for $ArchID ?
-  uint64_t DefaultExtensions;
+    const char *NameCStr;
+    size_t NameLength;
+    T ArchID;
+    bool Default; // is $Name the default CPU for $ArchID ?
+    uint64_t DefaultExtensions;
 
-  StringRef getName() const { return StringRef(NameCStr, NameLength); }
+    StringRef getName() const {
+        return StringRef(NameCStr, NameLength);
+    }
 };
 
 const CpuNames<ArchKind> CPUNames[] = {
@@ -131,32 +137,32 @@ const CpuNames<ArchKind> CPUNames[] = {
 enum FPUKind {
 #define ARM_FPU(NAME, KIND, VERSION, NEON_SUPPORT, RESTRICTION) KIND,
 #include "ARMTargetParser.def"
-  FK_LAST
+    FK_LAST
 };
 
 // FPU Version
 enum class FPUVersion {
-  NONE,
-  VFPV2,
-  VFPV3,
-  VFPV3_FP16,
-  VFPV4,
-  VFPV5,
-  VFPV5_FULLFP16,
+    NONE,
+    VFPV2,
+    VFPV3,
+    VFPV3_FP16,
+    VFPV4,
+    VFPV5,
+    VFPV5_FULLFP16,
 };
 
 // An FPU name restricts the FPU in one of three ways:
 enum class FPURestriction {
-  None = 0, ///< No restriction
-  D16,      ///< Only 16 D registers
-  SP_D16    ///< Only single-precision instructions, with 16 D registers
+    None = 0, ///< No restriction
+    D16,      ///< Only 16 D registers
+    SP_D16    ///< Only single-precision instructions, with 16 D registers
 };
 
 // An FPU name implies one of three levels of Neon support:
 enum class NeonSupportLevel {
-  None = 0, ///< No Neon
-  Neon,     ///< Neon
-  Crypto    ///< Neon with Crypto
+    None = 0, ///< No Neon
+    Neon,     ///< Neon
+    Crypto    ///< Neon with Crypto
 };
 
 // ISA kinds.
@@ -175,14 +181,16 @@ enum class ProfileKind { INVALID = 0, A, R, M };
 // The entries must appear in the order listed in ARM::FPUKind for correct
 // indexing
 struct FPUName {
-  const char *NameCStr;
-  size_t NameLength;
-  FPUKind ID;
-  FPUVersion FPUVer;
-  NeonSupportLevel NeonSupport;
-  FPURestriction Restriction;
+    const char *NameCStr;
+    size_t NameLength;
+    FPUKind ID;
+    FPUVersion FPUVer;
+    NeonSupportLevel NeonSupport;
+    FPURestriction Restriction;
 
-  StringRef getName() const { return StringRef(NameCStr, NameLength); }
+    StringRef getName() const {
+        return StringRef(NameCStr, NameLength);
+    }
 };
 
 static const FPUName FPUNames[] = {
@@ -200,24 +208,30 @@ static const FPUName FPUNames[] = {
 // Check to see if the expectation should be changed.
 // FIXME: TableGen this.
 template <typename T> struct ArchNames {
-  const char *NameCStr;
-  size_t NameLength;
-  const char *CPUAttrCStr;
-  size_t CPUAttrLength;
-  const char *SubArchCStr;
-  size_t SubArchLength;
-  unsigned DefaultFPU;
-  uint64_t ArchBaseExtensions;
-  T ID;
-  ARMBuildAttrs::CPUArch ArchAttr; // Arch ID in build attributes.
+    const char *NameCStr;
+    size_t NameLength;
+    const char *CPUAttrCStr;
+    size_t CPUAttrLength;
+    const char *SubArchCStr;
+    size_t SubArchLength;
+    unsigned DefaultFPU;
+    uint64_t ArchBaseExtensions;
+    T ID;
+    ARMBuildAttrs::CPUArch ArchAttr; // Arch ID in build attributes.
 
-  StringRef getName() const { return StringRef(NameCStr, NameLength); }
+    StringRef getName() const {
+        return StringRef(NameCStr, NameLength);
+    }
 
-  // CPU class in build attributes.
-  StringRef getCPUAttr() const { return StringRef(CPUAttrCStr, CPUAttrLength); }
+    // CPU class in build attributes.
+    StringRef getCPUAttr() const {
+        return StringRef(CPUAttrCStr, CPUAttrLength);
+    }
 
-  // Sub-Arch name.
-  StringRef getSubArch() const { return StringRef(SubArchCStr, SubArchLength); }
+    // Sub-Arch name.
+    StringRef getSubArch() const {
+        return StringRef(SubArchCStr, SubArchLength);
+    }
 };
 
 static const ArchNames<ArchKind> ARCHNames[] = {

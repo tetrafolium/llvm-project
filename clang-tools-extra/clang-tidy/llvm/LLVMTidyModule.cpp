@@ -24,35 +24,35 @@ namespace llvm_check {
 
 class LLVMModule : public ClangTidyModule {
 public:
-  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<readability::ElseAfterReturnCheck>(
-        "llvm-else-after-return");
-    CheckFactories.registerCheck<LLVMHeaderGuardCheck>("llvm-header-guard");
-    CheckFactories.registerCheck<IncludeOrderCheck>("llvm-include-order");
-    CheckFactories.registerCheck<readability::NamespaceCommentCheck>(
-        "llvm-namespace-comment");
-    CheckFactories.registerCheck<PreferIsaOrDynCastInConditionalsCheck>(
-        "llvm-prefer-isa-or-dyn-cast-in-conditionals");
-    CheckFactories.registerCheck<PreferRegisterOverUnsignedCheck>(
-        "llvm-prefer-register-over-unsigned");
-    CheckFactories.registerCheck<readability::QualifiedAutoCheck>(
-        "llvm-qualified-auto");
-    CheckFactories.registerCheck<TwineLocalCheck>("llvm-twine-local");
-  }
+    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+        CheckFactories.registerCheck<readability::ElseAfterReturnCheck>(
+            "llvm-else-after-return");
+        CheckFactories.registerCheck<LLVMHeaderGuardCheck>("llvm-header-guard");
+        CheckFactories.registerCheck<IncludeOrderCheck>("llvm-include-order");
+        CheckFactories.registerCheck<readability::NamespaceCommentCheck>(
+            "llvm-namespace-comment");
+        CheckFactories.registerCheck<PreferIsaOrDynCastInConditionalsCheck>(
+            "llvm-prefer-isa-or-dyn-cast-in-conditionals");
+        CheckFactories.registerCheck<PreferRegisterOverUnsignedCheck>(
+            "llvm-prefer-register-over-unsigned");
+        CheckFactories.registerCheck<readability::QualifiedAutoCheck>(
+            "llvm-qualified-auto");
+        CheckFactories.registerCheck<TwineLocalCheck>("llvm-twine-local");
+    }
 
-  ClangTidyOptions getModuleOptions() override {
-    ClangTidyOptions Options;
-    Options.CheckOptions["llvm-qualified-auto.AddConstToQualified"] = "0";
-    Options.CheckOptions["llvm-else-after-return.WarnOnUnfixable"] = "0";
-    Options.CheckOptions["llvm-else-after-return.WarnOnConditionVariables"] =
-        "0";
-    return Options;
-  }
+    ClangTidyOptions getModuleOptions() override {
+        ClangTidyOptions Options;
+        Options.CheckOptions["llvm-qualified-auto.AddConstToQualified"] = "0";
+        Options.CheckOptions["llvm-else-after-return.WarnOnUnfixable"] = "0";
+        Options.CheckOptions["llvm-else-after-return.WarnOnConditionVariables"] =
+            "0";
+        return Options;
+    }
 };
 
 // Register the LLVMTidyModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<LLVMModule> X("llvm-module",
-                                                  "Adds LLVM lint checks.");
+        "Adds LLVM lint checks.");
 
 } // namespace llvm_check
 

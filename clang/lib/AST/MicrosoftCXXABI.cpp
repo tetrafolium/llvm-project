@@ -28,113 +28,113 @@ namespace {
 /// Numbers things which need to correspond across multiple TUs.
 /// Typically these are things like static locals, lambdas, or blocks.
 class MicrosoftNumberingContext : public MangleNumberingContext {
-  llvm::DenseMap<const Type *, unsigned> ManglingNumbers;
-  unsigned LambdaManglingNumber;
-  unsigned StaticLocalNumber;
-  unsigned StaticThreadlocalNumber;
+    llvm::DenseMap<const Type *, unsigned> ManglingNumbers;
+    unsigned LambdaManglingNumber;
+    unsigned StaticLocalNumber;
+    unsigned StaticThreadlocalNumber;
 
 public:
-  MicrosoftNumberingContext()
-      : MangleNumberingContext(), LambdaManglingNumber(0),
-        StaticLocalNumber(0), StaticThreadlocalNumber(0) {}
+    MicrosoftNumberingContext()
+        : MangleNumberingContext(), LambdaManglingNumber(0),
+          StaticLocalNumber(0), StaticThreadlocalNumber(0) {}
 
-  unsigned getManglingNumber(const CXXMethodDecl *CallOperator) override {
-    return ++LambdaManglingNumber;
-  }
+    unsigned getManglingNumber(const CXXMethodDecl *CallOperator) override {
+        return ++LambdaManglingNumber;
+    }
 
-  unsigned getManglingNumber(const BlockDecl *BD) override {
-    const Type *Ty = nullptr;
-    return ++ManglingNumbers[Ty];
-  }
+    unsigned getManglingNumber(const BlockDecl *BD) override {
+        const Type *Ty = nullptr;
+        return ++ManglingNumbers[Ty];
+    }
 
-  unsigned getStaticLocalNumber(const VarDecl *VD) override {
-    if (VD->getTLSKind())
-      return ++StaticThreadlocalNumber;
-    return ++StaticLocalNumber;
-  }
+    unsigned getStaticLocalNumber(const VarDecl *VD) override {
+        if (VD->getTLSKind())
+            return ++StaticThreadlocalNumber;
+        return ++StaticLocalNumber;
+    }
 
-  unsigned getManglingNumber(const VarDecl *VD,
-                             unsigned MSLocalManglingNumber) override {
-    return MSLocalManglingNumber;
-  }
+    unsigned getManglingNumber(const VarDecl *VD,
+                               unsigned MSLocalManglingNumber) override {
+        return MSLocalManglingNumber;
+    }
 
-  unsigned getManglingNumber(const TagDecl *TD,
-                             unsigned MSLocalManglingNumber) override {
-    return MSLocalManglingNumber;
-  }
+    unsigned getManglingNumber(const TagDecl *TD,
+                               unsigned MSLocalManglingNumber) override {
+        return MSLocalManglingNumber;
+    }
 };
 
 class MicrosoftCXXABI : public CXXABI {
-  ASTContext &Context;
-  llvm::SmallDenseMap<CXXRecordDecl *, CXXConstructorDecl *> RecordToCopyCtor;
+    ASTContext &Context;
+    llvm::SmallDenseMap<CXXRecordDecl *, CXXConstructorDecl *> RecordToCopyCtor;
 
-  llvm::SmallDenseMap<TagDecl *, DeclaratorDecl *>
-      UnnamedTagDeclToDeclaratorDecl;
-  llvm::SmallDenseMap<TagDecl *, TypedefNameDecl *>
-      UnnamedTagDeclToTypedefNameDecl;
+    llvm::SmallDenseMap<TagDecl *, DeclaratorDecl *>
+    UnnamedTagDeclToDeclaratorDecl;
+    llvm::SmallDenseMap<TagDecl *, TypedefNameDecl *>
+    UnnamedTagDeclToTypedefNameDecl;
 
 public:
-  MicrosoftCXXABI(ASTContext &Ctx) : Context(Ctx) { }
+    MicrosoftCXXABI(ASTContext &Ctx) : Context(Ctx) { }
 
-  MemberPointerInfo
-  getMemberPointerInfo(const MemberPointerType *MPT) const override;
+    MemberPointerInfo
+    getMemberPointerInfo(const MemberPointerType *MPT) const override;
 
-  CallingConv getDefaultMethodCallConv(bool isVariadic) const override {
-    if (!isVariadic &&
-        Context.getTargetInfo().getTriple().getArch() == llvm::Triple::x86)
-      return CC_X86ThisCall;
-    return Context.getTargetInfo().getDefaultCallingConv();
-  }
+    CallingConv getDefaultMethodCallConv(bool isVariadic) const override {
+        if (!isVariadic &&
+                Context.getTargetInfo().getTriple().getArch() == llvm::Triple::x86)
+            return CC_X86ThisCall;
+        return Context.getTargetInfo().getDefaultCallingConv();
+    }
 
-  bool isNearlyEmpty(const CXXRecordDecl *RD) const override {
-    llvm_unreachable("unapplicable to the MS ABI");
-  }
+    bool isNearlyEmpty(const CXXRecordDecl *RD) const override {
+        llvm_unreachable("unapplicable to the MS ABI");
+    }
 
-  const CXXConstructorDecl *
-  getCopyConstructorForExceptionObject(CXXRecordDecl *RD) override {
-    return RecordToCopyCtor[RD];
-  }
+    const CXXConstructorDecl *
+    getCopyConstructorForExceptionObject(CXXRecordDecl *RD) override {
+        return RecordToCopyCtor[RD];
+    }
 
-  void
-  addCopyConstructorForExceptionObject(CXXRecordDecl *RD,
-                                       CXXConstructorDecl *CD) override {
-    assert(CD != nullptr);
-    assert(RecordToCopyCtor[RD] == nullptr || RecordToCopyCtor[RD] == CD);
-    RecordToCopyCtor[RD] = CD;
-  }
+    void
+    addCopyConstructorForExceptionObject(CXXRecordDecl *RD,
+                                         CXXConstructorDecl *CD) override {
+        assert(CD != nullptr);
+        assert(RecordToCopyCtor[RD] == nullptr || RecordToCopyCtor[RD] == CD);
+        RecordToCopyCtor[RD] = CD;
+    }
 
-  void addTypedefNameForUnnamedTagDecl(TagDecl *TD,
-                                       TypedefNameDecl *DD) override {
-    TD = TD->getCanonicalDecl();
-    DD = DD->getCanonicalDecl();
-    TypedefNameDecl *&I = UnnamedTagDeclToTypedefNameDecl[TD];
-    if (!I)
-      I = DD;
-  }
+    void addTypedefNameForUnnamedTagDecl(TagDecl *TD,
+                                         TypedefNameDecl *DD) override {
+        TD = TD->getCanonicalDecl();
+        DD = DD->getCanonicalDecl();
+        TypedefNameDecl *&I = UnnamedTagDeclToTypedefNameDecl[TD];
+        if (!I)
+            I = DD;
+    }
 
-  TypedefNameDecl *getTypedefNameForUnnamedTagDecl(const TagDecl *TD) override {
-    return UnnamedTagDeclToTypedefNameDecl.lookup(
-        const_cast<TagDecl *>(TD->getCanonicalDecl()));
-  }
+    TypedefNameDecl *getTypedefNameForUnnamedTagDecl(const TagDecl *TD) override {
+        return UnnamedTagDeclToTypedefNameDecl.lookup(
+                   const_cast<TagDecl *>(TD->getCanonicalDecl()));
+    }
 
-  void addDeclaratorForUnnamedTagDecl(TagDecl *TD,
-                                      DeclaratorDecl *DD) override {
-    TD = TD->getCanonicalDecl();
-    DD = cast<DeclaratorDecl>(DD->getCanonicalDecl());
-    DeclaratorDecl *&I = UnnamedTagDeclToDeclaratorDecl[TD];
-    if (!I)
-      I = DD;
-  }
+    void addDeclaratorForUnnamedTagDecl(TagDecl *TD,
+                                        DeclaratorDecl *DD) override {
+        TD = TD->getCanonicalDecl();
+        DD = cast<DeclaratorDecl>(DD->getCanonicalDecl());
+        DeclaratorDecl *&I = UnnamedTagDeclToDeclaratorDecl[TD];
+        if (!I)
+            I = DD;
+    }
 
-  DeclaratorDecl *getDeclaratorForUnnamedTagDecl(const TagDecl *TD) override {
-    return UnnamedTagDeclToDeclaratorDecl.lookup(
-        const_cast<TagDecl *>(TD->getCanonicalDecl()));
-  }
+    DeclaratorDecl *getDeclaratorForUnnamedTagDecl(const TagDecl *TD) override {
+        return UnnamedTagDeclToDeclaratorDecl.lookup(
+                   const_cast<TagDecl *>(TD->getCanonicalDecl()));
+    }
 
-  std::unique_ptr<MangleNumberingContext>
-  createMangleNumberingContext() const override {
-    return std::make_unique<MicrosoftNumberingContext>();
-  }
+    std::unique_ptr<MangleNumberingContext>
+    createMangleNumberingContext() const override {
+        return std::make_unique<MicrosoftNumberingContext>();
+    }
 };
 }
 
@@ -142,45 +142,45 @@ public:
 // total.  This function tells us if we inherit from anybody that uses MI, or if
 // we have a non-primary base class, which uses the multiple inheritance model.
 static bool usesMultipleInheritanceModel(const CXXRecordDecl *RD) {
-  while (RD->getNumBases() > 0) {
-    if (RD->getNumBases() > 1)
-      return true;
-    assert(RD->getNumBases() == 1);
-    const CXXRecordDecl *Base =
-        RD->bases_begin()->getType()->getAsCXXRecordDecl();
-    if (RD->isPolymorphic() && !Base->isPolymorphic())
-      return true;
-    RD = Base;
-  }
-  return false;
+    while (RD->getNumBases() > 0) {
+        if (RD->getNumBases() > 1)
+            return true;
+        assert(RD->getNumBases() == 1);
+        const CXXRecordDecl *Base =
+            RD->bases_begin()->getType()->getAsCXXRecordDecl();
+        if (RD->isPolymorphic() && !Base->isPolymorphic())
+            return true;
+        RD = Base;
+    }
+    return false;
 }
 
 MSInheritanceModel CXXRecordDecl::calculateInheritanceModel() const {
-  if (!hasDefinition() || isParsingBaseSpecifiers())
-    return MSInheritanceModel::Unspecified;
-  if (getNumVBases() > 0)
-    return MSInheritanceModel::Virtual;
-  if (usesMultipleInheritanceModel(this))
-    return MSInheritanceModel::Multiple;
-  return MSInheritanceModel::Single;
+    if (!hasDefinition() || isParsingBaseSpecifiers())
+        return MSInheritanceModel::Unspecified;
+    if (getNumVBases() > 0)
+        return MSInheritanceModel::Virtual;
+    if (usesMultipleInheritanceModel(this))
+        return MSInheritanceModel::Multiple;
+    return MSInheritanceModel::Single;
 }
 
 MSInheritanceModel CXXRecordDecl::getMSInheritanceModel() const {
-  MSInheritanceAttr *IA = getAttr<MSInheritanceAttr>();
-  assert(IA && "Expected MSInheritanceAttr on the CXXRecordDecl!");
-  return IA->getInheritanceModel();
+    MSInheritanceAttr *IA = getAttr<MSInheritanceAttr>();
+    assert(IA && "Expected MSInheritanceAttr on the CXXRecordDecl!");
+    return IA->getInheritanceModel();
 }
 
 bool CXXRecordDecl::nullFieldOffsetIsZero() const {
-  return !inheritanceModelHasOnlyOneField(/*IsMemberFunction=*/false,
-                                          getMSInheritanceModel()) ||
-         (hasDefinition() && isPolymorphic());
+    return !inheritanceModelHasOnlyOneField(/*IsMemberFunction=*/false,
+            getMSInheritanceModel()) ||
+           (hasDefinition() && isPolymorphic());
 }
 
 MSVtorDispMode CXXRecordDecl::getMSVtorDispMode() const {
-  if (MSVtorDispAttr *VDA = getAttr<MSVtorDispAttr>())
-    return VDA->getVtorDispMode();
-  return getASTContext().getLangOpts().getVtorDispMode();
+    if (MSVtorDispAttr *VDA = getAttr<MSVtorDispAttr>())
+        return VDA->getVtorDispMode();
+    return getASTContext().getLangOpts().getVtorDispMode();
 }
 
 // Returns the number of pointer and integer slots used to represent a member
@@ -214,56 +214,56 @@ MSVtorDispMode CXXRecordDecl::getMSVtorDispMode() const {
 //   };
 static std::pair<unsigned, unsigned>
 getMSMemberPointerSlots(const MemberPointerType *MPT) {
-  const CXXRecordDecl *RD = MPT->getMostRecentCXXRecordDecl();
-  MSInheritanceModel Inheritance = RD->getMSInheritanceModel();
-  unsigned Ptrs = 0;
-  unsigned Ints = 0;
-  if (MPT->isMemberFunctionPointer())
-    Ptrs = 1;
-  else
-    Ints = 1;
-  if (inheritanceModelHasNVOffsetField(MPT->isMemberFunctionPointer(),
-                                          Inheritance))
-    Ints++;
-  if (inheritanceModelHasVBPtrOffsetField(Inheritance))
-    Ints++;
-  if (inheritanceModelHasVBTableOffsetField(Inheritance))
-    Ints++;
-  return std::make_pair(Ptrs, Ints);
+    const CXXRecordDecl *RD = MPT->getMostRecentCXXRecordDecl();
+    MSInheritanceModel Inheritance = RD->getMSInheritanceModel();
+    unsigned Ptrs = 0;
+    unsigned Ints = 0;
+    if (MPT->isMemberFunctionPointer())
+        Ptrs = 1;
+    else
+        Ints = 1;
+    if (inheritanceModelHasNVOffsetField(MPT->isMemberFunctionPointer(),
+                                         Inheritance))
+        Ints++;
+    if (inheritanceModelHasVBPtrOffsetField(Inheritance))
+        Ints++;
+    if (inheritanceModelHasVBTableOffsetField(Inheritance))
+        Ints++;
+    return std::make_pair(Ptrs, Ints);
 }
 
 CXXABI::MemberPointerInfo MicrosoftCXXABI::getMemberPointerInfo(
     const MemberPointerType *MPT) const {
-  // The nominal struct is laid out with pointers followed by ints and aligned
-  // to a pointer width if any are present and an int width otherwise.
-  const TargetInfo &Target = Context.getTargetInfo();
-  unsigned PtrSize = Target.getPointerWidth(0);
-  unsigned IntSize = Target.getIntWidth();
+    // The nominal struct is laid out with pointers followed by ints and aligned
+    // to a pointer width if any are present and an int width otherwise.
+    const TargetInfo &Target = Context.getTargetInfo();
+    unsigned PtrSize = Target.getPointerWidth(0);
+    unsigned IntSize = Target.getIntWidth();
 
-  unsigned Ptrs, Ints;
-  std::tie(Ptrs, Ints) = getMSMemberPointerSlots(MPT);
-  MemberPointerInfo MPI;
-  MPI.HasPadding = false;
-  MPI.Width = Ptrs * PtrSize + Ints * IntSize;
+    unsigned Ptrs, Ints;
+    std::tie(Ptrs, Ints) = getMSMemberPointerSlots(MPT);
+    MemberPointerInfo MPI;
+    MPI.HasPadding = false;
+    MPI.Width = Ptrs * PtrSize + Ints * IntSize;
 
-  // When MSVC does x86_32 record layout, it aligns aggregate member pointers to
-  // 8 bytes.  However, __alignof usually returns 4 for data memptrs and 8 for
-  // function memptrs.
-  if (Ptrs + Ints > 1 && Target.getTriple().isArch32Bit())
-    MPI.Align = 64;
-  else if (Ptrs)
-    MPI.Align = Target.getPointerAlign(0);
-  else
-    MPI.Align = Target.getIntAlign();
+    // When MSVC does x86_32 record layout, it aligns aggregate member pointers to
+    // 8 bytes.  However, __alignof usually returns 4 for data memptrs and 8 for
+    // function memptrs.
+    if (Ptrs + Ints > 1 && Target.getTriple().isArch32Bit())
+        MPI.Align = 64;
+    else if (Ptrs)
+        MPI.Align = Target.getPointerAlign(0);
+    else
+        MPI.Align = Target.getIntAlign();
 
-  if (Target.getTriple().isArch64Bit()) {
-    MPI.Width = llvm::alignTo(MPI.Width, MPI.Align);
-    MPI.HasPadding = MPI.Width != (Ptrs * PtrSize + Ints * IntSize);
-  }
-  return MPI;
+    if (Target.getTriple().isArch64Bit()) {
+        MPI.Width = llvm::alignTo(MPI.Width, MPI.Align);
+        MPI.HasPadding = MPI.Width != (Ptrs * PtrSize + Ints * IntSize);
+    }
+    return MPI;
 }
 
 CXXABI *clang::CreateMicrosoftCXXABI(ASTContext &Ctx) {
-  return new MicrosoftCXXABI(Ctx);
+    return new MicrosoftCXXABI(Ctx);
 }
 

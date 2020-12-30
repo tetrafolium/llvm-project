@@ -48,10 +48,10 @@ LLVM_NODISCARD ProgramStateRef addTaint(ProgramStateRef State,
 LLVM_NODISCARD ProgramStateRef removeTaint(ProgramStateRef State, SVal V);
 
 LLVM_NODISCARD ProgramStateRef removeTaint(ProgramStateRef State,
-                                           const MemRegion *R);
+        const MemRegion *R);
 
 LLVM_NODISCARD ProgramStateRef removeTaint(ProgramStateRef State,
-                                           SymbolRef Sym);
+        SymbolRef Sym);
 
 /// Create a new state in a which a sub-region of a given symbol is tainted.
 /// This might be necessary when referring to regions that can not have an
@@ -88,15 +88,17 @@ LLVM_DUMP_METHOD void dumpTaint(ProgramStateRef State);
 /// variable was tainted.
 class TaintBugVisitor final : public BugReporterVisitor {
 private:
-  const SVal V;
+    const SVal V;
 
 public:
-  TaintBugVisitor(const SVal V) : V(V) {}
-  void Profile(llvm::FoldingSetNodeID &ID) const override { ID.Add(V); }
+    TaintBugVisitor(const SVal V) : V(V) {}
+    void Profile(llvm::FoldingSetNodeID &ID) const override {
+        ID.Add(V);
+    }
 
-  PathDiagnosticPieceRef VisitNode(const ExplodedNode *N,
-                                   BugReporterContext &BRC,
-                                   PathSensitiveBugReport &BR) override;
+    PathDiagnosticPieceRef VisitNode(const ExplodedNode *N,
+                                     BugReporterContext &BRC,
+                                     PathSensitiveBugReport &BR) override;
 };
 
 } // namespace taint

@@ -174,7 +174,7 @@ void MergeBasicBlockIntoOnlyPred(BasicBlock *BB, DomTreeUpdater *DTU = nullptr);
 /// possible, eliminate BB by rewriting all the predecessors to branch to the
 /// successor block and return true. If we can't transform, return false.
 bool TryToSimplifyUncondBranchFromEmptyBlock(BasicBlock *BB,
-                                             DomTreeUpdater *DTU = nullptr);
+        DomTreeUpdater *DTU = nullptr);
 
 /// Check for and eliminate duplicate PHI nodes in this block. This doesn't try
 /// to be clever about PHI nodes which differ only in the order of the incoming
@@ -240,7 +240,7 @@ inline Align getKnownAlignment(Value *V, const DataLayout &DL,
                                const Instruction *CxtI = nullptr,
                                AssumptionCache *AC = nullptr,
                                const DominatorTree *DT = nullptr) {
-  return getOrEnforceKnownAlignment(V, MaybeAlign(), DL, CxtI, AC, DT);
+    return getOrEnforceKnownAlignment(V, MaybeAlign(), DL, CxtI, AC, DT);
 }
 
 /// Create a call that matches the invoke \p II in terms of arguments,
@@ -367,7 +367,7 @@ unsigned changeToUnreachable(Instruction *I, bool UseLLVMTrap,
 /// InvokeInst is a terminator instruction.  Returns the newly split basic
 /// block.
 BasicBlock *changeToInvokeAndSplitBasicBlock(CallInst *CI,
-                                             BasicBlock *UnwindEdge);
+        BasicBlock *UnwindEdge);
 
 /// Replace 'BB's terminator with one that does not have an unwind successor
 /// block. Rewrites `invoke` to `call`, etc. Updates any PHIs in unwind
@@ -484,7 +484,7 @@ bool recognizeBSwapOrBitReverseIdiom(
 /// to intercept string functions and want to avoid converting them to target
 /// specific instructions.
 void maybeMarkSanitizerLibraryCallNoBuiltin(CallInst *CI,
-                                            const TargetLibraryInfo *TLI);
+        const TargetLibraryInfo *TLI);
 
 //===----------------------------------------------------------------------===//
 //  Transform predicates

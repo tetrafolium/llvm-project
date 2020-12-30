@@ -22,7 +22,7 @@ namespace llvm {
 class PartiallyInlineLibCallsPass
     : public PassInfoMixin<PartiallyInlineLibCallsPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 }
 

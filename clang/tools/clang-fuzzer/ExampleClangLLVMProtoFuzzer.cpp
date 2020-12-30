@@ -22,6 +22,6 @@
 using namespace clang_fuzzer;
 
 DEFINE_BINARY_PROTO_FUZZER(const LoopFunction &input) {
-  auto S = LoopFunctionToLLVMString(input);
-  HandleLLVM(S, GetCLArgs());
+    auto S = LoopFunctionToLLVMString(input);
+    HandleLLVM(S, GetCLArgs());
 }

@@ -23,36 +23,36 @@ static constexpr unsigned WAITING = 0x22;
 static constexpr unsigned FINISH = 0x33;
 
 void LLVM_LIBC_ENTRYPOINT(call_once)(once_flag *flag, __call_once_func_t func) {
-  FutexData *futex_word = reinterpret_cast<FutexData *>(flag);
-  unsigned int not_called = ONCE_FLAG_INIT;
+    FutexData *futex_word = reinterpret_cast<FutexData *>(flag);
+    unsigned int not_called = ONCE_FLAG_INIT;
 
-  // The C standard wording says:
-  //
-  //     The completion of the function func synchronizes with all
-  //     previous or subsequent calls to call_once with the same
-  //     flag variable.
-  //
-  // What this means is that, the call_once call can return only after
-  // the called function |func| returns. So, we use futexes to synchronize
-  // calls with the same flag value.
-  if (::atomic_compare_exchange_strong(futex_word, &not_called, START)) {
-    func();
-    auto status = ::atomic_exchange(futex_word, FINISH);
-    if (status == WAITING) {
-      __llvm_libc::syscall(SYS_futex, futex_word, FUTEX_WAKE_PRIVATE,
-                           INT_MAX, // Wake all waiters.
-                           0, 0, 0);
+    // The C standard wording says:
+    //
+    //     The completion of the function func synchronizes with all
+    //     previous or subsequent calls to call_once with the same
+    //     flag variable.
+    //
+    // What this means is that, the call_once call can return only after
+    // the called function |func| returns. So, we use futexes to synchronize
+    // calls with the same flag value.
+    if (::atomic_compare_exchange_strong(futex_word, &not_called, START)) {
+        func();
+        auto status = ::atomic_exchange(futex_word, FINISH);
+        if (status == WAITING) {
+            __llvm_libc::syscall(SYS_futex, futex_word, FUTEX_WAKE_PRIVATE,
+                                 INT_MAX, // Wake all waiters.
+                                 0, 0, 0);
+        }
+        return;
     }
-    return;
-  }
 
-  unsigned int status = START;
-  if (::atomic_compare_exchange_strong(futex_word, &status, WAITING) ||
-      status == WAITING) {
-    __llvm_libc::syscall(SYS_futex, futex_word, FUTEX_WAIT_PRIVATE,
-                         WAITING, // Block only if status is still |WAITING|.
-                         0, 0, 0);
-  }
+    unsigned int status = START;
+    if (::atomic_compare_exchange_strong(futex_word, &status, WAITING) ||
+            status == WAITING) {
+        __llvm_libc::syscall(SYS_futex, futex_word, FUTEX_WAIT_PRIVATE,
+                             WAITING, // Block only if status is still |WAITING|.
+                             0, 0, 0);
+    }
 }
 
 } // namespace __llvm_libc

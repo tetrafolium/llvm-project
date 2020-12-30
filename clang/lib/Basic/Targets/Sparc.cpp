@@ -33,7 +33,7 @@ const char *const SparcTargetInfo::GCCRegNames[] = {
 };
 
 ArrayRef<const char *> SparcTargetInfo::getGCCRegNames() const {
-  return llvm::makeArrayRef(GCCRegNames);
+    return llvm::makeArrayRef(GCCRegNames);
 }
 
 const TargetInfo::GCCRegAlias SparcTargetInfo::GCCRegAliases[] = {
@@ -48,20 +48,20 @@ const TargetInfo::GCCRegAlias SparcTargetInfo::GCCRegAliases[] = {
 };
 
 ArrayRef<TargetInfo::GCCRegAlias> SparcTargetInfo::getGCCRegAliases() const {
-  return llvm::makeArrayRef(GCCRegAliases);
+    return llvm::makeArrayRef(GCCRegAliases);
 }
 
 bool SparcTargetInfo::hasFeature(StringRef Feature) const {
-  return llvm::StringSwitch<bool>(Feature)
-      .Case("softfloat", SoftFloat)
-      .Case("sparc", true)
-      .Default(false);
+    return llvm::StringSwitch<bool>(Feature)
+           .Case("softfloat", SoftFloat)
+           .Case("sparc", true)
+           .Default(false);
 }
 
 struct SparcCPUInfo {
-  llvm::StringLiteral Name;
-  SparcTargetInfo::CPUKind Kind;
-  SparcTargetInfo::CPUGeneration Generation;
+    llvm::StringLiteral Name;
+    SparcTargetInfo::CPUKind Kind;
+    SparcTargetInfo::CPUGeneration Generation;
 };
 
 static constexpr SparcCPUInfo CPUInfo[] = {
@@ -70,9 +70,10 @@ static constexpr SparcCPUInfo CPUInfo[] = {
     {{"sparclite"}, SparcTargetInfo::CK_SPARCLITE, SparcTargetInfo::CG_V8},
     {{"f934"}, SparcTargetInfo::CK_F934, SparcTargetInfo::CG_V8},
     {{"hypersparc"}, SparcTargetInfo::CK_HYPERSPARC, SparcTargetInfo::CG_V8},
-    {{"sparclite86x"},
-     SparcTargetInfo::CK_SPARCLITE86X,
-     SparcTargetInfo::CG_V8},
+    {   {"sparclite86x"},
+        SparcTargetInfo::CK_SPARCLITE86X,
+        SparcTargetInfo::CG_V8
+    },
     {{"sparclet"}, SparcTargetInfo::CK_SPARCLET, SparcTargetInfo::CG_V8},
     {{"tsc701"}, SparcTargetInfo::CK_TSC701, SparcTargetInfo::CG_V8},
     {{"v9"}, SparcTargetInfo::CK_V9, SparcTargetInfo::CG_V9},
@@ -111,152 +112,156 @@ static constexpr SparcCPUInfo CPUInfo[] = {
 
 SparcTargetInfo::CPUGeneration
 SparcTargetInfo::getCPUGeneration(CPUKind Kind) const {
-  if (Kind == CK_GENERIC)
-    return CG_V8;
-  const SparcCPUInfo *Item = llvm::find_if(
-      CPUInfo, [Kind](const SparcCPUInfo &Info) { return Info.Kind == Kind; });
-  if (Item == std::end(CPUInfo))
-    llvm_unreachable("Unexpected CPU kind");
-  return Item->Generation;
+    if (Kind == CK_GENERIC)
+        return CG_V8;
+    const SparcCPUInfo *Item = llvm::find_if(
+    CPUInfo, [Kind](const SparcCPUInfo &Info) {
+        return Info.Kind == Kind;
+    });
+    if (Item == std::end(CPUInfo))
+        llvm_unreachable("Unexpected CPU kind");
+    return Item->Generation;
 }
 
 SparcTargetInfo::CPUKind SparcTargetInfo::getCPUKind(StringRef Name) const {
-  const SparcCPUInfo *Item = llvm::find_if(
-      CPUInfo, [Name](const SparcCPUInfo &Info) { return Info.Name == Name; });
+    const SparcCPUInfo *Item = llvm::find_if(
+    CPUInfo, [Name](const SparcCPUInfo &Info) {
+        return Info.Name == Name;
+    });
 
-  if (Item == std::end(CPUInfo))
-    return CK_GENERIC;
-  return Item->Kind;
+    if (Item == std::end(CPUInfo))
+        return CK_GENERIC;
+    return Item->Kind;
 }
 
 void SparcTargetInfo::fillValidCPUList(
     SmallVectorImpl<StringRef> &Values) const {
-  for (const SparcCPUInfo &Info : CPUInfo)
-    Values.push_back(Info.Name);
+    for (const SparcCPUInfo &Info : CPUInfo)
+        Values.push_back(Info.Name);
 }
 
 void SparcTargetInfo::getTargetDefines(const LangOptions &Opts,
                                        MacroBuilder &Builder) const {
-  DefineStd(Builder, "sparc", Opts);
-  Builder.defineMacro("__REGISTER_PREFIX__", "");
+    DefineStd(Builder, "sparc", Opts);
+    Builder.defineMacro("__REGISTER_PREFIX__", "");
 
-  if (SoftFloat)
-    Builder.defineMacro("SOFT_FLOAT", "1");
+    if (SoftFloat)
+        Builder.defineMacro("SOFT_FLOAT", "1");
 }
 
 void SparcV8TargetInfo::getTargetDefines(const LangOptions &Opts,
-                                         MacroBuilder &Builder) const {
-  SparcTargetInfo::getTargetDefines(Opts, Builder);
-  if (getTriple().getOS() == llvm::Triple::Solaris)
-    Builder.defineMacro("__sparcv8");
-  else {
-    switch (getCPUGeneration(CPU)) {
-    case CG_V8:
-      Builder.defineMacro("__sparcv8");
-      Builder.defineMacro("__sparcv8__");
-      break;
-    case CG_V9:
-      Builder.defineMacro("__sparcv9");
-      Builder.defineMacro("__sparcv9__");
-      Builder.defineMacro("__sparc_v9__");
-      break;
+        MacroBuilder &Builder) const {
+    SparcTargetInfo::getTargetDefines(Opts, Builder);
+    if (getTriple().getOS() == llvm::Triple::Solaris)
+        Builder.defineMacro("__sparcv8");
+    else {
+        switch (getCPUGeneration(CPU)) {
+        case CG_V8:
+            Builder.defineMacro("__sparcv8");
+            Builder.defineMacro("__sparcv8__");
+            break;
+        case CG_V9:
+            Builder.defineMacro("__sparcv9");
+            Builder.defineMacro("__sparcv9__");
+            Builder.defineMacro("__sparc_v9__");
+            break;
+        }
     }
-  }
-  if (getTriple().getVendor() == llvm::Triple::Myriad) {
-    std::string MyriadArchValue, Myriad2Value;
-    Builder.defineMacro("__sparc_v8__");
-    Builder.defineMacro("__leon__");
-    switch (CPU) {
-    case CK_MYRIAD2100:
-      MyriadArchValue = "__ma2100";
-      Myriad2Value = "1";
-      break;
-    case CK_MYRIAD2150:
-      MyriadArchValue = "__ma2150";
-      Myriad2Value = "2";
-      break;
-    case CK_MYRIAD2155:
-      MyriadArchValue = "__ma2155";
-      Myriad2Value = "2";
-      break;
-    case CK_MYRIAD2450:
-      MyriadArchValue = "__ma2450";
-      Myriad2Value = "2";
-      break;
-    case CK_MYRIAD2455:
-      MyriadArchValue = "__ma2455";
-      Myriad2Value = "2";
-      break;
-    case CK_MYRIAD2x5x:
-      Myriad2Value = "2";
-      break;
-    case CK_MYRIAD2080:
-      MyriadArchValue = "__ma2080";
-      Myriad2Value = "3";
-      break;
-    case CK_MYRIAD2085:
-      MyriadArchValue = "__ma2085";
-      Myriad2Value = "3";
-      break;
-    case CK_MYRIAD2480:
-      MyriadArchValue = "__ma2480";
-      Myriad2Value = "3";
-      break;
-    case CK_MYRIAD2485:
-      MyriadArchValue = "__ma2485";
-      Myriad2Value = "3";
-      break;
-    case CK_MYRIAD2x8x:
-      Myriad2Value = "3";
-      break;
-    default:
-      MyriadArchValue = "__ma2100";
-      Myriad2Value = "1";
-      break;
+    if (getTriple().getVendor() == llvm::Triple::Myriad) {
+        std::string MyriadArchValue, Myriad2Value;
+        Builder.defineMacro("__sparc_v8__");
+        Builder.defineMacro("__leon__");
+        switch (CPU) {
+        case CK_MYRIAD2100:
+            MyriadArchValue = "__ma2100";
+            Myriad2Value = "1";
+            break;
+        case CK_MYRIAD2150:
+            MyriadArchValue = "__ma2150";
+            Myriad2Value = "2";
+            break;
+        case CK_MYRIAD2155:
+            MyriadArchValue = "__ma2155";
+            Myriad2Value = "2";
+            break;
+        case CK_MYRIAD2450:
+            MyriadArchValue = "__ma2450";
+            Myriad2Value = "2";
+            break;
+        case CK_MYRIAD2455:
+            MyriadArchValue = "__ma2455";
+            Myriad2Value = "2";
+            break;
+        case CK_MYRIAD2x5x:
+            Myriad2Value = "2";
+            break;
+        case CK_MYRIAD2080:
+            MyriadArchValue = "__ma2080";
+            Myriad2Value = "3";
+            break;
+        case CK_MYRIAD2085:
+            MyriadArchValue = "__ma2085";
+            Myriad2Value = "3";
+            break;
+        case CK_MYRIAD2480:
+            MyriadArchValue = "__ma2480";
+            Myriad2Value = "3";
+            break;
+        case CK_MYRIAD2485:
+            MyriadArchValue = "__ma2485";
+            Myriad2Value = "3";
+            break;
+        case CK_MYRIAD2x8x:
+            Myriad2Value = "3";
+            break;
+        default:
+            MyriadArchValue = "__ma2100";
+            Myriad2Value = "1";
+            break;
+        }
+        if (!MyriadArchValue.empty()) {
+            Builder.defineMacro(MyriadArchValue, "1");
+            Builder.defineMacro(MyriadArchValue + "__", "1");
+        }
+        if (Myriad2Value == "2") {
+            Builder.defineMacro("__ma2x5x", "1");
+            Builder.defineMacro("__ma2x5x__", "1");
+        } else if (Myriad2Value == "3") {
+            Builder.defineMacro("__ma2x8x", "1");
+            Builder.defineMacro("__ma2x8x__", "1");
+        }
+        Builder.defineMacro("__myriad2__", Myriad2Value);
+        Builder.defineMacro("__myriad2", Myriad2Value);
     }
-    if (!MyriadArchValue.empty()) {
-      Builder.defineMacro(MyriadArchValue, "1");
-      Builder.defineMacro(MyriadArchValue + "__", "1");
+    if (getCPUGeneration(CPU) == CG_V9) {
+        Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1");
+        Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2");
+        Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4");
+        Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8");
     }
-    if (Myriad2Value == "2") {
-      Builder.defineMacro("__ma2x5x", "1");
-      Builder.defineMacro("__ma2x5x__", "1");
-    } else if (Myriad2Value == "3") {
-      Builder.defineMacro("__ma2x8x", "1");
-      Builder.defineMacro("__ma2x8x__", "1");
+}
+
+void SparcV9TargetInfo::getTargetDefines(const LangOptions &Opts,
+        MacroBuilder &Builder) const {
+    SparcTargetInfo::getTargetDefines(Opts, Builder);
+    Builder.defineMacro("__sparcv9");
+    Builder.defineMacro("__arch64__");
+    // Solaris doesn't need these variants, but the BSDs do.
+    if (getTriple().getOS() != llvm::Triple::Solaris) {
+        Builder.defineMacro("__sparc64__");
+        Builder.defineMacro("__sparc_v9__");
+        Builder.defineMacro("__sparcv9__");
     }
-    Builder.defineMacro("__myriad2__", Myriad2Value);
-    Builder.defineMacro("__myriad2", Myriad2Value);
-  }
-  if (getCPUGeneration(CPU) == CG_V9) {
+
     Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1");
     Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2");
     Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4");
     Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8");
-  }
-}
-
-void SparcV9TargetInfo::getTargetDefines(const LangOptions &Opts,
-                                         MacroBuilder &Builder) const {
-  SparcTargetInfo::getTargetDefines(Opts, Builder);
-  Builder.defineMacro("__sparcv9");
-  Builder.defineMacro("__arch64__");
-  // Solaris doesn't need these variants, but the BSDs do.
-  if (getTriple().getOS() != llvm::Triple::Solaris) {
-    Builder.defineMacro("__sparc64__");
-    Builder.defineMacro("__sparc_v9__");
-    Builder.defineMacro("__sparcv9__");
-  }
-
-  Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1");
-  Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2");
-  Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4");
-  Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8");
 }
 
 void SparcV9TargetInfo::fillValidCPUList(
     SmallVectorImpl<StringRef> &Values) const {
-  for (const SparcCPUInfo &Info : CPUInfo)
-    if (Info.Generation == CG_V9)
-      Values.push_back(Info.Name);
+    for (const SparcCPUInfo &Info : CPUInfo)
+        if (Info.Generation == CG_V9)
+            Values.push_back(Info.Name);
 }

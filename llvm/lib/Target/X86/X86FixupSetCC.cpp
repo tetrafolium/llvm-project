@@ -36,19 +36,21 @@ STATISTIC(NumSubstZexts, "Number of setcc + zext pairs substituted");
 namespace {
 class X86FixupSetCCPass : public MachineFunctionPass {
 public:
-  static char ID;
+    static char ID;
 
-  X86FixupSetCCPass() : MachineFunctionPass(ID) {}
+    X86FixupSetCCPass() : MachineFunctionPass(ID) {}
 
-  StringRef getPassName() const override { return "X86 Fixup SetCC"; }
+    StringRef getPassName() const override {
+        return "X86 Fixup SetCC";
+    }
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 
 private:
-  MachineRegisterInfo *MRI = nullptr;
-  const X86InstrInfo *TII = nullptr;
+    MachineRegisterInfo *MRI = nullptr;
+    const X86InstrInfo *TII = nullptr;
 
-  enum { SearchBound = 16 };
+    enum { SearchBound = 16 };
 };
 } // end anonymous namespace
 
@@ -56,78 +58,80 @@ char X86FixupSetCCPass::ID = 0;
 
 INITIALIZE_PASS(X86FixupSetCCPass, DEBUG_TYPE, DEBUG_TYPE, false, false)
 
-FunctionPass *llvm::createX86FixupSetCC() { return new X86FixupSetCCPass(); }
+FunctionPass *llvm::createX86FixupSetCC() {
+    return new X86FixupSetCCPass();
+}
 
 bool X86FixupSetCCPass::runOnMachineFunction(MachineFunction &MF) {
-  bool Changed = false;
-  MRI = &MF.getRegInfo();
-  TII = MF.getSubtarget<X86Subtarget>().getInstrInfo();
+    bool Changed = false;
+    MRI = &MF.getRegInfo();
+    TII = MF.getSubtarget<X86Subtarget>().getInstrInfo();
 
-  SmallVector<MachineInstr*, 4> ToErase;
+    SmallVector<MachineInstr*, 4> ToErase;
 
-  for (auto &MBB : MF) {
-    MachineInstr *FlagsDefMI = nullptr;
-    for (auto &MI : MBB) {
-      // Remember the most recent preceding eflags defining instruction.
-      if (MI.definesRegister(X86::EFLAGS))
-        FlagsDefMI = &MI;
+    for (auto &MBB : MF) {
+        MachineInstr *FlagsDefMI = nullptr;
+        for (auto &MI : MBB) {
+            // Remember the most recent preceding eflags defining instruction.
+            if (MI.definesRegister(X86::EFLAGS))
+                FlagsDefMI = &MI;
 
-      // Find a setcc that is used by a zext.
-      // This doesn't have to be the only use, the transformation is safe
-      // regardless.
-      if (MI.getOpcode() != X86::SETCCr)
-        continue;
+            // Find a setcc that is used by a zext.
+            // This doesn't have to be the only use, the transformation is safe
+            // regardless.
+            if (MI.getOpcode() != X86::SETCCr)
+                continue;
 
-      MachineInstr *ZExt = nullptr;
-      for (auto &Use : MRI->use_instructions(MI.getOperand(0).getReg()))
-        if (Use.getOpcode() == X86::MOVZX32rr8)
-          ZExt = &Use;
+            MachineInstr *ZExt = nullptr;
+            for (auto &Use : MRI->use_instructions(MI.getOperand(0).getReg()))
+                if (Use.getOpcode() == X86::MOVZX32rr8)
+                    ZExt = &Use;
 
-      if (!ZExt)
-        continue;
+            if (!ZExt)
+                continue;
 
-      if (!FlagsDefMI)
-        continue;
+            if (!FlagsDefMI)
+                continue;
 
-      // We'd like to put something that clobbers eflags directly before
-      // FlagsDefMI. This can't hurt anything after FlagsDefMI, because
-      // it, itself, by definition, clobbers eflags. But it may happen that
-      // FlagsDefMI also *uses* eflags, in which case the transformation is
-      // invalid.
-      if (FlagsDefMI->readsRegister(X86::EFLAGS))
-        continue;
+            // We'd like to put something that clobbers eflags directly before
+            // FlagsDefMI. This can't hurt anything after FlagsDefMI, because
+            // it, itself, by definition, clobbers eflags. But it may happen that
+            // FlagsDefMI also *uses* eflags, in which case the transformation is
+            // invalid.
+            if (FlagsDefMI->readsRegister(X86::EFLAGS))
+                continue;
 
-      // On 32-bit, we need to be careful to force an ABCD register.
-      const TargetRegisterClass *RC = MF.getSubtarget<X86Subtarget>().is64Bit()
-                                          ? &X86::GR32RegClass
-                                          : &X86::GR32_ABCDRegClass;
-      if (!MRI->constrainRegClass(ZExt->getOperand(0).getReg(), RC)) {
-        // If we cannot constrain the register, we would need an additional copy
-        // and are better off keeping the MOVZX32rr8 we have now.
-        continue;
-      }
+            // On 32-bit, we need to be careful to force an ABCD register.
+            const TargetRegisterClass *RC = MF.getSubtarget<X86Subtarget>().is64Bit()
+                                            ? &X86::GR32RegClass
+                                            : &X86::GR32_ABCDRegClass;
+            if (!MRI->constrainRegClass(ZExt->getOperand(0).getReg(), RC)) {
+                // If we cannot constrain the register, we would need an additional copy
+                // and are better off keeping the MOVZX32rr8 we have now.
+                continue;
+            }
 
-      ++NumSubstZexts;
-      Changed = true;
+            ++NumSubstZexts;
+            Changed = true;
 
-      // Initialize a register with 0. This must go before the eflags def
-      Register ZeroReg = MRI->createVirtualRegister(RC);
-      BuildMI(MBB, FlagsDefMI, MI.getDebugLoc(), TII->get(X86::MOV32r0),
-              ZeroReg);
+            // Initialize a register with 0. This must go before the eflags def
+            Register ZeroReg = MRI->createVirtualRegister(RC);
+            BuildMI(MBB, FlagsDefMI, MI.getDebugLoc(), TII->get(X86::MOV32r0),
+                    ZeroReg);
 
-      // X86 setcc only takes an output GR8, so fake a GR32 input by inserting
-      // the setcc result into the low byte of the zeroed register.
-      BuildMI(*ZExt->getParent(), ZExt, ZExt->getDebugLoc(),
-              TII->get(X86::INSERT_SUBREG), ZExt->getOperand(0).getReg())
-          .addReg(ZeroReg)
-          .addReg(MI.getOperand(0).getReg())
-          .addImm(X86::sub_8bit);
-      ToErase.push_back(ZExt);
+            // X86 setcc only takes an output GR8, so fake a GR32 input by inserting
+            // the setcc result into the low byte of the zeroed register.
+            BuildMI(*ZExt->getParent(), ZExt, ZExt->getDebugLoc(),
+                    TII->get(X86::INSERT_SUBREG), ZExt->getOperand(0).getReg())
+            .addReg(ZeroReg)
+            .addReg(MI.getOperand(0).getReg())
+            .addImm(X86::sub_8bit);
+            ToErase.push_back(ZExt);
+        }
     }
-  }
 
-  for (auto &I : ToErase)
-    I->eraseFromParent();
+    for (auto &I : ToErase)
+        I->eraseFromParent();
 
-  return Changed;
+    return Changed;
 }

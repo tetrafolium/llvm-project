@@ -15,8 +15,8 @@
 namespace scudo {
 
 Flags *getFlags() {
-  static Flags F;
-  return &F;
+    static Flags F;
+    return &F;
 }
 
 void Flags::setDefaults() {
@@ -50,24 +50,24 @@ void registerFlags(FlagParser *Parser, Flags *F) {
 
 static const char *getCompileDefinitionScudoDefaultOptions() {
 #ifdef SCUDO_DEFAULT_OPTIONS
-  return STRINGIFY(SCUDO_DEFAULT_OPTIONS);
+    return STRINGIFY(SCUDO_DEFAULT_OPTIONS);
 #else
-  return "";
+    return "";
 #endif
 }
 
 static const char *getScudoDefaultOptions() {
-  return (&__scudo_default_options) ? __scudo_default_options() : "";
+    return (&__scudo_default_options) ? __scudo_default_options() : "";
 }
 
 void initFlags() {
-  Flags *F = getFlags();
-  F->setDefaults();
-  FlagParser Parser;
-  registerFlags(&Parser, F);
-  Parser.parseString(getCompileDefinitionScudoDefaultOptions());
-  Parser.parseString(getScudoDefaultOptions());
-  Parser.parseString(getEnv("SCUDO_OPTIONS"));
+    Flags *F = getFlags();
+    F->setDefaults();
+    FlagParser Parser;
+    registerFlags(&Parser, F);
+    Parser.parseString(getCompileDefinitionScudoDefaultOptions());
+    Parser.parseString(getScudoDefaultOptions());
+    Parser.parseString(getEnv("SCUDO_OPTIONS"));
 }
 
 } // namespace scudo

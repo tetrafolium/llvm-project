@@ -58,9 +58,9 @@ class MCSymbol;
 class MCObjectStreamer;
 
 enum class MCPseudoProbeFlag {
-  // If set, indicates that the probe is encoded as an address delta
-  // instead of a real code address.
-  AddressDelta = 0x1,
+    // If set, indicates that the probe is encoded as an address delta
+    // instead of a real code address.
+    AddressDelta = 0x1,
 };
 
 /// Instances of this class represent a pseudo probe instance for a pseudo probe
@@ -68,33 +68,43 @@ enum class MCPseudoProbeFlag {
 /// uses an address from a temporary label created at the current address in the
 /// current section.
 class MCPseudoProbe {
-  MCSymbol *Label;
-  uint64_t Guid;
-  uint64_t Index;
-  uint8_t Type;
-  uint8_t Attributes;
+    MCSymbol *Label;
+    uint64_t Guid;
+    uint64_t Index;
+    uint8_t Type;
+    uint8_t Attributes;
 
 public:
-  MCPseudoProbe(MCSymbol *Label, uint64_t Guid, uint64_t Index, uint64_t Type,
-                uint64_t Attributes)
-      : Label(Label), Guid(Guid), Index(Index), Type(Type),
-        Attributes(Attributes) {
-    assert(Type <= 0xFF && "Probe type too big to encode, exceeding 2^8");
-    assert(Attributes <= 0xFF &&
-           "Probe attributes too big to encode, exceeding 2^16");
-  }
+    MCPseudoProbe(MCSymbol *Label, uint64_t Guid, uint64_t Index, uint64_t Type,
+                  uint64_t Attributes)
+        : Label(Label), Guid(Guid), Index(Index), Type(Type),
+          Attributes(Attributes) {
+        assert(Type <= 0xFF && "Probe type too big to encode, exceeding 2^8");
+        assert(Attributes <= 0xFF &&
+               "Probe attributes too big to encode, exceeding 2^16");
+    }
 
-  MCSymbol *getLabel() const { return Label; }
+    MCSymbol *getLabel() const {
+        return Label;
+    }
 
-  uint64_t getGuid() const { return Guid; }
+    uint64_t getGuid() const {
+        return Guid;
+    }
 
-  uint64_t getIndex() const { return Index; }
+    uint64_t getIndex() const {
+        return Index;
+    }
 
-  uint8_t getType() const { return Type; }
+    uint8_t getType() const {
+        return Type;
+    }
 
-  uint8_t getAttributes() const { return Attributes; }
+    uint8_t getAttributes() const {
+        return Attributes;
+    }
 
-  void emit(MCObjectStreamer *MCOS, const MCPseudoProbe *LastProbe) const;
+    void emit(MCObjectStreamer *MCOS, const MCPseudoProbe *LastProbe) const;
 };
 
 // An inline frame has the form <Guid, ProbeID>
@@ -107,70 +117,78 @@ using MCPseudoProbeInlineStack = SmallVector<InlineSite, 8>;
 // A real instance of this class is created for each function, either an
 // unlined function that has code in .text section or an inlined function.
 class MCPseudoProbeInlineTree {
-  uint64_t Guid;
-  // Set of probes that come with the function.
-  std::vector<MCPseudoProbe> Probes;
-  // Use std::map for a deterministic output.
-  std::map<InlineSite, MCPseudoProbeInlineTree *> Inlinees;
+    uint64_t Guid;
+    // Set of probes that come with the function.
+    std::vector<MCPseudoProbe> Probes;
+    // Use std::map for a deterministic output.
+    std::map<InlineSite, MCPseudoProbeInlineTree *> Inlinees;
 
-  // Root node has a GUID 0.
-  bool isRoot() { return Guid == 0; }
-  MCPseudoProbeInlineTree *getOrAddNode(InlineSite Site);
+    // Root node has a GUID 0.
+    bool isRoot() {
+        return Guid == 0;
+    }
+    MCPseudoProbeInlineTree *getOrAddNode(InlineSite Site);
 
 public:
-  MCPseudoProbeInlineTree() = default;
-  MCPseudoProbeInlineTree(uint64_t Guid) : Guid(Guid) {}
-  ~MCPseudoProbeInlineTree();
-  void addPseudoProbe(const MCPseudoProbe &Probe,
-                      const MCPseudoProbeInlineStack &InlineStack);
-  void emit(MCObjectStreamer *MCOS, const MCPseudoProbe *&LastProbe);
+    MCPseudoProbeInlineTree() = default;
+    MCPseudoProbeInlineTree(uint64_t Guid) : Guid(Guid) {}
+    ~MCPseudoProbeInlineTree();
+    void addPseudoProbe(const MCPseudoProbe &Probe,
+                        const MCPseudoProbeInlineStack &InlineStack);
+    void emit(MCObjectStreamer *MCOS, const MCPseudoProbe *&LastProbe);
 };
 
 /// Instances of this class represent the pseudo probes inserted into a compile
 /// unit.
 class MCPseudoProbeSection {
 public:
-  void addPseudoProbe(MCSection *Sec, const MCPseudoProbe &Probe,
-                      const MCPseudoProbeInlineStack &InlineStack) {
-    MCProbeDivisions[Sec].addPseudoProbe(Probe, InlineStack);
-  }
+    void addPseudoProbe(MCSection *Sec, const MCPseudoProbe &Probe,
+                        const MCPseudoProbeInlineStack &InlineStack) {
+        MCProbeDivisions[Sec].addPseudoProbe(Probe, InlineStack);
+    }
 
-  // TODO: Sort by getOrdinal to ensure a determinstic section order
-  using MCProbeDivisionMap = std::map<MCSection *, MCPseudoProbeInlineTree>;
+    // TODO: Sort by getOrdinal to ensure a determinstic section order
+    using MCProbeDivisionMap = std::map<MCSection *, MCPseudoProbeInlineTree>;
 
 private:
-  // A collection of MCPseudoProbe for each text section. The MCPseudoProbes
-  // are grouped by GUID of the functions where they are from and will be
-  // encoded by groups. In the comdat scenario where a text section really only
-  // contains the code of a function solely, the probes associated with a comdat
-  // function are still grouped by GUIDs due to inlining that can bring probes
-  // from different functions into one function.
-  MCProbeDivisionMap MCProbeDivisions;
+    // A collection of MCPseudoProbe for each text section. The MCPseudoProbes
+    // are grouped by GUID of the functions where they are from and will be
+    // encoded by groups. In the comdat scenario where a text section really only
+    // contains the code of a function solely, the probes associated with a comdat
+    // function are still grouped by GUIDs due to inlining that can bring probes
+    // from different functions into one function.
+    MCProbeDivisionMap MCProbeDivisions;
 
 public:
-  const MCProbeDivisionMap &getMCProbes() const { return MCProbeDivisions; }
+    const MCProbeDivisionMap &getMCProbes() const {
+        return MCProbeDivisions;
+    }
 
-  bool empty() const { return MCProbeDivisions.empty(); }
+    bool empty() const {
+        return MCProbeDivisions.empty();
+    }
 
-  void emit(MCObjectStreamer *MCOS);
+    void emit(MCObjectStreamer *MCOS);
 };
 
 class MCPseudoProbeTable {
-  // A collection of MCPseudoProbe in the current module grouped by text
-  // sections. MCPseudoProbes will be encoded into a corresponding
-  // .pseudoprobe section. With functions emitted as separate comdats,
-  // a text section really only contains the code of a function solely, and the
-  // probes associated with the text section will be emitted into a standalone
-  // .pseudoprobe section that shares the same comdat group with the function.
-  MCPseudoProbeSection MCProbeSections;
+    // A collection of MCPseudoProbe in the current module grouped by text
+    // sections. MCPseudoProbes will be encoded into a corresponding
+    // .pseudoprobe section. With functions emitted as separate comdats,
+    // a text section really only contains the code of a function solely, and the
+    // probes associated with the text section will be emitted into a standalone
+    // .pseudoprobe section that shares the same comdat group with the function.
+    MCPseudoProbeSection MCProbeSections;
 
 public:
-  static void emit(MCObjectStreamer *MCOS);
+    static void emit(MCObjectStreamer *MCOS);
 
-  MCPseudoProbeSection &getProbeSections() { return MCProbeSections; }
+    MCPseudoProbeSection &getProbeSections() {
+        return MCProbeSections;
+    }
 
 #ifndef NDEBUG
-  static int DdgPrintIndent;
+    static int DdgPrintIndent;
 #endif
 };
 } // end namespace llvm

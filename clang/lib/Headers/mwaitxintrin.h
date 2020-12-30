@@ -19,13 +19,13 @@
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_monitorx(void * __p, unsigned __extensions, unsigned __hints)
 {
-  __builtin_ia32_monitorx(__p, __extensions, __hints);
+    __builtin_ia32_monitorx(__p, __extensions, __hints);
 }
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_mwaitx(unsigned __extensions, unsigned __hints, unsigned __clock)
 {
-  __builtin_ia32_mwaitx(__extensions, __hints, __clock);
+    __builtin_ia32_mwaitx(__extensions, __hints, __clock);
 }
 
 #undef __DEFAULT_FN_ATTRS

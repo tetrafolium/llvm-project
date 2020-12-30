@@ -65,7 +65,7 @@
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_extract_si64(__m128i __x, __m128i __y)
 {
-  return (__m128i)__builtin_ia32_extrq((__v2di)__x, (__v16qi)__y);
+    return (__m128i)__builtin_ia32_extrq((__v2di)__x, (__v16qi)__y);
 }
 
 /// Inserts bits of a specified length from the source integer vector
@@ -135,7 +135,7 @@ _mm_extract_si64(__m128i __x, __m128i __y)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_insert_si64(__m128i __x, __m128i __y)
 {
-  return (__m128i)__builtin_ia32_insertq((__v2di)__x, (__v2di)__y);
+    return (__m128i)__builtin_ia32_insertq((__v2di)__x, (__v2di)__y);
 }
 
 /// Stores a 64-bit double-precision value in a 64-bit memory location.
@@ -153,7 +153,7 @@ _mm_insert_si64(__m128i __x, __m128i __y)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_stream_sd(double *__p, __m128d __a)
 {
-  __builtin_ia32_movntsd(__p, (__v2df)__a);
+    __builtin_ia32_movntsd(__p, (__v2df)__a);
 }
 
 /// Stores a 32-bit single-precision floating-point value in a 32-bit
@@ -171,7 +171,7 @@ _mm_stream_sd(double *__p, __m128d __a)
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_stream_ss(float *__p, __m128 __a)
 {
-  __builtin_ia32_movntss(__p, (__v4sf)__a);
+    __builtin_ia32_movntss(__p, (__v4sf)__a);
 }
 
 #undef __DEFAULT_FN_ATTRS

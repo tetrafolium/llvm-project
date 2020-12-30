@@ -19,10 +19,10 @@
 
 struct DNBRegisterValueClass : public DNBRegisterValue {
 #ifdef __cplusplus
-  DNBRegisterValueClass(const DNBRegisterInfo *regInfo = NULL);
-  void Clear();
-  void Dump(const char *pre, const char *post) const;
-  bool IsValid() const;
+    DNBRegisterValueClass(const DNBRegisterInfo *regInfo = NULL);
+    void Clear();
+    void Dump(const char *pre, const char *post) const;
+    bool IsValid() const;
 #endif
 };
 

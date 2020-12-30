@@ -15,16 +15,16 @@
 #include <stdio.h>
 
 int llvm_targets_list(void) {
-  LLVMTargetRef t;
-  LLVMInitializeAllTargetInfos();
-  LLVMInitializeAllTargets();
+    LLVMTargetRef t;
+    LLVMInitializeAllTargetInfos();
+    LLVMInitializeAllTargets();
 
-  for (t = LLVMGetFirstTarget(); t; t = LLVMGetNextTarget(t)) {
-    printf("%s", LLVMGetTargetName(t));
-    if (LLVMTargetHasJIT(t))
-      printf(" (+jit)");
-    printf("\n - %s\n", LLVMGetTargetDescription(t));
-  }
+    for (t = LLVMGetFirstTarget(); t; t = LLVMGetNextTarget(t)) {
+        printf("%s", LLVMGetTargetName(t));
+        if (LLVMTargetHasJIT(t))
+            printf(" (+jit)");
+        printf("\n - %s\n", LLVMGetTargetDescription(t));
+    }
 
-  return 0;
+    return 0;
 }

@@ -12,9 +12,9 @@
 namespace __llvm_libc {
 
 template <typename T> static inline T integer_abs(T n) {
-  if (n < 0)
-    return -n;
-  return n;
+    if (n < 0)
+        return -n;
+    return n;
 }
 
 } // namespace __llvm_libc

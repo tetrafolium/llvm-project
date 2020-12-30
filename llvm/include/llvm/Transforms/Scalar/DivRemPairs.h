@@ -22,7 +22,7 @@ namespace llvm {
 /// improvements and better codegen.
 struct DivRemPairsPass : public PassInfoMixin<DivRemPairsPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 };
 
 }

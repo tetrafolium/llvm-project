@@ -19,64 +19,64 @@
 namespace __tsan {
 
 enum MutexType {
-  MutexTypeInvalid,
-  MutexTypeTrace,
-  MutexTypeThreads,
-  MutexTypeReport,
-  MutexTypeSyncVar,
-  MutexTypeSyncTab,
-  MutexTypeSlab,
-  MutexTypeAnnotations,
-  MutexTypeAtExit,
-  MutexTypeMBlock,
-  MutexTypeJavaMBlock,
-  MutexTypeDDetector,
-  MutexTypeFired,
-  MutexTypeRacy,
-  MutexTypeGlobalProc,
+    MutexTypeInvalid,
+    MutexTypeTrace,
+    MutexTypeThreads,
+    MutexTypeReport,
+    MutexTypeSyncVar,
+    MutexTypeSyncTab,
+    MutexTypeSlab,
+    MutexTypeAnnotations,
+    MutexTypeAtExit,
+    MutexTypeMBlock,
+    MutexTypeJavaMBlock,
+    MutexTypeDDetector,
+    MutexTypeFired,
+    MutexTypeRacy,
+    MutexTypeGlobalProc,
 
-  // This must be the last.
-  MutexTypeCount
+    // This must be the last.
+    MutexTypeCount
 };
 
 class Mutex {
- public:
-  explicit Mutex(MutexType type, StatType stat_type);
-  ~Mutex();
+public:
+    explicit Mutex(MutexType type, StatType stat_type);
+    ~Mutex();
 
-  void Lock();
-  void Unlock();
+    void Lock();
+    void Unlock();
 
-  void ReadLock();
-  void ReadUnlock();
+    void ReadLock();
+    void ReadUnlock();
 
-  void CheckLocked();
+    void CheckLocked();
 
- private:
-  atomic_uintptr_t state_;
+private:
+    atomic_uintptr_t state_;
 #if SANITIZER_DEBUG
-  MutexType type_;
+    MutexType type_;
 #endif
 #if TSAN_COLLECT_STATS
-  StatType stat_type_;
+    StatType stat_type_;
 #endif
 
-  Mutex(const Mutex&);
-  void operator = (const Mutex&);
+    Mutex(const Mutex&);
+    void operator = (const Mutex&);
 };
 
 typedef GenericScopedLock<Mutex> Lock;
 typedef GenericScopedReadLock<Mutex> ReadLock;
 
 class InternalDeadlockDetector {
- public:
-  InternalDeadlockDetector();
-  void Lock(MutexType t);
-  void Unlock(MutexType t);
-  void CheckNoLocks();
- private:
-  u64 seq_;
-  u64 locked_[MutexTypeCount];
+public:
+    InternalDeadlockDetector();
+    void Lock(MutexType t);
+    void Unlock(MutexType t);
+    void CheckNoLocks();
+private:
+    u64 seq_;
+    u64 locked_[MutexTypeCount];
 };
 
 void InitializeMutex();

@@ -30,20 +30,20 @@ namespace runtime {
 /// http://clang.llvm.org/extra/clang-tidy/checks/google-runtime-int.html
 class IntegerTypesCheck : public ClangTidyCheck {
 public:
-  IntegerTypesCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus && !LangOpts.ObjC;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Options) override;
+    IntegerTypesCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus && !LangOpts.ObjC;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Options) override;
 
 private:
-  const std::string UnsignedTypePrefix;
-  const std::string SignedTypePrefix;
-  const std::string TypeSuffix;
+    const std::string UnsignedTypePrefix;
+    const std::string SignedTypePrefix;
+    const std::string TypeSuffix;
 
-  std::unique_ptr<IdentifierTable> IdentTable;
+    std::unique_ptr<IdentifierTable> IdentTable;
 };
 
 } // namespace runtime

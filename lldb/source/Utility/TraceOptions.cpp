@@ -14,11 +14,11 @@ namespace llvm {
 namespace json {
 
 bool fromJSON(const Value &value, TraceTypeInfo &info, Path path) {
-  ObjectMapper o(value, path);
-  if (!o)
-    return false;
-  o.map("description", info.description);
-  return o.map("name", info.name);
+    ObjectMapper o(value, path);
+    if (!o)
+        return false;
+    o.map("description", info.description);
+    return o.map("name", info.name);
 }
 
 } // namespace json

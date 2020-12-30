@@ -21,11 +21,11 @@
 namespace __asan {
 
 struct StackVarDescr {
-  uptr beg;
-  uptr size;
-  const char *name_pos;
-  uptr name_len;
-  uptr line;
+    uptr beg;
+    uptr size;
+    const char *name_pos;
+    uptr name_len;
+    uptr line;
 };
 
 // Returns the number of globals close to the provided address and copies
@@ -59,7 +59,7 @@ void ReportAllocTypeMismatch(uptr addr, BufferedStackTrace *free_stack,
                              AllocType dealloc_type);
 void ReportMallocUsableSizeNotOwned(uptr addr, BufferedStackTrace *stack);
 void ReportSanitizerGetAllocatedSizeNotOwned(uptr addr,
-                                             BufferedStackTrace *stack);
+        BufferedStackTrace *stack);
 void ReportCallocOverflow(uptr count, uptr size, BufferedStackTrace *stack);
 void ReportReallocArrayOverflow(uptr count, uptr size,
                                 BufferedStackTrace *stack);
@@ -69,20 +69,20 @@ void ReportInvalidAllocationAlignment(uptr alignment,
 void ReportInvalidAlignedAllocAlignment(uptr size, uptr alignment,
                                         BufferedStackTrace *stack);
 void ReportInvalidPosixMemalignAlignment(uptr alignment,
-                                         BufferedStackTrace *stack);
+        BufferedStackTrace *stack);
 void ReportAllocationSizeTooBig(uptr user_size, uptr total_size, uptr max_size,
                                 BufferedStackTrace *stack);
 void ReportRssLimitExceeded(BufferedStackTrace *stack);
 void ReportOutOfMemory(uptr requested_size, BufferedStackTrace *stack);
 void ReportStringFunctionMemoryRangesOverlap(const char *function,
-                                             const char *offset1, uptr length1,
-                                             const char *offset2, uptr length2,
-                                             BufferedStackTrace *stack);
+        const char *offset1, uptr length1,
+        const char *offset2, uptr length2,
+        BufferedStackTrace *stack);
 void ReportStringFunctionSizeOverflow(uptr offset, uptr size,
                                       BufferedStackTrace *stack);
 void ReportBadParamsToAnnotateContiguousContainer(uptr beg, uptr end,
-                                                  uptr old_mid, uptr new_mid,
-                                                  BufferedStackTrace *stack);
+        uptr old_mid, uptr new_mid,
+        BufferedStackTrace *stack);
 
 void ReportODRViolation(const __asan_global *g1, u32 stack_id1,
                         const __asan_global *g2, u32 stack_id2);

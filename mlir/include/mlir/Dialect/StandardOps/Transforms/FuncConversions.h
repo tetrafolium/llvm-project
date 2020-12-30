@@ -23,8 +23,8 @@ class TypeConverter;
 /// Add a pattern to the given pattern list to convert the operand and result
 /// types of a CallOp with the given type converter.
 void populateCallOpTypeConversionPattern(OwningRewritePatternList &patterns,
-                                         MLIRContext *ctx,
-                                         TypeConverter &converter);
+        MLIRContext *ctx,
+        TypeConverter &converter);
 
 /// Add a pattern to the given pattern list to rewrite branch operations and
 /// `return` to use operands that have been legalized by the conversion

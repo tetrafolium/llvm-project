@@ -27,30 +27,30 @@ namespace orc {
 namespace rpc {
 
 std::error_code ConnectionClosed::convertToErrorCode() const {
-  return orcError(OrcErrorCode::RPCConnectionClosed);
+    return orcError(OrcErrorCode::RPCConnectionClosed);
 }
 
 void ConnectionClosed::log(raw_ostream &OS) const {
-  OS << "RPC connection already closed";
+    OS << "RPC connection already closed";
 }
 
 std::error_code ResponseAbandoned::convertToErrorCode() const {
-  return orcError(OrcErrorCode::RPCResponseAbandoned);
+    return orcError(OrcErrorCode::RPCResponseAbandoned);
 }
 
 void ResponseAbandoned::log(raw_ostream &OS) const {
-  OS << "RPC response abandoned";
+    OS << "RPC response abandoned";
 }
 
 CouldNotNegotiate::CouldNotNegotiate(std::string Signature)
     : Signature(std::move(Signature)) {}
 
 std::error_code CouldNotNegotiate::convertToErrorCode() const {
-  return orcError(OrcErrorCode::RPCCouldNotNegotiateFunction);
+    return orcError(OrcErrorCode::RPCCouldNotNegotiateFunction);
 }
 
 void CouldNotNegotiate::log(raw_ostream &OS) const {
-  OS << "Could not negotiate RPC function " << Signature;
+    OS << "Could not negotiate RPC function " << Signature;
 }
 
 } // end namespace rpc

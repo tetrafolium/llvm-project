@@ -13,16 +13,18 @@
 namespace Fortran::runtime {
 
 void *AllocateMemoryOrCrash(const Terminator &terminator, std::size_t bytes) {
-  if (void *p{std::malloc(bytes)}) {
-    return p;
-  }
-  if (bytes > 0) {
-    terminator.Crash(
-        "Fortran runtime internal error: out of memory, needed %zd bytes",
-        bytes);
-  }
-  return nullptr;
+    if (void *p{std::malloc(bytes)}) {
+        return p;
+    }
+    if (bytes > 0) {
+        terminator.Crash(
+            "Fortran runtime internal error: out of memory, needed %zd bytes",
+            bytes);
+    }
+    return nullptr;
 }
 
-void FreeMemory(void *p) { std::free(p); }
+void FreeMemory(void *p) {
+    std::free(p);
+}
 } // namespace Fortran::runtime

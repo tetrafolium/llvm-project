@@ -24,11 +24,11 @@ CheckerManager::CheckerManager(
     : Context(&Context), LangOpts(Context.getLangOpts()), AOptions(AOptions),
       PP(&PP), Diags(Context.getDiagnostics()),
       RegistryData(std::make_unique<CheckerRegistryData>()) {
-  CheckerRegistry Registry(*RegistryData, plugins, Context.getDiagnostics(),
-                           AOptions, checkerRegistrationFns);
-  Registry.initializeRegistry(*this);
-  Registry.initializeManager(*this);
-  finishedCheckerRegistration();
+    CheckerRegistry Registry(*RegistryData, plugins, Context.getDiagnostics(),
+                             AOptions, checkerRegistrationFns);
+    Registry.initializeRegistry(*this);
+    Registry.initializeManager(*this);
+    finishedCheckerRegistration();
 }
 
 CheckerManager::CheckerManager(AnalyzerOptions &AOptions,
@@ -37,13 +37,13 @@ CheckerManager::CheckerManager(AnalyzerOptions &AOptions,
                                ArrayRef<std::string> plugins)
     : LangOpts(LangOpts), AOptions(AOptions), Diags(Diags),
       RegistryData(std::make_unique<CheckerRegistryData>()) {
-  CheckerRegistry Registry(*RegistryData, plugins, Diags, AOptions, {});
-  Registry.initializeRegistry(*this);
+    CheckerRegistry Registry(*RegistryData, plugins, Diags, AOptions, {});
+    Registry.initializeRegistry(*this);
 }
 
 CheckerManager::~CheckerManager() {
-  for (const auto &CheckerDtor : CheckerDtors)
-    CheckerDtor();
+    for (const auto &CheckerDtor : CheckerDtors)
+        CheckerDtor();
 }
 
 } // namespace ento

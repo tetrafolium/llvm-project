@@ -17,12 +17,12 @@
 #include "llvm/Support/raw_ostream.h"
 
 namespace llvm {
-  /// circular_raw_ostream - A raw_ostream which *can* save its data
-  /// to a circular buffer, or can pass it through directly to an
-  /// underlying stream if specified with a buffer of zero.
-  ///
-  class circular_raw_ostream : public raw_ostream {
-  public:
+/// circular_raw_ostream - A raw_ostream which *can* save its data
+/// to a circular buffer, or can pass it through directly to an
+/// underlying stream if specified with a buffer of zero.
+///
+class circular_raw_ostream : public raw_ostream {
+public:
     /// TAKE_OWNERSHIP - Tell this stream that it owns the underlying
     /// stream and is responsible for cleanup, memory management
     /// issues, etc.
@@ -34,7 +34,7 @@ namespace llvm {
     ///
     static constexpr bool REFERENCE_ONLY = false;
 
-  private:
+private:
     /// TheStream - The real stream we output to. We set it to be
     /// unbuffered, since we're already doing our own buffering.
     ///
@@ -70,13 +70,13 @@ namespace llvm {
     /// flushBuffer - Dump the contents of the buffer to Stream.
     ///
     void flushBuffer() {
-      if (Filled)
-        // Write the older portion of the buffer.
-        TheStream->write(Cur, BufferArray + BufferSize - Cur);
-      // Write the newer portion of the buffer.
-      TheStream->write(BufferArray, Cur - BufferArray);
-      Cur = BufferArray;
-      Filled = false;
+        if (Filled)
+            // Write the older portion of the buffer.
+            TheStream->write(Cur, BufferArray + BufferSize - Cur);
+        // Write the newer portion of the buffer.
+        TheStream->write(BufferArray, Cur - BufferArray);
+        Cur = BufferArray;
+        Filled = false;
     }
 
     void write_impl(const char *Ptr, size_t Size) override;
@@ -85,12 +85,12 @@ namespace llvm {
     /// not counting the bytes currently in the buffer.
     ///
     uint64_t current_pos() const override {
-      // This has the same effect as calling TheStream.current_pos(),
-      // but that interface is private.
-      return TheStream->tell() - TheStream->GetNumBytesInBuffer();
+        // This has the same effect as calling TheStream.current_pos(),
+        // but that interface is private.
+        return TheStream->tell() - TheStream->GetNumBytesInBuffer();
     }
 
-  public:
+public:
     /// circular_raw_ostream - Construct an optionally
     /// circular-buffered stream, handing it an underlying stream to
     /// do the "real" output.
@@ -109,21 +109,21 @@ namespace llvm {
         : raw_ostream(/*unbuffered*/ true), TheStream(nullptr),
           OwnsStream(Owns), BufferSize(BuffSize), BufferArray(nullptr),
           Filled(false), Banner(Header) {
-      if (BufferSize != 0)
-        BufferArray = new char[BufferSize];
-      Cur = BufferArray;
-      setStream(Stream, Owns);
+        if (BufferSize != 0)
+            BufferArray = new char[BufferSize];
+        Cur = BufferArray;
+        setStream(Stream, Owns);
     }
 
     ~circular_raw_ostream() override {
-      flush();
-      flushBufferWithBanner();
-      releaseStream();
-      delete[] BufferArray;
+        flush();
+        flushBufferWithBanner();
+        releaseStream();
+        delete[] BufferArray;
     }
 
     bool is_displayed() const override {
-      return TheStream->is_displayed();
+        return TheStream->is_displayed();
     }
 
     /// setStream - Tell the circular_raw_ostream to output a
@@ -132,9 +132,9 @@ namespace llvm {
     /// stream.
     ///
     void setStream(raw_ostream &Stream, bool Owns = REFERENCE_ONLY) {
-      releaseStream();
-      TheStream = &Stream;
-      OwnsStream = Owns;
+        releaseStream();
+        TheStream = &Stream;
+        OwnsStream = Owns;
     }
 
     /// flushBufferWithBanner - Force output of the buffer along with
@@ -142,18 +142,18 @@ namespace llvm {
     ///
     void flushBufferWithBanner();
 
-  private:
+private:
     /// releaseStream - Delete the held stream if needed. Otherwise,
     /// transfer the buffer settings from this circular_raw_ostream
     /// back to the underlying stream.
     ///
     void releaseStream() {
-      if (!TheStream)
-        return;
-      if (OwnsStream)
-        delete TheStream;
+        if (!TheStream)
+            return;
+        if (OwnsStream)
+            delete TheStream;
     }
-  };
+};
 } // end llvm namespace
 
 #endif

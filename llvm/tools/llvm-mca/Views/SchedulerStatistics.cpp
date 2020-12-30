@@ -22,12 +22,14 @@ SchedulerStatistics::SchedulerStatistics(const llvm::MCSubtargetInfo &STI)
     : SM(STI.getSchedModel()), LQResourceID(0), SQResourceID(0), NumIssued(0),
       NumCycles(0), MostRecentLoadDispatched(~0U),
       MostRecentStoreDispatched(~0U),
-      Usage(STI.getSchedModel().NumProcResourceKinds, {0, 0, 0}) {
-  if (SM.hasExtraProcessorInfo()) {
-    const MCExtraProcessorInfo &EPI = SM.getExtraProcessorInfo();
-    LQResourceID = EPI.LoadQueueID;
-    SQResourceID = EPI.StoreQueueID;
-  }
+      Usage(STI.getSchedModel().NumProcResourceKinds, {
+    0, 0, 0
+}) {
+    if (SM.hasExtraProcessorInfo()) {
+        const MCExtraProcessorInfo &EPI = SM.getExtraProcessorInfo();
+        LQResourceID = EPI.LoadQueueID;
+        SQResourceID = EPI.StoreQueueID;
+    }
 }
 
 // FIXME: This implementation works under the assumption that load/store queue
@@ -42,136 +44,138 @@ SchedulerStatistics::SchedulerStatistics(const llvm::MCSubtargetInfo &STI)
 // In future we should add a new "memory queue" event type, so that we stop
 // making assumptions on how LSUnit internally works (See PR39828).
 void SchedulerStatistics::onEvent(const HWInstructionEvent &Event) {
-  if (Event.Type == HWInstructionEvent::Issued) {
-    const Instruction &Inst = *Event.IR.getInstruction();
-    NumIssued += Inst.getDesc().NumMicroOps;
-  } else if (Event.Type == HWInstructionEvent::Dispatched) {
-    const Instruction &Inst = *Event.IR.getInstruction();
-    const unsigned Index = Event.IR.getSourceIndex();
-    if (LQResourceID && Inst.getDesc().MayLoad &&
-        MostRecentLoadDispatched != Index) {
-      Usage[LQResourceID].SlotsInUse++;
-      MostRecentLoadDispatched = Index;
+    if (Event.Type == HWInstructionEvent::Issued) {
+        const Instruction &Inst = *Event.IR.getInstruction();
+        NumIssued += Inst.getDesc().NumMicroOps;
+    } else if (Event.Type == HWInstructionEvent::Dispatched) {
+        const Instruction &Inst = *Event.IR.getInstruction();
+        const unsigned Index = Event.IR.getSourceIndex();
+        if (LQResourceID && Inst.getDesc().MayLoad &&
+                MostRecentLoadDispatched != Index) {
+            Usage[LQResourceID].SlotsInUse++;
+            MostRecentLoadDispatched = Index;
+        }
+        if (SQResourceID && Inst.getDesc().MayStore &&
+                MostRecentStoreDispatched != Index) {
+            Usage[SQResourceID].SlotsInUse++;
+            MostRecentStoreDispatched = Index;
+        }
+    } else if (Event.Type == HWInstructionEvent::Executed) {
+        const Instruction &Inst = *Event.IR.getInstruction();
+        if (LQResourceID && Inst.getDesc().MayLoad) {
+            assert(Usage[LQResourceID].SlotsInUse);
+            Usage[LQResourceID].SlotsInUse--;
+        }
+        if (SQResourceID && Inst.getDesc().MayStore) {
+            assert(Usage[SQResourceID].SlotsInUse);
+            Usage[SQResourceID].SlotsInUse--;
+        }
     }
-    if (SQResourceID && Inst.getDesc().MayStore &&
-        MostRecentStoreDispatched != Index) {
-      Usage[SQResourceID].SlotsInUse++;
-      MostRecentStoreDispatched = Index;
-    }
-  } else if (Event.Type == HWInstructionEvent::Executed) {
-    const Instruction &Inst = *Event.IR.getInstruction();
-    if (LQResourceID && Inst.getDesc().MayLoad) {
-      assert(Usage[LQResourceID].SlotsInUse);
-      Usage[LQResourceID].SlotsInUse--;
-    }
-    if (SQResourceID && Inst.getDesc().MayStore) {
-      assert(Usage[SQResourceID].SlotsInUse);
-      Usage[SQResourceID].SlotsInUse--;
-    }
-  }
 }
 
 void SchedulerStatistics::onReservedBuffers(const InstRef & /* unused */,
-                                            ArrayRef<unsigned> Buffers) {
-  for (const unsigned Buffer : Buffers) {
-    if (Buffer == LQResourceID || Buffer == SQResourceID)
-      continue;
-    Usage[Buffer].SlotsInUse++;
-  }
+        ArrayRef<unsigned> Buffers) {
+    for (const unsigned Buffer : Buffers) {
+        if (Buffer == LQResourceID || Buffer == SQResourceID)
+            continue;
+        Usage[Buffer].SlotsInUse++;
+    }
 }
 
 void SchedulerStatistics::onReleasedBuffers(const InstRef & /* unused */,
-                                            ArrayRef<unsigned> Buffers) {
-  for (const unsigned Buffer : Buffers) {
-    if (Buffer == LQResourceID || Buffer == SQResourceID)
-      continue;
-    Usage[Buffer].SlotsInUse--;
-  }
+        ArrayRef<unsigned> Buffers) {
+    for (const unsigned Buffer : Buffers) {
+        if (Buffer == LQResourceID || Buffer == SQResourceID)
+            continue;
+        Usage[Buffer].SlotsInUse--;
+    }
 }
 
 void SchedulerStatistics::updateHistograms() {
-  for (BufferUsage &BU : Usage) {
-    BU.CumulativeNumUsedSlots += BU.SlotsInUse;
-    BU.MaxUsedSlots = std::max(BU.MaxUsedSlots, BU.SlotsInUse);
-  }
+    for (BufferUsage &BU : Usage) {
+        BU.CumulativeNumUsedSlots += BU.SlotsInUse;
+        BU.MaxUsedSlots = std::max(BU.MaxUsedSlots, BU.SlotsInUse);
+    }
 
-  IssueWidthPerCycle[NumIssued]++;
-  NumIssued = 0;
+    IssueWidthPerCycle[NumIssued]++;
+    NumIssued = 0;
 }
 
 void SchedulerStatistics::printSchedulerStats(raw_ostream &OS) const {
-  OS << "\n\nSchedulers - "
-     << "number of cycles where we saw N micro opcodes issued:\n";
-  OS << "[# issued], [# cycles]\n";
+    OS << "\n\nSchedulers - "
+       << "number of cycles where we saw N micro opcodes issued:\n";
+    OS << "[# issued], [# cycles]\n";
 
-  bool HasColors = OS.has_colors();
-  const auto It =
-      std::max_element(IssueWidthPerCycle.begin(), IssueWidthPerCycle.end());
-  for (const std::pair<const unsigned, unsigned> &Entry : IssueWidthPerCycle) {
-    unsigned NumIssued = Entry.first;
-    if (NumIssued == It->first && HasColors)
-      OS.changeColor(raw_ostream::SAVEDCOLOR, true, false);
+    bool HasColors = OS.has_colors();
+    const auto It =
+        std::max_element(IssueWidthPerCycle.begin(), IssueWidthPerCycle.end());
+    for (const std::pair<const unsigned, unsigned> &Entry : IssueWidthPerCycle) {
+        unsigned NumIssued = Entry.first;
+        if (NumIssued == It->first && HasColors)
+            OS.changeColor(raw_ostream::SAVEDCOLOR, true, false);
 
-    unsigned IPC = Entry.second;
-    OS << " " << NumIssued << ",          " << IPC << "  ("
-       << format("%.1f", ((double)IPC / NumCycles) * 100) << "%)\n";
-    if (HasColors)
-      OS.resetColor();
-  }
+        unsigned IPC = Entry.second;
+        OS << " " << NumIssued << ",          " << IPC << "  ("
+           << format("%.1f", ((double)IPC / NumCycles) * 100) << "%)\n";
+        if (HasColors)
+            OS.resetColor();
+    }
 }
 
 void SchedulerStatistics::printSchedulerUsage(raw_ostream &OS) const {
-  assert(NumCycles && "Unexpected number of cycles!");
+    assert(NumCycles && "Unexpected number of cycles!");
 
-  OS << "\nScheduler's queue usage:\n";
-  if (all_of(Usage, [](const BufferUsage &BU) { return !BU.MaxUsedSlots; })) {
-    OS << "No scheduler resources used.\n";
-    return;
-  }
+    OS << "\nScheduler's queue usage:\n";
+    if (all_of(Usage, [](const BufferUsage &BU) {
+    return !BU.MaxUsedSlots;
+})) {
+        OS << "No scheduler resources used.\n";
+        return;
+    }
 
-  OS << "[1] Resource name.\n"
-     << "[2] Average number of used buffer entries.\n"
-     << "[3] Maximum number of used buffer entries.\n"
-     << "[4] Total number of buffer entries.\n\n"
-     << " [1]            [2]        [3]        [4]\n";
+    OS << "[1] Resource name.\n"
+       << "[2] Average number of used buffer entries.\n"
+       << "[3] Maximum number of used buffer entries.\n"
+       << "[4] Total number of buffer entries.\n\n"
+       << " [1]            [2]        [3]        [4]\n";
 
-  formatted_raw_ostream FOS(OS);
-  bool HasColors = FOS.has_colors();
-  for (unsigned I = 0, E = SM.getNumProcResourceKinds(); I < E; ++I) {
-    const MCProcResourceDesc &ProcResource = *SM.getProcResource(I);
-    if (ProcResource.BufferSize <= 0)
-      continue;
+    formatted_raw_ostream FOS(OS);
+    bool HasColors = FOS.has_colors();
+    for (unsigned I = 0, E = SM.getNumProcResourceKinds(); I < E; ++I) {
+        const MCProcResourceDesc &ProcResource = *SM.getProcResource(I);
+        if (ProcResource.BufferSize <= 0)
+            continue;
 
-    const BufferUsage &BU = Usage[I];
-    double AvgUsage = (double)BU.CumulativeNumUsedSlots / NumCycles;
-    double AlmostFullThreshold = (double)(ProcResource.BufferSize * 4) / 5;
-    unsigned NormalizedAvg = floor((AvgUsage * 10) + 0.5) / 10;
-    unsigned NormalizedThreshold = floor((AlmostFullThreshold * 10) + 0.5) / 10;
+        const BufferUsage &BU = Usage[I];
+        double AvgUsage = (double)BU.CumulativeNumUsedSlots / NumCycles;
+        double AlmostFullThreshold = (double)(ProcResource.BufferSize * 4) / 5;
+        unsigned NormalizedAvg = floor((AvgUsage * 10) + 0.5) / 10;
+        unsigned NormalizedThreshold = floor((AlmostFullThreshold * 10) + 0.5) / 10;
 
-    FOS << ProcResource.Name;
-    FOS.PadToColumn(17);
-    if (HasColors && NormalizedAvg >= NormalizedThreshold)
-      FOS.changeColor(raw_ostream::YELLOW, true, false);
-    FOS << NormalizedAvg;
-    if (HasColors)
-      FOS.resetColor();
-    FOS.PadToColumn(28);
-    if (HasColors &&
-        BU.MaxUsedSlots == static_cast<unsigned>(ProcResource.BufferSize))
-      FOS.changeColor(raw_ostream::RED, true, false);
-    FOS << BU.MaxUsedSlots;
-    if (HasColors)
-      FOS.resetColor();
-    FOS.PadToColumn(39);
-    FOS << ProcResource.BufferSize << '\n';
-  }
+        FOS << ProcResource.Name;
+        FOS.PadToColumn(17);
+        if (HasColors && NormalizedAvg >= NormalizedThreshold)
+            FOS.changeColor(raw_ostream::YELLOW, true, false);
+        FOS << NormalizedAvg;
+        if (HasColors)
+            FOS.resetColor();
+        FOS.PadToColumn(28);
+        if (HasColors &&
+                BU.MaxUsedSlots == static_cast<unsigned>(ProcResource.BufferSize))
+            FOS.changeColor(raw_ostream::RED, true, false);
+        FOS << BU.MaxUsedSlots;
+        if (HasColors)
+            FOS.resetColor();
+        FOS.PadToColumn(39);
+        FOS << ProcResource.BufferSize << '\n';
+    }
 
-  FOS.flush();
+    FOS.flush();
 }
 
 void SchedulerStatistics::printView(raw_ostream &OS) const {
-  printSchedulerStats(OS);
-  printSchedulerUsage(OS);
+    printSchedulerStats(OS);
+    printSchedulerUsage(OS);
 }
 
 } // namespace mca

@@ -20,32 +20,50 @@ NativeLineNumber::NativeLineNumber(const NativeSession &Session,
       Section(Section), Offset(Offset), Length(Length), SrcFileId(SrcFileId),
       CompilandId(CompilandId) {}
 
-uint32_t NativeLineNumber::getLineNumber() const { return Line.getStartLine(); }
-
-uint32_t NativeLineNumber::getLineNumberEnd() const {
-  return Line.getEndLine();
+uint32_t NativeLineNumber::getLineNumber() const {
+    return Line.getStartLine();
 }
 
-uint32_t NativeLineNumber::getColumnNumber() const { return ColumnNumber; }
+uint32_t NativeLineNumber::getLineNumberEnd() const {
+    return Line.getEndLine();
+}
 
-uint32_t NativeLineNumber::getColumnNumberEnd() const { return 0; }
+uint32_t NativeLineNumber::getColumnNumber() const {
+    return ColumnNumber;
+}
 
-uint32_t NativeLineNumber::getAddressSection() const { return Section; }
+uint32_t NativeLineNumber::getColumnNumberEnd() const {
+    return 0;
+}
 
-uint32_t NativeLineNumber::getAddressOffset() const { return Offset; }
+uint32_t NativeLineNumber::getAddressSection() const {
+    return Section;
+}
+
+uint32_t NativeLineNumber::getAddressOffset() const {
+    return Offset;
+}
 
 uint32_t NativeLineNumber::getRelativeVirtualAddress() const {
-  return Session.getRVAFromSectOffset(Section, Offset);
+    return Session.getRVAFromSectOffset(Section, Offset);
 }
 
 uint64_t NativeLineNumber::getVirtualAddress() const {
-  return Session.getVAFromSectOffset(Section, Offset);
+    return Session.getVAFromSectOffset(Section, Offset);
 }
 
-uint32_t NativeLineNumber::getLength() const { return Length; }
+uint32_t NativeLineNumber::getLength() const {
+    return Length;
+}
 
-uint32_t NativeLineNumber::getSourceFileId() const { return SrcFileId; }
+uint32_t NativeLineNumber::getSourceFileId() const {
+    return SrcFileId;
+}
 
-uint32_t NativeLineNumber::getCompilandId() const { return CompilandId; }
+uint32_t NativeLineNumber::getCompilandId() const {
+    return CompilandId;
+}
 
-bool NativeLineNumber::isStatement() const { return Line.isStatement(); }
+bool NativeLineNumber::isStatement() const {
+    return Line.isStatement();
+}

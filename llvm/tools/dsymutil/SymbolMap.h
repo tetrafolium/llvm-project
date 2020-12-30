@@ -21,31 +21,33 @@ class DebugMap;
 /// Callable class to unobfuscate strings based on a BCSymbolMap.
 class SymbolMapTranslator {
 public:
-  SymbolMapTranslator() : MangleNames(false) {}
+    SymbolMapTranslator() : MangleNames(false) {}
 
-  SymbolMapTranslator(std::vector<std::string> UnobfuscatedStrings,
-                      bool MangleNames)
-      : UnobfuscatedStrings(std::move(UnobfuscatedStrings)),
-        MangleNames(MangleNames) {}
+    SymbolMapTranslator(std::vector<std::string> UnobfuscatedStrings,
+                        bool MangleNames)
+        : UnobfuscatedStrings(std::move(UnobfuscatedStrings)),
+          MangleNames(MangleNames) {}
 
-  StringRef operator()(StringRef Input);
+    StringRef operator()(StringRef Input);
 
-  operator bool() const { return !UnobfuscatedStrings.empty(); }
+    operator bool() const {
+        return !UnobfuscatedStrings.empty();
+    }
 
 private:
-  std::vector<std::string> UnobfuscatedStrings;
-  bool MangleNames;
+    std::vector<std::string> UnobfuscatedStrings;
+    bool MangleNames;
 };
 
 /// Class to initialize SymbolMapTranslators from a BCSymbolMap.
 class SymbolMapLoader {
 public:
-  SymbolMapLoader(std::string SymbolMap) : SymbolMap(std::move(SymbolMap)) {}
+    SymbolMapLoader(std::string SymbolMap) : SymbolMap(std::move(SymbolMap)) {}
 
-  SymbolMapTranslator Load(StringRef InputFile, const DebugMap &Map) const;
+    SymbolMapTranslator Load(StringRef InputFile, const DebugMap &Map) const;
 
 private:
-  const std::string SymbolMap;
+    const std::string SymbolMap;
 };
 } // namespace dsymutil
 } // namespace llvm

@@ -14,11 +14,11 @@
 LLDB_PLUGIN_DEFINE(ABIMips)
 
 void ABIMips::Initialize() {
-  ABISysV_mips::Initialize();
-  ABISysV_mips64::Initialize();
+    ABISysV_mips::Initialize();
+    ABISysV_mips64::Initialize();
 }
 
 void ABIMips::Terminate() {
-  ABISysV_mips::Terminate();
-  ABISysV_mips64::Terminate();
+    ABISysV_mips::Terminate();
+    ABISysV_mips64::Terminate();
 }

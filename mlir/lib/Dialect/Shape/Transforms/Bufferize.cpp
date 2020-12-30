@@ -15,24 +15,24 @@ using namespace mlir;
 
 namespace {
 struct ShapeBufferizePass : public ShapeBufferizeBase<ShapeBufferizePass> {
-  void runOnFunction() override {
-    MLIRContext &ctx = getContext();
+    void runOnFunction() override {
+        MLIRContext &ctx = getContext();
 
-    OwningRewritePatternList patterns;
-    BufferizeTypeConverter typeConverter;
-    ConversionTarget target(getContext());
+        OwningRewritePatternList patterns;
+        BufferizeTypeConverter typeConverter;
+        ConversionTarget target(getContext());
 
-    populateBufferizeMaterializationLegality(target);
-    populateShapeStructuralTypeConversionsAndLegality(&ctx, typeConverter,
-                                                      patterns, target);
+        populateBufferizeMaterializationLegality(target);
+        populateShapeStructuralTypeConversionsAndLegality(&ctx, typeConverter,
+                patterns, target);
 
-    if (failed(
-            applyPartialConversion(getFunction(), target, std::move(patterns))))
-      signalPassFailure();
-  }
+        if (failed(
+                    applyPartialConversion(getFunction(), target, std::move(patterns))))
+            signalPassFailure();
+    }
 };
 } // namespace
 
 std::unique_ptr<FunctionPass> mlir::createShapeBufferizePass() {
-  return std::make_unique<ShapeBufferizePass>();
+    return std::make_unique<ShapeBufferizePass>();
 }

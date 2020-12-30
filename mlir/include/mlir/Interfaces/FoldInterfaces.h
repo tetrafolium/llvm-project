@@ -22,25 +22,27 @@ class Region;
 class DialectFoldInterface
     : public DialectInterface::Base<DialectFoldInterface> {
 public:
-  DialectFoldInterface(Dialect *dialect) : Base(dialect) {}
+    DialectFoldInterface(Dialect *dialect) : Base(dialect) {}
 
-  /// Registered fallback fold for the dialect. Like the fold hook of each
-  /// operation, it attempts to fold the operation with the specified constant
-  /// operand values - the elements in "operands" will correspond directly to
-  /// the operands of the operation, but may be null if non-constant.  If
-  /// folding is successful, this fills in the `results` vector.  If not, this
-  /// returns failure and `results` is unspecified.
-  virtual LogicalResult fold(Operation *op, ArrayRef<Attribute> operands,
-                             SmallVectorImpl<OpFoldResult> &results) const {
-    return failure();
-  }
+    /// Registered fallback fold for the dialect. Like the fold hook of each
+    /// operation, it attempts to fold the operation with the specified constant
+    /// operand values - the elements in "operands" will correspond directly to
+    /// the operands of the operation, but may be null if non-constant.  If
+    /// folding is successful, this fills in the `results` vector.  If not, this
+    /// returns failure and `results` is unspecified.
+    virtual LogicalResult fold(Operation *op, ArrayRef<Attribute> operands,
+                               SmallVectorImpl<OpFoldResult> &results) const {
+        return failure();
+    }
 
-  /// Registered hook to check if the given region, which is attached to an
-  /// operation that is *not* isolated from above, should be used when
-  /// materializing constants. The folder will generally materialize constants
-  /// into the top-level isolated region, this allows for materializing into a
-  /// lower level ancestor region if it is more profitable/correct.
-  virtual bool shouldMaterializeInto(Region *region) const { return false; }
+    /// Registered hook to check if the given region, which is attached to an
+    /// operation that is *not* isolated from above, should be used when
+    /// materializing constants. The folder will generally materialize constants
+    /// into the top-level isolated region, this allows for materializing into a
+    /// lower level ancestor region if it is more profitable/correct.
+    virtual bool shouldMaterializeInto(Region *region) const {
+        return false;
+    }
 };
 
 } // end namespace mlir

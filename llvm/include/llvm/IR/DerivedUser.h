@@ -26,17 +26,17 @@ class Use;
 /// its use/def list machinery.
 class DerivedUser : public User {
 protected:
-  using  DeleteValueTy = void (*)(DerivedUser *);
+    using  DeleteValueTy = void (*)(DerivedUser *);
 
 private:
-  friend class Value;
+    friend class Value;
 
-  DeleteValueTy DeleteValue;
+    DeleteValueTy DeleteValue;
 
 public:
-  DerivedUser(Type *Ty, unsigned VK, Use *U, unsigned NumOps,
-              DeleteValueTy DeleteValue)
-      : User(Ty, VK, U, NumOps), DeleteValue(DeleteValue) {}
+    DerivedUser(Type *Ty, unsigned VK, Use *U, unsigned NumOps,
+                DeleteValueTy DeleteValue)
+        : User(Ty, VK, U, NumOps), DeleteValue(DeleteValue) {}
 };
 
 } // end namespace llvm

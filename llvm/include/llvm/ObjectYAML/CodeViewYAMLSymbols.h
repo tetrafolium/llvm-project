@@ -30,13 +30,13 @@ struct SymbolRecordBase;
 } // end namespace detail
 
 struct SymbolRecord {
-  std::shared_ptr<detail::SymbolRecordBase> Symbol;
+    std::shared_ptr<detail::SymbolRecordBase> Symbol;
 
-  codeview::CVSymbol
-  toCodeViewSymbol(BumpPtrAllocator &Allocator,
-                   codeview::CodeViewContainer Container) const;
+    codeview::CVSymbol
+    toCodeViewSymbol(BumpPtrAllocator &Allocator,
+                     codeview::CodeViewContainer Container) const;
 
-  static Expected<SymbolRecord> fromCodeViewSymbol(codeview::CVSymbol Symbol);
+    static Expected<SymbolRecord> fromCodeViewSymbol(codeview::CVSymbol Symbol);
 };
 
 } // end namespace CodeViewYAML

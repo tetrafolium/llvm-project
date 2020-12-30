@@ -32,11 +32,13 @@ struct Flags {
 #include "memprof_flags.inc"
 #undef MEMPROF_FLAG
 
-  void SetDefaults();
+    void SetDefaults();
 };
 
 extern Flags memprof_flags_dont_use_directly;
-inline Flags *flags() { return &memprof_flags_dont_use_directly; }
+inline Flags *flags() {
+    return &memprof_flags_dont_use_directly;
+}
 
 void InitializeFlags();
 

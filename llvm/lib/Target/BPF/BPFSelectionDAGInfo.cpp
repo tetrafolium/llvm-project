@@ -21,22 +21,22 @@ SDValue BPFSelectionDAGInfo::EmitTargetCodeForMemcpy(
     SelectionDAG &DAG, const SDLoc &dl, SDValue Chain, SDValue Dst, SDValue Src,
     SDValue Size, Align Alignment, bool isVolatile, bool AlwaysInline,
     MachinePointerInfo DstPtrInfo, MachinePointerInfo SrcPtrInfo) const {
-  // Requires the copy size to be a constant.
-  ConstantSDNode *ConstantSize = dyn_cast<ConstantSDNode>(Size);
-  if (!ConstantSize)
-    return SDValue();
+    // Requires the copy size to be a constant.
+    ConstantSDNode *ConstantSize = dyn_cast<ConstantSDNode>(Size);
+    if (!ConstantSize)
+        return SDValue();
 
-  unsigned CopyLen = ConstantSize->getZExtValue();
-  unsigned StoresNumEstimate = alignTo(CopyLen, Alignment) >> Log2(Alignment);
-  // Impose the same copy length limit as MaxStoresPerMemcpy.
-  if (StoresNumEstimate > getCommonMaxStoresPerMemFunc())
-    return SDValue();
+    unsigned CopyLen = ConstantSize->getZExtValue();
+    unsigned StoresNumEstimate = alignTo(CopyLen, Alignment) >> Log2(Alignment);
+    // Impose the same copy length limit as MaxStoresPerMemcpy.
+    if (StoresNumEstimate > getCommonMaxStoresPerMemFunc())
+        return SDValue();
 
-  SDVTList VTs = DAG.getVTList(MVT::Other, MVT::Glue);
+    SDVTList VTs = DAG.getVTList(MVT::Other, MVT::Glue);
 
-  Dst = DAG.getNode(BPFISD::MEMCPY, dl, VTs, Chain, Dst, Src,
-                    DAG.getConstant(CopyLen, dl, MVT::i64),
-                    DAG.getConstant(Alignment.value(), dl, MVT::i64));
+    Dst = DAG.getNode(BPFISD::MEMCPY, dl, VTs, Chain, Dst, Src,
+                      DAG.getConstant(CopyLen, dl, MVT::i64),
+                      DAG.getConstant(Alignment.value(), dl, MVT::i64));
 
-  return Dst.getValue(0);
+    return Dst.getValue(0);
 }

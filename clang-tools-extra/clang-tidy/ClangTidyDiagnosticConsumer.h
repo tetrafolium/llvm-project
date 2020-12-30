@@ -38,30 +38,30 @@ namespace tidy {
 ///
 /// FIXME: Make Diagnostics flexible enough to support this directly.
 struct ClangTidyError : tooling::Diagnostic {
-  ClangTidyError(StringRef CheckName, Level DiagLevel, StringRef BuildDirectory,
-                 bool IsWarningAsError);
+    ClangTidyError(StringRef CheckName, Level DiagLevel, StringRef BuildDirectory,
+                   bool IsWarningAsError);
 
-  bool IsWarningAsError;
-  std::vector<std::string> EnabledDiagnosticAliases;
+    bool IsWarningAsError;
+    std::vector<std::string> EnabledDiagnosticAliases;
 };
 
 /// Contains displayed and ignored diagnostic counters for a ClangTidy
 /// run.
 struct ClangTidyStats {
-  ClangTidyStats()
-      : ErrorsDisplayed(0), ErrorsIgnoredCheckFilter(0), ErrorsIgnoredNOLINT(0),
-        ErrorsIgnoredNonUserCode(0), ErrorsIgnoredLineFilter(0) {}
+    ClangTidyStats()
+        : ErrorsDisplayed(0), ErrorsIgnoredCheckFilter(0), ErrorsIgnoredNOLINT(0),
+          ErrorsIgnoredNonUserCode(0), ErrorsIgnoredLineFilter(0) {}
 
-  unsigned ErrorsDisplayed;
-  unsigned ErrorsIgnoredCheckFilter;
-  unsigned ErrorsIgnoredNOLINT;
-  unsigned ErrorsIgnoredNonUserCode;
-  unsigned ErrorsIgnoredLineFilter;
+    unsigned ErrorsDisplayed;
+    unsigned ErrorsIgnoredCheckFilter;
+    unsigned ErrorsIgnoredNOLINT;
+    unsigned ErrorsIgnoredNonUserCode;
+    unsigned ErrorsIgnoredLineFilter;
 
-  unsigned errorsIgnored() const {
-    return ErrorsIgnoredNOLINT + ErrorsIgnoredCheckFilter +
-           ErrorsIgnoredNonUserCode + ErrorsIgnoredLineFilter;
-  }
+    unsigned errorsIgnored() const {
+        return ErrorsIgnoredNOLINT + ErrorsIgnoredCheckFilter +
+               ErrorsIgnoredNonUserCode + ErrorsIgnoredLineFilter;
+    }
 };
 
 /// Every \c ClangTidyCheck reports errors through a \c DiagnosticsEngine
@@ -75,141 +75,149 @@ struct ClangTidyStats {
 /// \endcode
 class ClangTidyContext {
 public:
-  /// Initializes \c ClangTidyContext instance.
-  ClangTidyContext(std::unique_ptr<ClangTidyOptionsProvider> OptionsProvider,
-                   bool AllowEnablingAnalyzerAlphaCheckers = false);
-  /// Sets the DiagnosticsEngine that diag() will emit diagnostics to.
-  // FIXME: this is required initialization, and should be a constructor param.
-  // Fix the context -> diag engine -> consumer -> context initialization cycle.
-  void setDiagnosticsEngine(DiagnosticsEngine *DiagEngine) {
-    this->DiagEngine = DiagEngine;
-  }
+    /// Initializes \c ClangTidyContext instance.
+    ClangTidyContext(std::unique_ptr<ClangTidyOptionsProvider> OptionsProvider,
+                     bool AllowEnablingAnalyzerAlphaCheckers = false);
+    /// Sets the DiagnosticsEngine that diag() will emit diagnostics to.
+    // FIXME: this is required initialization, and should be a constructor param.
+    // Fix the context -> diag engine -> consumer -> context initialization cycle.
+    void setDiagnosticsEngine(DiagnosticsEngine *DiagEngine) {
+        this->DiagEngine = DiagEngine;
+    }
 
-  ~ClangTidyContext();
+    ~ClangTidyContext();
 
-  /// Report any errors detected using this method.
-  ///
-  /// This is still under heavy development and will likely change towards using
-  /// tablegen'd diagnostic IDs.
-  /// FIXME: Figure out a way to manage ID spaces.
-  DiagnosticBuilder diag(StringRef CheckName, SourceLocation Loc,
-                         StringRef Message,
-                         DiagnosticIDs::Level Level = DiagnosticIDs::Warning);
+    /// Report any errors detected using this method.
+    ///
+    /// This is still under heavy development and will likely change towards using
+    /// tablegen'd diagnostic IDs.
+    /// FIXME: Figure out a way to manage ID spaces.
+    DiagnosticBuilder diag(StringRef CheckName, SourceLocation Loc,
+                           StringRef Message,
+                           DiagnosticIDs::Level Level = DiagnosticIDs::Warning);
 
-  DiagnosticBuilder diag(StringRef CheckName, StringRef Message,
-                         DiagnosticIDs::Level Level = DiagnosticIDs::Warning);
+    DiagnosticBuilder diag(StringRef CheckName, StringRef Message,
+                           DiagnosticIDs::Level Level = DiagnosticIDs::Warning);
 
-  /// Report any errors to do with reading the configuration using this method.
-  DiagnosticBuilder
-  configurationDiag(StringRef Message,
-                    DiagnosticIDs::Level Level = DiagnosticIDs::Warning);
+    /// Report any errors to do with reading the configuration using this method.
+    DiagnosticBuilder
+    configurationDiag(StringRef Message,
+                      DiagnosticIDs::Level Level = DiagnosticIDs::Warning);
 
-  /// Sets the \c SourceManager of the used \c DiagnosticsEngine.
-  ///
-  /// This is called from the \c ClangTidyCheck base class.
-  void setSourceManager(SourceManager *SourceMgr);
+    /// Sets the \c SourceManager of the used \c DiagnosticsEngine.
+    ///
+    /// This is called from the \c ClangTidyCheck base class.
+    void setSourceManager(SourceManager *SourceMgr);
 
-  /// Should be called when starting to process new translation unit.
-  void setCurrentFile(StringRef File);
+    /// Should be called when starting to process new translation unit.
+    void setCurrentFile(StringRef File);
 
-  /// Returns the main file name of the current translation unit.
-  StringRef getCurrentFile() const { return CurrentFile; }
+    /// Returns the main file name of the current translation unit.
+    StringRef getCurrentFile() const {
+        return CurrentFile;
+    }
 
-  /// Sets ASTContext for the current translation unit.
-  void setASTContext(ASTContext *Context);
+    /// Sets ASTContext for the current translation unit.
+    void setASTContext(ASTContext *Context);
 
-  /// Gets the language options from the AST context.
-  const LangOptions &getLangOpts() const { return LangOpts; }
+    /// Gets the language options from the AST context.
+    const LangOptions &getLangOpts() const {
+        return LangOpts;
+    }
 
-  /// Returns the name of the clang-tidy check which produced this
-  /// diagnostic ID.
-  std::string getCheckName(unsigned DiagnosticID) const;
+    /// Returns the name of the clang-tidy check which produced this
+    /// diagnostic ID.
+    std::string getCheckName(unsigned DiagnosticID) const;
 
-  /// Returns \c true if the check is enabled for the \c CurrentFile.
-  ///
-  /// The \c CurrentFile can be changed using \c setCurrentFile.
-  bool isCheckEnabled(StringRef CheckName) const;
+    /// Returns \c true if the check is enabled for the \c CurrentFile.
+    ///
+    /// The \c CurrentFile can be changed using \c setCurrentFile.
+    bool isCheckEnabled(StringRef CheckName) const;
 
-  /// Returns \c true if the check should be upgraded to error for the
-  /// \c CurrentFile.
-  bool treatAsError(StringRef CheckName) const;
+    /// Returns \c true if the check should be upgraded to error for the
+    /// \c CurrentFile.
+    bool treatAsError(StringRef CheckName) const;
 
-  /// Returns global options.
-  const ClangTidyGlobalOptions &getGlobalOptions() const;
+    /// Returns global options.
+    const ClangTidyGlobalOptions &getGlobalOptions() const;
 
-  /// Returns options for \c CurrentFile.
-  ///
-  /// The \c CurrentFile can be changed using \c setCurrentFile.
-  const ClangTidyOptions &getOptions() const;
+    /// Returns options for \c CurrentFile.
+    ///
+    /// The \c CurrentFile can be changed using \c setCurrentFile.
+    const ClangTidyOptions &getOptions() const;
 
-  /// Returns options for \c File. Does not change or depend on
-  /// \c CurrentFile.
-  ClangTidyOptions getOptionsForFile(StringRef File) const;
+    /// Returns options for \c File. Does not change or depend on
+    /// \c CurrentFile.
+    ClangTidyOptions getOptionsForFile(StringRef File) const;
 
-  /// Returns \c ClangTidyStats containing issued and ignored diagnostic
-  /// counters.
-  const ClangTidyStats &getStats() const { return Stats; }
+    /// Returns \c ClangTidyStats containing issued and ignored diagnostic
+    /// counters.
+    const ClangTidyStats &getStats() const {
+        return Stats;
+    }
 
-  /// Control profile collection in clang-tidy.
-  void setEnableProfiling(bool Profile);
-  bool getEnableProfiling() const { return Profile; }
+    /// Control profile collection in clang-tidy.
+    void setEnableProfiling(bool Profile);
+    bool getEnableProfiling() const {
+        return Profile;
+    }
 
-  /// Control storage of profile date.
-  void setProfileStoragePrefix(StringRef ProfilePrefix);
-  llvm::Optional<ClangTidyProfiling::StorageParams>
-  getProfileStorageParams() const;
+    /// Control storage of profile date.
+    void setProfileStoragePrefix(StringRef ProfilePrefix);
+    llvm::Optional<ClangTidyProfiling::StorageParams>
+    getProfileStorageParams() const;
 
-  /// Should be called when starting to process new translation unit.
-  void setCurrentBuildDirectory(StringRef BuildDirectory) {
-    CurrentBuildDirectory = std::string(BuildDirectory);
-  }
+    /// Should be called when starting to process new translation unit.
+    void setCurrentBuildDirectory(StringRef BuildDirectory) {
+        CurrentBuildDirectory = std::string(BuildDirectory);
+    }
 
-  /// Returns build directory of the current translation unit.
-  const std::string &getCurrentBuildDirectory() {
-    return CurrentBuildDirectory;
-  }
+    /// Returns build directory of the current translation unit.
+    const std::string &getCurrentBuildDirectory() {
+        return CurrentBuildDirectory;
+    }
 
-  /// If the experimental alpha checkers from the static analyzer can be
-  /// enabled.
-  bool canEnableAnalyzerAlphaCheckers() const {
-    return AllowEnablingAnalyzerAlphaCheckers;
-  }
+    /// If the experimental alpha checkers from the static analyzer can be
+    /// enabled.
+    bool canEnableAnalyzerAlphaCheckers() const {
+        return AllowEnablingAnalyzerAlphaCheckers;
+    }
 
-  using DiagLevelAndFormatString = std::pair<DiagnosticIDs::Level, std::string>;
-  DiagLevelAndFormatString getDiagLevelAndFormatString(unsigned DiagnosticID,
-                                                       SourceLocation Loc) {
-    return DiagLevelAndFormatString(
-        static_cast<DiagnosticIDs::Level>(
-            DiagEngine->getDiagnosticLevel(DiagnosticID, Loc)),
-        std::string(
-            DiagEngine->getDiagnosticIDs()->getDescription(DiagnosticID)));
-  }
+    using DiagLevelAndFormatString = std::pair<DiagnosticIDs::Level, std::string>;
+    DiagLevelAndFormatString getDiagLevelAndFormatString(unsigned DiagnosticID,
+            SourceLocation Loc) {
+        return DiagLevelAndFormatString(
+                   static_cast<DiagnosticIDs::Level>(
+                       DiagEngine->getDiagnosticLevel(DiagnosticID, Loc)),
+                   std::string(
+                       DiagEngine->getDiagnosticIDs()->getDescription(DiagnosticID)));
+    }
 
 private:
-  // Writes to Stats.
-  friend class ClangTidyDiagnosticConsumer;
+    // Writes to Stats.
+    friend class ClangTidyDiagnosticConsumer;
 
-  DiagnosticsEngine *DiagEngine;
-  std::unique_ptr<ClangTidyOptionsProvider> OptionsProvider;
+    DiagnosticsEngine *DiagEngine;
+    std::unique_ptr<ClangTidyOptionsProvider> OptionsProvider;
 
-  std::string CurrentFile;
-  ClangTidyOptions CurrentOptions;
-  class CachedGlobList;
-  std::unique_ptr<CachedGlobList> CheckFilter;
-  std::unique_ptr<CachedGlobList> WarningAsErrorFilter;
+    std::string CurrentFile;
+    ClangTidyOptions CurrentOptions;
+    class CachedGlobList;
+    std::unique_ptr<CachedGlobList> CheckFilter;
+    std::unique_ptr<CachedGlobList> WarningAsErrorFilter;
 
-  LangOptions LangOpts;
+    LangOptions LangOpts;
 
-  ClangTidyStats Stats;
+    ClangTidyStats Stats;
 
-  std::string CurrentBuildDirectory;
+    std::string CurrentBuildDirectory;
 
-  llvm::DenseMap<unsigned, std::string> CheckNamesByDiagnosticID;
+    llvm::DenseMap<unsigned, std::string> CheckNamesByDiagnosticID;
 
-  bool Profile;
-  std::string ProfilePrefix;
+    bool Profile;
+    std::string ProfilePrefix;
 
-  bool AllowEnablingAnalyzerAlphaCheckers;
+    bool AllowEnablingAnalyzerAlphaCheckers;
 };
 
 /// Check whether a given diagnostic should be suppressed due to the presence
@@ -233,43 +241,43 @@ bool shouldSuppressDiagnostic(DiagnosticsEngine::Level DiagLevel,
 // implementation file.
 class ClangTidyDiagnosticConsumer : public DiagnosticConsumer {
 public:
-  ClangTidyDiagnosticConsumer(ClangTidyContext &Ctx,
-                              DiagnosticsEngine *ExternalDiagEngine = nullptr,
-                              bool RemoveIncompatibleErrors = true);
+    ClangTidyDiagnosticConsumer(ClangTidyContext &Ctx,
+                                DiagnosticsEngine *ExternalDiagEngine = nullptr,
+                                bool RemoveIncompatibleErrors = true);
 
-  // FIXME: The concept of converting between FixItHints and Replacements is
-  // more generic and should be pulled out into a more useful Diagnostics
-  // library.
-  void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
-                        const Diagnostic &Info) override;
+    // FIXME: The concept of converting between FixItHints and Replacements is
+    // more generic and should be pulled out into a more useful Diagnostics
+    // library.
+    void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
+                          const Diagnostic &Info) override;
 
-  // Retrieve the diagnostics that were captured.
-  std::vector<ClangTidyError> take();
+    // Retrieve the diagnostics that were captured.
+    std::vector<ClangTidyError> take();
 
 private:
-  void finalizeLastError();
-  void removeIncompatibleErrors();
-  void removeDuplicatedDiagnosticsOfAliasCheckers();
+    void finalizeLastError();
+    void removeIncompatibleErrors();
+    void removeDuplicatedDiagnosticsOfAliasCheckers();
 
-  /// Returns the \c HeaderFilter constructed for the options set in the
-  /// context.
-  llvm::Regex *getHeaderFilter();
+    /// Returns the \c HeaderFilter constructed for the options set in the
+    /// context.
+    llvm::Regex *getHeaderFilter();
 
-  /// Updates \c LastErrorRelatesToUserCode and LastErrorPassesLineFilter
-  /// according to the diagnostic \p Location.
-  void checkFilters(SourceLocation Location, const SourceManager &Sources);
-  bool passesLineFilter(StringRef FileName, unsigned LineNumber) const;
+    /// Updates \c LastErrorRelatesToUserCode and LastErrorPassesLineFilter
+    /// according to the diagnostic \p Location.
+    void checkFilters(SourceLocation Location, const SourceManager &Sources);
+    bool passesLineFilter(StringRef FileName, unsigned LineNumber) const;
 
-  void forwardDiagnostic(const Diagnostic &Info);
+    void forwardDiagnostic(const Diagnostic &Info);
 
-  ClangTidyContext &Context;
-  DiagnosticsEngine *ExternalDiagEngine;
-  bool RemoveIncompatibleErrors;
-  std::vector<ClangTidyError> Errors;
-  std::unique_ptr<llvm::Regex> HeaderFilter;
-  bool LastErrorRelatesToUserCode;
-  bool LastErrorPassesLineFilter;
-  bool LastErrorWasIgnored;
+    ClangTidyContext &Context;
+    DiagnosticsEngine *ExternalDiagEngine;
+    bool RemoveIncompatibleErrors;
+    std::vector<ClangTidyError> Errors;
+    std::unique_ptr<llvm::Regex> HeaderFilter;
+    bool LastErrorRelatesToUserCode;
+    bool LastErrorPassesLineFilter;
+    bool LastErrorWasIgnored;
 };
 
 } // end namespace tidy

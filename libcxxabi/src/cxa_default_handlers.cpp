@@ -41,8 +41,8 @@ static void demangling_terminate_handler()
             {
                 void* thrown_object =
                     __getExceptionClass(unwind_exception) == kOurDependentExceptionClass ?
-                        ((__cxa_dependent_exception*)exception_header)->primaryException :
-                        exception_header + 1;
+                    ((__cxa_dependent_exception*)exception_header)->primaryException :
+                    exception_header + 1;
                 const __shim_type_info* thrown_type =
                     static_cast<const __shim_type_info*>(exception_header->exceptionType);
                 // Try to get demangled name of thrown_type
@@ -65,7 +65,7 @@ static void demangling_terminate_handler()
                 else
                     // Else just note that we're terminating with an exception
                     abort_message("terminating with %s exception of type %s",
-                                   cause, name);
+                                  cause, name);
             }
             else
                 // Else we're terminating with a foreign exception

@@ -23,10 +23,10 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/google-readability-avoid-underscore-in-googletest-name.html
 class AvoidUnderscoreInGoogletestNameCheck : public ClangTidyCheck {
 public:
-  using ClangTidyCheck::ClangTidyCheck;
+    using ClangTidyCheck::ClangTidyCheck;
 
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
 };
 
 } // namespace readability

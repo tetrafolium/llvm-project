@@ -27,7 +27,7 @@ struct __has_element_type : false_type {};
 
 template <class _Tp>
 struct __has_element_type<_Tp,
-              typename __void_t<typename _Tp::element_type>::type> : true_type {};
+           typename __void_t<typename _Tp::element_type>::type> : true_type {};
 
 template <class _Ptr, bool = __has_element_type<_Ptr>::value>
 struct __pointer_traits_element_type;
@@ -55,7 +55,7 @@ struct __has_difference_type : false_type {};
 
 template <class _Tp>
 struct __has_difference_type<_Tp,
-            typename __void_t<typename _Tp::difference_type>::type> : true_type {};
+           typename __void_t<typename _Tp::difference_type>::type> : true_type {};
 
 template <class _Ptr, bool = __has_difference_type<_Ptr>::value>
 struct __pointer_traits_difference_type
@@ -73,7 +73,10 @@ template <class _Tp, class _Up>
 struct __has_rebind
 {
 private:
-    struct __two {char __lx; char __lxx;};
+    struct __two {
+        char __lx;
+        char __lxx;
+    };
     template <class _Xp> static __two __test(...);
     _LIBCPP_SUPPRESS_DEPRECATED_PUSH
     template <class _Xp> static char __test(typename _Xp::template rebind<_Up>* = 0);
@@ -119,7 +122,9 @@ struct _LIBCPP_TEMPLATE_VIS pointer_traits
     template <class _Up> using rebind = typename __pointer_traits_rebind<pointer, _Up>::type;
 #else
     template <class _Up> struct rebind
-        {typedef typename __pointer_traits_rebind<pointer, _Up>::type other;};
+    {
+        typedef typename __pointer_traits_rebind<pointer, _Up>::type other;
+    };
 #endif  // _LIBCPP_CXX03_LANG
 
 private:
@@ -127,8 +132,10 @@ private:
 public:
     _LIBCPP_INLINE_VISIBILITY
     static pointer pointer_to(typename conditional<is_void<element_type>::value,
-                                           __nat, element_type>::type& __r)
-        {return pointer::pointer_to(__r);}
+                              __nat, element_type>::type& __r)
+    {
+        return pointer::pointer_to(__r);
+    }
 };
 
 template <class _Tp>
@@ -141,7 +148,9 @@ struct _LIBCPP_TEMPLATE_VIS pointer_traits<_Tp*>
 #ifndef _LIBCPP_CXX03_LANG
     template <class _Up> using rebind = _Up*;
 #else
-    template <class _Up> struct rebind {typedef _Up* other;};
+    template <class _Up> struct rebind {
+        typedef _Up* other;
+    };
 #endif
 
 private:
@@ -149,8 +158,8 @@ private:
 public:
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static pointer pointer_to(typename conditional<is_void<element_type>::value,
-                                      __nat, element_type>::type& __r) _NOEXCEPT
-        {return _VSTD::addressof(__r);}
+                              __nat, element_type>::type& __r) _NOEXCEPT
+    {return _VSTD::addressof(__r);}
 };
 
 template <class _From, class _To>

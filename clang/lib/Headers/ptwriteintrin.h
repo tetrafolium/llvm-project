@@ -20,14 +20,14 @@
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _ptwrite32(unsigned int __value) {
-  __builtin_ia32_ptwrite32(__value);
+    __builtin_ia32_ptwrite32(__value);
 }
 
 #ifdef __x86_64__
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _ptwrite64(unsigned long long __value) {
-  __builtin_ia32_ptwrite64(__value);
+    __builtin_ia32_ptwrite64(__value);
 }
 
 #endif /* __x86_64__ */

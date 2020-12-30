@@ -25,120 +25,123 @@ using namespace iterator;
 namespace {
 
 class DebugIteratorModeling
-  : public Checker<eval::Call> {
+    : public Checker<eval::Call> {
 
-  std::unique_ptr<BugType> DebugMsgBugType;
+    std::unique_ptr<BugType> DebugMsgBugType;
 
-  template <typename Getter>
-  void analyzerIteratorDataField(const CallExpr *CE, CheckerContext &C,
-                                 Getter get, SVal Default) const;
-  void analyzerIteratorPosition(const CallExpr *CE, CheckerContext &C) const;
-  void analyzerIteratorContainer(const CallExpr *CE, CheckerContext &C) const;
-  void analyzerIteratorValidity(const CallExpr *CE, CheckerContext &C) const;
-  ExplodedNode *reportDebugMsg(llvm::StringRef Msg, CheckerContext &C) const;
+    template <typename Getter>
+    void analyzerIteratorDataField(const CallExpr *CE, CheckerContext &C,
+                                   Getter get, SVal Default) const;
+    void analyzerIteratorPosition(const CallExpr *CE, CheckerContext &C) const;
+    void analyzerIteratorContainer(const CallExpr *CE, CheckerContext &C) const;
+    void analyzerIteratorValidity(const CallExpr *CE, CheckerContext &C) const;
+    ExplodedNode *reportDebugMsg(llvm::StringRef Msg, CheckerContext &C) const;
 
-  typedef void (DebugIteratorModeling::*FnCheck)(const CallExpr *,
-                                                 CheckerContext &) const;
+    typedef void (DebugIteratorModeling::*FnCheck)(const CallExpr *,
+            CheckerContext &) const;
 
-  CallDescriptionMap<FnCheck> Callbacks = {
-    {{0, "clang_analyzer_iterator_position", 1},
-     &DebugIteratorModeling::analyzerIteratorPosition},
-    {{0, "clang_analyzer_iterator_container", 1},
-     &DebugIteratorModeling::analyzerIteratorContainer},
-    {{0, "clang_analyzer_iterator_validity", 1},
-     &DebugIteratorModeling::analyzerIteratorValidity},
-  };
+    CallDescriptionMap<FnCheck> Callbacks = {
+        {   {0, "clang_analyzer_iterator_position", 1},
+            &DebugIteratorModeling::analyzerIteratorPosition
+        },
+        {   {0, "clang_analyzer_iterator_container", 1},
+            &DebugIteratorModeling::analyzerIteratorContainer
+        },
+        {   {0, "clang_analyzer_iterator_validity", 1},
+            &DebugIteratorModeling::analyzerIteratorValidity
+        },
+    };
 
 public:
-  DebugIteratorModeling();
+    DebugIteratorModeling();
 
-  bool evalCall(const CallEvent &Call, CheckerContext &C) const;
+    bool evalCall(const CallEvent &Call, CheckerContext &C) const;
 };
 
 } //namespace
 
 DebugIteratorModeling::DebugIteratorModeling() {
-  DebugMsgBugType.reset(
-      new BugType(this, "Checking analyzer assumptions", "debug",
-                  /*SuppressOnSink=*/true));
+    DebugMsgBugType.reset(
+        new BugType(this, "Checking analyzer assumptions", "debug",
+                    /*SuppressOnSink=*/true));
 }
 
 bool DebugIteratorModeling::evalCall(const CallEvent &Call,
                                      CheckerContext &C) const {
-  const auto *CE = dyn_cast_or_null<CallExpr>(Call.getOriginExpr());
-  if (!CE)
-    return false;
+    const auto *CE = dyn_cast_or_null<CallExpr>(Call.getOriginExpr());
+    if (!CE)
+        return false;
 
-  const FnCheck *Handler = Callbacks.lookup(Call);
-  if (!Handler)
-    return false;
+    const FnCheck *Handler = Callbacks.lookup(Call);
+    if (!Handler)
+        return false;
 
-  (this->**Handler)(CE, C);
-  return true;
+    (this->**Handler)(CE, C);
+    return true;
 }
 
 template <typename Getter>
 void DebugIteratorModeling::analyzerIteratorDataField(const CallExpr *CE,
-                                                      CheckerContext &C,
-                                                      Getter get,
-                                                      SVal Default) const {
-  if (CE->getNumArgs() == 0) {
-    reportDebugMsg("Missing iterator argument", C);
-    return;
-  }
+        CheckerContext &C,
+        Getter get,
+        SVal Default) const {
+    if (CE->getNumArgs() == 0) {
+        reportDebugMsg("Missing iterator argument", C);
+        return;
+    }
 
-  auto State = C.getState();
-  SVal V = C.getSVal(CE->getArg(0));
-  const auto *Pos = getIteratorPosition(State, V);
-  if (Pos) {
-    State = State->BindExpr(CE, C.getLocationContext(), get(Pos));
-  } else {
-    State = State->BindExpr(CE, C.getLocationContext(), Default);
-  }
-  C.addTransition(State);
+    auto State = C.getState();
+    SVal V = C.getSVal(CE->getArg(0));
+    const auto *Pos = getIteratorPosition(State, V);
+    if (Pos) {
+        State = State->BindExpr(CE, C.getLocationContext(), get(Pos));
+    } else {
+        State = State->BindExpr(CE, C.getLocationContext(), Default);
+    }
+    C.addTransition(State);
 }
 
 void DebugIteratorModeling::analyzerIteratorPosition(const CallExpr *CE,
-                                                     CheckerContext &C) const {
-  auto &BVF = C.getSValBuilder().getBasicValueFactory();
-  analyzerIteratorDataField(CE, C, [](const IteratorPosition *P) {
-      return nonloc::SymbolVal(P->getOffset());
+        CheckerContext &C) const {
+    auto &BVF = C.getSValBuilder().getBasicValueFactory();
+    analyzerIteratorDataField(CE, C, [](const IteratorPosition *P) {
+        return nonloc::SymbolVal(P->getOffset());
     }, nonloc::ConcreteInt(BVF.getValue(llvm::APSInt::get(0))));
 }
 
 void DebugIteratorModeling::analyzerIteratorContainer(const CallExpr *CE,
-                                                      CheckerContext &C) const {
-  auto &BVF = C.getSValBuilder().getBasicValueFactory();
-  analyzerIteratorDataField(CE, C, [](const IteratorPosition *P) {
-      return loc::MemRegionVal(P->getContainer());
+        CheckerContext &C) const {
+    auto &BVF = C.getSValBuilder().getBasicValueFactory();
+    analyzerIteratorDataField(CE, C, [](const IteratorPosition *P) {
+        return loc::MemRegionVal(P->getContainer());
     }, loc::ConcreteInt(BVF.getValue(llvm::APSInt::get(0))));
 }
 
 void DebugIteratorModeling::analyzerIteratorValidity(const CallExpr *CE,
-                                                     CheckerContext &C) const {
-  auto &BVF = C.getSValBuilder().getBasicValueFactory();
-  analyzerIteratorDataField(CE, C, [&BVF](const IteratorPosition *P) {
-      return
-        nonloc::ConcreteInt(BVF.getValue(llvm::APSInt::get((P->isValid()))));
+        CheckerContext &C) const {
+    auto &BVF = C.getSValBuilder().getBasicValueFactory();
+    analyzerIteratorDataField(CE, C, [&BVF](const IteratorPosition *P) {
+        return
+            nonloc::ConcreteInt(BVF.getValue(llvm::APSInt::get((P->isValid()))));
     }, nonloc::ConcreteInt(BVF.getValue(llvm::APSInt::get(0))));
 }
 
 ExplodedNode *DebugIteratorModeling::reportDebugMsg(llvm::StringRef Msg,
-                                                    CheckerContext &C) const {
-  ExplodedNode *N = C.generateNonFatalErrorNode();
-  if (!N)
-    return nullptr;
+        CheckerContext &C) const {
+    ExplodedNode *N = C.generateNonFatalErrorNode();
+    if (!N)
+        return nullptr;
 
-  auto &BR = C.getBugReporter();
-  BR.emitReport(std::make_unique<PathSensitiveBugReport>(*DebugMsgBugType,
-                                                         Msg, N));
-  return N;
+    auto &BR = C.getBugReporter();
+    BR.emitReport(std::make_unique<PathSensitiveBugReport>(*DebugMsgBugType,
+                  Msg, N));
+    return N;
 }
 
 void ento::registerDebugIteratorModeling(CheckerManager &mgr) {
-  mgr.registerChecker<DebugIteratorModeling>();
+    mgr.registerChecker<DebugIteratorModeling>();
 }
 
 bool ento::shouldRegisterDebugIteratorModeling(const CheckerManager &mgr) {
-  return true;
+    return true;
 }

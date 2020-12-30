@@ -28,18 +28,18 @@ class SCEV;
 
 struct AlignmentFromAssumptionsPass
     : public PassInfoMixin<AlignmentFromAssumptionsPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-  // Glue for old PM.
-  bool runImpl(Function &F, AssumptionCache &AC, ScalarEvolution *SE_,
-               DominatorTree *DT_);
+    // Glue for old PM.
+    bool runImpl(Function &F, AssumptionCache &AC, ScalarEvolution *SE_,
+                 DominatorTree *DT_);
 
-  ScalarEvolution *SE = nullptr;
-  DominatorTree *DT = nullptr;
+    ScalarEvolution *SE = nullptr;
+    DominatorTree *DT = nullptr;
 
-  bool extractAlignmentInfo(CallInst *I, unsigned Idx, Value *&AAPtr,
-                            const SCEV *&AlignSCEV, const SCEV *&OffSCEV);
-  bool processAssumption(CallInst *I, unsigned Idx);
+    bool extractAlignmentInfo(CallInst *I, unsigned Idx, Value *&AAPtr,
+                              const SCEV *&AlignSCEV, const SCEV *&OffSCEV);
+    bool processAssumption(CallInst *I, unsigned Idx);
 };
 }
 

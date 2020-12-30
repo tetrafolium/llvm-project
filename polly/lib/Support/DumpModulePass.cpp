@@ -27,54 +27,54 @@ namespace {
 
 class DumpModule : public ModulePass {
 private:
-  DumpModule(const DumpModule &) = delete;
-  const DumpModule &operator=(const DumpModule &) = delete;
+    DumpModule(const DumpModule &) = delete;
+    const DumpModule &operator=(const DumpModule &) = delete;
 
-  std::string Filename;
-  bool IsSuffix;
+    std::string Filename;
+    bool IsSuffix;
 
 public:
-  static char ID;
+    static char ID;
 
-  /// This constructor is used e.g. if using opt -polly-dump-module.
-  ///
-  /// Provide a default suffix to not overwrite the original file.
-  explicit DumpModule() : ModulePass(ID), Filename("-dump"), IsSuffix(true) {}
+    /// This constructor is used e.g. if using opt -polly-dump-module.
+    ///
+    /// Provide a default suffix to not overwrite the original file.
+    explicit DumpModule() : ModulePass(ID), Filename("-dump"), IsSuffix(true) {}
 
-  explicit DumpModule(llvm::StringRef Filename, bool IsSuffix)
-      : ModulePass(ID), Filename(Filename), IsSuffix(IsSuffix) {}
+    explicit DumpModule(llvm::StringRef Filename, bool IsSuffix)
+        : ModulePass(ID), Filename(Filename), IsSuffix(IsSuffix) {}
 
-  /// @name ModulePass interface
-  //@{
-  virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const override {
-    AU.setPreservesAll();
-  }
-
-  virtual bool runOnModule(llvm::Module &M) override {
-    std::string Dumpfile;
-    if (IsSuffix) {
-      auto ModuleName = M.getName();
-      auto Stem = sys::path::stem(ModuleName);
-      Dumpfile = (Twine(Stem) + Filename + ".ll").str();
-    } else {
-      Dumpfile = Filename;
-    }
-    LLVM_DEBUG(dbgs() << "Dumping module to " << Dumpfile << '\n');
-
-    std::unique_ptr<ToolOutputFile> Out;
-    std::error_code EC;
-    Out.reset(new ToolOutputFile(Dumpfile, EC, sys::fs::OF_None));
-    if (EC) {
-      errs() << EC.message() << '\n';
-      return false;
+    /// @name ModulePass interface
+    //@{
+    virtual void getAnalysisUsage(llvm::AnalysisUsage &AU) const override {
+        AU.setPreservesAll();
     }
 
-    M.print(Out->os(), nullptr);
-    Out->keep();
+    virtual bool runOnModule(llvm::Module &M) override {
+        std::string Dumpfile;
+        if (IsSuffix) {
+            auto ModuleName = M.getName();
+            auto Stem = sys::path::stem(ModuleName);
+            Dumpfile = (Twine(Stem) + Filename + ".ll").str();
+        } else {
+            Dumpfile = Filename;
+        }
+        LLVM_DEBUG(dbgs() << "Dumping module to " << Dumpfile << '\n');
 
-    return false;
-  }
-  //@}
+        std::unique_ptr<ToolOutputFile> Out;
+        std::error_code EC;
+        Out.reset(new ToolOutputFile(Dumpfile, EC, sys::fs::OF_None));
+        if (EC) {
+            errs() << EC.message() << '\n';
+            return false;
+        }
+
+        M.print(Out->os(), nullptr);
+        Out->keep();
+
+        return false;
+    }
+    //@}
 };
 
 char DumpModule::ID;
@@ -82,7 +82,7 @@ char DumpModule::ID;
 
 ModulePass *polly::createDumpModulePass(llvm::StringRef Filename,
                                         bool IsSuffix) {
-  return new DumpModule(Filename, IsSuffix);
+    return new DumpModule(Filename, IsSuffix);
 }
 
 INITIALIZE_PASS_BEGIN(DumpModule, "polly-dump-module", "Polly - Dump Module",

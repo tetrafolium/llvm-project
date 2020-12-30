@@ -18,54 +18,54 @@ namespace tidy {
 namespace bugprone {
 
 void InaccurateEraseCheck::registerMatchers(MatchFinder *Finder) {
-  const auto EndCall =
-      callExpr(
-          callee(functionDecl(hasAnyName("remove", "remove_if", "unique"))),
-          hasArgument(
-              1,
-              anyOf(cxxConstructExpr(has(ignoringImplicit(
+    const auto EndCall =
+        callExpr(
+            callee(functionDecl(hasAnyName("remove", "remove_if", "unique"))),
+            hasArgument(
+                1,
+                anyOf(cxxConstructExpr(has(ignoringImplicit(
                         cxxMemberCallExpr(callee(cxxMethodDecl(hasName("end"))))
-                            .bind("end")))),
-                    anything())))
-          .bind("alg");
+                        .bind("end")))),
+                      anything())))
+        .bind("alg");
 
-  const auto DeclInStd = type(hasUnqualifiedDesugaredType(
-      tagType(hasDeclaration(decl(isInStdNamespace())))));
-  Finder->addMatcher(
-      traverse(
-          TK_AsIs,
-          cxxMemberCallExpr(
-              on(anyOf(hasType(DeclInStd), hasType(pointsTo(DeclInStd)))),
-              callee(cxxMethodDecl(hasName("erase"))), argumentCountIs(1),
-              hasArgument(0, has(ignoringImplicit(anyOf(
-                                 EndCall, has(ignoringImplicit(EndCall)))))),
-              unless(isInTemplateInstantiation()))
-              .bind("erase")),
-      this);
+    const auto DeclInStd = type(hasUnqualifiedDesugaredType(
+                                    tagType(hasDeclaration(decl(isInStdNamespace())))));
+    Finder->addMatcher(
+        traverse(
+            TK_AsIs,
+            cxxMemberCallExpr(
+                on(anyOf(hasType(DeclInStd), hasType(pointsTo(DeclInStd)))),
+                callee(cxxMethodDecl(hasName("erase"))), argumentCountIs(1),
+                hasArgument(0, has(ignoringImplicit(anyOf(
+                                       EndCall, has(ignoringImplicit(EndCall)))))),
+                unless(isInTemplateInstantiation()))
+            .bind("erase")),
+        this);
 }
 
 void InaccurateEraseCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *MemberCall =
-      Result.Nodes.getNodeAs<CXXMemberCallExpr>("erase");
-  const auto *EndExpr =
-      Result.Nodes.getNodeAs<CXXMemberCallExpr>("end");
-  const SourceLocation Loc = MemberCall->getBeginLoc();
+    const auto *MemberCall =
+        Result.Nodes.getNodeAs<CXXMemberCallExpr>("erase");
+    const auto *EndExpr =
+        Result.Nodes.getNodeAs<CXXMemberCallExpr>("end");
+    const SourceLocation Loc = MemberCall->getBeginLoc();
 
-  FixItHint Hint;
+    FixItHint Hint;
 
-  if (!Loc.isMacroID() && EndExpr) {
-    const auto *AlgCall = Result.Nodes.getNodeAs<CallExpr>("alg");
-    std::string ReplacementText = std::string(Lexer::getSourceText(
-        CharSourceRange::getTokenRange(EndExpr->getSourceRange()),
-        *Result.SourceManager, getLangOpts()));
-    const SourceLocation EndLoc = Lexer::getLocForEndOfToken(
-        AlgCall->getEndLoc(), 0, *Result.SourceManager, getLangOpts());
-    Hint = FixItHint::CreateInsertion(EndLoc, ", " + ReplacementText);
-  }
+    if (!Loc.isMacroID() && EndExpr) {
+        const auto *AlgCall = Result.Nodes.getNodeAs<CallExpr>("alg");
+        std::string ReplacementText = std::string(Lexer::getSourceText(
+                                          CharSourceRange::getTokenRange(EndExpr->getSourceRange()),
+                                          *Result.SourceManager, getLangOpts()));
+        const SourceLocation EndLoc = Lexer::getLocForEndOfToken(
+                                          AlgCall->getEndLoc(), 0, *Result.SourceManager, getLangOpts());
+        Hint = FixItHint::CreateInsertion(EndLoc, ", " + ReplacementText);
+    }
 
-  diag(Loc, "this call will remove at most one item even when multiple items "
-            "should be removed")
-      << Hint;
+    diag(Loc, "this call will remove at most one item even when multiple items "
+         "should be removed")
+            << Hint;
 }
 
 } // namespace bugprone

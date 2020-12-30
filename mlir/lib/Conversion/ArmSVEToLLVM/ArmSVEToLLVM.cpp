@@ -37,39 +37,39 @@ using VectorScaleOpLowering =
 
 // Extract an LLVM IR type from the LLVM IR dialect type.
 static LLVM::LLVMType unwrap(Type type) {
-  if (!type)
-    return nullptr;
-  auto *mlirContext = type.getContext();
-  auto wrappedLLVMType = type.dyn_cast<LLVM::LLVMType>();
-  if (!wrappedLLVMType)
-    emitError(UnknownLoc::get(mlirContext),
-              "conversion resulted in a non-LLVM type");
-  return wrappedLLVMType;
+    if (!type)
+        return nullptr;
+    auto *mlirContext = type.getContext();
+    auto wrappedLLVMType = type.dyn_cast<LLVM::LLVMType>();
+    if (!wrappedLLVMType)
+        emitError(UnknownLoc::get(mlirContext),
+                  "conversion resulted in a non-LLVM type");
+    return wrappedLLVMType;
 }
 
 static Optional<Type>
 convertScalableVectorTypeToLLVM(ScalableVectorType svType,
                                 LLVMTypeConverter &converter) {
-  auto elementType = unwrap(converter.convertType(svType.getElementType()));
-  if (!elementType)
-    return {};
+    auto elementType = unwrap(converter.convertType(svType.getElementType()));
+    if (!elementType)
+        return {};
 
-  auto sVectorType =
-      LLVM::LLVMScalableVectorType::get(elementType, svType.getShape().back());
-  return sVectorType;
+    auto sVectorType =
+        LLVM::LLVMScalableVectorType::get(elementType, svType.getShape().back());
+    return sVectorType;
 }
 
 /// Populate the given list with patterns that convert from ArmSVE to LLVM.
 void mlir::populateArmSVEToLLVMConversionPatterns(
     LLVMTypeConverter &converter, OwningRewritePatternList &patterns) {
-  converter.addConversion([&converter](ScalableVectorType svType) {
-    return convertScalableVectorTypeToLLVM(svType, converter);
-  });
-  // clang-format off
-  patterns.insert<SdotOpLowering,
-                  SmmlaOpLowering,
-                  UdotOpLowering,
-                  UmmlaOpLowering,
-                  VectorScaleOpLowering>(converter);
-  // clang-format on
+    converter.addConversion([&converter](ScalableVectorType svType) {
+        return convertScalableVectorTypeToLLVM(svType, converter);
+    });
+    // clang-format off
+    patterns.insert<SdotOpLowering,
+                    SmmlaOpLowering,
+                    UdotOpLowering,
+                    UmmlaOpLowering,
+                    VectorScaleOpLowering>(converter);
+    // clang-format on
 }

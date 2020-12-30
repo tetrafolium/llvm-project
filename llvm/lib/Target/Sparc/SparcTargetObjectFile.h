@@ -18,17 +18,17 @@ class TargetMachine;
 
 class SparcELFTargetObjectFile : public TargetLoweringObjectFileELF {
 public:
-  SparcELFTargetObjectFile() :
-    TargetLoweringObjectFileELF()
-  {}
+    SparcELFTargetObjectFile() :
+        TargetLoweringObjectFileELF()
+    {}
 
-  void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
+    void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
-  const MCExpr *getTTypeGlobalReference(const GlobalValue *GV,
-                                        unsigned Encoding,
-                                        const TargetMachine &TM,
-                                        MachineModuleInfo *MMI,
-                                        MCStreamer &Streamer) const override;
+    const MCExpr *getTTypeGlobalReference(const GlobalValue *GV,
+                                          unsigned Encoding,
+                                          const TargetMachine &TM,
+                                          MachineModuleInfo *MMI,
+                                          MCStreamer &Streamer) const override;
 };
 
 } // end namespace llvm

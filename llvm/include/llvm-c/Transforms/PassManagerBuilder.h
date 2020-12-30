@@ -45,38 +45,38 @@ LLVMPassManagerBuilderSetSizeLevel(LLVMPassManagerBuilderRef PMB,
 /** See llvm::PassManagerBuilder::DisableUnitAtATime. */
 void
 LLVMPassManagerBuilderSetDisableUnitAtATime(LLVMPassManagerBuilderRef PMB,
-                                            LLVMBool Value);
+        LLVMBool Value);
 
 /** See llvm::PassManagerBuilder::DisableUnrollLoops. */
 void
 LLVMPassManagerBuilderSetDisableUnrollLoops(LLVMPassManagerBuilderRef PMB,
-                                            LLVMBool Value);
+        LLVMBool Value);
 
 /** See llvm::PassManagerBuilder::DisableSimplifyLibCalls */
 void
 LLVMPassManagerBuilderSetDisableSimplifyLibCalls(LLVMPassManagerBuilderRef PMB,
-                                                 LLVMBool Value);
+        LLVMBool Value);
 
 /** See llvm::PassManagerBuilder::Inliner. */
 void
 LLVMPassManagerBuilderUseInlinerWithThreshold(LLVMPassManagerBuilderRef PMB,
-                                              unsigned Threshold);
+        unsigned Threshold);
 
 /** See llvm::PassManagerBuilder::populateFunctionPassManager. */
 void
 LLVMPassManagerBuilderPopulateFunctionPassManager(LLVMPassManagerBuilderRef PMB,
-                                                  LLVMPassManagerRef PM);
+        LLVMPassManagerRef PM);
 
 /** See llvm::PassManagerBuilder::populateModulePassManager. */
 void
 LLVMPassManagerBuilderPopulateModulePassManager(LLVMPassManagerBuilderRef PMB,
-                                                LLVMPassManagerRef PM);
+        LLVMPassManagerRef PM);
 
 /** See llvm::PassManagerBuilder::populateLTOPassManager. */
 void LLVMPassManagerBuilderPopulateLTOPassManager(LLVMPassManagerBuilderRef PMB,
-                                                  LLVMPassManagerRef PM,
-                                                  LLVMBool Internalize,
-                                                  LLVMBool RunInliner);
+        LLVMPassManagerRef PM,
+        LLVMBool Internalize,
+        LLVMBool RunInliner);
 
 /**
  * @}

@@ -26,45 +26,45 @@ DynamicLoaderWasmDYLD::DynamicLoaderWasmDYLD(Process *process)
     : DynamicLoader(process) {}
 
 void DynamicLoaderWasmDYLD::Initialize() {
-  PluginManager::RegisterPlugin(GetPluginNameStatic(),
-                                GetPluginDescriptionStatic(), CreateInstance);
+    PluginManager::RegisterPlugin(GetPluginNameStatic(),
+                                  GetPluginDescriptionStatic(), CreateInstance);
 }
 
 ConstString DynamicLoaderWasmDYLD::GetPluginNameStatic() {
-  static ConstString g_plugin_name("wasm-dyld");
-  return g_plugin_name;
+    static ConstString g_plugin_name("wasm-dyld");
+    return g_plugin_name;
 }
 
 const char *DynamicLoaderWasmDYLD::GetPluginDescriptionStatic() {
-  return "Dynamic loader plug-in that watches for shared library "
-         "loads/unloads in WebAssembly engines.";
+    return "Dynamic loader plug-in that watches for shared library "
+           "loads/unloads in WebAssembly engines.";
 }
 
 DynamicLoader *DynamicLoaderWasmDYLD::CreateInstance(Process *process,
-                                                     bool force) {
-  bool should_create = force;
-  if (!should_create) {
-    should_create =
-        (process->GetTarget().GetArchitecture().GetTriple().getArch() ==
-         llvm::Triple::wasm32);
-  }
+        bool force) {
+    bool should_create = force;
+    if (!should_create) {
+        should_create =
+            (process->GetTarget().GetArchitecture().GetTriple().getArch() ==
+             llvm::Triple::wasm32);
+    }
 
-  if (should_create)
-    return new DynamicLoaderWasmDYLD(process);
+    if (should_create)
+        return new DynamicLoaderWasmDYLD(process);
 
-  return nullptr;
+    return nullptr;
 }
 
 void DynamicLoaderWasmDYLD::DidAttach() {
-  Log *log(GetLogIfAnyCategoriesSet(LIBLLDB_LOG_DYNAMIC_LOADER));
-  LLDB_LOGF(log, "DynamicLoaderWasmDYLD::%s()", __FUNCTION__);
+    Log *log(GetLogIfAnyCategoriesSet(LIBLLDB_LOG_DYNAMIC_LOADER));
+    LLDB_LOGF(log, "DynamicLoaderWasmDYLD::%s()", __FUNCTION__);
 
-  // Ask the process for the list of loaded WebAssembly modules.
-  auto error = m_process->LoadModules();
-  LLDB_LOG_ERROR(log, std::move(error), "Couldn't load modules: {0}");
+    // Ask the process for the list of loaded WebAssembly modules.
+    auto error = m_process->LoadModules();
+    LLDB_LOG_ERROR(log, std::move(error), "Couldn't load modules: {0}");
 }
 
 ThreadPlanSP DynamicLoaderWasmDYLD::GetStepThroughTrampolinePlan(Thread &thread,
-                                                                 bool stop) {
-  return ThreadPlanSP();
+        bool stop) {
+    return ThreadPlanSP();
 }

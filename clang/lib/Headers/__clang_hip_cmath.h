@@ -27,83 +27,113 @@
 
 // Start with functions that cannot be defined by DEF macros below.
 #if defined(__cplusplus)
-__DEVICE__ double abs(double __x) { return ::fabs(__x); }
-__DEVICE__ float abs(float __x) { return ::fabsf(__x); }
-__DEVICE__ long long abs(long long __n) { return ::llabs(__n); }
-__DEVICE__ long abs(long __n) { return ::labs(__n); }
+__DEVICE__ double abs(double __x) {
+    return ::fabs(__x);
+}
+__DEVICE__ float abs(float __x) {
+    return ::fabsf(__x);
+}
+__DEVICE__ long long abs(long long __n) {
+    return ::llabs(__n);
+}
+__DEVICE__ long abs(long __n) {
+    return ::labs(__n);
+}
 __DEVICE__ float fma(float __x, float __y, float __z) {
-  return ::fmaf(__x, __y, __z);
+    return ::fmaf(__x, __y, __z);
 }
 __DEVICE__ int fpclassify(float __x) {
-  return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL,
-                              FP_ZERO, __x);
+    return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL,
+                                FP_ZERO, __x);
 }
 __DEVICE__ int fpclassify(double __x) {
-  return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL,
-                              FP_ZERO, __x);
+    return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL,
+                                FP_ZERO, __x);
 }
 __DEVICE__ float frexp(float __arg, int *__exp) {
-  return ::frexpf(__arg, __exp);
+    return ::frexpf(__arg, __exp);
 }
-__DEVICE__ bool isfinite(float __x) { return ::__finitef(__x); }
-__DEVICE__ bool isfinite(double __x) { return ::__finite(__x); }
+__DEVICE__ bool isfinite(float __x) {
+    return ::__finitef(__x);
+}
+__DEVICE__ bool isfinite(double __x) {
+    return ::__finite(__x);
+}
 __DEVICE__ bool isgreater(float __x, float __y) {
-  return __builtin_isgreater(__x, __y);
+    return __builtin_isgreater(__x, __y);
 }
 __DEVICE__ bool isgreater(double __x, double __y) {
-  return __builtin_isgreater(__x, __y);
+    return __builtin_isgreater(__x, __y);
 }
 __DEVICE__ bool isgreaterequal(float __x, float __y) {
-  return __builtin_isgreaterequal(__x, __y);
+    return __builtin_isgreaterequal(__x, __y);
 }
 __DEVICE__ bool isgreaterequal(double __x, double __y) {
-  return __builtin_isgreaterequal(__x, __y);
+    return __builtin_isgreaterequal(__x, __y);
 }
-__DEVICE__ bool isinf(float __x) { return ::__isinff(__x); }
-__DEVICE__ bool isinf(double __x) { return ::__isinf(__x); }
+__DEVICE__ bool isinf(float __x) {
+    return ::__isinff(__x);
+}
+__DEVICE__ bool isinf(double __x) {
+    return ::__isinf(__x);
+}
 __DEVICE__ bool isless(float __x, float __y) {
-  return __builtin_isless(__x, __y);
+    return __builtin_isless(__x, __y);
 }
 __DEVICE__ bool isless(double __x, double __y) {
-  return __builtin_isless(__x, __y);
+    return __builtin_isless(__x, __y);
 }
 __DEVICE__ bool islessequal(float __x, float __y) {
-  return __builtin_islessequal(__x, __y);
+    return __builtin_islessequal(__x, __y);
 }
 __DEVICE__ bool islessequal(double __x, double __y) {
-  return __builtin_islessequal(__x, __y);
+    return __builtin_islessequal(__x, __y);
 }
 __DEVICE__ bool islessgreater(float __x, float __y) {
-  return __builtin_islessgreater(__x, __y);
+    return __builtin_islessgreater(__x, __y);
 }
 __DEVICE__ bool islessgreater(double __x, double __y) {
-  return __builtin_islessgreater(__x, __y);
+    return __builtin_islessgreater(__x, __y);
 }
-__DEVICE__ bool isnan(float __x) { return ::__isnanf(__x); }
-__DEVICE__ bool isnan(double __x) { return ::__isnan(__x); }
-__DEVICE__ bool isnormal(float __x) { return __builtin_isnormal(__x); }
-__DEVICE__ bool isnormal(double __x) { return __builtin_isnormal(__x); }
+__DEVICE__ bool isnan(float __x) {
+    return ::__isnanf(__x);
+}
+__DEVICE__ bool isnan(double __x) {
+    return ::__isnan(__x);
+}
+__DEVICE__ bool isnormal(float __x) {
+    return __builtin_isnormal(__x);
+}
+__DEVICE__ bool isnormal(double __x) {
+    return __builtin_isnormal(__x);
+}
 __DEVICE__ bool isunordered(float __x, float __y) {
-  return __builtin_isunordered(__x, __y);
+    return __builtin_isunordered(__x, __y);
 }
 __DEVICE__ bool isunordered(double __x, double __y) {
-  return __builtin_isunordered(__x, __y);
+    return __builtin_isunordered(__x, __y);
 }
-__DEVICE__ float modf(float __x, float *__iptr) { return ::modff(__x, __iptr); }
+__DEVICE__ float modf(float __x, float *__iptr) {
+    return ::modff(__x, __iptr);
+}
 __DEVICE__ float pow(float __base, int __iexp) {
-  return ::powif(__base, __iexp);
+    return ::powif(__base, __iexp);
 }
 __DEVICE__ double pow(double __base, int __iexp) {
-  return ::powi(__base, __iexp);
+    return ::powi(__base, __iexp);
 }
 __DEVICE__ float remquo(float __x, float __y, int *__quo) {
-  return ::remquof(__x, __y, __quo);
+    return ::remquof(__x, __y, __quo);
 }
 __DEVICE__ float scalbln(float __x, long int __n) {
-  return ::scalblnf(__x, __n);
+    return ::scalblnf(__x, __n);
 }
-__DEVICE__ bool signbit(float __x) { return ::__signbitf(__x); }
-__DEVICE__ bool signbit(double __x) { return ::__signbit(__x); }
+__DEVICE__ bool signbit(float __x) {
+    return ::__signbitf(__x);
+}
+__DEVICE__ bool signbit(double __x) {
+    return ::__signbit(__x);
+}
 
 // Notably missing above is nexttoward.  We omit it because
 // ocml doesn't provide an implementation, and we don't want to be in the
@@ -111,10 +141,10 @@ __DEVICE__ bool signbit(double __x) { return ::__signbit(__x); }
 
 // Other functions.
 __DEVICE__ _Float16 fma(_Float16 __x, _Float16 __y, _Float16 __z) {
-  return __ocml_fma_f16(__x, __y, __z);
+    return __ocml_fma_f16(__x, __y, __z);
 }
 __DEVICE__ _Float16 pow(_Float16 __base, int __iexp) {
-  return __ocml_pown_f16(__base, __iexp);
+    return __ocml_pown_f16(__base, __iexp);
 }
 
 // BEGIN DEF_FUN and HIP_OVERLOAD
@@ -205,7 +235,9 @@ __DEF_FUN1(float, trunc)
 // __hip_enable_if::type is a type function which returns __T if __B is true.
 template <bool __B, class __T = void> struct __hip_enable_if {};
 
-template <class __T> struct __hip_enable_if<true, __T> { typedef __T type; };
+template <class __T> struct __hip_enable_if<true, __T> {
+    typedef __T type;
+};
 
 // decltype is only available in C++11 and above.
 #if __cplusplus >= 201103L
@@ -213,60 +245,62 @@ template <class __T> struct __hip_enable_if<true, __T> { typedef __T type; };
 namespace __hip {
 
 template <class _Tp> struct __numeric_type {
-  static void __test(...);
-  static _Float16 __test(_Float16);
-  static float __test(float);
-  static double __test(char);
-  static double __test(int);
-  static double __test(unsigned);
-  static double __test(long);
-  static double __test(unsigned long);
-  static double __test(long long);
-  static double __test(unsigned long long);
-  static double __test(double);
-  // No support for long double, use double instead.
-  static double __test(long double);
+    static void __test(...);
+    static _Float16 __test(_Float16);
+    static float __test(float);
+    static double __test(char);
+    static double __test(int);
+    static double __test(unsigned);
+    static double __test(long);
+    static double __test(unsigned long);
+    static double __test(long long);
+    static double __test(unsigned long long);
+    static double __test(double);
+    // No support for long double, use double instead.
+    static double __test(long double);
 
-  typedef decltype(__test(std::declval<_Tp>())) type;
-  static const bool value = !std::is_same<type, void>::value;
+    typedef decltype(__test(std::declval<_Tp>())) type;
+    static const bool value = !std::is_same<type, void>::value;
 };
 
-template <> struct __numeric_type<void> { static const bool value = true; };
+template <> struct __numeric_type<void> {
+    static const bool value = true;
+};
 
 template <class _A1, class _A2 = void, class _A3 = void,
           bool = __numeric_type<_A1>::value &&__numeric_type<_A2>::value
-              &&__numeric_type<_A3>::value>
+          &&__numeric_type<_A3>::value>
 class __promote_imp {
 public:
-  static const bool value = false;
+    static const bool value = false;
 };
 
 template <class _A1, class _A2, class _A3>
 class __promote_imp<_A1, _A2, _A3, true> {
 private:
-  typedef typename __promote_imp<_A1>::type __type1;
-  typedef typename __promote_imp<_A2>::type __type2;
-  typedef typename __promote_imp<_A3>::type __type3;
+    typedef typename __promote_imp<_A1>::type __type1;
+    typedef typename __promote_imp<_A2>::type __type2;
+    typedef typename __promote_imp<_A3>::type __type3;
 
 public:
-  typedef decltype(__type1() + __type2() + __type3()) type;
-  static const bool value = true;
+    typedef decltype(__type1() + __type2() + __type3()) type;
+    static const bool value = true;
 };
 
 template <class _A1, class _A2> class __promote_imp<_A1, _A2, void, true> {
 private:
-  typedef typename __promote_imp<_A1>::type __type1;
-  typedef typename __promote_imp<_A2>::type __type2;
+    typedef typename __promote_imp<_A1>::type __type1;
+    typedef typename __promote_imp<_A2>::type __type2;
 
 public:
-  typedef decltype(__type1() + __type2()) type;
-  static const bool value = true;
+    typedef decltype(__type1() + __type2()) type;
+    static const bool value = true;
 };
 
 template <class _A1> class __promote_imp<_A1, void, void, true> {
 public:
-  typedef typename __numeric_type<_A1>::type type;
-  static const bool value = true;
+    typedef typename __numeric_type<_A1>::type type;
+    static const bool value = true;
 };
 
 template <class _A1, class _A2 = void, class _A3 = void>
@@ -382,80 +416,80 @@ __HIP_OVERLOAD2(double, min)
 #if __cplusplus >= 201103L
 template <typename __T1, typename __T2, typename __T3>
 __DEVICE__ typename __hip_enable_if<
-    std::numeric_limits<__T1>::is_specialized &&
-        std::numeric_limits<__T2>::is_specialized &&
-        std::numeric_limits<__T3>::is_specialized,
+std::numeric_limits<__T1>::is_specialized &&
+std::numeric_limits<__T2>::is_specialized &&
+std::numeric_limits<__T3>::is_specialized,
     typename __hip::__promote<__T1, __T2, __T3>::type>::type
 fma(__T1 __x, __T2 __y, __T3 __z) {
-  typedef typename __hip::__promote<__T1, __T2, __T3>::type __result_type;
-  return ::fma((__result_type)__x, (__result_type)__y, (__result_type)__z);
+    typedef typename __hip::__promote<__T1, __T2, __T3>::type __result_type;
+    return ::fma((__result_type)__x, (__result_type)__y, (__result_type)__z);
 }
 #else
 template <typename __T1, typename __T2, typename __T3>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T1>::is_specialized &&
-                                 std::numeric_limits<__T2>::is_specialized &&
-                                 std::numeric_limits<__T3>::is_specialized,
-                             double>::type
-    fma(__T1 __x, __T2 __y, __T3 __z) {
-  return ::fma((double)__x, (double)__y, (double)__z);
+typename __hip_enable_if<std::numeric_limits<__T1>::is_specialized &&
+std::numeric_limits<__T2>::is_specialized &&
+std::numeric_limits<__T3>::is_specialized,
+    double>::type
+fma(__T1 __x, __T2 __y, __T3 __z) {
+    return ::fma((double)__x, (double)__y, (double)__z);
 }
 #endif
 
 template <typename __T>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
-    frexp(__T __x, int *__exp) {
-  return ::frexp((double)__x, __exp);
+typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
+frexp(__T __x, int *__exp) {
+    return ::frexp((double)__x, __exp);
 }
 
 template <typename __T>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
-    ldexp(__T __x, int __exp) {
-  return ::ldexp((double)__x, __exp);
+typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
+ldexp(__T __x, int __exp) {
+    return ::ldexp((double)__x, __exp);
 }
 
 template <typename __T>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
-    modf(__T __x, double *__exp) {
-  return ::modf((double)__x, __exp);
+typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
+modf(__T __x, double *__exp) {
+    return ::modf((double)__x, __exp);
 }
 
 #if __cplusplus >= 201103L
 template <typename __T1, typename __T2>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T1>::is_specialized &&
-                                 std::numeric_limits<__T2>::is_specialized,
-                             typename __hip::__promote<__T1, __T2>::type>::type
-    remquo(__T1 __x, __T2 __y, int *__quo) {
-  typedef typename __hip::__promote<__T1, __T2>::type __result_type;
-  return ::remquo((__result_type)__x, (__result_type)__y, __quo);
+typename __hip_enable_if<std::numeric_limits<__T1>::is_specialized &&
+std::numeric_limits<__T2>::is_specialized,
+    typename __hip::__promote<__T1, __T2>::type>::type
+remquo(__T1 __x, __T2 __y, int *__quo) {
+    typedef typename __hip::__promote<__T1, __T2>::type __result_type;
+    return ::remquo((__result_type)__x, (__result_type)__y, __quo);
 }
 #else
 template <typename __T1, typename __T2>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T1>::is_specialized &&
-                                 std::numeric_limits<__T2>::is_specialized,
-                             double>::type
-    remquo(__T1 __x, __T2 __y, int *__quo) {
-  return ::remquo((double)__x, (double)__y, __quo);
+typename __hip_enable_if<std::numeric_limits<__T1>::is_specialized &&
+std::numeric_limits<__T2>::is_specialized,
+    double>::type
+remquo(__T1 __x, __T2 __y, int *__quo) {
+    return ::remquo((double)__x, (double)__y, __quo);
 }
 #endif
 
 template <typename __T>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
-    scalbln(__T __x, long int __exp) {
-  return ::scalbln((double)__x, __exp);
+typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
+scalbln(__T __x, long int __exp) {
+    return ::scalbln((double)__x, __exp);
 }
 
 template <typename __T>
 __DEVICE__
-    typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
-    scalbn(__T __x, int __exp) {
-  return ::scalbn((double)__x, __exp);
+typename __hip_enable_if<std::numeric_limits<__T>::is_integer, double>::type
+scalbn(__T __x, int __exp) {
+    return ::scalbn((double)__x, __exp);
 }
 
 #pragma pop_macro("__HIP_OVERLOAD1")

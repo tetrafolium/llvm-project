@@ -9,18 +9,18 @@
 // RUN:     -fsanitize=address" --ldflags="-fsanitize=address" -- %s
 
 struct S {
-  int a[8];
+    int a[8];
 };
 
 int f(struct S s, unsigned i) {
-  return s.a[i]; // DexLabel('asan')
+    return s.a[i]; // DexLabel('asan')
 }
 
 int main(int argc, const char **argv) {
-  struct S s = {{0, 1, 2, 3, 4, 5, 6, 7}};
-  if (f(s, 4) == 4)
-    return f(s, 0);
-  return 0;
+    struct S s = {{0, 1, 2, 3, 4, 5, 6, 7}};
+    if (f(s, 4) == 4)
+        return f(s, 0);
+    return 0;
 }
 
 // DexExpectWatchValue('s.a[0]', '0', on_line='asan')

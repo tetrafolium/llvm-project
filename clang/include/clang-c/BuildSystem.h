@@ -65,7 +65,7 @@ clang_VirtualFileOverlay_addFileMapping(CXVirtualFileOverlay,
  */
 CINDEX_LINKAGE enum CXErrorCode
 clang_VirtualFileOverlay_setCaseSensitivity(CXVirtualFileOverlay,
-                                            int caseSensitive);
+        int caseSensitive);
 
 /**
  * Write out the \c CXVirtualFileOverlay object to a char buffer.
@@ -114,7 +114,7 @@ clang_ModuleMapDescriptor_create(unsigned options);
  */
 CINDEX_LINKAGE enum CXErrorCode
 clang_ModuleMapDescriptor_setFrameworkModuleName(CXModuleMapDescriptor,
-                                                 const char *name);
+        const char *name);
 
 /**
  * Sets the umbrella header name that the module.map describes.
@@ -122,7 +122,7 @@ clang_ModuleMapDescriptor_setFrameworkModuleName(CXModuleMapDescriptor,
  */
 CINDEX_LINKAGE enum CXErrorCode
 clang_ModuleMapDescriptor_setUmbrellaHeader(CXModuleMapDescriptor,
-                                            const char *name);
+        const char *name);
 
 /**
  * Write out the \c CXModuleMapDescriptor object to a char buffer.
@@ -135,8 +135,8 @@ clang_ModuleMapDescriptor_setUmbrellaHeader(CXModuleMapDescriptor,
  */
 CINDEX_LINKAGE enum CXErrorCode
 clang_ModuleMapDescriptor_writeToBuffer(CXModuleMapDescriptor, unsigned options,
-                                       char **out_buffer_ptr,
-                                       unsigned *out_buffer_size);
+                                        char **out_buffer_ptr,
+                                        unsigned *out_buffer_size);
 
 /**
  * Dispose a \c CXModuleMapDescriptor object.

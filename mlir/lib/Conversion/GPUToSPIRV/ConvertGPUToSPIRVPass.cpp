@@ -35,39 +35,39 @@ namespace {
 ///
 /// 2) Lower the body of the spirv::ModuleOp.
 struct GPUToSPIRVPass : public ConvertGPUToSPIRVBase<GPUToSPIRVPass> {
-  void runOnOperation() override;
+    void runOnOperation() override;
 };
 } // namespace
 
 void GPUToSPIRVPass::runOnOperation() {
-  MLIRContext *context = &getContext();
-  ModuleOp module = getOperation();
+    MLIRContext *context = &getContext();
+    ModuleOp module = getOperation();
 
-  SmallVector<Operation *, 1> kernelModules;
-  OpBuilder builder(context);
-  module.walk([&builder, &kernelModules](gpu::GPUModuleOp moduleOp) {
-    // For each kernel module (should be only 1 for now, but that is not a
-    // requirement here), clone the module for conversion because the
-    // gpu.launch function still needs the kernel module.
-    builder.setInsertionPoint(moduleOp.getOperation());
-    kernelModules.push_back(builder.clone(*moduleOp.getOperation()));
-  });
+    SmallVector<Operation *, 1> kernelModules;
+    OpBuilder builder(context);
+    module.walk([&builder, &kernelModules](gpu::GPUModuleOp moduleOp) {
+        // For each kernel module (should be only 1 for now, but that is not a
+        // requirement here), clone the module for conversion because the
+        // gpu.launch function still needs the kernel module.
+        builder.setInsertionPoint(moduleOp.getOperation());
+        kernelModules.push_back(builder.clone(*moduleOp.getOperation()));
+    });
 
-  auto targetAttr = spirv::lookupTargetEnvOrDefault(module);
-  std::unique_ptr<ConversionTarget> target =
-      spirv::SPIRVConversionTarget::get(targetAttr);
+    auto targetAttr = spirv::lookupTargetEnvOrDefault(module);
+    std::unique_ptr<ConversionTarget> target =
+        spirv::SPIRVConversionTarget::get(targetAttr);
 
-  SPIRVTypeConverter typeConverter(targetAttr);
-  ScfToSPIRVContext scfContext;
-  OwningRewritePatternList patterns;
-  populateGPUToSPIRVPatterns(context, typeConverter, patterns);
-  populateSCFToSPIRVPatterns(context, typeConverter,scfContext, patterns);
-  populateStandardToSPIRVPatterns(context, typeConverter, patterns);
+    SPIRVTypeConverter typeConverter(targetAttr);
+    ScfToSPIRVContext scfContext;
+    OwningRewritePatternList patterns;
+    populateGPUToSPIRVPatterns(context, typeConverter, patterns);
+    populateSCFToSPIRVPatterns(context, typeConverter,scfContext, patterns);
+    populateStandardToSPIRVPatterns(context, typeConverter, patterns);
 
-  if (failed(applyFullConversion(kernelModules, *target, std::move(patterns))))
-    return signalPassFailure();
+    if (failed(applyFullConversion(kernelModules, *target, std::move(patterns))))
+        return signalPassFailure();
 }
 
 std::unique_ptr<OperationPass<ModuleOp>> mlir::createConvertGPUToSPIRVPass() {
-  return std::make_unique<GPUToSPIRVPass>();
+    return std::make_unique<GPUToSPIRVPass>();
 }

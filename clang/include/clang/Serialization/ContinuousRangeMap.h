@@ -36,107 +36,119 @@ namespace clang {
 template <typename Int, typename V, unsigned InitialCapacity>
 class ContinuousRangeMap {
 public:
-  using value_type = std::pair<Int, V>;
-  using reference = value_type &;
-  using const_reference = const value_type &;
-  using pointer = value_type *;
-  using const_pointer = const value_type *;
+    using value_type = std::pair<Int, V>;
+    using reference = value_type &;
+    using const_reference = const value_type &;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
 
 private:
-  using Representation = SmallVector<value_type, InitialCapacity>;
+    using Representation = SmallVector<value_type, InitialCapacity>;
 
-  Representation Rep;
+    Representation Rep;
 
-  struct Compare {
-    bool operator ()(const_reference L, Int R) const {
-      return L.first < R;
-    }
-    bool operator ()(Int L, const_reference R) const {
-      return L < R.first;
-    }
-    bool operator ()(Int L, Int R) const {
-      return L < R;
-    }
-    bool operator ()(const_reference L, const_reference R) const {
-      return L.first < R.first;
-    }
-  };
+    struct Compare {
+        bool operator ()(const_reference L, Int R) const {
+            return L.first < R;
+        }
+        bool operator ()(Int L, const_reference R) const {
+            return L < R.first;
+        }
+        bool operator ()(Int L, Int R) const {
+            return L < R;
+        }
+        bool operator ()(const_reference L, const_reference R) const {
+            return L.first < R.first;
+        }
+    };
 
 public:
-  void insert(const value_type &Val) {
-    if (!Rep.empty() && Rep.back() == Val)
-      return;
+    void insert(const value_type &Val) {
+        if (!Rep.empty() && Rep.back() == Val)
+            return;
 
-    assert((Rep.empty() || Rep.back().first < Val.first) &&
-           "Must insert keys in order.");
-    Rep.push_back(Val);
-  }
-
-  void insertOrReplace(const value_type &Val) {
-    iterator I = llvm::lower_bound(Rep, Val, Compare());
-    if (I != Rep.end() && I->first == Val.first) {
-      I->second = Val.second;
-      return;
+        assert((Rep.empty() || Rep.back().first < Val.first) &&
+               "Must insert keys in order.");
+        Rep.push_back(Val);
     }
 
-    Rep.insert(I, Val);
-  }
+    void insertOrReplace(const value_type &Val) {
+        iterator I = llvm::lower_bound(Rep, Val, Compare());
+        if (I != Rep.end() && I->first == Val.first) {
+            I->second = Val.second;
+            return;
+        }
 
-  using iterator = typename Representation::iterator;
-  using const_iterator = typename Representation::const_iterator;
+        Rep.insert(I, Val);
+    }
 
-  iterator begin() { return Rep.begin(); }
-  iterator end() { return Rep.end(); }
-  const_iterator begin() const { return Rep.begin(); }
-  const_iterator end() const { return Rep.end(); }
+    using iterator = typename Representation::iterator;
+    using const_iterator = typename Representation::const_iterator;
 
-  iterator find(Int K) {
-    iterator I = llvm::upper_bound(Rep, K, Compare());
-    // I points to the first entry with a key > K, which is the range that
-    // follows the one containing K.
-    if (I == Rep.begin())
-      return Rep.end();
-    --I;
-    return I;
-  }
-  const_iterator find(Int K) const {
-    return const_cast<ContinuousRangeMap*>(this)->find(K);
-  }
+    iterator begin() {
+        return Rep.begin();
+    }
+    iterator end() {
+        return Rep.end();
+    }
+    const_iterator begin() const {
+        return Rep.begin();
+    }
+    const_iterator end() const {
+        return Rep.end();
+    }
 
-  reference back() { return Rep.back(); }
-  const_reference back() const { return Rep.back(); }
+    iterator find(Int K) {
+        iterator I = llvm::upper_bound(Rep, K, Compare());
+        // I points to the first entry with a key > K, which is the range that
+        // follows the one containing K.
+        if (I == Rep.begin())
+            return Rep.end();
+        --I;
+        return I;
+    }
+    const_iterator find(Int K) const {
+        return const_cast<ContinuousRangeMap*>(this)->find(K);
+    }
 
-  /// An object that helps properly build a continuous range map
-  /// from a set of values.
-  class Builder {
-    ContinuousRangeMap &Self;
+    reference back() {
+        return Rep.back();
+    }
+    const_reference back() const {
+        return Rep.back();
+    }
 
-  public:
-    explicit Builder(ContinuousRangeMap &Self) : Self(Self) {}
-    Builder(const Builder&) = delete;
-    Builder &operator=(const Builder&) = delete;
+    /// An object that helps properly build a continuous range map
+    /// from a set of values.
+    class Builder {
+        ContinuousRangeMap &Self;
 
-    ~Builder() {
-      llvm::sort(Self.Rep, Compare());
-      Self.Rep.erase(
-          std::unique(
-              Self.Rep.begin(), Self.Rep.end(),
-              [](const_reference A, const_reference B) {
+    public:
+        explicit Builder(ContinuousRangeMap &Self) : Self(Self) {}
+        Builder(const Builder&) = delete;
+        Builder &operator=(const Builder&) = delete;
+
+        ~Builder() {
+            llvm::sort(Self.Rep, Compare());
+            Self.Rep.erase(
+                std::unique(
+                    Self.Rep.begin(), Self.Rep.end(),
+            [](const_reference A, const_reference B) {
                 // FIXME: we should not allow any duplicate keys, but there are
                 // a lot of duplicate 0 -> 0 mappings to remove first.
                 assert((A == B || A.first != B.first) &&
                        "ContinuousRangeMap::Builder given non-unique keys");
                 return A == B;
-              }),
-          Self.Rep.end());
-    }
+            }),
+            Self.Rep.end());
+        }
 
-    void insert(const value_type &Val) {
-      Self.Rep.push_back(Val);
-    }
-  };
+        void insert(const value_type &Val) {
+            Self.Rep.push_back(Val);
+        }
+    };
 
-  friend class Builder;
+    friend class Builder;
 };
 
 } // namespace clang

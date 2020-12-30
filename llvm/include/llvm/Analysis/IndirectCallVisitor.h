@@ -18,20 +18,20 @@
 namespace llvm {
 // Visitor class that finds all indirect call.
 struct PGOIndirectCallVisitor : public InstVisitor<PGOIndirectCallVisitor> {
-  std::vector<CallBase *> IndirectCalls;
-  PGOIndirectCallVisitor() {}
+    std::vector<CallBase *> IndirectCalls;
+    PGOIndirectCallVisitor() {}
 
-  void visitCallBase(CallBase &Call) {
-    if (Call.isIndirectCall())
-      IndirectCalls.push_back(&Call);
-  }
+    void visitCallBase(CallBase &Call) {
+        if (Call.isIndirectCall())
+            IndirectCalls.push_back(&Call);
+    }
 };
 
 // Helper function that finds all indirect call sites.
 inline std::vector<CallBase *> findIndirectCalls(Function &F) {
-  PGOIndirectCallVisitor ICV;
-  ICV.visit(F);
-  return ICV.IndirectCalls;
+    PGOIndirectCallVisitor ICV;
+    ICV.visit(F);
+    return ICV.IndirectCalls;
 }
 } // namespace llvm
 

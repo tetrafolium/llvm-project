@@ -17,13 +17,13 @@
 namespace llvm {
 
 AVRMCAsmInfo::AVRMCAsmInfo(const Triple &TT, const MCTargetOptions &Options) {
-  CodePointerSize = 2;
-  CalleeSaveStackSlotSize = 2;
-  CommentString = ";";
-  PrivateGlobalPrefix = ".L";
-  PrivateLabelPrefix = ".L";
-  UsesELFSectionDirectiveForBSS = true;
-  SupportsDebugInformation = true;
+    CodePointerSize = 2;
+    CalleeSaveStackSlotSize = 2;
+    CommentString = ";";
+    PrivateGlobalPrefix = ".L";
+    PrivateLabelPrefix = ".L";
+    UsesELFSectionDirectiveForBSS = true;
+    SupportsDebugInformation = true;
 }
 
 } // end of namespace llvm

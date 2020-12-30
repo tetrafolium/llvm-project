@@ -18,43 +18,43 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY MipsLLVMToolChain : public Linux {
 protected:
-  Tool *buildLinker() const override;
+    Tool *buildLinker() const override;
 
 public:
-  MipsLLVMToolChain(const Driver &D, const llvm::Triple &Triple,
-                    const llvm::opt::ArgList &Args);
+    MipsLLVMToolChain(const Driver &D, const llvm::Triple &Triple,
+                      const llvm::opt::ArgList &Args);
 
-  void
-  AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                            llvm::opt::ArgStringList &CC1Args) const override;
+    void
+    AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                              llvm::opt::ArgStringList &CC1Args) const override;
 
-  CXXStdlibType GetCXXStdlibType(const llvm::opt::ArgList &Args) const override;
+    CXXStdlibType GetCXXStdlibType(const llvm::opt::ArgList &Args) const override;
 
-  void addLibCxxIncludePaths(
-      const llvm::opt::ArgList &DriverArgs,
-      llvm::opt::ArgStringList &CC1Args) const override;
+    void addLibCxxIncludePaths(
+        const llvm::opt::ArgList &DriverArgs,
+        llvm::opt::ArgStringList &CC1Args) const override;
 
-  void AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
-                           llvm::opt::ArgStringList &CmdArgs) const override;
+    void AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
+                             llvm::opt::ArgStringList &CmdArgs) const override;
 
-  std::string
-  getCompilerRT(const llvm::opt::ArgList &Args, StringRef Component,
-                FileType Type = ToolChain::FT_Static) const override;
+    std::string
+    getCompilerRT(const llvm::opt::ArgList &Args, StringRef Component,
+                  FileType Type = ToolChain::FT_Static) const override;
 
-  std::string computeSysRoot() const override;
+    std::string computeSysRoot() const override;
 
-  RuntimeLibType GetDefaultRuntimeLibType() const override {
-    return GCCInstallation.isValid() ? RuntimeLibType::RLT_Libgcc
-                                     : RuntimeLibType::RLT_CompilerRT;
-  }
+    RuntimeLibType GetDefaultRuntimeLibType() const override {
+        return GCCInstallation.isValid() ? RuntimeLibType::RLT_Libgcc
+               : RuntimeLibType::RLT_CompilerRT;
+    }
 
-  const char *getDefaultLinker() const override {
-    return "ld.lld";
-  }
+    const char *getDefaultLinker() const override {
+        return "ld.lld";
+    }
 
 private:
-  Multilib SelectedMultilib;
-  std::string LibSuffix;
+    Multilib SelectedMultilib;
+    std::string LibSuffix;
 };
 
 } // end namespace toolchains

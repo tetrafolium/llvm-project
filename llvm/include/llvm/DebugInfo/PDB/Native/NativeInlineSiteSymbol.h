@@ -19,25 +19,25 @@ namespace pdb {
 
 class NativeInlineSiteSymbol : public NativeRawSymbol {
 public:
-  NativeInlineSiteSymbol(NativeSession &Session, SymIndexId Id,
-                         const codeview::InlineSiteSym &Sym,
-                         uint64_t ParentAddr);
+    NativeInlineSiteSymbol(NativeSession &Session, SymIndexId Id,
+                           const codeview::InlineSiteSym &Sym,
+                           uint64_t ParentAddr);
 
-  ~NativeInlineSiteSymbol() override;
+    ~NativeInlineSiteSymbol() override;
 
-  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-            PdbSymbolIdField RecurseIdFields) const override;
+    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+              PdbSymbolIdField RecurseIdFields) const override;
 
-  std::string getName() const override;
-  std::unique_ptr<IPDBEnumLineNumbers>
-  findInlineeLinesByVA(uint64_t VA, uint32_t Length) const override;
+    std::string getName() const override;
+    std::unique_ptr<IPDBEnumLineNumbers>
+    findInlineeLinesByVA(uint64_t VA, uint32_t Length) const override;
 
 private:
-  const codeview::InlineSiteSym Sym;
-  uint64_t ParentAddr;
+    const codeview::InlineSiteSym Sym;
+    uint64_t ParentAddr;
 
-  void getLineOffset(uint32_t OffsetInFunc, uint32_t &LineOffset,
-                     uint32_t &FileOffset) const;
+    void getLineOffset(uint32_t OffsetInFunc, uint32_t &LineOffset,
+                       uint32_t &FileOffset) const;
 };
 
 } // namespace pdb

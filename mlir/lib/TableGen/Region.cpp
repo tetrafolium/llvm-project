@@ -17,4 +17,6 @@ using namespace mlir;
 using namespace mlir::tblgen;
 
 // Returns true if this region is variadic.
-bool Region::isVariadic() const { return def->isSubClassOf("VariadicRegion"); }
+bool Region::isVariadic() const {
+    return def->isSubClassOf("VariadicRegion");
+}

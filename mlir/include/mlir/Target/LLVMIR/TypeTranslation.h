@@ -40,22 +40,22 @@ class TypeFromLLVMIRTranslatorImpl;
 /// reused in further translation.
 class TypeToLLVMIRTranslator {
 public:
-  TypeToLLVMIRTranslator(llvm::LLVMContext &context);
-  ~TypeToLLVMIRTranslator();
+    TypeToLLVMIRTranslator(llvm::LLVMContext &context);
+    ~TypeToLLVMIRTranslator();
 
-  /// Returns the perferred alignment for the type given the data layout. Note
-  /// that this will perform type conversion and store its results for future
-  /// uses.
-  // TODO: this should be removed when MLIR has proper data layout.
-  unsigned getPreferredAlignment(LLVM::LLVMType type,
-                                 const llvm::DataLayout &layout);
+    /// Returns the perferred alignment for the type given the data layout. Note
+    /// that this will perform type conversion and store its results for future
+    /// uses.
+    // TODO: this should be removed when MLIR has proper data layout.
+    unsigned getPreferredAlignment(LLVM::LLVMType type,
+                                   const llvm::DataLayout &layout);
 
-  /// Translates the given MLIR LLVM dialect type to LLVM IR.
-  llvm::Type *translateType(LLVM::LLVMType type);
+    /// Translates the given MLIR LLVM dialect type to LLVM IR.
+    llvm::Type *translateType(LLVM::LLVMType type);
 
 private:
-  /// Private implementation.
-  std::unique_ptr<detail::TypeToLLVMIRTranslatorImpl> impl;
+    /// Private implementation.
+    std::unique_ptr<detail::TypeToLLVMIRTranslatorImpl> impl;
 };
 
 /// Utility class to translate LLVM IR types to the MLIR LLVM dialect. Stores
@@ -63,15 +63,15 @@ private:
 /// reused across translations.
 class TypeFromLLVMIRTranslator {
 public:
-  TypeFromLLVMIRTranslator(MLIRContext &context);
-  ~TypeFromLLVMIRTranslator();
+    TypeFromLLVMIRTranslator(MLIRContext &context);
+    ~TypeFromLLVMIRTranslator();
 
-  /// Translates the given LLVM IR type to the MLIR LLVM dialect.
-  LLVM::LLVMType translateType(llvm::Type *type);
+    /// Translates the given LLVM IR type to the MLIR LLVM dialect.
+    LLVM::LLVMType translateType(llvm::Type *type);
 
 private:
-  /// Private implementation.
-  std::unique_ptr<detail::TypeFromLLVMIRTranslatorImpl> impl;
+    /// Private implementation.
+    std::unique_ptr<detail::TypeFromLLVMIRTranslatorImpl> impl;
 };
 
 } // namespace LLVM

@@ -33,18 +33,18 @@
 typedef uint64_t omp_nest_lock_t; /* arbitrary type of the right length */
 
 typedef enum omp_sched_t {
-  omp_sched_static = 1,  /* chunkSize >0 */
-  omp_sched_dynamic = 2, /* chunkSize >0 */
-  omp_sched_guided = 3,  /* chunkSize >0 */
-  omp_sched_auto = 4,    /* no chunkSize */
+    omp_sched_static = 1,  /* chunkSize >0 */
+    omp_sched_dynamic = 2, /* chunkSize >0 */
+    omp_sched_guided = 3,  /* chunkSize >0 */
+    omp_sched_auto = 4,    /* no chunkSize */
 } omp_sched_t;
 
 typedef enum omp_proc_bind_t {
-  omp_proc_bind_false = 0,
-  omp_proc_bind_true = 1,
-  omp_proc_bind_master = 2,
-  omp_proc_bind_close = 3,
-  omp_proc_bind_spread = 4
+    omp_proc_bind_false = 0,
+    omp_proc_bind_true = 1,
+    omp_proc_bind_master = 2,
+    omp_proc_bind_close = 3,
+    omp_proc_bind_spread = 4
 } omp_proc_bind_t;
 
 EXTERN double omp_get_wtick(void);
@@ -102,54 +102,54 @@ EXTERN int omp_get_max_task_priority(void);
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef enum kmp_sched_t {
-  kmp_sched_static_chunk = 33,
-  kmp_sched_static_nochunk = 34,
-  kmp_sched_dynamic = 35,
-  kmp_sched_guided = 36,
-  kmp_sched_runtime = 37,
-  kmp_sched_auto = 38,
+    kmp_sched_static_chunk = 33,
+    kmp_sched_static_nochunk = 34,
+    kmp_sched_dynamic = 35,
+    kmp_sched_guided = 36,
+    kmp_sched_runtime = 37,
+    kmp_sched_auto = 38,
 
-  kmp_sched_static_balanced_chunk = 45,
+    kmp_sched_static_balanced_chunk = 45,
 
-  kmp_sched_static_ordered = 65,
-  kmp_sched_static_nochunk_ordered = 66,
-  kmp_sched_dynamic_ordered = 67,
-  kmp_sched_guided_ordered = 68,
-  kmp_sched_runtime_ordered = 69,
-  kmp_sched_auto_ordered = 70,
+    kmp_sched_static_ordered = 65,
+    kmp_sched_static_nochunk_ordered = 66,
+    kmp_sched_dynamic_ordered = 67,
+    kmp_sched_guided_ordered = 68,
+    kmp_sched_runtime_ordered = 69,
+    kmp_sched_auto_ordered = 70,
 
-  kmp_sched_distr_static_chunk = 91,
-  kmp_sched_distr_static_nochunk = 92,
-  kmp_sched_distr_static_chunk_sched_static_chunkone = 93,
+    kmp_sched_distr_static_chunk = 91,
+    kmp_sched_distr_static_nochunk = 92,
+    kmp_sched_distr_static_chunk_sched_static_chunkone = 93,
 
-  kmp_sched_default = kmp_sched_static_nochunk,
-  kmp_sched_unordered_first = kmp_sched_static_chunk,
-  kmp_sched_unordered_last = kmp_sched_auto,
-  kmp_sched_ordered_first = kmp_sched_static_ordered,
-  kmp_sched_ordered_last = kmp_sched_auto_ordered,
-  kmp_sched_distribute_first = kmp_sched_distr_static_chunk,
-  kmp_sched_distribute_last =
-      kmp_sched_distr_static_chunk_sched_static_chunkone,
+    kmp_sched_default = kmp_sched_static_nochunk,
+    kmp_sched_unordered_first = kmp_sched_static_chunk,
+    kmp_sched_unordered_last = kmp_sched_auto,
+    kmp_sched_ordered_first = kmp_sched_static_ordered,
+    kmp_sched_ordered_last = kmp_sched_auto_ordered,
+    kmp_sched_distribute_first = kmp_sched_distr_static_chunk,
+    kmp_sched_distribute_last =
+        kmp_sched_distr_static_chunk_sched_static_chunkone,
 
-  /* Support for OpenMP 4.5 monotonic and nonmonotonic schedule modifiers.
-   * Since we need to distinguish the three possible cases (no modifier,
-   * monotonic modifier, nonmonotonic modifier), we need separate bits for
-   * each modifier. The absence of monotonic does not imply nonmonotonic,
-   * especially since 4.5 says that the behaviour of the "no modifier" case
-   * is implementation defined in 4.5, but will become "nonmonotonic" in 5.0.
-   *
-   * Since we're passing a full 32 bit value, we can use a couple of high
-   * bits for these flags; out of paranoia we avoid the sign bit.
-   *
-   * These modifiers can be or-ed into non-static schedules by the compiler
-   * to pass the additional information. They will be stripped early in the
-   * processing in __kmp_dispatch_init when setting up schedules, so
-   * most of the code won't ever see schedules with these bits set.
-   */
-  kmp_sched_modifier_monotonic = (1 << 29),
-  /**< Set if the monotonic schedule modifier was present */
-  kmp_sched_modifier_nonmonotonic = (1 << 30),
-/**< Set if the nonmonotonic schedule modifier was present */
+    /* Support for OpenMP 4.5 monotonic and nonmonotonic schedule modifiers.
+     * Since we need to distinguish the three possible cases (no modifier,
+     * monotonic modifier, nonmonotonic modifier), we need separate bits for
+     * each modifier. The absence of monotonic does not imply nonmonotonic,
+     * especially since 4.5 says that the behaviour of the "no modifier" case
+     * is implementation defined in 4.5, but will become "nonmonotonic" in 5.0.
+     *
+     * Since we're passing a full 32 bit value, we can use a couple of high
+     * bits for these flags; out of paranoia we avoid the sign bit.
+     *
+     * These modifiers can be or-ed into non-static schedules by the compiler
+     * to pass the additional information. They will be stripped early in the
+     * processing in __kmp_dispatch_init when setting up schedules, so
+     * most of the code won't ever see schedules with these bits set.
+     */
+    kmp_sched_modifier_monotonic = (1 << 29),
+    /**< Set if the monotonic schedule modifier was present */
+    kmp_sched_modifier_nonmonotonic = (1 << 30),
+    /**< Set if the nonmonotonic schedule modifier was present */
 
 #define SCHEDULE_WITHOUT_MODIFIERS(s)                                          \
   (enum kmp_sched_t)(                                                          \
@@ -167,10 +167,10 @@ typedef enum kmp_sched_t {
  * Enum for accesseing the reserved_2 field of the ident_t struct below.
  */
 enum {
-  /*! Bit set to 1 when in SPMD mode. */
-  KMP_IDENT_SPMD_MODE = 0x01,
-  /*! Bit set to 1 when a simplified runtime is used. */
-  KMP_IDENT_SIMPLE_RT_MODE = 0x02,
+    /*! Bit set to 1 when in SPMD mode. */
+    KMP_IDENT_SPMD_MODE = 0x01,
+    /*! Bit set to 1 when a simplified runtime is used. */
+    KMP_IDENT_SIMPLE_RT_MODE = 0x02,
 };
 
 /*!
@@ -180,12 +180,12 @@ enum {
  */
 typedef int kmp_int32;
 typedef struct ident {
-  kmp_int32 reserved_1; /**<  might be used in Fortran; see above  */
-  kmp_int32 flags; /**<  also f.flags; KMP_IDENT_xxx flags; KMP_IDENT_KMPC
+    kmp_int32 reserved_1; /**<  might be used in Fortran; see above  */
+    kmp_int32 flags; /**<  also f.flags; KMP_IDENT_xxx flags; KMP_IDENT_KMPC
                       identifies this union member  */
-  kmp_int32 reserved_2; /**<  not really used in Fortran any more; see above */
-  kmp_int32 reserved_3; /**<  source[4] in Fortran, do not use for C++  */
-  char const *psource; /**<  String describing the source location.
+    kmp_int32 reserved_2; /**<  not really used in Fortran any more; see above */
+    kmp_int32 reserved_3; /**<  source[4] in Fortran, do not use for C++  */
+    char const *psource; /**<  String describing the source location.
                        The string is composed of semi-colon separated fields
                        which describe the source file, the function and a pair
                        of line numbers that delimit the construct. */
@@ -203,10 +203,10 @@ typedef void (*kmp_ListGlobalFctPtr)(void *buffer, int idx, void *reduce_data);
 typedef struct kmp_TaskDescr kmp_TaskDescr;
 typedef int32_t (*kmp_TaskFctPtr)(int32_t global_tid, kmp_TaskDescr *taskDescr);
 typedef struct kmp_TaskDescr {
-  void *sharedPointerTable;   // ptr to a table of shared var ptrs
-  kmp_TaskFctPtr sub;         // task subroutine
-  int32_t partId;             // unused
-  kmp_TaskFctPtr destructors; // destructor of c++ first private
+    void *sharedPointerTable;   // ptr to a table of shared var ptrs
+    kmp_TaskFctPtr sub;         // task subroutine
+    int32_t partId;             // unused
+    kmp_TaskFctPtr destructors; // destructor of c++ first private
 } kmp_TaskDescr;
 
 // sync defs
@@ -222,7 +222,7 @@ EXTERN void __kmpc_push_num_threads(kmp_Ident *loc, int32_t global_tid,
                                     int32_t num_threads);
 EXTERN void __kmpc_serialized_parallel(kmp_Ident *loc, uint32_t global_tid);
 EXTERN void __kmpc_end_serialized_parallel(kmp_Ident *loc,
-                                           uint32_t global_tid);
+        uint32_t global_tid);
 EXTERN uint16_t __kmpc_parallel_level(kmp_Ident *loc, uint32_t global_tid);
 
 // proc bind
@@ -258,35 +258,35 @@ EXTERN void __kmpc_for_static_init_8u(kmp_Ident *loc, int32_t global_tid,
                                       int64_t chunk);
 EXTERN
 void __kmpc_for_static_init_4_simple_spmd(kmp_Ident *loc, int32_t global_tid,
-                                          int32_t sched, int32_t *plastiter,
-                                          int32_t *plower, int32_t *pupper,
-                                          int32_t *pstride, int32_t incr,
-                                          int32_t chunk);
+        int32_t sched, int32_t *plastiter,
+        int32_t *plower, int32_t *pupper,
+        int32_t *pstride, int32_t incr,
+        int32_t chunk);
 EXTERN
 void __kmpc_for_static_init_4u_simple_spmd(kmp_Ident *loc, int32_t global_tid,
-                                           int32_t sched, int32_t *plastiter,
-                                           uint32_t *plower, uint32_t *pupper,
-                                           int32_t *pstride, int32_t incr,
-                                           int32_t chunk);
+        int32_t sched, int32_t *plastiter,
+        uint32_t *plower, uint32_t *pupper,
+        int32_t *pstride, int32_t incr,
+        int32_t chunk);
 EXTERN
 void __kmpc_for_static_init_8_simple_spmd(kmp_Ident *loc, int32_t global_tid,
-                                          int32_t sched, int32_t *plastiter,
-                                          int64_t *plower, int64_t *pupper,
-                                          int64_t *pstride, int64_t incr,
-                                          int64_t chunk);
+        int32_t sched, int32_t *plastiter,
+        int64_t *plower, int64_t *pupper,
+        int64_t *pstride, int64_t incr,
+        int64_t chunk);
 EXTERN
 void __kmpc_for_static_init_8u_simple_spmd(kmp_Ident *loc, int32_t global_tid,
-                                           int32_t sched, int32_t *plastiter1,
-                                           uint64_t *plower, uint64_t *pupper,
-                                           int64_t *pstride, int64_t incr,
-                                           int64_t chunk);
+        int32_t sched, int32_t *plastiter1,
+        uint64_t *plower, uint64_t *pupper,
+        int64_t *pstride, int64_t incr,
+        int64_t chunk);
 EXTERN
 void __kmpc_for_static_init_4_simple_generic(kmp_Ident *loc,
-                                             int32_t global_tid, int32_t sched,
-                                             int32_t *plastiter,
-                                             int32_t *plower, int32_t *pupper,
-                                             int32_t *pstride, int32_t incr,
-                                             int32_t chunk);
+        int32_t global_tid, int32_t sched,
+        int32_t *plastiter,
+        int32_t *plower, int32_t *pupper,
+        int32_t *pstride, int32_t incr,
+        int32_t chunk);
 EXTERN
 void __kmpc_for_static_init_4u_simple_generic(
     kmp_Ident *loc, int32_t global_tid, int32_t sched, int32_t *plastiter,
@@ -294,11 +294,11 @@ void __kmpc_for_static_init_4u_simple_generic(
     int32_t chunk);
 EXTERN
 void __kmpc_for_static_init_8_simple_generic(kmp_Ident *loc,
-                                             int32_t global_tid, int32_t sched,
-                                             int32_t *plastiter,
-                                             int64_t *plower, int64_t *pupper,
-                                             int64_t *pstride, int64_t incr,
-                                             int64_t chunk);
+        int32_t global_tid, int32_t sched,
+        int32_t *plastiter,
+        int64_t *plower, int64_t *pupper,
+        int64_t *pstride, int64_t incr,
+        int64_t chunk);
 EXTERN
 void __kmpc_for_static_init_8u_simple_generic(
     kmp_Ident *loc, int32_t global_tid, int32_t sched, int32_t *plastiter1,
@@ -384,21 +384,21 @@ EXTERN void __kmpc_syncwarp(__kmpc_impl_lanemask_t);
 
 // tasks
 EXTERN kmp_TaskDescr *__kmpc_omp_task_alloc(kmp_Ident *loc,
-                                            uint32_t global_tid, int32_t flag,
-                                            size_t sizeOfTaskInclPrivate,
-                                            size_t sizeOfSharedTable,
-                                            kmp_TaskFctPtr sub);
+        uint32_t global_tid, int32_t flag,
+        size_t sizeOfTaskInclPrivate,
+        size_t sizeOfSharedTable,
+        kmp_TaskFctPtr sub);
 EXTERN int32_t __kmpc_omp_task(kmp_Ident *loc, uint32_t global_tid,
                                kmp_TaskDescr *newLegacyTaskDescr);
 EXTERN int32_t __kmpc_omp_task_with_deps(kmp_Ident *loc, uint32_t global_tid,
-                                         kmp_TaskDescr *newLegacyTaskDescr,
-                                         int32_t depNum, void *depList,
-                                         int32_t noAliasDepNum,
-                                         void *noAliasDepList);
+        kmp_TaskDescr *newLegacyTaskDescr,
+        int32_t depNum, void *depList,
+        int32_t noAliasDepNum,
+        void *noAliasDepList);
 EXTERN void __kmpc_omp_task_begin_if0(kmp_Ident *loc, uint32_t global_tid,
                                       kmp_TaskDescr *newLegacyTaskDescr);
 EXTERN void __kmpc_omp_task_complete_if0(kmp_Ident *loc, uint32_t global_tid,
-                                         kmp_TaskDescr *newLegacyTaskDescr);
+        kmp_TaskDescr *newLegacyTaskDescr);
 EXTERN void __kmpc_omp_wait_deps(kmp_Ident *loc, uint32_t global_tid,
                                  int32_t depNum, void *depList,
                                  int32_t noAliasDepNum, void *noAliasDepList);
@@ -431,7 +431,7 @@ EXTERN void __kmpc_kernel_end_parallel();
 EXTERN void __kmpc_data_sharing_init_stack();
 EXTERN void __kmpc_data_sharing_init_stack_spmd();
 EXTERN void *__kmpc_data_sharing_coalesced_push_stack(size_t size,
-    int16_t UseSharedMemory);
+        int16_t UseSharedMemory);
 EXTERN void *__kmpc_data_sharing_push_stack(size_t size, int16_t UseSharedMemory);
 EXTERN void __kmpc_data_sharing_pop_stack(void *a);
 EXTERN void __kmpc_begin_sharing_variables(void ***GlobalArgs, size_t nArgs);
@@ -442,10 +442,10 @@ EXTERN void __kmpc_get_shared_variables(void ***GlobalArgs);
 EXTERN int8_t __kmpc_is_spmd_exec_mode();
 
 EXTERN void __kmpc_get_team_static_memory(int16_t isSPMDExecutionMode,
-                                          const void *buf, size_t size,
-                                          int16_t is_shared, const void **res);
+        const void *buf, size_t size,
+        int16_t is_shared, const void **res);
 
 EXTERN void __kmpc_restore_team_static_memory(int16_t isSPMDExecutionMode,
-                                              int16_t is_shared);
+        int16_t is_shared);
 
 #endif

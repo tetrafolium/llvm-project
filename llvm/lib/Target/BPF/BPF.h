@@ -41,25 +41,29 @@ void initializeBPFMIPreEmitCheckingPass(PassRegistry&);
 
 class BPFAbstractMemberAccessPass
     : public PassInfoMixin<BPFAbstractMemberAccessPass> {
-  BPFTargetMachine *TM;
+    BPFTargetMachine *TM;
 
 public:
-  BPFAbstractMemberAccessPass(BPFTargetMachine *TM) : TM(TM) {}
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    BPFAbstractMemberAccessPass(BPFTargetMachine *TM) : TM(TM) {}
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-  static bool isRequired() { return true; }
+    static bool isRequired() {
+        return true;
+    }
 };
 
 class BPFPreserveDITypePass : public PassInfoMixin<BPFPreserveDITypePass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-  static bool isRequired() { return true; }
+    static bool isRequired() {
+        return true;
+    }
 };
 
 class BPFAdjustOptPass : public PassInfoMixin<BPFAdjustOptPass> {
 public:
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 } // namespace llvm
 

@@ -49,10 +49,10 @@ int __llvm_profile_write_buffer_internal(
  * nonzero, ElmSize*NumElm zero bytes are written.
  */
 typedef struct ProfDataIOVec {
-  const void *Data;
-  size_t ElmSize;
-  size_t NumElm;
-  int UseZeroPadding;
+    const void *Data;
+    size_t ElmSize;
+    size_t NumElm;
+    int UseZeroPadding;
 } ProfDataIOVec;
 
 struct ProfDataWriter;
@@ -60,22 +60,22 @@ typedef uint32_t (*WriterCallback)(struct ProfDataWriter *This, ProfDataIOVec *,
                                    uint32_t NumIOVecs);
 
 typedef struct ProfDataWriter {
-  WriterCallback Write;
-  void *WriterCtx;
+    WriterCallback Write;
+    void *WriterCtx;
 } ProfDataWriter;
 
 /*!
  * The data structure for buffered IO of profile data.
  */
 typedef struct ProfBufferIO {
-  ProfDataWriter *FileWriter;
-  uint32_t OwnFileWriter;
-  /* The start of the buffer. */
-  uint8_t *BufferStart;
-  /* Total size of the buffer. */
-  uint32_t BufferSz;
-  /* Current byte offset from the start of the buffer. */
-  uint32_t CurOffset;
+    ProfDataWriter *FileWriter;
+    uint32_t OwnFileWriter;
+    /* The start of the buffer. */
+    uint8_t *BufferStart;
+    /* Total size of the buffer. */
+    uint32_t BufferSz;
+    /* Current byte offset from the start of the buffer. */
+    uint32_t CurOffset;
 } ProfBufferIO;
 
 /* The creator interface used by testing.  */
@@ -121,28 +121,28 @@ struct ValueProfNode;
  * data for streaming/serialization from the instrumentation runtime.
  */
 typedef struct VPDataReaderType {
-  uint32_t (*InitRTRecord)(const __llvm_profile_data *Data,
-                           uint8_t *SiteCountArray[]);
-  /* Function pointer to getValueProfRecordHeader method. */
-  uint32_t (*GetValueProfRecordHeaderSize)(uint32_t NumSites);
-  /* Function pointer to getFristValueProfRecord method. */  
-  struct ValueProfRecord *(*GetFirstValueProfRecord)(struct ValueProfData *);
-  /* Return the number of value data for site \p Site.  */
-  uint32_t (*GetNumValueDataForSite)(uint32_t VK, uint32_t Site);
-  /* Return the total size of the value profile data of the 
-   * current function.  */
-  uint32_t (*GetValueProfDataSize)(void);
-  /*! 
-   * Read the next \p N value data for site \p Site and store the data
-   * in \p Dst. \p StartNode is the first value node to start with if
-   * it is not null. The function returns the pointer to the value
-   * node pointer to be used as the \p StartNode of the next batch reading.
-   * If there is nothing left, it returns NULL.
-   */
-  struct ValueProfNode *(*GetValueData)(uint32_t ValueKind, uint32_t Site,
-                                        struct InstrProfValueData *Dst,
-                                        struct ValueProfNode *StartNode,
-                                        uint32_t N);
+    uint32_t (*InitRTRecord)(const __llvm_profile_data *Data,
+                             uint8_t *SiteCountArray[]);
+    /* Function pointer to getValueProfRecordHeader method. */
+    uint32_t (*GetValueProfRecordHeaderSize)(uint32_t NumSites);
+    /* Function pointer to getFristValueProfRecord method. */
+    struct ValueProfRecord *(*GetFirstValueProfRecord)(struct ValueProfData *);
+    /* Return the number of value data for site \p Site.  */
+    uint32_t (*GetNumValueDataForSite)(uint32_t VK, uint32_t Site);
+    /* Return the total size of the value profile data of the
+     * current function.  */
+    uint32_t (*GetValueProfDataSize)(void);
+    /*!
+     * Read the next \p N value data for site \p Site and store the data
+     * in \p Dst. \p StartNode is the first value node to start with if
+     * it is not null. The function returns the pointer to the value
+     * node pointer to be used as the \p StartNode of the next batch reading.
+     * If there is nothing left, it returns NULL.
+     */
+    struct ValueProfNode *(*GetValueData)(uint32_t ValueKind, uint32_t Site,
+                                          struct InstrProfValueData *Dst,
+                                          struct ValueProfNode *StartNode,
+                                          uint32_t N);
 } VPDataReaderType;
 
 /* Write profile data to destinitation. If SkipNameDataWrite is set to 1,
@@ -164,7 +164,7 @@ void lprofMergeValueProfData(struct ValueProfData *SrcValueProfData,
 
 VPDataReaderType *lprofGetVPDataReader();
 
-/* Internal interface used by test to reset the max number of 
+/* Internal interface used by test to reset the max number of
  * tracked values per value site to be \p MaxVals.
  */
 void lprofSetMaxValsPerSite(uint32_t MaxVals);
@@ -177,7 +177,7 @@ void lprofSetupValueProfiler();
  * to dump merged profile data into its own profile file. */
 uint64_t lprofGetLoadModuleSignature();
 
-/* 
+/*
  * Return non zero value if the profile data has already been
  * dumped to the file.
  */

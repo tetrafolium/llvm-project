@@ -46,9 +46,9 @@ using ProfileCount = Function::ProfileCount;
 
 /// Initial synthetic count assigned to functions.
 cl::opt<int>
-    InitialSyntheticCount("initial-synthetic-count", cl::Hidden, cl::init(10),
-                          cl::ZeroOrMore,
-                          cl::desc("Initial value of synthetic entry count."));
+InitialSyntheticCount("initial-synthetic-count", cl::Hidden, cl::init(10),
+                      cl::ZeroOrMore,
+                      cl::desc("Initial value of synthetic entry count."));
 
 /// Initial synthetic count assigned to inline functions.
 static cl::opt<int> InlineSyntheticCount(
@@ -63,82 +63,84 @@ static cl::opt<int> ColdSyntheticCount(
 // Assign initial synthetic entry counts to functions.
 static void
 initializeCounts(Module &M, function_ref<void(Function *, uint64_t)> SetCount) {
-  auto MayHaveIndirectCalls = [](Function &F) {
-    for (auto *U : F.users()) {
-      if (!isa<CallInst>(U) && !isa<InvokeInst>(U))
-        return true;
-    }
-    return false;
-  };
+    auto MayHaveIndirectCalls = [](Function &F) {
+        for (auto *U : F.users()) {
+            if (!isa<CallInst>(U) && !isa<InvokeInst>(U))
+                return true;
+        }
+        return false;
+    };
 
-  for (Function &F : M) {
-    uint64_t InitialCount = InitialSyntheticCount;
-    if (F.isDeclaration())
-      continue;
-    if (F.hasFnAttribute(Attribute::AlwaysInline) ||
-        F.hasFnAttribute(Attribute::InlineHint)) {
-      // Use a higher value for inline functions to account for the fact that
-      // these are usually beneficial to inline.
-      InitialCount = InlineSyntheticCount;
-    } else if (F.hasLocalLinkage() && !MayHaveIndirectCalls(F)) {
-      // Local functions without inline hints get counts only through
-      // propagation.
-      InitialCount = 0;
-    } else if (F.hasFnAttribute(Attribute::Cold) ||
-               F.hasFnAttribute(Attribute::NoInline)) {
-      // Use a lower value for noinline and cold functions.
-      InitialCount = ColdSyntheticCount;
+    for (Function &F : M) {
+        uint64_t InitialCount = InitialSyntheticCount;
+        if (F.isDeclaration())
+            continue;
+        if (F.hasFnAttribute(Attribute::AlwaysInline) ||
+                F.hasFnAttribute(Attribute::InlineHint)) {
+            // Use a higher value for inline functions to account for the fact that
+            // these are usually beneficial to inline.
+            InitialCount = InlineSyntheticCount;
+        } else if (F.hasLocalLinkage() && !MayHaveIndirectCalls(F)) {
+            // Local functions without inline hints get counts only through
+            // propagation.
+            InitialCount = 0;
+        } else if (F.hasFnAttribute(Attribute::Cold) ||
+                   F.hasFnAttribute(Attribute::NoInline)) {
+            // Use a lower value for noinline and cold functions.
+            InitialCount = ColdSyntheticCount;
+        }
+        SetCount(&F, InitialCount);
     }
-    SetCount(&F, InitialCount);
-  }
 }
 
 PreservedAnalyses SyntheticCountsPropagation::run(Module &M,
-                                                  ModuleAnalysisManager &MAM) {
-  FunctionAnalysisManager &FAM =
-      MAM.getResult<FunctionAnalysisManagerModuleProxy>(M).getManager();
-  DenseMap<Function *, Scaled64> Counts;
-  // Set initial entry counts.
-  initializeCounts(
-      M, [&](Function *F, uint64_t Count) { Counts[F] = Scaled64(Count, 0); });
+        ModuleAnalysisManager &MAM) {
+    FunctionAnalysisManager &FAM =
+        MAM.getResult<FunctionAnalysisManagerModuleProxy>(M).getManager();
+    DenseMap<Function *, Scaled64> Counts;
+    // Set initial entry counts.
+    initializeCounts(
+    M, [&](Function *F, uint64_t Count) {
+        Counts[F] = Scaled64(Count, 0);
+    });
 
-  // Edge includes information about the source. Hence ignore the first
-  // parameter.
-  auto GetCallSiteProfCount = [&](const CallGraphNode *,
-                                  const CallGraphNode::CallRecord &Edge) {
-    Optional<Scaled64> Res = None;
-    if (!Edge.first)
-      return Res;
-    CallBase &CB = *cast<CallBase>(*Edge.first);
-    Function *Caller = CB.getCaller();
-    auto &BFI = FAM.getResult<BlockFrequencyAnalysis>(*Caller);
+    // Edge includes information about the source. Hence ignore the first
+    // parameter.
+    auto GetCallSiteProfCount = [&](const CallGraphNode *,
+    const CallGraphNode::CallRecord &Edge) {
+        Optional<Scaled64> Res = None;
+        if (!Edge.first)
+            return Res;
+        CallBase &CB = *cast<CallBase>(*Edge.first);
+        Function *Caller = CB.getCaller();
+        auto &BFI = FAM.getResult<BlockFrequencyAnalysis>(*Caller);
 
-    // Now compute the callsite count from relative frequency and
-    // entry count:
-    BasicBlock *CSBB = CB.getParent();
-    Scaled64 EntryFreq(BFI.getEntryFreq(), 0);
-    Scaled64 BBCount(BFI.getBlockFreq(CSBB).getFrequency(), 0);
-    BBCount /= EntryFreq;
-    BBCount *= Counts[Caller];
-    return Optional<Scaled64>(BBCount);
-  };
+        // Now compute the callsite count from relative frequency and
+        // entry count:
+        BasicBlock *CSBB = CB.getParent();
+        Scaled64 EntryFreq(BFI.getEntryFreq(), 0);
+        Scaled64 BBCount(BFI.getBlockFreq(CSBB).getFrequency(), 0);
+        BBCount /= EntryFreq;
+        BBCount *= Counts[Caller];
+        return Optional<Scaled64>(BBCount);
+    };
 
-  CallGraph CG(M);
-  // Propgate the entry counts on the callgraph.
-  SyntheticCountsUtils<const CallGraph *>::propagate(
-      &CG, GetCallSiteProfCount, [&](const CallGraphNode *N, Scaled64 New) {
+    CallGraph CG(M);
+    // Propgate the entry counts on the callgraph.
+    SyntheticCountsUtils<const CallGraph *>::propagate(
+    &CG, GetCallSiteProfCount, [&](const CallGraphNode *N, Scaled64 New) {
         auto F = N->getFunction();
         if (!F || F->isDeclaration())
-          return;
+            return;
 
         Counts[F] += New;
-      });
+    });
 
-  // Set the counts as metadata.
-  for (auto Entry : Counts) {
-    Entry.first->setEntryCount(ProfileCount(
-        Entry.second.template toInt<uint64_t>(), Function::PCT_Synthetic));
-  }
+    // Set the counts as metadata.
+    for (auto Entry : Counts) {
+        Entry.first->setEntryCount(ProfileCount(
+                                       Entry.second.template toInt<uint64_t>(), Function::PCT_Synthetic));
+    }
 
-  return PreservedAnalyses::all();
+    return PreservedAnalyses::all();
 }

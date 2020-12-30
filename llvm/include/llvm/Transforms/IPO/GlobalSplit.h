@@ -25,7 +25,7 @@ class Module;
 /// Pass to perform split of global variables.
 class GlobalSplitPass : public PassInfoMixin<GlobalSplitPass> {
 public:
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

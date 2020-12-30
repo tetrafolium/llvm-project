@@ -30,12 +30,12 @@ namespace ento {
 /// from a model file.
 class ModelConsumer : public ASTConsumer {
 public:
-  ModelConsumer(llvm::StringMap<Stmt *> &Bodies);
+    ModelConsumer(llvm::StringMap<Stmt *> &Bodies);
 
-  bool HandleTopLevelDecl(DeclGroupRef D) override;
+    bool HandleTopLevelDecl(DeclGroupRef D) override;
 
 private:
-  llvm::StringMap<Stmt *> &Bodies;
+    llvm::StringMap<Stmt *> &Bodies;
 };
 }
 }

@@ -33,20 +33,20 @@ void computeMultiplierAndShift(double scale, int32_t &multiplier,
 
 //// Builds ConvOpQuantizationAttr from input and weight.
 ConvOpQuantizationAttr buildConvOpQuantizationAttr(OpBuilder &builder,
-                                                   Value input, Value weight);
+        Value input, Value weight);
 
 //// Builds MatMulOpQuantizationAttr for MatMul operations from A and B.
 MatMulOpQuantizationAttr buildMatMulOpQuantizationAttr(OpBuilder &builder,
-                                                       Value a, Value b);
+        Value a, Value b);
 
 //// Builds UnaryOpQuantizationAttr for unary operations from input values.
 UnaryOpQuantizationAttr buildUnaryOpQuantizationAttr(OpBuilder &builder,
-                                                     Value input,
-                                                     Type outputRawType);
+        Value input,
+        Type outputRawType);
 
 //// Builds PadOpQuantizationAttr for pad operations from input values.
 PadOpQuantizationAttr buildPadOpQuantizationAttr(OpBuilder &builder,
-                                                 Value input);
+        Value input);
 
 //// construct ConvOp output type with correct bitwidth based on input/weight
 /// width.

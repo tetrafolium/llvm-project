@@ -13,7 +13,7 @@
 
 class OsLogger {
 public:
-  static DNBCallbackLog GetLogFunction();
+    static DNBCallbackLog GetLogFunction();
 };
 
 #endif // LLDB_TOOLS_DEBUGSERVER_SOURCE_MACOSX_OSLOGGER_H

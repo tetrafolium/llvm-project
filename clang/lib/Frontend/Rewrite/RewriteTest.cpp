@@ -16,23 +16,23 @@
 #include "llvm/Support/raw_ostream.h"
 
 void clang::DoRewriteTest(Preprocessor &PP, raw_ostream *OS) {
-  SourceManager &SM = PP.getSourceManager();
-  const LangOptions &LangOpts = PP.getLangOpts();
+    SourceManager &SM = PP.getSourceManager();
+    const LangOptions &LangOpts = PP.getLangOpts();
 
-  TokenRewriter Rewriter(SM.getMainFileID(), SM, LangOpts);
+    TokenRewriter Rewriter(SM.getMainFileID(), SM, LangOpts);
 
-  // Throw <i> </i> tags around comments.
-  for (TokenRewriter::token_iterator I = Rewriter.token_begin(),
-       E = Rewriter.token_end(); I != E; ++I) {
-    if (I->isNot(tok::comment)) continue;
+    // Throw <i> </i> tags around comments.
+    for (TokenRewriter::token_iterator I = Rewriter.token_begin(),
+            E = Rewriter.token_end(); I != E; ++I) {
+        if (I->isNot(tok::comment)) continue;
 
-    Rewriter.AddTokenBefore(I, "<i>");
-    Rewriter.AddTokenAfter(I, "</i>");
-  }
+        Rewriter.AddTokenBefore(I, "<i>");
+        Rewriter.AddTokenAfter(I, "</i>");
+    }
 
 
-  // Print out the output.
-  for (TokenRewriter::token_iterator I = Rewriter.token_begin(),
-       E = Rewriter.token_end(); I != E; ++I)
-    *OS << PP.getSpelling(*I);
+    // Print out the output.
+    for (TokenRewriter::token_iterator I = Rewriter.token_begin(),
+            E = Rewriter.token_end(); I != E; ++I)
+        *OS << PP.getSpelling(*I);
 }

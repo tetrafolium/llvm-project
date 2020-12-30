@@ -26,25 +26,25 @@ class MCInst;
 class raw_ostream;
 class TargetMachine;
 
-  class HexagonAsmPrinter : public AsmPrinter {
+class HexagonAsmPrinter : public AsmPrinter {
     const HexagonSubtarget *Subtarget = nullptr;
 
-  public:
+public:
     explicit HexagonAsmPrinter(TargetMachine &TM,
                                std::unique_ptr<MCStreamer> Streamer)
-      : AsmPrinter(TM, std::move(Streamer)) {}
+        : AsmPrinter(TM, std::move(Streamer)) {}
 
     bool runOnMachineFunction(MachineFunction &Fn) override {
-      Subtarget = &Fn.getSubtarget<HexagonSubtarget>();
-      return AsmPrinter::runOnMachineFunction(Fn);
+        Subtarget = &Fn.getSubtarget<HexagonSubtarget>();
+        return AsmPrinter::runOnMachineFunction(Fn);
     }
 
     StringRef getPassName() const override {
-      return "Hexagon Assembly Printer";
+        return "Hexagon Assembly Printer";
     }
 
     bool isBlockOnlyReachableByFallthrough(const MachineBasicBlock *MBB)
-          const override;
+    const override;
 
     void emitInstruction(const MachineInstr *MI) override;
     void HexagonProcessInstruction(MCInst &Inst, const MachineInstr &MBB);
@@ -54,7 +54,7 @@ class TargetMachine;
                          const char *ExtraCode, raw_ostream &OS) override;
     bool PrintAsmMemoryOperand(const MachineInstr *MI, unsigned OpNo,
                                const char *ExtraCode, raw_ostream &OS) override;
-  };
+};
 
 } // end namespace llvm
 

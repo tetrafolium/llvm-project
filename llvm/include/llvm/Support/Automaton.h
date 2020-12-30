@@ -46,12 +46,12 @@ using NfaPath = SmallVector<uint64_t, 4>;
 /// orders of magnitude) parsing speedup by using a custom struct here with a
 /// trivial constructor rather than std::pair<uint64_t, uint64_t>.
 struct NfaStatePair {
-  uint64_t FromDfaState, ToDfaState;
+    uint64_t FromDfaState, ToDfaState;
 
-  bool operator<(const NfaStatePair &Other) const {
-    return std::make_tuple(FromDfaState, ToDfaState) <
-           std::make_tuple(Other.FromDfaState, Other.ToDfaState);
-  }
+    bool operator<(const NfaStatePair &Other) const {
+        return std::make_tuple(FromDfaState, ToDfaState) <
+               std::make_tuple(Other.FromDfaState, Other.ToDfaState);
+    }
 };
 
 namespace internal {
@@ -59,98 +59,98 @@ namespace internal {
 /// on a path through the DFA.
 class NfaTranscriber {
 private:
-  /// Cached transition table. This is a table of NfaStatePairs that contains
-  /// zero-terminated sequences pointed to by DFA transitions.
-  ArrayRef<NfaStatePair> TransitionInfo;
+    /// Cached transition table. This is a table of NfaStatePairs that contains
+    /// zero-terminated sequences pointed to by DFA transitions.
+    ArrayRef<NfaStatePair> TransitionInfo;
 
-  /// A simple linked-list of traversed states that can have a shared tail. The
-  /// traversed path is stored in reverse order with the latest state as the
-  /// head.
-  struct PathSegment {
-    uint64_t State;
-    PathSegment *Tail;
-  };
+    /// A simple linked-list of traversed states that can have a shared tail. The
+    /// traversed path is stored in reverse order with the latest state as the
+    /// head.
+    struct PathSegment {
+        uint64_t State;
+        PathSegment *Tail;
+    };
 
-  /// We allocate segment objects frequently. Allocate them upfront and dispose
-  /// at the end of a traversal rather than hammering the system allocator.
-  SpecificBumpPtrAllocator<PathSegment> Allocator;
+    /// We allocate segment objects frequently. Allocate them upfront and dispose
+    /// at the end of a traversal rather than hammering the system allocator.
+    SpecificBumpPtrAllocator<PathSegment> Allocator;
 
-  /// Heads of each tracked path. These are not ordered.
-  std::deque<PathSegment *> Heads;
+    /// Heads of each tracked path. These are not ordered.
+    std::deque<PathSegment *> Heads;
 
-  /// The returned paths. This is populated during getPaths.
-  SmallVector<NfaPath, 4> Paths;
+    /// The returned paths. This is populated during getPaths.
+    SmallVector<NfaPath, 4> Paths;
 
-  /// Create a new segment and return it.
-  PathSegment *makePathSegment(uint64_t State, PathSegment *Tail) {
-    PathSegment *P = Allocator.Allocate();
-    *P = {State, Tail};
-    return P;
-  }
-
-  /// Pairs defines a sequence of possible NFA transitions for a single DFA
-  /// transition.
-  void transition(ArrayRef<NfaStatePair> Pairs) {
-    // Iterate over all existing heads. We will mutate the Heads deque during
-    // iteration.
-    unsigned NumHeads = Heads.size();
-    for (unsigned I = 0; I < NumHeads; ++I) {
-      PathSegment *Head = Heads[I];
-      // The sequence of pairs is sorted. Select the set of pairs that
-      // transition from the current head state.
-      auto PI = lower_bound(Pairs, NfaStatePair{Head->State, 0ULL});
-      auto PE = upper_bound(Pairs, NfaStatePair{Head->State, INT64_MAX});
-      // For every transition from the current head state, add a new path
-      // segment.
-      for (; PI != PE; ++PI)
-        if (PI->FromDfaState == Head->State)
-          Heads.push_back(makePathSegment(PI->ToDfaState, Head));
+    /// Create a new segment and return it.
+    PathSegment *makePathSegment(uint64_t State, PathSegment *Tail) {
+        PathSegment *P = Allocator.Allocate();
+        *P = {State, Tail};
+        return P;
     }
-    // Now we've iterated over all the initial heads and added new ones,
-    // dispose of the original heads.
-    Heads.erase(Heads.begin(), std::next(Heads.begin(), NumHeads));
-  }
+
+    /// Pairs defines a sequence of possible NFA transitions for a single DFA
+    /// transition.
+    void transition(ArrayRef<NfaStatePair> Pairs) {
+        // Iterate over all existing heads. We will mutate the Heads deque during
+        // iteration.
+        unsigned NumHeads = Heads.size();
+        for (unsigned I = 0; I < NumHeads; ++I) {
+            PathSegment *Head = Heads[I];
+            // The sequence of pairs is sorted. Select the set of pairs that
+            // transition from the current head state.
+            auto PI = lower_bound(Pairs, NfaStatePair{Head->State, 0ULL});
+            auto PE = upper_bound(Pairs, NfaStatePair{Head->State, INT64_MAX});
+            // For every transition from the current head state, add a new path
+            // segment.
+            for (; PI != PE; ++PI)
+                if (PI->FromDfaState == Head->State)
+                    Heads.push_back(makePathSegment(PI->ToDfaState, Head));
+        }
+        // Now we've iterated over all the initial heads and added new ones,
+        // dispose of the original heads.
+        Heads.erase(Heads.begin(), std::next(Heads.begin(), NumHeads));
+    }
 
 public:
-  NfaTranscriber(ArrayRef<NfaStatePair> TransitionInfo)
-      : TransitionInfo(TransitionInfo) {
-    reset();
-  }
-
-  ArrayRef<NfaStatePair> getTransitionInfo() const {
-    return TransitionInfo;
-  }
-
-  void reset() {
-    Paths.clear();
-    Heads.clear();
-    Allocator.DestroyAll();
-    // The initial NFA state is 0.
-    Heads.push_back(makePathSegment(0ULL, nullptr));
-  }
-
-  void transition(unsigned TransitionInfoIdx) {
-    unsigned EndIdx = TransitionInfoIdx;
-    while (TransitionInfo[EndIdx].ToDfaState != 0)
-      ++EndIdx;
-    ArrayRef<NfaStatePair> Pairs(&TransitionInfo[TransitionInfoIdx],
-                                 EndIdx - TransitionInfoIdx);
-    transition(Pairs);
-  }
-
-  ArrayRef<NfaPath> getPaths() {
-    Paths.clear();
-    for (auto *Head : Heads) {
-      NfaPath P;
-      while (Head->State != 0) {
-        P.push_back(Head->State);
-        Head = Head->Tail;
-      }
-      std::reverse(P.begin(), P.end());
-      Paths.push_back(std::move(P));
+    NfaTranscriber(ArrayRef<NfaStatePair> TransitionInfo)
+        : TransitionInfo(TransitionInfo) {
+        reset();
     }
-    return Paths;
-  }
+
+    ArrayRef<NfaStatePair> getTransitionInfo() const {
+        return TransitionInfo;
+    }
+
+    void reset() {
+        Paths.clear();
+        Heads.clear();
+        Allocator.DestroyAll();
+        // The initial NFA state is 0.
+        Heads.push_back(makePathSegment(0ULL, nullptr));
+    }
+
+    void transition(unsigned TransitionInfoIdx) {
+        unsigned EndIdx = TransitionInfoIdx;
+        while (TransitionInfo[EndIdx].ToDfaState != 0)
+            ++EndIdx;
+        ArrayRef<NfaStatePair> Pairs(&TransitionInfo[TransitionInfoIdx],
+                                     EndIdx - TransitionInfoIdx);
+        transition(Pairs);
+    }
+
+    ArrayRef<NfaPath> getPaths() {
+        Paths.clear();
+        for (auto *Head : Heads) {
+            NfaPath P;
+            while (Head->State != 0) {
+                P.push_back(Head->State);
+                Head = Head->Tail;
+            }
+            std::reverse(P.begin(), P.end());
+            Paths.push_back(std::move(P));
+        }
+        return Paths;
+    }
 };
 } // namespace internal
 
@@ -160,102 +160,102 @@ public:
 /// An automaton accepts a sequence of input tokens ("actions"). This class is
 /// templated on the type of these actions.
 template <typename ActionT> class Automaton {
-  /// Map from {State, Action} to {NewState, TransitionInfoIdx}.
-  /// TransitionInfoIdx is used by the DfaTranscriber to analyze the transition.
-  /// FIXME: This uses a std::map because ActionT can be a pair type including
-  /// an enum. In particular DenseMapInfo<ActionT> must be defined to use
-  /// DenseMap here.
-  /// This is a shared_ptr to allow very quick copy-construction of Automata; this
-  /// state is immutable after construction so this is safe.
-  using MapTy = std::map<std::pair<uint64_t, ActionT>, std::pair<uint64_t, unsigned>>;
-  std::shared_ptr<MapTy> M;
-  /// An optional transcription object. This uses much more state than simply
-  /// traversing the DFA for acceptance, so is heap allocated.
-  std::shared_ptr<internal::NfaTranscriber> Transcriber;
-  /// The initial DFA state is 1.
-  uint64_t State = 1;
-  /// True if we should transcribe and false if not (even if Transcriber is defined).
-  bool Transcribe;
+    /// Map from {State, Action} to {NewState, TransitionInfoIdx}.
+    /// TransitionInfoIdx is used by the DfaTranscriber to analyze the transition.
+    /// FIXME: This uses a std::map because ActionT can be a pair type including
+    /// an enum. In particular DenseMapInfo<ActionT> must be defined to use
+    /// DenseMap here.
+    /// This is a shared_ptr to allow very quick copy-construction of Automata; this
+    /// state is immutable after construction so this is safe.
+    using MapTy = std::map<std::pair<uint64_t, ActionT>, std::pair<uint64_t, unsigned>>;
+    std::shared_ptr<MapTy> M;
+    /// An optional transcription object. This uses much more state than simply
+    /// traversing the DFA for acceptance, so is heap allocated.
+    std::shared_ptr<internal::NfaTranscriber> Transcriber;
+    /// The initial DFA state is 1.
+    uint64_t State = 1;
+    /// True if we should transcribe and false if not (even if Transcriber is defined).
+    bool Transcribe;
 
 public:
-  /// Create an automaton.
-  /// \param Transitions The Transitions table as created by TableGen. Note that
-  ///                    because the action type differs per automaton, the
-  ///                    table type is templated as ArrayRef<InfoT>.
-  /// \param TranscriptionTable The TransitionInfo table as created by TableGen.
-  ///
-  /// Providing the TranscriptionTable argument as non-empty will enable the
-  /// use of transcription, which analyzes the possible paths in the original
-  /// NFA taken by the DFA. NOTE: This is substantially more work than simply
-  /// driving the DFA, so unless you require the getPaths() method leave this
-  /// empty.
-  template <typename InfoT>
-  Automaton(ArrayRef<InfoT> Transitions,
-            ArrayRef<NfaStatePair> TranscriptionTable = {}) {
-    if (!TranscriptionTable.empty())
-      Transcriber =
-          std::make_shared<internal::NfaTranscriber>(TranscriptionTable);
-    Transcribe = Transcriber != nullptr;
-    M = std::make_shared<MapTy>();
-    for (const auto &I : Transitions)
-      // Greedily read and cache the transition table.
-      M->emplace(std::make_pair(I.FromDfaState, I.Action),
-                 std::make_pair(I.ToDfaState, I.InfoIdx));
-  }
-  Automaton(const Automaton &Other)
-      : M(Other.M), State(Other.State), Transcribe(Other.Transcribe) {
-    // Transcriber is not thread-safe, so create a new instance on copy.
-    if (Other.Transcriber)
-      Transcriber = std::make_shared<internal::NfaTranscriber>(
-          Other.Transcriber->getTransitionInfo());
-  }
+    /// Create an automaton.
+    /// \param Transitions The Transitions table as created by TableGen. Note that
+    ///                    because the action type differs per automaton, the
+    ///                    table type is templated as ArrayRef<InfoT>.
+    /// \param TranscriptionTable The TransitionInfo table as created by TableGen.
+    ///
+    /// Providing the TranscriptionTable argument as non-empty will enable the
+    /// use of transcription, which analyzes the possible paths in the original
+    /// NFA taken by the DFA. NOTE: This is substantially more work than simply
+    /// driving the DFA, so unless you require the getPaths() method leave this
+    /// empty.
+    template <typename InfoT>
+    Automaton(ArrayRef<InfoT> Transitions,
+              ArrayRef<NfaStatePair> TranscriptionTable = {}) {
+        if (!TranscriptionTable.empty())
+            Transcriber =
+                std::make_shared<internal::NfaTranscriber>(TranscriptionTable);
+        Transcribe = Transcriber != nullptr;
+        M = std::make_shared<MapTy>();
+        for (const auto &I : Transitions)
+            // Greedily read and cache the transition table.
+            M->emplace(std::make_pair(I.FromDfaState, I.Action),
+                       std::make_pair(I.ToDfaState, I.InfoIdx));
+    }
+    Automaton(const Automaton &Other)
+        : M(Other.M), State(Other.State), Transcribe(Other.Transcribe) {
+        // Transcriber is not thread-safe, so create a new instance on copy.
+        if (Other.Transcriber)
+            Transcriber = std::make_shared<internal::NfaTranscriber>(
+                              Other.Transcriber->getTransitionInfo());
+    }
 
-  /// Reset the automaton to its initial state.
-  void reset() {
-    State = 1;
-    if (Transcriber)
-      Transcriber->reset();
-  }
+    /// Reset the automaton to its initial state.
+    void reset() {
+        State = 1;
+        if (Transcriber)
+            Transcriber->reset();
+    }
 
-  /// Enable or disable transcription. Transcription is only available if
-  /// TranscriptionTable was provided to the constructor.
-  void enableTranscription(bool Enable = true) {
-    assert(Transcriber &&
-           "Transcription is only available if TranscriptionTable was provided "
-           "to the Automaton constructor");
-    Transcribe = Enable;
-  }
+    /// Enable or disable transcription. Transcription is only available if
+    /// TranscriptionTable was provided to the constructor.
+    void enableTranscription(bool Enable = true) {
+        assert(Transcriber &&
+               "Transcription is only available if TranscriptionTable was provided "
+               "to the Automaton constructor");
+        Transcribe = Enable;
+    }
 
-  /// Transition the automaton based on input symbol A. Return true if the
-  /// automaton transitioned to a valid state, false if the automaton
-  /// transitioned to an invalid state.
-  ///
-  /// If this function returns false, all methods are undefined until reset() is
-  /// called.
-  bool add(const ActionT &A) {
-    auto I = M->find({State, A});
-    if (I == M->end())
-      return false;
-    if (Transcriber && Transcribe)
-      Transcriber->transition(I->second.second);
-    State = I->second.first;
-    return true;
-  }
+    /// Transition the automaton based on input symbol A. Return true if the
+    /// automaton transitioned to a valid state, false if the automaton
+    /// transitioned to an invalid state.
+    ///
+    /// If this function returns false, all methods are undefined until reset() is
+    /// called.
+    bool add(const ActionT &A) {
+        auto I = M->find({State, A});
+        if (I == M->end())
+            return false;
+        if (Transcriber && Transcribe)
+            Transcriber->transition(I->second.second);
+        State = I->second.first;
+        return true;
+    }
 
-  /// Return true if the automaton can be transitioned based on input symbol A.
-  bool canAdd(const ActionT &A) {
-    auto I = M->find({State, A});
-    return I != M->end();
-  }
+    /// Return true if the automaton can be transitioned based on input symbol A.
+    bool canAdd(const ActionT &A) {
+        auto I = M->find({State, A});
+        return I != M->end();
+    }
 
-  /// Obtain a set of possible paths through the input nondeterministic
-  /// automaton that could be obtained from the sequence of input actions
-  /// presented to this deterministic automaton.
-  ArrayRef<NfaPath> getNfaPaths() {
-    assert(Transcriber && Transcribe &&
-           "Can only obtain NFA paths if transcribing!");
-    return Transcriber->getPaths();
-  }
+    /// Obtain a set of possible paths through the input nondeterministic
+    /// automaton that could be obtained from the sequence of input actions
+    /// presented to this deterministic automaton.
+    ArrayRef<NfaPath> getNfaPaths() {
+        assert(Transcriber && Transcribe &&
+               "Can only obtain NFA paths if transcribing!");
+        return Transcriber->getPaths();
+    }
 };
 
 } // namespace llvm

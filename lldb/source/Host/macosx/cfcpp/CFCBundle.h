@@ -13,27 +13,27 @@
 
 class CFCBundle : public CFCReleaser<CFBundleRef> {
 public:
-  // Constructors and Destructors
-  CFCBundle(const char *path = NULL);
-  CFCBundle(CFURLRef url);
+    // Constructors and Destructors
+    CFCBundle(const char *path = NULL);
+    CFCBundle(CFURLRef url);
 
-  virtual ~CFCBundle();
+    virtual ~CFCBundle();
 
-  CFURLRef CopyExecutableURL() const;
+    CFURLRef CopyExecutableURL() const;
 
-  CFStringRef GetIdentifier() const;
+    CFStringRef GetIdentifier() const;
 
-  CFTypeRef GetValueForInfoDictionaryKey(CFStringRef key) const;
+    CFTypeRef GetValueForInfoDictionaryKey(CFStringRef key) const;
 
-  bool GetPath(char *dst, size_t dst_len);
+    bool GetPath(char *dst, size_t dst_len);
 
-  bool SetPath(const char *path);
+    bool SetPath(const char *path);
 
 private:
-  // Disallow copy and assignment constructors
-  CFCBundle(const CFCBundle &) = delete;
+    // Disallow copy and assignment constructors
+    CFCBundle(const CFCBundle &) = delete;
 
-  const CFCBundle &operator=(const CFCBundle &) = delete;
+    const CFCBundle &operator=(const CFCBundle &) = delete;
 };
 
 #endif // LLDB_SOURCE_HOST_MACOSX_CFCPP_CFCBUNDLE_H

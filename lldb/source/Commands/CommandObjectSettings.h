@@ -17,9 +17,9 @@ namespace lldb_private {
 
 class CommandObjectMultiwordSettings : public CommandObjectMultiword {
 public:
-  CommandObjectMultiwordSettings(CommandInterpreter &interpreter);
+    CommandObjectMultiwordSettings(CommandInterpreter &interpreter);
 
-  ~CommandObjectMultiwordSettings() override;
+    ~CommandObjectMultiwordSettings() override;
 };
 
 } // namespace lldb_private

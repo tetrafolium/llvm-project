@@ -51,24 +51,24 @@
 // just to work around this issue, let's clone the variable that is constant
 // after initialization anyways.
 extern "C" {
-__declspec(dllimport) int __asan_should_detect_stack_use_after_return();
-int __asan_option_detect_stack_use_after_return;
+    __declspec(dllimport) int __asan_should_detect_stack_use_after_return();
+    int __asan_option_detect_stack_use_after_return;
 
-__declspec(dllimport) void* __asan_get_shadow_memory_dynamic_address();
-void* __asan_shadow_memory_dynamic_address;
+    __declspec(dllimport) void* __asan_get_shadow_memory_dynamic_address();
+    void* __asan_shadow_memory_dynamic_address;
 }
 
 static int InitializeClonedVariables() {
-  __asan_option_detect_stack_use_after_return =
-    __asan_should_detect_stack_use_after_return();
-  __asan_shadow_memory_dynamic_address =
-    __asan_get_shadow_memory_dynamic_address();
-  return 0;
+    __asan_option_detect_stack_use_after_return =
+        __asan_should_detect_stack_use_after_return();
+    __asan_shadow_memory_dynamic_address =
+        __asan_get_shadow_memory_dynamic_address();
+    return 0;
 }
 
 static void NTAPI asan_thread_init(void *mod, unsigned long reason,
-    void *reserved) {
-  if (reason == DLL_PROCESS_ATTACH) InitializeClonedVariables();
+                                   void *reserved) {
+    if (reason == DLL_PROCESS_ATTACH) InitializeClonedVariables();
 }
 
 // Our cloned variables must be initialized before C/C++ constructors.  If TLS
@@ -77,7 +77,7 @@ static void NTAPI asan_thread_init(void *mod, unsigned long reason,
 __declspec(allocate(".CRT$XIB")) int (*__asan_initialize_cloned_variables)() =
     InitializeClonedVariables;
 __declspec(allocate(".CRT$XLAB")) void (NTAPI *__asan_tls_init)(void *,
-    unsigned long, void *) = asan_thread_init;
+        unsigned long, void *) = asan_thread_init;
 
 ////////////////////////////////////////////////////////////////////////////////
 // For some reason, the MD CRT doesn't call the C/C++ terminators during on DLL
@@ -96,11 +96,11 @@ __declspec(allocate(".CRT$XTW")) void* before_global_dtors = 0;
 __declspec(allocate(".CRT$XTY")) void* after_global_dtors = 0;
 
 void UnregisterGlobals() {
-  _initterm(&before_global_dtors, &after_global_dtors);
+    _initterm(&before_global_dtors, &after_global_dtors);
 }
 
 int ScheduleUnregisterGlobals() {
-  return atexit(UnregisterGlobals);
+    return atexit(UnregisterGlobals);
 }
 }  // namespace
 
@@ -116,13 +116,15 @@ int (*__asan_schedule_unregister_globals)() = ScheduleUnregisterGlobals;
 // We need to set the ASan-specific SEH handler at the end of CRT initialization
 // of each module (see also asan_win.cpp).
 extern "C" {
-__declspec(dllimport) int __asan_set_seh_filter();
-static int SetSEHFilter() { return __asan_set_seh_filter(); }
+    __declspec(dllimport) int __asan_set_seh_filter();
+    static int SetSEHFilter() {
+        return __asan_set_seh_filter();
+    }
 
 // Unfortunately, putting a pointer to __asan_set_seh_filter into
 // __asan_intercept_seh gets optimized out, so we have to use an extra function.
-__declspec(allocate(".CRT$XCAB")) int (*__asan_seh_interceptor)() =
-    SetSEHFilter;
+    __declspec(allocate(".CRT$XCAB")) int (*__asan_seh_interceptor)() =
+        SetSEHFilter;
 }
 
 WIN_FORCE_LINK(__asan_dso_reg_hook)

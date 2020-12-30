@@ -21,14 +21,14 @@ namespace mlir {
 namespace detail {
 
 struct AffineMapStorage {
-  unsigned numDims;
-  unsigned numSymbols;
+    unsigned numDims;
+    unsigned numSymbols;
 
-  /// The affine expressions for this (multi-dimensional) map.
-  /// TODO: use trailing objects for this.
-  ArrayRef<AffineExpr> results;
+    /// The affine expressions for this (multi-dimensional) map.
+    /// TODO: use trailing objects for this.
+    ArrayRef<AffineExpr> results;
 
-  MLIRContext *context;
+    MLIRContext *context;
 };
 
 } // end namespace detail

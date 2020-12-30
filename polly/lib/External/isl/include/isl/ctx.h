@@ -69,27 +69,27 @@ extern "C" {
  * The only exception is the isl_ctx argument, which should never be NULL.
  */
 struct isl_stats {
-	long	gbr_solved_lps;
+    long	gbr_solved_lps;
 };
 enum isl_error {
-	isl_error_none = 0,
-	isl_error_abort,
-	isl_error_alloc,
-	isl_error_unknown,
-	isl_error_internal,
-	isl_error_invalid,
-	isl_error_quota,
-	isl_error_unsupported
+    isl_error_none = 0,
+    isl_error_abort,
+    isl_error_alloc,
+    isl_error_unknown,
+    isl_error_internal,
+    isl_error_invalid,
+    isl_error_quota,
+    isl_error_unsupported
 };
 typedef enum {
-	isl_stat_error = -1,
-	isl_stat_ok = 0
+    isl_stat_error = -1,
+    isl_stat_ok = 0
 } isl_stat;
 isl_stat isl_stat_non_null(void *obj);
 typedef enum {
-	isl_bool_error = -1,
-	isl_bool_false = 0,
-	isl_bool_true = 1
+    isl_bool_error = -1,
+    isl_bool_false = 0,
+    isl_bool_true = 1
 } isl_bool;
 isl_bool isl_bool_not(isl_bool b);
 isl_bool isl_bool_ok(int b);
@@ -141,7 +141,7 @@ void *isl_realloc_or_die(isl_ctx *ctx, void *ptr, size_t size);
 	} while (0)
 
 void isl_handle_error(isl_ctx *ctx, enum isl_error error, const char *msg,
-	const char *file, int line);
+                      const char *file, int line);
 
 #define isl_assert4(ctx,test,code,errno)				\
 	do {								\
@@ -159,7 +159,7 @@ void isl_handle_error(isl_ctx *ctx, enum isl_error error, const char *msg,
 struct isl_options *isl_ctx_options(isl_ctx *ctx);
 
 isl_ctx *isl_ctx_alloc_with_options(struct isl_args *args,
-	__isl_take void *opt);
+                                    __isl_take void *opt);
 isl_ctx *isl_ctx_alloc(void);
 void *isl_ctx_peek_options(isl_ctx *ctx, struct isl_args *args);
 int isl_ctx_parse_options(isl_ctx *ctx, int argc, char **argv, unsigned flags);

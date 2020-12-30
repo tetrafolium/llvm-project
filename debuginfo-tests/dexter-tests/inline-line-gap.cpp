@@ -20,22 +20,22 @@ void __attribute__((optnone)) doTailCall() {}
 extern "C" void __declspec(noreturn) abort();
 
 void __forceinline inlineCrashFrame() {
-  if (shutting_down_ || tearing_down_) {
-    setCrashString("crashing");
-    // MSVC lays out calls to abort out of line, gets the layout we want.
-    abort(); // DexLabel('stop')
-  }
+    if (shutting_down_ || tearing_down_) {
+        setCrashString("crashing");
+        // MSVC lays out calls to abort out of line, gets the layout we want.
+        abort(); // DexLabel('stop')
+    }
 }
 
 void __declspec(noinline) callerOfInlineCrashFrame(bool is_keeping_alive) {
-  if (is_keeping_alive)
-    inlineCrashFrame();
-  else
-    doTailCall();
+    if (is_keeping_alive)
+        inlineCrashFrame();
+    else
+        doTailCall();
 }
 
 int __attribute__((optnone)) main() {
-  callerOfInlineCrashFrame(true);
+    callerOfInlineCrashFrame(true);
 }
 
 /*

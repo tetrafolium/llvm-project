@@ -19,21 +19,21 @@ struct PrefixSpec;
 namespace Fortran::semantics {
 class PurityChecker : public virtual BaseChecker {
 public:
-  explicit PurityChecker(SemanticsContext &c) : context_{c} {}
-  void Enter(const parser::ExecutableConstruct &);
-  void Enter(const parser::SubroutineSubprogram &);
-  void Leave(const parser::SubroutineSubprogram &);
-  void Enter(const parser::FunctionSubprogram &);
-  void Leave(const parser::FunctionSubprogram &);
+    explicit PurityChecker(SemanticsContext &c) : context_{c} {}
+    void Enter(const parser::ExecutableConstruct &);
+    void Enter(const parser::SubroutineSubprogram &);
+    void Leave(const parser::SubroutineSubprogram &);
+    void Enter(const parser::FunctionSubprogram &);
+    void Leave(const parser::FunctionSubprogram &);
 
 private:
-  bool InPureSubprogram() const;
-  bool HasPurePrefix(const std::list<parser::PrefixSpec> &) const;
-  void Entered(parser::CharBlock, const std::list<parser::PrefixSpec> &);
-  void Left();
-  SemanticsContext &context_;
-  int depth_{0};
-  int pureDepth_{-1};
+    bool InPureSubprogram() const;
+    bool HasPurePrefix(const std::list<parser::PrefixSpec> &) const;
+    void Entered(parser::CharBlock, const std::list<parser::PrefixSpec> &);
+    void Left();
+    SemanticsContext &context_;
+    int depth_{0};
+    int pureDepth_{-1};
 };
 } // namespace Fortran::semantics
 #endif

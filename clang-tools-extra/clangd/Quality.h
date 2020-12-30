@@ -55,109 +55,109 @@ class URIDistance;
 
 /// Attributes of a symbol that affect how much we like it.
 struct SymbolQualitySignals {
-  bool Deprecated = false;
-  bool ReservedName = false; // __foo, _Foo are usually implementation details.
-                             // FIXME: make these findable once user types _.
-  bool ImplementationDetail = false;
-  unsigned References = 0;
+    bool Deprecated = false;
+    bool ReservedName = false; // __foo, _Foo are usually implementation details.
+    // FIXME: make these findable once user types _.
+    bool ImplementationDetail = false;
+    unsigned References = 0;
 
-  enum SymbolCategory {
-    Unknown = 0,
-    Variable,
-    Macro,
-    Type,
-    Function,
-    Constructor,
-    Destructor,
-    Namespace,
-    Keyword,
-    Operator,
-  } Category = Unknown;
+    enum SymbolCategory {
+        Unknown = 0,
+        Variable,
+        Macro,
+        Type,
+        Function,
+        Constructor,
+        Destructor,
+        Namespace,
+        Keyword,
+        Operator,
+    } Category = Unknown;
 
-  void merge(const CodeCompletionResult &SemaCCResult);
-  void merge(const Symbol &IndexResult);
+    void merge(const CodeCompletionResult &SemaCCResult);
+    void merge(const Symbol &IndexResult);
 
-  // Condense these signals down to a single number, higher is better.
-  float evaluateHeuristics() const;
+    // Condense these signals down to a single number, higher is better.
+    float evaluateHeuristics() const;
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &,
                               const SymbolQualitySignals &);
 
 /// Attributes of a symbol-query pair that affect how much we like it.
 struct SymbolRelevanceSignals {
-  /// The name of the symbol (for ContextWords). Must be explicitly assigned.
-  llvm::StringRef Name;
-  /// 0-1+ fuzzy-match score for unqualified name. Must be explicitly assigned.
-  float NameMatch = 1;
-  /// Lowercase words relevant to the context (e.g. near the completion point).
-  llvm::StringSet<>* ContextWords = nullptr;
-  bool Forbidden = false; // Unavailable (e.g const) or inaccessible (private).
-  /// Whether fixits needs to be applied for that completion or not.
-  bool NeedsFixIts = false;
-  bool InBaseClass = false; // A member from base class of the accessed class.
+    /// The name of the symbol (for ContextWords). Must be explicitly assigned.
+    llvm::StringRef Name;
+    /// 0-1+ fuzzy-match score for unqualified name. Must be explicitly assigned.
+    float NameMatch = 1;
+    /// Lowercase words relevant to the context (e.g. near the completion point).
+    llvm::StringSet<>* ContextWords = nullptr;
+    bool Forbidden = false; // Unavailable (e.g const) or inaccessible (private).
+    /// Whether fixits needs to be applied for that completion or not.
+    bool NeedsFixIts = false;
+    bool InBaseClass = false; // A member from base class of the accessed class.
 
-  URIDistance *FileProximityMatch = nullptr;
-  /// These are used to calculate proximity between the index symbol and the
-  /// query.
-  llvm::StringRef SymbolURI;
-  /// FIXME: unify with index proximity score - signals should be
-  /// source-independent.
-  /// Proximity between best declaration and the query. [0-1], 1 is closest.
-  float SemaFileProximityScore = 0;
+    URIDistance *FileProximityMatch = nullptr;
+    /// These are used to calculate proximity between the index symbol and the
+    /// query.
+    llvm::StringRef SymbolURI;
+    /// FIXME: unify with index proximity score - signals should be
+    /// source-independent.
+    /// Proximity between best declaration and the query. [0-1], 1 is closest.
+    float SemaFileProximityScore = 0;
 
-  // Scope proximity is only considered (both index and sema) when this is set.
-  ScopeDistance *ScopeProximityMatch = nullptr;
-  llvm::Optional<llvm::StringRef> SymbolScope;
-  // A symbol from sema should be accessible from the current scope.
-  bool SemaSaysInScope = false;
+    // Scope proximity is only considered (both index and sema) when this is set.
+    ScopeDistance *ScopeProximityMatch = nullptr;
+    llvm::Optional<llvm::StringRef> SymbolScope;
+    // A symbol from sema should be accessible from the current scope.
+    bool SemaSaysInScope = false;
 
-  // An approximate measure of where we expect the symbol to be used.
-  enum AccessibleScope {
-    FunctionScope,
-    ClassScope,
-    FileScope,
-    GlobalScope,
-  } Scope = GlobalScope;
+    // An approximate measure of where we expect the symbol to be used.
+    enum AccessibleScope {
+        FunctionScope,
+        ClassScope,
+        FileScope,
+        GlobalScope,
+    } Scope = GlobalScope;
 
-  enum QueryType {
-    CodeComplete,
-    Generic,
-  } Query = Generic;
+    enum QueryType {
+        CodeComplete,
+        Generic,
+    } Query = Generic;
 
-  CodeCompletionContext::Kind Context = CodeCompletionContext::CCC_Other;
+    CodeCompletionContext::Kind Context = CodeCompletionContext::CCC_Other;
 
-  // Whether symbol is an instance member of a class.
-  bool IsInstanceMember = false;
+    // Whether symbol is an instance member of a class.
+    bool IsInstanceMember = false;
 
-  // Whether clang provided a preferred type in the completion context.
-  bool HadContextType = false;
-  // Whether a source completion item or a symbol had a type information.
-  bool HadSymbolType = false;
-  // Whether the item matches the type expected in the completion context.
-  bool TypeMatchesPreferred = false;
+    // Whether clang provided a preferred type in the completion context.
+    bool HadContextType = false;
+    // Whether a source completion item or a symbol had a type information.
+    bool HadSymbolType = false;
+    // Whether the item matches the type expected in the completion context.
+    bool TypeMatchesPreferred = false;
 
-  /// Length of the unqualified partial name of Symbol typed in
-  /// CompletionPrefix.
-  unsigned FilterLength = 0;
+    /// Length of the unqualified partial name of Symbol typed in
+    /// CompletionPrefix.
+    unsigned FilterLength = 0;
 
-  /// Set of derived signals computed by calculateDerivedSignals(). Must not be
-  /// set explicitly.
-  struct DerivedSignals {
-    /// Whether Name contains some word from context.
-    bool NameMatchesContext = false;
-    /// Min distance between SymbolURI and all the headers included by the TU.
-    unsigned FileProximityDistance = FileDistance::Unreachable;
-    /// Min distance between SymbolScope and all the available scopes.
-    unsigned ScopeProximityDistance = FileDistance::Unreachable;
-  };
+    /// Set of derived signals computed by calculateDerivedSignals(). Must not be
+    /// set explicitly.
+    struct DerivedSignals {
+        /// Whether Name contains some word from context.
+        bool NameMatchesContext = false;
+        /// Min distance between SymbolURI and all the headers included by the TU.
+        unsigned FileProximityDistance = FileDistance::Unreachable;
+        /// Min distance between SymbolScope and all the available scopes.
+        unsigned ScopeProximityDistance = FileDistance::Unreachable;
+    };
 
-  DerivedSignals calculateDerivedSignals() const;
+    DerivedSignals calculateDerivedSignals() const;
 
-  void merge(const CodeCompletionResult &SemaResult);
-  void merge(const Symbol &IndexResult);
+    void merge(const CodeCompletionResult &SemaResult);
+    void merge(const Symbol &IndexResult);
 
-  // Condense these signals down to a single number, higher is better.
-  float evaluateHeuristics() const;
+    // Condense these signals down to a single number, higher is better.
+    float evaluateHeuristics() const;
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &,
                               const SymbolRelevanceSignals &);
@@ -169,8 +169,8 @@ float evaluateSymbolAndRelevance(float SymbolQuality, float SymbolRelevance);
 /// have been removed since DecisionForest cannot assign individual scores to
 /// Quality and Relevance signals.
 struct DecisionForestScores {
-  float Total = 0.f;
-  float ExcludingName = 0.f;
+    float Total = 0.f;
+    float ExcludingName = 0.f;
 };
 
 DecisionForestScores
@@ -180,41 +180,41 @@ evaluateDecisionForest(const SymbolQualitySignals &Quality,
 /// TopN<T> is a lossy container that preserves only the "best" N elements.
 template <typename T, typename Compare = std::greater<T>> class TopN {
 public:
-  using value_type = T;
-  TopN(size_t N, Compare Greater = Compare())
-      : N(N), Greater(std::move(Greater)) {}
+    using value_type = T;
+    TopN(size_t N, Compare Greater = Compare())
+        : N(N), Greater(std::move(Greater)) {}
 
-  // Adds a candidate to the set.
-  // Returns true if a candidate was dropped to get back under N.
-  bool push(value_type &&V) {
-    bool Dropped = false;
-    if (Heap.size() >= N) {
-      Dropped = true;
-      if (N > 0 && Greater(V, Heap.front())) {
-        std::pop_heap(Heap.begin(), Heap.end(), Greater);
-        Heap.back() = std::move(V);
-        std::push_heap(Heap.begin(), Heap.end(), Greater);
-      }
-    } else {
-      Heap.push_back(std::move(V));
-      std::push_heap(Heap.begin(), Heap.end(), Greater);
+    // Adds a candidate to the set.
+    // Returns true if a candidate was dropped to get back under N.
+    bool push(value_type &&V) {
+        bool Dropped = false;
+        if (Heap.size() >= N) {
+            Dropped = true;
+            if (N > 0 && Greater(V, Heap.front())) {
+                std::pop_heap(Heap.begin(), Heap.end(), Greater);
+                Heap.back() = std::move(V);
+                std::push_heap(Heap.begin(), Heap.end(), Greater);
+            }
+        } else {
+            Heap.push_back(std::move(V));
+            std::push_heap(Heap.begin(), Heap.end(), Greater);
+        }
+        assert(Heap.size() <= N);
+        assert(std::is_heap(Heap.begin(), Heap.end(), Greater));
+        return Dropped;
     }
-    assert(Heap.size() <= N);
-    assert(std::is_heap(Heap.begin(), Heap.end(), Greater));
-    return Dropped;
-  }
 
-  // Returns candidates from best to worst.
-  std::vector<value_type> items() && {
-    std::sort_heap(Heap.begin(), Heap.end(), Greater);
-    assert(Heap.size() <= N);
-    return std::move(Heap);
-  }
+    // Returns candidates from best to worst.
+    std::vector<value_type> items() && {
+        std::sort_heap(Heap.begin(), Heap.end(), Greater);
+        assert(Heap.size() <= N);
+        return std::move(Heap);
+    }
 
 private:
-  const size_t N;
-  std::vector<value_type> Heap; // Min-heap, comparator is Greater.
-  Compare Greater;
+    const size_t N;
+    std::vector<value_type> Heap; // Min-heap, comparator is Greater.
+    Compare Greater;
 };
 
 /// Returns a string that sorts in the same order as (-Score, Tiebreak), for
@@ -222,10 +222,10 @@ private:
 std::string sortText(float Score, llvm::StringRef Tiebreak = "");
 
 struct SignatureQualitySignals {
-  uint32_t NumberOfParameters = 0;
-  uint32_t NumberOfOptionalParameters = 0;
-  CodeCompleteConsumer::OverloadCandidate::CandidateKind Kind =
-      CodeCompleteConsumer::OverloadCandidate::CandidateKind::CK_Function;
+    uint32_t NumberOfParameters = 0;
+    uint32_t NumberOfOptionalParameters = 0;
+    CodeCompleteConsumer::OverloadCandidate::CandidateKind Kind =
+        CodeCompleteConsumer::OverloadCandidate::CandidateKind::CK_Function;
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &,
                               const SignatureQualitySignals &);

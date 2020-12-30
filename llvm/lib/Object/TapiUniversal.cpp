@@ -22,40 +22,40 @@ using namespace object;
 
 TapiUniversal::TapiUniversal(MemoryBufferRef Source, Error &Err)
     : Binary(ID_TapiUniversal, Source) {
-  Expected<std::unique_ptr<InterfaceFile>> Result = TextAPIReader::get(Source);
-  ErrorAsOutParameter ErrAsOuParam(&Err);
-  if (!Result) {
-    Err = Result.takeError();
-    return;
-  }
-  ParsedFile = std::move(Result.get());
+    Expected<std::unique_ptr<InterfaceFile>> Result = TextAPIReader::get(Source);
+    ErrorAsOutParameter ErrAsOuParam(&Err);
+    if (!Result) {
+        Err = Result.takeError();
+        return;
+    }
+    ParsedFile = std::move(Result.get());
 
-  auto FlattenObjectInfo = [this](const auto &File) {
-    StringRef Name = File->getInstallName();
-    for (const Architecture Arch : File->getArchitectures())
-      Libraries.emplace_back(Library({Name, Arch}));
-  };
+    auto FlattenObjectInfo = [this](const auto &File) {
+        StringRef Name = File->getInstallName();
+        for (const Architecture Arch : File->getArchitectures())
+            Libraries.emplace_back(Library({Name, Arch}));
+    };
 
-  FlattenObjectInfo(ParsedFile);
-  // Get inlined documents from tapi file.
-  for (const std::shared_ptr<InterfaceFile> &File : ParsedFile->documents())
-    FlattenObjectInfo(File);
+    FlattenObjectInfo(ParsedFile);
+    // Get inlined documents from tapi file.
+    for (const std::shared_ptr<InterfaceFile> &File : ParsedFile->documents())
+        FlattenObjectInfo(File);
 }
 
 TapiUniversal::~TapiUniversal() = default;
 
 Expected<std::unique_ptr<TapiFile>>
 TapiUniversal::ObjectForArch::getAsObjectFile() const {
-  return std::unique_ptr<TapiFile>(new TapiFile(Parent->getMemoryBufferRef(),
-                                                *Parent->ParsedFile.get(),
-                                                Parent->Libraries[Index].Arch));
+    return std::unique_ptr<TapiFile>(new TapiFile(Parent->getMemoryBufferRef(),
+                                     *Parent->ParsedFile.get(),
+                                     Parent->Libraries[Index].Arch));
 }
 
 Expected<std::unique_ptr<TapiUniversal>>
 TapiUniversal::create(MemoryBufferRef Source) {
-  Error Err = Error::success();
-  std::unique_ptr<TapiUniversal> Ret(new TapiUniversal(Source, Err));
-  if (Err)
-    return std::move(Err);
-  return std::move(Ret);
+    Error Err = Error::success();
+    std::unique_ptr<TapiUniversal> Ret(new TapiUniversal(Source, Err));
+    if (Err)
+        return std::move(Err);
+    return std::move(Ret);
 }

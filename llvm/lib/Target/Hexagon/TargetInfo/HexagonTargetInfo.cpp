@@ -11,11 +11,11 @@
 using namespace llvm;
 
 Target &llvm::getTheHexagonTarget() {
-  static Target TheHexagonTarget;
-  return TheHexagonTarget;
+    static Target TheHexagonTarget;
+    return TheHexagonTarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeHexagonTargetInfo() {
-  RegisterTarget<Triple::hexagon, /*HasJIT=*/true> X(
-      getTheHexagonTarget(), "hexagon", "Hexagon", "Hexagon");
+    RegisterTarget<Triple::hexagon, /*HasJIT=*/true> X(
+                       getTheHexagonTarget(), "hexagon", "Hexagon", "Hexagon");
 }

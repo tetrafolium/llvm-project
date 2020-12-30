@@ -28,8 +28,8 @@ void AddLinkerInputs(const ToolChain &TC, const InputInfoList &Inputs,
                      llvm::opt::ArgStringList &CmdArgs, const JobAction &JA);
 
 void addLinkerCompressDebugSectionsOption(const ToolChain &TC,
-                                          const llvm::opt::ArgList &Args,
-                                          llvm::opt::ArgStringList &CmdArgs);
+        const llvm::opt::ArgList &Args,
+        llvm::opt::ArgStringList &CmdArgs);
 
 void claimNoWarnArgs(const llvm::opt::ArgList &Args);
 
@@ -139,8 +139,8 @@ void addX86AlignBranchArgs(const Driver &D, const llvm::opt::ArgList &Args,
                            llvm::opt::ArgStringList &CmdArgs, bool IsLTO);
 
 unsigned getOrCheckAMDGPUCodeObjectVersion(const Driver &D,
-                                           const llvm::opt::ArgList &Args,
-                                           bool Diagnose = false);
+        const llvm::opt::ArgList &Args,
+        bool Diagnose = false);
 } // end namespace tools
 } // end namespace driver
 } // end namespace clang

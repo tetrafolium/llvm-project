@@ -21,72 +21,72 @@ namespace lldb_private {
 
 class CPPLanguageRuntime : public LanguageRuntime {
 public:
-  enum class LibCppStdFunctionCallableCase {
-    Lambda = 0,
-    CallableObject,
-    FreeOrMemberFunction,
-    Invalid
-  };
+    enum class LibCppStdFunctionCallableCase {
+        Lambda = 0,
+        CallableObject,
+        FreeOrMemberFunction,
+        Invalid
+    };
 
-  struct LibCppStdFunctionCallableInfo {
-    Symbol callable_symbol;
-    Address callable_address;
-    LineEntry callable_line_entry;
-    lldb::addr_t member__f_pointer_value = 0u;
-    LibCppStdFunctionCallableCase callable_case =
-        LibCppStdFunctionCallableCase::Invalid;
-  };
+    struct LibCppStdFunctionCallableInfo {
+        Symbol callable_symbol;
+        Address callable_address;
+        LineEntry callable_line_entry;
+        lldb::addr_t member__f_pointer_value = 0u;
+        LibCppStdFunctionCallableCase callable_case =
+            LibCppStdFunctionCallableCase::Invalid;
+    };
 
-  LibCppStdFunctionCallableInfo
-  FindLibCppStdFunctionCallableInfo(lldb::ValueObjectSP &valobj_sp);
+    LibCppStdFunctionCallableInfo
+    FindLibCppStdFunctionCallableInfo(lldb::ValueObjectSP &valobj_sp);
 
-  static char ID;
+    static char ID;
 
-  bool isA(const void *ClassID) const override {
-    return ClassID == &ID || LanguageRuntime::isA(ClassID);
-  }
+    bool isA(const void *ClassID) const override {
+        return ClassID == &ID || LanguageRuntime::isA(ClassID);
+    }
 
-  static bool classof(const LanguageRuntime *runtime) {
-    return runtime->isA(&ID);
-  }
+    static bool classof(const LanguageRuntime *runtime) {
+        return runtime->isA(&ID);
+    }
 
-  lldb::LanguageType GetLanguageType() const override {
-    return lldb::eLanguageTypeC_plus_plus;
-  }
+    lldb::LanguageType GetLanguageType() const override {
+        return lldb::eLanguageTypeC_plus_plus;
+    }
 
-  static CPPLanguageRuntime *Get(Process &process) {
-    return llvm::cast_or_null<CPPLanguageRuntime>(
-        process.GetLanguageRuntime(lldb::eLanguageTypeC_plus_plus));
-  }
+    static CPPLanguageRuntime *Get(Process &process) {
+        return llvm::cast_or_null<CPPLanguageRuntime>(
+                   process.GetLanguageRuntime(lldb::eLanguageTypeC_plus_plus));
+    }
 
-  bool GetObjectDescription(Stream &str, ValueObject &object) override;
+    bool GetObjectDescription(Stream &str, ValueObject &object) override;
 
-  bool GetObjectDescription(Stream &str, Value &value,
-                            ExecutionContextScope *exe_scope) override;
+    bool GetObjectDescription(Stream &str, Value &value,
+                              ExecutionContextScope *exe_scope) override;
 
-  /// Obtain a ThreadPlan to get us into C++ constructs such as std::function.
-  ///
-  /// \param[in] thread
-  ///     Current thrad of execution.
-  ///
-  /// \param[in] stop_others
-  ///     True if other threads should pause during execution.
-  ///
-  /// \return
-  ///      A ThreadPlan Shared pointer
-  lldb::ThreadPlanSP GetStepThroughTrampolinePlan(Thread &thread,
-                                                  bool stop_others) override;
+    /// Obtain a ThreadPlan to get us into C++ constructs such as std::function.
+    ///
+    /// \param[in] thread
+    ///     Current thrad of execution.
+    ///
+    /// \param[in] stop_others
+    ///     True if other threads should pause during execution.
+    ///
+    /// \return
+    ///      A ThreadPlan Shared pointer
+    lldb::ThreadPlanSP GetStepThroughTrampolinePlan(Thread &thread,
+            bool stop_others) override;
 
-  bool IsAllowedRuntimeValue(ConstString name) override;
+    bool IsAllowedRuntimeValue(ConstString name) override;
 protected:
-  // Classes that inherit from CPPLanguageRuntime can see and modify these
-  CPPLanguageRuntime(Process *process);
+    // Classes that inherit from CPPLanguageRuntime can see and modify these
+    CPPLanguageRuntime(Process *process);
 
 private:
-  using OperatorStringToCallableInfoMap =
-    llvm::StringMap<CPPLanguageRuntime::LibCppStdFunctionCallableInfo>;
+    using OperatorStringToCallableInfoMap =
+        llvm::StringMap<CPPLanguageRuntime::LibCppStdFunctionCallableInfo>;
 
-  OperatorStringToCallableInfoMap CallableLookupCache;
+    OperatorStringToCallableInfoMap CallableLookupCache;
 };
 
 } // namespace lldb_private

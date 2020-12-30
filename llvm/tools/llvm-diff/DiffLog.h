@@ -17,15 +17,15 @@
 #include "llvm/ADT/StringRef.h"
 
 namespace llvm {
-  class Instruction;
-  class Value;
-  class Consumer;
+class Instruction;
+class Value;
+class Consumer;
 
-  /// Trichotomy assumption
-  enum DiffChange { DC_match, DC_left, DC_right };
+/// Trichotomy assumption
+enum DiffChange { DC_match, DC_left, DC_right };
 
-  /// A temporary-object class for building up log messages.
-  class LogBuilder {
+/// A temporary-object class for building up log messages.
+class LogBuilder {
     Consumer *consumer;
 
     /// The use of a stored StringRef here is okay because
@@ -36,17 +36,17 @@ namespace llvm {
 
     SmallVector<Value*, 4> Arguments;
 
-  public:
+public:
     LogBuilder(Consumer &c, StringRef Format) : consumer(&c), Format(Format) {}
     LogBuilder(LogBuilder &&L)
         : consumer(L.consumer), Format(L.Format),
           Arguments(std::move(L.Arguments)) {
-      L.consumer = nullptr;
+        L.consumer = nullptr;
     }
 
     LogBuilder &operator<<(Value *V) {
-      Arguments.push_back(V);
-      return *this;
+        Arguments.push_back(V);
+        return *this;
     }
 
     ~LogBuilder();
@@ -54,16 +54,16 @@ namespace llvm {
     StringRef getFormat() const;
     unsigned getNumArguments() const;
     Value *getArgument(unsigned I) const;
-  };
+};
 
-  /// A temporary-object class for building up diff messages.
-  class DiffLogBuilder {
+/// A temporary-object class for building up diff messages.
+class DiffLogBuilder {
     typedef std::pair<Instruction*,Instruction*> DiffRecord;
     SmallVector<DiffRecord, 20> Diff;
 
     Consumer &consumer;
 
-  public:
+public:
     DiffLogBuilder(Consumer &c) : consumer(c) {}
     ~DiffLogBuilder();
 
@@ -76,7 +76,7 @@ namespace llvm {
     DiffChange getLineKind(unsigned I) const;
     Instruction *getLeft(unsigned I) const;
     Instruction *getRight(unsigned I) const;
-  };
+};
 
 }
 

@@ -16,28 +16,28 @@ namespace Fortran::lower {
 /// Helper to build fir.do_loop Ops.
 class DoLoopHelper {
 public:
-  explicit DoLoopHelper(FirOpBuilder &builder, mlir::Location loc)
-      : builder(builder), loc(loc) {}
-  DoLoopHelper(const DoLoopHelper &) = delete;
+    explicit DoLoopHelper(FirOpBuilder &builder, mlir::Location loc)
+        : builder(builder), loc(loc) {}
+    DoLoopHelper(const DoLoopHelper &) = delete;
 
-  /// Type of a callback to generate the loop body.
-  using BodyGenerator = std::function<void(FirOpBuilder &, mlir::Value)>;
+    /// Type of a callback to generate the loop body.
+    using BodyGenerator = std::function<void(FirOpBuilder &, mlir::Value)>;
 
-  /// Build loop [\p lb, \p ub] with step \p step.
-  /// If \p step is an empty value, 1 is used for the step.
-  void createLoop(mlir::Value lb, mlir::Value ub, mlir::Value step,
-                  const BodyGenerator &bodyGenerator);
+    /// Build loop [\p lb, \p ub] with step \p step.
+    /// If \p step is an empty value, 1 is used for the step.
+    void createLoop(mlir::Value lb, mlir::Value ub, mlir::Value step,
+                    const BodyGenerator &bodyGenerator);
 
-  /// Build loop [\p lb,  \p ub] with step 1.
-  void createLoop(mlir::Value lb, mlir::Value ub,
-                  const BodyGenerator &bodyGenerator);
+    /// Build loop [\p lb,  \p ub] with step 1.
+    void createLoop(mlir::Value lb, mlir::Value ub,
+                    const BodyGenerator &bodyGenerator);
 
-  /// Build loop [0, \p count) with step 1.
-  void createLoop(mlir::Value count, const BodyGenerator &bodyGenerator);
+    /// Build loop [0, \p count) with step 1.
+    void createLoop(mlir::Value count, const BodyGenerator &bodyGenerator);
 
 private:
-  FirOpBuilder &builder;
-  mlir::Location loc;
+    FirOpBuilder &builder;
+    mlir::Location loc;
 };
 
 } // namespace Fortran::lower

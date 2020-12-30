@@ -89,7 +89,7 @@ thread::hardware_concurrency() _NOEXCEPT
     // TODO: grovel through /proc or check cpuid on x86 and similar
     // instructions on other architectures.
 #   if defined(_LIBCPP_WARNING)
-        _LIBCPP_WARNING("hardware_concurrency not yet implemented")
+    _LIBCPP_WARNING("hardware_concurrency not yet implemented")
 #   else
 #       warning hardware_concurrency not yet implemented
 #   endif
@@ -127,18 +127,24 @@ public:
     typedef T  value_type;
 
     T* allocate(size_t __n)
-        {return static_cast<T*>(::operator new(__n * sizeof(T)));}
-    void deallocate(T* __p, size_t) {::operator delete(static_cast<void*>(__p));}
+    {
+        return static_cast<T*>(::operator new(__n * sizeof(T)));
+    }
+    void deallocate(T* __p, size_t) {
+        ::operator delete(static_cast<void*>(__p));
+    }
 
-    size_t max_size() const {return size_t(~0) / sizeof(T);}
+    size_t max_size() const {
+        return size_t(~0) / sizeof(T);
+    }
 };
 
 class _LIBCPP_HIDDEN __thread_struct_imp
 {
     typedef vector<__assoc_sub_state*,
-                          __hidden_allocator<__assoc_sub_state*> > _AsyncStates;
+            __hidden_allocator<__assoc_sub_state*> > _AsyncStates;
     typedef vector<pair<condition_variable*, mutex*>,
-               __hidden_allocator<pair<condition_variable*, mutex*> > > _Notify;
+            __hidden_allocator<pair<condition_variable*, mutex*> > > _Notify;
 
     _AsyncStates async_states_;
     _Notify notify_;

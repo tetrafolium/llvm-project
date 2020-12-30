@@ -26,57 +26,57 @@ static bool HandledDecl = false;
 
 class AnnotateFunctionsConsumer : public ASTConsumer {
 public:
-  bool HandleTopLevelDecl(DeclGroupRef DG) override {
-    HandledDecl = true;
-    if (!EnableAnnotate)
-      return true;
-    for (auto D : DG)
-      if (FunctionDecl *FD = dyn_cast<FunctionDecl>(D))
-        FD->addAttr(AnnotateAttr::CreateImplicit(
-            FD->getASTContext(), "example_annotation", nullptr, 0));
-    return true;
-  }
+    bool HandleTopLevelDecl(DeclGroupRef DG) override {
+        HandledDecl = true;
+        if (!EnableAnnotate)
+            return true;
+        for (auto D : DG)
+            if (FunctionDecl *FD = dyn_cast<FunctionDecl>(D))
+                FD->addAttr(AnnotateAttr::CreateImplicit(
+                                FD->getASTContext(), "example_annotation", nullptr, 0));
+        return true;
+    }
 };
 
 class AnnotateFunctionsAction : public PluginASTAction {
 public:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
-                                                 llvm::StringRef) override {
-    return std::make_unique<AnnotateFunctionsConsumer>();
-  }
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
+            llvm::StringRef) override {
+        return std::make_unique<AnnotateFunctionsConsumer>();
+    }
 
-  bool ParseArgs(const CompilerInstance &CI,
-                 const std::vector<std::string> &args) override {
-    return true;
-  }
+    bool ParseArgs(const CompilerInstance &CI,
+                   const std::vector<std::string> &args) override {
+        return true;
+    }
 
-  PluginASTAction::ActionType getActionType() override {
-    return AddBeforeMainAction;
-  }
+    PluginASTAction::ActionType getActionType() override {
+        return AddBeforeMainAction;
+    }
 };
 
 class PragmaAnnotateHandler : public PragmaHandler {
 public:
-  PragmaAnnotateHandler() : PragmaHandler("enable_annotate") { }
+    PragmaAnnotateHandler() : PragmaHandler("enable_annotate") { }
 
-  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
-                    Token &PragmaTok) override {
+    void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
+                      Token &PragmaTok) override {
 
-    Token Tok;
-    PP.LexUnexpandedToken(Tok);
-    if (Tok.isNot(tok::eod))
-      PP.Diag(Tok, diag::ext_pp_extra_tokens_at_eol) << "pragma";
+        Token Tok;
+        PP.LexUnexpandedToken(Tok);
+        if (Tok.isNot(tok::eod))
+            PP.Diag(Tok, diag::ext_pp_extra_tokens_at_eol) << "pragma";
 
-    if (HandledDecl) {
-      DiagnosticsEngine &D = PP.getDiagnostics();
-      unsigned ID = D.getCustomDiagID(
-        DiagnosticsEngine::Error,
-        "#pragma enable_annotate not allowed after declarations");
-      D.Report(PragmaTok.getLocation(), ID);
+        if (HandledDecl) {
+            DiagnosticsEngine &D = PP.getDiagnostics();
+            unsigned ID = D.getCustomDiagID(
+                              DiagnosticsEngine::Error,
+                              "#pragma enable_annotate not allowed after declarations");
+            D.Report(PragmaTok.getLocation(), ID);
+        }
+
+        EnableAnnotate = true;
     }
-
-    EnableAnnotate = true;
-  }
 };
 
 }

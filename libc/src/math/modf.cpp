@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 double LLVM_LIBC_ENTRYPOINT(modf)(double x, double *iptr) {
-  return fputil::modf(x, *iptr);
+    return fputil::modf(x, *iptr);
 }
 
 } // namespace __llvm_libc

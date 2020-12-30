@@ -33,38 +33,38 @@ cl::opt<std::string> DumpFileStem("dump-file-stem",
                                   cl::Optional, cl::init(""));
 
 int main(int argc, char *argv[]) {
-  // Initialize LLVM.
-  InitLLVM X(argc, argv);
+    // Initialize LLVM.
+    InitLLVM X(argc, argv);
 
-  InitializeNativeTarget();
-  InitializeNativeTargetAsmPrinter();
+    InitializeNativeTarget();
+    InitializeNativeTargetAsmPrinter();
 
-  cl::ParseCommandLineOptions(argc, argv, "LLJITDumpObjects");
-  ExitOnErr.setBanner(std::string(argv[0]) + ": ");
+    cl::ParseCommandLineOptions(argc, argv, "LLJITDumpObjects");
+    ExitOnErr.setBanner(std::string(argv[0]) + ": ");
 
-  outs()
-      << "Usage notes:\n"
-         "  Use -debug-only=orc on debug builds to see log messages of objects "
-         "being dumped\n"
-         "  Specify -dump-dir to specify a dump directory\n"
-         "  Specify -dump-file-stem to override the dump file stem\n"
-         "  Specify -dump-jitted-objects=false to disable dumping\n";
+    outs()
+            << "Usage notes:\n"
+            "  Use -debug-only=orc on debug builds to see log messages of objects "
+            "being dumped\n"
+            "  Specify -dump-dir to specify a dump directory\n"
+            "  Specify -dump-file-stem to override the dump file stem\n"
+            "  Specify -dump-jitted-objects=false to disable dumping\n";
 
-  auto J = ExitOnErr(LLJITBuilder().create());
+    auto J = ExitOnErr(LLJITBuilder().create());
 
-  if (DumpJITdObjects)
-    J->getObjTransformLayer().setTransform(DumpObjects(DumpDir, DumpFileStem));
+    if (DumpJITdObjects)
+        J->getObjTransformLayer().setTransform(DumpObjects(DumpDir, DumpFileStem));
 
-  auto M = ExitOnErr(parseExampleModule(Add1Example, "add1"));
+    auto M = ExitOnErr(parseExampleModule(Add1Example, "add1"));
 
-  ExitOnErr(J->addIRModule(std::move(M)));
+    ExitOnErr(J->addIRModule(std::move(M)));
 
-  // Look up the JIT'd function, cast it to a function pointer, then call it.
-  auto Add1Sym = ExitOnErr(J->lookup("add1"));
-  int (*Add1)(int) = (int (*)(int))Add1Sym.getAddress();
+    // Look up the JIT'd function, cast it to a function pointer, then call it.
+    auto Add1Sym = ExitOnErr(J->lookup("add1"));
+    int (*Add1)(int) = (int (*)(int))Add1Sym.getAddress();
 
-  int Result = Add1(42);
-  outs() << "add1(42) = " << Result << "\n";
+    int Result = Add1(42);
+    outs() << "add1(42) = " << Result << "\n";
 
-  return 0;
+    return 0;
 }

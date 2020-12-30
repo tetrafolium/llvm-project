@@ -44,40 +44,42 @@ BitVector getFunctionReservedRegs(const TargetMachine &TM);
 // Helper to fill in a basic block.
 class BasicBlockFiller {
 public:
-  BasicBlockFiller(MachineFunction &MF, MachineBasicBlock *MBB,
-                   const MCInstrInfo *MCII);
+    BasicBlockFiller(MachineFunction &MF, MachineBasicBlock *MBB,
+                     const MCInstrInfo *MCII);
 
-  void addInstruction(const MCInst &Inst, const DebugLoc &DL = DebugLoc());
-  void addInstructions(ArrayRef<MCInst> Insts, const DebugLoc &DL = DebugLoc());
+    void addInstruction(const MCInst &Inst, const DebugLoc &DL = DebugLoc());
+    void addInstructions(ArrayRef<MCInst> Insts, const DebugLoc &DL = DebugLoc());
 
-  void addReturn(const DebugLoc &DL = DebugLoc());
+    void addReturn(const DebugLoc &DL = DebugLoc());
 
-  MachineFunction &MF;
-  MachineBasicBlock *const MBB;
-  const MCInstrInfo *const MCII;
+    MachineFunction &MF;
+    MachineBasicBlock *const MBB;
+    const MCInstrInfo *const MCII;
 };
 
 // Helper to fill in a function.
 class FunctionFiller {
 public:
-  FunctionFiller(MachineFunction &MF, std::vector<unsigned> RegistersSetUp);
+    FunctionFiller(MachineFunction &MF, std::vector<unsigned> RegistersSetUp);
 
-  // Adds a basic block to the function.
-  BasicBlockFiller addBasicBlock();
+    // Adds a basic block to the function.
+    BasicBlockFiller addBasicBlock();
 
-  // Returns the function entry point.
-  BasicBlockFiller getEntry() { return Entry; }
+    // Returns the function entry point.
+    BasicBlockFiller getEntry() {
+        return Entry;
+    }
 
-  MachineFunction &MF;
-  const MCInstrInfo *const MCII;
+    MachineFunction &MF;
+    const MCInstrInfo *const MCII;
 
-  // Returns the set of registers in the snippet setup code.
-  ArrayRef<unsigned> getRegistersSetUp() const;
+    // Returns the set of registers in the snippet setup code.
+    ArrayRef<unsigned> getRegistersSetUp() const;
 
 private:
-  BasicBlockFiller Entry;
-  // The set of registers that are set up in the basic block.
-  std::vector<unsigned> RegistersSetUp;
+    BasicBlockFiller Entry;
+    // The set of registers that are set up in the basic block.
+    std::vector<unsigned> RegistersSetUp;
 };
 
 // A callback that fills a function.
@@ -104,27 +106,29 @@ object::OwningBinary<object::ObjectFile> getObjectFromFile(StringRef Filename);
 // Consumes an ObjectFile containing a `void foo(char*)` function and make it
 // executable.
 struct ExecutableFunction {
-  explicit ExecutableFunction(
-      std::unique_ptr<LLVMTargetMachine> TM,
-      object::OwningBinary<object::ObjectFile> &&ObjectFileHolder);
+    explicit ExecutableFunction(
+        std::unique_ptr<LLVMTargetMachine> TM,
+        object::OwningBinary<object::ObjectFile> &&ObjectFileHolder);
 
-  // Retrieves the function as an array of bytes.
-  StringRef getFunctionBytes() const { return FunctionBytes; }
+    // Retrieves the function as an array of bytes.
+    StringRef getFunctionBytes() const {
+        return FunctionBytes;
+    }
 
-  // Executes the function.
-  void operator()(char *Memory) const {
-    ((void (*)(char *))(intptr_t)FunctionBytes.data())(Memory);
-  }
+    // Executes the function.
+    void operator()(char *Memory) const {
+        ((void (*)(char *))(intptr_t)FunctionBytes.data())(Memory);
+    }
 
-  std::unique_ptr<LLVMContext> Context;
-  std::unique_ptr<ExecutionEngine> ExecEngine;
-  StringRef FunctionBytes;
+    std::unique_ptr<LLVMContext> Context;
+    std::unique_ptr<ExecutionEngine> ExecEngine;
+    StringRef FunctionBytes;
 };
 
 // Creates a void(int8*) MachineFunction.
 MachineFunction &createVoidVoidPtrMachineFunction(StringRef FunctionID,
-                                                  Module *Module,
-                                                  MachineModuleInfo *MMI);
+        Module *Module,
+        MachineModuleInfo *MMI);
 
 } // namespace exegesis
 } // namespace llvm

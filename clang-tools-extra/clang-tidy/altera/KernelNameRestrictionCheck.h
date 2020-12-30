@@ -22,10 +22,10 @@ namespace altera {
 /// http://clang.llvm.org/extra/clang-tidy/checks/altera-kernel-name-restriction.html
 class KernelNameRestrictionCheck : public ClangTidyCheck {
 public:
-  KernelNameRestrictionCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *) override;
+    KernelNameRestrictionCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *) override;
 };
 
 } // namespace altera

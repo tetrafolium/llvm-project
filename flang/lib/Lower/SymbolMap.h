@@ -40,125 +40,161 @@ namespace Fortran::lower {
 /// The lowering bridge needs to be able to record all four of these ssa-values
 /// in the lookup table to be able to correctly lower Fortran to FIR.
 struct SymbolBox {
-  // For lookups that fail, have a monostate
-  using None = std::monostate;
+    // For lookups that fail, have a monostate
+    using None = std::monostate;
 
-  // Trivial intrinsic type
-  using Intrinsic = fir::AbstractBox;
+    // Trivial intrinsic type
+    using Intrinsic = fir::AbstractBox;
 
-  // Array variable that uses bounds notation
-  using FullDim = fir::ArrayBoxValue;
+    // Array variable that uses bounds notation
+    using FullDim = fir::ArrayBoxValue;
 
-  // CHARACTER type variable with its dependent type LEN parameter
-  using Char = fir::CharBoxValue;
+    // CHARACTER type variable with its dependent type LEN parameter
+    using Char = fir::CharBoxValue;
 
-  // CHARACTER array variable using bounds notation
-  using CharFullDim = fir::CharArrayBoxValue;
+    // CHARACTER array variable using bounds notation
+    using CharFullDim = fir::CharArrayBoxValue;
 
-  // Generalized derived type variable
-  using Derived = fir::BoxValue;
+    // Generalized derived type variable
+    using Derived = fir::BoxValue;
 
-  //===--------------------------------------------------------------------===//
-  // Constructors
-  //===--------------------------------------------------------------------===//
+    //===--------------------------------------------------------------------===//
+    // Constructors
+    //===--------------------------------------------------------------------===//
 
-  SymbolBox() : box{None{}} {}
-  template <typename A>
-  SymbolBox(const A &x) : box{x} {}
+    SymbolBox() : box{None{}} {}
+    template <typename A>
+    SymbolBox(const A &x) : box{x} {}
 
-  operator bool() const { return !std::holds_alternative<None>(box); }
+    operator bool() const {
+        return !std::holds_alternative<None>(box);
+    }
 
-  // This operator returns the address of the boxed value. TODO: consider
-  // eliminating this in favor of explicit conversion.
-  operator mlir::Value() const { return getAddr(); }
+    // This operator returns the address of the boxed value. TODO: consider
+    // eliminating this in favor of explicit conversion.
+    operator mlir::Value() const {
+        return getAddr();
+    }
 
-  //===--------------------------------------------------------------------===//
-  // Accessors
-  //===--------------------------------------------------------------------===//
+    //===--------------------------------------------------------------------===//
+    // Accessors
+    //===--------------------------------------------------------------------===//
 
-  /// Get address of the boxed value. For a scalar, this is the address of the
-  /// scalar. For an array, this is the address of the first element in the
-  /// array, etc.
-  mlir::Value getAddr() const {
-    return std::visit(common::visitors{
-                          [](const None &) { return mlir::Value{}; },
-                          [](const auto &x) { return x.getAddr(); },
-                      },
-                      box);
-  }
-
-  /// Get the LEN type parameter of a CHARACTER boxed value.
-  llvm::Optional<mlir::Value> getCharLen() const {
-    using T = llvm::Optional<mlir::Value>;
-    return std::visit(common::visitors{
-                          [](const Char &x) { return T{x.getLen()}; },
-                          [](const CharFullDim &x) { return T{x.getLen()}; },
-                          [](const auto &) { return T{}; },
-                      },
-                      box);
-  }
-
-  /// Does the boxed value have an intrinsic type?
-  bool isIntrinsic() const {
-    return std::visit(common::visitors{
-                          [](const Intrinsic &) { return true; },
-                          [](const Char &) { return true; },
-                          [](const auto &x) { return false; },
-                      },
-                      box);
-  }
-
-  /// Does the boxed value have a rank greater than zero?
-  bool hasRank() const {
-    return std::visit(
-        common::visitors{
-            [](const Intrinsic &) { return false; },
-            [](const Char &) { return false; },
-            [](const None &) { return false; },
-            [](const auto &x) { return x.getExtents().size() > 0; },
+    /// Get address of the boxed value. For a scalar, this is the address of the
+    /// scalar. For an array, this is the address of the first element in the
+    /// array, etc.
+    mlir::Value getAddr() const {
+        return std::visit(common::visitors{
+            [](const None &) {
+                return mlir::Value{};
+            },
+            [](const auto &x) {
+                return x.getAddr();
+            },
         },
         box);
-  }
+    }
 
-  /// Does the boxed value have trivial lower bounds (== 1)?
-  bool hasSimpleLBounds() const {
-    if (auto *arr = std::get_if<FullDim>(&box))
-      return arr->getLBounds().empty();
-    if (auto *arr = std::get_if<CharFullDim>(&box))
-      return arr->getLBounds().empty();
-    if (auto *arr = std::get_if<Derived>(&box))
-      return (arr->getExtents().size() > 0) && arr->getLBounds().empty();
-    return false;
-  }
-
-  /// Does the boxed value have a constant shape?
-  bool hasConstantShape() const {
-    if (auto eleTy = fir::dyn_cast_ptrEleTy(getAddr().getType()))
-      if (auto arrTy = eleTy.dyn_cast<fir::SequenceType>())
-        return arrTy.hasConstantShape();
-    return false;
-  }
-
-  /// Get the lbound if the box explicitly contains it.
-  mlir::Value getLBound(unsigned dim) const {
-    return std::visit(
-        common::visitors{
-            [&](const FullDim &box) { return box.getLBounds()[dim]; },
-            [&](const CharFullDim &box) { return box.getLBounds()[dim]; },
-            [&](const Derived &box) { return box.getLBounds()[dim]; },
-            [](const auto &) { return mlir::Value{}; }},
+    /// Get the LEN type parameter of a CHARACTER boxed value.
+    llvm::Optional<mlir::Value> getCharLen() const {
+        using T = llvm::Optional<mlir::Value>;
+        return std::visit(common::visitors{
+            [](const Char &x) {
+                return T{x.getLen()};
+            },
+            [](const CharFullDim &x) {
+                return T{x.getLen()};
+            },
+            [](const auto &) {
+                return T{};
+            },
+        },
         box);
-  }
+    }
 
-  /// Apply the lambda `func` to this box value.
-  template <typename ON, typename RT>
-  constexpr RT apply(RT(&&func)(const ON &)) const {
-    if (auto *x = std::get_if<ON>(&box))
-      return func(*x);
-    return RT{};
-  }
+    /// Does the boxed value have an intrinsic type?
+    bool isIntrinsic() const {
+        return std::visit(common::visitors{
+            [](const Intrinsic &) {
+                return true;
+            },
+            [](const Char &) {
+                return true;
+            },
+            [](const auto &x) {
+                return false;
+            },
+        },
+        box);
+    }
 
-  std::variant<Intrinsic, FullDim, Char, CharFullDim, Derived, None> box;
+    /// Does the boxed value have a rank greater than zero?
+    bool hasRank() const {
+        return std::visit(
+        common::visitors{
+            [](const Intrinsic &) {
+                return false;
+            },
+            [](const Char &) {
+                return false;
+            },
+            [](const None &) {
+                return false;
+            },
+            [](const auto &x) {
+                return x.getExtents().size() > 0;
+            },
+        },
+        box);
+    }
+
+    /// Does the boxed value have trivial lower bounds (== 1)?
+    bool hasSimpleLBounds() const {
+        if (auto *arr = std::get_if<FullDim>(&box))
+            return arr->getLBounds().empty();
+        if (auto *arr = std::get_if<CharFullDim>(&box))
+            return arr->getLBounds().empty();
+        if (auto *arr = std::get_if<Derived>(&box))
+            return (arr->getExtents().size() > 0) && arr->getLBounds().empty();
+        return false;
+    }
+
+    /// Does the boxed value have a constant shape?
+    bool hasConstantShape() const {
+        if (auto eleTy = fir::dyn_cast_ptrEleTy(getAddr().getType()))
+            if (auto arrTy = eleTy.dyn_cast<fir::SequenceType>())
+                return arrTy.hasConstantShape();
+        return false;
+    }
+
+    /// Get the lbound if the box explicitly contains it.
+    mlir::Value getLBound(unsigned dim) const {
+        return std::visit(
+        common::visitors{
+            [&](const FullDim &box) {
+                return box.getLBounds()[dim];
+            },
+            [&](const CharFullDim &box) {
+                return box.getLBounds()[dim];
+            },
+            [&](const Derived &box) {
+                return box.getLBounds()[dim];
+            },
+            [](const auto &) {
+                return mlir::Value{};
+            }},
+        box);
+    }
+
+    /// Apply the lambda `func` to this box value.
+    template <typename ON, typename RT>
+    constexpr RT apply(RT(&&func)(const ON &)) const {
+        if (auto *x = std::get_if<ON>(&box))
+            return func(*x);
+        return RT{};
+    }
+
+    std::variant<Intrinsic, FullDim, Char, CharFullDim, Derived, None> box;
 };
 
 //===----------------------------------------------------------------------===//
@@ -172,86 +208,90 @@ struct SymbolBox {
 /// etc.
 class SymMap {
 public:
-  /// Add a trivial symbol mapping to an address.
-  void addSymbol(semantics::SymbolRef sym, mlir::Value value,
-                 bool force = false) {
-    makeSym(sym, SymbolBox::Intrinsic(value), force);
-  }
+    /// Add a trivial symbol mapping to an address.
+    void addSymbol(semantics::SymbolRef sym, mlir::Value value,
+                   bool force = false) {
+        makeSym(sym, SymbolBox::Intrinsic(value), force);
+    }
 
-  /// Add a scalar CHARACTER mapping to an (address, len).
-  void addCharSymbol(semantics::SymbolRef sym, mlir::Value value,
-                     mlir::Value len, bool force = false) {
-    makeSym(sym, SymbolBox::Char(value, len), force);
-  }
+    /// Add a scalar CHARACTER mapping to an (address, len).
+    void addCharSymbol(semantics::SymbolRef sym, mlir::Value value,
+                       mlir::Value len, bool force = false) {
+        makeSym(sym, SymbolBox::Char(value, len), force);
+    }
 
-  /// Add an array mapping with (address, shape).
-  void addSymbolWithShape(semantics::SymbolRef sym, mlir::Value value,
-                          llvm::ArrayRef<mlir::Value> shape,
+    /// Add an array mapping with (address, shape).
+    void addSymbolWithShape(semantics::SymbolRef sym, mlir::Value value,
+                            llvm::ArrayRef<mlir::Value> shape,
+                            bool force = false) {
+        makeSym(sym, SymbolBox::FullDim(value, shape), force);
+    }
+
+    /// Add an array of CHARACTER mapping.
+    void addCharSymbolWithShape(semantics::SymbolRef sym, mlir::Value value,
+                                mlir::Value len,
+                                llvm::ArrayRef<mlir::Value> shape,
+                                bool force = false) {
+        makeSym(sym, SymbolBox::CharFullDim(value, len, shape), force);
+    }
+
+    /// Add an array mapping with bounds notation.
+    void addSymbolWithBounds(semantics::SymbolRef sym, mlir::Value value,
+                             llvm::ArrayRef<mlir::Value> extents,
+                             llvm::ArrayRef<mlir::Value> lbounds,
+                             bool force = false) {
+        makeSym(sym, SymbolBox::FullDim(value, extents, lbounds), force);
+    }
+
+    /// Add an array of CHARACTER with bounds notation.
+    void addCharSymbolWithBounds(semantics::SymbolRef sym, mlir::Value value,
+                                 mlir::Value len,
+                                 llvm::ArrayRef<mlir::Value> extents,
+                                 llvm::ArrayRef<mlir::Value> lbounds,
+                                 bool force = false) {
+        makeSym(sym, SymbolBox::CharFullDim(value, len, extents, lbounds), force);
+    }
+
+    /// Generalized derived type mapping.
+    void addDerivedSymbol(semantics::SymbolRef sym, mlir::Value value,
+                          mlir::Value size, llvm::ArrayRef<mlir::Value> extents,
+                          llvm::ArrayRef<mlir::Value> lbounds,
+                          llvm::ArrayRef<mlir::Value> params,
                           bool force = false) {
-    makeSym(sym, SymbolBox::FullDim(value, shape), force);
-  }
+        makeSym(sym, SymbolBox::Derived(value, size, params, extents, lbounds),
+                force);
+    }
 
-  /// Add an array of CHARACTER mapping.
-  void addCharSymbolWithShape(semantics::SymbolRef sym, mlir::Value value,
-                              mlir::Value len,
-                              llvm::ArrayRef<mlir::Value> shape,
-                              bool force = false) {
-    makeSym(sym, SymbolBox::CharFullDim(value, len, shape), force);
-  }
+    /// Find `symbol` and return its value if it appears in the current mappings.
+    SymbolBox lookupSymbol(semantics::SymbolRef sym) {
+        auto iter = symbolMap.find(&*sym);
+        return (iter == symbolMap.end()) ? SymbolBox() : iter->second;
+    }
 
-  /// Add an array mapping with bounds notation.
-  void addSymbolWithBounds(semantics::SymbolRef sym, mlir::Value value,
-                           llvm::ArrayRef<mlir::Value> extents,
-                           llvm::ArrayRef<mlir::Value> lbounds,
-                           bool force = false) {
-    makeSym(sym, SymbolBox::FullDim(value, extents, lbounds), force);
-  }
+    /// Remove `sym` from the map.
+    void erase(semantics::SymbolRef sym) {
+        symbolMap.erase(&*sym);
+    }
 
-  /// Add an array of CHARACTER with bounds notation.
-  void addCharSymbolWithBounds(semantics::SymbolRef sym, mlir::Value value,
-                               mlir::Value len,
-                               llvm::ArrayRef<mlir::Value> extents,
-                               llvm::ArrayRef<mlir::Value> lbounds,
-                               bool force = false) {
-    makeSym(sym, SymbolBox::CharFullDim(value, len, extents, lbounds), force);
-  }
+    /// Remove all symbols from the map.
+    void clear() {
+        symbolMap.clear();
+    }
 
-  /// Generalized derived type mapping.
-  void addDerivedSymbol(semantics::SymbolRef sym, mlir::Value value,
-                        mlir::Value size, llvm::ArrayRef<mlir::Value> extents,
-                        llvm::ArrayRef<mlir::Value> lbounds,
-                        llvm::ArrayRef<mlir::Value> params,
-                        bool force = false) {
-    makeSym(sym, SymbolBox::Derived(value, size, params, extents, lbounds),
-            force);
-  }
-
-  /// Find `symbol` and return its value if it appears in the current mappings.
-  SymbolBox lookupSymbol(semantics::SymbolRef sym) {
-    auto iter = symbolMap.find(&*sym);
-    return (iter == symbolMap.end()) ? SymbolBox() : iter->second;
-  }
-
-  /// Remove `sym` from the map.
-  void erase(semantics::SymbolRef sym) { symbolMap.erase(&*sym); }
-
-  /// Remove all symbols from the map.
-  void clear() { symbolMap.clear(); }
-
-  /// Dump the map. For debugging.
-  LLVM_DUMP_METHOD void dump() const;
+    /// Dump the map. For debugging.
+    LLVM_DUMP_METHOD void dump() const;
 
 private:
-  /// Add `symbol` to the current map and bind a `box`.
-  void makeSym(semantics::SymbolRef sym, const SymbolBox &box,
-               bool force = false) {
-    if (force)
-      erase(sym);
-    assert(box && "cannot add an undefined symbol box");
-    symbolMap.try_emplace(&*sym, box);
-  }
+    /// Add `symbol` to the current map and bind a `box`.
+    void makeSym(semantics::SymbolRef sym, const SymbolBox &box,
+                 bool force = false) {
+        if (force)
+            erase(sym);
+        assert(box && "cannot add an undefined symbol box");
+        symbolMap.try_emplace(&*sym, box);
+    }
 
-  llvm::DenseMap<const semantics::Symbol *, SymbolBox> symbolMap;
+    llvm::DenseMap<const semantics::Symbol *, SymbolBox> symbolMap;
 };
 
 } // namespace Fortran::lower

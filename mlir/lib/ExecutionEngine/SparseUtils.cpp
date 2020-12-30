@@ -33,9 +33,9 @@
 
 // Helper to convert string to lower case.
 static char *toLower(char *token) {
-  for (char *c = token; *c; c++)
-    *c = tolower(*c);
-  return token;
+    for (char *c = token; *c; c++)
+        *c = tolower(*c);
+    return token;
 }
 
 // Read the header of a general sparse matrix of type real.
@@ -44,53 +44,53 @@ static char *toLower(char *token) {
 //
 static void readHeader(FILE *file, char *name, uint64_t *m, uint64_t *n,
                        uint64_t *nnz) {
-  char line[1025];
-  char header[64];
-  char object[64];
-  char format[64];
-  char field[64];
-  char symmetry[64];
-  // Read header line.
-  if (fscanf(file, "%63s %63s %63s %63s %63s\n", header, object, format, field,
-             symmetry) != 5) {
-    fprintf(stderr, "Corrupt header in %s\n", name);
-    exit(1);
-  }
-  // Make sure this is a general sparse matrix.
-  if (strcmp(toLower(header), "%%matrixmarket") ||
-      strcmp(toLower(object), "matrix") ||
-      strcmp(toLower(format), "coordinate") || strcmp(toLower(field), "real") ||
-      strcmp(toLower(symmetry), "general")) {
-    fprintf(stderr,
-            "Cannot find a general sparse matrix with type real in %s\n", name);
-    exit(1);
-  }
-  // Skip comments.
-  while (1) {
-    if (!fgets(line, 1025, file)) {
-      fprintf(stderr, "Cannot find data in %s\n", name);
-      exit(1);
+    char line[1025];
+    char header[64];
+    char object[64];
+    char format[64];
+    char field[64];
+    char symmetry[64];
+    // Read header line.
+    if (fscanf(file, "%63s %63s %63s %63s %63s\n", header, object, format, field,
+               symmetry) != 5) {
+        fprintf(stderr, "Corrupt header in %s\n", name);
+        exit(1);
     }
-    if (line[0] != '%')
-      break;
-  }
-  // Next line contains M N NNZ.
-  if (sscanf(line, "%" PRIu64 "%" PRIu64 "%" PRIu64, m, n, nnz) != 3) {
-    fprintf(stderr, "Cannot find size in %s\n", name);
-    exit(1);
-  }
+    // Make sure this is a general sparse matrix.
+    if (strcmp(toLower(header), "%%matrixmarket") ||
+            strcmp(toLower(object), "matrix") ||
+            strcmp(toLower(format), "coordinate") || strcmp(toLower(field), "real") ||
+            strcmp(toLower(symmetry), "general")) {
+        fprintf(stderr,
+                "Cannot find a general sparse matrix with type real in %s\n", name);
+        exit(1);
+    }
+    // Skip comments.
+    while (1) {
+        if (!fgets(line, 1025, file)) {
+            fprintf(stderr, "Cannot find data in %s\n", name);
+            exit(1);
+        }
+        if (line[0] != '%')
+            break;
+    }
+    // Next line contains M N NNZ.
+    if (sscanf(line, "%" PRIu64 "%" PRIu64 "%" PRIu64, m, n, nnz) != 3) {
+        fprintf(stderr, "Cannot find size in %s\n", name);
+        exit(1);
+    }
 }
 
 // Read next data item.
 static void readItem(FILE *file, char *name, uint64_t *i, uint64_t *j,
                      double *d) {
-  if (fscanf(file, "%" PRIu64 " %" PRIu64 " %lg\n", i, j, d) != 3) {
-    fprintf(stderr, "Cannot find next data item in %s\n", name);
-    exit(1);
-  }
-  // Translate 1-based to 0-based.
-  *i = *i - 1;
-  *j = *j - 1;
+    if (fscanf(file, "%" PRIu64 " %" PRIu64 " %lg\n", i, j, d) != 3) {
+        fprintf(stderr, "Cannot find next data item in %s\n", name);
+        exit(1);
+    }
+    // Translate 1-based to 0-based.
+    *i = *i - 1;
+    *j = *j - 1;
 }
 
 //===----------------------------------------------------------------------===//
@@ -133,18 +133,18 @@ static char *sparseFilename = nullptr;
 
 extern "C" void openMatrixC(char *filename, uint64_t *mdata, uint64_t *ndata,
                             uint64_t *nnzdata) {
-  if (sparseFile != nullptr) {
-    fprintf(stderr, "Other file still open %s vs. %s\n", sparseFilename,
-            filename);
-    exit(1);
-  }
-  sparseFile = fopen(filename, "r");
-  if (!sparseFile) {
-    fprintf(stderr, "Cannot find %s\n", filename);
-    exit(1);
-  }
-  sparseFilename = filename;
-  readHeader(sparseFile, filename, mdata, ndata, nnzdata);
+    if (sparseFile != nullptr) {
+        fprintf(stderr, "Other file still open %s vs. %s\n", sparseFilename,
+                filename);
+        exit(1);
+    }
+    sparseFile = fopen(filename, "r");
+    if (!sparseFile) {
+        fprintf(stderr, "Cannot find %s\n", filename);
+        exit(1);
+    }
+    sparseFilename = filename;
+    readHeader(sparseFile, filename, mdata, ndata, nnzdata);
 }
 
 // "MLIRized" version.
@@ -152,42 +152,42 @@ extern "C" void openMatrix(char *filename, uint64_t *mbase, uint64_t *mdata,
                            int64_t moff, uint64_t *nbase, uint64_t *ndata,
                            int64_t noff, uint64_t *nnzbase, uint64_t *nnzdata,
                            int64_t nnzoff) {
-  openMatrixC(filename, mdata, ndata, nnzdata);
+    openMatrixC(filename, mdata, ndata, nnzdata);
 }
 
 extern "C" void readMatrixItemC(uint64_t *idata, uint64_t *jdata,
                                 double *ddata) {
-  if (sparseFile == nullptr) {
-    fprintf(stderr, "Cannot read item from unopened matrix\n");
-    exit(1);
-  }
-  readItem(sparseFile, sparseFilename, idata, jdata, ddata);
+    if (sparseFile == nullptr) {
+        fprintf(stderr, "Cannot read item from unopened matrix\n");
+        exit(1);
+    }
+    readItem(sparseFile, sparseFilename, idata, jdata, ddata);
 }
 
 // "MLIRized" version.
 extern "C" void readMatrixItem(uint64_t *ibase, uint64_t *idata, int64_t ioff,
                                uint64_t *jbase, uint64_t *jdata, int64_t joff,
                                double *dbase, double *ddata, int64_t doff) {
-  readMatrixItemC(idata, jdata, ddata);
+    readMatrixItemC(idata, jdata, ddata);
 }
 
 extern "C" void closeMatrix() {
-  if (sparseFile == nullptr) {
-    fprintf(stderr, "Cannot close unopened matrix\n");
-    exit(1);
-  }
-  fclose(sparseFile);
-  sparseFile = nullptr;
-  sparseFilename = nullptr;
+    if (sparseFile == nullptr) {
+        fprintf(stderr, "Cannot close unopened matrix\n");
+        exit(1);
+    }
+    fclose(sparseFile);
+    sparseFile = nullptr;
+    sparseFilename = nullptr;
 }
 
 // Helper method to read matrix filenames from the environment, defined
 // with the naming convention ${MATRIX0}, ${MATRIX1}, etc.
 extern "C" char *getMatrix(uint64_t id) {
-  char var[80];
-  sprintf(var, "MATRIX%" PRIu64, id);
-  char *env = getenv(var);
-  return env;
+    char var[80];
+    sprintf(var, "MATRIX%" PRIu64, id);
+    char *env = getenv(var);
+    return env;
 }
 
 #endif // MLIR_CRUNNERUTILS_DEFINE_FUNCTIONS

@@ -22,32 +22,32 @@ namespace __memprof {
 // Each MemprofThread has its own MemprofStats, which are sometimes flushed
 // to the accumulated MemprofStats.
 struct MemprofStats {
-  // MemprofStats must be a struct consisting of uptr fields only.
-  // When merging two MemprofStats structs, we treat them as arrays of uptr.
-  uptr mallocs;
-  uptr malloced;
-  uptr malloced_overhead;
-  uptr frees;
-  uptr freed;
-  uptr real_frees;
-  uptr really_freed;
-  uptr reallocs;
-  uptr realloced;
-  uptr mmaps;
-  uptr mmaped;
-  uptr munmaps;
-  uptr munmaped;
-  uptr malloc_large;
-  uptr malloced_by_size[kNumberOfSizeClasses];
+    // MemprofStats must be a struct consisting of uptr fields only.
+    // When merging two MemprofStats structs, we treat them as arrays of uptr.
+    uptr mallocs;
+    uptr malloced;
+    uptr malloced_overhead;
+    uptr frees;
+    uptr freed;
+    uptr real_frees;
+    uptr really_freed;
+    uptr reallocs;
+    uptr realloced;
+    uptr mmaps;
+    uptr mmaped;
+    uptr munmaps;
+    uptr munmaped;
+    uptr malloc_large;
+    uptr malloced_by_size[kNumberOfSizeClasses];
 
-  // Ctor for global MemprofStats (accumulated stats for dead threads).
-  explicit MemprofStats(LinkerInitialized) {}
-  // Creates empty stats.
-  MemprofStats();
+    // Ctor for global MemprofStats (accumulated stats for dead threads).
+    explicit MemprofStats(LinkerInitialized) {}
+    // Creates empty stats.
+    MemprofStats();
 
-  void Print(); // Prints formatted stats to stderr.
-  void Clear();
-  void MergeFrom(const MemprofStats *stats);
+    void Print(); // Prints formatted stats to stderr.
+    void Clear();
+    void MergeFrom(const MemprofStats *stats);
 };
 
 // Returns stats for GetCurrentThread(), or stats for fake "unknown thread"

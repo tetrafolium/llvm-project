@@ -34,90 +34,96 @@
 
 namespace llvm {
 
-  class AAResults;
-  class LiveIntervals;
-  class MachineFrameInfo;
-  class MachineFunction;
-  class MachineInstr;
-  class MachineLoopInfo;
-  class MachineOperand;
-  struct MCSchedClassDesc;
-  class PressureDiffs;
-  class PseudoSourceValue;
-  class RegPressureTracker;
-  class UndefValue;
-  class Value;
+class AAResults;
+class LiveIntervals;
+class MachineFrameInfo;
+class MachineFunction;
+class MachineInstr;
+class MachineLoopInfo;
+class MachineOperand;
+struct MCSchedClassDesc;
+class PressureDiffs;
+class PseudoSourceValue;
+class RegPressureTracker;
+class UndefValue;
+class Value;
 
-  /// An individual mapping from virtual register number to SUnit.
-  struct VReg2SUnit {
+/// An individual mapping from virtual register number to SUnit.
+struct VReg2SUnit {
     unsigned VirtReg;
     LaneBitmask LaneMask;
     SUnit *SU;
 
     VReg2SUnit(unsigned VReg, LaneBitmask LaneMask, SUnit *SU)
-      : VirtReg(VReg), LaneMask(LaneMask), SU(SU) {}
+        : VirtReg(VReg), LaneMask(LaneMask), SU(SU) {}
 
     unsigned getSparseSetIndex() const {
-      return Register::virtReg2Index(VirtReg);
+        return Register::virtReg2Index(VirtReg);
     }
-  };
+};
 
-  /// Mapping from virtual register to SUnit including an operand index.
-  struct VReg2SUnitOperIdx : public VReg2SUnit {
+/// Mapping from virtual register to SUnit including an operand index.
+struct VReg2SUnitOperIdx : public VReg2SUnit {
     unsigned OperandIndex;
 
     VReg2SUnitOperIdx(unsigned VReg, LaneBitmask LaneMask,
                       unsigned OperandIndex, SUnit *SU)
-      : VReg2SUnit(VReg, LaneMask, SU), OperandIndex(OperandIndex) {}
-  };
+        : VReg2SUnit(VReg, LaneMask, SU), OperandIndex(OperandIndex) {}
+};
 
-  /// Record a physical register access.
-  /// For non-data-dependent uses, OpIdx == -1.
-  struct PhysRegSUOper {
+/// Record a physical register access.
+/// For non-data-dependent uses, OpIdx == -1.
+struct PhysRegSUOper {
     SUnit *SU;
     int OpIdx;
     unsigned Reg;
 
     PhysRegSUOper(SUnit *su, int op, unsigned R): SU(su), OpIdx(op), Reg(R) {}
 
-    unsigned getSparseSetIndex() const { return Reg; }
-  };
+    unsigned getSparseSetIndex() const {
+        return Reg;
+    }
+};
 
-  /// Use a SparseMultiSet to track physical registers. Storage is only
-  /// allocated once for the pass. It can be cleared in constant time and reused
-  /// without any frees.
-  using Reg2SUnitsMap =
-      SparseMultiSet<PhysRegSUOper, identity<unsigned>, uint16_t>;
+/// Use a SparseMultiSet to track physical registers. Storage is only
+/// allocated once for the pass. It can be cleared in constant time and reused
+/// without any frees.
+using Reg2SUnitsMap =
+    SparseMultiSet<PhysRegSUOper, identity<unsigned>, uint16_t>;
 
-  /// Use SparseSet as a SparseMap by relying on the fact that it never
-  /// compares ValueT's, only unsigned keys. This allows the set to be cleared
-  /// between scheduling regions in constant time as long as ValueT does not
-  /// require a destructor.
-  using VReg2SUnitMap = SparseSet<VReg2SUnit, VirtReg2IndexFunctor>;
+/// Use SparseSet as a SparseMap by relying on the fact that it never
+/// compares ValueT's, only unsigned keys. This allows the set to be cleared
+/// between scheduling regions in constant time as long as ValueT does not
+/// require a destructor.
+using VReg2SUnitMap = SparseSet<VReg2SUnit, VirtReg2IndexFunctor>;
 
-  /// Track local uses of virtual registers. These uses are gathered by the DAG
-  /// builder and may be consulted by the scheduler to avoid iterating an entire
-  /// vreg use list.
-  using VReg2SUnitMultiMap = SparseMultiSet<VReg2SUnit, VirtReg2IndexFunctor>;
+/// Track local uses of virtual registers. These uses are gathered by the DAG
+/// builder and may be consulted by the scheduler to avoid iterating an entire
+/// vreg use list.
+using VReg2SUnitMultiMap = SparseMultiSet<VReg2SUnit, VirtReg2IndexFunctor>;
 
-  using VReg2SUnitOperIdxMultiMap =
-      SparseMultiSet<VReg2SUnitOperIdx, VirtReg2IndexFunctor>;
+using VReg2SUnitOperIdxMultiMap =
+    SparseMultiSet<VReg2SUnitOperIdx, VirtReg2IndexFunctor>;
 
-  using ValueType = PointerUnion<const Value *, const PseudoSourceValue *>;
+using ValueType = PointerUnion<const Value *, const PseudoSourceValue *>;
 
-  struct UnderlyingObject : PointerIntPair<ValueType, 1, bool> {
+struct UnderlyingObject : PointerIntPair<ValueType, 1, bool> {
     UnderlyingObject(ValueType V, bool MayAlias)
         : PointerIntPair<ValueType, 1, bool>(V, MayAlias) {}
 
-    ValueType getValue() const { return getPointer(); }
-    bool mayAlias() const { return getInt(); }
-  };
+    ValueType getValue() const {
+        return getPointer();
+    }
+    bool mayAlias() const {
+        return getInt();
+    }
+};
 
-  using UnderlyingObjectsVector = SmallVector<UnderlyingObject, 4>;
+using UnderlyingObjectsVector = SmallVector<UnderlyingObject, 4>;
 
-  /// A ScheduleDAG for scheduling lists of MachineInstr.
-  class ScheduleDAGInstrs : public ScheduleDAG {
-  protected:
+/// A ScheduleDAG for scheduling lists of MachineInstr.
+class ScheduleDAGInstrs : public ScheduleDAG {
+protected:
     const MachineLoopInfo *MLI;
     const MachineFrameInfo &MFI;
 
@@ -181,7 +187,7 @@ namespace llvm {
     /// case of a huge region that gets reduced).
     SUnit *BarrierChain = nullptr;
 
-  public:
+public:
     /// A list of SUnits, used in Value2SUsMap, during DAG construction.
     /// Note: to gain speed it might be worth investigating an optimized
     /// implementation of this data structure, such as a singly linked list
@@ -189,7 +195,7 @@ namespace llvm {
     /// applicable).
     using SUList = std::list<SUnit *>;
 
-  protected:
+protected:
     /// A map from ValueType to SUList, used during DAG construction, as
     /// a means of remembering which SUs depend on which memory locations.
     class Value2SUsMap;
@@ -208,8 +214,8 @@ namespace llvm {
 
     /// Adds dependencies as needed from all SUs in list to SU.
     void addChainDependencies(SUnit *SU, SUList &SUs, unsigned Latency) {
-      for (SUnit *Entry : SUs)
-        addChainDependency(SU, Entry, Latency);
+        for (SUnit *Entry : SUs)
+            addChainDependency(SU, Entry, Latency);
     }
 
     /// Adds dependencies as needed from all SUs in map, to SU.
@@ -251,7 +257,7 @@ namespace llvm {
     /// Set of live physical registers for updating kill flags.
     LivePhysRegs LiveRegs;
 
-  public:
+public:
     explicit ScheduleDAGInstrs(MachineFunction &mf,
                                const MachineLoopInfo *mli,
                                bool RemoveKillFlags = false);
@@ -259,25 +265,31 @@ namespace llvm {
     ~ScheduleDAGInstrs() override = default;
 
     /// Gets the machine model for instruction scheduling.
-    const TargetSchedModel *getSchedModel() const { return &SchedModel; }
+    const TargetSchedModel *getSchedModel() const {
+        return &SchedModel;
+    }
 
     /// Resolves and cache a resolved scheduling class for an SUnit.
     const MCSchedClassDesc *getSchedClass(SUnit *SU) const {
-      if (!SU->SchedClass && SchedModel.hasInstrSchedModel())
-        SU->SchedClass = SchedModel.resolveSchedClass(SU->getInstr());
-      return SU->SchedClass;
+        if (!SU->SchedClass && SchedModel.hasInstrSchedModel())
+            SU->SchedClass = SchedModel.resolveSchedClass(SU->getInstr());
+        return SU->SchedClass;
     }
 
     /// IsReachable - Checks if SU is reachable from TargetSU.
     bool IsReachable(SUnit *SU, SUnit *TargetSU) {
-      return Topo.IsReachable(SU, TargetSU);
+        return Topo.IsReachable(SU, TargetSU);
     }
 
     /// Returns an iterator to the top of the current scheduling region.
-    MachineBasicBlock::iterator begin() const { return RegionBegin; }
+    MachineBasicBlock::iterator begin() const {
+        return RegionBegin;
+    }
 
     /// Returns an iterator to the bottom of the current scheduling region.
-    MachineBasicBlock::iterator end() const { return RegionEnd; }
+    MachineBasicBlock::iterator end() const {
+        return RegionEnd;
+    }
 
     /// Creates a new SUnit and return a ptr to it.
     SUnit *newSUnit(MachineInstr *MI);
@@ -288,7 +300,9 @@ namespace llvm {
     /// If this method returns true, handling of the scheduling regions
     /// themselves (in case of a scheduling boundary in MBB) will be done
     /// beginning with the topmost region of MBB.
-    virtual bool doMBBSchedRegionsTopDown() const { return false; }
+    virtual bool doMBBSchedRegionsTopDown() const {
+        return false;
+    }
 
     /// Prepares to perform scheduling in the given block.
     virtual void startBlock(MachineBasicBlock *BB);
@@ -360,7 +374,7 @@ namespace llvm {
     /// equivalent edge already existed (false indicates failure).
     bool addEdge(SUnit *SuccSU, const SDep &PredDep);
 
-  protected:
+protected:
     void initSUnits();
     void addPhysRegDataDeps(SUnit *SU, unsigned OperIdx);
     void addPhysRegDeps(SUnit *SU, unsigned OperIdx);
@@ -373,10 +387,10 @@ namespace llvm {
 
     /// Returns true if the def register in \p MO has no uses.
     bool deadDefHasNoUse(const MachineOperand &MO);
-  };
+};
 
-  /// Creates a new SUnit and return a ptr to it.
-  inline SUnit *ScheduleDAGInstrs::newSUnit(MachineInstr *MI) {
+/// Creates a new SUnit and return a ptr to it.
+inline SUnit *ScheduleDAGInstrs::newSUnit(MachineInstr *MI) {
 #ifndef NDEBUG
     const SUnit *Addr = SUnits.empty() ? nullptr : &SUnits[0];
 #endif
@@ -384,15 +398,15 @@ namespace llvm {
     assert((Addr == nullptr || Addr == &SUnits[0]) &&
            "SUnits std::vector reallocated on the fly!");
     return &SUnits.back();
-  }
+}
 
-  /// Returns an existing SUnit for this MI, or nullptr.
-  inline SUnit *ScheduleDAGInstrs::getSUnit(MachineInstr *MI) const {
+/// Returns an existing SUnit for this MI, or nullptr.
+inline SUnit *ScheduleDAGInstrs::getSUnit(MachineInstr *MI) const {
     DenseMap<MachineInstr*, SUnit*>::const_iterator I = MISUnitMap.find(MI);
     if (I == MISUnitMap.end())
-      return nullptr;
+        return nullptr;
     return I->second;
-  }
+}
 
 } // end namespace llvm
 

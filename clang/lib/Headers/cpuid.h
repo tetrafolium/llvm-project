@@ -278,7 +278,7 @@ static __inline int __get_cpuid_max (unsigned int __leaf, unsigned int *__sig)
           "  je     1f\n"
           "  movl   $1,%0\n"
           "1:"
-        : "=r" (__cpuid_supported) : : "eax", "ecx");
+          : "=r" (__cpuid_supported) : : "eax", "ecx");
     if (!__cpuid_supported)
         return 0;
 #endif

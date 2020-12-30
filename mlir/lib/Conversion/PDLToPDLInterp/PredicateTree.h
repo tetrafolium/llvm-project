@@ -28,18 +28,18 @@ class MatcherNode;
 /// A PositionalPredicate is a predicate that is associated with a specific
 /// positional value.
 struct PositionalPredicate {
-  PositionalPredicate(Position *pos,
-                      const PredicateBuilder::Predicate &predicate)
-      : position(pos), question(predicate.first), answer(predicate.second) {}
+    PositionalPredicate(Position *pos,
+                        const PredicateBuilder::Predicate &predicate)
+        : position(pos), question(predicate.first), answer(predicate.second) {}
 
-  /// The position the predicate is applied to.
-  Position *position;
+    /// The position the predicate is applied to.
+    Position *position;
 
-  /// The question that the predicate applies.
-  Qualifier *question;
+    /// The question that the predicate applies.
+    Qualifier *question;
 
-  /// The expected answer of the predicate.
-  Qualifier *answer;
+    /// The expected answer of the predicate.
+    Qualifier *answer;
 };
 
 //===----------------------------------------------------------------------===//
@@ -49,55 +49,63 @@ struct PositionalPredicate {
 /// This class represents the base of a predicate matcher node.
 class MatcherNode {
 public:
-  virtual ~MatcherNode() = default;
+    virtual ~MatcherNode() = default;
 
-  /// Given a module containing PDL pattern operations, generate a matcher tree
-  /// using the patterns within the given module and return the root matcher
-  /// node. `valueToPosition` is a map that is populated with the original
-  /// pdl values and their corresponding positions in the matcher tree.
-  static std::unique_ptr<MatcherNode>
-  generateMatcherTree(ModuleOp module, PredicateBuilder &builder,
-                      DenseMap<Value, Position *> &valueToPosition);
+    /// Given a module containing PDL pattern operations, generate a matcher tree
+    /// using the patterns within the given module and return the root matcher
+    /// node. `valueToPosition` is a map that is populated with the original
+    /// pdl values and their corresponding positions in the matcher tree.
+    static std::unique_ptr<MatcherNode>
+    generateMatcherTree(ModuleOp module, PredicateBuilder &builder,
+                        DenseMap<Value, Position *> &valueToPosition);
 
-  /// Returns the position on which the question predicate should be checked.
-  Position *getPosition() const { return position; }
+    /// Returns the position on which the question predicate should be checked.
+    Position *getPosition() const {
+        return position;
+    }
 
-  /// Returns the predicate checked on this node.
-  Qualifier *getQuestion() const { return question; }
+    /// Returns the predicate checked on this node.
+    Qualifier *getQuestion() const {
+        return question;
+    }
 
-  /// Returns the node that should be visited if this, or a subsequent node
-  /// fails.
-  std::unique_ptr<MatcherNode> &getFailureNode() { return failureNode; }
+    /// Returns the node that should be visited if this, or a subsequent node
+    /// fails.
+    std::unique_ptr<MatcherNode> &getFailureNode() {
+        return failureNode;
+    }
 
-  /// Sets the node that should be visited if this, or a subsequent node fails.
-  void setFailureNode(std::unique_ptr<MatcherNode> node) {
-    failureNode = std::move(node);
-  }
+    /// Sets the node that should be visited if this, or a subsequent node fails.
+    void setFailureNode(std::unique_ptr<MatcherNode> node) {
+        failureNode = std::move(node);
+    }
 
-  /// Returns the unique type ID of this matcher instance. This should not be
-  /// used directly, and is provided to support type casting.
-  TypeID getMatcherTypeID() const { return matcherTypeID; }
+    /// Returns the unique type ID of this matcher instance. This should not be
+    /// used directly, and is provided to support type casting.
+    TypeID getMatcherTypeID() const {
+        return matcherTypeID;
+    }
 
 protected:
-  MatcherNode(TypeID matcherTypeID, Position *position = nullptr,
-              Qualifier *question = nullptr,
-              std::unique_ptr<MatcherNode> failureNode = nullptr);
+    MatcherNode(TypeID matcherTypeID, Position *position = nullptr,
+                Qualifier *question = nullptr,
+                std::unique_ptr<MatcherNode> failureNode = nullptr);
 
 private:
-  /// The position on which the predicate should be checked.
-  Position *position;
+    /// The position on which the predicate should be checked.
+    Position *position;
 
-  /// The predicate that is checked on the given position.
-  Qualifier *question;
+    /// The predicate that is checked on the given position.
+    Qualifier *question;
 
-  /// The node to visit if this node fails.
-  std::unique_ptr<MatcherNode> failureNode;
+    /// The node to visit if this node fails.
+    std::unique_ptr<MatcherNode> failureNode;
 
-  /// An owning store for the failure node if it is owned by this node.
-  std::unique_ptr<MatcherNode> failureNodeStorage;
+    /// An owning store for the failure node if it is owned by this node.
+    std::unique_ptr<MatcherNode> failureNodeStorage;
 
-  /// A unique identifier for the derived matcher node, used for type casting.
-  TypeID matcherTypeID;
+    /// A unique identifier for the derived matcher node, used for type casting.
+    TypeID matcherTypeID;
 };
 
 //===----------------------------------------------------------------------===//
@@ -107,28 +115,32 @@ private:
 /// to a single node on a successful result, otherwise defaulting to the failure
 /// node.
 struct BoolNode : public MatcherNode {
-  BoolNode(Position *position, Qualifier *question, Qualifier *answer,
-           std::unique_ptr<MatcherNode> successNode,
-           std::unique_ptr<MatcherNode> failureNode = nullptr);
+    BoolNode(Position *position, Qualifier *question, Qualifier *answer,
+             std::unique_ptr<MatcherNode> successNode,
+             std::unique_ptr<MatcherNode> failureNode = nullptr);
 
-  /// Returns if the given matcher node is an instance of this class, used to
-  /// support type casting.
-  static bool classof(const MatcherNode *node) {
-    return node->getMatcherTypeID() == TypeID::get<BoolNode>();
-  }
+    /// Returns if the given matcher node is an instance of this class, used to
+    /// support type casting.
+    static bool classof(const MatcherNode *node) {
+        return node->getMatcherTypeID() == TypeID::get<BoolNode>();
+    }
 
-  /// Returns the expected answer of this boolean node.
-  Qualifier *getAnswer() const { return answer; }
+    /// Returns the expected answer of this boolean node.
+    Qualifier *getAnswer() const {
+        return answer;
+    }
 
-  /// Returns the node that should be visited on success.
-  std::unique_ptr<MatcherNode> &getSuccessNode() { return successNode; }
+    /// Returns the node that should be visited on success.
+    std::unique_ptr<MatcherNode> &getSuccessNode() {
+        return successNode;
+    }
 
 private:
-  /// The expected answer of this boolean node.
-  Qualifier *answer;
+    /// The expected answer of this boolean node.
+    Qualifier *answer;
 
-  /// The next node if this node succeeds. Otherwise, go to the failure node.
-  std::unique_ptr<MatcherNode> successNode;
+    /// The next node if this node succeeds. Otherwise, go to the failure node.
+    std::unique_ptr<MatcherNode> successNode;
 };
 
 //===----------------------------------------------------------------------===//
@@ -136,13 +148,13 @@ private:
 
 /// An ExitNode is a special sentinel node that denotes the end of matcher.
 struct ExitNode : public MatcherNode {
-  ExitNode() : MatcherNode(TypeID::get<ExitNode>()) {}
+    ExitNode() : MatcherNode(TypeID::get<ExitNode>()) {}
 
-  /// Returns if the given matcher node is an instance of this class, used to
-  /// support type casting.
-  static bool classof(const MatcherNode *node) {
-    return node->getMatcherTypeID() == TypeID::get<ExitNode>();
-  }
+    /// Returns if the given matcher node is an instance of this class, used to
+    /// support type casting.
+    static bool classof(const MatcherNode *node) {
+        return node->getMatcherTypeID() == TypeID::get<ExitNode>();
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -152,22 +164,24 @@ struct ExitNode : public MatcherNode {
 /// matched. This does not terminate the matcher, as there may be multiple
 /// successful matches.
 struct SuccessNode : public MatcherNode {
-  explicit SuccessNode(pdl::PatternOp pattern,
-                       std::unique_ptr<MatcherNode> failureNode);
+    explicit SuccessNode(pdl::PatternOp pattern,
+                         std::unique_ptr<MatcherNode> failureNode);
 
-  /// Returns if the given matcher node is an instance of this class, used to
-  /// support type casting.
-  static bool classof(const MatcherNode *node) {
-    return node->getMatcherTypeID() == TypeID::get<SuccessNode>();
-  }
+    /// Returns if the given matcher node is an instance of this class, used to
+    /// support type casting.
+    static bool classof(const MatcherNode *node) {
+        return node->getMatcherTypeID() == TypeID::get<SuccessNode>();
+    }
 
-  /// Return the high level pattern operation that is matched with this node.
-  pdl::PatternOp getPattern() const { return pattern; }
+    /// Return the high level pattern operation that is matched with this node.
+    pdl::PatternOp getPattern() const {
+        return pattern;
+    }
 
 private:
-  /// The high level pattern operation that was successfully matched with this
-  /// node.
-  pdl::PatternOp pattern;
+    /// The high level pattern operation that was successfully matched with this
+    /// node.
+    pdl::PatternOp pattern;
 };
 
 //===----------------------------------------------------------------------===//
@@ -176,24 +190,26 @@ private:
 /// A SwitchNode denotes a question with multiple potential results. These nodes
 /// branch to a specific node based on the result of the question.
 struct SwitchNode : public MatcherNode {
-  SwitchNode(Position *position, Qualifier *question);
+    SwitchNode(Position *position, Qualifier *question);
 
-  /// Returns if the given matcher node is an instance of this class, used to
-  /// support type casting.
-  static bool classof(const MatcherNode *node) {
-    return node->getMatcherTypeID() == TypeID::get<SwitchNode>();
-  }
+    /// Returns if the given matcher node is an instance of this class, used to
+    /// support type casting.
+    static bool classof(const MatcherNode *node) {
+        return node->getMatcherTypeID() == TypeID::get<SwitchNode>();
+    }
 
-  /// Returns the children of this switch node. The children are contained
-  /// within a mapping between the various case answers to destination matcher
-  /// nodes.
-  using ChildMapT = llvm::MapVector<Qualifier *, std::unique_ptr<MatcherNode>>;
-  ChildMapT &getChildren() { return children; }
+    /// Returns the children of this switch node. The children are contained
+    /// within a mapping between the various case answers to destination matcher
+    /// nodes.
+    using ChildMapT = llvm::MapVector<Qualifier *, std::unique_ptr<MatcherNode>>;
+    ChildMapT &getChildren() {
+        return children;
+    }
 
 private:
-  /// Switch predicate "answers" select the child. Answers that are not found
-  /// default to the failure node.
-  ChildMapT children;
+    /// Switch predicate "answers" select the child. Answers that are not found
+    /// default to the failure node.
+    ChildMapT children;
 };
 
 } // end namespace pdl_to_pdl_interp

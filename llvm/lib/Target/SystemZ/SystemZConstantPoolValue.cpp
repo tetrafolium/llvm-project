@@ -17,34 +17,34 @@ using namespace llvm;
 SystemZConstantPoolValue::
 SystemZConstantPoolValue(const GlobalValue *gv,
                          SystemZCP::SystemZCPModifier modifier)
-  : MachineConstantPoolValue(gv->getType()), GV(gv), Modifier(modifier) {}
+    : MachineConstantPoolValue(gv->getType()), GV(gv), Modifier(modifier) {}
 
 SystemZConstantPoolValue *
 SystemZConstantPoolValue::Create(const GlobalValue *GV,
                                  SystemZCP::SystemZCPModifier Modifier) {
-  return new SystemZConstantPoolValue(GV, Modifier);
+    return new SystemZConstantPoolValue(GV, Modifier);
 }
 
 int SystemZConstantPoolValue::getExistingMachineCPValue(MachineConstantPool *CP,
-                                                        Align Alignment) {
-  const std::vector<MachineConstantPoolEntry> &Constants = CP->getConstants();
-  for (unsigned I = 0, E = Constants.size(); I != E; ++I) {
-    if (Constants[I].isMachineConstantPoolEntry() &&
-        Constants[I].getAlign() >= Alignment) {
-      auto *ZCPV =
-        static_cast<SystemZConstantPoolValue *>(Constants[I].Val.MachineCPVal);
-      if (ZCPV->GV == GV && ZCPV->Modifier == Modifier)
-        return I;
+        Align Alignment) {
+    const std::vector<MachineConstantPoolEntry> &Constants = CP->getConstants();
+    for (unsigned I = 0, E = Constants.size(); I != E; ++I) {
+        if (Constants[I].isMachineConstantPoolEntry() &&
+                Constants[I].getAlign() >= Alignment) {
+            auto *ZCPV =
+                static_cast<SystemZConstantPoolValue *>(Constants[I].Val.MachineCPVal);
+            if (ZCPV->GV == GV && ZCPV->Modifier == Modifier)
+                return I;
+        }
     }
-  }
-  return -1;
+    return -1;
 }
 
 void SystemZConstantPoolValue::addSelectionDAGCSEId(FoldingSetNodeID &ID) {
-  ID.AddPointer(GV);
-  ID.AddInteger(Modifier);
+    ID.AddPointer(GV);
+    ID.AddInteger(Modifier);
 }
 
 void SystemZConstantPoolValue::print(raw_ostream &O) const {
-  O << GV << "@" << int(Modifier);
+    O << GV << "@" << int(Modifier);
 }

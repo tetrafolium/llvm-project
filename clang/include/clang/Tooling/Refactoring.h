@@ -36,39 +36,39 @@ namespace tooling {
 /// getReplacements().
 class RefactoringTool : public ClangTool {
 public:
-  /// \see ClangTool::ClangTool.
-  RefactoringTool(const CompilationDatabase &Compilations,
-                  ArrayRef<std::string> SourcePaths,
-                  std::shared_ptr<PCHContainerOperations> PCHContainerOps =
-                      std::make_shared<PCHContainerOperations>());
+    /// \see ClangTool::ClangTool.
+    RefactoringTool(const CompilationDatabase &Compilations,
+                    ArrayRef<std::string> SourcePaths,
+                    std::shared_ptr<PCHContainerOperations> PCHContainerOps =
+                        std::make_shared<PCHContainerOperations>());
 
-  /// Returns the file path to replacements map to which replacements
-  /// should be added during the run of the tool.
-  std::map<std::string, Replacements> &getReplacements();
+    /// Returns the file path to replacements map to which replacements
+    /// should be added during the run of the tool.
+    std::map<std::string, Replacements> &getReplacements();
 
-  /// Call run(), apply all generated replacements, and immediately save
-  /// the results to disk.
-  ///
-  /// \returns 0 upon success. Non-zero upon failure.
-  int runAndSave(FrontendActionFactory *ActionFactory);
+    /// Call run(), apply all generated replacements, and immediately save
+    /// the results to disk.
+    ///
+    /// \returns 0 upon success. Non-zero upon failure.
+    int runAndSave(FrontendActionFactory *ActionFactory);
 
-  /// Apply all stored replacements to the given Rewriter.
-  ///
-  /// FileToReplaces will be deduplicated with `groupReplacementsByFile` before
-  /// application.
-  ///
-  /// Replacement applications happen independently of the success of other
-  /// applications.
-  ///
-  /// \returns true if all replacements apply. false otherwise.
-  bool applyAllReplacements(Rewriter &Rewrite);
-
-private:
-  /// Write all refactored files to disk.
-  int saveRewrittenFiles(Rewriter &Rewrite);
+    /// Apply all stored replacements to the given Rewriter.
+    ///
+    /// FileToReplaces will be deduplicated with `groupReplacementsByFile` before
+    /// application.
+    ///
+    /// Replacement applications happen independently of the success of other
+    /// applications.
+    ///
+    /// \returns true if all replacements apply. false otherwise.
+    bool applyAllReplacements(Rewriter &Rewrite);
 
 private:
-  std::map<std::string, Replacements> FileToReplaces;
+    /// Write all refactored files to disk.
+    int saveRewrittenFiles(Rewriter &Rewrite);
+
+private:
+    std::map<std::string, Replacements> FileToReplaces;
 };
 
 /// Groups \p Replaces by the file path and applies each group of

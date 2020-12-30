@@ -27,42 +27,42 @@ using DirtyBufferGetter =
     llvm::function_ref<llvm::Optional<std::string>(PathRef AbsPath)>;
 
 struct RenameOptions {
-  /// If true, enable cross-file rename; otherwise, only allows to rename a
-  /// symbol that's only used in the current file.
-  bool AllowCrossFile = false;
-  /// The maximum number of affected files (0 means no limit), only meaningful
-  /// when AllowCrossFile = true.
-  /// If the actual number exceeds the limit, rename is forbidden.
-  size_t LimitFiles = 50;
-  /// If true, format the rename edits, only meaningful in ClangdServer layer.
-  bool WantFormat = false;
+    /// If true, enable cross-file rename; otherwise, only allows to rename a
+    /// symbol that's only used in the current file.
+    bool AllowCrossFile = false;
+    /// The maximum number of affected files (0 means no limit), only meaningful
+    /// when AllowCrossFile = true.
+    /// If the actual number exceeds the limit, rename is forbidden.
+    size_t LimitFiles = 50;
+    /// If true, format the rename edits, only meaningful in ClangdServer layer.
+    bool WantFormat = false;
 };
 
 struct RenameInputs {
-  Position Pos; // the position triggering the rename
-  llvm::StringRef NewName;
+    Position Pos; // the position triggering the rename
+    llvm::StringRef NewName;
 
-  ParsedAST &AST;
-  llvm::StringRef MainFilePath;
+    ParsedAST &AST;
+    llvm::StringRef MainFilePath;
 
-  const SymbolIndex *Index = nullptr;
+    const SymbolIndex *Index = nullptr;
 
-  RenameOptions Opts = {};
-  // When set, used by the rename to get file content for all rename-related
-  // files.
-  // If there is no corresponding dirty buffer, we will use the file content
-  // from disk.
-  DirtyBufferGetter GetDirtyBuffer = nullptr;
+    RenameOptions Opts = {};
+    // When set, used by the rename to get file content for all rename-related
+    // files.
+    // If there is no corresponding dirty buffer, we will use the file content
+    // from disk.
+    DirtyBufferGetter GetDirtyBuffer = nullptr;
 };
 
 struct RenameResult {
-  // The range of the symbol that the user can attempt to rename.
-  Range Target;
-  // Rename occurrences for the current main file.
-  std::vector<Range> LocalChanges;
-  // Complete edits for the rename, including LocalChanges.
-  // If the full set of changes is unknown, this field is empty.
-  FileEdits GlobalChanges;
+    // The range of the symbol that the user can attempt to rename.
+    Range Target;
+    // Rename occurrences for the current main file.
+    std::vector<Range> LocalChanges;
+    // Complete edits for the rename, including LocalChanges.
+    // If the full set of changes is unknown, this field is empty.
+    FileEdits GlobalChanges;
 };
 
 /// Renames all occurrences of the symbol. The result edits are unformatted.
@@ -90,8 +90,8 @@ llvm::Expected<Edit> buildRenameEdit(llvm::StringRef AbsFilePath,
 /// occurrence has the same length).
 /// REQUIRED: Indexed is sorted.
 llvm::Optional<std::vector<Range>>
-adjustRenameRanges(llvm::StringRef DraftCode, llvm::StringRef Identifier,
-                   std::vector<Range> Indexed, const LangOptions &LangOpts);
+                                adjustRenameRanges(llvm::StringRef DraftCode, llvm::StringRef Identifier,
+                                        std::vector<Range> Indexed, const LangOptions &LangOpts);
 
 /// Calculates the lexed occurrences that the given indexed occurrences map to.
 /// Returns None if we don't find a mapping.
@@ -100,7 +100,7 @@ adjustRenameRanges(llvm::StringRef DraftCode, llvm::StringRef Identifier,
 ///
 /// REQUIRED: Indexed and Lexed are sorted.
 llvm::Optional<std::vector<Range>> getMappedRanges(ArrayRef<Range> Indexed,
-                                                   ArrayRef<Range> Lexed);
+                                ArrayRef<Range> Lexed);
 /// Evaluates how good the mapped result is. 0 indicates a perfect match.
 ///
 /// Exposed for testing only.

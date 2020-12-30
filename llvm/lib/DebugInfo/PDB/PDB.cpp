@@ -22,30 +22,30 @@ using namespace llvm::pdb;
 
 Error llvm::pdb::loadDataForPDB(PDB_ReaderType Type, StringRef Path,
                                 std::unique_ptr<IPDBSession> &Session) {
-  // Create the correct concrete instance type based on the value of Type.
-  if (Type == PDB_ReaderType::Native)
-    return NativeSession::createFromPdbPath(Path, Session);
+    // Create the correct concrete instance type based on the value of Type.
+    if (Type == PDB_ReaderType::Native)
+        return NativeSession::createFromPdbPath(Path, Session);
 
 #if LLVM_ENABLE_DIA_SDK
-  return DIASession::createFromPdb(Path, Session);
+    return DIASession::createFromPdb(Path, Session);
 #else
-  return make_error<PDBError>(pdb_error_code::dia_sdk_not_present);
+    return make_error<PDBError>(pdb_error_code::dia_sdk_not_present);
 #endif
 }
 
 Error llvm::pdb::loadDataForEXE(PDB_ReaderType Type, StringRef Path,
                                 std::unique_ptr<IPDBSession> &Session) {
-  // Create the correct concrete instance type based on the value of Type.
-  if (Type == PDB_ReaderType::Native) {
-    Expected<std::string> PdbPath = NativeSession::searchForPdb({Path});
-    if (!PdbPath)
-      return PdbPath.takeError();
-    return NativeSession::createFromPdbPath(PdbPath.get(), Session);
-  }
+    // Create the correct concrete instance type based on the value of Type.
+    if (Type == PDB_ReaderType::Native) {
+        Expected<std::string> PdbPath = NativeSession::searchForPdb({Path});
+        if (!PdbPath)
+            return PdbPath.takeError();
+        return NativeSession::createFromPdbPath(PdbPath.get(), Session);
+    }
 
 #if LLVM_ENABLE_DIA_SDK
-  return DIASession::createFromExe(Path, Session);
+    return DIASession::createFromExe(Path, Session);
 #else
-  return make_error<PDBError>(pdb_error_code::dia_sdk_not_present);
+    return make_error<PDBError>(pdb_error_code::dia_sdk_not_present);
 #endif
 }

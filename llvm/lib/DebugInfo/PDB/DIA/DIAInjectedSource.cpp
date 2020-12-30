@@ -19,44 +19,44 @@ DIAInjectedSource::DIAInjectedSource(CComPtr<IDiaInjectedSource> DiaSourceFile)
     : SourceFile(DiaSourceFile) {}
 
 uint32_t DIAInjectedSource::getCrc32() const {
-  DWORD Crc;
-  return (S_OK == SourceFile->get_crc(&Crc)) ? Crc : 0;
+    DWORD Crc;
+    return (S_OK == SourceFile->get_crc(&Crc)) ? Crc : 0;
 }
 
 uint64_t DIAInjectedSource::getCodeByteSize() const {
-  ULONGLONG Size;
-  return (S_OK == SourceFile->get_length(&Size)) ? Size : 0;
+    ULONGLONG Size;
+    return (S_OK == SourceFile->get_length(&Size)) ? Size : 0;
 }
 
 std::string DIAInjectedSource::getFileName() const {
-  return invokeBstrMethod(*SourceFile, &IDiaInjectedSource::get_filename);
+    return invokeBstrMethod(*SourceFile, &IDiaInjectedSource::get_filename);
 }
 
 std::string DIAInjectedSource::getObjectFileName() const {
-  return invokeBstrMethod(*SourceFile, &IDiaInjectedSource::get_objectFilename);
+    return invokeBstrMethod(*SourceFile, &IDiaInjectedSource::get_objectFilename);
 }
 
 std::string DIAInjectedSource::getVirtualFileName() const {
-  return invokeBstrMethod(*SourceFile,
-                          &IDiaInjectedSource::get_virtualFilename);
+    return invokeBstrMethod(*SourceFile,
+                            &IDiaInjectedSource::get_virtualFilename);
 }
 
 uint32_t DIAInjectedSource::getCompression() const {
-  DWORD Compression = 0;
-  if (S_OK != SourceFile->get_sourceCompression(&Compression))
-    return PDB_SourceCompression::None;
-  return static_cast<uint32_t>(Compression);
+    DWORD Compression = 0;
+    if (S_OK != SourceFile->get_sourceCompression(&Compression))
+        return PDB_SourceCompression::None;
+    return static_cast<uint32_t>(Compression);
 }
 
 std::string DIAInjectedSource::getCode() const {
-  DWORD DataSize;
-  if (S_OK != SourceFile->get_source(0, &DataSize, nullptr))
-    return "";
+    DWORD DataSize;
+    if (S_OK != SourceFile->get_source(0, &DataSize, nullptr))
+        return "";
 
-  std::vector<uint8_t> Buffer(DataSize);
-  if (S_OK != SourceFile->get_source(DataSize, &DataSize, Buffer.data()))
-    return "";
-  assert(Buffer.size() == DataSize);
-  return std::string(reinterpret_cast<const char *>(Buffer.data()),
-                     Buffer.size());
+    std::vector<uint8_t> Buffer(DataSize);
+    if (S_OK != SourceFile->get_source(DataSize, &DataSize, Buffer.data()))
+        return "";
+    assert(Buffer.size() == DataSize);
+    return std::string(reinterpret_cast<const char *>(Buffer.data()),
+                       Buffer.size());
 }

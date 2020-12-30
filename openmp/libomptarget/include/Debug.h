@@ -14,17 +14,17 @@
 //
 // Debug and information messages are controlled by the environment variables
 // LIBOMPTARGET_DEBUG and LIBOMPTARGET_INFO which is set upon initialization
-// of libomptarget or the plugin RTL. 
+// of libomptarget or the plugin RTL.
 //
 // To printf a pointer in hex with a fixed width of 16 digits and a leading 0x,
 // use printf("ptr=" DPxMOD "...\n", DPxPTR(ptr));
-// 
+//
 // DPxMOD expands to:
 //   "0x%0*" PRIxPTR
 // where PRIxPTR expands to an appropriate modifier for the type uintptr_t on a
 // specific platform, e.g. "lu" if uintptr_t is typedef'd as unsigned long:
 //   "0x%0*lu"
-// 
+//
 // Ultimately, the whole statement expands to:
 //   printf("ptr=0x%0*lu...\n",  // the 0* modifier expects an extra argument
 //                               // specifying the width of the output
@@ -38,25 +38,25 @@
 #define _OMPTARGET_DEBUG_H
 
 static inline int getInfoLevel() {
-  static int InfoLevel = -1;
-  if (InfoLevel >= 0)
+    static int InfoLevel = -1;
+    if (InfoLevel >= 0)
+        return InfoLevel;
+
+    if (char *EnvStr = getenv("LIBOMPTARGET_INFO"))
+        InfoLevel = std::stoi(EnvStr);
+
     return InfoLevel;
-
-  if (char *EnvStr = getenv("LIBOMPTARGET_INFO"))
-    InfoLevel = std::stoi(EnvStr);
-
-  return InfoLevel;
 }
 
 static inline int getDebugLevel() {
-  static int DebugLevel = -1;
-  if (DebugLevel >= 0)
+    static int DebugLevel = -1;
+    if (DebugLevel >= 0)
+        return DebugLevel;
+
+    if (char *EnvStr = getenv("LIBOMPTARGET_DEBUG"))
+        DebugLevel = std::stoi(EnvStr);
+
     return DebugLevel;
-
-  if (char *EnvStr = getenv("LIBOMPTARGET_DEBUG"))
-    DebugLevel = std::stoi(EnvStr);
-
-  return DebugLevel;
 }
 
 #ifndef __STDC_FORMAT_MACROS

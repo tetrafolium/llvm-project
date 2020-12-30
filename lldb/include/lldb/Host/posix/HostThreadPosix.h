@@ -14,18 +14,18 @@
 namespace lldb_private {
 
 class HostThreadPosix : public HostNativeThreadBase {
-  HostThreadPosix(const HostThreadPosix &) = delete;
-  const HostThreadPosix &operator=(const HostThreadPosix &) = delete;
+    HostThreadPosix(const HostThreadPosix &) = delete;
+    const HostThreadPosix &operator=(const HostThreadPosix &) = delete;
 
 public:
-  HostThreadPosix();
-  HostThreadPosix(lldb::thread_t thread);
-  ~HostThreadPosix() override;
+    HostThreadPosix();
+    HostThreadPosix(lldb::thread_t thread);
+    ~HostThreadPosix() override;
 
-  Status Join(lldb::thread_result_t *result) override;
-  Status Cancel() override;
+    Status Join(lldb::thread_result_t *result) override;
+    Status Cancel() override;
 
-  Status Detach();
+    Status Detach();
 };
 
 } // namespace lldb_private

@@ -22,26 +22,26 @@ using FunctionNameKind = DILineInfoSpecifier::FunctionNameKind;
 
 class SymbolizableModule {
 public:
-  virtual ~SymbolizableModule() = default;
+    virtual ~SymbolizableModule() = default;
 
-  virtual DILineInfo symbolizeCode(object::SectionedAddress ModuleOffset,
-                                   DILineInfoSpecifier LineInfoSpecifier,
-                                   bool UseSymbolTable) const = 0;
-  virtual DIInliningInfo
-  symbolizeInlinedCode(object::SectionedAddress ModuleOffset,
-                       DILineInfoSpecifier LineInfoSpecifier,
-                       bool UseSymbolTable) const = 0;
-  virtual DIGlobal
-  symbolizeData(object::SectionedAddress ModuleOffset) const = 0;
-  virtual std::vector<DILocal>
-  symbolizeFrame(object::SectionedAddress ModuleOffset) const = 0;
+    virtual DILineInfo symbolizeCode(object::SectionedAddress ModuleOffset,
+                                     DILineInfoSpecifier LineInfoSpecifier,
+                                     bool UseSymbolTable) const = 0;
+    virtual DIInliningInfo
+    symbolizeInlinedCode(object::SectionedAddress ModuleOffset,
+                         DILineInfoSpecifier LineInfoSpecifier,
+                         bool UseSymbolTable) const = 0;
+    virtual DIGlobal
+    symbolizeData(object::SectionedAddress ModuleOffset) const = 0;
+    virtual std::vector<DILocal>
+    symbolizeFrame(object::SectionedAddress ModuleOffset) const = 0;
 
-  // Return true if this is a 32-bit x86 PE COFF module.
-  virtual bool isWin32Module() const = 0;
+    // Return true if this is a 32-bit x86 PE COFF module.
+    virtual bool isWin32Module() const = 0;
 
-  // Returns the preferred base of the module, i.e. where the loader would place
-  // it in memory assuming there were no conflicts.
-  virtual uint64_t getModulePreferredBase() const = 0;
+    // Returns the preferred base of the module, i.e. where the loader would place
+    // it in memory assuming there were no conflicts.
+    virtual uint64_t getModulePreferredBase() const = 0;
 };
 
 } // end namespace symbolize

@@ -78,20 +78,20 @@ static void bear_strings_release(char const **);
 
 
 static bear_env_t env_names =
-    { ENV_OUTPUT
+{   ENV_OUTPUT
     , ENV_PRELOAD
 #ifdef ENV_FLAT
     , ENV_FLAT
 #endif
-    };
+};
 
 static bear_env_t initial_env =
-    { 0
+{   0
     , 0
 #ifdef ENV_FLAT
     , 0
 #endif
-    };
+};
 
 static int initialized = 0;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -493,7 +493,7 @@ static char const **bear_update_environ(char const *envs[], char const *key, cha
     char const **it = envs;
     for (; (it) && (*it); ++it) {
         if ((0 == strncmp(*it, key, key_length)) &&
-            (strlen(*it) > key_length) && ('=' == (*it)[key_length]))
+                (strlen(*it) > key_length) && ('=' == (*it)[key_length]))
             break;
     }
     // allocate a environment entry
@@ -512,7 +512,7 @@ static char const **bear_update_environ(char const *envs[], char const *key, cha
     if (it && *it) {
         free((void *)*it);
         *it = env;
-	return envs;
+        return envs;
     }
     return bear_strings_append(envs, env);
 }
@@ -565,7 +565,7 @@ static char const **bear_strings_copy(char const **const in) {
 
     char const **out_it = result;
     for (char const *const *in_it = in; (in_it) && (*in_it);
-         ++in_it, ++out_it) {
+            ++in_it, ++out_it) {
         *out_it = strdup(*in_it);
         if (0 == *out_it) {
             perror("bear: strdup");

@@ -324,48 +324,48 @@ extern uptr kHighMemEnd, kMidMemBeg, kMidMemEnd;  // Initialized in __asan_init.
 namespace __asan {
 
 static inline bool AddrIsInLowMem(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return a <= kLowMemEnd;
+    PROFILE_ASAN_MAPPING();
+    return a <= kLowMemEnd;
 }
 
 static inline bool AddrIsInLowShadow(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return a >= kLowShadowBeg && a <= kLowShadowEnd;
+    PROFILE_ASAN_MAPPING();
+    return a >= kLowShadowBeg && a <= kLowShadowEnd;
 }
 
 static inline bool AddrIsInMidMem(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return kMidMemBeg && a >= kMidMemBeg && a <= kMidMemEnd;
+    PROFILE_ASAN_MAPPING();
+    return kMidMemBeg && a >= kMidMemBeg && a <= kMidMemEnd;
 }
 
 static inline bool AddrIsInMidShadow(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return kMidMemBeg && a >= kMidShadowBeg && a <= kMidShadowEnd;
+    PROFILE_ASAN_MAPPING();
+    return kMidMemBeg && a >= kMidShadowBeg && a <= kMidShadowEnd;
 }
 
 static inline bool AddrIsInHighMem(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return kHighMemBeg && a >= kHighMemBeg && a <= kHighMemEnd;
+    PROFILE_ASAN_MAPPING();
+    return kHighMemBeg && a >= kHighMemBeg && a <= kHighMemEnd;
 }
 
 static inline bool AddrIsInHighShadow(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return kHighMemBeg && a >= kHighShadowBeg && a <= kHighShadowEnd;
+    PROFILE_ASAN_MAPPING();
+    return kHighMemBeg && a >= kHighShadowBeg && a <= kHighShadowEnd;
 }
 
 static inline bool AddrIsInShadowGap(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  if (kMidMemBeg) {
-    if (a <= kShadowGapEnd)
-      return SHADOW_OFFSET == 0 || a >= kShadowGapBeg;
-    return (a >= kShadowGap2Beg && a <= kShadowGap2End) ||
-           (a >= kShadowGap3Beg && a <= kShadowGap3End);
-  }
-  // In zero-based shadow mode we treat addresses near zero as addresses
-  // in shadow gap as well.
-  if (SHADOW_OFFSET == 0)
-    return a <= kShadowGapEnd;
-  return a >= kShadowGapBeg && a <= kShadowGapEnd;
+    PROFILE_ASAN_MAPPING();
+    if (kMidMemBeg) {
+        if (a <= kShadowGapEnd)
+            return SHADOW_OFFSET == 0 || a >= kShadowGapBeg;
+        return (a >= kShadowGap2Beg && a <= kShadowGap2End) ||
+               (a >= kShadowGap3Beg && a <= kShadowGap3End);
+    }
+    // In zero-based shadow mode we treat addresses near zero as addresses
+    // in shadow gap as well.
+    if (SHADOW_OFFSET == 0)
+        return a <= kShadowGapEnd;
+    return a >= kShadowGapBeg && a <= kShadowGapEnd;
 }
 
 }  // namespace __asan
@@ -374,43 +374,45 @@ static inline bool AddrIsInShadowGap(uptr a) {
 
 namespace __asan {
 
-static inline uptr MemToShadowSize(uptr size) { return size >> SHADOW_SCALE; }
+static inline uptr MemToShadowSize(uptr size) {
+    return size >> SHADOW_SCALE;
+}
 
 static inline bool AddrIsInMem(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return AddrIsInLowMem(a) || AddrIsInMidMem(a) || AddrIsInHighMem(a) ||
-      (flags()->protect_shadow_gap == 0 && AddrIsInShadowGap(a));
+    PROFILE_ASAN_MAPPING();
+    return AddrIsInLowMem(a) || AddrIsInMidMem(a) || AddrIsInHighMem(a) ||
+           (flags()->protect_shadow_gap == 0 && AddrIsInShadowGap(a));
 }
 
 static inline uptr MemToShadow(uptr p) {
-  PROFILE_ASAN_MAPPING();
-  CHECK(AddrIsInMem(p));
-  return MEM_TO_SHADOW(p);
+    PROFILE_ASAN_MAPPING();
+    CHECK(AddrIsInMem(p));
+    return MEM_TO_SHADOW(p);
 }
 
 static inline bool AddrIsInShadow(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return AddrIsInLowShadow(a) || AddrIsInMidShadow(a) || AddrIsInHighShadow(a);
+    PROFILE_ASAN_MAPPING();
+    return AddrIsInLowShadow(a) || AddrIsInMidShadow(a) || AddrIsInHighShadow(a);
 }
 
 static inline bool AddrIsAlignedByGranularity(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  return (a & (SHADOW_GRANULARITY - 1)) == 0;
+    PROFILE_ASAN_MAPPING();
+    return (a & (SHADOW_GRANULARITY - 1)) == 0;
 }
 
 static inline bool AddressIsPoisoned(uptr a) {
-  PROFILE_ASAN_MAPPING();
-  if (SANITIZER_MYRIAD2 && !AddrIsInMem(a) && !AddrIsInShadow(a))
+    PROFILE_ASAN_MAPPING();
+    if (SANITIZER_MYRIAD2 && !AddrIsInMem(a) && !AddrIsInShadow(a))
+        return false;
+    const uptr kAccessSize = 1;
+    u8 *shadow_address = (u8*)MEM_TO_SHADOW(a);
+    s8 shadow_value = *shadow_address;
+    if (shadow_value) {
+        u8 last_accessed_byte = (a & (SHADOW_GRANULARITY - 1))
+                                + kAccessSize - 1;
+        return (last_accessed_byte >= shadow_value);
+    }
     return false;
-  const uptr kAccessSize = 1;
-  u8 *shadow_address = (u8*)MEM_TO_SHADOW(a);
-  s8 shadow_value = *shadow_address;
-  if (shadow_value) {
-    u8 last_accessed_byte = (a & (SHADOW_GRANULARITY - 1))
-                                 + kAccessSize - 1;
-    return (last_accessed_byte >= shadow_value);
-  }
-  return false;
 }
 
 // Must be after all calls to PROFILE_ASAN_MAPPING().

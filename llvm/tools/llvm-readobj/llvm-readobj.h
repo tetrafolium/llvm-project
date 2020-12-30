@@ -16,31 +16,31 @@
 #include <string>
 
 namespace llvm {
-  namespace object {
-    class RelocationRef;
-  }
+namespace object {
+class RelocationRef;
+}
 
-  // Various helper functions.
-  LLVM_ATTRIBUTE_NORETURN void reportError(Error Err, StringRef Input); 
-  void reportWarning(Error Err, StringRef Input);
+// Various helper functions.
+LLVM_ATTRIBUTE_NORETURN void reportError(Error Err, StringRef Input);
+void reportWarning(Error Err, StringRef Input);
 
-  template <class T> T unwrapOrError(StringRef Input, Expected<T> EO) {
+template <class T> T unwrapOrError(StringRef Input, Expected<T> EO) {
     if (EO)
-      return *EO;
+        return *EO;
     reportError(EO.takeError(), Input);
-  }
+}
 } // namespace llvm
 
 namespace opts {
-  extern llvm::cl::opt<bool> SectionRelocations;
-  extern llvm::cl::opt<bool> SectionSymbols;
-  extern llvm::cl::opt<bool> SectionData;
-  extern llvm::cl::opt<bool> ExpandRelocs;
-  extern llvm::cl::opt<bool> RawRelr;
-  extern llvm::cl::opt<bool> CodeViewSubsectionBytes;
-  extern llvm::cl::opt<bool> Demangle;
-  enum OutputStyleTy { LLVM, GNU };
-  extern llvm::cl::opt<OutputStyleTy> Output;
+extern llvm::cl::opt<bool> SectionRelocations;
+extern llvm::cl::opt<bool> SectionSymbols;
+extern llvm::cl::opt<bool> SectionData;
+extern llvm::cl::opt<bool> ExpandRelocs;
+extern llvm::cl::opt<bool> RawRelr;
+extern llvm::cl::opt<bool> CodeViewSubsectionBytes;
+extern llvm::cl::opt<bool> Demangle;
+enum OutputStyleTy { LLVM, GNU };
+extern llvm::cl::opt<OutputStyleTy> Output;
 } // namespace opts
 
 #define LLVM_READOBJ_ENUM_ENT(ns, enum) \

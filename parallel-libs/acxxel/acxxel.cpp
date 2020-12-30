@@ -24,22 +24,22 @@ Expected<Platform *> getPlatform();
 } // namespace opencl
 
 void logWarning(const std::string &Message) {
-  std::cerr << "WARNING: " << Message << "\n";
+    std::cerr << "WARNING: " << Message << "\n";
 }
 
 Expected<Platform *> getCUDAPlatform() {
 #ifdef ACXXEL_ENABLE_CUDA
-  return cuda::getPlatform();
+    return cuda::getPlatform();
 #else
-  return Status("library was build without CUDA support");
+    return Status("library was build without CUDA support");
 #endif
 }
 
 Expected<Platform *> getOpenCLPlatform() {
 #ifdef ACXXEL_ENABLE_OPENCL
-  return opencl::getPlatform();
+    return opencl::getPlatform();
 #else
-  return Status("library was build without OpenCL support");
+    return Status("library was build without OpenCL support");
 #endif
 }
 
@@ -47,18 +47,18 @@ Stream::Stream(Stream &&) noexcept = default;
 Stream &Stream::operator=(Stream &&) noexcept = default;
 
 Status Stream::sync() {
-  return takeStatusOr(ThePlatform->streamSync(TheHandle.get()));
+    return takeStatusOr(ThePlatform->streamSync(TheHandle.get()));
 }
 
 Status Stream::waitOnEvent(Event &Event) {
-  return takeStatusOr(ThePlatform->streamWaitOnEvent(
-      TheHandle.get(), ThePlatform->getEventHandle(Event)));
+    return takeStatusOr(ThePlatform->streamWaitOnEvent(
+                            TheHandle.get(), ThePlatform->getEventHandle(Event)));
 }
 
 Stream &
 Stream::addCallback(std::function<void(Stream &, const Status &)> Callback) {
-  setStatus(ThePlatform->addStreamCallback(*this, std::move(Callback)));
-  return *this;
+    setStatus(ThePlatform->addStreamCallback(*this, std::move(Callback)));
+    return *this;
 }
 
 Stream &Stream::asyncKernelLaunch(const Kernel &TheKernel,
@@ -66,40 +66,44 @@ Stream &Stream::asyncKernelLaunch(const Kernel &TheKernel,
                                   Span<void *> Arguments,
                                   Span<size_t> ArgumentSizes,
                                   size_t SharedMemoryBytes) {
-  setStatus(ThePlatform->rawEnqueueKernelLaunch(
-      TheHandle.get(), TheKernel.TheHandle.get(), LaunchDimensions, Arguments,
-      ArgumentSizes, SharedMemoryBytes));
-  return *this;
+    setStatus(ThePlatform->rawEnqueueKernelLaunch(
+                  TheHandle.get(), TheKernel.TheHandle.get(), LaunchDimensions, Arguments,
+                  ArgumentSizes, SharedMemoryBytes));
+    return *this;
 }
 
 Stream &Stream::enqueueEvent(Event &E) {
-  setStatus(ThePlatform->enqueueEvent(ThePlatform->getEventHandle(E),
-                                      TheHandle.get()));
-  return *this;
+    setStatus(ThePlatform->enqueueEvent(ThePlatform->getEventHandle(E),
+                                        TheHandle.get()));
+    return *this;
 }
 
 Event::Event(Event &&) noexcept = default;
 Event &Event::operator=(Event &&) noexcept = default;
 
-bool Event::isDone() { return ThePlatform->eventIsDone(TheHandle.get()); }
+bool Event::isDone() {
+    return ThePlatform->eventIsDone(TheHandle.get());
+}
 
-Status Event::sync() { return ThePlatform->eventSync(TheHandle.get()); }
+Status Event::sync() {
+    return ThePlatform->eventSync(TheHandle.get());
+}
 
 Expected<float> Event::getSecondsSince(const Event &Previous) {
-  Expected<float> MaybeSeconds = ThePlatform->getSecondsBetweenEvents(
-      Previous.TheHandle.get(), TheHandle.get());
-  if (MaybeSeconds.isError())
-    MaybeSeconds.getError();
-  return MaybeSeconds;
+    Expected<float> MaybeSeconds = ThePlatform->getSecondsBetweenEvents(
+                                       Previous.TheHandle.get(), TheHandle.get());
+    if (MaybeSeconds.isError())
+        MaybeSeconds.getError();
+    return MaybeSeconds;
 }
 
 Expected<Kernel> Program::createKernel(const std::string &Name) {
-  Expected<void *> MaybeKernelHandle =
-      ThePlatform->rawCreateKernel(TheHandle.get(), Name);
-  if (MaybeKernelHandle.isError())
-    return MaybeKernelHandle.getError();
-  return Kernel(ThePlatform, MaybeKernelHandle.getValue(),
-                ThePlatform->getKernelHandleDestructor());
+    Expected<void *> MaybeKernelHandle =
+        ThePlatform->rawCreateKernel(TheHandle.get(), Name);
+    if (MaybeKernelHandle.isError())
+        return MaybeKernelHandle.getError();
+    return Kernel(ThePlatform, MaybeKernelHandle.getValue(),
+                  ThePlatform->getKernelHandleDestructor());
 }
 
 Program::Program(Program &&) noexcept = default;

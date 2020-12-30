@@ -4,5 +4,5 @@
  */
 static __isl_give isl_union_set *uset_from_umap(__isl_take isl_union_map *umap)
 {
-	return (isl_union_set *) umap;
+    return (isl_union_set *) umap;
 }

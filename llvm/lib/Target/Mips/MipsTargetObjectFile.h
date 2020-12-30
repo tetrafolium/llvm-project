@@ -13,7 +13,7 @@
 
 namespace llvm {
 class MipsTargetMachine;
-  class MipsTargetObjectFile : public TargetLoweringObjectFileELF {
+class MipsTargetObjectFile : public TargetLoweringObjectFileELF {
     MCSection *SmallDataSection;
     MCSection *SmallBSSSection;
     const MipsTargetMachine *TM;
@@ -22,7 +22,7 @@ class MipsTargetMachine;
                                 SectionKind Kind) const;
     bool IsGlobalInSmallSectionImpl(const GlobalObject *GO,
                                     const TargetMachine &TM) const;
-  public:
+public:
 
     void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
@@ -43,7 +43,7 @@ class MipsTargetMachine;
                                      Align &Alignment) const override;
     /// Describe a TLS variable address within debug info.
     const MCExpr *getDebugThreadLocalSymbol(const MCSymbol *Sym) const override;
-  };
+};
 } // end namespace llvm
 
 #endif

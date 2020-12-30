@@ -45,220 +45,224 @@
 
 class RegisterContextDarwin_arm : public lldb_private::RegisterContext {
 public:
-  RegisterContextDarwin_arm(lldb_private::Thread &thread,
-                            uint32_t concrete_frame_idx);
+    RegisterContextDarwin_arm(lldb_private::Thread &thread,
+                              uint32_t concrete_frame_idx);
 
-  ~RegisterContextDarwin_arm() override;
+    ~RegisterContextDarwin_arm() override;
 
-  void InvalidateAllRegisters() override;
+    void InvalidateAllRegisters() override;
 
-  size_t GetRegisterCount() override;
+    size_t GetRegisterCount() override;
 
-  const lldb_private::RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
+    const lldb_private::RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
 
-  size_t GetRegisterSetCount() override;
+    size_t GetRegisterSetCount() override;
 
-  const lldb_private::RegisterSet *GetRegisterSet(size_t set) override;
+    const lldb_private::RegisterSet *GetRegisterSet(size_t set) override;
 
-  bool ReadRegister(const lldb_private::RegisterInfo *reg_info,
-                    lldb_private::RegisterValue &reg_value) override;
+    bool ReadRegister(const lldb_private::RegisterInfo *reg_info,
+                      lldb_private::RegisterValue &reg_value) override;
 
-  bool WriteRegister(const lldb_private::RegisterInfo *reg_info,
-                     const lldb_private::RegisterValue &reg_value) override;
+    bool WriteRegister(const lldb_private::RegisterInfo *reg_info,
+                       const lldb_private::RegisterValue &reg_value) override;
 
-  bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+    bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-  bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+    bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-  uint32_t ConvertRegisterKindToRegisterNumber(lldb::RegisterKind kind,
-                                               uint32_t num) override;
+    uint32_t ConvertRegisterKindToRegisterNumber(lldb::RegisterKind kind,
+            uint32_t num) override;
 
-  uint32_t NumSupportedHardwareBreakpoints() override;
+    uint32_t NumSupportedHardwareBreakpoints() override;
 
-  uint32_t SetHardwareBreakpoint(lldb::addr_t addr, size_t size) override;
+    uint32_t SetHardwareBreakpoint(lldb::addr_t addr, size_t size) override;
 
-  bool ClearHardwareBreakpoint(uint32_t hw_idx) override;
+    bool ClearHardwareBreakpoint(uint32_t hw_idx) override;
 
-  uint32_t NumSupportedHardwareWatchpoints() override;
+    uint32_t NumSupportedHardwareWatchpoints() override;
 
-  uint32_t SetHardwareWatchpoint(lldb::addr_t addr, size_t size, bool read,
-                                 bool write) override;
+    uint32_t SetHardwareWatchpoint(lldb::addr_t addr, size_t size, bool read,
+                                   bool write) override;
 
-  bool ClearHardwareWatchpoint(uint32_t hw_index) override;
+    bool ClearHardwareWatchpoint(uint32_t hw_index) override;
 
-  struct GPR {
-    uint32_t r[16]; // R0-R15
-    uint32_t cpsr;  // CPSR
-  };
+    struct GPR {
+        uint32_t r[16]; // R0-R15
+        uint32_t cpsr;  // CPSR
+    };
 
-  struct QReg {
-    uint8_t bytes[16];
-  };
+    struct QReg {
+        uint8_t bytes[16];
+    };
 
-  struct FPU {
-    union {
-      uint32_t s[32];
-      uint64_t d[32];
-      QReg q[16]; // the 128-bit NEON registers
-    } floats;
-    uint32_t fpscr;
-  };
+    struct FPU {
+        union {
+            uint32_t s[32];
+            uint64_t d[32];
+            QReg q[16]; // the 128-bit NEON registers
+        } floats;
+        uint32_t fpscr;
+    };
 
-  //  struct NeonReg
-  //  {
-  //      uint8_t bytes[16];
-  //  };
-  //
-  //  struct VFPv3
-  //  {
-  //      union {
-  //          uint32_t s[32];
-  //          uint64_t d[32];
-  //          NeonReg  q[16];
-  //      } v3;
-  //      uint32_t fpscr;
-  //  };
+    //  struct NeonReg
+    //  {
+    //      uint8_t bytes[16];
+    //  };
+    //
+    //  struct VFPv3
+    //  {
+    //      union {
+    //          uint32_t s[32];
+    //          uint64_t d[32];
+    //          NeonReg  q[16];
+    //      } v3;
+    //      uint32_t fpscr;
+    //  };
 
-  struct EXC {
-    uint32_t exception;
-    uint32_t fsr; /* Fault status */
-    uint32_t far; /* Virtual Fault Address */
-  };
+    struct EXC {
+        uint32_t exception;
+        uint32_t fsr; /* Fault status */
+        uint32_t far; /* Virtual Fault Address */
+    };
 
-  struct DBG {
-    uint32_t bvr[16];
-    uint32_t bcr[16];
-    uint32_t wvr[16];
-    uint32_t wcr[16];
-  };
+    struct DBG {
+        uint32_t bvr[16];
+        uint32_t bcr[16];
+        uint32_t wvr[16];
+        uint32_t wcr[16];
+    };
 
-  static void LogDBGRegisters(lldb_private::Log *log, const DBG &dbg);
+    static void LogDBGRegisters(lldb_private::Log *log, const DBG &dbg);
 
 protected:
-  enum {
-    GPRRegSet = 1,    // ARM_THREAD_STATE
-    GPRAltRegSet = 9, // ARM_THREAD_STATE32
-    FPURegSet = 2,    // ARM_VFP_STATE
-    EXCRegSet = 3,    // ARM_EXCEPTION_STATE
-    DBGRegSet = 4     // ARM_DEBUG_STATE
-  };
+    enum {
+        GPRRegSet = 1,    // ARM_THREAD_STATE
+        GPRAltRegSet = 9, // ARM_THREAD_STATE32
+        FPURegSet = 2,    // ARM_VFP_STATE
+        EXCRegSet = 3,    // ARM_EXCEPTION_STATE
+        DBGRegSet = 4     // ARM_DEBUG_STATE
+    };
 
-  enum {
-    GPRWordCount = sizeof(GPR) / sizeof(uint32_t),
-    FPUWordCount = sizeof(FPU) / sizeof(uint32_t),
-    EXCWordCount = sizeof(EXC) / sizeof(uint32_t),
-    DBGWordCount = sizeof(DBG) / sizeof(uint32_t)
-  };
+    enum {
+        GPRWordCount = sizeof(GPR) / sizeof(uint32_t),
+        FPUWordCount = sizeof(FPU) / sizeof(uint32_t),
+        EXCWordCount = sizeof(EXC) / sizeof(uint32_t),
+        DBGWordCount = sizeof(DBG) / sizeof(uint32_t)
+    };
 
-  enum { Read = 0, Write = 1, kNumErrors = 2 };
+    enum { Read = 0, Write = 1, kNumErrors = 2 };
 
-  GPR gpr;
-  FPU fpu;
-  EXC exc;
-  DBG dbg;
-  int gpr_errs[2]; // Read/Write errors
-  int fpu_errs[2]; // Read/Write errors
-  int exc_errs[2]; // Read/Write errors
-  int dbg_errs[2]; // Read/Write errors
+    GPR gpr;
+    FPU fpu;
+    EXC exc;
+    DBG dbg;
+    int gpr_errs[2]; // Read/Write errors
+    int fpu_errs[2]; // Read/Write errors
+    int exc_errs[2]; // Read/Write errors
+    int dbg_errs[2]; // Read/Write errors
 
-  void InvalidateAllRegisterStates() {
-    SetError(GPRRegSet, Read, -1);
-    SetError(FPURegSet, Read, -1);
-    SetError(EXCRegSet, Read, -1);
-  }
-
-  int GetError(int flavor, uint32_t err_idx) const {
-    if (err_idx < kNumErrors) {
-      switch (flavor) {
-      // When getting all errors, just OR all values together to see if
-      // we got any kind of error.
-      case GPRRegSet:
-        return gpr_errs[err_idx];
-      case FPURegSet:
-        return fpu_errs[err_idx];
-      case EXCRegSet:
-        return exc_errs[err_idx];
-      case DBGRegSet:
-        return dbg_errs[err_idx];
-      default:
-        break;
-      }
+    void InvalidateAllRegisterStates() {
+        SetError(GPRRegSet, Read, -1);
+        SetError(FPURegSet, Read, -1);
+        SetError(EXCRegSet, Read, -1);
     }
-    return -1;
-  }
 
-  bool SetError(int flavor, uint32_t err_idx, int err) {
-    if (err_idx < kNumErrors) {
-      switch (flavor) {
-      case GPRRegSet:
-        gpr_errs[err_idx] = err;
-        return true;
-
-      case FPURegSet:
-        fpu_errs[err_idx] = err;
-        return true;
-
-      case EXCRegSet:
-        exc_errs[err_idx] = err;
-        return true;
-
-      case DBGRegSet:
-        exc_errs[err_idx] = err;
-        return true;
-
-      default:
-        break;
-      }
+    int GetError(int flavor, uint32_t err_idx) const {
+        if (err_idx < kNumErrors) {
+            switch (flavor) {
+            // When getting all errors, just OR all values together to see if
+            // we got any kind of error.
+            case GPRRegSet:
+                return gpr_errs[err_idx];
+            case FPURegSet:
+                return fpu_errs[err_idx];
+            case EXCRegSet:
+                return exc_errs[err_idx];
+            case DBGRegSet:
+                return dbg_errs[err_idx];
+            default:
+                break;
+            }
+        }
+        return -1;
     }
-    return false;
-  }
 
-  bool RegisterSetIsCached(int set) const { return GetError(set, Read) == 0; }
+    bool SetError(int flavor, uint32_t err_idx, int err) {
+        if (err_idx < kNumErrors) {
+            switch (flavor) {
+            case GPRRegSet:
+                gpr_errs[err_idx] = err;
+                return true;
 
-  int ReadGPR(bool force);
+            case FPURegSet:
+                fpu_errs[err_idx] = err;
+                return true;
 
-  int ReadFPU(bool force);
+            case EXCRegSet:
+                exc_errs[err_idx] = err;
+                return true;
 
-  int ReadEXC(bool force);
+            case DBGRegSet:
+                exc_errs[err_idx] = err;
+                return true;
 
-  int ReadDBG(bool force);
+            default:
+                break;
+            }
+        }
+        return false;
+    }
 
-  int WriteGPR();
+    bool RegisterSetIsCached(int set) const {
+        return GetError(set, Read) == 0;
+    }
 
-  int WriteFPU();
+    int ReadGPR(bool force);
 
-  int WriteEXC();
+    int ReadFPU(bool force);
 
-  int WriteDBG();
+    int ReadEXC(bool force);
 
-  // Subclasses override these to do the actual reading.
-  virtual int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) { return -1; }
+    int ReadDBG(bool force);
 
-  virtual int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) = 0;
+    int WriteGPR();
 
-  virtual int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) = 0;
+    int WriteFPU();
 
-  virtual int DoReadDBG(lldb::tid_t tid, int flavor, DBG &dbg) = 0;
+    int WriteEXC();
 
-  virtual int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) = 0;
+    int WriteDBG();
 
-  virtual int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) = 0;
+    // Subclasses override these to do the actual reading.
+    virtual int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) {
+        return -1;
+    }
 
-  virtual int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) = 0;
+    virtual int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) = 0;
 
-  virtual int DoWriteDBG(lldb::tid_t tid, int flavor, const DBG &dbg) = 0;
+    virtual int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) = 0;
 
-  int ReadRegisterSet(uint32_t set, bool force);
+    virtual int DoReadDBG(lldb::tid_t tid, int flavor, DBG &dbg) = 0;
 
-  int WriteRegisterSet(uint32_t set);
+    virtual int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) = 0;
 
-  static uint32_t GetRegisterNumber(uint32_t reg_kind, uint32_t reg_num);
+    virtual int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) = 0;
 
-  static int GetSetForNativeRegNum(int reg_num);
+    virtual int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) = 0;
 
-  static size_t GetRegisterInfosCount();
+    virtual int DoWriteDBG(lldb::tid_t tid, int flavor, const DBG &dbg) = 0;
 
-  static const lldb_private::RegisterInfo *GetRegisterInfos();
+    int ReadRegisterSet(uint32_t set, bool force);
+
+    int WriteRegisterSet(uint32_t set);
+
+    static uint32_t GetRegisterNumber(uint32_t reg_kind, uint32_t reg_num);
+
+    static int GetSetForNativeRegNum(int reg_num);
+
+    static size_t GetRegisterInfosCount();
+
+    static const lldb_private::RegisterInfo *GetRegisterInfos();
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_UTILITY_REGISTERCONTEXTDARWIN_ARM_H

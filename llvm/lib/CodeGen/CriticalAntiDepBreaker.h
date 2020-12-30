@@ -70,7 +70,7 @@ class LLVM_LIBRARY_VISIBILITY CriticalAntiDepBreaker : public AntiDepBreaker {
     /// break anti-dependencies.
     BitVector KeepRegs;
 
-  public:
+public:
     CriticalAntiDepBreaker(MachineFunction& MFi, const RegisterClassInfo &RCI);
     ~CriticalAntiDepBreaker() override;
 
@@ -93,7 +93,7 @@ class LLVM_LIBRARY_VISIBILITY CriticalAntiDepBreaker : public AntiDepBreaker {
     /// Finish anti-dep breaking for a basic block.
     void FinishBlock() override;
 
-  private:
+private:
     void PrescanInstruction(MachineInstr &MI);
     void ScanInstruction(MachineInstr &MI, unsigned Count);
     bool isNewRegClobberedByRefs(RegRefIter RegRefBegin,
@@ -105,7 +105,7 @@ class LLVM_LIBRARY_VISIBILITY CriticalAntiDepBreaker : public AntiDepBreaker {
                                       unsigned LastNewReg,
                                       const TargetRegisterClass *RC,
                                       SmallVectorImpl<unsigned> &Forbid);
-  };
+};
 
 } // end namespace llvm
 

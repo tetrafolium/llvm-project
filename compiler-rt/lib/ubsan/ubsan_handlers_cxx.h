@@ -18,10 +18,10 @@
 namespace __ubsan {
 
 struct DynamicTypeCacheMissData {
-  SourceLocation Loc;
-  const TypeDescriptor &Type;
-  void *TypeInfo;
-  unsigned char TypeCheckKind;
+    SourceLocation Loc;
+    const TypeDescriptor &Type;
+    void *TypeInfo;
+    unsigned char TypeCheckKind;
 };
 
 /// \brief Handle a runtime type check failure, caused by an incorrect vptr.
@@ -29,26 +29,26 @@ struct DynamicTypeCacheMissData {
 /// cache; this does not necessarily imply the existence of a bug.
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE
 void __ubsan_handle_dynamic_type_cache_miss(
-  DynamicTypeCacheMissData *Data, ValueHandle Pointer, ValueHandle Hash);
+    DynamicTypeCacheMissData *Data, ValueHandle Pointer, ValueHandle Hash);
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE
 void __ubsan_handle_dynamic_type_cache_miss_abort(
-  DynamicTypeCacheMissData *Data, ValueHandle Pointer, ValueHandle Hash);
+    DynamicTypeCacheMissData *Data, ValueHandle Pointer, ValueHandle Hash);
 
 struct FunctionTypeMismatchData {
-  SourceLocation Loc;
-  const TypeDescriptor &Type;
+    SourceLocation Loc;
+    const TypeDescriptor &Type;
 };
 
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE void
 __ubsan_handle_function_type_mismatch_v1(FunctionTypeMismatchData *Data,
-                                         ValueHandle Val,
-                                         ValueHandle calleeRTTI,
-                                         ValueHandle fnRTTI);
+        ValueHandle Val,
+        ValueHandle calleeRTTI,
+        ValueHandle fnRTTI);
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE void
 __ubsan_handle_function_type_mismatch_v1_abort(FunctionTypeMismatchData *Data,
-                                               ValueHandle Val,
-                                               ValueHandle calleeRTTI,
-                                               ValueHandle fnRTTI);
+        ValueHandle Val,
+        ValueHandle calleeRTTI,
+        ValueHandle fnRTTI);
 }
 
 #endif // UBSAN_HANDLERS_H

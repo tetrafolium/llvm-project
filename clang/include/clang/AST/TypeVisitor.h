@@ -64,27 +64,29 @@ template<typename ImplClass, typename RetTy=void>
 class TypeVisitor {
 public:
 
-  /// Performs the operation associated with this visitor object.
-  RetTy Visit(const Type *T) {
-    // Top switch stmt: dispatch to VisitFooType for each FooType.
-    switch (T->getTypeClass()) {
+    /// Performs the operation associated with this visitor object.
+    RetTy Visit(const Type *T) {
+        // Top switch stmt: dispatch to VisitFooType for each FooType.
+        switch (T->getTypeClass()) {
 #define ABSTRACT_TYPE(CLASS, PARENT)
 #define TYPE(CLASS, PARENT) case Type::CLASS: DISPATCH(CLASS##Type);
 #include "clang/AST/TypeNodes.inc"
+        }
+        llvm_unreachable("Unknown type class!");
     }
-    llvm_unreachable("Unknown type class!");
-  }
 
-  // If the implementation chooses not to implement a certain visit method, fall
-  // back on superclass.
+    // If the implementation chooses not to implement a certain visit method, fall
+    // back on superclass.
 #define TYPE(CLASS, PARENT) RetTy Visit##CLASS##Type(const CLASS##Type *T) { \
   DISPATCH(PARENT);                                                          \
 }
 #include "clang/AST/TypeNodes.inc"
 
-  /// Method called if \c ImpClass doesn't provide specific handler
-  /// for some type class.
-  RetTy VisitType(const Type*) { return RetTy(); }
+    /// Method called if \c ImpClass doesn't provide specific handler
+    /// for some type class.
+    RetTy VisitType(const Type*) {
+        return RetTy();
+    }
 };
 
 #undef DISPATCH

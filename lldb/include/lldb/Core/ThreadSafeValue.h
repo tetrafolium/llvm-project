@@ -17,44 +17,50 @@ namespace lldb_private {
 
 template <class T> class ThreadSafeValue {
 public:
-  // Constructors and Destructors
-  ThreadSafeValue() : m_value(), m_mutex() {}
+    // Constructors and Destructors
+    ThreadSafeValue() : m_value(), m_mutex() {}
 
-  ThreadSafeValue(const T &value) : m_value(value), m_mutex() {}
+    ThreadSafeValue(const T &value) : m_value(value), m_mutex() {}
 
-  ~ThreadSafeValue() {}
+    ~ThreadSafeValue() {}
 
-  T GetValue() const {
-    T value;
-    {
-      std::lock_guard<std::recursive_mutex> guard(m_mutex);
-      value = m_value;
+    T GetValue() const {
+        T value;
+        {
+            std::lock_guard<std::recursive_mutex> guard(m_mutex);
+            value = m_value;
+        }
+        return value;
     }
-    return value;
-  }
 
-  // Call this if you have already manually locked the mutex using the
-  // GetMutex() accessor
-  const T &GetValueNoLock() const { return m_value; }
+    // Call this if you have already manually locked the mutex using the
+    // GetMutex() accessor
+    const T &GetValueNoLock() const {
+        return m_value;
+    }
 
-  void SetValue(const T &value) {
-    std::lock_guard<std::recursive_mutex> guard(m_mutex);
-    m_value = value;
-  }
+    void SetValue(const T &value) {
+        std::lock_guard<std::recursive_mutex> guard(m_mutex);
+        m_value = value;
+    }
 
-  // Call this if you have already manually locked the mutex using the
-  // GetMutex() accessor
-  void SetValueNoLock(const T &value) { m_value = value; }
+    // Call this if you have already manually locked the mutex using the
+    // GetMutex() accessor
+    void SetValueNoLock(const T &value) {
+        m_value = value;
+    }
 
-  std::recursive_mutex &GetMutex() { return m_mutex; }
+    std::recursive_mutex &GetMutex() {
+        return m_mutex;
+    }
 
 private:
-  T m_value;
-  mutable std::recursive_mutex m_mutex;
+    T m_value;
+    mutable std::recursive_mutex m_mutex;
 
-  // For ThreadSafeValue only
-  ThreadSafeValue(const ThreadSafeValue &) = delete;
-  const ThreadSafeValue &operator=(const ThreadSafeValue &) = delete;
+    // For ThreadSafeValue only
+    ThreadSafeValue(const ThreadSafeValue &) = delete;
+    const ThreadSafeValue &operator=(const ThreadSafeValue &) = delete;
 };
 
 } // namespace lldb_private

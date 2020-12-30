@@ -16,8 +16,8 @@ namespace llvm {
 class raw_ostream;
 enum class FloatStyle { Exponent, ExponentUpper, Fixed, Percent };
 enum class IntegerStyle {
-  Integer,
-  Number,
+    Integer,
+    Number,
 };
 enum class HexPrintStyle { Upper, Lower, PrefixUpper, PrefixLower };
 

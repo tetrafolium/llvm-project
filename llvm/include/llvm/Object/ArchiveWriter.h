@@ -18,19 +18,19 @@
 namespace llvm {
 
 struct NewArchiveMember {
-  std::unique_ptr<MemoryBuffer> Buf;
-  StringRef MemberName;
-  sys::TimePoint<std::chrono::seconds> ModTime;
-  unsigned UID = 0, GID = 0, Perms = 0644;
+    std::unique_ptr<MemoryBuffer> Buf;
+    StringRef MemberName;
+    sys::TimePoint<std::chrono::seconds> ModTime;
+    unsigned UID = 0, GID = 0, Perms = 0644;
 
-  NewArchiveMember() = default;
-  NewArchiveMember(MemoryBufferRef BufRef);
+    NewArchiveMember() = default;
+    NewArchiveMember(MemoryBufferRef BufRef);
 
-  static Expected<NewArchiveMember>
-  getOldMember(const object::Archive::Child &OldMember, bool Deterministic);
+    static Expected<NewArchiveMember>
+    getOldMember(const object::Archive::Child &OldMember, bool Deterministic);
 
-  static Expected<NewArchiveMember> getFile(StringRef FileName,
-                                            bool Deterministic);
+    static Expected<NewArchiveMember> getFile(StringRef FileName,
+            bool Deterministic);
 };
 
 Expected<std::string> computeArchiveRelativePath(StringRef From, StringRef To);
@@ -43,8 +43,8 @@ Error writeArchive(StringRef ArcName, ArrayRef<NewArchiveMember> NewMembers,
 // writeArchiveToBuffer is similar to writeArchive but returns the Archive in a
 // buffer instead of writing it out to a file.
 Expected<std::unique_ptr<MemoryBuffer>>
-writeArchiveToBuffer(ArrayRef<NewArchiveMember> NewMembers, bool WriteSymtab,
-                     object::Archive::Kind Kind, bool Deterministic, bool Thin);
+                                     writeArchiveToBuffer(ArrayRef<NewArchiveMember> NewMembers, bool WriteSymtab,
+                                             object::Archive::Kind Kind, bool Deterministic, bool Thin);
 }
 
 #endif

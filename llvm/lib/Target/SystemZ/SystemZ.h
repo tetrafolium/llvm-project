@@ -130,23 +130,23 @@ const unsigned TDCMASK_SNAN_MINUS      = 0x001;
 
 const unsigned TDCMASK_ZERO            = TDCMASK_ZERO_PLUS | TDCMASK_ZERO_MINUS;
 const unsigned TDCMASK_POSITIVE        = TDCMASK_NORMAL_PLUS |
-                                         TDCMASK_SUBNORMAL_PLUS |
-                                         TDCMASK_INFINITY_PLUS;
+        TDCMASK_SUBNORMAL_PLUS |
+        TDCMASK_INFINITY_PLUS;
 const unsigned TDCMASK_NEGATIVE        = TDCMASK_NORMAL_MINUS |
-                                         TDCMASK_SUBNORMAL_MINUS |
-                                         TDCMASK_INFINITY_MINUS;
+        TDCMASK_SUBNORMAL_MINUS |
+        TDCMASK_INFINITY_MINUS;
 const unsigned TDCMASK_NAN             = TDCMASK_QNAN_PLUS |
-                                         TDCMASK_QNAN_MINUS |
-                                         TDCMASK_SNAN_PLUS |
-                                         TDCMASK_SNAN_MINUS;
+        TDCMASK_QNAN_MINUS |
+        TDCMASK_SNAN_PLUS |
+        TDCMASK_SNAN_MINUS;
 const unsigned TDCMASK_PLUS            = TDCMASK_POSITIVE |
-                                         TDCMASK_ZERO_PLUS |
-                                         TDCMASK_QNAN_PLUS |
-                                         TDCMASK_SNAN_PLUS;
+        TDCMASK_ZERO_PLUS |
+        TDCMASK_QNAN_PLUS |
+        TDCMASK_SNAN_PLUS;
 const unsigned TDCMASK_MINUS           = TDCMASK_NEGATIVE |
-                                         TDCMASK_ZERO_MINUS |
-                                         TDCMASK_QNAN_MINUS |
-                                         TDCMASK_SNAN_MINUS;
+        TDCMASK_ZERO_MINUS |
+        TDCMASK_QNAN_MINUS |
+        TDCMASK_SNAN_MINUS;
 const unsigned TDCMASK_ALL             = TDCMASK_PLUS | TDCMASK_MINUS;
 
 // Number of bits in a vector register.
@@ -158,32 +158,32 @@ const unsigned VectorBytes = VectorBits / 8;
 
 // Return true if Val fits an LLILL operand.
 static inline bool isImmLL(uint64_t Val) {
-  return (Val & ~0x000000000000ffffULL) == 0;
+    return (Val & ~0x000000000000ffffULL) == 0;
 }
 
 // Return true if Val fits an LLILH operand.
 static inline bool isImmLH(uint64_t Val) {
-  return (Val & ~0x00000000ffff0000ULL) == 0;
+    return (Val & ~0x00000000ffff0000ULL) == 0;
 }
 
 // Return true if Val fits an LLIHL operand.
 static inline bool isImmHL(uint64_t Val) {
-  return (Val & ~0x00000ffff00000000ULL) == 0;
+    return (Val & ~0x00000ffff00000000ULL) == 0;
 }
 
 // Return true if Val fits an LLIHH operand.
 static inline bool isImmHH(uint64_t Val) {
-  return (Val & ~0xffff000000000000ULL) == 0;
+    return (Val & ~0xffff000000000000ULL) == 0;
 }
 
 // Return true if Val fits an LLILF operand.
 static inline bool isImmLF(uint64_t Val) {
-  return (Val & ~0x00000000ffffffffULL) == 0;
+    return (Val & ~0x00000000ffffffffULL) == 0;
 }
 
 // Return true if Val fits an LLIHF operand.
 static inline bool isImmHF(uint64_t Val) {
-  return (Val & ~0xffffffff00000000ULL) == 0;
+    return (Val & ~0xffffffff00000000ULL) == 0;
 }
 } // end namespace SystemZ
 

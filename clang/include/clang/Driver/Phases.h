@@ -12,9 +12,9 @@
 namespace clang {
 namespace driver {
 namespace phases {
-  /// ID - Ordered values for successive stages in the
-  /// compilation process which interact with user options.
-  enum ID {
+/// ID - Ordered values for successive stages in the
+/// compilation process which interact with user options.
+enum ID {
     Preprocess,
     Precompile,
     Compile,
@@ -23,13 +23,13 @@ namespace phases {
     Link,
     IfsMerge,
     LastPhase = IfsMerge,
-  };
+};
 
-  enum {
+enum {
     MaxNumberOfPhases = LastPhase + 1
-  };
+};
 
-  const char *getPhaseName(ID Id);
+const char *getPhaseName(ID Id);
 
 } // end namespace phases
 } // end namespace driver

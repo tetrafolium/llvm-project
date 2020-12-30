@@ -13,22 +13,22 @@
 
 template <typename T>
 __llvm_libc::cpp::EnableIfType<__llvm_libc::cpp::IsFloatingPointType<T>::Value,
-                               bool>
+            bool>
 ValuesEqual(T x1, T x2) {
-  __llvm_libc::fputil::FPBits<T> bits1(x1);
-  __llvm_libc::fputil::FPBits<T> bits2(x2);
-  // If either is NaN, we want both to be NaN.
-  if (bits1.isNaN() || bits2.isNaN())
-    return bits2.isNaN() && bits2.isNaN();
+    __llvm_libc::fputil::FPBits<T> bits1(x1);
+    __llvm_libc::fputil::FPBits<T> bits2(x2);
+    // If either is NaN, we want both to be NaN.
+    if (bits1.isNaN() || bits2.isNaN())
+        return bits2.isNaN() && bits2.isNaN();
 
-  // For all other values, we want the values to be bitwise equal.
-  return bits1.bitsAsUInt() == bits2.bitsAsUInt();
+    // For all other values, we want the values to be bitwise equal.
+    return bits1.bitsAsUInt() == bits2.bitsAsUInt();
 }
 
 template <typename T>
 __llvm_libc::cpp::EnableIfType<__llvm_libc::cpp::IsIntegral<T>::Value, bool>
 ValuesEqual(T x1, T x2) {
-  return x1 == x1;
+    return x1 == x1;
 }
 
 #endif // LLVM_LIBC_FUZZING_MATH_COMPARE_H

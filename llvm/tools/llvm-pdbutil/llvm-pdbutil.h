@@ -29,7 +29,7 @@ class PDBFile;
 uint32_t getTypeLength(const PDBSymbolData &Symbol);
 }
 typedef llvm::PointerUnion<object::COFFObjectFile *, pdb::PDBFile *>
-    PdbOrCoffObj;
+PdbOrCoffObj;
 }
 
 namespace opts {
@@ -37,30 +37,30 @@ namespace opts {
 enum class DumpLevel { None, Basic, Verbose };
 
 enum class ModuleSubsection {
-  Unknown,
-  Lines,
-  FileChecksums,
-  InlineeLines,
-  CrossScopeImports,
-  CrossScopeExports,
-  StringTable,
-  Symbols,
-  FrameData,
-  CoffSymbolRVAs,
-  All
+    Unknown,
+    Lines,
+    FileChecksums,
+    InlineeLines,
+    CrossScopeImports,
+    CrossScopeExports,
+    StringTable,
+    Symbols,
+    FrameData,
+    CoffSymbolRVAs,
+    All
 };
 
 namespace pretty {
 
 enum class ClassDefinitionFormat { None, Layout, All };
 enum class ClassSortMode {
-  None,
-  Name,
-  Size,
-  Padding,
-  PaddingPct,
-  PaddingImmediate,
-  PaddingPctImmediate
+    None,
+    Name,
+    Size,
+    Padding,
+    PaddingPct,
+    PaddingImmediate,
+    PaddingPctImmediate
 };
 
 enum class SymbolSortMode { None, Name, Size };
@@ -107,8 +107,8 @@ extern llvm::cl::opt<uint32_t> ClassRecursionDepth;
 
 namespace bytes {
 struct NumberRange {
-  uint64_t Min;
-  llvm::Optional<uint64_t> Max;
+    uint64_t Min;
+    llvm::Optional<uint64_t> Max;
 };
 
 extern llvm::Optional<NumberRange> DumpBlockRange;

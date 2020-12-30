@@ -24,8 +24,10 @@ static constexpr Log::Category g_categories[] = {
 Log::Channel ProcessWindowsLog::g_channel(g_categories, WINDOWS_LOG_PROCESS);
 
 void ProcessWindowsLog::Initialize() {
-  static llvm::once_flag g_once_flag;
-  llvm::call_once(g_once_flag, []() { Log::Register("windows", g_channel); });
+    static llvm::once_flag g_once_flag;
+    llvm::call_once(g_once_flag, []() {
+        Log::Register("windows", g_channel);
+    });
 }
 
 void ProcessWindowsLog::Terminate() {}

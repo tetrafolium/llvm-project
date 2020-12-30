@@ -15,31 +15,31 @@ namespace lldb_private {
 
 class ScriptInterpreterNone : public ScriptInterpreter {
 public:
-  ScriptInterpreterNone(Debugger &debugger);
+    ScriptInterpreterNone(Debugger &debugger);
 
-  ~ScriptInterpreterNone() override;
+    ~ScriptInterpreterNone() override;
 
-  bool ExecuteOneLine(
-      llvm::StringRef command, CommandReturnObject *result,
-      const ExecuteScriptOptions &options = ExecuteScriptOptions()) override;
+    bool ExecuteOneLine(
+        llvm::StringRef command, CommandReturnObject *result,
+        const ExecuteScriptOptions &options = ExecuteScriptOptions()) override;
 
-  void ExecuteInterpreterLoop() override;
+    void ExecuteInterpreterLoop() override;
 
-  // Static Functions
-  static void Initialize();
+    // Static Functions
+    static void Initialize();
 
-  static void Terminate();
+    static void Terminate();
 
-  static lldb::ScriptInterpreterSP CreateInstance(Debugger &debugger);
+    static lldb::ScriptInterpreterSP CreateInstance(Debugger &debugger);
 
-  static lldb_private::ConstString GetPluginNameStatic();
+    static lldb_private::ConstString GetPluginNameStatic();
 
-  static const char *GetPluginDescriptionStatic();
+    static const char *GetPluginDescriptionStatic();
 
-  // PluginInterface protocol
-  lldb_private::ConstString GetPluginName() override;
+    // PluginInterface protocol
+    lldb_private::ConstString GetPluginName() override;
 
-  uint32_t GetPluginVersion() override;
+    uint32_t GetPluginVersion() override;
 };
 
 } // namespace lldb_private

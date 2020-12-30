@@ -24,6 +24,6 @@ StringRef InstructionView::printInstructionString(const llvm::MCInst &MCI) const
     InstrStream.flush();
     // Remove any tabs or spaces at the beginning of the instruction.
     return StringRef(InstructionString).ltrim();
-  }
+}
 } // namespace mca
 } // namespace llvm

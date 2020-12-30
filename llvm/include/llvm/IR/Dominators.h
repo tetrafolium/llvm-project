@@ -49,85 +49,85 @@ using BBPostDomTreeGraphDiff = GraphDiff<BasicBlock *, true>;
 
 extern template void Calculate<BBDomTree>(BBDomTree &DT);
 extern template void CalculateWithUpdates<BBDomTree>(BBDomTree &DT,
-                                                     BBUpdates U);
+        BBUpdates U);
 
 extern template void Calculate<BBPostDomTree>(BBPostDomTree &DT);
 
 extern template void InsertEdge<BBDomTree>(BBDomTree &DT, BasicBlock *From,
-                                           BasicBlock *To);
+        BasicBlock *To);
 extern template void InsertEdge<BBPostDomTree>(BBPostDomTree &DT,
-                                               BasicBlock *From,
-                                               BasicBlock *To);
+        BasicBlock *From,
+        BasicBlock *To);
 
 extern template void DeleteEdge<BBDomTree>(BBDomTree &DT, BasicBlock *From,
-                                           BasicBlock *To);
+        BasicBlock *To);
 extern template void DeleteEdge<BBPostDomTree>(BBPostDomTree &DT,
-                                               BasicBlock *From,
-                                               BasicBlock *To);
+        BasicBlock *From,
+        BasicBlock *To);
 
 extern template void ApplyUpdates<BBDomTree>(BBDomTree &DT,
-                                             BBDomTreeGraphDiff &,
-                                             BBDomTreeGraphDiff *);
+        BBDomTreeGraphDiff &,
+        BBDomTreeGraphDiff *);
 extern template void ApplyUpdates<BBPostDomTree>(BBPostDomTree &DT,
-                                                 BBPostDomTreeGraphDiff &,
-                                                 BBPostDomTreeGraphDiff *);
+        BBPostDomTreeGraphDiff &,
+        BBPostDomTreeGraphDiff *);
 
 extern template bool Verify<BBDomTree>(const BBDomTree &DT,
                                        BBDomTree::VerificationLevel VL);
 extern template bool Verify<BBPostDomTree>(const BBPostDomTree &DT,
-                                           BBPostDomTree::VerificationLevel VL);
+        BBPostDomTree::VerificationLevel VL);
 }  // namespace DomTreeBuilder
 
 using DomTreeNode = DomTreeNodeBase<BasicBlock>;
 
 class BasicBlockEdge {
-  const BasicBlock *Start;
-  const BasicBlock *End;
+    const BasicBlock *Start;
+    const BasicBlock *End;
 
 public:
-  BasicBlockEdge(const BasicBlock *Start_, const BasicBlock *End_) :
-    Start(Start_), End(End_) {}
+    BasicBlockEdge(const BasicBlock *Start_, const BasicBlock *End_) :
+        Start(Start_), End(End_) {}
 
-  BasicBlockEdge(const std::pair<BasicBlock *, BasicBlock *> &Pair)
-      : Start(Pair.first), End(Pair.second) {}
+    BasicBlockEdge(const std::pair<BasicBlock *, BasicBlock *> &Pair)
+        : Start(Pair.first), End(Pair.second) {}
 
-  BasicBlockEdge(const std::pair<const BasicBlock *, const BasicBlock *> &Pair)
-      : Start(Pair.first), End(Pair.second) {}
+    BasicBlockEdge(const std::pair<const BasicBlock *, const BasicBlock *> &Pair)
+        : Start(Pair.first), End(Pair.second) {}
 
-  const BasicBlock *getStart() const {
-    return Start;
-  }
+    const BasicBlock *getStart() const {
+        return Start;
+    }
 
-  const BasicBlock *getEnd() const {
-    return End;
-  }
+    const BasicBlock *getEnd() const {
+        return End;
+    }
 
-  /// Check if this is the only edge between Start and End.
-  bool isSingleEdge() const;
+    /// Check if this is the only edge between Start and End.
+    bool isSingleEdge() const;
 };
 
 template <> struct DenseMapInfo<BasicBlockEdge> {
-  using BBInfo = DenseMapInfo<const BasicBlock *>;
+    using BBInfo = DenseMapInfo<const BasicBlock *>;
 
-  static unsigned getHashValue(const BasicBlockEdge *V);
+    static unsigned getHashValue(const BasicBlockEdge *V);
 
-  static inline BasicBlockEdge getEmptyKey() {
-    return BasicBlockEdge(BBInfo::getEmptyKey(), BBInfo::getEmptyKey());
-  }
+    static inline BasicBlockEdge getEmptyKey() {
+        return BasicBlockEdge(BBInfo::getEmptyKey(), BBInfo::getEmptyKey());
+    }
 
-  static inline BasicBlockEdge getTombstoneKey() {
-    return BasicBlockEdge(BBInfo::getTombstoneKey(), BBInfo::getTombstoneKey());
-  }
+    static inline BasicBlockEdge getTombstoneKey() {
+        return BasicBlockEdge(BBInfo::getTombstoneKey(), BBInfo::getTombstoneKey());
+    }
 
-  static unsigned getHashValue(const BasicBlockEdge &Edge) {
-    return hash_combine(BBInfo::getHashValue(Edge.getStart()),
-                        BBInfo::getHashValue(Edge.getEnd()));
-  }
+    static unsigned getHashValue(const BasicBlockEdge &Edge) {
+        return hash_combine(BBInfo::getHashValue(Edge.getStart()),
+                            BBInfo::getHashValue(Edge.getEnd()));
+    }
 
-  static bool isEqual(const BasicBlockEdge &LHS, const BasicBlockEdge &RHS) {
-    return BBInfo::isEqual(LHS.getStart(), RHS.getStart()) &&
-           BBInfo::isEqual(LHS.getEnd(), RHS.getEnd());
-  }
+    static bool isEqual(const BasicBlockEdge &LHS, const BasicBlockEdge &RHS) {
+        return BBInfo::isEqual(LHS.getStart(), RHS.getStart()) &&
+               BBInfo::isEqual(LHS.getEnd(), RHS.getEnd());
+    }
 };
 
 /// Concrete subclass of DominatorTreeBase that is used to compute a
@@ -149,57 +149,59 @@ template <> struct DenseMapInfo<BasicBlockEdge> {
 /// even if the tree is properly updated. Calling code should not rely on the
 /// preceding statements; this is stated only to assist human understanding.
 class DominatorTree : public DominatorTreeBase<BasicBlock, false> {
- public:
-  using Base = DominatorTreeBase<BasicBlock, false>;
+public:
+    using Base = DominatorTreeBase<BasicBlock, false>;
 
-  DominatorTree() = default;
-  explicit DominatorTree(Function &F) { recalculate(F); }
-  explicit DominatorTree(DominatorTree &DT, DomTreeBuilder::BBUpdates U) {
-    recalculate(*DT.Parent, U);
-  }
+    DominatorTree() = default;
+    explicit DominatorTree(Function &F) {
+        recalculate(F);
+    }
+    explicit DominatorTree(DominatorTree &DT, DomTreeBuilder::BBUpdates U) {
+        recalculate(*DT.Parent, U);
+    }
 
-  /// Handle invalidation explicitly.
-  bool invalidate(Function &F, const PreservedAnalyses &PA,
-                  FunctionAnalysisManager::Invalidator &);
+    /// Handle invalidation explicitly.
+    bool invalidate(Function &F, const PreservedAnalyses &PA,
+                    FunctionAnalysisManager::Invalidator &);
 
-  // Ensure base-class overloads are visible.
-  using Base::dominates;
+    // Ensure base-class overloads are visible.
+    using Base::dominates;
 
-  /// Return true if value Def dominates use U, in the sense that Def is
-  /// available at U, and could be substituted as the used value without
-  /// violating the SSA dominance requirement.
-  ///
-  /// In particular, it is worth noting that:
-  ///  * Non-instruction Defs dominate everything.
-  ///  * Def does not dominate a use in Def itself (outside of degenerate cases
-  ///    like unreachable code or trivial phi cycles).
-  ///  * Invoke/callbr Defs only dominate uses in their default destination.
-  bool dominates(const Value *Def, const Use &U) const;
-  /// Return true if value Def dominates all possible uses inside instruction
-  /// User. Same comments as for the Use-based API apply.
-  bool dominates(const Value *Def, const Instruction *User) const;
-  // Does not accept Value to avoid ambiguity with dominance checks between
-  // two basic blocks.
-  bool dominates(const Instruction *Def, const BasicBlock *BB) const;
+    /// Return true if value Def dominates use U, in the sense that Def is
+    /// available at U, and could be substituted as the used value without
+    /// violating the SSA dominance requirement.
+    ///
+    /// In particular, it is worth noting that:
+    ///  * Non-instruction Defs dominate everything.
+    ///  * Def does not dominate a use in Def itself (outside of degenerate cases
+    ///    like unreachable code or trivial phi cycles).
+    ///  * Invoke/callbr Defs only dominate uses in their default destination.
+    bool dominates(const Value *Def, const Use &U) const;
+    /// Return true if value Def dominates all possible uses inside instruction
+    /// User. Same comments as for the Use-based API apply.
+    bool dominates(const Value *Def, const Instruction *User) const;
+    // Does not accept Value to avoid ambiguity with dominance checks between
+    // two basic blocks.
+    bool dominates(const Instruction *Def, const BasicBlock *BB) const;
 
-  /// Return true if an edge dominates a use.
-  ///
-  /// If BBE is not a unique edge between start and end of the edge, it can
-  /// never dominate the use.
-  bool dominates(const BasicBlockEdge &BBE, const Use &U) const;
-  bool dominates(const BasicBlockEdge &BBE, const BasicBlock *BB) const;
-  /// Returns true if edge \p BBE1 dominates edge \p BBE2.
-  bool dominates(const BasicBlockEdge &BBE1, const BasicBlockEdge &BBE2) const;
+    /// Return true if an edge dominates a use.
+    ///
+    /// If BBE is not a unique edge between start and end of the edge, it can
+    /// never dominate the use.
+    bool dominates(const BasicBlockEdge &BBE, const Use &U) const;
+    bool dominates(const BasicBlockEdge &BBE, const BasicBlock *BB) const;
+    /// Returns true if edge \p BBE1 dominates edge \p BBE2.
+    bool dominates(const BasicBlockEdge &BBE1, const BasicBlockEdge &BBE2) const;
 
-  // Ensure base class overloads are visible.
-  using Base::isReachableFromEntry;
+    // Ensure base class overloads are visible.
+    using Base::isReachableFromEntry;
 
-  /// Provide an overload for a Use.
-  bool isReachableFromEntry(const Use &U) const;
+    /// Provide an overload for a Use.
+    bool isReachableFromEntry(const Use &U) const;
 
-  // Pop up a GraphViz/gv window with the Dominator Tree rendered using `dot`.
-  void viewGraph(const Twine &Name, const Twine &Title);
-  void viewGraph();
+    // Pop up a GraphViz/gv window with the Dominator Tree rendered using `dot`.
+    void viewGraph(const Twine &Name, const Twine &Title);
+    void viewGraph();
 };
 
 //===-------------------------------------
@@ -207,19 +209,27 @@ class DominatorTree : public DominatorTreeBase<BasicBlock, false> {
 // iterable by generic graph iterators.
 
 template <class Node, class ChildIterator> struct DomTreeGraphTraitsBase {
-  using NodeRef = Node *;
-  using ChildIteratorType = ChildIterator;
-  using nodes_iterator = df_iterator<Node *, df_iterator_default_set<Node*>>;
+    using NodeRef = Node *;
+    using ChildIteratorType = ChildIterator;
+    using nodes_iterator = df_iterator<Node *, df_iterator_default_set<Node*>>;
 
-  static NodeRef getEntryNode(NodeRef N) { return N; }
-  static ChildIteratorType child_begin(NodeRef N) { return N->begin(); }
-  static ChildIteratorType child_end(NodeRef N) { return N->end(); }
+    static NodeRef getEntryNode(NodeRef N) {
+        return N;
+    }
+    static ChildIteratorType child_begin(NodeRef N) {
+        return N->begin();
+    }
+    static ChildIteratorType child_end(NodeRef N) {
+        return N->end();
+    }
 
-  static nodes_iterator nodes_begin(NodeRef N) {
-    return df_begin(getEntryNode(N));
-  }
+    static nodes_iterator nodes_begin(NodeRef N) {
+        return df_begin(getEntryNode(N));
+    }
 
-  static nodes_iterator nodes_end(NodeRef N) { return df_end(getEntryNode(N)); }
+    static nodes_iterator nodes_end(NodeRef N) {
+        return df_end(getEntryNode(N));
+    }
 };
 
 template <>
@@ -230,73 +240,81 @@ struct GraphTraits<DomTreeNode *>
 template <>
 struct GraphTraits<const DomTreeNode *>
     : public DomTreeGraphTraitsBase<const DomTreeNode,
-                                    DomTreeNode::const_iterator> {};
+      DomTreeNode::const_iterator> {};
 
 template <> struct GraphTraits<DominatorTree*>
-  : public GraphTraits<DomTreeNode*> {
-  static NodeRef getEntryNode(DominatorTree *DT) { return DT->getRootNode(); }
+    : public GraphTraits<DomTreeNode*> {
+    static NodeRef getEntryNode(DominatorTree *DT) {
+        return DT->getRootNode();
+    }
 
-  static nodes_iterator nodes_begin(DominatorTree *N) {
-    return df_begin(getEntryNode(N));
-  }
+    static nodes_iterator nodes_begin(DominatorTree *N) {
+        return df_begin(getEntryNode(N));
+    }
 
-  static nodes_iterator nodes_end(DominatorTree *N) {
-    return df_end(getEntryNode(N));
-  }
+    static nodes_iterator nodes_end(DominatorTree *N) {
+        return df_end(getEntryNode(N));
+    }
 };
 
 /// Analysis pass which computes a \c DominatorTree.
 class DominatorTreeAnalysis : public AnalysisInfoMixin<DominatorTreeAnalysis> {
-  friend AnalysisInfoMixin<DominatorTreeAnalysis>;
-  static AnalysisKey Key;
+    friend AnalysisInfoMixin<DominatorTreeAnalysis>;
+    static AnalysisKey Key;
 
 public:
-  /// Provide the result typedef for this analysis pass.
-  using Result = DominatorTree;
+    /// Provide the result typedef for this analysis pass.
+    using Result = DominatorTree;
 
-  /// Run the analysis pass over a function and produce a dominator tree.
-  DominatorTree run(Function &F, FunctionAnalysisManager &);
+    /// Run the analysis pass over a function and produce a dominator tree.
+    DominatorTree run(Function &F, FunctionAnalysisManager &);
 };
 
 /// Printer pass for the \c DominatorTree.
 class DominatorTreePrinterPass
     : public PassInfoMixin<DominatorTreePrinterPass> {
-  raw_ostream &OS;
+    raw_ostream &OS;
 
 public:
-  explicit DominatorTreePrinterPass(raw_ostream &OS);
+    explicit DominatorTreePrinterPass(raw_ostream &OS);
 
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Verifier pass for the \c DominatorTree.
 struct DominatorTreeVerifierPass : PassInfoMixin<DominatorTreeVerifierPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Legacy analysis pass which computes a \c DominatorTree.
 class DominatorTreeWrapperPass : public FunctionPass {
-  DominatorTree DT;
+    DominatorTree DT;
 
 public:
-  static char ID;
+    static char ID;
 
-  DominatorTreeWrapperPass();
+    DominatorTreeWrapperPass();
 
-  DominatorTree &getDomTree() { return DT; }
-  const DominatorTree &getDomTree() const { return DT; }
+    DominatorTree &getDomTree() {
+        return DT;
+    }
+    const DominatorTree &getDomTree() const {
+        return DT;
+    }
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 
-  void verifyAnalysis() const override;
+    void verifyAnalysis() const override;
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesAll();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesAll();
+    }
 
-  void releaseMemory() override { DT.reset(); }
+    void releaseMemory() override {
+        DT.reset();
+    }
 
-  void print(raw_ostream &OS, const Module *M = nullptr) const override;
+    void print(raw_ostream &OS, const Module *M = nullptr) const override;
 };
 } // end namespace llvm
 

@@ -13,16 +13,16 @@
  * The explicit domain is only accessible when n == 0.
  */
 struct MULTI(BASE) {
-	int ref;
-	isl_space *space;
+    int ref;
+    isl_space *space;
 
-	int n;
-	struct {
+    int n;
+    struct {
 #ifdef EXPLICIT_DOMAIN
-		DOM *dom;
+        DOM *dom;
 #endif
-		EL *p[1];
-	} u;
+        EL *p[1];
+    } u;
 };
 
 __isl_give MULTI(BASE) *CAT(MULTI(BASE),_alloc)(__isl_take isl_space *space);
@@ -30,5 +30,5 @@ __isl_keep isl_space *FN(MULTI(BASE),peek_space)(__isl_keep MULTI(BASE) *multi);
 
 #ifdef EXPLICIT_DOMAIN
 isl_bool CAT(MULTI(BASE),_has_non_trivial_domain)(
-	__isl_keep MULTI(BASE) *multi);
+    __isl_keep MULTI(BASE) *multi);
 #endif

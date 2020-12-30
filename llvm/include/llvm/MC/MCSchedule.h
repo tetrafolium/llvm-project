@@ -30,44 +30,44 @@ class InstrItineraryData;
 
 /// Define a kind of processor resource that will be modeled by the scheduler.
 struct MCProcResourceDesc {
-  const char *Name;
-  unsigned NumUnits; // Number of resource of this kind
-  unsigned SuperIdx; // Index of the resources kind that contains this kind.
+    const char *Name;
+    unsigned NumUnits; // Number of resource of this kind
+    unsigned SuperIdx; // Index of the resources kind that contains this kind.
 
-  // Number of resources that may be buffered.
-  //
-  // Buffered resources (BufferSize != 0) may be consumed at some indeterminate
-  // cycle after dispatch. This should be used for out-of-order cpus when
-  // instructions that use this resource can be buffered in a reservaton
-  // station.
-  //
-  // Unbuffered resources (BufferSize == 0) always consume their resource some
-  // fixed number of cycles after dispatch. If a resource is unbuffered, then
-  // the scheduler will avoid scheduling instructions with conflicting resources
-  // in the same cycle. This is for in-order cpus, or the in-order portion of
-  // an out-of-order cpus.
-  int BufferSize;
+    // Number of resources that may be buffered.
+    //
+    // Buffered resources (BufferSize != 0) may be consumed at some indeterminate
+    // cycle after dispatch. This should be used for out-of-order cpus when
+    // instructions that use this resource can be buffered in a reservaton
+    // station.
+    //
+    // Unbuffered resources (BufferSize == 0) always consume their resource some
+    // fixed number of cycles after dispatch. If a resource is unbuffered, then
+    // the scheduler will avoid scheduling instructions with conflicting resources
+    // in the same cycle. This is for in-order cpus, or the in-order portion of
+    // an out-of-order cpus.
+    int BufferSize;
 
-  // If the resource has sub-units, a pointer to the first element of an array
-  // of `NumUnits` elements containing the ProcResourceIdx of the sub units.
-  // nullptr if the resource does not have sub-units.
-  const unsigned *SubUnitsIdxBegin;
+    // If the resource has sub-units, a pointer to the first element of an array
+    // of `NumUnits` elements containing the ProcResourceIdx of the sub units.
+    // nullptr if the resource does not have sub-units.
+    const unsigned *SubUnitsIdxBegin;
 
-  bool operator==(const MCProcResourceDesc &Other) const {
-    return NumUnits == Other.NumUnits && SuperIdx == Other.SuperIdx
-      && BufferSize == Other.BufferSize;
-  }
+    bool operator==(const MCProcResourceDesc &Other) const {
+        return NumUnits == Other.NumUnits && SuperIdx == Other.SuperIdx
+               && BufferSize == Other.BufferSize;
+    }
 };
 
 /// Identify one of the processor resource kinds consumed by a particular
 /// scheduling class for the specified number of cycles.
 struct MCWriteProcResEntry {
-  uint16_t ProcResourceIdx;
-  uint16_t Cycles;
+    uint16_t ProcResourceIdx;
+    uint16_t Cycles;
 
-  bool operator==(const MCWriteProcResEntry &Other) const {
-    return ProcResourceIdx == Other.ProcResourceIdx && Cycles == Other.Cycles;
-  }
+    bool operator==(const MCWriteProcResEntry &Other) const {
+        return ProcResourceIdx == Other.ProcResourceIdx && Cycles == Other.Cycles;
+    }
 };
 
 /// Specify the latency in cpu cycles for a particular scheduling class and def
@@ -76,12 +76,12 @@ struct MCWriteProcResEntry {
 /// the WriteResources of this def. When the operand expands to a sequence of
 /// writes, this ID is the last write in the sequence.
 struct MCWriteLatencyEntry {
-  int16_t Cycles;
-  uint16_t WriteResourceID;
+    int16_t Cycles;
+    uint16_t WriteResourceID;
 
-  bool operator==(const MCWriteLatencyEntry &Other) const {
-    return Cycles == Other.Cycles && WriteResourceID == Other.WriteResourceID;
-  }
+    bool operator==(const MCWriteLatencyEntry &Other) const {
+        return Cycles == Other.Cycles && WriteResourceID == Other.WriteResourceID;
+    }
 };
 
 /// Specify the number of cycles allowed after instruction issue before a
@@ -93,14 +93,14 @@ struct MCWriteLatencyEntry {
 /// MCReadAdvanceEntries are sorted first by operand index (UseIdx), then by
 /// WriteResourceIdx.
 struct MCReadAdvanceEntry {
-  unsigned UseIdx;
-  unsigned WriteResourceID;
-  int Cycles;
+    unsigned UseIdx;
+    unsigned WriteResourceID;
+    int Cycles;
 
-  bool operator==(const MCReadAdvanceEntry &Other) const {
-    return UseIdx == Other.UseIdx && WriteResourceID == Other.WriteResourceID
-      && Cycles == Other.Cycles;
-  }
+    bool operator==(const MCReadAdvanceEntry &Other) const {
+        return UseIdx == Other.UseIdx && WriteResourceID == Other.WriteResourceID
+               && Cycles == Other.Cycles;
+    }
 };
 
 /// Summarize the scheduling resources required for an instruction of a
@@ -108,28 +108,28 @@ struct MCReadAdvanceEntry {
 ///
 /// Defined as an aggregate struct for creating tables with initializer lists.
 struct MCSchedClassDesc {
-  static const unsigned short InvalidNumMicroOps = (1U << 14) - 1;
-  static const unsigned short VariantNumMicroOps = InvalidNumMicroOps - 1;
+    static const unsigned short InvalidNumMicroOps = (1U << 14) - 1;
+    static const unsigned short VariantNumMicroOps = InvalidNumMicroOps - 1;
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-  const char* Name;
+    const char* Name;
 #endif
-  uint16_t NumMicroOps : 14;
-  bool     BeginGroup : 1;
-  bool     EndGroup : 1;
-  uint16_t WriteProcResIdx; // First index into WriteProcResTable.
-  uint16_t NumWriteProcResEntries;
-  uint16_t WriteLatencyIdx; // First index into WriteLatencyTable.
-  uint16_t NumWriteLatencyEntries;
-  uint16_t ReadAdvanceIdx; // First index into ReadAdvanceTable.
-  uint16_t NumReadAdvanceEntries;
+    uint16_t NumMicroOps : 14;
+    bool     BeginGroup : 1;
+    bool     EndGroup : 1;
+    uint16_t WriteProcResIdx; // First index into WriteProcResTable.
+    uint16_t NumWriteProcResEntries;
+    uint16_t WriteLatencyIdx; // First index into WriteLatencyTable.
+    uint16_t NumWriteLatencyEntries;
+    uint16_t ReadAdvanceIdx; // First index into ReadAdvanceTable.
+    uint16_t NumReadAdvanceEntries;
 
-  bool isValid() const {
-    return NumMicroOps != InvalidNumMicroOps;
-  }
-  bool isVariant() const {
-    return NumMicroOps == VariantNumMicroOps;
-  }
+    bool isValid() const {
+        return NumMicroOps != InvalidNumMicroOps;
+    }
+    bool isVariant() const {
+        return NumMicroOps == VariantNumMicroOps;
+    }
 };
 
 /// Specify the cost of a register definition in terms of number of physical
@@ -140,9 +140,9 @@ struct MCSchedClassDesc {
 /// register write effectively consumes two physical registers. That means,
 /// the cost of a YMM write in the BtVer2 model is 2.
 struct MCRegisterCostEntry {
-  unsigned RegisterClassID;
-  unsigned Cost;
-  bool AllowMoveElimination;
+    unsigned RegisterClassID;
+    unsigned Cost;
+    bool AllowMoveElimination;
 };
 
 /// A register file descriptor.
@@ -155,17 +155,17 @@ struct MCRegisterCostEntry {
 /// 'NumPhysRegs' means: this register file has an unbounded number of physical
 /// registers.
 struct MCRegisterFileDesc {
-  const char *Name;
-  uint16_t NumPhysRegs;
-  uint16_t NumRegisterCostEntries;
-  // Index of the first cost entry in MCExtraProcessorInfo::RegisterCostTable.
-  uint16_t RegisterCostEntryIdx;
-  // A value of zero means: there is no limit in the number of moves that can be
-  // eliminated every cycle.
-  uint16_t MaxMovesEliminatedPerCycle;
-  // Ture if this register file only knows how to optimize register moves from
-  // known zero registers.
-  bool AllowZeroMoveEliminationOnly;
+    const char *Name;
+    uint16_t NumPhysRegs;
+    uint16_t NumRegisterCostEntries;
+    // Index of the first cost entry in MCExtraProcessorInfo::RegisterCostTable.
+    uint16_t RegisterCostEntryIdx;
+    // A value of zero means: there is no limit in the number of moves that can be
+    // eliminated every cycle.
+    uint16_t MaxMovesEliminatedPerCycle;
+    // Ture if this register file only knows how to optimize register moves from
+    // known zero registers.
+    bool AllowZeroMoveEliminationOnly;
 };
 
 /// Provide extra details about the machine processor.
@@ -175,16 +175,16 @@ struct MCRegisterFileDesc {
 /// external tools like llvm-mca to improve the quality of the peformance
 /// analysis.
 struct MCExtraProcessorInfo {
-  // Actual size of the reorder buffer in hardware.
-  unsigned ReorderBufferSize;
-  // Number of instructions retired per cycle.
-  unsigned MaxRetirePerCycle;
-  const MCRegisterFileDesc *RegisterFiles;
-  unsigned NumRegisterFiles;
-  const MCRegisterCostEntry *RegisterCostTable;
-  unsigned NumRegisterCostEntries;
-  unsigned LoadQueueID;
-  unsigned StoreQueueID;
+    // Actual size of the reorder buffer in hardware.
+    unsigned ReorderBufferSize;
+    // Number of instructions retired per cycle.
+    unsigned MaxRetirePerCycle;
+    const MCRegisterFileDesc *RegisterFiles;
+    unsigned NumRegisterFiles;
+    const MCRegisterCostEntry *RegisterCostTable;
+    unsigned NumRegisterCostEntries;
+    unsigned LoadQueueID;
+    unsigned StoreQueueID;
 };
 
 /// Machine model for scheduling, bundling, and heuristics.
@@ -242,142 +242,154 @@ struct MCExtraProcessorInfo {
 /// to detect potential bottlenecks across a sequence of instructions and bias
 /// the scheduling heuristics appropriately.
 struct MCSchedModel {
-  // IssueWidth is the maximum number of instructions that may be scheduled in
-  // the same per-cycle group. This is meant to be a hard in-order constraint
-  // (a.k.a. "hazard"). In the GenericScheduler strategy, no more than
-  // IssueWidth micro-ops can ever be scheduled in a particular cycle.
-  //
-  // In practice, IssueWidth is useful to model any bottleneck between the
-  // decoder (after micro-op expansion) and the out-of-order reservation
-  // stations or the decoder bandwidth itself. If the total number of
-  // reservation stations is also a bottleneck, or if any other pipeline stage
-  // has a bandwidth limitation, then that can be naturally modeled by adding an
-  // out-of-order processor resource.
-  unsigned IssueWidth;
-  static const unsigned DefaultIssueWidth = 1;
+    // IssueWidth is the maximum number of instructions that may be scheduled in
+    // the same per-cycle group. This is meant to be a hard in-order constraint
+    // (a.k.a. "hazard"). In the GenericScheduler strategy, no more than
+    // IssueWidth micro-ops can ever be scheduled in a particular cycle.
+    //
+    // In practice, IssueWidth is useful to model any bottleneck between the
+    // decoder (after micro-op expansion) and the out-of-order reservation
+    // stations or the decoder bandwidth itself. If the total number of
+    // reservation stations is also a bottleneck, or if any other pipeline stage
+    // has a bandwidth limitation, then that can be naturally modeled by adding an
+    // out-of-order processor resource.
+    unsigned IssueWidth;
+    static const unsigned DefaultIssueWidth = 1;
 
-  // MicroOpBufferSize is the number of micro-ops that the processor may buffer
-  // for out-of-order execution.
-  //
-  // "0" means operations that are not ready in this cycle are not considered
-  // for scheduling (they go in the pending queue). Latency is paramount. This
-  // may be more efficient if many instructions are pending in a schedule.
-  //
-  // "1" means all instructions are considered for scheduling regardless of
-  // whether they are ready in this cycle. Latency still causes issue stalls,
-  // but we balance those stalls against other heuristics.
-  //
-  // "> 1" means the processor is out-of-order. This is a machine independent
-  // estimate of highly machine specific characteristics such as the register
-  // renaming pool and reorder buffer.
-  unsigned MicroOpBufferSize;
-  static const unsigned DefaultMicroOpBufferSize = 0;
+    // MicroOpBufferSize is the number of micro-ops that the processor may buffer
+    // for out-of-order execution.
+    //
+    // "0" means operations that are not ready in this cycle are not considered
+    // for scheduling (they go in the pending queue). Latency is paramount. This
+    // may be more efficient if many instructions are pending in a schedule.
+    //
+    // "1" means all instructions are considered for scheduling regardless of
+    // whether they are ready in this cycle. Latency still causes issue stalls,
+    // but we balance those stalls against other heuristics.
+    //
+    // "> 1" means the processor is out-of-order. This is a machine independent
+    // estimate of highly machine specific characteristics such as the register
+    // renaming pool and reorder buffer.
+    unsigned MicroOpBufferSize;
+    static const unsigned DefaultMicroOpBufferSize = 0;
 
-  // LoopMicroOpBufferSize is the number of micro-ops that the processor may
-  // buffer for optimized loop execution. More generally, this represents the
-  // optimal number of micro-ops in a loop body. A loop may be partially
-  // unrolled to bring the count of micro-ops in the loop body closer to this
-  // number.
-  unsigned LoopMicroOpBufferSize;
-  static const unsigned DefaultLoopMicroOpBufferSize = 0;
+    // LoopMicroOpBufferSize is the number of micro-ops that the processor may
+    // buffer for optimized loop execution. More generally, this represents the
+    // optimal number of micro-ops in a loop body. A loop may be partially
+    // unrolled to bring the count of micro-ops in the loop body closer to this
+    // number.
+    unsigned LoopMicroOpBufferSize;
+    static const unsigned DefaultLoopMicroOpBufferSize = 0;
 
-  // LoadLatency is the expected latency of load instructions.
-  unsigned LoadLatency;
-  static const unsigned DefaultLoadLatency = 4;
+    // LoadLatency is the expected latency of load instructions.
+    unsigned LoadLatency;
+    static const unsigned DefaultLoadLatency = 4;
 
-  // HighLatency is the expected latency of "very high latency" operations.
-  // See TargetInstrInfo::isHighLatencyDef().
-  // By default, this is set to an arbitrarily high number of cycles
-  // likely to have some impact on scheduling heuristics.
-  unsigned HighLatency;
-  static const unsigned DefaultHighLatency = 10;
+    // HighLatency is the expected latency of "very high latency" operations.
+    // See TargetInstrInfo::isHighLatencyDef().
+    // By default, this is set to an arbitrarily high number of cycles
+    // likely to have some impact on scheduling heuristics.
+    unsigned HighLatency;
+    static const unsigned DefaultHighLatency = 10;
 
-  // MispredictPenalty is the typical number of extra cycles the processor
-  // takes to recover from a branch misprediction.
-  unsigned MispredictPenalty;
-  static const unsigned DefaultMispredictPenalty = 10;
+    // MispredictPenalty is the typical number of extra cycles the processor
+    // takes to recover from a branch misprediction.
+    unsigned MispredictPenalty;
+    static const unsigned DefaultMispredictPenalty = 10;
 
-  bool PostRAScheduler; // default value is false
+    bool PostRAScheduler; // default value is false
 
-  bool CompleteModel;
+    bool CompleteModel;
 
-  unsigned ProcID;
-  const MCProcResourceDesc *ProcResourceTable;
-  const MCSchedClassDesc *SchedClassTable;
-  unsigned NumProcResourceKinds;
-  unsigned NumSchedClasses;
-  // Instruction itinerary tables used by InstrItineraryData.
-  friend class InstrItineraryData;
-  const InstrItinerary *InstrItineraries;
+    unsigned ProcID;
+    const MCProcResourceDesc *ProcResourceTable;
+    const MCSchedClassDesc *SchedClassTable;
+    unsigned NumProcResourceKinds;
+    unsigned NumSchedClasses;
+    // Instruction itinerary tables used by InstrItineraryData.
+    friend class InstrItineraryData;
+    const InstrItinerary *InstrItineraries;
 
-  const MCExtraProcessorInfo *ExtraProcessorInfo;
+    const MCExtraProcessorInfo *ExtraProcessorInfo;
 
-  bool hasExtraProcessorInfo() const { return ExtraProcessorInfo; }
+    bool hasExtraProcessorInfo() const {
+        return ExtraProcessorInfo;
+    }
 
-  unsigned getProcessorID() const { return ProcID; }
+    unsigned getProcessorID() const {
+        return ProcID;
+    }
 
-  /// Does this machine model include instruction-level scheduling.
-  bool hasInstrSchedModel() const { return SchedClassTable; }
+    /// Does this machine model include instruction-level scheduling.
+    bool hasInstrSchedModel() const {
+        return SchedClassTable;
+    }
 
-  const MCExtraProcessorInfo &getExtraProcessorInfo() const {
-    assert(hasExtraProcessorInfo() &&
-           "No extra information available for this model");
-    return *ExtraProcessorInfo;
-  }
+    const MCExtraProcessorInfo &getExtraProcessorInfo() const {
+        assert(hasExtraProcessorInfo() &&
+               "No extra information available for this model");
+        return *ExtraProcessorInfo;
+    }
 
-  /// Return true if this machine model data for all instructions with a
-  /// scheduling class (itinerary class or SchedRW list).
-  bool isComplete() const { return CompleteModel; }
+    /// Return true if this machine model data for all instructions with a
+    /// scheduling class (itinerary class or SchedRW list).
+    bool isComplete() const {
+        return CompleteModel;
+    }
 
-  /// Return true if machine supports out of order execution.
-  bool isOutOfOrder() const { return MicroOpBufferSize > 1; }
+    /// Return true if machine supports out of order execution.
+    bool isOutOfOrder() const {
+        return MicroOpBufferSize > 1;
+    }
 
-  unsigned getNumProcResourceKinds() const {
-    return NumProcResourceKinds;
-  }
+    unsigned getNumProcResourceKinds() const {
+        return NumProcResourceKinds;
+    }
 
-  const MCProcResourceDesc *getProcResource(unsigned ProcResourceIdx) const {
-    assert(hasInstrSchedModel() && "No scheduling machine model");
+    const MCProcResourceDesc *getProcResource(unsigned ProcResourceIdx) const {
+        assert(hasInstrSchedModel() && "No scheduling machine model");
 
-    assert(ProcResourceIdx < NumProcResourceKinds && "bad proc resource idx");
-    return &ProcResourceTable[ProcResourceIdx];
-  }
+        assert(ProcResourceIdx < NumProcResourceKinds && "bad proc resource idx");
+        return &ProcResourceTable[ProcResourceIdx];
+    }
 
-  const MCSchedClassDesc *getSchedClassDesc(unsigned SchedClassIdx) const {
-    assert(hasInstrSchedModel() && "No scheduling machine model");
+    const MCSchedClassDesc *getSchedClassDesc(unsigned SchedClassIdx) const {
+        assert(hasInstrSchedModel() && "No scheduling machine model");
 
-    assert(SchedClassIdx < NumSchedClasses && "bad scheduling class idx");
-    return &SchedClassTable[SchedClassIdx];
-  }
+        assert(SchedClassIdx < NumSchedClasses && "bad scheduling class idx");
+        return &SchedClassTable[SchedClassIdx];
+    }
 
-  /// Returns the latency value for the scheduling class.
-  static int computeInstrLatency(const MCSubtargetInfo &STI,
-                                 const MCSchedClassDesc &SCDesc);
+    /// Returns the latency value for the scheduling class.
+    static int computeInstrLatency(const MCSubtargetInfo &STI,
+                                   const MCSchedClassDesc &SCDesc);
 
-  int computeInstrLatency(const MCSubtargetInfo &STI, unsigned SClass) const;
-  int computeInstrLatency(const MCSubtargetInfo &STI, const MCInstrInfo &MCII,
-                          const MCInst &Inst) const;
+    int computeInstrLatency(const MCSubtargetInfo &STI, unsigned SClass) const;
+    int computeInstrLatency(const MCSubtargetInfo &STI, const MCInstrInfo &MCII,
+                            const MCInst &Inst) const;
 
-  // Returns the reciprocal throughput information from a MCSchedClassDesc.
-  static double
-  getReciprocalThroughput(const MCSubtargetInfo &STI,
-                          const MCSchedClassDesc &SCDesc);
+    // Returns the reciprocal throughput information from a MCSchedClassDesc.
+    static double
+    getReciprocalThroughput(const MCSubtargetInfo &STI,
+                            const MCSchedClassDesc &SCDesc);
 
-  static double
-  getReciprocalThroughput(unsigned SchedClass, const InstrItineraryData &IID);
+    static double
+    getReciprocalThroughput(unsigned SchedClass, const InstrItineraryData &IID);
 
-  double
-  getReciprocalThroughput(const MCSubtargetInfo &STI, const MCInstrInfo &MCII,
-                          const MCInst &Inst) const;
+    double
+    getReciprocalThroughput(const MCSubtargetInfo &STI, const MCInstrInfo &MCII,
+                            const MCInst &Inst) const;
 
-  /// Returns the maximum forwarding delay for register reads dependent on
-  /// writes of scheduling class WriteResourceIdx.
-  static unsigned getForwardingDelayCycles(ArrayRef<MCReadAdvanceEntry> Entries,
-                                           unsigned WriteResourceIdx = 0);
+    /// Returns the maximum forwarding delay for register reads dependent on
+    /// writes of scheduling class WriteResourceIdx.
+    static unsigned getForwardingDelayCycles(ArrayRef<MCReadAdvanceEntry> Entries,
+            unsigned WriteResourceIdx = 0);
 
-  /// Returns the default initialized model.
-  static const MCSchedModel &GetDefaultSchedModel() { return Default; }
-  static const MCSchedModel Default;
+    /// Returns the default initialized model.
+    static const MCSchedModel &GetDefaultSchedModel() {
+        return Default;
+    }
+    static const MCSchedModel Default;
 };
 
 } // namespace llvm

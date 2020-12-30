@@ -22,10 +22,10 @@ class MachineInstr;
 class TargetRegisterClass;
 class TargetRegisterInfo;
 
-  /// A helper class for register coalescers. When deciding if
-  /// two registers can be coalesced, CoalescerPair can determine if a copy
-  /// instruction would become an identity copy after coalescing.
-  class CoalescerPair {
+/// A helper class for register coalescers. When deciding if
+/// two registers can be coalesced, CoalescerPair can determine if a copy
+/// instruction would become an identity copy after coalescing.
+class CoalescerPair {
     const TargetRegisterInfo &TRI;
 
     /// The register that will be left after coalescing. It can be a
@@ -56,7 +56,7 @@ class TargetRegisterInfo;
     /// SrcReg and DstReg.
     const TargetRegisterClass *NewRC = nullptr;
 
-  public:
+public:
     CoalescerPair(const TargetRegisterInfo &tri) : TRI(tri) {}
 
     /// Create a CoalescerPair representing a virtreg-to-physreg copy.
@@ -78,36 +78,54 @@ class TargetRegisterInfo;
     bool isCoalescable(const MachineInstr*) const;
 
     /// Return true if DstReg is a physical register.
-    bool isPhys() const { return !NewRC; }
+    bool isPhys() const {
+        return !NewRC;
+    }
 
     /// Return true if the original copy instruction did not copy
     /// the full register, but was a subreg operation.
-    bool isPartial() const { return Partial; }
+    bool isPartial() const {
+        return Partial;
+    }
 
     /// Return true if DstReg is virtual and NewRC is a smaller
     /// register class than DstReg's.
-    bool isCrossClass() const { return CrossClass; }
+    bool isCrossClass() const {
+        return CrossClass;
+    }
 
     /// Return true when getSrcReg is the register being defined by
     /// the original copy instruction.
-    bool isFlipped() const { return Flipped; }
+    bool isFlipped() const {
+        return Flipped;
+    }
 
     /// Return the register (virtual or physical) that will remain
     /// after coalescing.
-    Register getDstReg() const { return DstReg; }
+    Register getDstReg() const {
+        return DstReg;
+    }
 
     /// Return the virtual register that will be coalesced away.
-    Register getSrcReg() const { return SrcReg; }
+    Register getSrcReg() const {
+        return SrcReg;
+    }
 
     /// Return the subregister index that DstReg will be coalesced into, or 0.
-    unsigned getDstIdx() const { return DstIdx; }
+    unsigned getDstIdx() const {
+        return DstIdx;
+    }
 
     /// Return the subregister index that SrcReg will be coalesced into, or 0.
-    unsigned getSrcIdx() const { return SrcIdx; }
+    unsigned getSrcIdx() const {
+        return SrcIdx;
+    }
 
     /// Return the register class of the coalesced register.
-    const TargetRegisterClass *getNewRC() const { return NewRC; }
-  };
+    const TargetRegisterClass *getNewRC() const {
+        return NewRC;
+    }
+};
 
 } // end namespace llvm
 

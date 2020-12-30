@@ -14,56 +14,56 @@
 using namespace Fortran::frontend;
 
 void FrontendAction::set_currentInput(const FrontendInputFile &currentInput) {
-  this->currentInput_ = currentInput;
+    this->currentInput_ = currentInput;
 }
 
 // Call this method if BeginSourceFile fails.
 // Deallocate compiler instance, input and output descriptors
 static void BeginSourceFileCleanUp(FrontendAction &fa, CompilerInstance &ci) {
-  ci.ClearOutputFiles(/*EraseFiles=*/true);
-  fa.set_currentInput(FrontendInputFile());
-  fa.set_instance(nullptr);
+    ci.ClearOutputFiles(/*EraseFiles=*/true);
+    fa.set_currentInput(FrontendInputFile());
+    fa.set_instance(nullptr);
 }
 
 bool FrontendAction::BeginSourceFile(
     CompilerInstance &ci, const FrontendInputFile &realInput) {
 
-  FrontendInputFile input(realInput);
-  assert(!instance_ && "Already processing a source file!");
-  assert(!realInput.IsEmpty() && "Unexpected empty filename!");
-  set_currentInput(realInput);
-  set_instance(&ci);
-  if (!ci.HasAllSources()) {
-    BeginSourceFileCleanUp(*this, ci);
-    return false;
-  }
-  return true;
+    FrontendInputFile input(realInput);
+    assert(!instance_ && "Already processing a source file!");
+    assert(!realInput.IsEmpty() && "Unexpected empty filename!");
+    set_currentInput(realInput);
+    set_instance(&ci);
+    if (!ci.HasAllSources()) {
+        BeginSourceFileCleanUp(*this, ci);
+        return false;
+    }
+    return true;
 }
 
 bool FrontendAction::ShouldEraseOutputFiles() {
-  return instance().diagnostics().hasErrorOccurred();
+    return instance().diagnostics().hasErrorOccurred();
 }
 
 llvm::Error FrontendAction::Execute() {
-  std::string currentInputPath{GetCurrentFileOrBufferName()};
+    std::string currentInputPath{GetCurrentFileOrBufferName()};
 
-  Fortran::parser::Options parserOptions =
-      this->instance().invocation().fortranOpts();
+    Fortran::parser::Options parserOptions =
+        this->instance().invocation().fortranOpts();
 
-  this->instance().parsing().Prescan(currentInputPath, parserOptions);
+    this->instance().parsing().Prescan(currentInputPath, parserOptions);
 
-  ExecuteAction();
+    ExecuteAction();
 
-  return llvm::Error::success();
+    return llvm::Error::success();
 }
 
 void FrontendAction::EndSourceFile() {
-  CompilerInstance &ci = instance();
+    CompilerInstance &ci = instance();
 
-  // Cleanup the output streams, and erase the output files if instructed by the
-  // FrontendAction.
-  ci.ClearOutputFiles(/*EraseFiles=*/ShouldEraseOutputFiles());
+    // Cleanup the output streams, and erase the output files if instructed by the
+    // FrontendAction.
+    ci.ClearOutputFiles(/*EraseFiles=*/ShouldEraseOutputFiles());
 
-  set_instance(nullptr);
-  set_currentInput(FrontendInputFile());
+    set_instance(nullptr);
+    set_currentInput(FrontendInputFile());
 }

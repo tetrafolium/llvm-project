@@ -19,20 +19,20 @@ namespace __llvm_libc {
 // llvm libc code. In the future writeToStderr will not exist and __assert_fail
 // will call fprintf(stderr, ...).
 static void writeToStderr(const char *s) {
-  size_t length = 0;
-  for (const char *curr = s; *curr; ++curr, ++length);
-  __llvm_libc::syscall(SYS_write, 2, s, length);
+    size_t length = 0;
+    for (const char *curr = s; *curr; ++curr, ++length);
+    __llvm_libc::syscall(SYS_write, 2, s, length);
 }
 
 void LLVM_LIBC_ENTRYPOINT(__assert_fail)(const char *assertion, const char *file,
-                                         unsigned line, const char *function) {
-  writeToStderr(file);
-  writeToStderr(": Assertion failed: '");
-  writeToStderr(assertion);
-  writeToStderr("' in function: '");
-  writeToStderr(function);
-  writeToStderr("'\n");
-  __llvm_libc::abort();
+        unsigned line, const char *function) {
+    writeToStderr(file);
+    writeToStderr(": Assertion failed: '");
+    writeToStderr(assertion);
+    writeToStderr("' in function: '");
+    writeToStderr(function);
+    writeToStderr("'\n");
+    __llvm_libc::abort();
 }
 
 } // namespace __llvm_libc

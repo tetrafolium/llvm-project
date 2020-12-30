@@ -31,85 +31,85 @@ namespace mach_o {
 /// the sort must take that into account too.
 class LayoutPass : public Pass {
 public:
-  struct SortKey {
-    SortKey(OwningAtomPtr<DefinedAtom> &&atom,
-            const DefinedAtom *root, uint64_t override)
-    : _atom(std::move(atom)), _root(root), _override(override) {}
-    OwningAtomPtr<DefinedAtom> _atom;
-    const DefinedAtom *_root;
-    uint64_t _override;
+    struct SortKey {
+        SortKey(OwningAtomPtr<DefinedAtom> &&atom,
+                const DefinedAtom *root, uint64_t override)
+            : _atom(std::move(atom)), _root(root), _override(override) {}
+        OwningAtomPtr<DefinedAtom> _atom;
+        const DefinedAtom *_root;
+        uint64_t _override;
 
-    // Note, these are only here to appease MSVC bots which didn't like
-    // the same methods being implemented/deleted in OwningAtomPtr.
-    SortKey(SortKey &&key) : _atom(std::move(key._atom)), _root(key._root),
-                             _override(key._override) {
-      key._root = nullptr;
-    }
+        // Note, these are only here to appease MSVC bots which didn't like
+        // the same methods being implemented/deleted in OwningAtomPtr.
+        SortKey(SortKey &&key) : _atom(std::move(key._atom)), _root(key._root),
+            _override(key._override) {
+            key._root = nullptr;
+        }
 
-    SortKey &operator=(SortKey &&key) {
-      _atom = std::move(key._atom);
-      _root = key._root;
-      key._root = nullptr;
-      _override = key._override;
-      return *this;
-    }
+        SortKey &operator=(SortKey &&key) {
+            _atom = std::move(key._atom);
+            _root = key._root;
+            key._root = nullptr;
+            _override = key._override;
+            return *this;
+        }
 
-  private:
-    SortKey(const SortKey &) = delete;
-    void operator=(const SortKey&) = delete;
-  };
+    private:
+        SortKey(const SortKey &) = delete;
+        void operator=(const SortKey&) = delete;
+    };
 
-  typedef std::function<bool (const DefinedAtom *left, const DefinedAtom *right,
-                              bool &leftBeforeRight)> SortOverride;
+    typedef std::function<bool (const DefinedAtom *left, const DefinedAtom *right,
+                                bool &leftBeforeRight)> SortOverride;
 
-  LayoutPass(const Registry &registry, SortOverride sorter);
+    LayoutPass(const Registry &registry, SortOverride sorter);
 
-  /// Sorts atoms in mergedFile by content type then by command line order.
-  llvm::Error perform(SimpleFile &mergedFile) override;
+    /// Sorts atoms in mergedFile by content type then by command line order.
+    llvm::Error perform(SimpleFile &mergedFile) override;
 
-  ~LayoutPass() override = default;
+    ~LayoutPass() override = default;
 
 private:
-  // Build the followOn atoms chain as specified by the kindLayoutAfter
-  // reference type
-  void buildFollowOnTable(const File::AtomRange<DefinedAtom> &range);
+    // Build the followOn atoms chain as specified by the kindLayoutAfter
+    // reference type
+    void buildFollowOnTable(const File::AtomRange<DefinedAtom> &range);
 
-  // Build a map of Atoms to ordinals for sorting the atoms
-  void buildOrdinalOverrideMap(const File::AtomRange<DefinedAtom> &range);
+    // Build a map of Atoms to ordinals for sorting the atoms
+    void buildOrdinalOverrideMap(const File::AtomRange<DefinedAtom> &range);
 
-  const Registry &_registry;
-  SortOverride _customSorter;
+    const Registry &_registry;
+    SortOverride _customSorter;
 
-  typedef llvm::DenseMap<const DefinedAtom *, const DefinedAtom *> AtomToAtomT;
-  typedef llvm::DenseMap<const DefinedAtom *, uint64_t> AtomToOrdinalT;
+    typedef llvm::DenseMap<const DefinedAtom *, const DefinedAtom *> AtomToAtomT;
+    typedef llvm::DenseMap<const DefinedAtom *, uint64_t> AtomToOrdinalT;
 
-  // A map to be used to sort atoms. It represents the order of atoms in the
-  // result; if Atom X is mapped to atom Y in this map, X will be located
-  // immediately before Y in the output file. Y might be mapped to another
-  // atom, constructing a follow-on chain. An atom cannot be mapped to more
-  // than one atom unless all but one atom are of size zero.
-  AtomToAtomT _followOnNexts;
+    // A map to be used to sort atoms. It represents the order of atoms in the
+    // result; if Atom X is mapped to atom Y in this map, X will be located
+    // immediately before Y in the output file. Y might be mapped to another
+    // atom, constructing a follow-on chain. An atom cannot be mapped to more
+    // than one atom unless all but one atom are of size zero.
+    AtomToAtomT _followOnNexts;
 
-  // A map to be used to sort atoms. It's a map from an atom to its root of
-  // follow-on chain. A root atom is mapped to itself. If an atom is not in
-  // _followOnNexts, the atom is not in this map, and vice versa.
-  AtomToAtomT _followOnRoots;
+    // A map to be used to sort atoms. It's a map from an atom to its root of
+    // follow-on chain. A root atom is mapped to itself. If an atom is not in
+    // _followOnNexts, the atom is not in this map, and vice versa.
+    AtomToAtomT _followOnRoots;
 
-  AtomToOrdinalT _ordinalOverrideMap;
+    AtomToOrdinalT _ordinalOverrideMap;
 
-  // Helper methods for buildFollowOnTable().
-  const DefinedAtom *findAtomFollowedBy(const DefinedAtom *targetAtom);
-  bool checkAllPrevAtomsZeroSize(const DefinedAtom *targetAtom);
+    // Helper methods for buildFollowOnTable().
+    const DefinedAtom *findAtomFollowedBy(const DefinedAtom *targetAtom);
+    bool checkAllPrevAtomsZeroSize(const DefinedAtom *targetAtom);
 
-  void setChainRoot(const DefinedAtom *targetAtom, const DefinedAtom *root);
+    void setChainRoot(const DefinedAtom *targetAtom, const DefinedAtom *root);
 
-  std::vector<SortKey> decorate(File::AtomRange<DefinedAtom> &atomRange) const;
+    std::vector<SortKey> decorate(File::AtomRange<DefinedAtom> &atomRange) const;
 
-  void undecorate(File::AtomRange<DefinedAtom> &atomRange,
-                  std::vector<SortKey> &keys) const;
+    void undecorate(File::AtomRange<DefinedAtom> &atomRange,
+                    std::vector<SortKey> &keys) const;
 
-  // Check if the follow-on graph is a correct structure. For debugging only.
-  void checkFollowonChain(const File::AtomRange<DefinedAtom> &range);
+    // Check if the follow-on graph is a correct structure. For debugging only.
+    void checkFollowonChain(const File::AtomRange<DefinedAtom> &range);
 };
 
 } // namespace mach_o

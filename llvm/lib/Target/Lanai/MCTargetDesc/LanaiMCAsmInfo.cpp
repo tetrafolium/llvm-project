@@ -20,21 +20,21 @@ void LanaiMCAsmInfo::anchor() {}
 
 LanaiMCAsmInfo::LanaiMCAsmInfo(const Triple & /*TheTriple*/,
                                const MCTargetOptions &Options) {
-  IsLittleEndian = false;
-  PrivateGlobalPrefix = ".L";
-  WeakRefDirective = "\t.weak\t";
-  ExceptionsType = ExceptionHandling::DwarfCFI;
+    IsLittleEndian = false;
+    PrivateGlobalPrefix = ".L";
+    WeakRefDirective = "\t.weak\t";
+    ExceptionsType = ExceptionHandling::DwarfCFI;
 
-  // Lanai assembly requires ".section" before ".bss"
-  UsesELFSectionDirectiveForBSS = true;
+    // Lanai assembly requires ".section" before ".bss"
+    UsesELFSectionDirectiveForBSS = true;
 
-  // Use '!' as comment string to correspond with old toolchain.
-  CommentString = "!";
+    // Use '!' as comment string to correspond with old toolchain.
+    CommentString = "!";
 
-  // Target supports emission of debugging information.
-  SupportsDebugInformation = true;
+    // Target supports emission of debugging information.
+    SupportsDebugInformation = true;
 
-  // Set the instruction alignment. Currently used only for address adjustment
-  // in dwarf generation.
-  MinInstAlignment = 4;
+    // Set the instruction alignment. Currently used only for address adjustment
+    // in dwarf generation.
+    MinInstAlignment = 4;
 }

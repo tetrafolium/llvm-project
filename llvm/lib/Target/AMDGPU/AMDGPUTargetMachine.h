@@ -31,41 +31,41 @@ namespace llvm {
 
 class AMDGPUTargetMachine : public LLVMTargetMachine {
 protected:
-  std::unique_ptr<TargetLoweringObjectFile> TLOF;
+    std::unique_ptr<TargetLoweringObjectFile> TLOF;
 
-  StringRef getGPUName(const Function &F) const;
-  StringRef getFeatureString(const Function &F) const;
+    StringRef getGPUName(const Function &F) const;
+    StringRef getFeatureString(const Function &F) const;
 
 public:
-  static bool EnableLateStructurizeCFG;
-  static bool EnableFunctionCalls;
-  static bool EnableFixedFunctionABI;
+    static bool EnableLateStructurizeCFG;
+    static bool EnableFunctionCalls;
+    static bool EnableFixedFunctionABI;
 
-  AMDGPUTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                      StringRef FS, TargetOptions Options,
-                      Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                      CodeGenOpt::Level OL);
-  ~AMDGPUTargetMachine() override;
+    AMDGPUTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                        StringRef FS, TargetOptions Options,
+                        Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                        CodeGenOpt::Level OL);
+    ~AMDGPUTargetMachine() override;
 
-  const TargetSubtargetInfo *getSubtargetImpl() const;
-  const TargetSubtargetInfo *getSubtargetImpl(const Function &) const override = 0;
+    const TargetSubtargetInfo *getSubtargetImpl() const;
+    const TargetSubtargetInfo *getSubtargetImpl(const Function &) const override = 0;
 
-  TargetLoweringObjectFile *getObjFileLowering() const override {
-    return TLOF.get();
-  }
+    TargetLoweringObjectFile *getObjFileLowering() const override {
+        return TLOF.get();
+    }
 
-  void adjustPassManager(PassManagerBuilder &) override;
+    void adjustPassManager(PassManagerBuilder &) override;
 
-  /// Get the integer value of a null pointer in the given address space.
-  static int64_t getNullPointerValue(unsigned AddrSpace) {
-    return (AddrSpace == AMDGPUAS::LOCAL_ADDRESS ||
-            AddrSpace == AMDGPUAS::PRIVATE_ADDRESS ||
-            AddrSpace == AMDGPUAS::REGION_ADDRESS) ? -1 : 0;
-  }
+    /// Get the integer value of a null pointer in the given address space.
+    static int64_t getNullPointerValue(unsigned AddrSpace) {
+        return (AddrSpace == AMDGPUAS::LOCAL_ADDRESS ||
+                AddrSpace == AMDGPUAS::PRIVATE_ADDRESS ||
+                AddrSpace == AMDGPUAS::REGION_ADDRESS) ? -1 : 0;
+    }
 
-  bool isNoopAddrSpaceCast(unsigned SrcAS, unsigned DestAS) const override;
+    bool isNoopAddrSpaceCast(unsigned SrcAS, unsigned DestAS) const override;
 
-  unsigned getAssumedAddrSpace(const Value *V) const override;
+    unsigned getAssumedAddrSpace(const Value *V) const override;
 };
 
 //===----------------------------------------------------------------------===//
@@ -74,23 +74,23 @@ public:
 
 class R600TargetMachine final : public AMDGPUTargetMachine {
 private:
-  mutable StringMap<std::unique_ptr<R600Subtarget>> SubtargetMap;
+    mutable StringMap<std::unique_ptr<R600Subtarget>> SubtargetMap;
 
 public:
-  R600TargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                    StringRef FS, TargetOptions Options,
-                    Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                    CodeGenOpt::Level OL, bool JIT);
+    R600TargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                      StringRef FS, TargetOptions Options,
+                      Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                      CodeGenOpt::Level OL, bool JIT);
 
-  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-  const R600Subtarget *getSubtargetImpl(const Function &) const override;
+    const R600Subtarget *getSubtargetImpl(const Function &) const override;
 
-  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+    TargetTransformInfo getTargetTransformInfo(const Function &F) override;
 
-  bool isMachineVerifierClean() const override {
-    return false;
-  }
+    bool isMachineVerifierClean() const override {
+        return false;
+    }
 };
 
 //===----------------------------------------------------------------------===//
@@ -99,31 +99,31 @@ public:
 
 class GCNTargetMachine final : public AMDGPUTargetMachine {
 private:
-  mutable StringMap<std::unique_ptr<GCNSubtarget>> SubtargetMap;
+    mutable StringMap<std::unique_ptr<GCNSubtarget>> SubtargetMap;
 
 public:
-  GCNTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                   StringRef FS, TargetOptions Options,
-                   Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                   CodeGenOpt::Level OL, bool JIT);
+    GCNTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                     StringRef FS, TargetOptions Options,
+                     Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                     CodeGenOpt::Level OL, bool JIT);
 
-  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-  const GCNSubtarget *getSubtargetImpl(const Function &) const override;
+    const GCNSubtarget *getSubtargetImpl(const Function &) const override;
 
-  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+    TargetTransformInfo getTargetTransformInfo(const Function &F) override;
 
-  bool useIPRA() const override {
-    return true;
-  }
+    bool useIPRA() const override {
+        return true;
+    }
 
-  yaml::MachineFunctionInfo *createDefaultFuncInfoYAML() const override;
-  yaml::MachineFunctionInfo *
-  convertFuncInfoToYAML(const MachineFunction &MF) const override;
-  bool parseMachineFunctionInfo(const yaml::MachineFunctionInfo &,
-                                PerFunctionMIParsingState &PFS,
-                                SMDiagnostic &Error,
-                                SMRange &SourceRange) const override;
+    yaml::MachineFunctionInfo *createDefaultFuncInfoYAML() const override;
+    yaml::MachineFunctionInfo *
+    convertFuncInfoToYAML(const MachineFunction &MF) const override;
+    bool parseMachineFunctionInfo(const yaml::MachineFunctionInfo &,
+                                  PerFunctionMIParsingState &PFS,
+                                  SMDiagnostic &Error,
+                                  SMRange &SourceRange) const override;
 };
 
 } // end namespace llvm

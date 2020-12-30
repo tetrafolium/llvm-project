@@ -13,7 +13,7 @@
 
 #include <cstdlib>
 
-int func(int i){
+int func(int i) {
     return abs(i);
 }
 

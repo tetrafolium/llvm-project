@@ -22,10 +22,10 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-deleted-default.html
 class DeletedDefaultCheck : public ClangTidyCheck {
 public:
-  DeletedDefaultCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    DeletedDefaultCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace readability

@@ -31,52 +31,54 @@ class Type;
 
 class AArch64CallLowering: public CallLowering {
 public:
-  AArch64CallLowering(const AArch64TargetLowering &TLI);
+    AArch64CallLowering(const AArch64TargetLowering &TLI);
 
-  bool lowerReturn(MachineIRBuilder &MIRBuilder, const Value *Val,
-                   ArrayRef<Register> VRegs,
-                   Register SwiftErrorVReg) const override;
+    bool lowerReturn(MachineIRBuilder &MIRBuilder, const Value *Val,
+                     ArrayRef<Register> VRegs,
+                     Register SwiftErrorVReg) const override;
 
-  bool fallBackToDAGISel(const Function &F) const override;
+    bool fallBackToDAGISel(const Function &F) const override;
 
-  bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
-                            ArrayRef<ArrayRef<Register>> VRegs) const override;
+    bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
+                              ArrayRef<ArrayRef<Register>> VRegs) const override;
 
-  bool lowerCall(MachineIRBuilder &MIRBuilder,
-                 CallLoweringInfo &Info) const override;
+    bool lowerCall(MachineIRBuilder &MIRBuilder,
+                   CallLoweringInfo &Info) const override;
 
-  /// Returns true if the call can be lowered as a tail call.
-  bool
-  isEligibleForTailCallOptimization(MachineIRBuilder &MIRBuilder,
-                                    CallLoweringInfo &Info,
-                                    SmallVectorImpl<ArgInfo> &InArgs,
-                                    SmallVectorImpl<ArgInfo> &OutArgs) const;
+    /// Returns true if the call can be lowered as a tail call.
+    bool
+    isEligibleForTailCallOptimization(MachineIRBuilder &MIRBuilder,
+                                      CallLoweringInfo &Info,
+                                      SmallVectorImpl<ArgInfo> &InArgs,
+                                      SmallVectorImpl<ArgInfo> &OutArgs) const;
 
-  bool supportSwiftError() const override { return true; }
+    bool supportSwiftError() const override {
+        return true;
+    }
 
 private:
-  using RegHandler = std::function<void(MachineIRBuilder &, Type *, unsigned,
-                                        CCValAssign &)>;
+    using RegHandler = std::function<void(MachineIRBuilder &, Type *, unsigned,
+                                          CCValAssign &)>;
 
-  using MemHandler =
-      std::function<void(MachineIRBuilder &, int, CCValAssign &)>;
+    using MemHandler =
+        std::function<void(MachineIRBuilder &, int, CCValAssign &)>;
 
-  void splitToValueTypes(const ArgInfo &OrigArgInfo,
-                         SmallVectorImpl<ArgInfo> &SplitArgs,
-                         const DataLayout &DL, MachineRegisterInfo &MRI,
-                         CallingConv::ID CallConv) const;
+    void splitToValueTypes(const ArgInfo &OrigArgInfo,
+                           SmallVectorImpl<ArgInfo> &SplitArgs,
+                           const DataLayout &DL, MachineRegisterInfo &MRI,
+                           CallingConv::ID CallConv) const;
 
-  bool lowerTailCall(MachineIRBuilder &MIRBuilder, CallLoweringInfo &Info,
-                     SmallVectorImpl<ArgInfo> &OutArgs) const;
+    bool lowerTailCall(MachineIRBuilder &MIRBuilder, CallLoweringInfo &Info,
+                       SmallVectorImpl<ArgInfo> &OutArgs) const;
 
-  bool
-  doCallerAndCalleePassArgsTheSameWay(CallLoweringInfo &Info,
-                                      MachineFunction &MF,
-                                      SmallVectorImpl<ArgInfo> &InArgs) const;
+    bool
+    doCallerAndCalleePassArgsTheSameWay(CallLoweringInfo &Info,
+                                        MachineFunction &MF,
+                                        SmallVectorImpl<ArgInfo> &InArgs) const;
 
-  bool
-  areCalleeOutgoingArgsTailCallable(CallLoweringInfo &Info, MachineFunction &MF,
-                                    SmallVectorImpl<ArgInfo> &OutArgs) const;
+    bool
+    areCalleeOutgoingArgsTailCallable(CallLoweringInfo &Info, MachineFunction &MF,
+                                      SmallVectorImpl<ArgInfo> &OutArgs) const;
 };
 
 } // end namespace llvm

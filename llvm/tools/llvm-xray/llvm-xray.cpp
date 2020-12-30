@@ -23,26 +23,26 @@ using namespace llvm;
 using namespace llvm::xray;
 
 int main(int argc, char *argv[]) {
-  cl::ParseCommandLineOptions(argc, argv,
-                              "XRay Tools\n\n"
-                              "  This program consolidates multiple XRay trace "
-                              "processing tools for convenient access.\n");
-  for (auto *SC : cl::getRegisteredSubcommands()) {
-    if (*SC) {
-      // If no subcommand was provided, we need to explicitly check if this is
-      // the top-level subcommand.
-      if (SC == &*cl::TopLevelSubCommand) {
-        cl::PrintHelpMessage(false, true);
-        return 0;
-      }
-      if (auto C = dispatch(SC)) {
-        ExitOnError("llvm-xray: ")(C());
-        return 0;
-      }
+    cl::ParseCommandLineOptions(argc, argv,
+                                "XRay Tools\n\n"
+                                "  This program consolidates multiple XRay trace "
+                                "processing tools for convenient access.\n");
+    for (auto *SC : cl::getRegisteredSubcommands()) {
+        if (*SC) {
+            // If no subcommand was provided, we need to explicitly check if this is
+            // the top-level subcommand.
+            if (SC == &*cl::TopLevelSubCommand) {
+                cl::PrintHelpMessage(false, true);
+                return 0;
+            }
+            if (auto C = dispatch(SC)) {
+                ExitOnError("llvm-xray: ")(C());
+                return 0;
+            }
+        }
     }
-  }
 
-  // If all else fails, we still print the usage message.
-  cl::PrintHelpMessage(false, true);
-  return 0;
+    // If all else fails, we still print the usage message.
+    cl::PrintHelpMessage(false, true);
+    return 0;
 }

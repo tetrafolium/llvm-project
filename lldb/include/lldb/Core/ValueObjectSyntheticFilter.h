@@ -34,138 +34,144 @@ class SyntheticChildrenFrontEnd;
 // accordingly
 class ValueObjectSynthetic : public ValueObject {
 public:
-  ~ValueObjectSynthetic() override;
+    ~ValueObjectSynthetic() override;
 
-  llvm::Optional<uint64_t> GetByteSize() override;
+    llvm::Optional<uint64_t> GetByteSize() override;
 
-  ConstString GetTypeName() override;
+    ConstString GetTypeName() override;
 
-  ConstString GetQualifiedTypeName() override;
+    ConstString GetQualifiedTypeName() override;
 
-  ConstString GetDisplayTypeName() override;
+    ConstString GetDisplayTypeName() override;
 
-  bool MightHaveChildren() override;
+    bool MightHaveChildren() override;
 
-  size_t CalculateNumChildren(uint32_t max) override;
+    size_t CalculateNumChildren(uint32_t max) override;
 
-  lldb::ValueType GetValueType() const override;
+    lldb::ValueType GetValueType() const override;
 
-  lldb::ValueObjectSP GetChildAtIndex(size_t idx, bool can_create) override;
+    lldb::ValueObjectSP GetChildAtIndex(size_t idx, bool can_create) override;
 
-  lldb::ValueObjectSP GetChildMemberWithName(ConstString name,
-                                             bool can_create) override;
+    lldb::ValueObjectSP GetChildMemberWithName(ConstString name,
+            bool can_create) override;
 
-  size_t GetIndexOfChildWithName(ConstString name) override;
+    size_t GetIndexOfChildWithName(ConstString name) override;
 
-  lldb::ValueObjectSP
-  GetDynamicValue(lldb::DynamicValueType valueType) override;
+    lldb::ValueObjectSP
+    GetDynamicValue(lldb::DynamicValueType valueType) override;
 
-  bool IsInScope() override;
+    bool IsInScope() override;
 
-  bool HasSyntheticValue() override { return false; }
+    bool HasSyntheticValue() override {
+        return false;
+    }
 
-  bool IsSynthetic() override { return true; }
+    bool IsSynthetic() override {
+        return true;
+    }
 
-  void CalculateSyntheticValue() override {}
+    void CalculateSyntheticValue() override {}
 
-  bool IsDynamic() override {
-    return ((m_parent != nullptr) ? m_parent->IsDynamic() : false);
-  }
+    bool IsDynamic() override {
+        return ((m_parent != nullptr) ? m_parent->IsDynamic() : false);
+    }
 
-  lldb::ValueObjectSP GetStaticValue() override {
-    return ((m_parent != nullptr) ? m_parent->GetStaticValue() : GetSP());
-  }
+    lldb::ValueObjectSP GetStaticValue() override {
+        return ((m_parent != nullptr) ? m_parent->GetStaticValue() : GetSP());
+    }
 
-  virtual lldb::DynamicValueType GetDynamicValueType() {
-    return ((m_parent != nullptr) ? m_parent->GetDynamicValueType()
-                                  : lldb::eNoDynamicValues);
-  }
+    virtual lldb::DynamicValueType GetDynamicValueType() {
+        return ((m_parent != nullptr) ? m_parent->GetDynamicValueType()
+                : lldb::eNoDynamicValues);
+    }
 
-  ValueObject *GetParent() override {
-    return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
-  }
+    ValueObject *GetParent() override {
+        return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
+    }
 
-  const ValueObject *GetParent() const override {
-    return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
-  }
+    const ValueObject *GetParent() const override {
+        return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
+    }
 
-  lldb::ValueObjectSP GetNonSyntheticValue() override;
+    lldb::ValueObjectSP GetNonSyntheticValue() override;
 
-  bool CanProvideValue() override;
+    bool CanProvideValue() override;
 
-  bool DoesProvideSyntheticValue() override {
-    return (UpdateValueIfNeeded(), m_provides_value == eLazyBoolYes);
-  }
+    bool DoesProvideSyntheticValue() override {
+        return (UpdateValueIfNeeded(), m_provides_value == eLazyBoolYes);
+    }
 
-  bool GetIsConstant() const override { return false; }
+    bool GetIsConstant() const override {
+        return false;
+    }
 
-  bool SetValueFromCString(const char *value_str, Status &error) override;
+    bool SetValueFromCString(const char *value_str, Status &error) override;
 
-  void SetFormat(lldb::Format format) override;
+    void SetFormat(lldb::Format format) override;
 
-  lldb::LanguageType GetPreferredDisplayLanguage() override;
+    lldb::LanguageType GetPreferredDisplayLanguage() override;
 
-  void SetPreferredDisplayLanguage(lldb::LanguageType);
+    void SetPreferredDisplayLanguage(lldb::LanguageType);
 
-  bool IsSyntheticChildrenGenerated() override;
+    bool IsSyntheticChildrenGenerated() override;
 
-  void SetSyntheticChildrenGenerated(bool b) override;
+    void SetSyntheticChildrenGenerated(bool b) override;
 
-  bool GetDeclaration(Declaration &decl) override;
+    bool GetDeclaration(Declaration &decl) override;
 
-  uint64_t GetLanguageFlags() override;
+    uint64_t GetLanguageFlags() override;
 
-  void SetLanguageFlags(uint64_t flags) override;
+    void SetLanguageFlags(uint64_t flags) override;
 
 protected:
-  bool UpdateValue() override;
+    bool UpdateValue() override;
 
-  LazyBool CanUpdateWithInvalidExecutionContext() override {
-    return eLazyBoolYes;
-  }
+    LazyBool CanUpdateWithInvalidExecutionContext() override {
+        return eLazyBoolYes;
+    }
 
-  CompilerType GetCompilerTypeImpl() override;
+    CompilerType GetCompilerTypeImpl() override;
 
-  virtual void CreateSynthFilter();
+    virtual void CreateSynthFilter();
 
-  // we need to hold on to the SyntheticChildren because someone might delete
-  // the type binding while we are alive
-  lldb::SyntheticChildrenSP m_synth_sp;
-  std::unique_ptr<SyntheticChildrenFrontEnd> m_synth_filter_up;
+    // we need to hold on to the SyntheticChildren because someone might delete
+    // the type binding while we are alive
+    lldb::SyntheticChildrenSP m_synth_sp;
+    std::unique_ptr<SyntheticChildrenFrontEnd> m_synth_filter_up;
 
-  typedef std::map<uint32_t, ValueObject *> ByIndexMap;
-  typedef std::map<const char *, uint32_t> NameToIndexMap;
-  typedef std::vector<lldb::ValueObjectSP> SyntheticChildrenCache;
+    typedef std::map<uint32_t, ValueObject *> ByIndexMap;
+    typedef std::map<const char *, uint32_t> NameToIndexMap;
+    typedef std::vector<lldb::ValueObjectSP> SyntheticChildrenCache;
 
-  typedef ByIndexMap::iterator ByIndexIterator;
-  typedef NameToIndexMap::iterator NameToIndexIterator;
+    typedef ByIndexMap::iterator ByIndexIterator;
+    typedef NameToIndexMap::iterator NameToIndexIterator;
 
-  std::mutex m_child_mutex;
-  /// Guarded by m_child_mutex;
-  ByIndexMap m_children_byindex;
-  /// Guarded by m_child_mutex;
-  NameToIndexMap m_name_toindex;
-  /// Guarded by m_child_mutex;
-  SyntheticChildrenCache m_synthetic_children_cache;
+    std::mutex m_child_mutex;
+    /// Guarded by m_child_mutex;
+    ByIndexMap m_children_byindex;
+    /// Guarded by m_child_mutex;
+    NameToIndexMap m_name_toindex;
+    /// Guarded by m_child_mutex;
+    SyntheticChildrenCache m_synthetic_children_cache;
 
-  uint32_t m_synthetic_children_count; // FIXME use the ValueObject's
-                                       // ChildrenManager instead of a special
-                                       // purpose solution
+    uint32_t m_synthetic_children_count; // FIXME use the ValueObject's
+    // ChildrenManager instead of a special
+    // purpose solution
 
-  ConstString m_parent_type_name;
+    ConstString m_parent_type_name;
 
-  LazyBool m_might_have_children;
+    LazyBool m_might_have_children;
 
-  LazyBool m_provides_value;
+    LazyBool m_provides_value;
 
 private:
-  friend class ValueObject;
-  ValueObjectSynthetic(ValueObject &parent, lldb::SyntheticChildrenSP filter);
+    friend class ValueObject;
+    ValueObjectSynthetic(ValueObject &parent, lldb::SyntheticChildrenSP filter);
 
-  void CopyValueData(ValueObject *source);
+    void CopyValueData(ValueObject *source);
 
-  ValueObjectSynthetic(const ValueObjectSynthetic &) = delete;
-  const ValueObjectSynthetic &operator=(const ValueObjectSynthetic &) = delete;
+    ValueObjectSynthetic(const ValueObjectSynthetic &) = delete;
+    const ValueObjectSynthetic &operator=(const ValueObjectSynthetic &) = delete;
 };
 
 } // namespace lldb_private

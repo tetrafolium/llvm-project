@@ -15,49 +15,49 @@ namespace lldb {
 
 class LLDB_API SBProcessInfo {
 public:
-  SBProcessInfo();
-  SBProcessInfo(const SBProcessInfo &rhs);
+    SBProcessInfo();
+    SBProcessInfo(const SBProcessInfo &rhs);
 
-  ~SBProcessInfo();
+    ~SBProcessInfo();
 
-  SBProcessInfo &operator=(const SBProcessInfo &rhs);
+    SBProcessInfo &operator=(const SBProcessInfo &rhs);
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  const char *GetName();
+    const char *GetName();
 
-  SBFileSpec GetExecutableFile();
+    SBFileSpec GetExecutableFile();
 
-  lldb::pid_t GetProcessID();
+    lldb::pid_t GetProcessID();
 
-  uint32_t GetUserID();
+    uint32_t GetUserID();
 
-  uint32_t GetGroupID();
+    uint32_t GetGroupID();
 
-  bool UserIDIsValid();
+    bool UserIDIsValid();
 
-  bool GroupIDIsValid();
+    bool GroupIDIsValid();
 
-  uint32_t GetEffectiveUserID();
+    uint32_t GetEffectiveUserID();
 
-  uint32_t GetEffectiveGroupID();
+    uint32_t GetEffectiveGroupID();
 
-  bool EffectiveUserIDIsValid();
+    bool EffectiveUserIDIsValid();
 
-  bool EffectiveGroupIDIsValid();
+    bool EffectiveGroupIDIsValid();
 
-  lldb::pid_t GetParentProcessID();
+    lldb::pid_t GetParentProcessID();
 
 private:
-  friend class SBProcess;
+    friend class SBProcess;
 
-  lldb_private::ProcessInstanceInfo &ref();
+    lldb_private::ProcessInstanceInfo &ref();
 
-  void SetProcessInfo(const lldb_private::ProcessInstanceInfo &proc_info_ref);
+    void SetProcessInfo(const lldb_private::ProcessInstanceInfo &proc_info_ref);
 
-  std::unique_ptr<lldb_private::ProcessInstanceInfo> m_opaque_up;
+    std::unique_ptr<lldb_private::ProcessInstanceInfo> m_opaque_up;
 };
 
 } // namespace lldb

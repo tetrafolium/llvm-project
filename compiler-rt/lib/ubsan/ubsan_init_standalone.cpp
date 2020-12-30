@@ -22,11 +22,11 @@
 namespace __ubsan {
 
 class UbsanStandaloneInitializer {
- public:
-  UbsanStandaloneInitializer() {
-    InitAsStandalone();
-    InitializeDeadlySignals();
-  }
+public:
+    UbsanStandaloneInitializer() {
+        InitAsStandalone();
+        InitializeDeadlySignals();
+    }
 };
 static UbsanStandaloneInitializer ubsan_standalone_initializer;
 

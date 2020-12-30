@@ -31,44 +31,44 @@ ValueObjectConstResultChild::ValueObjectConstResultChild(
                        bitfield_bit_size, bitfield_bit_offset, is_base_class,
                        is_deref_of_parent, eAddressTypeLoad, language_flags),
       m_impl(this, live_address) {
-  m_name = name;
+    m_name = name;
 }
 
 ValueObjectConstResultChild::~ValueObjectConstResultChild() {}
 
 lldb::ValueObjectSP ValueObjectConstResultChild::Dereference(Status &error) {
-  return m_impl.Dereference(error);
+    return m_impl.Dereference(error);
 }
 
 lldb::ValueObjectSP ValueObjectConstResultChild::GetSyntheticChildAtOffset(
     uint32_t offset, const CompilerType &type, bool can_create,
     ConstString name_const_str) {
-  return m_impl.GetSyntheticChildAtOffset(offset, type, can_create,
-                                          name_const_str);
+    return m_impl.GetSyntheticChildAtOffset(offset, type, can_create,
+                                            name_const_str);
 }
 
 lldb::ValueObjectSP ValueObjectConstResultChild::AddressOf(Status &error) {
-  return m_impl.AddressOf(error);
+    return m_impl.AddressOf(error);
 }
 
 lldb::addr_t ValueObjectConstResultChild::GetAddressOf(
-  bool scalar_is_load_address, AddressType* address_type) {
-  return m_impl.GetAddressOf(scalar_is_load_address, address_type);
+    bool scalar_is_load_address, AddressType* address_type) {
+    return m_impl.GetAddressOf(scalar_is_load_address, address_type);
 }
 
 ValueObject *ValueObjectConstResultChild::CreateChildAtIndex(
     size_t idx, bool synthetic_array_member, int32_t synthetic_index) {
-  return m_impl.CreateChildAtIndex(idx, synthetic_array_member,
-                                   synthetic_index);
+    return m_impl.CreateChildAtIndex(idx, synthetic_array_member,
+                                     synthetic_index);
 }
 
 size_t ValueObjectConstResultChild::GetPointeeData(DataExtractor &data,
-                                                   uint32_t item_idx,
-                                                   uint32_t item_count) {
-  return m_impl.GetPointeeData(data, item_idx, item_count);
+        uint32_t item_idx,
+        uint32_t item_count) {
+    return m_impl.GetPointeeData(data, item_idx, item_count);
 }
 
 lldb::ValueObjectSP
 ValueObjectConstResultChild::Cast(const CompilerType &compiler_type) {
-  return m_impl.Cast(compiler_type);
+    return m_impl.Cast(compiler_type);
 }

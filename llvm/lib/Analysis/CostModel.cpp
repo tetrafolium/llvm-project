@@ -44,13 +44,13 @@ static cl::opt<TargetTransformInfo::TargetCostKind> CostKind(
 #define DEBUG_TYPE CM_NAME
 
 namespace {
-  class CostModelAnalysis : public FunctionPass {
+class CostModelAnalysis : public FunctionPass {
 
-  public:
+public:
     static char ID; // Class identification, replacement for typeinfo
     CostModelAnalysis() : FunctionPass(ID), F(nullptr), TTI(nullptr) {
-      initializeCostModelAnalysisPass(
-        *PassRegistry::getPassRegistry());
+        initializeCostModelAnalysisPass(
+            *PassRegistry::getPassRegistry());
     }
 
     /// Returns the expected cost of the instruction.
@@ -58,10 +58,10 @@ namespace {
     /// Note, this method does not cache the cost calculation and it
     /// can be expensive in some cases.
     InstructionCost getInstructionCost(const Instruction *I) const {
-      return TTI->getInstructionCost(I, TargetTransformInfo::TCK_RecipThroughput);
+        return TTI->getInstructionCost(I, TargetTransformInfo::TCK_RecipThroughput);
     }
 
-  private:
+private:
     void getAnalysisUsage(AnalysisUsage &AU) const override;
     bool runOnFunction(Function &F) override;
     void print(raw_ostream &OS, const Module*) const override;
@@ -70,7 +70,7 @@ namespace {
     Function *F;
     /// Target information.
     const TargetTransformInfo *TTI;
-  };
+};
 }  // End of anonymous namespace
 
 // Register this pass.
@@ -80,36 +80,36 @@ INITIALIZE_PASS_BEGIN(CostModelAnalysis, CM_NAME, cm_name, false, true)
 INITIALIZE_PASS_END  (CostModelAnalysis, CM_NAME, cm_name, false, true)
 
 FunctionPass *llvm::createCostModelAnalysisPass() {
-  return new CostModelAnalysis();
+    return new CostModelAnalysis();
 }
 
 void
 CostModelAnalysis::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesAll();
+    AU.setPreservesAll();
 }
 
 bool
 CostModelAnalysis::runOnFunction(Function &F) {
- this->F = &F;
- auto *TTIWP = getAnalysisIfAvailable<TargetTransformInfoWrapperPass>();
- TTI = TTIWP ? &TTIWP->getTTI(F) : nullptr;
+    this->F = &F;
+    auto *TTIWP = getAnalysisIfAvailable<TargetTransformInfoWrapperPass>();
+    TTI = TTIWP ? &TTIWP->getTTI(F) : nullptr;
 
- return false;
+    return false;
 }
 
 void CostModelAnalysis::print(raw_ostream &OS, const Module*) const {
-  if (!F)
-    return;
+    if (!F)
+        return;
 
-  for (BasicBlock &B : *F) {
-    for (Instruction &Inst : B) {
-      InstructionCost Cost = TTI->getInstructionCost(&Inst, CostKind);
-      if (auto CostVal = Cost.getValue())
-        OS << "Cost Model: Found an estimated cost of " << *CostVal;
-      else
-        OS << "Cost Model: Unknown cost";
+    for (BasicBlock &B : *F) {
+        for (Instruction &Inst : B) {
+            InstructionCost Cost = TTI->getInstructionCost(&Inst, CostKind);
+            if (auto CostVal = Cost.getValue())
+                OS << "Cost Model: Found an estimated cost of " << *CostVal;
+            else
+                OS << "Cost Model: Unknown cost";
 
-      OS << " for instruction: " << Inst << "\n";
+            OS << " for instruction: " << Inst << "\n";
+        }
     }
-  }
 }

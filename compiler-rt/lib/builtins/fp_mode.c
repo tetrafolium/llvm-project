@@ -16,9 +16,9 @@
 
 // IEEE-754 default rounding (to nearest, ties to even).
 FE_ROUND_MODE __fe_getround() {
-  return FE_TONEAREST;
+    return FE_TONEAREST;
 }
 
 int __fe_raise_inexact() {
-  return 0;
+    return 0;
 }

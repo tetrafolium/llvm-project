@@ -59,7 +59,7 @@ using namespace __sanitizer;
 
 namespace __sanitizer {
 #if !SANITIZER_ANDROID
-  unsigned struct_statfs64_sz = sizeof(struct statfs64);
+unsigned struct_statfs64_sz = sizeof(struct statfs64);
 #endif
 }  // namespace __sanitizer
 

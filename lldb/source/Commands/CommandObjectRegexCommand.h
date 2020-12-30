@@ -21,39 +21,43 @@ namespace lldb_private {
 
 class CommandObjectRegexCommand : public CommandObjectRaw {
 public:
-  CommandObjectRegexCommand(CommandInterpreter &interpreter,
-                            llvm::StringRef name, llvm::StringRef help,
-                            llvm::StringRef syntax, uint32_t max_matches,
-                            uint32_t completion_type_mask, bool is_removable);
+    CommandObjectRegexCommand(CommandInterpreter &interpreter,
+                              llvm::StringRef name, llvm::StringRef help,
+                              llvm::StringRef syntax, uint32_t max_matches,
+                              uint32_t completion_type_mask, bool is_removable);
 
-  ~CommandObjectRegexCommand() override;
+    ~CommandObjectRegexCommand() override;
 
-  bool IsRemovable() const override { return m_is_removable; }
+    bool IsRemovable() const override {
+        return m_is_removable;
+    }
 
-  bool AddRegexCommand(llvm::StringRef re_cstr, llvm::StringRef command_cstr);
+    bool AddRegexCommand(llvm::StringRef re_cstr, llvm::StringRef command_cstr);
 
-  bool HasRegexEntries() const { return !m_entries.empty(); }
+    bool HasRegexEntries() const {
+        return !m_entries.empty();
+    }
 
-  void HandleCompletion(CompletionRequest &request) override;
+    void HandleCompletion(CompletionRequest &request) override;
 
 protected:
-  bool DoExecute(llvm::StringRef command, CommandReturnObject &result) override;
+    bool DoExecute(llvm::StringRef command, CommandReturnObject &result) override;
 
-  struct Entry {
-    RegularExpression regex;
-    std::string command;
-  };
+    struct Entry {
+        RegularExpression regex;
+        std::string command;
+    };
 
-  typedef std::list<Entry> EntryCollection;
-  const uint32_t m_max_matches;
-  const uint32_t m_completion_type_mask;
-  EntryCollection m_entries;
-  bool m_is_removable;
+    typedef std::list<Entry> EntryCollection;
+    const uint32_t m_max_matches;
+    const uint32_t m_completion_type_mask;
+    EntryCollection m_entries;
+    bool m_is_removable;
 
 private:
-  CommandObjectRegexCommand(const CommandObjectRegexCommand &) = delete;
-  const CommandObjectRegexCommand &
-  operator=(const CommandObjectRegexCommand &) = delete;
+    CommandObjectRegexCommand(const CommandObjectRegexCommand &) = delete;
+    const CommandObjectRegexCommand &
+    operator=(const CommandObjectRegexCommand &) = delete;
 };
 
 } // namespace lldb_private

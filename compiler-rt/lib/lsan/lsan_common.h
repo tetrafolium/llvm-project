@@ -57,10 +57,10 @@ namespace __lsan {
 
 // Chunk tags.
 enum ChunkTag {
-  kDirectlyLeaked = 0,  // default
-  kIndirectlyLeaked = 1,
-  kReachable = 2,
-  kIgnored = 3
+    kDirectlyLeaked = 0,  // default
+    kIndirectlyLeaked = 1,
+    kReachable = 2,
+    kIgnored = 3
 };
 
 const u32 kInvalidTid = (u32) -1;
@@ -70,49 +70,51 @@ struct Flags {
 #include "lsan_flags.inc"
 #undef LSAN_FLAG
 
-  void SetDefaults();
-  uptr pointer_alignment() const {
-    return use_unaligned ? 1 : sizeof(uptr);
-  }
+    void SetDefaults();
+    uptr pointer_alignment() const {
+        return use_unaligned ? 1 : sizeof(uptr);
+    }
 };
 
 extern Flags lsan_flags;
-inline Flags *flags() { return &lsan_flags; }
+inline Flags *flags() {
+    return &lsan_flags;
+}
 void RegisterLsanFlags(FlagParser *parser, Flags *f);
 
 struct Leak {
-  u32 id;
-  uptr hit_count;
-  uptr total_size;
-  u32 stack_trace_id;
-  bool is_directly_leaked;
-  bool is_suppressed;
+    u32 id;
+    uptr hit_count;
+    uptr total_size;
+    u32 stack_trace_id;
+    bool is_directly_leaked;
+    bool is_suppressed;
 };
 
 struct LeakedObject {
-  u32 leak_id;
-  uptr addr;
-  uptr size;
+    u32 leak_id;
+    uptr addr;
+    uptr size;
 };
 
 // Aggregates leaks by stack trace prefix.
 class LeakReport {
- public:
-  LeakReport() {}
-  void AddLeakedChunk(uptr chunk, u32 stack_trace_id, uptr leaked_size,
-                      ChunkTag tag);
-  void ReportTopLeaks(uptr max_leaks);
-  void PrintSummary();
-  void ApplySuppressions();
-  uptr UnsuppressedLeakCount();
+public:
+    LeakReport() {}
+    void AddLeakedChunk(uptr chunk, u32 stack_trace_id, uptr leaked_size,
+                        ChunkTag tag);
+    void ReportTopLeaks(uptr max_leaks);
+    void PrintSummary();
+    void ApplySuppressions();
+    uptr UnsuppressedLeakCount();
 
- private:
-  void PrintReportForLeak(uptr index);
-  void PrintLeakedObjectsForLeak(uptr index);
+private:
+    void PrintReportForLeak(uptr index);
+    void PrintLeakedObjectsForLeak(uptr index);
 
-  u32 next_id_ = 0;
-  InternalMmapVector<Leak> leaks_;
-  InternalMmapVector<LeakedObject> leaked_objects_;
+    u32 next_id_ = 0;
+    InternalMmapVector<Leak> leaks_;
+    InternalMmapVector<LeakedObject> leaked_objects_;
 };
 
 typedef InternalMmapVector<uptr> Frontier;
@@ -123,8 +125,8 @@ void ProcessGlobalRegions(Frontier *frontier);
 void ProcessPlatformSpecificAllocations(Frontier *frontier);
 
 struct RootRegion {
-  uptr begin;
-  uptr size;
+    uptr begin;
+    uptr size;
 };
 
 // LockStuffAndStopTheWorld can start to use Scan* calls to collect into
@@ -132,9 +134,9 @@ struct RootRegion {
 // This is used when the OS has a unified callback API for suspending
 // threads and enumerating roots.
 struct CheckForLeaksParam {
-  Frontier frontier;
-  LeakReport leak_report;
-  bool success = false;
+    Frontier frontier;
+    LeakReport leak_report;
+    bool success = false;
 };
 
 InternalMmapVector<RootRegion> const *GetRootRegions();
@@ -152,9 +154,9 @@ void ScanRangeForPointers(uptr begin, uptr end,
 void ScanGlobalRange(uptr begin, uptr end, Frontier *frontier);
 
 enum IgnoreObjectResult {
-  kIgnoreObjectSuccess,
-  kIgnoreObjectAlreadyIgnored,
-  kIgnoreObjectInvalid
+    kIgnoreObjectSuccess,
+    kIgnoreObjectAlreadyIgnored,
+    kIgnoreObjectInvalid
 };
 
 // Functions called from the parent tool.
@@ -171,16 +173,20 @@ void EnableInThisThread();
 // Can be used to ignore memory allocated by an intercepted
 // function.
 struct ScopedInterceptorDisabler {
-  ScopedInterceptorDisabler() { DisableInThisThread(); }
-  ~ScopedInterceptorDisabler() { EnableInThisThread(); }
+    ScopedInterceptorDisabler() {
+        DisableInThisThread();
+    }
+    ~ScopedInterceptorDisabler() {
+        EnableInThisThread();
+    }
 };
 
 // According to Itanium C++ ABI array cookie is a one word containing
 // size of allocated array.
 static inline bool IsItaniumABIArrayCookie(uptr chunk_beg, uptr chunk_size,
-                                           uptr addr) {
-  return chunk_size == sizeof(uptr) && chunk_beg + chunk_size == addr &&
-         *reinterpret_cast<uptr *>(chunk_beg) == 0;
+        uptr addr) {
+    return chunk_size == sizeof(uptr) && chunk_beg + chunk_size == addr &&
+           *reinterpret_cast<uptr *>(chunk_beg) == 0;
 }
 
 // According to ARM C++ ABI array cookie consists of two words:
@@ -190,8 +196,8 @@ static inline bool IsItaniumABIArrayCookie(uptr chunk_beg, uptr chunk_size,
 // };
 static inline bool IsARMABIArrayCookie(uptr chunk_beg, uptr chunk_size,
                                        uptr addr) {
-  return chunk_size == 2 * sizeof(uptr) && chunk_beg + chunk_size == addr &&
-         *reinterpret_cast<uptr *>(chunk_beg + sizeof(uptr)) == 0;
+    return chunk_size == 2 * sizeof(uptr) && chunk_beg + chunk_size == addr &&
+           *reinterpret_cast<uptr *>(chunk_beg + sizeof(uptr)) == 0;
 }
 
 // Special case for "new T[0]" where T is a type with DTOR.
@@ -201,9 +207,9 @@ static inline bool IsARMABIArrayCookie(uptr chunk_beg, uptr chunk_size,
 inline bool IsSpecialCaseOfOperatorNew0(uptr chunk_beg, uptr chunk_size,
                                         uptr addr) {
 #if defined(__arm__)
-  return IsARMABIArrayCookie(chunk_beg, chunk_size, addr);
+    return IsARMABIArrayCookie(chunk_beg, chunk_size, addr);
 #else
-  return IsItaniumABIArrayCookie(chunk_beg, chunk_size, addr);
+    return IsItaniumABIArrayCookie(chunk_beg, chunk_size, addr);
 #endif
 }
 
@@ -253,29 +259,29 @@ void HandleLeaks();
 
 // Wrapper for chunk metadata operations.
 class LsanMetadata {
- public:
-  // Constructor accepts address of user-visible chunk.
-  explicit LsanMetadata(uptr chunk);
-  bool allocated() const;
-  ChunkTag tag() const;
-  void set_tag(ChunkTag value);
-  uptr requested_size() const;
-  u32 stack_trace_id() const;
- private:
-  void *metadata_;
+public:
+    // Constructor accepts address of user-visible chunk.
+    explicit LsanMetadata(uptr chunk);
+    bool allocated() const;
+    ChunkTag tag() const;
+    void set_tag(ChunkTag value);
+    uptr requested_size() const;
+    u32 stack_trace_id() const;
+private:
+    void *metadata_;
 };
 
 }  // namespace __lsan
 
 extern "C" {
-SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
-const char *__lsan_default_options();
+    SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
+    const char *__lsan_default_options();
 
-SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
-int __lsan_is_turned_off();
+    SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
+    int __lsan_is_turned_off();
 
-SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
-const char *__lsan_default_suppressions();
+    SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE
+    const char *__lsan_default_suppressions();
 }  // extern "C"
 
 #endif  // LSAN_COMMON_H

@@ -18,20 +18,20 @@ namespace tidy {
 namespace cert {
 
 void ThrownExceptionTypeCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(
-      traverse(
-          TK_AsIs,
-          cxxThrowExpr(has(ignoringParenImpCasts(
-              cxxConstructExpr(hasDeclaration(cxxConstructorDecl(
-                                   isCopyConstructor(), unless(isNoThrow()))))
-                  .bind("expr"))))),
-      this);
+    Finder->addMatcher(
+        traverse(
+            TK_AsIs,
+            cxxThrowExpr(has(ignoringParenImpCasts(
+                                 cxxConstructExpr(hasDeclaration(cxxConstructorDecl(
+                                         isCopyConstructor(), unless(isNoThrow()))))
+                                 .bind("expr"))))),
+        this);
 }
 
 void ThrownExceptionTypeCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *E = Result.Nodes.getNodeAs<Expr>("expr");
-  diag(E->getExprLoc(),
-       "thrown exception type is not nothrow copy constructible");
+    const auto *E = Result.Nodes.getNodeAs<Expr>("expr");
+    diag(E->getExprLoc(),
+         "thrown exception type is not nothrow copy constructible");
 }
 
 } // namespace cert

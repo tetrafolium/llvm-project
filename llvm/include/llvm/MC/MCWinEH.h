@@ -19,69 +19,71 @@ class MCSymbol;
 
 namespace WinEH {
 struct Instruction {
-  const MCSymbol *Label;
-  unsigned Offset;
-  unsigned Register;
-  unsigned Operation;
+    const MCSymbol *Label;
+    unsigned Offset;
+    unsigned Register;
+    unsigned Operation;
 
-  Instruction(unsigned Op, MCSymbol *L, unsigned Reg, unsigned Off)
-    : Label(L), Offset(Off), Register(Reg), Operation(Op) {}
+    Instruction(unsigned Op, MCSymbol *L, unsigned Reg, unsigned Off)
+        : Label(L), Offset(Off), Register(Reg), Operation(Op) {}
 
-  bool operator==(const Instruction &I) const {
-    // Check whether two instructions refer to the same operation
-    // applied at a different spot (i.e. pointing at a different label).
-    return Offset == I.Offset && Register == I.Register &&
-           Operation == I.Operation;
-  }
-  bool operator!=(const Instruction &I) const { return !(*this == I); }
+    bool operator==(const Instruction &I) const {
+        // Check whether two instructions refer to the same operation
+        // applied at a different spot (i.e. pointing at a different label).
+        return Offset == I.Offset && Register == I.Register &&
+               Operation == I.Operation;
+    }
+    bool operator!=(const Instruction &I) const {
+        return !(*this == I);
+    }
 };
 
 struct FrameInfo {
-  const MCSymbol *Begin = nullptr;
-  const MCSymbol *End = nullptr;
-  const MCSymbol *FuncletOrFuncEnd = nullptr;
-  const MCSymbol *ExceptionHandler = nullptr;
-  const MCSymbol *Function = nullptr;
-  const MCSymbol *PrologEnd = nullptr;
-  const MCSymbol *Symbol = nullptr;
-  MCSection *TextSection = nullptr;
-  uint32_t PackedInfo = 0;
+    const MCSymbol *Begin = nullptr;
+    const MCSymbol *End = nullptr;
+    const MCSymbol *FuncletOrFuncEnd = nullptr;
+    const MCSymbol *ExceptionHandler = nullptr;
+    const MCSymbol *Function = nullptr;
+    const MCSymbol *PrologEnd = nullptr;
+    const MCSymbol *Symbol = nullptr;
+    MCSection *TextSection = nullptr;
+    uint32_t PackedInfo = 0;
 
-  bool HandlesUnwind = false;
-  bool HandlesExceptions = false;
-  bool EmitAttempted = false;
+    bool HandlesUnwind = false;
+    bool HandlesExceptions = false;
+    bool EmitAttempted = false;
 
-  int LastFrameInst = -1;
-  const FrameInfo *ChainedParent = nullptr;
-  std::vector<Instruction> Instructions;
-  MapVector<MCSymbol*, std::vector<Instruction>> EpilogMap;
+    int LastFrameInst = -1;
+    const FrameInfo *ChainedParent = nullptr;
+    std::vector<Instruction> Instructions;
+    MapVector<MCSymbol*, std::vector<Instruction>> EpilogMap;
 
-  FrameInfo() = default;
-  FrameInfo(const MCSymbol *Function, const MCSymbol *BeginFuncEHLabel)
-      : Begin(BeginFuncEHLabel), Function(Function) {}
-  FrameInfo(const MCSymbol *Function, const MCSymbol *BeginFuncEHLabel,
-            const FrameInfo *ChainedParent)
-      : Begin(BeginFuncEHLabel), Function(Function),
-        ChainedParent(ChainedParent) {}
+    FrameInfo() = default;
+    FrameInfo(const MCSymbol *Function, const MCSymbol *BeginFuncEHLabel)
+        : Begin(BeginFuncEHLabel), Function(Function) {}
+    FrameInfo(const MCSymbol *Function, const MCSymbol *BeginFuncEHLabel,
+              const FrameInfo *ChainedParent)
+        : Begin(BeginFuncEHLabel), Function(Function),
+          ChainedParent(ChainedParent) {}
 
-  bool empty() const {
-    if (!Instructions.empty())
-      return false;
-    for (const auto &E : EpilogMap)
-      if (!E.second.empty())
-        return false;
-    return true;
-  }
+    bool empty() const {
+        if (!Instructions.empty())
+            return false;
+        for (const auto &E : EpilogMap)
+            if (!E.second.empty())
+                return false;
+        return true;
+    }
 };
 
 class UnwindEmitter {
 public:
-  virtual ~UnwindEmitter();
+    virtual ~UnwindEmitter();
 
-  /// This emits the unwind info sections (.pdata and .xdata in PE/COFF).
-  virtual void Emit(MCStreamer &Streamer) const = 0;
-  virtual void EmitUnwindInfo(MCStreamer &Streamer, FrameInfo *FI,
-                              bool HandlerData) const = 0;
+    /// This emits the unwind info sections (.pdata and .xdata in PE/COFF).
+    virtual void Emit(MCStreamer &Streamer) const = 0;
+    virtual void EmitUnwindInfo(MCStreamer &Streamer, FrameInfo *FI,
+                                bool HandlerData) const = 0;
 };
 }
 }

@@ -32,14 +32,14 @@ namespace __sanitizer {
 struct linux_dirent;
 
 struct ProcSelfMapsBuff {
-  char *data;
-  uptr mmaped_size;
-  uptr len;
+    char *data;
+    uptr mmaped_size;
+    uptr len;
 };
 
 struct MemoryMappingLayoutData {
-  ProcSelfMapsBuff proc_self_maps;
-  const char *current;
+    ProcSelfMapsBuff proc_self_maps;
+    const char *current;
 };
 
 void ReadProcMaps(ProcSelfMapsBuff *proc_maps);
@@ -48,7 +48,7 @@ void ReadProcMaps(ProcSelfMapsBuff *proc_maps);
 uptr internal_getdents(fd_t fd, struct linux_dirent *dirp, unsigned int count);
 uptr internal_sigaltstack(const void* ss, void* oss);
 uptr internal_sigprocmask(int how, __sanitizer_sigset_t *set,
-    __sanitizer_sigset_t *oldset);
+                          __sanitizer_sigset_t *oldset);
 uptr internal_clock_gettime(__sanitizer_clockid_t clk_id, void *tp);
 
 // Linux-only syscalls.
@@ -75,22 +75,22 @@ uptr internal_clone(int (*fn)(void *), void *child_stack, int flags, void *arg);
 
 // This class reads thread IDs from /proc/<pid>/task using only syscalls.
 class ThreadLister {
- public:
-  explicit ThreadLister(pid_t pid);
-  ~ThreadLister();
-  enum Result {
-    Error,
-    Incomplete,
-    Ok,
-  };
-  Result ListThreads(InternalMmapVector<tid_t> *threads);
+public:
+    explicit ThreadLister(pid_t pid);
+    ~ThreadLister();
+    enum Result {
+        Error,
+        Incomplete,
+        Ok,
+    };
+    Result ListThreads(InternalMmapVector<tid_t> *threads);
 
- private:
-  bool IsAlive(int tid);
+private:
+    bool IsAlive(int tid);
 
-  pid_t pid_;
-  int descriptor_ = -1;
-  InternalMmapVector<char> buffer_;
+    pid_t pid_;
+    int descriptor_ = -1;
+    InternalMmapVector<char> buffer_;
 };
 
 // Exposed for testing.
@@ -109,11 +109,11 @@ void ForEachMappedRegion(link_map *map, void (*cb)(const void *, uptr));
 // The pages no longer count toward RSS; reads are guaranteed to return 0.
 // Requires (but does not verify!) that pages are MAP_PRIVATE.
 inline void ReleaseMemoryPagesToOSAndZeroFill(uptr beg, uptr end) {
-  // man madvise on Linux promises zero-fill for anonymous private pages.
-  // Testing shows the same behaviour for private (but not anonymous) mappings
-  // of shm_open() files, as long as the underlying file is untouched.
-  CHECK(SANITIZER_LINUX);
-  ReleaseMemoryPagesToOS(beg, end);
+    // man madvise on Linux promises zero-fill for anonymous private pages.
+    // Testing shows the same behaviour for private (but not anonymous) mappings
+    // of shm_open() files, as long as the underlying file is untouched.
+    CHECK(SANITIZER_LINUX);
+    ReleaseMemoryPagesToOS(beg, end);
 }
 
 #if SANITIZER_ANDROID
@@ -150,7 +150,7 @@ inline void ReleaseMemoryPagesToOSAndZeroFill(uptr beg, uptr end) {
 static const int TLS_SLOT_SANITIZER = 6;
 
 ALWAYS_INLINE uptr *get_android_tls_ptr() {
-  return reinterpret_cast<uptr *>(&__get_tls()[TLS_SLOT_SANITIZER]);
+    return reinterpret_cast<uptr *>(&__get_tls()[TLS_SLOT_SANITIZER]);
 }
 
 #endif  // SANITIZER_ANDROID

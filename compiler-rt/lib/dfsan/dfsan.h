@@ -24,22 +24,22 @@ using __sanitizer::u16;
 typedef u16 dfsan_label;
 
 struct dfsan_label_info {
-  dfsan_label l1;
-  dfsan_label l2;
-  const char *desc;
-  void *userdata;
+    dfsan_label l1;
+    dfsan_label l2;
+    const char *desc;
+    void *userdata;
 };
 
 extern "C" {
-void dfsan_add_label(dfsan_label label, void *addr, uptr size);
-void dfsan_set_label(dfsan_label label, void *addr, uptr size);
-dfsan_label dfsan_read_label(const void *addr, uptr size);
-dfsan_label dfsan_union(dfsan_label l1, dfsan_label l2);
+    void dfsan_add_label(dfsan_label label, void *addr, uptr size);
+    void dfsan_set_label(dfsan_label label, void *addr, uptr size);
+    dfsan_label dfsan_read_label(const void *addr, uptr size);
+    dfsan_label dfsan_union(dfsan_label l1, dfsan_label l2);
 }  // extern "C"
 
 template <typename T>
 void dfsan_set_label(dfsan_label label, T &data) {  // NOLINT
-  dfsan_set_label(label, (void *)&data, sizeof(T));
+    dfsan_set_label(label, (void *)&data, sizeof(T));
 }
 
 namespace __dfsan {
@@ -47,11 +47,11 @@ namespace __dfsan {
 void InitializeInterceptors();
 
 inline dfsan_label *shadow_for(void *ptr) {
-  return (dfsan_label *) ((((uptr) ptr) & ShadowMask()) << 1);
+    return (dfsan_label *) ((((uptr) ptr) & ShadowMask()) << 1);
 }
 
 inline const dfsan_label *shadow_for(const void *ptr) {
-  return shadow_for(const_cast<void *>(ptr));
+    return shadow_for(const_cast<void *>(ptr));
 }
 
 struct Flags {
@@ -59,12 +59,12 @@ struct Flags {
 #include "dfsan_flags.inc"
 #undef DFSAN_FLAG
 
-  void SetDefaults();
+    void SetDefaults();
 };
 
 extern Flags flags_data;
 inline Flags &flags() {
-  return flags_data;
+    return flags_data;
 }
 
 }  // namespace __dfsan

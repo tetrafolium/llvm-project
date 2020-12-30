@@ -30,18 +30,18 @@ namespace {
 ///   10*a+10*a
 class ExpandMacro : public Tweak {
 public:
-  const char *id() const override final;
-  llvm::StringLiteral kind() const override {
-    return CodeAction::REFACTOR_KIND;
-  }
+    const char *id() const override final;
+    llvm::StringLiteral kind() const override {
+        return CodeAction::REFACTOR_KIND;
+    }
 
-  bool prepare(const Selection &Inputs) override;
-  Expected<Tweak::Effect> apply(const Selection &Inputs) override;
-  std::string title() const override;
+    bool prepare(const Selection &Inputs) override;
+    Expected<Tweak::Effect> apply(const Selection &Inputs) override;
+    std::string title() const override;
 
 private:
-  syntax::TokenBuffer::Expansion Expansion;
-  std::string MacroName;
+    syntax::TokenBuffer::Expansion Expansion;
+    std::string MacroName;
 };
 
 REGISTER_TWEAK(ExpandMacro)
@@ -51,84 +51,84 @@ static const syntax::Token *
 findTokenUnderCursor(const SourceManager &SM,
                      llvm::ArrayRef<syntax::Token> Spelled,
                      unsigned CursorOffset) {
-  // Find the token that strats after the offset, then look at a previous one.
-  auto It = llvm::partition_point(Spelled, [&](const syntax::Token &T) {
-    assert(T.location().isFileID());
-    return SM.getFileOffset(T.location()) <= CursorOffset;
-  });
-  if (It == Spelled.begin())
-    return nullptr;
-  // Check the token we found actually touches the cursor position.
-  --It;
-  return It->range(SM).touches(CursorOffset) ? It : nullptr;
+    // Find the token that strats after the offset, then look at a previous one.
+    auto It = llvm::partition_point(Spelled, [&](const syntax::Token &T) {
+        assert(T.location().isFileID());
+        return SM.getFileOffset(T.location()) <= CursorOffset;
+    });
+    if (It == Spelled.begin())
+        return nullptr;
+    // Check the token we found actually touches the cursor position.
+    --It;
+    return It->range(SM).touches(CursorOffset) ? It : nullptr;
 }
 
 static const syntax::Token *
 findIdentifierUnderCursor(const syntax::TokenBuffer &Tokens,
                           SourceLocation Cursor) {
-  assert(Cursor.isFileID());
+    assert(Cursor.isFileID());
 
-  auto &SM = Tokens.sourceManager();
-  auto Spelled = Tokens.spelledTokens(SM.getFileID(Cursor));
+    auto &SM = Tokens.sourceManager();
+    auto Spelled = Tokens.spelledTokens(SM.getFileID(Cursor));
 
-  auto *T = findTokenUnderCursor(SM, Spelled, SM.getFileOffset(Cursor));
-  if (!T)
-    return nullptr;
-  if (T->kind() == tok::identifier)
+    auto *T = findTokenUnderCursor(SM, Spelled, SM.getFileOffset(Cursor));
+    if (!T)
+        return nullptr;
+    if (T->kind() == tok::identifier)
+        return T;
+    // Also try the previous token when the cursor is at the boundary, e.g.
+    //   FOO^()
+    //   FOO^+
+    if (T == Spelled.begin())
+        return nullptr;
+    --T;
+    if (T->endLocation() != Cursor || T->kind() != tok::identifier)
+        return nullptr;
     return T;
-  // Also try the previous token when the cursor is at the boundary, e.g.
-  //   FOO^()
-  //   FOO^+
-  if (T == Spelled.begin())
-    return nullptr;
-  --T;
-  if (T->endLocation() != Cursor || T->kind() != tok::identifier)
-    return nullptr;
-  return T;
 }
 
 bool ExpandMacro::prepare(const Selection &Inputs) {
-  // FIXME: we currently succeed on selection at the end of the token, e.g.
-  //        'FOO[[ ]]BAR'. We should not trigger in that case.
+    // FIXME: we currently succeed on selection at the end of the token, e.g.
+    //        'FOO[[ ]]BAR'. We should not trigger in that case.
 
-  // Find a token under the cursor.
-  auto *T = findIdentifierUnderCursor(Inputs.AST->getTokens(), Inputs.Cursor);
-  // We are interested only in identifiers, other tokens can't be macro names.
-  if (!T)
-    return false;
-  // If the identifier is a macro we will find the corresponding expansion.
-  auto Expansion = Inputs.AST->getTokens().expansionStartingAt(T);
-  if (!Expansion)
-    return false;
-  this->MacroName = std::string(T->text(Inputs.AST->getSourceManager()));
-  this->Expansion = *Expansion;
-  return true;
+    // Find a token under the cursor.
+    auto *T = findIdentifierUnderCursor(Inputs.AST->getTokens(), Inputs.Cursor);
+    // We are interested only in identifiers, other tokens can't be macro names.
+    if (!T)
+        return false;
+    // If the identifier is a macro we will find the corresponding expansion.
+    auto Expansion = Inputs.AST->getTokens().expansionStartingAt(T);
+    if (!Expansion)
+        return false;
+    this->MacroName = std::string(T->text(Inputs.AST->getSourceManager()));
+    this->Expansion = *Expansion;
+    return true;
 }
 
 Expected<Tweak::Effect> ExpandMacro::apply(const Selection &Inputs) {
-  auto &SM = Inputs.AST->getSourceManager();
+    auto &SM = Inputs.AST->getSourceManager();
 
-  std::string Replacement;
-  for (const syntax::Token &T : Expansion.Expanded) {
-    Replacement += T.text(SM);
-    Replacement += " ";
-  }
-  if (!Replacement.empty()) {
-    assert(Replacement.back() == ' ');
-    Replacement.pop_back();
-  }
+    std::string Replacement;
+    for (const syntax::Token &T : Expansion.Expanded) {
+        Replacement += T.text(SM);
+        Replacement += " ";
+    }
+    if (!Replacement.empty()) {
+        assert(Replacement.back() == ' ');
+        Replacement.pop_back();
+    }
 
-  CharSourceRange MacroRange =
-      CharSourceRange::getCharRange(Expansion.Spelled.front().location(),
-                                    Expansion.Spelled.back().endLocation());
+    CharSourceRange MacroRange =
+        CharSourceRange::getCharRange(Expansion.Spelled.front().location(),
+                                      Expansion.Spelled.back().endLocation());
 
-  tooling::Replacements Reps;
-  llvm::cantFail(Reps.add(tooling::Replacement(SM, MacroRange, Replacement)));
-  return Effect::mainFileEdit(SM, std::move(Reps));
+    tooling::Replacements Reps;
+    llvm::cantFail(Reps.add(tooling::Replacement(SM, MacroRange, Replacement)));
+    return Effect::mainFileEdit(SM, std::move(Reps));
 }
 
 std::string ExpandMacro::title() const {
-  return std::string(llvm::formatv("Expand macro '{0}'", MacroName));
+    return std::string(llvm::formatv("Expand macro '{0}'", MacroName));
 }
 
 } // namespace

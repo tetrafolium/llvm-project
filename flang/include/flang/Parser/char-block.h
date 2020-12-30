@@ -27,115 +27,147 @@ namespace Fortran::parser {
 
 class CharBlock {
 public:
-  constexpr CharBlock() {}
-  constexpr CharBlock(const char *x, std::size_t n = 1) : interval_{x, n} {}
-  constexpr CharBlock(const char *b, const char *ep1)
-      : interval_{b, static_cast<std::size_t>(ep1 - b)} {}
-  CharBlock(const std::string &s) : interval_{s.data(), s.size()} {}
-  constexpr CharBlock(const CharBlock &) = default;
-  constexpr CharBlock(CharBlock &&) = default;
-  constexpr CharBlock &operator=(const CharBlock &) = default;
-  constexpr CharBlock &operator=(CharBlock &&) = default;
+    constexpr CharBlock() {}
+    constexpr CharBlock(const char *x, std::size_t n = 1) : interval_{x, n} {}
+    constexpr CharBlock(const char *b, const char *ep1)
+        : interval_{b, static_cast<std::size_t>(ep1 - b)} {}
+    CharBlock(const std::string &s) : interval_{s.data(), s.size()} {}
+    constexpr CharBlock(const CharBlock &) = default;
+    constexpr CharBlock(CharBlock &&) = default;
+    constexpr CharBlock &operator=(const CharBlock &) = default;
+    constexpr CharBlock &operator=(CharBlock &&) = default;
 
-  constexpr bool empty() const { return interval_.empty(); }
-  constexpr std::size_t size() const { return interval_.size(); }
-  constexpr const char *begin() const { return interval_.start(); }
-  constexpr const char *end() const {
-    return interval_.start() + interval_.size();
-  }
-  constexpr const char &operator[](std::size_t j) const {
-    return interval_.start()[j];
-  }
-
-  bool Contains(const CharBlock &that) const {
-    return interval_.Contains(that.interval_);
-  }
-
-  void ExtendToCover(const CharBlock &that) {
-    interval_.ExtendToCover(that.interval_);
-  }
-
-  char FirstNonBlank() const {
-    for (char ch : *this) {
-      if (ch != ' ' && ch != '\t') {
-        return ch;
-      }
+    constexpr bool empty() const {
+        return interval_.empty();
     }
-    return ' '; // non no-blank character
-  }
+    constexpr std::size_t size() const {
+        return interval_.size();
+    }
+    constexpr const char *begin() const {
+        return interval_.start();
+    }
+    constexpr const char *end() const {
+        return interval_.start() + interval_.size();
+    }
+    constexpr const char &operator[](std::size_t j) const {
+        return interval_.start()[j];
+    }
 
-  bool IsBlank() const { return FirstNonBlank() == ' '; }
+    bool Contains(const CharBlock &that) const {
+        return interval_.Contains(that.interval_);
+    }
 
-  std::string ToString() const {
-    return std::string{interval_.start(), interval_.size()};
-  }
+    void ExtendToCover(const CharBlock &that) {
+        interval_.ExtendToCover(that.interval_);
+    }
 
-  // Convert to string, stopping early at any embedded '\0'.
-  std::string NULTerminatedToString() const {
-    return std::string{interval_.start(),
-        /*not in std::*/ strnlen(interval_.start(), interval_.size())};
-  }
+    char FirstNonBlank() const {
+        for (char ch : *this) {
+            if (ch != ' ' && ch != '\t') {
+                return ch;
+            }
+        }
+        return ' '; // non no-blank character
+    }
 
-  bool operator<(const CharBlock &that) const { return Compare(that) < 0; }
-  bool operator<=(const CharBlock &that) const { return Compare(that) <= 0; }
-  bool operator==(const CharBlock &that) const { return Compare(that) == 0; }
-  bool operator!=(const CharBlock &that) const { return Compare(that) != 0; }
-  bool operator>=(const CharBlock &that) const { return Compare(that) >= 0; }
-  bool operator>(const CharBlock &that) const { return Compare(that) > 0; }
+    bool IsBlank() const {
+        return FirstNonBlank() == ' ';
+    }
 
-  bool operator<(const char *that) const { return Compare(that) < 0; }
-  bool operator<=(const char *that) const { return Compare(that) <= 0; }
-  bool operator==(const char *that) const { return Compare(that) == 0; }
-  bool operator!=(const char *that) const { return Compare(that) != 0; }
-  bool operator>=(const char *that) const { return Compare(that) >= 0; }
-  bool operator>(const char *that) const { return Compare(that) > 0; }
+    std::string ToString() const {
+        return std::string{interval_.start(), interval_.size()};
+    }
 
-  friend bool operator<(const char *, const CharBlock &);
-  friend bool operator<=(const char *, const CharBlock &);
-  friend bool operator==(const char *, const CharBlock &);
-  friend bool operator!=(const char *, const CharBlock &);
-  friend bool operator>=(const char *, const CharBlock &);
-  friend bool operator>(const char *, const CharBlock &);
+    // Convert to string, stopping early at any embedded '\0'.
+    std::string NULTerminatedToString() const {
+        return std::string{interval_.start(),
+                           /*not in std::*/ strnlen(interval_.start(), interval_.size())};
+    }
+
+    bool operator<(const CharBlock &that) const {
+        return Compare(that) < 0;
+    }
+    bool operator<=(const CharBlock &that) const {
+        return Compare(that) <= 0;
+    }
+    bool operator==(const CharBlock &that) const {
+        return Compare(that) == 0;
+    }
+    bool operator!=(const CharBlock &that) const {
+        return Compare(that) != 0;
+    }
+    bool operator>=(const CharBlock &that) const {
+        return Compare(that) >= 0;
+    }
+    bool operator>(const CharBlock &that) const {
+        return Compare(that) > 0;
+    }
+
+    bool operator<(const char *that) const {
+        return Compare(that) < 0;
+    }
+    bool operator<=(const char *that) const {
+        return Compare(that) <= 0;
+    }
+    bool operator==(const char *that) const {
+        return Compare(that) == 0;
+    }
+    bool operator!=(const char *that) const {
+        return Compare(that) != 0;
+    }
+    bool operator>=(const char *that) const {
+        return Compare(that) >= 0;
+    }
+    bool operator>(const char *that) const {
+        return Compare(that) > 0;
+    }
+
+    friend bool operator<(const char *, const CharBlock &);
+    friend bool operator<=(const char *, const CharBlock &);
+    friend bool operator==(const char *, const CharBlock &);
+    friend bool operator!=(const char *, const CharBlock &);
+    friend bool operator>=(const char *, const CharBlock &);
+    friend bool operator>(const char *, const CharBlock &);
 
 private:
-  int Compare(const CharBlock &that) const {
-    std::size_t bytes{std::min(size(), that.size())};
-    int cmp{std::memcmp(static_cast<const void *>(begin()),
-        static_cast<const void *>(that.begin()), bytes)};
-    if (cmp != 0) {
-      return cmp;
+    int Compare(const CharBlock &that) const {
+        std::size_t bytes{std::min(size(), that.size())};
+        int cmp{std::memcmp(static_cast<const void *>(begin()),
+                            static_cast<const void *>(that.begin()), bytes)};
+        if (cmp != 0) {
+            return cmp;
+        }
+        return size() < that.size() ? -1 : size() > that.size();
     }
-    return size() < that.size() ? -1 : size() > that.size();
-  }
 
-  int Compare(const char *that) const {
-    std::size_t bytes{size()};
-    if (int cmp{std::strncmp(begin(), that, bytes)}) {
-      return cmp;
+    int Compare(const char *that) const {
+        std::size_t bytes{size()};
+        if (int cmp{std::strncmp(begin(), that, bytes)}) {
+            return cmp;
+        }
+        return that[bytes] == '\0' ? 0 : -1;
     }
-    return that[bytes] == '\0' ? 0 : -1;
-  }
 
-  common::Interval<const char *> interval_{nullptr, 0};
+    common::Interval<const char *> interval_{nullptr, 0};
 };
 
 inline bool operator<(const char *left, const CharBlock &right) {
-  return right > left;
+    return right > left;
 }
 inline bool operator<=(const char *left, const CharBlock &right) {
-  return right >= left;
+    return right >= left;
 }
 inline bool operator==(const char *left, const CharBlock &right) {
-  return right == left;
+    return right == left;
 }
 inline bool operator!=(const char *left, const CharBlock &right) {
-  return right != left;
+    return right != left;
 }
 inline bool operator>=(const char *left, const CharBlock &right) {
-  return right <= left;
+    return right <= left;
 }
 inline bool operator>(const char *left, const CharBlock &right) {
-  return right < left;
+    return right < left;
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &os, const CharBlock &x);
@@ -144,12 +176,12 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &os, const CharBlock &x);
 
 // Specializations to enable std::unordered_map<CharBlock, ...> &c.
 template <> struct std::hash<Fortran::parser::CharBlock> {
-  std::size_t operator()(const Fortran::parser::CharBlock &x) const {
-    std::size_t hash{0}, bytes{x.size()};
-    for (std::size_t j{0}; j < bytes; ++j) {
-      hash = (hash * 31) ^ x[j];
+    std::size_t operator()(const Fortran::parser::CharBlock &x) const {
+        std::size_t hash{0}, bytes{x.size()};
+        for (std::size_t j{0}; j < bytes; ++j) {
+            hash = (hash * 31) ^ x[j];
+        }
+        return hash;
     }
-    return hash;
-  }
 };
 #endif // FORTRAN_PARSER_CHAR_BLOCK_H_

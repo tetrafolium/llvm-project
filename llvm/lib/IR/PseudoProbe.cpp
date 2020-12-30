@@ -21,38 +21,38 @@ using namespace llvm;
 namespace llvm {
 
 Optional<PseudoProbe> extractProbeFromDiscriminator(const Instruction &Inst) {
-  assert(isa<CallBase>(&Inst) && !isa<IntrinsicInst>(&Inst) &&
-         "Only call instructions should have pseudo probe encodes as their "
-         "Dwarf discriminators");
-  if (const DebugLoc &DLoc = Inst.getDebugLoc()) {
-    const DILocation *DIL = DLoc;
-    auto Discriminator = DIL->getDiscriminator();
-    if (DILocation::isPseudoProbeDiscriminator(Discriminator)) {
-      PseudoProbe Probe;
-      Probe.Id =
-          PseudoProbeDwarfDiscriminator::extractProbeIndex(Discriminator);
-      Probe.Type =
-          PseudoProbeDwarfDiscriminator::extractProbeType(Discriminator);
-      Probe.Attr =
-          PseudoProbeDwarfDiscriminator::extractProbeAttributes(Discriminator);
-      return Probe;
+    assert(isa<CallBase>(&Inst) && !isa<IntrinsicInst>(&Inst) &&
+           "Only call instructions should have pseudo probe encodes as their "
+           "Dwarf discriminators");
+    if (const DebugLoc &DLoc = Inst.getDebugLoc()) {
+        const DILocation *DIL = DLoc;
+        auto Discriminator = DIL->getDiscriminator();
+        if (DILocation::isPseudoProbeDiscriminator(Discriminator)) {
+            PseudoProbe Probe;
+            Probe.Id =
+                PseudoProbeDwarfDiscriminator::extractProbeIndex(Discriminator);
+            Probe.Type =
+                PseudoProbeDwarfDiscriminator::extractProbeType(Discriminator);
+            Probe.Attr =
+                PseudoProbeDwarfDiscriminator::extractProbeAttributes(Discriminator);
+            return Probe;
+        }
     }
-  }
-  return None;
+    return None;
 }
 
 Optional<PseudoProbe> extractProbe(const Instruction &Inst) {
-  if (const auto *II = dyn_cast<PseudoProbeInst>(&Inst)) {
-    PseudoProbe Probe;
-    Probe.Id = II->getIndex()->getZExtValue();
-    Probe.Type = (uint32_t)PseudoProbeType::Block;
-    Probe.Attr = II->getAttributes()->getZExtValue();
-    return Probe;
-  }
+    if (const auto *II = dyn_cast<PseudoProbeInst>(&Inst)) {
+        PseudoProbe Probe;
+        Probe.Id = II->getIndex()->getZExtValue();
+        Probe.Type = (uint32_t)PseudoProbeType::Block;
+        Probe.Attr = II->getAttributes()->getZExtValue();
+        return Probe;
+    }
 
-  if (isa<CallBase>(&Inst) && !isa<IntrinsicInst>(&Inst))
-    return extractProbeFromDiscriminator(Inst);
+    if (isa<CallBase>(&Inst) && !isa<IntrinsicInst>(&Inst))
+        return extractProbeFromDiscriminator(Inst);
 
-  return None;
+    return None;
 }
 } // namespace llvm

@@ -20,7 +20,7 @@ enum {
 #define ANALYSISSTART
 #include "clang/Basic/DiagnosticAnalysisKinds.inc"
 #undef DIAG
-  NUM_BUILTIN_ANALYSIS_DIAGNOSTICS
+    NUM_BUILTIN_ANALYSIS_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

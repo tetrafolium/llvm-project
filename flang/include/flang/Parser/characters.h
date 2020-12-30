@@ -29,159 +29,165 @@ extern bool useHexadecimalEscapeSequences;
 enum class Encoding { LATIN_1, UTF_8 };
 
 inline constexpr bool IsUpperCaseLetter(char ch) {
-  return ch >= 'A' && ch <= 'Z';
+    return ch >= 'A' && ch <= 'Z';
 }
 
 inline constexpr bool IsLowerCaseLetter(char ch) {
-  return ch >= 'a' && ch <= 'z';
+    return ch >= 'a' && ch <= 'z';
 }
 
 inline constexpr bool IsLetter(char ch) {
-  return IsUpperCaseLetter(ch) || IsLowerCaseLetter(ch);
+    return IsUpperCaseLetter(ch) || IsLowerCaseLetter(ch);
 }
 
-inline constexpr bool IsDecimalDigit(char ch) { return ch >= '0' && ch <= '9'; }
+inline constexpr bool IsDecimalDigit(char ch) {
+    return ch >= '0' && ch <= '9';
+}
 
 inline constexpr bool IsHexadecimalDigit(char ch) {
-  return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') ||
-      (ch >= 'a' && ch <= 'f');
+    return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') ||
+           (ch >= 'a' && ch <= 'f');
 }
 
-inline constexpr bool IsOctalDigit(char ch) { return ch >= '0' && ch <= '7'; }
+inline constexpr bool IsOctalDigit(char ch) {
+    return ch >= '0' && ch <= '7';
+}
 
 inline constexpr bool IsLegalIdentifierStart(char ch) {
-  return IsLetter(ch) || ch == '_' || ch == '@' || ch == '$';
+    return IsLetter(ch) || ch == '_' || ch == '@' || ch == '$';
 }
 
 inline constexpr bool IsLegalInIdentifier(char ch) {
-  return IsLegalIdentifierStart(ch) || IsDecimalDigit(ch);
+    return IsLegalIdentifierStart(ch) || IsDecimalDigit(ch);
 }
 
 inline constexpr char ToLowerCaseLetter(char ch) {
-  return IsUpperCaseLetter(ch) ? ch - 'A' + 'a' : ch;
+    return IsUpperCaseLetter(ch) ? ch - 'A' + 'a' : ch;
 }
 
 inline constexpr char ToLowerCaseLetter(char &&ch) {
-  return IsUpperCaseLetter(ch) ? ch - 'A' + 'a' : ch;
+    return IsUpperCaseLetter(ch) ? ch - 'A' + 'a' : ch;
 }
 
 inline std::string ToLowerCaseLetters(const std::string &str) {
-  std::string lowered{str};
-  for (char &ch : lowered) {
-    ch = ToLowerCaseLetter(ch);
-  }
-  return lowered;
+    std::string lowered{str};
+    for (char &ch : lowered) {
+        ch = ToLowerCaseLetter(ch);
+    }
+    return lowered;
 }
 
 inline constexpr char ToUpperCaseLetter(char ch) {
-  return IsLowerCaseLetter(ch) ? ch - 'a' + 'A' : ch;
+    return IsLowerCaseLetter(ch) ? ch - 'a' + 'A' : ch;
 }
 
 inline constexpr char ToUpperCaseLetter(char &&ch) {
-  return IsLowerCaseLetter(ch) ? ch - 'a' + 'A' : ch;
+    return IsLowerCaseLetter(ch) ? ch - 'a' + 'A' : ch;
 }
 
 inline std::string ToUpperCaseLetters(const std::string &str) {
-  std::string raised{str};
-  for (char &ch : raised) {
-    ch = ToUpperCaseLetter(ch);
-  }
-  return raised;
+    std::string raised{str};
+    for (char &ch : raised) {
+        ch = ToUpperCaseLetter(ch);
+    }
+    return raised;
 }
 
 inline constexpr bool IsSameApartFromCase(char x, char y) {
-  return ToLowerCaseLetter(x) == ToLowerCaseLetter(y);
+    return ToLowerCaseLetter(x) == ToLowerCaseLetter(y);
 }
 
-inline constexpr char DecimalDigitValue(char ch) { return ch - '0'; }
+inline constexpr char DecimalDigitValue(char ch) {
+    return ch - '0';
+}
 
 inline constexpr char HexadecimalDigitValue(char ch) {
-  return IsUpperCaseLetter(ch) ? ch - 'A' + 10
-      : IsLowerCaseLetter(ch)  ? ch - 'a' + 10
-                               : DecimalDigitValue(ch);
+    return IsUpperCaseLetter(ch) ? ch - 'A' + 10
+           : IsLowerCaseLetter(ch)  ? ch - 'a' + 10
+           : DecimalDigitValue(ch);
 }
 
 inline constexpr std::optional<char> BackslashEscapeValue(char ch) {
-  switch (ch) {
-  case 'a':
-    return std::nullopt; // '\a';  PGF90 doesn't know \a
-  case 'b':
-    return '\b';
-  case 'f':
-    return '\f';
-  case 'n':
-    return '\n';
-  case 'r':
-    return '\r';
-  case 't':
-    return '\t';
-  case 'v':
-    return '\v';
-  case '"':
-  case '\'':
-  case '\\':
-    return ch;
-  default:
-    return std::nullopt;
-  }
+    switch (ch) {
+    case 'a':
+        return std::nullopt; // '\a';  PGF90 doesn't know \a
+    case 'b':
+        return '\b';
+    case 'f':
+        return '\f';
+    case 'n':
+        return '\n';
+    case 'r':
+        return '\r';
+    case 't':
+        return '\t';
+    case 'v':
+        return '\v';
+    case '"':
+    case '\'':
+    case '\\':
+        return ch;
+    default:
+        return std::nullopt;
+    }
 }
 
 inline constexpr std::optional<char> BackslashEscapeChar(char ch) {
-  switch (ch) {
-  case '\a':
-    return std::nullopt; // 'a';  PGF90 doesn't know \a
-  case '\b':
-    return 'b';
-  case '\f':
-    return 'f';
-  case '\n':
-    return 'n';
-  case '\r':
-    return 'r';
-  case '\t':
-    return 't';
-  case '\v':
-    return 'v';
-  case '"':
-  case '\'':
-  case '\\':
-    return ch;
-  default:
-    return std::nullopt;
-  }
+    switch (ch) {
+    case '\a':
+        return std::nullopt; // 'a';  PGF90 doesn't know \a
+    case '\b':
+        return 'b';
+    case '\f':
+        return 'f';
+    case '\n':
+        return 'n';
+    case '\r':
+        return 'r';
+    case '\t':
+        return 't';
+    case '\v':
+        return 'v';
+    case '"':
+    case '\'':
+    case '\\':
+        return ch;
+    default:
+        return std::nullopt;
+    }
 }
 
 // Does not include spaces or line ending characters.
 inline constexpr bool IsValidFortranTokenCharacter(char ch) {
-  switch (ch) {
-  case '"':
-  case '%':
-  case '\'':
-  case '(':
-  case ')':
-  case '*':
-  case '+':
-  case ',':
-  case '-':
-  case '.':
-  case '/':
-  case ':':
-  case ';':
-  case '<':
-  case '=':
-  case '>':
-  case '[':
-  case ']':
-    return true;
-  default:
-    return IsLegalIdentifierStart(ch) || IsDecimalDigit(ch);
-  }
+    switch (ch) {
+    case '"':
+    case '%':
+    case '\'':
+    case '(':
+    case ')':
+    case '*':
+    case '+':
+    case ',':
+    case '-':
+    case '.':
+    case '/':
+    case ':':
+    case ';':
+    case '<':
+    case '=':
+    case '>':
+    case '[':
+    case ']':
+        return true;
+    default:
+        return IsLegalIdentifierStart(ch) || IsDecimalDigit(ch);
+    }
 }
 
 struct EncodedCharacter {
-  static constexpr int maxEncodingBytes{6};
-  char buffer[maxEncodingBytes];
-  int bytes{0};
+    static constexpr int maxEncodingBytes{6};
+    char buffer[maxEncodingBytes];
+    int bytes{0};
 };
 
 template <Encoding ENCODING> EncodedCharacter EncodeCharacter(char32_t ucs);
@@ -201,54 +207,54 @@ extern template std::string EncodeString<Encoding::UTF_8, std::u32string>(
 // bytes of an encoding for a codepoint.
 template <typename NORMAL, typename INSERTED>
 void EmitQuotedChar(char32_t ch, const NORMAL &emit, const INSERTED &insert,
-    bool backslashEscapes = true, Encoding encoding = Encoding::UTF_8) {
-  auto emitOneByte{[&](std::uint8_t ch) {
-    if (backslashEscapes && (ch < ' ' || ch >= 0x7f || ch == '\\')) {
-      if (std::optional<char> escape{BackslashEscapeChar(ch)}) {
-        insert('\\');
-        emit(*escape);
-      } else if (useHexadecimalEscapeSequences) {
-        insert('\\');
-        insert('x');
-        int top{ch >> 4}, bottom{ch & 0xf};
-        insert(top > 9 ? 'a' + top - 10 : '0' + top);
-        insert(bottom > 9 ? 'a' + bottom - 10 : '0' + bottom);
-      } else {
-        // octal escape sequence; always emit 3 digits to avoid ambiguity
-        insert('\\');
-        insert('0' + (ch >> 6));
-        insert('0' + ((ch >> 3) & 7));
-        insert('0' + (ch & 7));
-      }
-    } else if (ch == '\n') { // always escape newlines
-      insert('\\');
-      insert('n');
+                    bool backslashEscapes = true, Encoding encoding = Encoding::UTF_8) {
+    auto emitOneByte{[&](std::uint8_t ch) {
+        if (backslashEscapes && (ch < ' ' || ch >= 0x7f || ch == '\\')) {
+            if (std::optional<char> escape{BackslashEscapeChar(ch)}) {
+                insert('\\');
+                emit(*escape);
+            } else if (useHexadecimalEscapeSequences) {
+                insert('\\');
+                insert('x');
+                int top{ch >> 4}, bottom{ch & 0xf};
+                insert(top > 9 ? 'a' + top - 10 : '0' + top);
+                insert(bottom > 9 ? 'a' + bottom - 10 : '0' + bottom);
+            } else {
+                // octal escape sequence; always emit 3 digits to avoid ambiguity
+                insert('\\');
+                insert('0' + (ch >> 6));
+                insert('0' + ((ch >> 3) & 7));
+                insert('0' + (ch & 7));
+            }
+        } else if (ch == '\n') { // always escape newlines
+            insert('\\');
+            insert('n');
+        } else {
+            emit(ch);
+        }
+    }};
+    if (ch <= 0x7f) {
+        emitOneByte(ch);
     } else {
-      emit(ch);
+        EncodedCharacter encoded{EncodeCharacter(encoding, ch)};
+        for (int j{0}; j < encoded.bytes; ++j) {
+            emitOneByte(encoded.buffer[j]);
+        }
     }
-  }};
-  if (ch <= 0x7f) {
-    emitOneByte(ch);
-  } else {
-    EncodedCharacter encoded{EncodeCharacter(encoding, ch)};
-    for (int j{0}; j < encoded.bytes; ++j) {
-      emitOneByte(encoded.buffer[j]);
-    }
-  }
 }
 
 std::string QuoteCharacterLiteral(const std::string &,
-    bool backslashEscapes = true, Encoding = Encoding::LATIN_1);
+                                  bool backslashEscapes = true, Encoding = Encoding::LATIN_1);
 std::string QuoteCharacterLiteral(const std::u16string &,
-    bool backslashEscapes = true, Encoding = Encoding::UTF_8);
+                                  bool backslashEscapes = true, Encoding = Encoding::UTF_8);
 std::string QuoteCharacterLiteral(const std::u32string &,
-    bool backslashEscapes = true, Encoding = Encoding::UTF_8);
+                                  bool backslashEscapes = true, Encoding = Encoding::UTF_8);
 
 int UTF_8CharacterBytes(const char *);
 
 struct DecodedCharacter {
-  char32_t codepoint{0};
-  int bytes{0}; // signifying failure
+    char32_t codepoint{0};
+    int bytes{0}; // signifying failure
 };
 
 template <Encoding ENCODING>

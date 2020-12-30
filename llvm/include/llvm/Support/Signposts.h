@@ -24,18 +24,18 @@ class Timer;
 /// Manages the emission of signposts into the recording method supported by
 /// the OS.
 class SignpostEmitter {
-  SignpostEmitterImpl *Impl;
+    SignpostEmitterImpl *Impl;
 
 public:
-  SignpostEmitter();
-  ~SignpostEmitter();
+    SignpostEmitter();
+    ~SignpostEmitter();
 
-  bool isEnabled() const;
+    bool isEnabled() const;
 
-  /// Begin a signposted interval for the given timer.
-  void startTimerInterval(Timer *T);
-  /// End a signposted interval for the given timer.
-  void endTimerInterval(Timer *T);
+    /// Begin a signposted interval for the given timer.
+    void startTimerInterval(Timer *T);
+    /// End a signposted interval for the given timer.
+    void endTimerInterval(Timer *T);
 };
 
 } // end namespace llvm

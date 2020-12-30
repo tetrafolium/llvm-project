@@ -17,9 +17,9 @@
 // Returns: -a
 
 COMPILER_RT_ABI ti_int __negti2(ti_int a) {
-  // Note: this routine is here for API compatibility; any sane compiler
-  // should expand it inline.
-  return -a;
+    // Note: this routine is here for API compatibility; any sane compiler
+    // should expand it inline.
+    return -a;
 }
 
 #endif // CRT_HAS_128BIT

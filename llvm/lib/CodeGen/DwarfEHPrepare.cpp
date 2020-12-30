@@ -44,7 +44,7 @@ STATISTIC(NumResumesLowered, "Number of resume calls lowered");
 
 namespace {
 
-  class DwarfEHPrepare : public FunctionPass {
+class DwarfEHPrepare : public FunctionPass {
     // RewindFunction - _Unwind_Resume or the target equivalent.
     FunctionCallee RewindFunction = nullptr;
 
@@ -59,25 +59,25 @@ namespace {
                             SmallVectorImpl<ResumeInst *> &Resumes,
                             SmallVectorImpl<LandingPadInst *> &CleanupLPads);
 
-  public:
+public:
     static char ID; // Pass identification, replacement for typeid.
 
     DwarfEHPrepare(CodeGenOpt::Level OptLevel = CodeGenOpt::Default)
-      : FunctionPass(ID), OptLevel(OptLevel) {}
+        : FunctionPass(ID), OptLevel(OptLevel) {}
 
     bool runOnFunction(Function &Fn) override;
 
     bool doFinalization(Module &M) override {
-      RewindFunction = nullptr;
-      return false;
+        RewindFunction = nullptr;
+        return false;
     }
 
     void getAnalysisUsage(AnalysisUsage &AU) const override;
 
     StringRef getPassName() const override {
-      return "Exception handling preparation";
+        return "Exception handling preparation";
     }
-  };
+};
 
 } // end anonymous namespace
 
@@ -92,54 +92,54 @@ INITIALIZE_PASS_END(DwarfEHPrepare, DEBUG_TYPE,
                     "Prepare DWARF exceptions", false, false)
 
 FunctionPass *llvm::createDwarfEHPass(CodeGenOpt::Level OptLevel) {
-  return new DwarfEHPrepare(OptLevel);
+    return new DwarfEHPrepare(OptLevel);
 }
 
 void DwarfEHPrepare::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.addRequired<TargetPassConfig>();
-  AU.addRequired<TargetTransformInfoWrapperPass>();
-  if (OptLevel != CodeGenOpt::None)
-    AU.addRequired<DominatorTreeWrapperPass>();
+    AU.addRequired<TargetPassConfig>();
+    AU.addRequired<TargetTransformInfoWrapperPass>();
+    if (OptLevel != CodeGenOpt::None)
+        AU.addRequired<DominatorTreeWrapperPass>();
 }
 
 /// GetExceptionObject - Return the exception object from the value passed into
 /// the 'resume' instruction (typically an aggregate). Clean up any dead
 /// instructions, including the 'resume' instruction.
 Value *DwarfEHPrepare::GetExceptionObject(ResumeInst *RI) {
-  Value *V = RI->getOperand(0);
-  Value *ExnObj = nullptr;
-  InsertValueInst *SelIVI = dyn_cast<InsertValueInst>(V);
-  LoadInst *SelLoad = nullptr;
-  InsertValueInst *ExcIVI = nullptr;
-  bool EraseIVIs = false;
+    Value *V = RI->getOperand(0);
+    Value *ExnObj = nullptr;
+    InsertValueInst *SelIVI = dyn_cast<InsertValueInst>(V);
+    LoadInst *SelLoad = nullptr;
+    InsertValueInst *ExcIVI = nullptr;
+    bool EraseIVIs = false;
 
-  if (SelIVI) {
-    if (SelIVI->getNumIndices() == 1 && *SelIVI->idx_begin() == 1) {
-      ExcIVI = dyn_cast<InsertValueInst>(SelIVI->getOperand(0));
-      if (ExcIVI && isa<UndefValue>(ExcIVI->getOperand(0)) &&
-          ExcIVI->getNumIndices() == 1 && *ExcIVI->idx_begin() == 0) {
-        ExnObj = ExcIVI->getOperand(1);
-        SelLoad = dyn_cast<LoadInst>(SelIVI->getOperand(1));
-        EraseIVIs = true;
-      }
+    if (SelIVI) {
+        if (SelIVI->getNumIndices() == 1 && *SelIVI->idx_begin() == 1) {
+            ExcIVI = dyn_cast<InsertValueInst>(SelIVI->getOperand(0));
+            if (ExcIVI && isa<UndefValue>(ExcIVI->getOperand(0)) &&
+                    ExcIVI->getNumIndices() == 1 && *ExcIVI->idx_begin() == 0) {
+                ExnObj = ExcIVI->getOperand(1);
+                SelLoad = dyn_cast<LoadInst>(SelIVI->getOperand(1));
+                EraseIVIs = true;
+            }
+        }
     }
-  }
 
-  if (!ExnObj)
-    ExnObj = ExtractValueInst::Create(RI->getOperand(0), 0, "exn.obj", RI);
+    if (!ExnObj)
+        ExnObj = ExtractValueInst::Create(RI->getOperand(0), 0, "exn.obj", RI);
 
-  RI->eraseFromParent();
+    RI->eraseFromParent();
 
-  if (EraseIVIs) {
-    if (SelIVI->use_empty())
-      SelIVI->eraseFromParent();
-    if (ExcIVI->use_empty())
-      ExcIVI->eraseFromParent();
-    if (SelLoad && SelLoad->use_empty())
-      SelLoad->eraseFromParent();
-  }
+    if (EraseIVIs) {
+        if (SelIVI->use_empty())
+            SelIVI->eraseFromParent();
+        if (ExcIVI->use_empty())
+            ExcIVI->eraseFromParent();
+        if (SelLoad && SelLoad->use_empty())
+            SelLoad->eraseFromParent();
+    }
 
-  return ExnObj;
+    return ExnObj;
 }
 
 /// Replace resumes that are not reachable from a cleanup landing pad with
@@ -147,131 +147,131 @@ Value *DwarfEHPrepare::GetExceptionObject(ResumeInst *RI) {
 size_t DwarfEHPrepare::pruneUnreachableResumes(
     Function &Fn, SmallVectorImpl<ResumeInst *> &Resumes,
     SmallVectorImpl<LandingPadInst *> &CleanupLPads) {
-  BitVector ResumeReachable(Resumes.size());
-  size_t ResumeIndex = 0;
-  for (auto *RI : Resumes) {
-    for (auto *LP : CleanupLPads) {
-      if (isPotentiallyReachable(LP, RI, nullptr, DT)) {
-        ResumeReachable.set(ResumeIndex);
-        break;
-      }
+    BitVector ResumeReachable(Resumes.size());
+    size_t ResumeIndex = 0;
+    for (auto *RI : Resumes) {
+        for (auto *LP : CleanupLPads) {
+            if (isPotentiallyReachable(LP, RI, nullptr, DT)) {
+                ResumeReachable.set(ResumeIndex);
+                break;
+            }
+        }
+        ++ResumeIndex;
     }
-    ++ResumeIndex;
-  }
 
-  // If everything is reachable, there is no change.
-  if (ResumeReachable.all())
-    return Resumes.size();
+    // If everything is reachable, there is no change.
+    if (ResumeReachable.all())
+        return Resumes.size();
 
-  const TargetTransformInfo &TTI =
-      getAnalysis<TargetTransformInfoWrapperPass>().getTTI(Fn);
-  LLVMContext &Ctx = Fn.getContext();
+    const TargetTransformInfo &TTI =
+        getAnalysis<TargetTransformInfoWrapperPass>().getTTI(Fn);
+    LLVMContext &Ctx = Fn.getContext();
 
-  // Otherwise, insert unreachable instructions and call simplifycfg.
-  size_t ResumesLeft = 0;
-  for (size_t I = 0, E = Resumes.size(); I < E; ++I) {
-    ResumeInst *RI = Resumes[I];
-    if (ResumeReachable[I]) {
-      Resumes[ResumesLeft++] = RI;
-    } else {
-      BasicBlock *BB = RI->getParent();
-      new UnreachableInst(Ctx, RI);
-      RI->eraseFromParent();
-      simplifyCFG(BB, TTI);
+    // Otherwise, insert unreachable instructions and call simplifycfg.
+    size_t ResumesLeft = 0;
+    for (size_t I = 0, E = Resumes.size(); I < E; ++I) {
+        ResumeInst *RI = Resumes[I];
+        if (ResumeReachable[I]) {
+            Resumes[ResumesLeft++] = RI;
+        } else {
+            BasicBlock *BB = RI->getParent();
+            new UnreachableInst(Ctx, RI);
+            RI->eraseFromParent();
+            simplifyCFG(BB, TTI);
+        }
     }
-  }
-  Resumes.resize(ResumesLeft);
-  return ResumesLeft;
+    Resumes.resize(ResumesLeft);
+    return ResumesLeft;
 }
 
 /// InsertUnwindResumeCalls - Convert the ResumeInsts that are still present
 /// into calls to the appropriate _Unwind_Resume function.
 bool DwarfEHPrepare::InsertUnwindResumeCalls(Function &Fn) {
-  SmallVector<ResumeInst*, 16> Resumes;
-  SmallVector<LandingPadInst*, 16> CleanupLPads;
-  for (BasicBlock &BB : Fn) {
-    if (auto *RI = dyn_cast<ResumeInst>(BB.getTerminator()))
-      Resumes.push_back(RI);
-    if (auto *LP = BB.getLandingPadInst())
-      if (LP->isCleanup())
-        CleanupLPads.push_back(LP);
-  }
+    SmallVector<ResumeInst*, 16> Resumes;
+    SmallVector<LandingPadInst*, 16> CleanupLPads;
+    for (BasicBlock &BB : Fn) {
+        if (auto *RI = dyn_cast<ResumeInst>(BB.getTerminator()))
+            Resumes.push_back(RI);
+        if (auto *LP = BB.getLandingPadInst())
+            if (LP->isCleanup())
+                CleanupLPads.push_back(LP);
+    }
 
-  if (Resumes.empty())
-    return false;
+    if (Resumes.empty())
+        return false;
 
-  // Check the personality, don't do anything if it's scope-based.
-  EHPersonality Pers = classifyEHPersonality(Fn.getPersonalityFn());
-  if (isScopedEHPersonality(Pers))
-    return false;
+    // Check the personality, don't do anything if it's scope-based.
+    EHPersonality Pers = classifyEHPersonality(Fn.getPersonalityFn());
+    if (isScopedEHPersonality(Pers))
+        return false;
 
-  LLVMContext &Ctx = Fn.getContext();
+    LLVMContext &Ctx = Fn.getContext();
 
-  size_t ResumesLeft = Resumes.size();
-  if (OptLevel != CodeGenOpt::None)
-    ResumesLeft = pruneUnreachableResumes(Fn, Resumes, CleanupLPads);
+    size_t ResumesLeft = Resumes.size();
+    if (OptLevel != CodeGenOpt::None)
+        ResumesLeft = pruneUnreachableResumes(Fn, Resumes, CleanupLPads);
 
-  if (ResumesLeft == 0)
-    return true; // We pruned them all.
+    if (ResumesLeft == 0)
+        return true; // We pruned them all.
 
-  // Find the rewind function if we didn't already.
-  if (!RewindFunction) {
-    FunctionType *FTy = FunctionType::get(Type::getVoidTy(Ctx),
-                                          Type::getInt8PtrTy(Ctx), false);
-    const char *RewindName = TLI->getLibcallName(RTLIB::UNWIND_RESUME);
-    RewindFunction = Fn.getParent()->getOrInsertFunction(RewindName, FTy);
-  }
+    // Find the rewind function if we didn't already.
+    if (!RewindFunction) {
+        FunctionType *FTy = FunctionType::get(Type::getVoidTy(Ctx),
+                                              Type::getInt8PtrTy(Ctx), false);
+        const char *RewindName = TLI->getLibcallName(RTLIB::UNWIND_RESUME);
+        RewindFunction = Fn.getParent()->getOrInsertFunction(RewindName, FTy);
+    }
 
-  // Create the basic block where the _Unwind_Resume call will live.
-  if (ResumesLeft == 1) {
-    // Instead of creating a new BB and PHI node, just append the call to
-    // _Unwind_Resume to the end of the single resume block.
-    ResumeInst *RI = Resumes.front();
-    BasicBlock *UnwindBB = RI->getParent();
-    Value *ExnObj = GetExceptionObject(RI);
+    // Create the basic block where the _Unwind_Resume call will live.
+    if (ResumesLeft == 1) {
+        // Instead of creating a new BB and PHI node, just append the call to
+        // _Unwind_Resume to the end of the single resume block.
+        ResumeInst *RI = Resumes.front();
+        BasicBlock *UnwindBB = RI->getParent();
+        Value *ExnObj = GetExceptionObject(RI);
 
-    // Call the _Unwind_Resume function.
-    CallInst *CI = CallInst::Create(RewindFunction, ExnObj, "", UnwindBB);
+        // Call the _Unwind_Resume function.
+        CallInst *CI = CallInst::Create(RewindFunction, ExnObj, "", UnwindBB);
+        CI->setCallingConv(TLI->getLibcallCallingConv(RTLIB::UNWIND_RESUME));
+
+        // We never expect _Unwind_Resume to return.
+        new UnreachableInst(Ctx, UnwindBB);
+        return true;
+    }
+
+    BasicBlock *UnwindBB = BasicBlock::Create(Ctx, "unwind_resume", &Fn);
+    PHINode *PN = PHINode::Create(Type::getInt8PtrTy(Ctx), ResumesLeft,
+                                  "exn.obj", UnwindBB);
+
+    // Extract the exception object from the ResumeInst and add it to the PHI node
+    // that feeds the _Unwind_Resume call.
+    for (ResumeInst *RI : Resumes) {
+        BasicBlock *Parent = RI->getParent();
+        BranchInst::Create(UnwindBB, Parent);
+
+        Value *ExnObj = GetExceptionObject(RI);
+        PN->addIncoming(ExnObj, Parent);
+
+        ++NumResumesLowered;
+    }
+
+    // Call the function.
+    CallInst *CI = CallInst::Create(RewindFunction, PN, "", UnwindBB);
     CI->setCallingConv(TLI->getLibcallCallingConv(RTLIB::UNWIND_RESUME));
 
     // We never expect _Unwind_Resume to return.
     new UnreachableInst(Ctx, UnwindBB);
     return true;
-  }
-
-  BasicBlock *UnwindBB = BasicBlock::Create(Ctx, "unwind_resume", &Fn);
-  PHINode *PN = PHINode::Create(Type::getInt8PtrTy(Ctx), ResumesLeft,
-                                "exn.obj", UnwindBB);
-
-  // Extract the exception object from the ResumeInst and add it to the PHI node
-  // that feeds the _Unwind_Resume call.
-  for (ResumeInst *RI : Resumes) {
-    BasicBlock *Parent = RI->getParent();
-    BranchInst::Create(UnwindBB, Parent);
-
-    Value *ExnObj = GetExceptionObject(RI);
-    PN->addIncoming(ExnObj, Parent);
-
-    ++NumResumesLowered;
-  }
-
-  // Call the function.
-  CallInst *CI = CallInst::Create(RewindFunction, PN, "", UnwindBB);
-  CI->setCallingConv(TLI->getLibcallCallingConv(RTLIB::UNWIND_RESUME));
-
-  // We never expect _Unwind_Resume to return.
-  new UnreachableInst(Ctx, UnwindBB);
-  return true;
 }
 
 bool DwarfEHPrepare::runOnFunction(Function &Fn) {
-  const TargetMachine &TM =
-      getAnalysis<TargetPassConfig>().getTM<TargetMachine>();
-  DT = OptLevel != CodeGenOpt::None
-      ? &getAnalysis<DominatorTreeWrapperPass>().getDomTree() : nullptr;
-  TLI = TM.getSubtargetImpl(Fn)->getTargetLowering();
-  bool Changed = InsertUnwindResumeCalls(Fn);
-  DT = nullptr;
-  TLI = nullptr;
-  return Changed;
+    const TargetMachine &TM =
+        getAnalysis<TargetPassConfig>().getTM<TargetMachine>();
+    DT = OptLevel != CodeGenOpt::None
+         ? &getAnalysis<DominatorTreeWrapperPass>().getDomTree() : nullptr;
+    TLI = TM.getSubtargetImpl(Fn)->getTargetLowering();
+    bool Changed = InsertUnwindResumeCalls(Fn);
+    DT = nullptr;
+    TLI = nullptr;
+    return Changed;
 }

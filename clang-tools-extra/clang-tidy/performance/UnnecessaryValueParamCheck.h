@@ -24,25 +24,25 @@ namespace performance {
 /// http://clang.llvm.org/extra/clang-tidy/checks/performance-unnecessary-value-param.html
 class UnnecessaryValueParamCheck : public ClangTidyCheck {
 public:
-  UnnecessaryValueParamCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void onEndOfTranslationUnit() override;
+    UnnecessaryValueParamCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void onEndOfTranslationUnit() override;
 
 private:
-  void handleMoveFix(const ParmVarDecl &Var, const DeclRefExpr &CopyArgument,
-                     const ASTContext &Context);
+    void handleMoveFix(const ParmVarDecl &Var, const DeclRefExpr &CopyArgument,
+                       const ASTContext &Context);
 
-  llvm::DenseMap<const FunctionDecl *, FunctionParmMutationAnalyzer>
-      MutationAnalyzers;
-  utils::IncludeInserter Inserter;
-  const std::vector<std::string> AllowedTypes;
+    llvm::DenseMap<const FunctionDecl *, FunctionParmMutationAnalyzer>
+    MutationAnalyzers;
+    utils::IncludeInserter Inserter;
+    const std::vector<std::string> AllowedTypes;
 };
 
 } // namespace performance

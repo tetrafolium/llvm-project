@@ -24,16 +24,16 @@ extern "C" {
 /** An opaque reference to a diagnostic, always owned by the diagnostics engine
  * (context). Must not be stored outside of the diagnostic handler. */
 struct MlirDiagnostic {
-  void *ptr;
+    void *ptr;
 };
 typedef struct MlirDiagnostic MlirDiagnostic;
 
 /// Severity of a diagnostic.
 enum MlirDiagnosticSeverity {
-  MlirDiagnosticError,
-  MlirDiagnosticWarning,
-  MlirDiagnosticNote,
-  MlirDiagnosticRemark
+    MlirDiagnosticError,
+    MlirDiagnosticWarning,
+    MlirDiagnosticNote,
+    MlirDiagnosticRemark
 };
 typedef enum MlirDiagnosticSeverity MlirDiagnosticSeverity;
 
@@ -47,12 +47,12 @@ typedef uint64_t MlirDiagnosticHandlerID;
  * Otherwise, it is expected to return failure to indicate that other handlers
  * should attempt to process the diagnostic. */
 typedef MlirLogicalResult (*MlirDiagnosticHandler)(MlirDiagnostic,
-                                                   void *userData);
+        void *userData);
 
 /// Prints a diagnostic using the provided callback.
 MLIR_CAPI_EXPORTED void mlirDiagnosticPrint(MlirDiagnostic diagnostic,
-                                            MlirStringCallback callback,
-                                            void *userData);
+        MlirStringCallback callback,
+        void *userData);
 
 /// Returns the location at which the diagnostic is reported.
 MLIR_CAPI_EXPORTED MlirLocation

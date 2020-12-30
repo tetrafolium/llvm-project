@@ -5,11 +5,11 @@
 
 
 namespace llvm {
-	namespace details {
-		void extensions_anchor() {
+namespace details {
+void extensions_anchor() {
 #define HANDLE_EXTENSION(Ext)                                                  \
 			get##Ext##PluginInfo();
 #include "llvm/Support/Extension.def"
-		}
-	}
+}
+}
 }

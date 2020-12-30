@@ -20,44 +20,44 @@ using namespace mlir;
 
 namespace {
 class LLVMArmSVEModuleTranslation : public LLVM::ModuleTranslation {
-  friend LLVM::ModuleTranslation;
+    friend LLVM::ModuleTranslation;
 
 public:
-  using LLVM::ModuleTranslation::ModuleTranslation;
+    using LLVM::ModuleTranslation::ModuleTranslation;
 
 protected:
-  LogicalResult convertOperation(Operation &opInst,
-                                 llvm::IRBuilder<> &builder) override {
+    LogicalResult convertOperation(Operation &opInst,
+                                   llvm::IRBuilder<> &builder) override {
 #include "mlir/Dialect/LLVMIR/LLVMArmSVEConversions.inc"
 
-    return LLVM::ModuleTranslation::convertOperation(opInst, builder);
-  }
+        return LLVM::ModuleTranslation::convertOperation(opInst, builder);
+    }
 };
 } // end namespace
 
 static std::unique_ptr<llvm::Module>
 translateLLVMArmSVEModuleToLLVMIR(Operation *m, llvm::LLVMContext &llvmContext,
                                   StringRef name) {
-  return LLVM::ModuleTranslation::translateModule<LLVMArmSVEModuleTranslation>(
-      m, llvmContext, name);
+    return LLVM::ModuleTranslation::translateModule<LLVMArmSVEModuleTranslation>(
+               m, llvmContext, name);
 }
 
 namespace mlir {
 void registerArmSVEToLLVMIRTranslation() {
-  TranslateFromMLIRRegistration reg(
-      "arm-sve-mlir-to-llvmir",
-      [](ModuleOp module, raw_ostream &output) {
+    TranslateFromMLIRRegistration reg(
+        "arm-sve-mlir-to-llvmir",
+    [](ModuleOp module, raw_ostream &output) {
         llvm::LLVMContext llvmContext;
         auto llvmModule = translateLLVMArmSVEModuleToLLVMIR(
-            module, llvmContext, "LLVMDialectModule");
+                              module, llvmContext, "LLVMDialectModule");
         if (!llvmModule)
-          return failure();
+            return failure();
 
         llvmModule->print(output, nullptr);
         return success();
-      },
-      [](DialectRegistry &registry) {
+    },
+    [](DialectRegistry &registry) {
         registry.insert<LLVM::LLVMArmSVEDialect, LLVM::LLVMDialect>();
-      });
+    });
 }
 } // namespace mlir

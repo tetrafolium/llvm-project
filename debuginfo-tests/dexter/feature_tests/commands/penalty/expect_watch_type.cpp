@@ -15,33 +15,33 @@
 template<class T>
 class Doubled {
 public:
-  Doubled(const T & to_double)
-    : m_member(to_double * 2) {}
+    Doubled(const T & to_double)
+        : m_member(to_double * 2) {}
 
-  T GetVal() {
-    T to_return = m_member; // DexLabel('gv_start')
-    return to_return;       // DexLabel('gv_end')
-  }
+    T GetVal() {
+        T to_return = m_member; // DexLabel('gv_start')
+        return to_return;       // DexLabel('gv_end')
+    }
 
-  static T static_doubler(const T & to_double) {
-    T result = 0;           // DexLabel('sd_start')
-    result = to_double * 2;
-    return result;          // DexLabel('sd_end')
-  }
+    static T static_doubler(const T & to_double) {
+        T result = 0;           // DexLabel('sd_start')
+        result = to_double * 2;
+        return result;          // DexLabel('sd_end')
+    }
 
 private:
-  T m_member;
+    T m_member;
 };
 
 int main() {
-  auto myInt = Doubled<int>(5); // DexLabel('main_start')
-  auto myDouble = Doubled<double>(5.5);
-  auto staticallyDoubledInt = Doubled<int>::static_doubler(5);
-  auto staticallyDoubledDouble = Doubled<double>::static_doubler(5.5);
-  return int(double(myInt.GetVal())
-         + double(staticallyDoubledInt)
-         + myDouble.GetVal()
-         + staticallyDoubledDouble); // DexLabel('main_end')
+    auto myInt = Doubled<int>(5); // DexLabel('main_start')
+    auto myDouble = Doubled<double>(5.5);
+    auto staticallyDoubledInt = Doubled<int>::static_doubler(5);
+    auto staticallyDoubledDouble = Doubled<double>::static_doubler(5.5);
+    return int(double(myInt.GetVal())
+               + double(staticallyDoubledInt)
+               + myDouble.GetVal()
+               + staticallyDoubledDouble); // DexLabel('main_end')
 }
 
 

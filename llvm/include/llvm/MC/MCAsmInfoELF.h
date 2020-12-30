@@ -14,11 +14,11 @@
 namespace llvm {
 
 class MCAsmInfoELF : public MCAsmInfo {
-  virtual void anchor();
-  MCSection *getNonexecutableStackSection(MCContext &Ctx) const final;
+    virtual void anchor();
+    MCSection *getNonexecutableStackSection(MCContext &Ctx) const final;
 
 protected:
-  MCAsmInfoELF();
+    MCAsmInfoELF();
 };
 
 } // end namespace llvm

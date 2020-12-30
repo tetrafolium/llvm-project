@@ -28,69 +28,69 @@ namespace {
 // either a function body or a lambda body.
 class MacroExpansionsWithFileAndLine : public PPCallbacks {
 public:
-  explicit MacroExpansionsWithFileAndLine(
-      LambdaFunctionNameCheck::SourceRangeSet *SME)
-      : SuppressMacroExpansions(SME) {}
+    explicit MacroExpansionsWithFileAndLine(
+        LambdaFunctionNameCheck::SourceRangeSet *SME)
+        : SuppressMacroExpansions(SME) {}
 
-  void MacroExpands(const Token &MacroNameTok,
-                    const MacroDefinition &MD, SourceRange Range,
-                    const MacroArgs *Args) override {
-    bool has_file = false;
-    bool has_line = false;
-    for (const auto& T : MD.getMacroInfo()->tokens()) {
-      if (T.is(tok::identifier)) {
-        StringRef IdentName = T.getIdentifierInfo()->getName();
-        if (IdentName == "__FILE__") {
-          has_file = true;
-        } else if (IdentName == "__LINE__") {
-          has_line = true;
+    void MacroExpands(const Token &MacroNameTok,
+                      const MacroDefinition &MD, SourceRange Range,
+                      const MacroArgs *Args) override {
+        bool has_file = false;
+        bool has_line = false;
+        for (const auto& T : MD.getMacroInfo()->tokens()) {
+            if (T.is(tok::identifier)) {
+                StringRef IdentName = T.getIdentifierInfo()->getName();
+                if (IdentName == "__FILE__") {
+                    has_file = true;
+                } else if (IdentName == "__LINE__") {
+                    has_line = true;
+                }
+            }
         }
-      }
+        if (has_file && has_line) {
+            SuppressMacroExpansions->insert(Range);
+        }
     }
-    if (has_file && has_line) {
-      SuppressMacroExpansions->insert(Range);
-    }
-  }
 
 private:
-  LambdaFunctionNameCheck::SourceRangeSet* SuppressMacroExpansions;
+    LambdaFunctionNameCheck::SourceRangeSet* SuppressMacroExpansions;
 };
 
 } // namespace
 
 void LambdaFunctionNameCheck::registerMatchers(MatchFinder *Finder) {
-  // Match on PredefinedExprs inside a lambda.
-  Finder->addMatcher(predefinedExpr(hasAncestor(lambdaExpr())).bind("E"),
-                     this);
+    // Match on PredefinedExprs inside a lambda.
+    Finder->addMatcher(predefinedExpr(hasAncestor(lambdaExpr())).bind("E"),
+                       this);
 }
 
 void LambdaFunctionNameCheck::registerPPCallbacks(
     const SourceManager &SM, Preprocessor *PP, Preprocessor *ModuleExpanderPP) {
-  PP->addPPCallbacks(std::make_unique<MacroExpansionsWithFileAndLine>(
-      &SuppressMacroExpansions));
+    PP->addPPCallbacks(std::make_unique<MacroExpansionsWithFileAndLine>(
+                           &SuppressMacroExpansions));
 }
 
 void LambdaFunctionNameCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *E = Result.Nodes.getNodeAs<PredefinedExpr>("E");
-  if (E->getIdentKind() != PredefinedExpr::Func &&
-      E->getIdentKind() != PredefinedExpr::Function) {
-    // We don't care about other PredefinedExprs.
-    return;
-  }
-  if (E->getLocation().isMacroID()) {
-    auto ER =
-        Result.SourceManager->getImmediateExpansionRange(E->getLocation());
-    if (SuppressMacroExpansions.find(ER.getAsRange()) !=
-        SuppressMacroExpansions.end()) {
-      // This is a macro expansion for which we should not warn.
-      return;
+    const auto *E = Result.Nodes.getNodeAs<PredefinedExpr>("E");
+    if (E->getIdentKind() != PredefinedExpr::Func &&
+            E->getIdentKind() != PredefinedExpr::Function) {
+        // We don't care about other PredefinedExprs.
+        return;
     }
-  }
-  diag(E->getLocation(),
-       "inside a lambda, '%0' expands to the name of the function call "
-       "operator; consider capturing the name of the enclosing function "
-       "explicitly")
-      << PredefinedExpr::getIdentKindName(E->getIdentKind());
+    if (E->getLocation().isMacroID()) {
+        auto ER =
+            Result.SourceManager->getImmediateExpansionRange(E->getLocation());
+        if (SuppressMacroExpansions.find(ER.getAsRange()) !=
+                SuppressMacroExpansions.end()) {
+            // This is a macro expansion for which we should not warn.
+            return;
+        }
+    }
+    diag(E->getLocation(),
+         "inside a lambda, '%0' expands to the name of the function call "
+         "operator; consider capturing the name of the enclosing function "
+         "explicitly")
+            << PredefinedExpr::getIdentKindName(E->getIdentKind());
 }
 
 } // namespace bugprone

@@ -19,52 +19,56 @@ namespace lldb_private {
 
 class TypeList {
 public:
-  // Constructors and Destructors
-  TypeList();
+    // Constructors and Destructors
+    TypeList();
 
-  virtual ~TypeList();
+    virtual ~TypeList();
 
-  void Clear();
+    void Clear();
 
-  void Dump(Stream *s, bool show_context);
+    void Dump(Stream *s, bool show_context);
 
-  TypeList FindTypes(ConstString name);
+    TypeList FindTypes(ConstString name);
 
-  void Insert(const lldb::TypeSP &type);
+    void Insert(const lldb::TypeSP &type);
 
-  uint32_t GetSize() const;
+    uint32_t GetSize() const;
 
-  bool Empty() const { return !GetSize(); }
+    bool Empty() const {
+        return !GetSize();
+    }
 
-  lldb::TypeSP GetTypeAtIndex(uint32_t idx);
+    lldb::TypeSP GetTypeAtIndex(uint32_t idx);
 
-  typedef std::vector<lldb::TypeSP> collection;
-  typedef AdaptedIterable<collection, lldb::TypeSP, vector_adapter>
-      TypeIterable;
+    typedef std::vector<lldb::TypeSP> collection;
+    typedef AdaptedIterable<collection, lldb::TypeSP, vector_adapter>
+    TypeIterable;
 
-  TypeIterable Types() { return TypeIterable(m_types); }
+    TypeIterable Types() {
+        return TypeIterable(m_types);
+    }
 
-  void ForEach(
-      std::function<bool(const lldb::TypeSP &type_sp)> const &callback) const;
+    void ForEach(
+        std::function<bool(const lldb::TypeSP &type_sp)> const &callback) const;
 
-  void ForEach(std::function<bool(lldb::TypeSP &type_sp)> const &callback);
+    void ForEach(std::function<bool(lldb::TypeSP &type_sp)> const &callback);
 
-  void RemoveMismatchedTypes(const char *qualified_typename, bool exact_match);
+    void RemoveMismatchedTypes(const char *qualified_typename, bool exact_match);
 
-  void RemoveMismatchedTypes(const std::string &type_scope,
-                             const std::string &type_basename,
-                             lldb::TypeClass type_class, bool exact_match);
+    void RemoveMismatchedTypes(const std::string &type_scope,
+                               const std::string &type_basename,
+                               lldb::TypeClass type_class, bool exact_match);
 
-  void RemoveMismatchedTypes(lldb::TypeClass type_class);
+    void RemoveMismatchedTypes(lldb::TypeClass type_class);
 
 private:
-  typedef collection::iterator iterator;
-  typedef collection::const_iterator const_iterator;
+    typedef collection::iterator iterator;
+    typedef collection::const_iterator const_iterator;
 
-  collection m_types;
+    collection m_types;
 
-  TypeList(const TypeList &) = delete;
-  const TypeList &operator=(const TypeList &) = delete;
+    TypeList(const TypeList &) = delete;
+    const TypeList &operator=(const TypeList &) = delete;
 };
 
 } // namespace lldb_private

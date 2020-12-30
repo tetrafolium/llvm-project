@@ -15,10 +15,10 @@ using namespace llvm;
 PreservedAnalyses
 LoopAccessInfoPrinterPass::run(Loop &L, LoopAnalysisManager &AM,
                                LoopStandardAnalysisResults &AR, LPMUpdater &) {
-  Function &F = *L.getHeader()->getParent();
-  auto &LAI = AM.getResult<LoopAccessAnalysis>(L, AR);
-  OS << "Loop access info in function '" << F.getName() << "':\n";
-  OS.indent(2) << L.getHeader()->getName() << ":\n";
-  LAI.print(OS, 4);
-  return PreservedAnalyses::all();
+    Function &F = *L.getHeader()->getParent();
+    auto &LAI = AM.getResult<LoopAccessAnalysis>(L, AR);
+    OS << "Loop access info in function '" << F.getName() << "':\n";
+    OS.indent(2) << L.getHeader()->getName() << ":\n";
+    LAI.print(OS, 4);
+    return PreservedAnalyses::all();
 }

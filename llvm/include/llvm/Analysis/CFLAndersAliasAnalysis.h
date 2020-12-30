@@ -36,55 +36,55 @@ struct AliasSummary;
 } // end namespace cflaa
 
 class CFLAndersAAResult : public AAResultBase<CFLAndersAAResult> {
-  friend AAResultBase<CFLAndersAAResult>;
+    friend AAResultBase<CFLAndersAAResult>;
 
-  class FunctionInfo;
+    class FunctionInfo;
 
 public:
-  explicit CFLAndersAAResult(
-      std::function<const TargetLibraryInfo &(Function &F)> GetTLI);
-  CFLAndersAAResult(CFLAndersAAResult &&RHS);
-  ~CFLAndersAAResult();
+    explicit CFLAndersAAResult(
+        std::function<const TargetLibraryInfo &(Function &F)> GetTLI);
+    CFLAndersAAResult(CFLAndersAAResult &&RHS);
+    ~CFLAndersAAResult();
 
-  /// Handle invalidation events from the new pass manager.
-  /// By definition, this result is stateless and so remains valid.
-  bool invalidate(Function &, const PreservedAnalyses &,
-                  FunctionAnalysisManager::Invalidator &) {
-    return false;
-  }
+    /// Handle invalidation events from the new pass manager.
+    /// By definition, this result is stateless and so remains valid.
+    bool invalidate(Function &, const PreservedAnalyses &,
+                    FunctionAnalysisManager::Invalidator &) {
+        return false;
+    }
 
-  /// Evict the given function from cache
-  void evict(const Function *Fn);
+    /// Evict the given function from cache
+    void evict(const Function *Fn);
 
-  /// Get the alias summary for the given function
-  /// Return nullptr if the summary is not found or not available
-  const cflaa::AliasSummary *getAliasSummary(const Function &);
+    /// Get the alias summary for the given function
+    /// Return nullptr if the summary is not found or not available
+    const cflaa::AliasSummary *getAliasSummary(const Function &);
 
-  AliasResult query(const MemoryLocation &, const MemoryLocation &);
-  AliasResult alias(const MemoryLocation &, const MemoryLocation &,
-                    AAQueryInfo &);
+    AliasResult query(const MemoryLocation &, const MemoryLocation &);
+    AliasResult alias(const MemoryLocation &, const MemoryLocation &,
+                      AAQueryInfo &);
 
 private:
-  /// Ensures that the given function is available in the cache.
-  /// Returns the appropriate entry from the cache.
-  const Optional<FunctionInfo> &ensureCached(const Function &);
+    /// Ensures that the given function is available in the cache.
+    /// Returns the appropriate entry from the cache.
+    const Optional<FunctionInfo> &ensureCached(const Function &);
 
-  /// Inserts the given Function into the cache.
-  void scan(const Function &);
+    /// Inserts the given Function into the cache.
+    void scan(const Function &);
 
-  /// Build summary for a given function
-  FunctionInfo buildInfoFrom(const Function &);
+    /// Build summary for a given function
+    FunctionInfo buildInfoFrom(const Function &);
 
-  std::function<const TargetLibraryInfo &(Function &F)> GetTLI;
+    std::function<const TargetLibraryInfo &(Function &F)> GetTLI;
 
-  /// Cached mapping of Functions to their StratifiedSets.
-  /// If a function's sets are currently being built, it is marked
-  /// in the cache as an Optional without a value. This way, if we
-  /// have any kind of recursion, it is discernable from a function
-  /// that simply has empty sets.
-  DenseMap<const Function *, Optional<FunctionInfo>> Cache;
+    /// Cached mapping of Functions to their StratifiedSets.
+    /// If a function's sets are currently being built, it is marked
+    /// in the cache as an Optional without a value. This way, if we
+    /// have any kind of recursion, it is discernable from a function
+    /// that simply has empty sets.
+    DenseMap<const Function *, Optional<FunctionInfo>> Cache;
 
-  std::forward_list<cflaa::FunctionHandle<CFLAndersAAResult>> Handles;
+    std::forward_list<cflaa::FunctionHandle<CFLAndersAAResult>> Handles;
 };
 
 /// Analysis pass providing a never-invalidated alias analysis result.
@@ -92,30 +92,34 @@ private:
 /// FIXME: We really should refactor CFL to use the analysis more heavily, and
 /// in particular to leverage invalidation to trigger re-computation.
 class CFLAndersAA : public AnalysisInfoMixin<CFLAndersAA> {
-  friend AnalysisInfoMixin<CFLAndersAA>;
+    friend AnalysisInfoMixin<CFLAndersAA>;
 
-  static AnalysisKey Key;
+    static AnalysisKey Key;
 
 public:
-  using Result = CFLAndersAAResult;
+    using Result = CFLAndersAAResult;
 
-  CFLAndersAAResult run(Function &F, FunctionAnalysisManager &AM);
+    CFLAndersAAResult run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Legacy wrapper pass to provide the CFLAndersAAResult object.
 class CFLAndersAAWrapperPass : public ImmutablePass {
-  std::unique_ptr<CFLAndersAAResult> Result;
+    std::unique_ptr<CFLAndersAAResult> Result;
 
 public:
-  static char ID;
+    static char ID;
 
-  CFLAndersAAWrapperPass();
+    CFLAndersAAWrapperPass();
 
-  CFLAndersAAResult &getResult() { return *Result; }
-  const CFLAndersAAResult &getResult() const { return *Result; }
+    CFLAndersAAResult &getResult() {
+        return *Result;
+    }
+    const CFLAndersAAResult &getResult() const {
+        return *Result;
+    }
 
-  void initializePass() override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    void initializePass() override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 // createCFLAndersAAWrapperPass - This pass implements a set-based approach to

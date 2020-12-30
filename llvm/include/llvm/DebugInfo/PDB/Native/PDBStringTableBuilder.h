@@ -33,36 +33,36 @@ class PDBFileBuilder;
 class PDBStringTableBuilder;
 
 struct StringTableHashTraits {
-  PDBStringTableBuilder *Table;
+    PDBStringTableBuilder *Table;
 
-  explicit StringTableHashTraits(PDBStringTableBuilder &Table);
-  uint32_t hashLookupKey(StringRef S) const;
-  StringRef storageKeyToLookupKey(uint32_t Offset) const;
-  uint32_t lookupKeyToStorageKey(StringRef S);
+    explicit StringTableHashTraits(PDBStringTableBuilder &Table);
+    uint32_t hashLookupKey(StringRef S) const;
+    StringRef storageKeyToLookupKey(uint32_t Offset) const;
+    uint32_t lookupKeyToStorageKey(StringRef S);
 };
 
 class PDBStringTableBuilder {
 public:
-  // If string S does not exist in the string table, insert it.
-  // Returns the ID for S.
-  uint32_t insert(StringRef S);
+    // If string S does not exist in the string table, insert it.
+    // Returns the ID for S.
+    uint32_t insert(StringRef S);
 
-  uint32_t getIdForString(StringRef S) const;
-  StringRef getStringForId(uint32_t Id) const;
+    uint32_t getIdForString(StringRef S) const;
+    StringRef getStringForId(uint32_t Id) const;
 
-  uint32_t calculateSerializedSize() const;
-  Error commit(BinaryStreamWriter &Writer) const;
+    uint32_t calculateSerializedSize() const;
+    Error commit(BinaryStreamWriter &Writer) const;
 
-  void setStrings(const codeview::DebugStringTableSubsection &Strings);
+    void setStrings(const codeview::DebugStringTableSubsection &Strings);
 
 private:
-  uint32_t calculateHashTableSize() const;
-  Error writeHeader(BinaryStreamWriter &Writer) const;
-  Error writeStrings(BinaryStreamWriter &Writer) const;
-  Error writeHashTable(BinaryStreamWriter &Writer) const;
-  Error writeEpilogue(BinaryStreamWriter &Writer) const;
+    uint32_t calculateHashTableSize() const;
+    Error writeHeader(BinaryStreamWriter &Writer) const;
+    Error writeStrings(BinaryStreamWriter &Writer) const;
+    Error writeHashTable(BinaryStreamWriter &Writer) const;
+    Error writeEpilogue(BinaryStreamWriter &Writer) const;
 
-  codeview::DebugStringTableSubsection Strings;
+    codeview::DebugStringTableSubsection Strings;
 };
 
 } // end namespace pdb

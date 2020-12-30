@@ -27,14 +27,16 @@ namespace llvm {
 /// uses by inlining them. The \c GlobalDCE pass can be used to remove these
 /// functions once all users are gone.
 class AlwaysInlinerPass : public PassInfoMixin<AlwaysInlinerPass> {
-  bool InsertLifetime;
+    bool InsertLifetime;
 
 public:
-  AlwaysInlinerPass(bool InsertLifetime = true)
-      : InsertLifetime(InsertLifetime) {}
+    AlwaysInlinerPass(bool InsertLifetime = true)
+        : InsertLifetime(InsertLifetime) {}
 
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
-  static bool isRequired() { return true; }
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
+    static bool isRequired() {
+        return true;
+    }
 };
 
 /// Create a legacy pass manager instance of a pass to inline and remove

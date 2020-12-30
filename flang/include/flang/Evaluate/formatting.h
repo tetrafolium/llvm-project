@@ -28,31 +28,31 @@ namespace Fortran::evaluate {
 
 template <typename A>
 auto operator<<(llvm::raw_ostream &o, const A &x) -> decltype(x.AsFortran(o)) {
-  return x.AsFortran(o);
+    return x.AsFortran(o);
 }
 
 template <typename A>
 auto operator<<(llvm::raw_ostream &o, const A &x)
-    -> decltype(o << x.AsFortran()) {
-  return o << x.AsFortran();
+-> decltype(o << x.AsFortran()) {
+    return o << x.AsFortran();
 }
 
 template <typename A, bool COPYABLE>
 auto operator<<(
     llvm::raw_ostream &o, const Fortran::common::Indirection<A, COPYABLE> &x)
-    -> decltype(o << x.value()) {
-  return o << x.value();
+-> decltype(o << x.value()) {
+    return o << x.value();
 }
 
 template <typename A>
 auto operator<<(llvm::raw_ostream &o, const std::optional<A> &x)
-    -> decltype(o << *x) {
-  if (x) {
-    o << *x;
-  } else {
-    o << "(nullopt)";
-  }
-  return o;
+-> decltype(o << *x) {
+    if (x) {
+        o << *x;
+    } else {
+        o << "(nullopt)";
+    }
+    return o;
 }
 } // namespace Fortran::evaluate
 #endif // FORTRAN_EVALUATE_FORMATTING_H_

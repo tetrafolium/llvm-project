@@ -78,13 +78,13 @@ bool __attribute__((noinline)) __clc_runtime_has_hw_fma32(void);
 
 _CLC_OVERLOAD _CLC_INLINE float __clc_flush_denormal_if_not_supported(float x)
 {
-	int ix = as_int(x);
-	if (!__clc_fp32_subnormals_supported() &&
-		((ix & EXPBITS_SP32) == 0) && ((ix & MANTBITS_SP32) != 0)) {
-		ix &= SIGNBIT_SP32;
-		x = as_float(ix);
-	}
-	return x;
+    int ix = as_int(x);
+    if (!__clc_fp32_subnormals_supported() &&
+            ((ix & EXPBITS_SP32) == 0) && ((ix & MANTBITS_SP32) != 0)) {
+        ix &= SIGNBIT_SP32;
+        x = as_float(ix);
+    }
+    return x;
 }
 
 #ifdef cl_khr_fp64

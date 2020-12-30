@@ -36,36 +36,36 @@ namespace trace {
 /// labels. For example a metric tracking accesses to a cache can have labels
 /// named hit and miss.
 struct Metric {
-  enum MetricType {
-    /// A number whose value is meaningful, and may vary over time.
-    /// Each measurement replaces the current value.
-    Value,
+    enum MetricType {
+        /// A number whose value is meaningful, and may vary over time.
+        /// Each measurement replaces the current value.
+        Value,
 
-    /// An aggregate number whose rate of change over time is meaningful.
-    /// Each measurement is an increment for the counter.
-    Counter,
+        /// An aggregate number whose rate of change over time is meaningful.
+        /// Each measurement is an increment for the counter.
+        Counter,
 
-    /// A distribution of values with a meaningful mean and count.
-    /// Each measured value is a sample for the distribution.
-    /// The distribution is assumed not to vary, samples are aggregated over
-    /// time.
-    Distribution,
-  };
-  constexpr Metric(llvm::StringLiteral Name, MetricType Type,
-                   llvm::StringLiteral LabelName = llvm::StringLiteral(""))
-      : Name(Name), Type(Type), LabelName(LabelName) {}
+        /// A distribution of values with a meaningful mean and count.
+        /// Each measured value is a sample for the distribution.
+        /// The distribution is assumed not to vary, samples are aggregated over
+        /// time.
+        Distribution,
+    };
+    constexpr Metric(llvm::StringLiteral Name, MetricType Type,
+                     llvm::StringLiteral LabelName = llvm::StringLiteral(""))
+        : Name(Name), Type(Type), LabelName(LabelName) {}
 
-  /// Records a measurement for this metric to active tracer.
-  void record(double Value, llvm::StringRef Label = "") const;
+    /// Records a measurement for this metric to active tracer.
+    void record(double Value, llvm::StringRef Label = "") const;
 
-  /// Uniquely identifies the metric. Should use snake_case identifiers, can use
-  /// dots for hierarchy if needed. e.g. method_latency, foo.bar.
-  const llvm::StringLiteral Name;
-  const MetricType Type;
-  /// Indicates what measurement labels represent, e.g. "operation_name" for a
-  /// metric tracking latencies. If non empty all measurements must also have a
-  /// non-empty label.
-  const llvm::StringLiteral LabelName;
+    /// Uniquely identifies the metric. Should use snake_case identifiers, can use
+    /// dots for hierarchy if needed. e.g. method_latency, foo.bar.
+    const llvm::StringLiteral Name;
+    const MetricType Type;
+    /// Indicates what measurement labels represent, e.g. "operation_name" for a
+    /// metric tracking latencies. If non empty all measurements must also have a
+    /// non-empty label.
+    const llvm::StringLiteral LabelName;
 };
 
 /// A consumer of trace events and measurements. The events are produced by
@@ -73,32 +73,32 @@ struct Metric {
 /// Implementations of this interface must be thread-safe.
 class EventTracer {
 public:
-  virtual ~EventTracer() = default;
+    virtual ~EventTracer() = default;
 
-  /// Called when event that has a duration starts. \p Name describes the event.
-  /// Returns a derived context that will be destroyed when the event ends.
-  /// Usually implementations will store an object in the returned context
-  /// whose destructor records the end of the event.
-  /// The tracer may capture event details provided in SPAN_ATTACH() calls.
-  /// In this case it should call AttachDetails(), and pass in an empty Object
-  /// to hold them. This Object should be owned by the context, and the data
-  /// will be complete by the time the context is destroyed.
-  virtual Context
-  beginSpan(llvm::StringRef Name,
-            llvm::function_ref<void(llvm::json::Object *)> AttachDetails);
-  // Called when a Span is destroyed (it may still be active on other threads).
-  // beginSpan() and endSpan() will always form a proper stack on each thread.
-  // The Context returned by beginSpan is active, but Args is not ready.
-  // Tracers should not override this unless they need to observe strict
-  // per-thread nesting. Instead they should observe context destruction.
-  virtual void endSpan() {}
+    /// Called when event that has a duration starts. \p Name describes the event.
+    /// Returns a derived context that will be destroyed when the event ends.
+    /// Usually implementations will store an object in the returned context
+    /// whose destructor records the end of the event.
+    /// The tracer may capture event details provided in SPAN_ATTACH() calls.
+    /// In this case it should call AttachDetails(), and pass in an empty Object
+    /// to hold them. This Object should be owned by the context, and the data
+    /// will be complete by the time the context is destroyed.
+    virtual Context
+    beginSpan(llvm::StringRef Name,
+              llvm::function_ref<void(llvm::json::Object *)> AttachDetails);
+    // Called when a Span is destroyed (it may still be active on other threads).
+    // beginSpan() and endSpan() will always form a proper stack on each thread.
+    // The Context returned by beginSpan is active, but Args is not ready.
+    // Tracers should not override this unless they need to observe strict
+    // per-thread nesting. Instead they should observe context destruction.
+    virtual void endSpan() {}
 
-  /// Called for instant events.
-  virtual void instant(llvm::StringRef Name, llvm::json::Object &&Args) {}
+    /// Called for instant events.
+    virtual void instant(llvm::StringRef Name, llvm::json::Object &&Args) {}
 
-  /// Called whenever a metrics records a measurement.
-  virtual void record(const Metric &Metric, double Value,
-                      llvm::StringRef Label) {}
+    /// Called whenever a metrics records a measurement.
+    virtual void record(const Metric &Metric, double Value,
+                        llvm::StringRef Label) {}
 };
 
 /// Sets up a global EventTracer that consumes events produced by Span and
@@ -106,8 +106,8 @@ public:
 /// set up before calling any clangd-specific functions.
 class Session {
 public:
-  Session(EventTracer &Tracer);
-  ~Session();
+    Session(EventTracer &Tracer);
+    ~Session();
 };
 
 /// Create an instance of EventTracer that produces an output in the Trace Event
@@ -118,7 +118,7 @@ public:
 /// The format is documented here:
 /// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 std::unique_ptr<EventTracer> createJSONTracer(llvm::raw_ostream &OS,
-                                              bool Pretty = false);
+        bool Pretty = false);
 
 /// Create an instance of EventTracer that outputs metric measurements as CSV.
 ///
@@ -142,21 +142,21 @@ bool enabled();
 /// SomeJSONExpr is evaluated and copied only if actually needed.
 class Span {
 public:
-  Span(llvm::Twine Name);
-  /// Records span's duration in seconds to \p LatencyMetric with \p Name as the
-  /// label.
-  Span(llvm::Twine Name, const Metric &LatencyMetric);
-  ~Span();
+    Span(llvm::Twine Name);
+    /// Records span's duration in seconds to \p LatencyMetric with \p Name as the
+    /// label.
+    Span(llvm::Twine Name, const Metric &LatencyMetric);
+    ~Span();
 
-  /// Mutable metadata, if this span is interested.
-  /// Prefer to use SPAN_ATTACH rather than accessing this directly.
-  /// The lifetime of Args is the whole event, even if the Span dies.
-  llvm::json::Object *const Args;
+    /// Mutable metadata, if this span is interested.
+    /// Prefer to use SPAN_ATTACH rather than accessing this directly.
+    /// The lifetime of Args is the whole event, even if the Span dies.
+    llvm::json::Object *const Args;
 
 private:
-  // Awkward constructor works around constant initialization.
-  Span(std::pair<Context, llvm::json::Object *>);
-  WithContext RestoreCtx;
+    // Awkward constructor works around constant initialization.
+    Span(std::pair<Context, llvm::json::Object *>);
+    WithContext RestoreCtx;
 };
 
 /// Attach a key-value pair to a Span event.

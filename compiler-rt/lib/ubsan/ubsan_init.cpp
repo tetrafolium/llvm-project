@@ -23,44 +23,46 @@
 using namespace __ubsan;
 
 const char *__ubsan::GetSanititizerToolName() {
-  return "UndefinedBehaviorSanitizer";
+    return "UndefinedBehaviorSanitizer";
 }
 
 static bool ubsan_initialized;
 static StaticSpinMutex ubsan_init_mu;
 
 static void CommonInit() {
-  InitializeSuppressions();
+    InitializeSuppressions();
 }
 
 static void CommonStandaloneInit() {
-  SanitizerToolName = GetSanititizerToolName();
-  CacheBinaryName();
-  InitializeFlags();
-  __sanitizer::InitializePlatformEarly();
-  __sanitizer_set_report_path(common_flags()->log_path);
-  AndroidLogInit();
-  InitializeCoverage(common_flags()->coverage, common_flags()->coverage_dir);
-  CommonInit();
-  Symbolizer::LateInitialize();
+    SanitizerToolName = GetSanititizerToolName();
+    CacheBinaryName();
+    InitializeFlags();
+    __sanitizer::InitializePlatformEarly();
+    __sanitizer_set_report_path(common_flags()->log_path);
+    AndroidLogInit();
+    InitializeCoverage(common_flags()->coverage, common_flags()->coverage_dir);
+    CommonInit();
+    Symbolizer::LateInitialize();
 }
 
 void __ubsan::InitAsStandalone() {
-  SpinMutexLock l(&ubsan_init_mu);
-  if (!ubsan_initialized) {
-    CommonStandaloneInit();
-    ubsan_initialized = true;
-  }
+    SpinMutexLock l(&ubsan_init_mu);
+    if (!ubsan_initialized) {
+        CommonStandaloneInit();
+        ubsan_initialized = true;
+    }
 }
 
-void __ubsan::InitAsStandaloneIfNecessary() { return InitAsStandalone(); }
+void __ubsan::InitAsStandaloneIfNecessary() {
+    return InitAsStandalone();
+}
 
 void __ubsan::InitAsPlugin() {
-  SpinMutexLock l(&ubsan_init_mu);
-  if (!ubsan_initialized) {
-    CommonInit();
-    ubsan_initialized = true;
-  }
+    SpinMutexLock l(&ubsan_init_mu);
+    if (!ubsan_initialized) {
+        CommonInit();
+        ubsan_initialized = true;
+    }
 }
 
 #endif  // CAN_SANITIZE_UB

@@ -16,14 +16,14 @@ namespace llvm {
 namespace pdb {
 class DIATable : public IPDBTable {
 public:
-  explicit DIATable(CComPtr<IDiaTable> DiaTable);
+    explicit DIATable(CComPtr<IDiaTable> DiaTable);
 
-  uint32_t getItemCount() const override;
-  std::string getName() const override;
-  PDB_TableType getTableType() const override;
+    uint32_t getItemCount() const override;
+    std::string getName() const override;
+    PDB_TableType getTableType() const override;
 
 private:
-  CComPtr<IDiaTable> Table;
+    CComPtr<IDiaTable> Table;
 };
 }
 }

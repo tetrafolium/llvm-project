@@ -12,11 +12,17 @@
 
 namespace gwp_asan {
 namespace options {
-Backtrace_t getBacktraceFunction() { return nullptr; }
-crash_handler::PrintBacktrace_t getPrintBacktraceFunction() { return nullptr; }
+Backtrace_t getBacktraceFunction() {
+    return nullptr;
+}
+crash_handler::PrintBacktrace_t getPrintBacktraceFunction() {
+    return nullptr;
+}
 } // namespace options
 
 namespace crash_handler {
-SegvBacktrace_t getSegvBacktraceFunction() { return nullptr; }
+SegvBacktrace_t getSegvBacktraceFunction() {
+    return nullptr;
+}
 } // namespace crash_handler
 } // namespace gwp_asan

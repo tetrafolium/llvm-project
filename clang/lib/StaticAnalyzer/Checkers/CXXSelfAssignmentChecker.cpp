@@ -28,54 +28,54 @@ namespace {
 
 class CXXSelfAssignmentChecker : public Checker<check::BeginFunction> {
 public:
-  CXXSelfAssignmentChecker();
-  void checkBeginFunction(CheckerContext &C) const;
+    CXXSelfAssignmentChecker();
+    void checkBeginFunction(CheckerContext &C) const;
 };
 }
 
 CXXSelfAssignmentChecker::CXXSelfAssignmentChecker() {}
 
 void CXXSelfAssignmentChecker::checkBeginFunction(CheckerContext &C) const {
-  if (!C.inTopFrame())
-    return;
-  const auto *LCtx = C.getLocationContext();
-  const auto *MD = dyn_cast<CXXMethodDecl>(LCtx->getDecl());
-  if (!MD)
-    return;
-  if (!MD->isCopyAssignmentOperator() && !MD->isMoveAssignmentOperator())
-    return;
-  auto &State = C.getState();
-  auto &SVB = C.getSValBuilder();
-  auto ThisVal =
-      State->getSVal(SVB.getCXXThis(MD, LCtx->getStackFrame()));
-  auto Param = SVB.makeLoc(State->getRegion(MD->getParamDecl(0), LCtx));
-  auto ParamVal = State->getSVal(Param);
+    if (!C.inTopFrame())
+        return;
+    const auto *LCtx = C.getLocationContext();
+    const auto *MD = dyn_cast<CXXMethodDecl>(LCtx->getDecl());
+    if (!MD)
+        return;
+    if (!MD->isCopyAssignmentOperator() && !MD->isMoveAssignmentOperator())
+        return;
+    auto &State = C.getState();
+    auto &SVB = C.getSValBuilder();
+    auto ThisVal =
+        State->getSVal(SVB.getCXXThis(MD, LCtx->getStackFrame()));
+    auto Param = SVB.makeLoc(State->getRegion(MD->getParamDecl(0), LCtx));
+    auto ParamVal = State->getSVal(Param);
 
-  ProgramStateRef SelfAssignState = State->bindLoc(Param, ThisVal, LCtx);
-  const NoteTag *SelfAssignTag =
+    ProgramStateRef SelfAssignState = State->bindLoc(Param, ThisVal, LCtx);
+    const NoteTag *SelfAssignTag =
     C.getNoteTag([MD](PathSensitiveBugReport &BR) -> std::string {
         SmallString<256> Msg;
         llvm::raw_svector_ostream Out(Msg);
         Out << "Assuming " << MD->getParamDecl(0)->getName() << " == *this";
         return std::string(Out.str());
-      });
-  C.addTransition(SelfAssignState, SelfAssignTag);
+    });
+    C.addTransition(SelfAssignState, SelfAssignTag);
 
-  ProgramStateRef NonSelfAssignState = State->bindLoc(Param, ParamVal, LCtx);
-  const NoteTag *NonSelfAssignTag =
+    ProgramStateRef NonSelfAssignState = State->bindLoc(Param, ParamVal, LCtx);
+    const NoteTag *NonSelfAssignTag =
     C.getNoteTag([MD](PathSensitiveBugReport &BR) -> std::string {
         SmallString<256> Msg;
         llvm::raw_svector_ostream Out(Msg);
         Out << "Assuming " << MD->getParamDecl(0)->getName() << " != *this";
         return std::string(Out.str());
-      });
-  C.addTransition(NonSelfAssignState, NonSelfAssignTag);
+    });
+    C.addTransition(NonSelfAssignState, NonSelfAssignTag);
 }
 
 void ento::registerCXXSelfAssignmentChecker(CheckerManager &Mgr) {
-  Mgr.registerChecker<CXXSelfAssignmentChecker>();
+    Mgr.registerChecker<CXXSelfAssignmentChecker>();
 }
 
 bool ento::shouldRegisterCXXSelfAssignmentChecker(const CheckerManager &mgr) {
-  return true;
+    return true;
 }

@@ -19,9 +19,9 @@ MCTargetOptions::MCTargetOptions()
       PreserveAsmComments(true), Dwarf64(false) {}
 
 StringRef MCTargetOptions::getABIName() const {
-  return ABIName;
+    return ABIName;
 }
 
 StringRef MCTargetOptions::getAssemblyLanguage() const {
-  return AssemblyLanguage;
+    return AssemblyLanguage;
 }

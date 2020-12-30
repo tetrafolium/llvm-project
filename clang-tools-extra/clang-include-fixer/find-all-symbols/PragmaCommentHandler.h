@@ -26,12 +26,12 @@ class HeaderMapCollector;
 /// https://github.com/include-what-you-use/include-what-you-use/blob/master/docs/IWYUPragmas.md#iwyu-pragma-private
 class PragmaCommentHandler : public clang::CommentHandler {
 public:
-  PragmaCommentHandler(HeaderMapCollector *Collector) : Collector(Collector) {}
+    PragmaCommentHandler(HeaderMapCollector *Collector) : Collector(Collector) {}
 
-  bool HandleComment(Preprocessor &PP, SourceRange Range) override;
+    bool HandleComment(Preprocessor &PP, SourceRange Range) override;
 
 private:
-  HeaderMapCollector *const Collector;
+    HeaderMapCollector *const Collector;
 };
 
 } // namespace find_all_symbols

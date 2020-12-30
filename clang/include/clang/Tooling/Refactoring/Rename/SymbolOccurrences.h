@@ -38,48 +38,50 @@ class SymbolName;
 /// Objective-C method 'selectorPiece1:selectorPiece2'.
 class SymbolOccurrence {
 public:
-  enum OccurrenceKind {
-    /// This occurrence is an exact match and can be renamed automatically.
-    ///
-    /// Note:
-    /// Symbol occurrences in macro arguments that expand to different
-    /// declarations get marked as exact matches, and thus the renaming engine
-    /// will rename them e.g.:
-    ///
-    /// \code
-    ///   #define MACRO(x) x + ns::x
-    ///   int foo(int var) {
-    ///     return MACRO(var); // var is renamed automatically here when
-    ///                        // either var or ns::var is renamed.
-    ///   };
-    /// \endcode
-    ///
-    /// The user will have to fix their code manually after performing such a
-    /// rename.
-    /// FIXME: The rename verifier should notify user about this issue.
-    MatchingSymbol
-  };
+    enum OccurrenceKind {
+        /// This occurrence is an exact match and can be renamed automatically.
+        ///
+        /// Note:
+        /// Symbol occurrences in macro arguments that expand to different
+        /// declarations get marked as exact matches, and thus the renaming engine
+        /// will rename them e.g.:
+        ///
+        /// \code
+        ///   #define MACRO(x) x + ns::x
+        ///   int foo(int var) {
+        ///     return MACRO(var); // var is renamed automatically here when
+        ///                        // either var or ns::var is renamed.
+        ///   };
+        /// \endcode
+        ///
+        /// The user will have to fix their code manually after performing such a
+        /// rename.
+        /// FIXME: The rename verifier should notify user about this issue.
+        MatchingSymbol
+    };
 
-  SymbolOccurrence(const SymbolName &Name, OccurrenceKind Kind,
-                   ArrayRef<SourceLocation> Locations);
+    SymbolOccurrence(const SymbolName &Name, OccurrenceKind Kind,
+                     ArrayRef<SourceLocation> Locations);
 
-  SymbolOccurrence(SymbolOccurrence &&) = default;
-  SymbolOccurrence &operator=(SymbolOccurrence &&) = default;
+    SymbolOccurrence(SymbolOccurrence &&) = default;
+    SymbolOccurrence &operator=(SymbolOccurrence &&) = default;
 
-  OccurrenceKind getKind() const { return Kind; }
-
-  ArrayRef<SourceRange> getNameRanges() const {
-    if (MultipleRanges) {
-      return llvm::makeArrayRef(MultipleRanges.get(),
-                                RangeOrNumRanges.getBegin().getRawEncoding());
+    OccurrenceKind getKind() const {
+        return Kind;
     }
-    return RangeOrNumRanges;
-  }
+
+    ArrayRef<SourceRange> getNameRanges() const {
+        if (MultipleRanges) {
+            return llvm::makeArrayRef(MultipleRanges.get(),
+                                      RangeOrNumRanges.getBegin().getRawEncoding());
+        }
+        return RangeOrNumRanges;
+    }
 
 private:
-  OccurrenceKind Kind;
-  std::unique_ptr<SourceRange[]> MultipleRanges;
-  SourceRange RangeOrNumRanges;
+    OccurrenceKind Kind;
+    std::unique_ptr<SourceRange[]> MultipleRanges;
+    SourceRange RangeOrNumRanges;
 };
 
 using SymbolOccurrences = std::vector<SymbolOccurrence>;

@@ -22,9 +22,9 @@ namespace llvm {
 /// Simple pass that provides a name to every anonymous globals.
 class NameAnonGlobalPass : public PassInfoMixin<NameAnonGlobalPass> {
 public:
-  NameAnonGlobalPass() = default;
+    NameAnonGlobalPass() = default;
 
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

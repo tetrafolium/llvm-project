@@ -22,53 +22,55 @@ namespace tidy {
 namespace openmp {
 
 ExceptionEscapeCheck::ExceptionEscapeCheck(StringRef Name,
-                                           ClangTidyContext *Context)
+        ClangTidyContext *Context)
     : ClangTidyCheck(Name, Context),
       RawIgnoredExceptions(Options.get("IgnoredExceptions", "")) {
-  llvm::SmallVector<StringRef, 8> FunctionsThatShouldNotThrowVec,
-      IgnoredExceptionsVec;
+    llvm::SmallVector<StringRef, 8> FunctionsThatShouldNotThrowVec,
+         IgnoredExceptionsVec;
 
-  llvm::StringSet<> IgnoredExceptions;
-  StringRef(RawIgnoredExceptions).split(IgnoredExceptionsVec, ",", -1, false);
-  llvm::transform(IgnoredExceptionsVec, IgnoredExceptionsVec.begin(),
-                  [](StringRef S) { return S.trim(); });
-  IgnoredExceptions.insert(IgnoredExceptionsVec.begin(),
-                           IgnoredExceptionsVec.end());
-  Tracer.ignoreExceptions(std::move(IgnoredExceptions));
-  Tracer.ignoreBadAlloc(true);
+    llvm::StringSet<> IgnoredExceptions;
+    StringRef(RawIgnoredExceptions).split(IgnoredExceptionsVec, ",", -1, false);
+    llvm::transform(IgnoredExceptionsVec, IgnoredExceptionsVec.begin(),
+    [](StringRef S) {
+        return S.trim();
+    });
+    IgnoredExceptions.insert(IgnoredExceptionsVec.begin(),
+                             IgnoredExceptionsVec.end());
+    Tracer.ignoreExceptions(std::move(IgnoredExceptions));
+    Tracer.ignoreBadAlloc(true);
 }
 
 void ExceptionEscapeCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
-  Options.store(Opts, "IgnoredExceptions", RawIgnoredExceptions);
+    Options.store(Opts, "IgnoredExceptions", RawIgnoredExceptions);
 }
 
 void ExceptionEscapeCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(ompExecutableDirective(
-                         unless(isStandaloneDirective()),
-                         hasStructuredBlock(stmt().bind("structured-block")))
-                         .bind("directive"),
-                     this);
+    Finder->addMatcher(ompExecutableDirective(
+                           unless(isStandaloneDirective()),
+                           hasStructuredBlock(stmt().bind("structured-block")))
+                       .bind("directive"),
+                       this);
 }
 
 void ExceptionEscapeCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *Directive =
-      Result.Nodes.getNodeAs<OMPExecutableDirective>("directive");
-  assert(Directive && "Expected to match some OpenMP Executable directive.");
-  const auto *StructuredBlock =
-      Result.Nodes.getNodeAs<Stmt>("structured-block");
-  assert(StructuredBlock && "Expected to get some OpenMP Structured Block.");
+    const auto *Directive =
+        Result.Nodes.getNodeAs<OMPExecutableDirective>("directive");
+    assert(Directive && "Expected to match some OpenMP Executable directive.");
+    const auto *StructuredBlock =
+        Result.Nodes.getNodeAs<Stmt>("structured-block");
+    assert(StructuredBlock && "Expected to get some OpenMP Structured Block.");
 
-  if (Tracer.analyze(StructuredBlock).getBehaviour() !=
-      utils::ExceptionAnalyzer::State::Throwing)
-    return; // No exceptions have been proven to escape out of the struc. block.
+    if (Tracer.analyze(StructuredBlock).getBehaviour() !=
+            utils::ExceptionAnalyzer::State::Throwing)
+        return; // No exceptions have been proven to escape out of the struc. block.
 
-  // FIXME: We should provide more information about the exact location where
-  // the exception is thrown, maybe the full path the exception escapes.
+    // FIXME: We should provide more information about the exact location where
+    // the exception is thrown, maybe the full path the exception escapes.
 
-  diag(StructuredBlock->getBeginLoc(),
-       "an exception thrown inside of the OpenMP '%0' region is not caught in "
-       "that same region")
-      << getOpenMPDirectiveName(Directive->getDirectiveKind());
+    diag(StructuredBlock->getBeginLoc(),
+         "an exception thrown inside of the OpenMP '%0' region is not caught in "
+         "that same region")
+            << getOpenMPDirectiveName(Directive->getDirectiveKind());
 }
 
 } // namespace openmp

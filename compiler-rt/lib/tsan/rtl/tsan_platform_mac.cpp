@@ -46,22 +46,22 @@ namespace __tsan {
 
 #if !SANITIZER_GO
 static void *SignalSafeGetOrAllocate(uptr *dst, uptr size) {
-  atomic_uintptr_t *a = (atomic_uintptr_t *)dst;
-  void *val = (void *)atomic_load_relaxed(a);
-  atomic_signal_fence(memory_order_acquire);  // Turns the previous load into
-                                              // acquire wrt signals.
-  if (UNLIKELY(val == nullptr)) {
-    val = (void *)internal_mmap(nullptr, size, PROT_READ | PROT_WRITE,
-                                MAP_PRIVATE | MAP_ANON, -1, 0);
-    CHECK(val);
-    void *cmp = nullptr;
-    if (!atomic_compare_exchange_strong(a, (uintptr_t *)&cmp, (uintptr_t)val,
-                                        memory_order_acq_rel)) {
-      internal_munmap(val, size);
-      val = cmp;
+    atomic_uintptr_t *a = (atomic_uintptr_t *)dst;
+    void *val = (void *)atomic_load_relaxed(a);
+    atomic_signal_fence(memory_order_acquire);  // Turns the previous load into
+    // acquire wrt signals.
+    if (UNLIKELY(val == nullptr)) {
+        val = (void *)internal_mmap(nullptr, size, PROT_READ | PROT_WRITE,
+                                    MAP_PRIVATE | MAP_ANON, -1, 0);
+        CHECK(val);
+        void *cmp = nullptr;
+        if (!atomic_compare_exchange_strong(a, (uintptr_t *)&cmp, (uintptr_t)val,
+                                            memory_order_acq_rel)) {
+            internal_munmap(val, size);
+            val = cmp;
+        }
     }
-  }
-  return val;
+    return val;
 }
 
 // On OS X, accessing TLVs via __thread or manually by using pthread_key_* is
@@ -80,35 +80,35 @@ static ThreadState *main_thread_state_loc = (ThreadState *)main_thread_state;
 // current heuristic for guarding this is checking `main_thread_identity` which
 // is only assigned in `__tsan::InitializePlatform`.
 static ThreadState **cur_thread_location() {
-  if (main_thread_identity == 0)
-    return &main_thread_state_loc;
-  uptr thread_identity = (uptr)pthread_self();
-  if (thread_identity == main_thread_identity)
-    return &main_thread_state_loc;
-  return (ThreadState **)MemToShadow(thread_identity);
+    if (main_thread_identity == 0)
+        return &main_thread_state_loc;
+    uptr thread_identity = (uptr)pthread_self();
+    if (thread_identity == main_thread_identity)
+        return &main_thread_state_loc;
+    return (ThreadState **)MemToShadow(thread_identity);
 }
 
 ThreadState *cur_thread() {
-  return (ThreadState *)SignalSafeGetOrAllocate(
-      (uptr *)cur_thread_location(), sizeof(ThreadState));
+    return (ThreadState *)SignalSafeGetOrAllocate(
+               (uptr *)cur_thread_location(), sizeof(ThreadState));
 }
 
 void set_cur_thread(ThreadState *thr) {
-  *cur_thread_location() = thr;
+    *cur_thread_location() = thr;
 }
 
 // TODO(kuba.brecka): This is not async-signal-safe. In particular, we call
 // munmap first and then clear `fake_tls`; if we receive a signal in between,
 // handler will try to access the unmapped ThreadState.
 void cur_thread_finalize() {
-  ThreadState **thr_state_loc = cur_thread_location();
-  if (thr_state_loc == &main_thread_state_loc) {
-    // Calling dispatch_main() or xpc_main() actually invokes pthread_exit to
-    // exit the main thread. Let's keep the main thread's ThreadState.
-    return;
-  }
-  internal_munmap(*thr_state_loc, sizeof(ThreadState));
-  *thr_state_loc = nullptr;
+    ThreadState **thr_state_loc = cur_thread_location();
+    if (thr_state_loc == &main_thread_state_loc) {
+        // Calling dispatch_main() or xpc_main() actually invokes pthread_exit to
+        // exit the main thread. Let's keep the main thread's ThreadState.
+        return;
+    }
+    internal_munmap(*thr_state_loc, sizeof(ThreadState));
+    *thr_state_loc = nullptr;
 }
 #endif
 
@@ -116,76 +116,76 @@ void FlushShadowMemory() {
 }
 
 static void RegionMemUsage(uptr start, uptr end, uptr *res, uptr *dirty) {
-  vm_address_t address = start;
-  vm_address_t end_address = end;
-  uptr resident_pages = 0;
-  uptr dirty_pages = 0;
-  while (address < end_address) {
-    vm_size_t vm_region_size;
-    mach_msg_type_number_t count = VM_REGION_EXTENDED_INFO_COUNT;
-    vm_region_extended_info_data_t vm_region_info;
-    mach_port_t object_name;
-    kern_return_t ret = vm_region_64(
-        mach_task_self(), &address, &vm_region_size, VM_REGION_EXTENDED_INFO,
-        (vm_region_info_t)&vm_region_info, &count, &object_name);
-    if (ret != KERN_SUCCESS) break;
+    vm_address_t address = start;
+    vm_address_t end_address = end;
+    uptr resident_pages = 0;
+    uptr dirty_pages = 0;
+    while (address < end_address) {
+        vm_size_t vm_region_size;
+        mach_msg_type_number_t count = VM_REGION_EXTENDED_INFO_COUNT;
+        vm_region_extended_info_data_t vm_region_info;
+        mach_port_t object_name;
+        kern_return_t ret = vm_region_64(
+                                mach_task_self(), &address, &vm_region_size, VM_REGION_EXTENDED_INFO,
+                                (vm_region_info_t)&vm_region_info, &count, &object_name);
+        if (ret != KERN_SUCCESS) break;
 
-    resident_pages += vm_region_info.pages_resident;
-    dirty_pages += vm_region_info.pages_dirtied;
+        resident_pages += vm_region_info.pages_resident;
+        dirty_pages += vm_region_info.pages_dirtied;
 
-    address += vm_region_size;
-  }
-  *res = resident_pages * GetPageSizeCached();
-  *dirty = dirty_pages * GetPageSizeCached();
+        address += vm_region_size;
+    }
+    *res = resident_pages * GetPageSizeCached();
+    *dirty = dirty_pages * GetPageSizeCached();
 }
 
 void WriteMemoryProfile(char *buf, uptr buf_size, uptr nthread, uptr nlive) {
-  uptr shadow_res, shadow_dirty;
-  uptr meta_res, meta_dirty;
-  uptr trace_res, trace_dirty;
-  RegionMemUsage(ShadowBeg(), ShadowEnd(), &shadow_res, &shadow_dirty);
-  RegionMemUsage(MetaShadowBeg(), MetaShadowEnd(), &meta_res, &meta_dirty);
-  RegionMemUsage(TraceMemBeg(), TraceMemEnd(), &trace_res, &trace_dirty);
+    uptr shadow_res, shadow_dirty;
+    uptr meta_res, meta_dirty;
+    uptr trace_res, trace_dirty;
+    RegionMemUsage(ShadowBeg(), ShadowEnd(), &shadow_res, &shadow_dirty);
+    RegionMemUsage(MetaShadowBeg(), MetaShadowEnd(), &meta_res, &meta_dirty);
+    RegionMemUsage(TraceMemBeg(), TraceMemEnd(), &trace_res, &trace_dirty);
 
 #if !SANITIZER_GO
-  uptr low_res, low_dirty;
-  uptr high_res, high_dirty;
-  uptr heap_res, heap_dirty;
-  RegionMemUsage(LoAppMemBeg(), LoAppMemEnd(), &low_res, &low_dirty);
-  RegionMemUsage(HiAppMemBeg(), HiAppMemEnd(), &high_res, &high_dirty);
-  RegionMemUsage(HeapMemBeg(), HeapMemEnd(), &heap_res, &heap_dirty);
+    uptr low_res, low_dirty;
+    uptr high_res, high_dirty;
+    uptr heap_res, heap_dirty;
+    RegionMemUsage(LoAppMemBeg(), LoAppMemEnd(), &low_res, &low_dirty);
+    RegionMemUsage(HiAppMemBeg(), HiAppMemEnd(), &high_res, &high_dirty);
+    RegionMemUsage(HeapMemBeg(), HeapMemEnd(), &heap_res, &heap_dirty);
 #else  // !SANITIZER_GO
-  uptr app_res, app_dirty;
-  RegionMemUsage(AppMemBeg(), AppMemEnd(), &app_res, &app_dirty);
+    uptr app_res, app_dirty;
+    RegionMemUsage(AppMemBeg(), AppMemEnd(), &app_res, &app_dirty);
 #endif
 
-  StackDepotStats *stacks = StackDepotGetStats();
-  internal_snprintf(buf, buf_size,
-    "shadow   (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
-    "meta     (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
-    "traces   (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
+    StackDepotStats *stacks = StackDepotGetStats();
+    internal_snprintf(buf, buf_size,
+                      "shadow   (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
+                      "meta     (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
+                      "traces   (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
 #if !SANITIZER_GO
-    "low app  (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
-    "high app (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
-    "heap     (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
+                      "low app  (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
+                      "high app (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
+                      "heap     (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
 #else  // !SANITIZER_GO
-    "app      (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
+                      "app      (0x%016zx-0x%016zx): resident %zd kB, dirty %zd kB\n"
 #endif
-    "stacks: %zd unique IDs, %zd kB allocated\n"
-    "threads: %zd total, %zd live\n"
-    "------------------------------\n",
-    ShadowBeg(), ShadowEnd(), shadow_res / 1024, shadow_dirty / 1024,
-    MetaShadowBeg(), MetaShadowEnd(), meta_res / 1024, meta_dirty / 1024,
-    TraceMemBeg(), TraceMemEnd(), trace_res / 1024, trace_dirty / 1024,
+                      "stacks: %zd unique IDs, %zd kB allocated\n"
+                      "threads: %zd total, %zd live\n"
+                      "------------------------------\n",
+                      ShadowBeg(), ShadowEnd(), shadow_res / 1024, shadow_dirty / 1024,
+                      MetaShadowBeg(), MetaShadowEnd(), meta_res / 1024, meta_dirty / 1024,
+                      TraceMemBeg(), TraceMemEnd(), trace_res / 1024, trace_dirty / 1024,
 #if !SANITIZER_GO
-    LoAppMemBeg(), LoAppMemEnd(), low_res / 1024, low_dirty / 1024,
-    HiAppMemBeg(), HiAppMemEnd(), high_res / 1024, high_dirty / 1024,
-    HeapMemBeg(), HeapMemEnd(), heap_res / 1024, heap_dirty / 1024,
+                      LoAppMemBeg(), LoAppMemEnd(), low_res / 1024, low_dirty / 1024,
+                      HiAppMemBeg(), HiAppMemEnd(), high_res / 1024, high_dirty / 1024,
+                      HeapMemBeg(), HeapMemEnd(), heap_res / 1024, heap_dirty / 1024,
 #else  // !SANITIZER_GO
-    AppMemBeg(), AppMemEnd(), app_res / 1024, app_dirty / 1024,
+                      AppMemBeg(), AppMemEnd(), app_res / 1024, app_dirty / 1024,
 #endif
-    stacks->n_uniq_ids, stacks->allocated / 1024,
-    nthread, nlive);
+                      stacks->n_uniq_ids, stacks->allocated / 1024,
+                      nthread, nlive);
 }
 
 #if !SANITIZER_GO
@@ -199,70 +199,70 @@ void InitializeShadowMemoryPlatform() { }
 // thread. If it's just a regular thread, this hook is called on the parent
 // thread.
 typedef void (*pthread_introspection_hook_t)(unsigned int event,
-                                             pthread_t thread, void *addr,
-                                             size_t size);
+        pthread_t thread, void *addr,
+        size_t size);
 extern "C" pthread_introspection_hook_t pthread_introspection_hook_install(
     pthread_introspection_hook_t hook);
 static const uptr PTHREAD_INTROSPECTION_THREAD_CREATE = 1;
 static const uptr PTHREAD_INTROSPECTION_THREAD_TERMINATE = 3;
 static pthread_introspection_hook_t prev_pthread_introspection_hook;
 static void my_pthread_introspection_hook(unsigned int event, pthread_t thread,
-                                          void *addr, size_t size) {
-  if (event == PTHREAD_INTROSPECTION_THREAD_CREATE) {
-    if (thread == pthread_self()) {
-      // The current thread is a newly created GCD worker thread.
-      ThreadState *thr = cur_thread();
-      Processor *proc = ProcCreate();
-      ProcWire(proc, thr);
-      ThreadState *parent_thread_state = nullptr;  // No parent.
-      int tid = ThreadCreate(parent_thread_state, 0, (uptr)thread, true);
-      CHECK_NE(tid, 0);
-      ThreadStart(thr, tid, GetTid(), ThreadType::Worker);
+        void *addr, size_t size) {
+    if (event == PTHREAD_INTROSPECTION_THREAD_CREATE) {
+        if (thread == pthread_self()) {
+            // The current thread is a newly created GCD worker thread.
+            ThreadState *thr = cur_thread();
+            Processor *proc = ProcCreate();
+            ProcWire(proc, thr);
+            ThreadState *parent_thread_state = nullptr;  // No parent.
+            int tid = ThreadCreate(parent_thread_state, 0, (uptr)thread, true);
+            CHECK_NE(tid, 0);
+            ThreadStart(thr, tid, GetTid(), ThreadType::Worker);
+        }
+    } else if (event == PTHREAD_INTROSPECTION_THREAD_TERMINATE) {
+        if (thread == pthread_self()) {
+            ThreadState *thr = cur_thread();
+            if (thr->tctx) {
+                DestroyThreadState();
+            }
+        }
     }
-  } else if (event == PTHREAD_INTROSPECTION_THREAD_TERMINATE) {
-    if (thread == pthread_self()) {
-      ThreadState *thr = cur_thread();
-      if (thr->tctx) {
-        DestroyThreadState();
-      }
-    }
-  }
 
-  if (prev_pthread_introspection_hook != nullptr)
-    prev_pthread_introspection_hook(event, thread, addr, size);
+    if (prev_pthread_introspection_hook != nullptr)
+        prev_pthread_introspection_hook(event, thread, addr, size);
 }
 #endif
 
 void InitializePlatformEarly() {
 #if !SANITIZER_GO && defined(__aarch64__)
-  uptr max_vm = GetMaxUserVirtualAddress() + 1;
-  if (max_vm != Mapping::kHiAppMemEnd) {
-    Printf("ThreadSanitizer: unsupported vm address limit %p, expected %p.\n",
-           max_vm, Mapping::kHiAppMemEnd);
-    Die();
-  }
+    uptr max_vm = GetMaxUserVirtualAddress() + 1;
+    if (max_vm != Mapping::kHiAppMemEnd) {
+        Printf("ThreadSanitizer: unsupported vm address limit %p, expected %p.\n",
+               max_vm, Mapping::kHiAppMemEnd);
+        Die();
+    }
 #endif
 }
 
 static uptr longjmp_xor_key = 0;
 
 void InitializePlatform() {
-  DisableCoreDumperIfNecessary();
+    DisableCoreDumperIfNecessary();
 #if !SANITIZER_GO
-  CheckAndProtect();
+    CheckAndProtect();
 
-  CHECK_EQ(main_thread_identity, 0);
-  main_thread_identity = (uptr)pthread_self();
+    CHECK_EQ(main_thread_identity, 0);
+    main_thread_identity = (uptr)pthread_self();
 
-  prev_pthread_introspection_hook =
-      pthread_introspection_hook_install(&my_pthread_introspection_hook);
+    prev_pthread_introspection_hook =
+        pthread_introspection_hook_install(&my_pthread_introspection_hook);
 #endif
 
-  if (GetMacosAlignedVersion() >= MacosVersion(10, 14)) {
-    // Libsystem currently uses a process-global key; this might change.
-    const unsigned kTLSLongjmpXorKeySlot = 0x7;
-    longjmp_xor_key = (uptr)pthread_getspecific(kTLSLongjmpXorKeySlot);
-  }
+    if (GetMacosAlignedVersion() >= MacosVersion(10, 14)) {
+        // Libsystem currently uses a process-global key; this might change.
+        const unsigned kTLSLongjmpXorKeySlot = 0x7;
+        longjmp_xor_key = (uptr)pthread_getspecific(kTLSLongjmpXorKeySlot);
+    }
 }
 
 #ifdef __aarch64__
@@ -273,33 +273,33 @@ void InitializePlatform() {
 #endif
 
 uptr ExtractLongJmpSp(uptr *env) {
-  uptr mangled_sp = env[LONG_JMP_SP_ENV_SLOT];
-  uptr sp = mangled_sp ^ longjmp_xor_key;
-  sp = (uptr)ptrauth_auth_data((void *)sp, ptrauth_key_asdb,
-                               ptrauth_string_discriminator("sp"));
-  return sp;
+    uptr mangled_sp = env[LONG_JMP_SP_ENV_SLOT];
+    uptr sp = mangled_sp ^ longjmp_xor_key;
+    sp = (uptr)ptrauth_auth_data((void *)sp, ptrauth_key_asdb,
+                                 ptrauth_string_discriminator("sp"));
+    return sp;
 }
 
 #if !SANITIZER_GO
 void ImitateTlsWrite(ThreadState *thr, uptr tls_addr, uptr tls_size) {
-  // The pointer to the ThreadState object is stored in the shadow memory
-  // of the tls.
-  uptr tls_end = tls_addr + tls_size;
-  uptr thread_identity = (uptr)pthread_self();
-  if (thread_identity == main_thread_identity) {
-    MemoryRangeImitateWrite(thr, /*pc=*/2, tls_addr, tls_size);
-  } else {
-    uptr thr_state_start = thread_identity;
-    uptr thr_state_end = thr_state_start + sizeof(uptr);
-    CHECK_GE(thr_state_start, tls_addr);
-    CHECK_LE(thr_state_start, tls_addr + tls_size);
-    CHECK_GE(thr_state_end, tls_addr);
-    CHECK_LE(thr_state_end, tls_addr + tls_size);
-    MemoryRangeImitateWrite(thr, /*pc=*/2, tls_addr,
-                            thr_state_start - tls_addr);
-    MemoryRangeImitateWrite(thr, /*pc=*/2, thr_state_end,
-                            tls_end - thr_state_end);
-  }
+    // The pointer to the ThreadState object is stored in the shadow memory
+    // of the tls.
+    uptr tls_end = tls_addr + tls_size;
+    uptr thread_identity = (uptr)pthread_self();
+    if (thread_identity == main_thread_identity) {
+        MemoryRangeImitateWrite(thr, /*pc=*/2, tls_addr, tls_size);
+    } else {
+        uptr thr_state_start = thread_identity;
+        uptr thr_state_end = thr_state_start + sizeof(uptr);
+        CHECK_GE(thr_state_start, tls_addr);
+        CHECK_LE(thr_state_start, tls_addr + tls_size);
+        CHECK_GE(thr_state_end, tls_addr);
+        CHECK_LE(thr_state_end, tls_addr + tls_size);
+        MemoryRangeImitateWrite(thr, /*pc=*/2, tls_addr,
+                                thr_state_start - tls_addr);
+        MemoryRangeImitateWrite(thr, /*pc=*/2, thr_state_end,
+                                tls_end - thr_state_end);
+    }
 }
 #endif
 
@@ -308,13 +308,13 @@ void ImitateTlsWrite(ThreadState *thr, uptr tls_addr, uptr tls_size) {
 // so it must not touch any tsan state.
 int call_pthread_cancel_with_cleanup(int (*fn)(void *arg),
                                      void (*cleanup)(void *arg), void *arg) {
-  // pthread_cleanup_push/pop are hardcore macros mess.
-  // We can't intercept nor call them w/o including pthread.h.
-  int res;
-  pthread_cleanup_push(cleanup, arg);
-  res = fn(arg);
-  pthread_cleanup_pop(0);
-  return res;
+    // pthread_cleanup_push/pop are hardcore macros mess.
+    // We can't intercept nor call them w/o including pthread.h.
+    int res;
+    pthread_cleanup_push(cleanup, arg);
+    res = fn(arg);
+    pthread_cleanup_pop(0);
+    return res;
 }
 #endif
 

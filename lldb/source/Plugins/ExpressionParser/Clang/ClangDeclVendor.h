@@ -20,23 +20,23 @@ namespace lldb_private {
 // A clang specialized extension to DeclVendor.
 class ClangDeclVendor : public DeclVendor {
 public:
-  ClangDeclVendor(DeclVendorKind kind) : DeclVendor(kind) {}
+    ClangDeclVendor(DeclVendorKind kind) : DeclVendor(kind) {}
 
-  virtual ~ClangDeclVendor() {}
+    virtual ~ClangDeclVendor() {}
 
-  using DeclVendor::FindDecls;
+    using DeclVendor::FindDecls;
 
-  uint32_t FindDecls(ConstString name, bool append, uint32_t max_matches,
-                     std::vector<clang::NamedDecl *> &decls);
+    uint32_t FindDecls(ConstString name, bool append, uint32_t max_matches,
+                       std::vector<clang::NamedDecl *> &decls);
 
-  static bool classof(const DeclVendor *vendor) {
-    return vendor->GetKind() >= eClangDeclVendor &&
-           vendor->GetKind() < eLastClangDeclVendor;
-  }
+    static bool classof(const DeclVendor *vendor) {
+        return vendor->GetKind() >= eClangDeclVendor &&
+               vendor->GetKind() < eLastClangDeclVendor;
+    }
 
 private:
-  ClangDeclVendor(const ClangDeclVendor &) = delete;
-  const ClangDeclVendor &operator=(const ClangDeclVendor &) = delete;
+    ClangDeclVendor(const ClangDeclVendor &) = delete;
+    const ClangDeclVendor &operator=(const ClangDeclVendor &) = delete;
 };
 } // namespace lldb_private
 

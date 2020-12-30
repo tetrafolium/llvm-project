@@ -51,32 +51,32 @@ namespace mca {
 
 /// A view that prints out generic instruction information.
 class InstructionInfoView : public InstructionView {
-  const llvm::MCInstrInfo &MCII;
-  CodeEmitter &CE;
-  bool PrintEncodings;
+    const llvm::MCInstrInfo &MCII;
+    CodeEmitter &CE;
+    bool PrintEncodings;
 
-  struct InstructionInfoViewData {
-    unsigned NumMicroOpcodes = 0;
-    unsigned Latency = 0;
-    Optional<double> RThroughput = 0.0;
-    bool mayLoad = false;
-    bool mayStore = false;
-    bool hasUnmodeledSideEffects = false;
-  };
-  using IIVDVec = SmallVector<InstructionInfoViewData, 16>;
+    struct InstructionInfoViewData {
+        unsigned NumMicroOpcodes = 0;
+        unsigned Latency = 0;
+        Optional<double> RThroughput = 0.0;
+        bool mayLoad = false;
+        bool mayStore = false;
+        bool hasUnmodeledSideEffects = false;
+    };
+    using IIVDVec = SmallVector<InstructionInfoViewData, 16>;
 
-  /// Place the data into the array of InstructionInfoViewData IIVD.
-  void collectData(MutableArrayRef<InstructionInfoViewData> IIVD) const;
+    /// Place the data into the array of InstructionInfoViewData IIVD.
+    void collectData(MutableArrayRef<InstructionInfoViewData> IIVD) const;
 
 public:
-  InstructionInfoView(const llvm::MCSubtargetInfo &ST,
-                      const llvm::MCInstrInfo &II, CodeEmitter &C,
-                      bool ShouldPrintEncodings, llvm::ArrayRef<llvm::MCInst> S,
-                      llvm::MCInstPrinter &IP)
-      : InstructionView(ST, IP, S), MCII(II), CE(C),
-        PrintEncodings(ShouldPrintEncodings) {}
+    InstructionInfoView(const llvm::MCSubtargetInfo &ST,
+                        const llvm::MCInstrInfo &II, CodeEmitter &C,
+                        bool ShouldPrintEncodings, llvm::ArrayRef<llvm::MCInst> S,
+                        llvm::MCInstPrinter &IP)
+        : InstructionView(ST, IP, S), MCII(II), CE(C),
+          PrintEncodings(ShouldPrintEncodings) {}
 
-  void printView(llvm::raw_ostream &OS) const override;
+    void printView(llvm::raw_ostream &OS) const override;
 };
 } // namespace mca
 } // namespace llvm

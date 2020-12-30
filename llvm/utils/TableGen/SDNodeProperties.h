@@ -17,19 +17,19 @@ class Record;
 //  SDNPMemOperand: indicates that a node touches memory and therefore must
 //                  have an associated memory operand that describes the access.
 enum SDNP {
-  SDNPCommutative,
-  SDNPAssociative,
-  SDNPHasChain,
-  SDNPOutGlue,
-  SDNPInGlue,
-  SDNPOptInGlue,
-  SDNPMayLoad,
-  SDNPMayStore,
-  SDNPSideEffect,
-  SDNPMemOperand,
-  SDNPVariadic,
-  SDNPWantRoot,
-  SDNPWantParent
+    SDNPCommutative,
+    SDNPAssociative,
+    SDNPHasChain,
+    SDNPOutGlue,
+    SDNPInGlue,
+    SDNPOptInGlue,
+    SDNPMayLoad,
+    SDNPMayStore,
+    SDNPSideEffect,
+    SDNPMemOperand,
+    SDNPVariadic,
+    SDNPWantRoot,
+    SDNPWantParent
 };
 
 unsigned parseSDPatternOperatorProperties(Record *R);

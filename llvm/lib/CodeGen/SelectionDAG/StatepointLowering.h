@@ -32,93 +32,93 @@ class SelectionDAGBuilder;
 /// works in concert with information in FunctionLoweringInfo.
 class StatepointLoweringState {
 public:
-  StatepointLoweringState() = default;
+    StatepointLoweringState() = default;
 
-  /// Reset all state tracking for a newly encountered safepoint.  Also
-  /// performs some consistency checking.
-  void startNewStatepoint(SelectionDAGBuilder &Builder);
+    /// Reset all state tracking for a newly encountered safepoint.  Also
+    /// performs some consistency checking.
+    void startNewStatepoint(SelectionDAGBuilder &Builder);
 
-  /// Clear the memory usage of this object.  This is called from
-  /// SelectionDAGBuilder::clear.  We require this is never called in the
-  /// midst of processing a statepoint sequence.
-  void clear();
+    /// Clear the memory usage of this object.  This is called from
+    /// SelectionDAGBuilder::clear.  We require this is never called in the
+    /// midst of processing a statepoint sequence.
+    void clear();
 
-  /// Returns the spill location of a value incoming to the current
-  /// statepoint.  Will return SDValue() if this value hasn't been
-  /// spilled.  Otherwise, the value has already been spilled and no
-  /// further action is required by the caller.
-  SDValue getLocation(SDValue Val) {
-    auto I = Locations.find(Val);
-    if (I == Locations.end())
-      return SDValue();
-    return I->second;
-  }
+    /// Returns the spill location of a value incoming to the current
+    /// statepoint.  Will return SDValue() if this value hasn't been
+    /// spilled.  Otherwise, the value has already been spilled and no
+    /// further action is required by the caller.
+    SDValue getLocation(SDValue Val) {
+        auto I = Locations.find(Val);
+        if (I == Locations.end())
+            return SDValue();
+        return I->second;
+    }
 
-  void setLocation(SDValue Val, SDValue Location) {
-    assert(!Locations.count(Val) &&
-           "Trying to allocate already allocated location");
-    Locations[Val] = Location;
-  }
+    void setLocation(SDValue Val, SDValue Location) {
+        assert(!Locations.count(Val) &&
+               "Trying to allocate already allocated location");
+        Locations[Val] = Location;
+    }
 
-  /// Record the fact that we expect to encounter a given gc_relocate
-  /// before the next statepoint.  If we don't see it, we'll report
-  /// an assertion.
-  void scheduleRelocCall(const CallInst &RelocCall) {
-    // We are not interested in lowering dead instructions.
-    if (!RelocCall.use_empty())
-      PendingGCRelocateCalls.push_back(&RelocCall);
-  }
+    /// Record the fact that we expect to encounter a given gc_relocate
+    /// before the next statepoint.  If we don't see it, we'll report
+    /// an assertion.
+    void scheduleRelocCall(const CallInst &RelocCall) {
+        // We are not interested in lowering dead instructions.
+        if (!RelocCall.use_empty())
+            PendingGCRelocateCalls.push_back(&RelocCall);
+    }
 
-  /// Remove this gc_relocate from the list we're expecting to see
-  /// before the next statepoint.  If we weren't expecting to see
-  /// it, we'll report an assertion.
-  void relocCallVisited(const CallInst &RelocCall) {
-    // We are not interested in lowering dead instructions.
-    if (RelocCall.use_empty())
-      return;
-    auto I = llvm::find(PendingGCRelocateCalls, &RelocCall);
-    assert(I != PendingGCRelocateCalls.end() &&
-           "Visited unexpected gcrelocate call");
-    PendingGCRelocateCalls.erase(I);
-  }
+    /// Remove this gc_relocate from the list we're expecting to see
+    /// before the next statepoint.  If we weren't expecting to see
+    /// it, we'll report an assertion.
+    void relocCallVisited(const CallInst &RelocCall) {
+        // We are not interested in lowering dead instructions.
+        if (RelocCall.use_empty())
+            return;
+        auto I = llvm::find(PendingGCRelocateCalls, &RelocCall);
+        assert(I != PendingGCRelocateCalls.end() &&
+               "Visited unexpected gcrelocate call");
+        PendingGCRelocateCalls.erase(I);
+    }
 
-  // TODO: Should add consistency tracking to ensure we encounter
-  // expected gc_result calls too.
+    // TODO: Should add consistency tracking to ensure we encounter
+    // expected gc_result calls too.
 
-  /// Get a stack slot we can use to store an value of type ValueType.  This
-  /// will hopefully be a recylced slot from another statepoint.
-  SDValue allocateStackSlot(EVT ValueType, SelectionDAGBuilder &Builder);
+    /// Get a stack slot we can use to store an value of type ValueType.  This
+    /// will hopefully be a recylced slot from another statepoint.
+    SDValue allocateStackSlot(EVT ValueType, SelectionDAGBuilder &Builder);
 
-  void reserveStackSlot(int Offset) {
-    assert(Offset >= 0 && Offset < (int)AllocatedStackSlots.size() &&
-           "out of bounds");
-    assert(!AllocatedStackSlots.test(Offset) && "already reserved!");
-    assert(NextSlotToAllocate <= (unsigned)Offset && "consistency!");
-    AllocatedStackSlots.set(Offset);
-  }
+    void reserveStackSlot(int Offset) {
+        assert(Offset >= 0 && Offset < (int)AllocatedStackSlots.size() &&
+               "out of bounds");
+        assert(!AllocatedStackSlots.test(Offset) && "already reserved!");
+        assert(NextSlotToAllocate <= (unsigned)Offset && "consistency!");
+        AllocatedStackSlots.set(Offset);
+    }
 
-  bool isStackSlotAllocated(int Offset) {
-    assert(Offset >= 0 && Offset < (int)AllocatedStackSlots.size() &&
-           "out of bounds");
-    return AllocatedStackSlots.test(Offset);
-  }
+    bool isStackSlotAllocated(int Offset) {
+        assert(Offset >= 0 && Offset < (int)AllocatedStackSlots.size() &&
+               "out of bounds");
+        return AllocatedStackSlots.test(Offset);
+    }
 
 private:
-  /// Maps pre-relocation value (gc pointer directly incoming into statepoint)
-  /// into it's location (currently only stack slots)
-  DenseMap<SDValue, SDValue> Locations;
+    /// Maps pre-relocation value (gc pointer directly incoming into statepoint)
+    /// into it's location (currently only stack slots)
+    DenseMap<SDValue, SDValue> Locations;
 
-  /// A boolean indicator for each slot listed in the FunctionInfo as to
-  /// whether it has been used in the current statepoint.  Since we try to
-  /// preserve stack slots across safepoints, there can be gaps in which
-  /// slots have been allocated.
-  SmallBitVector AllocatedStackSlots;
+    /// A boolean indicator for each slot listed in the FunctionInfo as to
+    /// whether it has been used in the current statepoint.  Since we try to
+    /// preserve stack slots across safepoints, there can be gaps in which
+    /// slots have been allocated.
+    SmallBitVector AllocatedStackSlots;
 
-  /// Points just beyond the last slot known to have been allocated
-  unsigned NextSlotToAllocate = 0;
+    /// Points just beyond the last slot known to have been allocated
+    unsigned NextSlotToAllocate = 0;
 
-  /// Keep track of pending gcrelocate calls for consistency check
-  SmallVector<const CallInst *, 10> PendingGCRelocateCalls;
+    /// Keep track of pending gcrelocate calls for consistency check
+    SmallVector<const CallInst *, 10> PendingGCRelocateCalls;
 };
 
 } // end namespace llvm

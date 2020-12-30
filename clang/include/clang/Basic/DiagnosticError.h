@@ -19,40 +19,46 @@ namespace clang {
 /// Users should emit the stored diagnostic using the DiagnosticsEngine.
 class DiagnosticError : public llvm::ErrorInfo<DiagnosticError> {
 public:
-  DiagnosticError(PartialDiagnosticAt Diag) : Diag(std::move(Diag)) {}
+    DiagnosticError(PartialDiagnosticAt Diag) : Diag(std::move(Diag)) {}
 
-  void log(raw_ostream &OS) const override { OS << "clang diagnostic"; }
+    void log(raw_ostream &OS) const override {
+        OS << "clang diagnostic";
+    }
 
-  PartialDiagnosticAt &getDiagnostic() { return Diag; }
-  const PartialDiagnosticAt &getDiagnostic() const { return Diag; }
+    PartialDiagnosticAt &getDiagnostic() {
+        return Diag;
+    }
+    const PartialDiagnosticAt &getDiagnostic() const {
+        return Diag;
+    }
 
-  /// Creates a new \c DiagnosticError that contains the given diagnostic at
-  /// the given location.
-  static llvm::Error create(SourceLocation Loc, PartialDiagnostic Diag) {
-    return llvm::make_error<DiagnosticError>(
-        PartialDiagnosticAt(Loc, std::move(Diag)));
-  }
+    /// Creates a new \c DiagnosticError that contains the given diagnostic at
+    /// the given location.
+    static llvm::Error create(SourceLocation Loc, PartialDiagnostic Diag) {
+        return llvm::make_error<DiagnosticError>(
+                   PartialDiagnosticAt(Loc, std::move(Diag)));
+    }
 
-  /// Extracts and returns the diagnostic payload from the given \c Error if
-  /// the error is a \c DiagnosticError. Returns none if the given error is not
-  /// a \c DiagnosticError.
-  static Optional<PartialDiagnosticAt> take(llvm::Error &Err) {
-    Optional<PartialDiagnosticAt> Result;
-    Err = llvm::handleErrors(std::move(Err), [&](DiagnosticError &E) {
-      Result = std::move(E.getDiagnostic());
-    });
-    return Result;
-  }
+    /// Extracts and returns the diagnostic payload from the given \c Error if
+    /// the error is a \c DiagnosticError. Returns none if the given error is not
+    /// a \c DiagnosticError.
+    static Optional<PartialDiagnosticAt> take(llvm::Error &Err) {
+        Optional<PartialDiagnosticAt> Result;
+        Err = llvm::handleErrors(std::move(Err), [&](DiagnosticError &E) {
+            Result = std::move(E.getDiagnostic());
+        });
+        return Result;
+    }
 
-  static char ID;
+    static char ID;
 
 private:
-  // Users are not expected to use error_code.
-  std::error_code convertToErrorCode() const override {
-    return llvm::inconvertibleErrorCode();
-  }
+    // Users are not expected to use error_code.
+    std::error_code convertToErrorCode() const override {
+        return llvm::inconvertibleErrorCode();
+    }
 
-  PartialDiagnosticAt Diag;
+    PartialDiagnosticAt Diag;
 };
 
 } // end namespace clang

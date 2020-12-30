@@ -28,39 +28,49 @@ class GIMatchDagOperand;
 /// Ideally, all edges in the DAG are from a use to a def as this is a many
 /// to one edge but edges from defs to uses are supported too.
 class GIMatchDagEdge {
-  /// The name of the edge. For example,
-  ///     (FOO $a, $b, $c)
-  ///     (BAR $d, $e, $a)
-  /// will create an edge named 'a' to connect FOO to BAR. Although the name
-  /// refers to the edge, the canonical value of 'a' is the operand that defines
-  /// it.
-  StringRef Name;
-  const GIMatchDagInstr *FromMI;
-  const GIMatchDagOperand *FromMO;
-  const GIMatchDagInstr *ToMI;
-  const GIMatchDagOperand *ToMO;
+    /// The name of the edge. For example,
+    ///     (FOO $a, $b, $c)
+    ///     (BAR $d, $e, $a)
+    /// will create an edge named 'a' to connect FOO to BAR. Although the name
+    /// refers to the edge, the canonical value of 'a' is the operand that defines
+    /// it.
+    StringRef Name;
+    const GIMatchDagInstr *FromMI;
+    const GIMatchDagOperand *FromMO;
+    const GIMatchDagInstr *ToMI;
+    const GIMatchDagOperand *ToMO;
 
 public:
-  GIMatchDagEdge(StringRef Name, const GIMatchDagInstr *FromMI, const GIMatchDagOperand *FromMO,
-            const GIMatchDagInstr *ToMI, const GIMatchDagOperand *ToMO)
-      : Name(Name), FromMI(FromMI), FromMO(FromMO), ToMI(ToMI), ToMO(ToMO) {}
+    GIMatchDagEdge(StringRef Name, const GIMatchDagInstr *FromMI, const GIMatchDagOperand *FromMO,
+                   const GIMatchDagInstr *ToMI, const GIMatchDagOperand *ToMO)
+        : Name(Name), FromMI(FromMI), FromMO(FromMO), ToMI(ToMI), ToMO(ToMO) {}
 
-  StringRef getName() const { return Name; }
-  const GIMatchDagInstr *getFromMI() const { return FromMI; }
-  const GIMatchDagOperand *getFromMO() const { return FromMO; }
-  const GIMatchDagInstr *getToMI() const { return ToMI; }
-  const GIMatchDagOperand *getToMO() const { return ToMO; }
+    StringRef getName() const {
+        return Name;
+    }
+    const GIMatchDagInstr *getFromMI() const {
+        return FromMI;
+    }
+    const GIMatchDagOperand *getFromMO() const {
+        return FromMO;
+    }
+    const GIMatchDagInstr *getToMI() const {
+        return ToMI;
+    }
+    const GIMatchDagOperand *getToMO() const {
+        return ToMO;
+    }
 
-  /// Flip the direction of the edge.
-  void reverse();
+    /// Flip the direction of the edge.
+    void reverse();
 
-  /// Does this edge run from a def to (one of many) uses?
-  bool isDefToUse() const;
+    /// Does this edge run from a def to (one of many) uses?
+    bool isDefToUse() const;
 
-  LLVM_DUMP_METHOD void print(raw_ostream &OS) const;
+    LLVM_DUMP_METHOD void print(raw_ostream &OS) const;
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-  LLVM_DUMP_METHOD void dump() const;
+    LLVM_DUMP_METHOD void dump() const;
 #endif // if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 };
 

@@ -45,7 +45,7 @@ MLIR_CAPI_EXPORTED MlirContext mlirAffineMapGetContext(MlirAffineMap affineMap);
 
 /// Checks whether an affine map is null.
 static inline bool mlirAffineMapIsNull(MlirAffineMap affineMap) {
-  return !affineMap.ptr;
+    return !affineMap.ptr;
 }
 
 /// Checks if two affine maps are equal.
@@ -55,8 +55,8 @@ MLIR_CAPI_EXPORTED bool mlirAffineMapEqual(MlirAffineMap a1, MlirAffineMap a2);
  * forwarding `userData to `callback`. Note that the callback may be called
  * several times with consecutive chunks of the string. */
 MLIR_CAPI_EXPORTED void mlirAffineMapPrint(MlirAffineMap affineMap,
-                                           MlirStringCallback callback,
-                                           void *userData);
+        MlirStringCallback callback,
+        void *userData);
 
 /// Prints the affine map to the standard error stream.
 MLIR_CAPI_EXPORTED void mlirAffineMapDump(MlirAffineMap affineMap);
@@ -68,13 +68,13 @@ MLIR_CAPI_EXPORTED MlirAffineMap mlirAffineMapEmptyGet(MlirContext ctx);
 /** Creates a zero result affine map of the given dimensions and symbols in the
  * context. The affine map is owned by the context. */
 MLIR_CAPI_EXPORTED MlirAffineMap mlirAffineMapGet(MlirContext ctx,
-                                                  intptr_t dimCount,
-                                                  intptr_t symbolCount);
+        intptr_t dimCount,
+        intptr_t symbolCount);
 
 /** Creates a single constant result affine map in the context. The affine map
  * is owned by the context. */
 MLIR_CAPI_EXPORTED MlirAffineMap mlirAffineMapConstantGet(MlirContext ctx,
-                                                          int64_t val);
+        int64_t val);
 
 /** Creates an affine map with 'numDims' identity in the context. The affine map
  * is owned by the context. */
@@ -139,8 +139,8 @@ MLIR_CAPI_EXPORTED bool mlirAffineMapIsPermutation(MlirAffineMap affineMap);
 
 /// Returns the affine map consisting of the `resultPos` subset.
 MLIR_CAPI_EXPORTED MlirAffineMap mlirAffineMapGetSubMap(MlirAffineMap affineMap,
-                                                        intptr_t size,
-                                                        intptr_t *resultPos);
+        intptr_t size,
+        intptr_t *resultPos);
 
 /** Returns the affine map consisting of the most major `numResults` results.
  * Returns the null AffineMap if the `numResults` is equal to zero.

@@ -18,11 +18,11 @@ class raw_ostream;
 namespace pdb {
 
 class PDBSymbolTypeManaged : public PDBSymbol {
-  DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::ManagedType)
+    DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::ManagedType)
 public:
-  void dump(PDBSymDumper &Dumper) const override;
+    void dump(PDBSymDumper &Dumper) const override;
 
-  FORWARD_SYMBOL_METHOD(getName)
+    FORWARD_SYMBOL_METHOD(getName)
 };
 
 } // namespace llvm

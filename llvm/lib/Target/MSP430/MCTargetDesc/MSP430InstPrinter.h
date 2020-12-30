@@ -16,11 +16,11 @@
 #include "llvm/MC/MCInstPrinter.h"
 
 namespace llvm {
-  class MSP430InstPrinter : public MCInstPrinter {
-  public:
+class MSP430InstPrinter : public MCInstPrinter {
+public:
     MSP430InstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &MII,
                       const MCRegisterInfo &MRI)
-      : MCInstPrinter(MAI, MII, MRI) {}
+        : MCInstPrinter(MAI, MII, MRI) {}
 
     void printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
                    const MCSubtargetInfo &STI, raw_ostream &O) override;
@@ -45,7 +45,7 @@ private:
                                 raw_ostream &O);
     void printCCOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O);
 
-  };
+};
 }
 
 #endif

@@ -39,57 +39,61 @@ namespace llvm {
 // automatically add a command line argument to opt for each pass.
 //
 class PassNameParser : public PassRegistrationListener,
-                       public cl::parser<const PassInfo*> {
+    public cl::parser<const PassInfo*> {
 public:
-  PassNameParser(cl::Option &O);
-  ~PassNameParser() override;
+    PassNameParser(cl::Option &O);
+    ~PassNameParser() override;
 
-  void initialize() {
-    cl::parser<const PassInfo*>::initialize();
+    void initialize() {
+        cl::parser<const PassInfo*>::initialize();
 
-    // Add all of the passes to the map that got initialized before 'this' did.
-    enumeratePasses();
-  }
-
-  // ignorablePassImpl - Can be overriden in subclasses to refine the list of
-  // which passes we want to include.
-  //
-  virtual bool ignorablePassImpl(const PassInfo *P) const { return false; }
-
-  inline bool ignorablePass(const PassInfo *P) const {
-    // Ignore non-selectable and non-constructible passes!  Ignore
-    // non-optimizations.
-    return P->getPassArgument().empty() || P->getNormalCtor() == nullptr ||
-           ignorablePassImpl(P);
-  }
-
-  // Implement the PassRegistrationListener callbacks used to populate our map
-  //
-  void passRegistered(const PassInfo *P) override {
-    if (ignorablePass(P)) return;
-    if (findOption(P->getPassArgument().data()) != getNumOptions()) {
-      errs() << "Two passes with the same argument (-"
-           << P->getPassArgument() << ") attempted to be registered!\n";
-      llvm_unreachable(nullptr);
+        // Add all of the passes to the map that got initialized before 'this' did.
+        enumeratePasses();
     }
-    addLiteralOption(P->getPassArgument().data(), P, P->getPassName().data());
-  }
-  void passEnumerate(const PassInfo *P) override { passRegistered(P); }
 
-  // printOptionInfo - Print out information about this option.  Override the
-  // default implementation to sort the table before we print...
-  void printOptionInfo(const cl::Option &O, size_t GlobalWidth) const override {
-    PassNameParser *PNP = const_cast<PassNameParser*>(this);
-    array_pod_sort(PNP->Values.begin(), PNP->Values.end(), ValCompare);
-    cl::parser<const PassInfo*>::printOptionInfo(O, GlobalWidth);
-  }
+    // ignorablePassImpl - Can be overriden in subclasses to refine the list of
+    // which passes we want to include.
+    //
+    virtual bool ignorablePassImpl(const PassInfo *P) const {
+        return false;
+    }
+
+    inline bool ignorablePass(const PassInfo *P) const {
+        // Ignore non-selectable and non-constructible passes!  Ignore
+        // non-optimizations.
+        return P->getPassArgument().empty() || P->getNormalCtor() == nullptr ||
+               ignorablePassImpl(P);
+    }
+
+    // Implement the PassRegistrationListener callbacks used to populate our map
+    //
+    void passRegistered(const PassInfo *P) override {
+        if (ignorablePass(P)) return;
+        if (findOption(P->getPassArgument().data()) != getNumOptions()) {
+            errs() << "Two passes with the same argument (-"
+                   << P->getPassArgument() << ") attempted to be registered!\n";
+            llvm_unreachable(nullptr);
+        }
+        addLiteralOption(P->getPassArgument().data(), P, P->getPassName().data());
+    }
+    void passEnumerate(const PassInfo *P) override {
+        passRegistered(P);
+    }
+
+    // printOptionInfo - Print out information about this option.  Override the
+    // default implementation to sort the table before we print...
+    void printOptionInfo(const cl::Option &O, size_t GlobalWidth) const override {
+        PassNameParser *PNP = const_cast<PassNameParser*>(this);
+        array_pod_sort(PNP->Values.begin(), PNP->Values.end(), ValCompare);
+        cl::parser<const PassInfo*>::printOptionInfo(O, GlobalWidth);
+    }
 
 private:
-  // ValCompare - Provide a sorting comparator for Values elements...
-  static int ValCompare(const PassNameParser::OptionInfo *VT1,
-                        const PassNameParser::OptionInfo *VT2) {
-    return VT1->Name.compare(VT2->Name);
-  }
+    // ValCompare - Provide a sorting comparator for Values elements...
+    static int ValCompare(const PassNameParser::OptionInfo *VT1,
+                          const PassNameParser::OptionInfo *VT2) {
+        return VT1->Name.compare(VT2->Name);
+    }
 };
 
 } // End llvm namespace

@@ -19,15 +19,15 @@ class IPDBTable;
 
 class DIAEnumTables : public IPDBEnumChildren<IPDBTable> {
 public:
-  explicit DIAEnumTables(CComPtr<IDiaEnumTables> DiaEnumerator);
+    explicit DIAEnumTables(CComPtr<IDiaEnumTables> DiaEnumerator);
 
-  uint32_t getChildCount() const override;
-  std::unique_ptr<IPDBTable> getChildAtIndex(uint32_t Index) const override;
-  std::unique_ptr<IPDBTable> getNext() override;
-  void reset() override;
+    uint32_t getChildCount() const override;
+    std::unique_ptr<IPDBTable> getChildAtIndex(uint32_t Index) const override;
+    std::unique_ptr<IPDBTable> getNext() override;
+    void reset() override;
 
 private:
-  CComPtr<IDiaEnumTables> Enumerator;
+    CComPtr<IDiaEnumTables> Enumerator;
 };
 }
 }

@@ -24,23 +24,23 @@ namespace utils {
 // This allows using a shorter name without clobbering other scopes.
 class UsingInserter {
 public:
-  UsingInserter(const SourceManager &SourceMgr);
+    UsingInserter(const SourceManager &SourceMgr);
 
-  // Creates a \p using declaration fixit. Returns ``llvm::None`` on error
-  // or if the using declaration already exists.
-  llvm::Optional<FixItHint>
-  createUsingDeclaration(ASTContext &Context, const Stmt &Statement,
-                         llvm::StringRef QualifiedName);
+    // Creates a \p using declaration fixit. Returns ``llvm::None`` on error
+    // or if the using declaration already exists.
+    llvm::Optional<FixItHint>
+    createUsingDeclaration(ASTContext &Context, const Stmt &Statement,
+                           llvm::StringRef QualifiedName);
 
-  // Returns the unqualified version of the name if there is an
-  // appropriate using declaration and the qualified name otherwise.
-  llvm::StringRef getShortName(ASTContext &Context, const Stmt &Statement,
-                               llvm::StringRef QualifiedName);
+    // Returns the unqualified version of the name if there is an
+    // appropriate using declaration and the qualified name otherwise.
+    llvm::StringRef getShortName(ASTContext &Context, const Stmt &Statement,
+                                 llvm::StringRef QualifiedName);
 
 private:
-  typedef std::pair<const FunctionDecl *, std::string> NameInFunction;
-  const SourceManager &SourceMgr;
-  std::set<NameInFunction> AddedUsing;
+    typedef std::pair<const FunctionDecl *, std::string> NameInFunction;
+    const SourceManager &SourceMgr;
+    std::set<NameInFunction> AddedUsing;
 };
 
 } // namespace utils

@@ -17,7 +17,7 @@
 #include "llvm/InitializePasses.h"
 
 namespace llvm {
-  class PassRegistry;
+class PassRegistry;
 }
 
 using namespace llvm;
@@ -26,14 +26,14 @@ using namespace llvm::objcarc;
 /// initializeObjCARCOptsPasses - Initialize all passes linked into the
 /// ObjCARCOpts library.
 void llvm::initializeObjCARCOpts(PassRegistry &Registry) {
-  initializeObjCARCAAWrapperPassPass(Registry);
-  initializeObjCARCAPElimPass(Registry);
-  initializeObjCARCExpandPass(Registry);
-  initializeObjCARCContractLegacyPassPass(Registry);
-  initializeObjCARCOptLegacyPassPass(Registry);
-  initializePAEvalPass(Registry);
+    initializeObjCARCAAWrapperPassPass(Registry);
+    initializeObjCARCAPElimPass(Registry);
+    initializeObjCARCExpandPass(Registry);
+    initializeObjCARCContractLegacyPassPass(Registry);
+    initializeObjCARCOptLegacyPassPass(Registry);
+    initializePAEvalPass(Registry);
 }
 
 void LLVMInitializeObjCARCOpts(LLVMPassRegistryRef R) {
-  initializeObjCARCOpts(*unwrap(R));
+    initializeObjCARCOpts(*unwrap(R));
 }

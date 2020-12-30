@@ -201,8 +201,8 @@ extern char &AMDGPUPromoteAllocaToVectorID;
 
 Pass *createAMDGPUStructurizeCFGPass();
 FunctionPass *createAMDGPUISelDag(
-  TargetMachine *TM = nullptr,
-  CodeGenOpt::Level OptLevel = CodeGenOpt::Default);
+    TargetMachine *TM = nullptr,
+    CodeGenOpt::Level OptLevel = CodeGenOpt::Default);
 ModulePass *createAMDGPUAlwaysInlinePass(bool GlobalOpt = true);
 ModulePass *createR600OpenCLImageTypeLoweringPass();
 FunctionPass *createAMDGPUAnnotateUniformValues();
@@ -273,11 +273,11 @@ extern char &GCNNSAReassignID;
 
 namespace AMDGPU {
 enum TargetIndex {
-  TI_CONSTDATA_START,
-  TI_SCRATCH_RSRC_DWORD0,
-  TI_SCRATCH_RSRC_DWORD1,
-  TI_SCRATCH_RSRC_DWORD2,
-  TI_SCRATCH_RSRC_DWORD3
+    TI_CONSTDATA_START,
+    TI_SCRATCH_RSRC_DWORD0,
+    TI_SCRATCH_RSRC_DWORD1,
+    TI_SCRATCH_RSRC_DWORD2,
+    TI_SCRATCH_RSRC_DWORD3
 };
 }
 
@@ -288,7 +288,7 @@ enum TargetIndex {
 /// a separate piece of memory that is unique from other
 /// memory locations.
 namespace AMDGPUAS {
-  enum : unsigned {
+enum : unsigned {
     // The maximum value for flat, generic, local, private, constant and region.
     MAX_AMDGPU_ADDRESS = 7,
 
@@ -334,17 +334,17 @@ namespace AMDGPUAS {
 
     // Some places use this if the address space can't be determined.
     UNKNOWN_ADDRESS_SPACE = ~0u,
-  };
+};
 }
 
 namespace AMDGPU {
 
 // FIXME: Missing constant_32bit
 inline bool isFlatGlobalAddrSpace(unsigned AS) {
-  return AS == AMDGPUAS::GLOBAL_ADDRESS ||
-         AS == AMDGPUAS::FLAT_ADDRESS ||
-         AS == AMDGPUAS::CONSTANT_ADDRESS ||
-         AS > AMDGPUAS::MAX_AMDGPU_ADDRESS;
+    return AS == AMDGPUAS::GLOBAL_ADDRESS ||
+           AS == AMDGPUAS::FLAT_ADDRESS ||
+           AS == AMDGPUAS::CONSTANT_ADDRESS ||
+           AS > AMDGPUAS::MAX_AMDGPU_ADDRESS;
 }
 }
 

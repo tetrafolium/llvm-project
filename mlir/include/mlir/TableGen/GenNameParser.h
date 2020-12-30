@@ -21,10 +21,10 @@ class GenInfo;
 
 /// Adds command line option for each registered generator.
 struct GenNameParser : public llvm::cl::parser<const GenInfo *> {
-  GenNameParser(llvm::cl::Option &opt);
+    GenNameParser(llvm::cl::Option &opt);
 
-  void printOptionInfo(const llvm::cl::Option &O,
-                       size_t GlobalWidth) const override;
+    void printOptionInfo(const llvm::cl::Option &O,
+                         size_t GlobalWidth) const override;
 };
 } // end namespace mlir
 

@@ -15,8 +15,8 @@ namespace clang {
 namespace interp {
 
 size_t primSize(PrimType Type) {
-  TYPE_SWITCH(Type, return sizeof(T));
-  llvm_unreachable("not a primitive type");
+    TYPE_SWITCH(Type, return sizeof(T));
+    llvm_unreachable("not a primitive type");
 }
 
 } // namespace interp

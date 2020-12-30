@@ -6,5 +6,5 @@
  */
 isl_stat FN(TYPE,check_named_params)(__isl_keep TYPE *obj)
 {
-	return isl_space_check_named_params(FN(TYPE,peek_space)(obj));
+    return isl_space_check_named_params(FN(TYPE,peek_space)(obj));
 }

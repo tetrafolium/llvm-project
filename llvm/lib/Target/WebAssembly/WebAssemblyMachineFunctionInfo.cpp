@@ -22,25 +22,25 @@ using namespace llvm;
 WebAssemblyFunctionInfo::~WebAssemblyFunctionInfo() = default; // anchor.
 
 void WebAssemblyFunctionInfo::initWARegs(MachineRegisterInfo &MRI) {
-  assert(WARegs.empty());
-  unsigned Reg = UnusedReg;
-  WARegs.resize(MRI.getNumVirtRegs(), Reg);
+    assert(WARegs.empty());
+    unsigned Reg = UnusedReg;
+    WARegs.resize(MRI.getNumVirtRegs(), Reg);
 }
 
 void llvm::computeLegalValueVTs(const Function &F, const TargetMachine &TM,
                                 Type *Ty, SmallVectorImpl<MVT> &ValueVTs) {
-  const DataLayout &DL(F.getParent()->getDataLayout());
-  const WebAssemblyTargetLowering &TLI =
-      *TM.getSubtarget<WebAssemblySubtarget>(F).getTargetLowering();
-  SmallVector<EVT, 4> VTs;
-  ComputeValueVTs(TLI, DL, Ty, VTs);
+    const DataLayout &DL(F.getParent()->getDataLayout());
+    const WebAssemblyTargetLowering &TLI =
+        *TM.getSubtarget<WebAssemblySubtarget>(F).getTargetLowering();
+    SmallVector<EVT, 4> VTs;
+    ComputeValueVTs(TLI, DL, Ty, VTs);
 
-  for (EVT VT : VTs) {
-    unsigned NumRegs = TLI.getNumRegisters(F.getContext(), VT);
-    MVT RegisterVT = TLI.getRegisterType(F.getContext(), VT);
-    for (unsigned I = 0; I != NumRegs; ++I)
-      ValueVTs.push_back(RegisterVT);
-  }
+    for (EVT VT : VTs) {
+        unsigned NumRegs = TLI.getNumRegisters(F.getContext(), VT);
+        MVT RegisterVT = TLI.getRegisterType(F.getContext(), VT);
+        for (unsigned I = 0; I != NumRegs; ++I)
+            ValueVTs.push_back(RegisterVT);
+    }
 }
 
 void llvm::computeSignatureVTs(const FunctionType *Ty,
@@ -49,57 +49,57 @@ void llvm::computeSignatureVTs(const FunctionType *Ty,
                                const TargetMachine &TM,
                                SmallVectorImpl<MVT> &Params,
                                SmallVectorImpl<MVT> &Results) {
-  computeLegalValueVTs(ContextFunc, TM, Ty->getReturnType(), Results);
+    computeLegalValueVTs(ContextFunc, TM, Ty->getReturnType(), Results);
 
-  MVT PtrVT = MVT::getIntegerVT(TM.createDataLayout().getPointerSizeInBits());
-  if (Results.size() > 1 &&
-      !TM.getSubtarget<WebAssemblySubtarget>(ContextFunc).hasMultivalue()) {
-    // WebAssembly can't lower returns of multiple values without demoting to
-    // sret unless multivalue is enabled (see
-    // WebAssemblyTargetLowering::CanLowerReturn). So replace multiple return
-    // values with a poitner parameter.
-    Results.clear();
-    Params.push_back(PtrVT);
-  }
-
-  for (auto *Param : Ty->params())
-    computeLegalValueVTs(ContextFunc, TM, Param, Params);
-  if (Ty->isVarArg())
-    Params.push_back(PtrVT);
-
-  // For swiftcc, emit additional swiftself and swifterror parameters
-  // if there aren't. These additional parameters are also passed for caller.
-  // They are necessary to match callee and caller signature for indirect
-  // call.
-
-  if (TargetFunc && TargetFunc->getCallingConv() == CallingConv::Swift) {
     MVT PtrVT = MVT::getIntegerVT(TM.createDataLayout().getPointerSizeInBits());
-    bool HasSwiftErrorArg = false;
-    bool HasSwiftSelfArg = false;
-    for (const auto &Arg : TargetFunc->args()) {
-      HasSwiftErrorArg |= Arg.hasAttribute(Attribute::SwiftError);
-      HasSwiftSelfArg |= Arg.hasAttribute(Attribute::SwiftSelf);
+    if (Results.size() > 1 &&
+            !TM.getSubtarget<WebAssemblySubtarget>(ContextFunc).hasMultivalue()) {
+        // WebAssembly can't lower returns of multiple values without demoting to
+        // sret unless multivalue is enabled (see
+        // WebAssemblyTargetLowering::CanLowerReturn). So replace multiple return
+        // values with a poitner parameter.
+        Results.clear();
+        Params.push_back(PtrVT);
     }
-    if (!HasSwiftErrorArg)
-      Params.push_back(PtrVT);
-    if (!HasSwiftSelfArg)
-      Params.push_back(PtrVT);
-  }
+
+    for (auto *Param : Ty->params())
+        computeLegalValueVTs(ContextFunc, TM, Param, Params);
+    if (Ty->isVarArg())
+        Params.push_back(PtrVT);
+
+    // For swiftcc, emit additional swiftself and swifterror parameters
+    // if there aren't. These additional parameters are also passed for caller.
+    // They are necessary to match callee and caller signature for indirect
+    // call.
+
+    if (TargetFunc && TargetFunc->getCallingConv() == CallingConv::Swift) {
+        MVT PtrVT = MVT::getIntegerVT(TM.createDataLayout().getPointerSizeInBits());
+        bool HasSwiftErrorArg = false;
+        bool HasSwiftSelfArg = false;
+        for (const auto &Arg : TargetFunc->args()) {
+            HasSwiftErrorArg |= Arg.hasAttribute(Attribute::SwiftError);
+            HasSwiftSelfArg |= Arg.hasAttribute(Attribute::SwiftSelf);
+        }
+        if (!HasSwiftErrorArg)
+            Params.push_back(PtrVT);
+        if (!HasSwiftSelfArg)
+            Params.push_back(PtrVT);
+    }
 }
 
 void llvm::valTypesFromMVTs(const ArrayRef<MVT> &In,
                             SmallVectorImpl<wasm::ValType> &Out) {
-  for (MVT Ty : In)
-    Out.push_back(WebAssembly::toValType(Ty));
+    for (MVT Ty : In)
+        Out.push_back(WebAssembly::toValType(Ty));
 }
 
 std::unique_ptr<wasm::WasmSignature>
 llvm::signatureFromMVTs(const SmallVectorImpl<MVT> &Results,
                         const SmallVectorImpl<MVT> &Params) {
-  auto Sig = std::make_unique<wasm::WasmSignature>();
-  valTypesFromMVTs(Results, Sig->Returns);
-  valTypesFromMVTs(Params, Sig->Params);
-  return Sig;
+    auto Sig = std::make_unique<wasm::WasmSignature>();
+    valTypesFromMVTs(Results, Sig->Returns);
+    valTypesFromMVTs(Params, Sig->Params);
+    return Sig;
 }
 
 yaml::WebAssemblyFunctionInfo::WebAssemblyFunctionInfo(
@@ -107,10 +107,10 @@ yaml::WebAssemblyFunctionInfo::WebAssemblyFunctionInfo(
     : CFGStackified(MFI.isCFGStackified()) {}
 
 void yaml::WebAssemblyFunctionInfo::mappingImpl(yaml::IO &YamlIO) {
-  MappingTraits<WebAssemblyFunctionInfo>::mapping(YamlIO, *this);
+    MappingTraits<WebAssemblyFunctionInfo>::mapping(YamlIO, *this);
 }
 
 void WebAssemblyFunctionInfo::initializeBaseYamlFields(
     const yaml::WebAssemblyFunctionInfo &YamlMFI) {
-  CFGStackified = YamlMFI.CFGStackified;
+    CFGStackified = YamlMFI.CFGStackified;
 }

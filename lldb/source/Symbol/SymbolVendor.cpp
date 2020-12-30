@@ -25,35 +25,35 @@ using namespace lldb_private;
 // finding separate debug information files.
 SymbolVendor *SymbolVendor::FindPlugin(const lldb::ModuleSP &module_sp,
                                        lldb_private::Stream *feedback_strm) {
-  std::unique_ptr<SymbolVendor> instance_up;
-  SymbolVendorCreateInstance create_callback;
+    std::unique_ptr<SymbolVendor> instance_up;
+    SymbolVendorCreateInstance create_callback;
 
-  for (size_t idx = 0;
-       (create_callback = PluginManager::GetSymbolVendorCreateCallbackAtIndex(
-            idx)) != nullptr;
-       ++idx) {
-    instance_up.reset(create_callback(module_sp, feedback_strm));
+    for (size_t idx = 0;
+            (create_callback = PluginManager::GetSymbolVendorCreateCallbackAtIndex(
+                                   idx)) != nullptr;
+            ++idx) {
+        instance_up.reset(create_callback(module_sp, feedback_strm));
 
-    if (instance_up) {
-      return instance_up.release();
+        if (instance_up) {
+            return instance_up.release();
+        }
     }
-  }
-  // The default implementation just tries to create debug information using
-  // the file representation for the module.
-  ObjectFileSP sym_objfile_sp;
-  FileSpec sym_spec = module_sp->GetSymbolFileFileSpec();
-  if (sym_spec && sym_spec != module_sp->GetObjectFile()->GetFileSpec()) {
-    DataBufferSP data_sp;
-    offset_t data_offset = 0;
-    sym_objfile_sp = ObjectFile::FindPlugin(
-        module_sp, &sym_spec, 0, FileSystem::Instance().GetByteSize(sym_spec),
-        data_sp, data_offset);
-  }
-  if (!sym_objfile_sp)
-    sym_objfile_sp = module_sp->GetObjectFile()->shared_from_this();
-  instance_up = std::make_unique<SymbolVendor>(module_sp);
-  instance_up->AddSymbolFileRepresentation(sym_objfile_sp);
-  return instance_up.release();
+    // The default implementation just tries to create debug information using
+    // the file representation for the module.
+    ObjectFileSP sym_objfile_sp;
+    FileSpec sym_spec = module_sp->GetSymbolFileFileSpec();
+    if (sym_spec && sym_spec != module_sp->GetObjectFile()->GetFileSpec()) {
+        DataBufferSP data_sp;
+        offset_t data_offset = 0;
+        sym_objfile_sp = ObjectFile::FindPlugin(
+                             module_sp, &sym_spec, 0, FileSystem::Instance().GetByteSize(sym_spec),
+                             data_sp, data_offset);
+    }
+    if (!sym_objfile_sp)
+        sym_objfile_sp = module_sp->GetObjectFile()->shared_from_this();
+    instance_up = std::make_unique<SymbolVendor>(module_sp);
+    instance_up->AddSymbolFileRepresentation(sym_objfile_sp);
+    return instance_up.release();
 }
 
 // SymbolVendor constructor
@@ -62,18 +62,20 @@ SymbolVendor::SymbolVendor(const lldb::ModuleSP &module_sp)
 
 // Add a representation given an object file.
 void SymbolVendor::AddSymbolFileRepresentation(const ObjectFileSP &objfile_sp) {
-  ModuleSP module_sp(GetModule());
-  if (module_sp) {
-    std::lock_guard<std::recursive_mutex> guard(module_sp->GetMutex());
-    if (objfile_sp)
-      m_sym_file_up.reset(SymbolFile::FindPlugin(objfile_sp));
-  }
+    ModuleSP module_sp(GetModule());
+    if (module_sp) {
+        std::lock_guard<std::recursive_mutex> guard(module_sp->GetMutex());
+        if (objfile_sp)
+            m_sym_file_up.reset(SymbolFile::FindPlugin(objfile_sp));
+    }
 }
 
 // PluginInterface protocol
 lldb_private::ConstString SymbolVendor::GetPluginName() {
-  static ConstString g_name("vendor-default");
-  return g_name;
+    static ConstString g_name("vendor-default");
+    return g_name;
 }
 
-uint32_t SymbolVendor::GetPluginVersion() { return 1; }
+uint32_t SymbolVendor::GetPluginVersion() {
+    return 1;
+}

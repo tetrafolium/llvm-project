@@ -23,21 +23,21 @@ using namespace llvm;
 void AVRMCELFStreamer::emitValueForModiferKind(
     const MCSymbol *Sym, unsigned SizeInBytes, SMLoc Loc,
     AVRMCExpr::VariantKind ModifierKind) {
-  MCSymbolRefExpr::VariantKind Kind = MCSymbolRefExpr::VK_AVR_NONE;
-  if (ModifierKind == AVRMCExpr::VK_AVR_None) {
-    Kind = MCSymbolRefExpr::VK_AVR_DIFF8;
-    if (SizeInBytes == SIZE_LONG)
-      Kind = MCSymbolRefExpr::VK_AVR_DIFF32;
-    else if (SizeInBytes == SIZE_WORD)
-      Kind = MCSymbolRefExpr::VK_AVR_DIFF16;
-  } else if (ModifierKind == AVRMCExpr::VK_AVR_LO8)
-    Kind = MCSymbolRefExpr::VK_AVR_LO8;
-  else if (ModifierKind == AVRMCExpr::VK_AVR_HI8)
-    Kind = MCSymbolRefExpr::VK_AVR_HI8;
-  else if (ModifierKind == AVRMCExpr::VK_AVR_HH8)
-    Kind = MCSymbolRefExpr::VK_AVR_HLO8;
-  MCELFStreamer::emitValue(MCSymbolRefExpr::create(Sym, Kind, getContext()),
-                           SizeInBytes, Loc);
+    MCSymbolRefExpr::VariantKind Kind = MCSymbolRefExpr::VK_AVR_NONE;
+    if (ModifierKind == AVRMCExpr::VK_AVR_None) {
+        Kind = MCSymbolRefExpr::VK_AVR_DIFF8;
+        if (SizeInBytes == SIZE_LONG)
+            Kind = MCSymbolRefExpr::VK_AVR_DIFF32;
+        else if (SizeInBytes == SIZE_WORD)
+            Kind = MCSymbolRefExpr::VK_AVR_DIFF16;
+    } else if (ModifierKind == AVRMCExpr::VK_AVR_LO8)
+        Kind = MCSymbolRefExpr::VK_AVR_LO8;
+    else if (ModifierKind == AVRMCExpr::VK_AVR_HI8)
+        Kind = MCSymbolRefExpr::VK_AVR_HI8;
+    else if (ModifierKind == AVRMCExpr::VK_AVR_HH8)
+        Kind = MCSymbolRefExpr::VK_AVR_HLO8;
+    MCELFStreamer::emitValue(MCSymbolRefExpr::create(Sym, Kind, getContext()),
+                             SizeInBytes, Loc);
 }
 
 namespace llvm {
@@ -45,8 +45,8 @@ MCStreamer *createAVRELFStreamer(Triple const &TT, MCContext &Context,
                                  std::unique_ptr<MCAsmBackend> MAB,
                                  std::unique_ptr<MCObjectWriter> OW,
                                  std::unique_ptr<MCCodeEmitter> CE) {
-  return new AVRMCELFStreamer(Context, std::move(MAB), std::move(OW),
-                              std::move(CE));
+    return new AVRMCELFStreamer(Context, std::move(MAB), std::move(OW),
+                                std::move(CE));
 }
 
 } // end namespace llvm

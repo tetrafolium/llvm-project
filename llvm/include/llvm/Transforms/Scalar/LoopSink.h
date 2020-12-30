@@ -32,7 +32,7 @@ namespace llvm {
 /// fundamental analyses and transforms of the loop.
 class LoopSinkPass : public PassInfoMixin<LoopSinkPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM);
 };
 }
 

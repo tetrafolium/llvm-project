@@ -29,13 +29,13 @@
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 _xbegin(void)
 {
-  return __builtin_ia32_xbegin();
+    return __builtin_ia32_xbegin();
 }
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _xend(void)
 {
-  __builtin_ia32_xend();
+    __builtin_ia32_xend();
 }
 
 #define _xabort(imm) __builtin_ia32_xabort((imm))

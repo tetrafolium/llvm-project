@@ -33,7 +33,7 @@
 ///    A pointer to 512-bits configuration
 static __inline__ void __DEFAULT_FN_ATTRS_TILE
 _tile_loadconfig(const void *__config) {
-  __builtin_ia32_tile_loadconfig(__config);
+    __builtin_ia32_tile_loadconfig(__config);
 }
 
 /// Stores the current tile configuration to a 64-byte memory location
@@ -49,7 +49,7 @@ _tile_loadconfig(const void *__config) {
 ///    A pointer to 512-bits configuration
 static __inline__ void __DEFAULT_FN_ATTRS_TILE
 _tile_storeconfig(void *__config) {
-  __builtin_ia32_tile_storeconfig(__config);
+    __builtin_ia32_tile_storeconfig(__config);
 }
 
 /// Release the tile configuration to return to the init state, which
@@ -59,7 +59,7 @@ _tile_storeconfig(void *__config) {
 ///
 /// This intrinsic corresponds to the <c> TILERELEASE </c> instruction.
 static __inline__ void __DEFAULT_FN_ATTRS_TILE _tile_release(void) {
-  __builtin_ia32_tilerelease();
+    __builtin_ia32_tilerelease();
 }
 
 /// Load tile rows from memory specifieid by "base" address and "stride" into
@@ -228,45 +228,45 @@ typedef int _tile1024i __attribute__((__vector_size__(1024), __aligned__(64)));
 static __inline__ _tile1024i __DEFAULT_FN_ATTRS_INT8
 _tile_loadd_internal(unsigned short m, unsigned short n, const void *base,
                      __SIZE_TYPE__ stride) {
-  return __builtin_ia32_tileloadd64_internal(m, n, base,
-                                             (__SIZE_TYPE__)(stride));
+    return __builtin_ia32_tileloadd64_internal(m, n, base,
+            (__SIZE_TYPE__)(stride));
 }
 
 static __inline__ _tile1024i __DEFAULT_FN_ATTRS_INT8
 _tile_dpbssd_internal(unsigned short m, unsigned short n, unsigned short k,
                       _tile1024i dst, _tile1024i src1, _tile1024i src2) {
-  return __builtin_ia32_tdpbssd_internal(m, n, k, dst, src1, src2);
+    return __builtin_ia32_tdpbssd_internal(m, n, k, dst, src1, src2);
 }
 
 static __inline__ void __DEFAULT_FN_ATTRS_INT8
 _tile_stored_internal(unsigned short m, unsigned short n, void *base,
                       __SIZE_TYPE__ stride, _tile1024i tile) {
-  return __builtin_ia32_tilestored64_internal(m, n, base,
-                                              (__SIZE_TYPE__)(stride), tile);
+    return __builtin_ia32_tilestored64_internal(m, n, base,
+            (__SIZE_TYPE__)(stride), tile);
 }
 
 typedef struct __tile1024i_str {
-  const unsigned short row;
-  const unsigned short col;
-  _tile1024i tile;
+    const unsigned short row;
+    const unsigned short col;
+    _tile1024i tile;
 } __tile1024i;
 
 __DEFAULT_FN_ATTRS_INT8
 static void __tile_loadd(__tile1024i *dst, const void *base,
                          __SIZE_TYPE__ stride) {
-  dst->tile = _tile_loadd_internal(dst->row, dst->col, base, stride);
+    dst->tile = _tile_loadd_internal(dst->row, dst->col, base, stride);
 }
 
 __DEFAULT_FN_ATTRS_INT8
 static void __tile_dpbsud(__tile1024i *dst, __tile1024i src1,
                           __tile1024i src2) {
-  dst->tile = _tile_dpbssd_internal(src1.row, src2.col, src1.col, dst->tile,
-                                    src1.tile, src2.tile);
+    dst->tile = _tile_dpbssd_internal(src1.row, src2.col, src1.col, dst->tile,
+                                      src1.tile, src2.tile);
 }
 
 __DEFAULT_FN_ATTRS_INT8
 static void __tile_stored(void *base, __SIZE_TYPE__ stride, __tile1024i src) {
-  _tile_stored_internal(src.row, src.col, base, stride, src.tile);
+    _tile_stored_internal(src.row, src.col, base, stride, src.tile);
 }
 
 #endif /* __x86_64__ */

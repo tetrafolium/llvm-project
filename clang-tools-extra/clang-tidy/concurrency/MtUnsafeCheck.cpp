@@ -262,31 +262,32 @@ namespace clang {
 namespace tidy {
 
 template <> struct OptionEnumMapping<concurrency::MtUnsafeCheck::FunctionSet> {
-  static llvm::ArrayRef<
-      std::pair<concurrency::MtUnsafeCheck::FunctionSet, StringRef>>
-  getEnumMapping() {
-    static constexpr std::pair<concurrency::MtUnsafeCheck::FunctionSet,
-                               StringRef>
+    static llvm::ArrayRef<
+    std::pair<concurrency::MtUnsafeCheck::FunctionSet, StringRef>>
+    getEnumMapping() {
+        static constexpr std::pair<concurrency::MtUnsafeCheck::FunctionSet,
+               StringRef>
         Mapping[] = {{concurrency::MtUnsafeCheck::FunctionSet::Posix, "posix"},
-                     {concurrency::MtUnsafeCheck::FunctionSet::Glibc, "glibc"},
-                     {concurrency::MtUnsafeCheck::FunctionSet::Any, "any"}};
-    return makeArrayRef(Mapping);
-  }
+            {concurrency::MtUnsafeCheck::FunctionSet::Glibc, "glibc"},
+            {concurrency::MtUnsafeCheck::FunctionSet::Any, "any"}
+        };
+        return makeArrayRef(Mapping);
+    }
 };
 
 namespace concurrency {
 
 static ast_matchers::internal::Matcher<clang::NamedDecl>
 hasAnyMtUnsafeNames(MtUnsafeCheck::FunctionSet libc) {
-  switch (libc) {
-  case MtUnsafeCheck::FunctionSet::Posix:
-    return hasAnyName(PosixFunctions);
-  case MtUnsafeCheck::FunctionSet::Glibc:
-    return hasAnyName(GlibcFunctions);
-  case MtUnsafeCheck::FunctionSet::Any:
-    return anyOf(hasAnyName(PosixFunctions), hasAnyName(GlibcFunctions));
-  }
-  llvm_unreachable("invalid FunctionSet");
+    switch (libc) {
+    case MtUnsafeCheck::FunctionSet::Posix:
+        return hasAnyName(PosixFunctions);
+    case MtUnsafeCheck::FunctionSet::Glibc:
+        return hasAnyName(GlibcFunctions);
+    case MtUnsafeCheck::FunctionSet::Any:
+        return anyOf(hasAnyName(PosixFunctions), hasAnyName(GlibcFunctions));
+    }
+    llvm_unreachable("invalid FunctionSet");
 }
 
 MtUnsafeCheck::MtUnsafeCheck(StringRef Name, ClangTidyContext *Context)
@@ -294,21 +295,21 @@ MtUnsafeCheck::MtUnsafeCheck(StringRef Name, ClangTidyContext *Context)
       FuncSet(Options.get("FunctionSet", MtUnsafeCheck::FunctionSet::Any)) {}
 
 void MtUnsafeCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
-  Options.store(Opts, "FunctionSet", FuncSet);
+    Options.store(Opts, "FunctionSet", FuncSet);
 }
 
 void MtUnsafeCheck::registerMatchers(MatchFinder *Finder) {
-  Finder->addMatcher(
-      callExpr(callee(functionDecl(hasAnyMtUnsafeNames(FuncSet))))
-          .bind("mt-unsafe"),
-      this);
+    Finder->addMatcher(
+        callExpr(callee(functionDecl(hasAnyMtUnsafeNames(FuncSet))))
+        .bind("mt-unsafe"),
+        this);
 }
 
 void MtUnsafeCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *Call = Result.Nodes.getNodeAs<CallExpr>("mt-unsafe");
-  assert(Call && "Unhandled binding in the Matcher");
+    const auto *Call = Result.Nodes.getNodeAs<CallExpr>("mt-unsafe");
+    assert(Call && "Unhandled binding in the Matcher");
 
-  diag(Call->getBeginLoc(), "function is not thread safe");
+    diag(Call->getBeginLoc(), "function is not thread safe");
 }
 
 } // namespace concurrency

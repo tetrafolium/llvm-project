@@ -92,7 +92,7 @@ class __reorder_pred
 {
     _Pred _M_pred;
 
-  public:
+public:
     explicit __reorder_pred(_Pred __pred) : _M_pred(__pred) {}
 
     template <typename _FTp, typename _STp>
@@ -110,7 +110,7 @@ class __equal_value_by_pred
     const _Tp& _M_value;
     _Predicate _M_pred;
 
-  public:
+public:
     __equal_value_by_pred(const _Tp& __value, _Predicate __pred) : _M_value(__value), _M_pred(__pred) {}
 
     template <typename _Arg>
@@ -127,7 +127,7 @@ class __equal_value
 {
     const _Tp& _M_value;
 
-  public:
+public:
     explicit __equal_value(const _Tp& __value) : _M_value(__value) {}
 
     template <typename _Arg>
@@ -144,7 +144,7 @@ class __not_equal_value
 {
     const _Tp& _M_value;
 
-  public:
+public:
     explicit __not_equal_value(const _Tp& __value) : _M_value(__value) {}
 
     template <typename _Arg>
@@ -160,7 +160,7 @@ _ForwardIterator
 __cmp_iterators_by_values(_ForwardIterator __a, _ForwardIterator __b, _Compare __comp)
 {
     if (__a < __b)
-    { // we should return closer iterator
+    {   // we should return closer iterator
         return __comp(*__b, *__a) ? __b : __a;
     }
     else

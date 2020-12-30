@@ -24,23 +24,25 @@ namespace exegesis {
 
 // A simple object storing the value for a particular register.
 struct RegisterValue {
-  static RegisterValue zero(unsigned Reg) { return {Reg, APInt()}; }
-  unsigned Register;
-  APInt Value;
+    static RegisterValue zero(unsigned Reg) {
+        return {Reg, APInt()};
+    }
+    unsigned Register;
+    APInt Value;
 };
 
 enum class PredefinedValues {
-  POS_ZERO,       // Positive zero
-  NEG_ZERO,       // Negative zero
-  ONE,            // 1.0
-  TWO,            // 2.0
-  INF,            // Infinity
-  QNAN,           // Quiet NaN
-  ULP,            // One Unit in the last place
-  SMALLEST = ULP, // The minimum subnormal number
-  SMALLEST_NORM,  // The minimum normal number
-  LARGEST,        // The maximum normal number
-  ONE_PLUS_ULP,   // The value just after 1.0
+    POS_ZERO,       // Positive zero
+    NEG_ZERO,       // Negative zero
+    ONE,            // 1.0
+    TWO,            // 2.0
+    INF,            // Infinity
+    QNAN,           // Quiet NaN
+    ULP,            // One Unit in the last place
+    SMALLEST = ULP, // The minimum subnormal number
+    SMALLEST_NORM,  // The minimum normal number
+    LARGEST,        // The maximum normal number
+    ONE_PLUS_ULP,   // The value just after 1.0
 };
 
 APInt bitcastFloatValue(const fltSemantics &FltSemantics,

@@ -20,7 +20,7 @@ class OwningRewritePatternList;
 
 /// Populate the given list with patterns that convert from OpenMP to LLVM.
 void populateOpenMPToLLVMConversionPatterns(LLVMTypeConverter &converter,
-                                            OwningRewritePatternList &patterns);
+        OwningRewritePatternList &patterns);
 
 /// Create a pass to convert OpenMP operations to the LLVMIR dialect.
 std::unique_ptr<OperationPass<ModuleOp>> createConvertOpenMPToLLVMPass();

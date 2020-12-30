@@ -29,8 +29,8 @@ _LIBCPP_STRING_V1_EXTERN_TEMPLATE_LIST(_LIBCPP_EXTERN_TEMPLATE_DEFINE, wchar_t)
 #endif
 
 template
-    string
-    operator+<char, char_traits<char>, allocator<char> >(char const*, string const&);
+string
+operator+<char, char_traits<char>, allocator<char> >(char const*, string const&);
 
 namespace
 {
@@ -437,27 +437,63 @@ S i_to_string(const V v)
 
 }  // unnamed namespace
 
-string  to_string (int val)                { return i_to_string< string>(val); }
-string  to_string (long val)               { return i_to_string< string>(val); }
-string  to_string (long long val)          { return i_to_string< string>(val); }
-string  to_string (unsigned val)           { return i_to_string< string>(val); }
-string  to_string (unsigned long val)      { return i_to_string< string>(val); }
-string  to_string (unsigned long long val) { return i_to_string< string>(val); }
+string  to_string (int val)                {
+    return i_to_string< string>(val);
+}
+string  to_string (long val)               {
+    return i_to_string< string>(val);
+}
+string  to_string (long long val)          {
+    return i_to_string< string>(val);
+}
+string  to_string (unsigned val)           {
+    return i_to_string< string>(val);
+}
+string  to_string (unsigned long val)      {
+    return i_to_string< string>(val);
+}
+string  to_string (unsigned long long val) {
+    return i_to_string< string>(val);
+}
 
-wstring to_wstring(int val)                { return i_to_string<wstring>(val); }
-wstring to_wstring(long val)               { return i_to_string<wstring>(val); }
-wstring to_wstring(long long val)          { return i_to_string<wstring>(val); }
-wstring to_wstring(unsigned val)           { return i_to_string<wstring>(val); }
-wstring to_wstring(unsigned long val)      { return i_to_string<wstring>(val); }
-wstring to_wstring(unsigned long long val) { return i_to_string<wstring>(val); }
+wstring to_wstring(int val)                {
+    return i_to_string<wstring>(val);
+}
+wstring to_wstring(long val)               {
+    return i_to_string<wstring>(val);
+}
+wstring to_wstring(long long val)          {
+    return i_to_string<wstring>(val);
+}
+wstring to_wstring(unsigned val)           {
+    return i_to_string<wstring>(val);
+}
+wstring to_wstring(unsigned long val)      {
+    return i_to_string<wstring>(val);
+}
+wstring to_wstring(unsigned long long val) {
+    return i_to_string<wstring>(val);
+}
 
 
-string  to_string (float val)       { return as_string(snprintf,       initial_string< string>()(),   "%f", val); }
-string  to_string (double val)      { return as_string(snprintf,       initial_string< string>()(),   "%f", val); }
-string  to_string (long double val) { return as_string(snprintf,       initial_string< string>()(),  "%Lf", val); }
+string  to_string (float val)       {
+    return as_string(snprintf,       initial_string< string>()(),   "%f", val);
+}
+string  to_string (double val)      {
+    return as_string(snprintf,       initial_string< string>()(),   "%f", val);
+}
+string  to_string (long double val) {
+    return as_string(snprintf,       initial_string< string>()(),  "%Lf", val);
+}
 
-wstring to_wstring(float val)       { return as_string(get_swprintf(), initial_string<wstring>()(),  L"%f", val); }
-wstring to_wstring(double val)      { return as_string(get_swprintf(), initial_string<wstring>()(),  L"%f", val); }
-wstring to_wstring(long double val) { return as_string(get_swprintf(), initial_string<wstring>()(), L"%Lf", val); }
+wstring to_wstring(float val)       {
+    return as_string(get_swprintf(), initial_string<wstring>()(),  L"%f", val);
+}
+wstring to_wstring(double val)      {
+    return as_string(get_swprintf(), initial_string<wstring>()(),  L"%f", val);
+}
+wstring to_wstring(long double val) {
+    return as_string(get_swprintf(), initial_string<wstring>()(), L"%Lf", val);
+}
 
 _LIBCPP_END_NAMESPACE_STD

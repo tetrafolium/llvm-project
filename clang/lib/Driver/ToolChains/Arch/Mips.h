@@ -24,9 +24,9 @@ namespace mips {
 typedef enum { Legacy = 1, Std2008 = 2 } IEEE754Standard;
 
 enum class FloatABI {
-  Invalid,
-  Soft,
-  Hard,
+    Invalid,
+    Soft,
+    Hard,
 };
 
 IEEE754Standard getIEEE754Standard(StringRef &CPU);

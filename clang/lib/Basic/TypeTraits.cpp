@@ -56,31 +56,31 @@ static constexpr const char *UnaryExprOrTypeTraitSpellings[] = {
 };
 
 const char *clang::getTraitName(TypeTrait T) {
-  assert(T <= TT_Last && "invalid enum value!");
-  return TypeTraitNames[T];
+    assert(T <= TT_Last && "invalid enum value!");
+    return TypeTraitNames[T];
 }
 
 const char *clang::getTraitName(ArrayTypeTrait T) {
-  assert(T <= ATT_Last && "invalid enum value!");
-  return ArrayTypeTraitNames[T];
+    assert(T <= ATT_Last && "invalid enum value!");
+    return ArrayTypeTraitNames[T];
 }
 
 const char *clang::getTraitName(UnaryExprOrTypeTrait T) {
-  assert(T <= UETT_Last && "invalid enum value!");
-  return UnaryExprOrTypeTraitNames[T];
+    assert(T <= UETT_Last && "invalid enum value!");
+    return UnaryExprOrTypeTraitNames[T];
 }
 
 const char *clang::getTraitSpelling(TypeTrait T) {
-  assert(T <= TT_Last && "invalid enum value!");
-  return TypeTraitSpellings[T];
+    assert(T <= TT_Last && "invalid enum value!");
+    return TypeTraitSpellings[T];
 }
 
 const char *clang::getTraitSpelling(ArrayTypeTrait T) {
-  assert(T <= ATT_Last && "invalid enum value!");
-  return ArrayTypeTraitSpellings[T];
+    assert(T <= ATT_Last && "invalid enum value!");
+    return ArrayTypeTraitSpellings[T];
 }
 
 const char *clang::getTraitSpelling(UnaryExprOrTypeTrait T) {
-  assert(T <= UETT_Last && "invalid enum value!");
-  return UnaryExprOrTypeTraitSpellings[T];
+    assert(T <= UETT_Last && "invalid enum value!");
+    return UnaryExprOrTypeTraitSpellings[T];
 }

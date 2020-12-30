@@ -48,27 +48,27 @@ class HWEventListener;
 /// histograms. For example, it tracks how the dispatch group size changes
 /// over time.
 class Pipeline {
-  Pipeline(const Pipeline &P) = delete;
-  Pipeline &operator=(const Pipeline &P) = delete;
+    Pipeline(const Pipeline &P) = delete;
+    Pipeline &operator=(const Pipeline &P) = delete;
 
-  /// An ordered list of stages that define this instruction pipeline.
-  SmallVector<std::unique_ptr<Stage>, 8> Stages;
-  std::set<HWEventListener *> Listeners;
-  unsigned Cycles;
+    /// An ordered list of stages that define this instruction pipeline.
+    SmallVector<std::unique_ptr<Stage>, 8> Stages;
+    std::set<HWEventListener *> Listeners;
+    unsigned Cycles;
 
-  Error runCycle();
-  bool hasWorkToProcess();
-  void notifyCycleBegin();
-  void notifyCycleEnd();
+    Error runCycle();
+    bool hasWorkToProcess();
+    void notifyCycleBegin();
+    void notifyCycleEnd();
 
 public:
-  Pipeline() : Cycles(0) {}
-  void appendStage(std::unique_ptr<Stage> S);
+    Pipeline() : Cycles(0) {}
+    void appendStage(std::unique_ptr<Stage> S);
 
-  /// Returns the total number of simulated cycles.
-  Expected<unsigned> run();
+    /// Returns the total number of simulated cycles.
+    Expected<unsigned> run();
 
-  void addEventListener(HWEventListener *Listener);
+    void addEventListener(HWEventListener *Listener);
 };
 } // namespace mca
 } // namespace llvm

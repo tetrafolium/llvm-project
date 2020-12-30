@@ -26,77 +26,79 @@ static constexpr StringLiteral ObjC2EHTypePrefix = "_OBJC_EHTYPE_$_";
 static constexpr StringLiteral ObjC2IVarPrefix = "_OBJC_IVAR_$_";
 
 static uint32_t getFlags(const Symbol *Sym) {
-  uint32_t Flags = BasicSymbolRef::SF_Global;
-  if (Sym->isUndefined())
-    Flags |= BasicSymbolRef::SF_Undefined;
-  else
-    Flags |= BasicSymbolRef::SF_Exported;
+    uint32_t Flags = BasicSymbolRef::SF_Global;
+    if (Sym->isUndefined())
+        Flags |= BasicSymbolRef::SF_Undefined;
+    else
+        Flags |= BasicSymbolRef::SF_Exported;
 
-  if (Sym->isWeakDefined() || Sym->isWeakReferenced())
-    Flags |= BasicSymbolRef::SF_Weak;
+    if (Sym->isWeakDefined() || Sym->isWeakReferenced())
+        Flags |= BasicSymbolRef::SF_Weak;
 
-  return Flags;
+    return Flags;
 }
 
 TapiFile::TapiFile(MemoryBufferRef Source, const InterfaceFile &interface,
                    Architecture Arch)
     : SymbolicFile(ID_TapiFile, Source), Arch(Arch) {
-  for (const auto *Symbol : interface.symbols()) {
-    if (!Symbol->getArchitectures().has(Arch))
-      continue;
+    for (const auto *Symbol : interface.symbols()) {
+        if (!Symbol->getArchitectures().has(Arch))
+            continue;
 
-    switch (Symbol->getKind()) {
-    case SymbolKind::GlobalSymbol:
-      Symbols.emplace_back(StringRef(), Symbol->getName(), getFlags(Symbol));
-      break;
-    case SymbolKind::ObjectiveCClass:
-      if (interface.getPlatforms().count(PlatformKind::macOS) &&
-          Arch == AK_i386) {
-        Symbols.emplace_back(ObjC1ClassNamePrefix, Symbol->getName(),
-                             getFlags(Symbol));
-      } else {
-        Symbols.emplace_back(ObjC2ClassNamePrefix, Symbol->getName(),
-                             getFlags(Symbol));
-        Symbols.emplace_back(ObjC2MetaClassNamePrefix, Symbol->getName(),
-                             getFlags(Symbol));
-      }
-      break;
-    case SymbolKind::ObjectiveCClassEHType:
-      Symbols.emplace_back(ObjC2EHTypePrefix, Symbol->getName(),
-                           getFlags(Symbol));
-      break;
-    case SymbolKind::ObjectiveCInstanceVariable:
-      Symbols.emplace_back(ObjC2IVarPrefix, Symbol->getName(),
-                           getFlags(Symbol));
-      break;
+        switch (Symbol->getKind()) {
+        case SymbolKind::GlobalSymbol:
+            Symbols.emplace_back(StringRef(), Symbol->getName(), getFlags(Symbol));
+            break;
+        case SymbolKind::ObjectiveCClass:
+            if (interface.getPlatforms().count(PlatformKind::macOS) &&
+                    Arch == AK_i386) {
+                Symbols.emplace_back(ObjC1ClassNamePrefix, Symbol->getName(),
+                                     getFlags(Symbol));
+            } else {
+                Symbols.emplace_back(ObjC2ClassNamePrefix, Symbol->getName(),
+                                     getFlags(Symbol));
+                Symbols.emplace_back(ObjC2MetaClassNamePrefix, Symbol->getName(),
+                                     getFlags(Symbol));
+            }
+            break;
+        case SymbolKind::ObjectiveCClassEHType:
+            Symbols.emplace_back(ObjC2EHTypePrefix, Symbol->getName(),
+                                 getFlags(Symbol));
+            break;
+        case SymbolKind::ObjectiveCInstanceVariable:
+            Symbols.emplace_back(ObjC2IVarPrefix, Symbol->getName(),
+                                 getFlags(Symbol));
+            break;
+        }
     }
-  }
 }
 
 TapiFile::~TapiFile() = default;
 
-void TapiFile::moveSymbolNext(DataRefImpl &DRI) const { DRI.d.a++; }
+void TapiFile::moveSymbolNext(DataRefImpl &DRI) const {
+    DRI.d.a++;
+}
 
 Error TapiFile::printSymbolName(raw_ostream &OS, DataRefImpl DRI) const {
-  assert(DRI.d.a < Symbols.size() && "Attempt to access symbol out of bounds");
-  const Symbol &Sym = Symbols[DRI.d.a];
-  OS << Sym.Prefix << Sym.Name;
-  return Error::success();
+    assert(DRI.d.a < Symbols.size() && "Attempt to access symbol out of bounds");
+    const Symbol &Sym = Symbols[DRI.d.a];
+    OS << Sym.Prefix << Sym.Name;
+    return Error::success();
 }
 
 Expected<uint32_t> TapiFile::getSymbolFlags(DataRefImpl DRI) const {
-  assert(DRI.d.a < Symbols.size() && "Attempt to access symbol out of bounds");
-  return Symbols[DRI.d.a].Flags;
+    assert(DRI.d.a < Symbols.size() && "Attempt to access symbol out of bounds");
+    return Symbols[DRI.d.a].Flags;
 }
 
 basic_symbol_iterator TapiFile::symbol_begin() const {
-  DataRefImpl DRI;
-  DRI.d.a = 0;
-  return BasicSymbolRef{DRI, this};
+    DataRefImpl DRI;
+    DRI.d.a = 0;
+    return BasicSymbolRef{DRI, this};
 }
 
 basic_symbol_iterator TapiFile::symbol_end() const {
-  DataRefImpl DRI;
-  DRI.d.a = Symbols.size();
-  return BasicSymbolRef{DRI, this};
+    DataRefImpl DRI;
+    DRI.d.a = Symbols.size();
+    return BasicSymbolRef{DRI, this};
 }

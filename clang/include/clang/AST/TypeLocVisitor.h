@@ -24,25 +24,25 @@ namespace clang {
 template<typename ImplClass, typename RetTy=void>
 class TypeLocVisitor {
 public:
-  RetTy Visit(TypeLoc TyLoc) {
-    switch (TyLoc.getTypeLocClass()) {
+    RetTy Visit(TypeLoc TyLoc) {
+        switch (TyLoc.getTypeLocClass()) {
 #define ABSTRACT_TYPELOC(CLASS, PARENT)
 #define TYPELOC(CLASS, PARENT) \
     case TypeLoc::CLASS: DISPATCH(CLASS##TypeLoc);
 #include "clang/AST/TypeLocNodes.def"
+        }
+        llvm_unreachable("unexpected type loc class!");
     }
-    llvm_unreachable("unexpected type loc class!");
-  }
 
-  RetTy Visit(UnqualTypeLoc TyLoc) {
-    switch (TyLoc.getTypeLocClass()) {
+    RetTy Visit(UnqualTypeLoc TyLoc) {
+        switch (TyLoc.getTypeLocClass()) {
 #define ABSTRACT_TYPELOC(CLASS, PARENT)
 #define TYPELOC(CLASS, PARENT) \
     case TypeLoc::CLASS: DISPATCH(CLASS##TypeLoc);
 #include "clang/AST/TypeLocNodes.def"
+        }
+        llvm_unreachable("unexpected type loc class!");
     }
-    llvm_unreachable("unexpected type loc class!");
-  }
 
 #define TYPELOC(CLASS, PARENT)      \
   RetTy Visit##CLASS##TypeLoc(CLASS##TypeLoc TyLoc) { \
@@ -50,7 +50,9 @@ public:
   }
 #include "clang/AST/TypeLocNodes.def"
 
-  RetTy VisitTypeLoc(TypeLoc TyLoc) { return RetTy(); }
+    RetTy VisitTypeLoc(TypeLoc TyLoc) {
+        return RetTy();
+    }
 };
 
 #undef DISPATCH

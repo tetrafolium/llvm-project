@@ -49,14 +49,14 @@ extern uptr kHighMemStart;
 extern uptr kHighMemEnd;
 
 inline uptr MemToShadow(uptr untagged_addr) {
-  return (untagged_addr >> kShadowScale) +
-         __hwasan_shadow_memory_dynamic_address;
+    return (untagged_addr >> kShadowScale) +
+           __hwasan_shadow_memory_dynamic_address;
 }
 inline uptr ShadowToMem(uptr shadow_addr) {
-  return (shadow_addr - __hwasan_shadow_memory_dynamic_address) << kShadowScale;
+    return (shadow_addr - __hwasan_shadow_memory_dynamic_address) << kShadowScale;
 }
 inline uptr MemToShadowSize(uptr size) {
-  return size >> kShadowScale;
+    return size >> kShadowScale;
 }
 
 bool MemIsApp(uptr p);

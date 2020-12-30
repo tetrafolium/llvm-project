@@ -21,23 +21,31 @@ namespace llvm {
 
 /// Represents a location in source code.
 class SMLoc {
-  const char *Ptr = nullptr;
+    const char *Ptr = nullptr;
 
 public:
-  SMLoc() = default;
+    SMLoc() = default;
 
-  bool isValid() const { return Ptr != nullptr; }
+    bool isValid() const {
+        return Ptr != nullptr;
+    }
 
-  bool operator==(const SMLoc &RHS) const { return RHS.Ptr == Ptr; }
-  bool operator!=(const SMLoc &RHS) const { return RHS.Ptr != Ptr; }
+    bool operator==(const SMLoc &RHS) const {
+        return RHS.Ptr == Ptr;
+    }
+    bool operator!=(const SMLoc &RHS) const {
+        return RHS.Ptr != Ptr;
+    }
 
-  const char *getPointer() const { return Ptr; }
+    const char *getPointer() const {
+        return Ptr;
+    }
 
-  static SMLoc getFromPointer(const char *Ptr) {
-    SMLoc L;
-    L.Ptr = Ptr;
-    return L;
-  }
+    static SMLoc getFromPointer(const char *Ptr) {
+        SMLoc L;
+        L.Ptr = Ptr;
+        return L;
+    }
 };
 
 /// Represents a range in source code.
@@ -47,16 +55,18 @@ public:
 /// range [2,2) represents an empty range between the characters "b" and "c".
 class SMRange {
 public:
-  SMLoc Start, End;
+    SMLoc Start, End;
 
-  SMRange() = default;
-  SMRange(NoneType) {}
-  SMRange(SMLoc St, SMLoc En) : Start(St), End(En) {
-    assert(Start.isValid() == End.isValid() &&
-           "Start and End should either both be valid or both be invalid!");
-  }
+    SMRange() = default;
+    SMRange(NoneType) {}
+    SMRange(SMLoc St, SMLoc En) : Start(St), End(En) {
+        assert(Start.isValid() == End.isValid() &&
+               "Start and End should either both be valid or both be invalid!");
+    }
 
-  bool isValid() const { return Start.isValid(); }
+    bool isValid() const {
+        return Start.isValid();
+    }
 };
 
 } // end namespace llvm

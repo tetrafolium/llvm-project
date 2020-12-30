@@ -30,227 +30,227 @@ namespace comments {
 class CommandTraits;
 
 class Sema {
-  Sema(const Sema &) = delete;
-  void operator=(const Sema &) = delete;
+    Sema(const Sema &) = delete;
+    void operator=(const Sema &) = delete;
 
-  /// Allocator for AST nodes.
-  llvm::BumpPtrAllocator &Allocator;
+    /// Allocator for AST nodes.
+    llvm::BumpPtrAllocator &Allocator;
 
-  /// Source manager for the comment being parsed.
-  const SourceManager &SourceMgr;
+    /// Source manager for the comment being parsed.
+    const SourceManager &SourceMgr;
 
-  DiagnosticsEngine &Diags;
+    DiagnosticsEngine &Diags;
 
-  CommandTraits &Traits;
+    CommandTraits &Traits;
 
-  const Preprocessor *PP;
+    const Preprocessor *PP;
 
-  /// Information about the declaration this comment is attached to.
-  DeclInfo *ThisDeclInfo;
+    /// Information about the declaration this comment is attached to.
+    DeclInfo *ThisDeclInfo;
 
-  /// Comment AST nodes that correspond to parameter names in
-  /// \c TemplateParameters.
-  ///
-  /// Contains a valid value if \c DeclInfo->IsFilled is true.
-  llvm::StringMap<TParamCommandComment *> TemplateParameterDocs;
+    /// Comment AST nodes that correspond to parameter names in
+    /// \c TemplateParameters.
+    ///
+    /// Contains a valid value if \c DeclInfo->IsFilled is true.
+    llvm::StringMap<TParamCommandComment *> TemplateParameterDocs;
 
-  /// AST node for the \command and its aliases.
-  const BlockCommandComment *BriefCommand;
+    /// AST node for the \command and its aliases.
+    const BlockCommandComment *BriefCommand;
 
-  /// AST node for the \\headerfile command.
-  const BlockCommandComment *HeaderfileCommand;
+    /// AST node for the \\headerfile command.
+    const BlockCommandComment *HeaderfileCommand;
 
-  DiagnosticBuilder Diag(SourceLocation Loc, unsigned DiagID) {
-    return Diags.Report(Loc, DiagID);
-  }
+    DiagnosticBuilder Diag(SourceLocation Loc, unsigned DiagID) {
+        return Diags.Report(Loc, DiagID);
+    }
 
-  /// A stack of HTML tags that are currently open (not matched with closing
-  /// tags).
-  SmallVector<HTMLStartTagComment *, 8> HTMLOpenTags;
+    /// A stack of HTML tags that are currently open (not matched with closing
+    /// tags).
+    SmallVector<HTMLStartTagComment *, 8> HTMLOpenTags;
 
 public:
-  Sema(llvm::BumpPtrAllocator &Allocator, const SourceManager &SourceMgr,
-       DiagnosticsEngine &Diags, CommandTraits &Traits,
-       const Preprocessor *PP);
+    Sema(llvm::BumpPtrAllocator &Allocator, const SourceManager &SourceMgr,
+         DiagnosticsEngine &Diags, CommandTraits &Traits,
+         const Preprocessor *PP);
 
-  void setDecl(const Decl *D);
+    void setDecl(const Decl *D);
 
-  /// Returns a copy of array, owned by Sema's allocator.
-  template<typename T>
-  ArrayRef<T> copyArray(ArrayRef<T> Source) {
-    if (!Source.empty())
-      return Source.copy(Allocator);
-    return None;
-  }
+    /// Returns a copy of array, owned by Sema's allocator.
+    template<typename T>
+    ArrayRef<T> copyArray(ArrayRef<T> Source) {
+        if (!Source.empty())
+            return Source.copy(Allocator);
+        return None;
+    }
 
-  ParagraphComment *actOnParagraphComment(
-      ArrayRef<InlineContentComment *> Content);
+    ParagraphComment *actOnParagraphComment(
+        ArrayRef<InlineContentComment *> Content);
 
-  BlockCommandComment *actOnBlockCommandStart(SourceLocation LocBegin,
-                                              SourceLocation LocEnd,
-                                              unsigned CommandID,
-                                              CommandMarkerKind CommandMarker);
+    BlockCommandComment *actOnBlockCommandStart(SourceLocation LocBegin,
+            SourceLocation LocEnd,
+            unsigned CommandID,
+            CommandMarkerKind CommandMarker);
 
-  void actOnBlockCommandArgs(BlockCommandComment *Command,
-                             ArrayRef<BlockCommandComment::Argument> Args);
+    void actOnBlockCommandArgs(BlockCommandComment *Command,
+                               ArrayRef<BlockCommandComment::Argument> Args);
 
-  void actOnBlockCommandFinish(BlockCommandComment *Command,
-                               ParagraphComment *Paragraph);
+    void actOnBlockCommandFinish(BlockCommandComment *Command,
+                                 ParagraphComment *Paragraph);
 
-  ParamCommandComment *actOnParamCommandStart(SourceLocation LocBegin,
-                                              SourceLocation LocEnd,
-                                              unsigned CommandID,
-                                              CommandMarkerKind CommandMarker);
+    ParamCommandComment *actOnParamCommandStart(SourceLocation LocBegin,
+            SourceLocation LocEnd,
+            unsigned CommandID,
+            CommandMarkerKind CommandMarker);
 
-  void actOnParamCommandDirectionArg(ParamCommandComment *Command,
-                                     SourceLocation ArgLocBegin,
-                                     SourceLocation ArgLocEnd,
-                                     StringRef Arg);
+    void actOnParamCommandDirectionArg(ParamCommandComment *Command,
+                                       SourceLocation ArgLocBegin,
+                                       SourceLocation ArgLocEnd,
+                                       StringRef Arg);
 
-  void actOnParamCommandParamNameArg(ParamCommandComment *Command,
-                                     SourceLocation ArgLocBegin,
-                                     SourceLocation ArgLocEnd,
-                                     StringRef Arg);
+    void actOnParamCommandParamNameArg(ParamCommandComment *Command,
+                                       SourceLocation ArgLocBegin,
+                                       SourceLocation ArgLocEnd,
+                                       StringRef Arg);
 
-  void actOnParamCommandFinish(ParamCommandComment *Command,
-                               ParagraphComment *Paragraph);
+    void actOnParamCommandFinish(ParamCommandComment *Command,
+                                 ParagraphComment *Paragraph);
 
-  TParamCommandComment *actOnTParamCommandStart(SourceLocation LocBegin,
-                                                SourceLocation LocEnd,
-                                                unsigned CommandID,
-                                                CommandMarkerKind CommandMarker);
+    TParamCommandComment *actOnTParamCommandStart(SourceLocation LocBegin,
+            SourceLocation LocEnd,
+            unsigned CommandID,
+            CommandMarkerKind CommandMarker);
 
-  void actOnTParamCommandParamNameArg(TParamCommandComment *Command,
-                                      SourceLocation ArgLocBegin,
-                                      SourceLocation ArgLocEnd,
-                                      StringRef Arg);
+    void actOnTParamCommandParamNameArg(TParamCommandComment *Command,
+                                        SourceLocation ArgLocBegin,
+                                        SourceLocation ArgLocEnd,
+                                        StringRef Arg);
 
-  void actOnTParamCommandFinish(TParamCommandComment *Command,
-                                ParagraphComment *Paragraph);
+    void actOnTParamCommandFinish(TParamCommandComment *Command,
+                                  ParagraphComment *Paragraph);
 
-  InlineCommandComment *actOnInlineCommand(SourceLocation CommandLocBegin,
-                                           SourceLocation CommandLocEnd,
-                                           unsigned CommandID);
+    InlineCommandComment *actOnInlineCommand(SourceLocation CommandLocBegin,
+            SourceLocation CommandLocEnd,
+            unsigned CommandID);
 
-  InlineCommandComment *actOnInlineCommand(SourceLocation CommandLocBegin,
-                                           SourceLocation CommandLocEnd,
+    InlineCommandComment *actOnInlineCommand(SourceLocation CommandLocBegin,
+            SourceLocation CommandLocEnd,
+            unsigned CommandID,
+            SourceLocation ArgLocBegin,
+            SourceLocation ArgLocEnd,
+            StringRef Arg);
+
+    InlineContentComment *actOnUnknownCommand(SourceLocation LocBegin,
+            SourceLocation LocEnd,
+            StringRef CommandName);
+
+    InlineContentComment *actOnUnknownCommand(SourceLocation LocBegin,
+            SourceLocation LocEnd,
+            unsigned CommandID);
+
+    TextComment *actOnText(SourceLocation LocBegin,
+                           SourceLocation LocEnd,
+                           StringRef Text);
+
+    VerbatimBlockComment *actOnVerbatimBlockStart(SourceLocation Loc,
+            unsigned CommandID);
+
+    VerbatimBlockLineComment *actOnVerbatimBlockLine(SourceLocation Loc,
+            StringRef Text);
+
+    void actOnVerbatimBlockFinish(VerbatimBlockComment *Block,
+                                  SourceLocation CloseNameLocBegin,
+                                  StringRef CloseName,
+                                  ArrayRef<VerbatimBlockLineComment *> Lines);
+
+    VerbatimLineComment *actOnVerbatimLine(SourceLocation LocBegin,
                                            unsigned CommandID,
-                                           SourceLocation ArgLocBegin,
-                                           SourceLocation ArgLocEnd,
-                                           StringRef Arg);
+                                           SourceLocation TextBegin,
+                                           StringRef Text);
 
-  InlineContentComment *actOnUnknownCommand(SourceLocation LocBegin,
-                                            SourceLocation LocEnd,
-                                            StringRef CommandName);
+    HTMLStartTagComment *actOnHTMLStartTagStart(SourceLocation LocBegin,
+            StringRef TagName);
 
-  InlineContentComment *actOnUnknownCommand(SourceLocation LocBegin,
-                                            SourceLocation LocEnd,
-                                            unsigned CommandID);
+    void actOnHTMLStartTagFinish(HTMLStartTagComment *Tag,
+                                 ArrayRef<HTMLStartTagComment::Attribute> Attrs,
+                                 SourceLocation GreaterLoc,
+                                 bool IsSelfClosing);
 
-  TextComment *actOnText(SourceLocation LocBegin,
-                         SourceLocation LocEnd,
-                         StringRef Text);
+    HTMLEndTagComment *actOnHTMLEndTag(SourceLocation LocBegin,
+                                       SourceLocation LocEnd,
+                                       StringRef TagName);
 
-  VerbatimBlockComment *actOnVerbatimBlockStart(SourceLocation Loc,
-                                                unsigned CommandID);
+    FullComment *actOnFullComment(ArrayRef<BlockContentComment *> Blocks);
 
-  VerbatimBlockLineComment *actOnVerbatimBlockLine(SourceLocation Loc,
-                                                   StringRef Text);
+    void checkBlockCommandEmptyParagraph(BlockCommandComment *Command);
 
-  void actOnVerbatimBlockFinish(VerbatimBlockComment *Block,
-                                SourceLocation CloseNameLocBegin,
-                                StringRef CloseName,
-                                ArrayRef<VerbatimBlockLineComment *> Lines);
+    void checkReturnsCommand(const BlockCommandComment *Command);
 
-  VerbatimLineComment *actOnVerbatimLine(SourceLocation LocBegin,
-                                         unsigned CommandID,
-                                         SourceLocation TextBegin,
-                                         StringRef Text);
+    /// Emit diagnostics about duplicate block commands that should be
+    /// used only once per comment, e.g., \and \\returns.
+    void checkBlockCommandDuplicate(const BlockCommandComment *Command);
 
-  HTMLStartTagComment *actOnHTMLStartTagStart(SourceLocation LocBegin,
-                                              StringRef TagName);
+    void checkDeprecatedCommand(const BlockCommandComment *Comment);
 
-  void actOnHTMLStartTagFinish(HTMLStartTagComment *Tag,
-                               ArrayRef<HTMLStartTagComment::Attribute> Attrs,
-                               SourceLocation GreaterLoc,
-                               bool IsSelfClosing);
+    void checkFunctionDeclVerbatimLine(const BlockCommandComment *Comment);
 
-  HTMLEndTagComment *actOnHTMLEndTag(SourceLocation LocBegin,
-                                     SourceLocation LocEnd,
-                                     StringRef TagName);
+    void checkContainerDeclVerbatimLine(const BlockCommandComment *Comment);
 
-  FullComment *actOnFullComment(ArrayRef<BlockContentComment *> Blocks);
+    void checkContainerDecl(const BlockCommandComment *Comment);
 
-  void checkBlockCommandEmptyParagraph(BlockCommandComment *Command);
+    /// Resolve parameter names to parameter indexes in function declaration.
+    /// Emit diagnostics about unknown parametrs.
+    void resolveParamCommandIndexes(const FullComment *FC);
 
-  void checkReturnsCommand(const BlockCommandComment *Command);
+    bool isFunctionDecl();
+    bool isAnyFunctionDecl();
 
-  /// Emit diagnostics about duplicate block commands that should be
-  /// used only once per comment, e.g., \and \\returns.
-  void checkBlockCommandDuplicate(const BlockCommandComment *Command);
+    /// \returns \c true if declaration that this comment is attached to declares
+    /// a function pointer.
+    bool isFunctionPointerVarDecl();
+    /// \returns \c true if the declaration that this comment is attached to
+    /// declares a variable or a field whose type is a function or a block
+    /// pointer.
+    bool isFunctionOrBlockPointerVarLikeDecl();
+    bool isFunctionOrMethodVariadic();
+    bool isObjCMethodDecl();
+    bool isObjCPropertyDecl();
+    bool isTemplateOrSpecialization();
+    bool isRecordLikeDecl();
+    bool isClassOrStructDecl();
+    /// \return \c true if the declaration that this comment is attached to
+    /// declares either struct, class or tag typedef.
+    bool isClassOrStructOrTagTypedefDecl();
+    bool isUnionDecl();
+    bool isObjCInterfaceDecl();
+    bool isObjCProtocolDecl();
+    bool isClassTemplateDecl();
+    bool isFunctionTemplateDecl();
 
-  void checkDeprecatedCommand(const BlockCommandComment *Comment);
+    ArrayRef<const ParmVarDecl *> getParamVars();
 
-  void checkFunctionDeclVerbatimLine(const BlockCommandComment *Comment);
+    /// Extract all important semantic information from
+    /// \c ThisDeclInfo->ThisDecl into \c ThisDeclInfo members.
+    void inspectThisDecl();
 
-  void checkContainerDeclVerbatimLine(const BlockCommandComment *Comment);
+    /// Returns index of a function parameter with a given name.
+    unsigned resolveParmVarReference(StringRef Name,
+                                     ArrayRef<const ParmVarDecl *> ParamVars);
 
-  void checkContainerDecl(const BlockCommandComment *Comment);
+    /// Returns index of a function parameter with the name closest to a given
+    /// typo.
+    unsigned correctTypoInParmVarReference(StringRef Typo,
+                                           ArrayRef<const ParmVarDecl *> ParamVars);
 
-  /// Resolve parameter names to parameter indexes in function declaration.
-  /// Emit diagnostics about unknown parametrs.
-  void resolveParamCommandIndexes(const FullComment *FC);
+    bool resolveTParamReference(StringRef Name,
+                                const TemplateParameterList *TemplateParameters,
+                                SmallVectorImpl<unsigned> *Position);
 
-  bool isFunctionDecl();
-  bool isAnyFunctionDecl();
+    StringRef correctTypoInTParamReference(
+        StringRef Typo,
+        const TemplateParameterList *TemplateParameters);
 
-  /// \returns \c true if declaration that this comment is attached to declares
-  /// a function pointer.
-  bool isFunctionPointerVarDecl();
-  /// \returns \c true if the declaration that this comment is attached to
-  /// declares a variable or a field whose type is a function or a block
-  /// pointer.
-  bool isFunctionOrBlockPointerVarLikeDecl();
-  bool isFunctionOrMethodVariadic();
-  bool isObjCMethodDecl();
-  bool isObjCPropertyDecl();
-  bool isTemplateOrSpecialization();
-  bool isRecordLikeDecl();
-  bool isClassOrStructDecl();
-  /// \return \c true if the declaration that this comment is attached to
-  /// declares either struct, class or tag typedef.
-  bool isClassOrStructOrTagTypedefDecl();
-  bool isUnionDecl();
-  bool isObjCInterfaceDecl();
-  bool isObjCProtocolDecl();
-  bool isClassTemplateDecl();
-  bool isFunctionTemplateDecl();
-
-  ArrayRef<const ParmVarDecl *> getParamVars();
-
-  /// Extract all important semantic information from
-  /// \c ThisDeclInfo->ThisDecl into \c ThisDeclInfo members.
-  void inspectThisDecl();
-
-  /// Returns index of a function parameter with a given name.
-  unsigned resolveParmVarReference(StringRef Name,
-                                   ArrayRef<const ParmVarDecl *> ParamVars);
-
-  /// Returns index of a function parameter with the name closest to a given
-  /// typo.
-  unsigned correctTypoInParmVarReference(StringRef Typo,
-                                         ArrayRef<const ParmVarDecl *> ParamVars);
-
-  bool resolveTParamReference(StringRef Name,
-                              const TemplateParameterList *TemplateParameters,
-                              SmallVectorImpl<unsigned> *Position);
-
-  StringRef correctTypoInTParamReference(
-                              StringRef Typo,
-                              const TemplateParameterList *TemplateParameters);
-
-  InlineCommandComment::RenderKind
-  getInlineCommandRenderKind(StringRef Name) const;
+    InlineCommandComment::RenderKind
+    getInlineCommandRenderKind(StringRef Name) const;
 };
 
 } // end namespace comments

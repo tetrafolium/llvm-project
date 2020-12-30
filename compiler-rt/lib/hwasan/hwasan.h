@@ -50,20 +50,20 @@ const unsigned kRecordFPLShift = 4;
 const unsigned kRecordFPModulus = 1 << (64 - kRecordFPShift + kRecordFPLShift);
 
 static inline tag_t GetTagFromPointer(uptr p) {
-  return p >> kAddressTagShift;
+    return p >> kAddressTagShift;
 }
 
 static inline uptr UntagAddr(uptr tagged_addr) {
-  return tagged_addr & ~kAddressTagMask;
+    return tagged_addr & ~kAddressTagMask;
 }
 
 static inline void *UntagPtr(const void *tagged_ptr) {
-  return reinterpret_cast<void *>(
-      UntagAddr(reinterpret_cast<uptr>(tagged_ptr)));
+    return reinterpret_cast<void *>(
+               UntagAddr(reinterpret_cast<uptr>(tagged_ptr)));
 }
 
 static inline uptr AddTagToPointer(uptr p, tag_t tag) {
-  return (p & ~kAddressTagMask) | ((uptr)tag << kAddressTagShift);
+    return (p & ~kAddressTagMask) | ((uptr)tag << kAddressTagShift);
 }
 
 namespace __hwasan {
@@ -88,7 +88,7 @@ void *hwasan_pvalloc(uptr size, StackTrace *stack);
 void *hwasan_aligned_alloc(uptr alignment, uptr size, StackTrace *stack);
 void *hwasan_memalign(uptr alignment, uptr size, StackTrace *stack);
 int hwasan_posix_memalign(void **memptr, uptr alignment, uptr size,
-                        StackTrace *stack);
+                          StackTrace *stack);
 void hwasan_free(void *ptr, StackTrace *stack);
 
 void InstallAtExitHandler();
@@ -150,13 +150,13 @@ typedef unsigned long __hw_sigset_t;
 // the interception for AArch64.
 typedef unsigned long long __hw_register_buf[22];
 struct __hw_jmp_buf_struct {
-  // NOTE: The machine-dependent definition of `__sigsetjmp'
-  // assume that a `__hw_jmp_buf' begins with a `__hw_register_buf' and that
-  // `__mask_was_saved' follows it.  Do not move these members or add others
-  // before it.
-  __hw_register_buf __jmpbuf; // Calling environment.
-  int __mask_was_saved;       // Saved the signal mask?
-  __hw_sigset_t __saved_mask; // Saved signal mask.
+    // NOTE: The machine-dependent definition of `__sigsetjmp'
+    // assume that a `__hw_jmp_buf' begins with a `__hw_register_buf' and that
+    // `__mask_was_saved' follows it.  Do not move these members or add others
+    // before it.
+    __hw_register_buf __jmpbuf; // Calling environment.
+    int __mask_was_saved;       // Saved the signal mask?
+    __hw_sigset_t __saved_mask; // Saved signal mask.
 };
 typedef struct __hw_jmp_buf_struct __hw_jmp_buf[1];
 typedef struct __hw_jmp_buf_struct __hw_sigjmp_buf[1];

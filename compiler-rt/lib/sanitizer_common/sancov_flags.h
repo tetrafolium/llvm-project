@@ -22,12 +22,14 @@ struct SancovFlags {
 #include "sancov_flags.inc"
 #undef SANCOV_FLAG
 
-  void SetDefaults();
+    void SetDefaults();
 };
 
 extern SancovFlags sancov_flags_dont_use_directly;
 
-inline SancovFlags* sancov_flags() { return &sancov_flags_dont_use_directly; }
+inline SancovFlags* sancov_flags() {
+    return &sancov_flags_dont_use_directly;
+}
 
 void InitializeSancovFlags();
 

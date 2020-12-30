@@ -18,7 +18,7 @@ using namespace lldb_private;
 
 namespace {
 void __stdcall ExitThreadProxy(ULONG_PTR dwExitCode) {
-  ::ExitThread(dwExitCode);
+    ::ExitThread(dwExitCode);
 }
 }
 
@@ -28,47 +28,51 @@ HostThreadWindows::HostThreadWindows()
 HostThreadWindows::HostThreadWindows(lldb::thread_t thread)
     : HostNativeThreadBase(thread), m_owns_handle(true) {}
 
-HostThreadWindows::~HostThreadWindows() { Reset(); }
+HostThreadWindows::~HostThreadWindows() {
+    Reset();
+}
 
-void HostThreadWindows::SetOwnsHandle(bool owns) { m_owns_handle = owns; }
+void HostThreadWindows::SetOwnsHandle(bool owns) {
+    m_owns_handle = owns;
+}
 
 Status HostThreadWindows::Join(lldb::thread_result_t *result) {
-  Status error;
-  if (IsJoinable()) {
-    DWORD wait_result = ::WaitForSingleObject(m_thread, INFINITE);
-    if (WAIT_OBJECT_0 == wait_result && result) {
-      DWORD exit_code = 0;
-      if (!::GetExitCodeThread(m_thread, &exit_code))
-        *result = 0;
-      *result = exit_code;
-    } else if (WAIT_OBJECT_0 != wait_result)
-      error.SetError(::GetLastError(), eErrorTypeWin32);
-  } else
-    error.SetError(ERROR_INVALID_HANDLE, eErrorTypeWin32);
+    Status error;
+    if (IsJoinable()) {
+        DWORD wait_result = ::WaitForSingleObject(m_thread, INFINITE);
+        if (WAIT_OBJECT_0 == wait_result && result) {
+            DWORD exit_code = 0;
+            if (!::GetExitCodeThread(m_thread, &exit_code))
+                *result = 0;
+            *result = exit_code;
+        } else if (WAIT_OBJECT_0 != wait_result)
+            error.SetError(::GetLastError(), eErrorTypeWin32);
+    } else
+        error.SetError(ERROR_INVALID_HANDLE, eErrorTypeWin32);
 
-  Reset();
-  return error;
+    Reset();
+    return error;
 }
 
 Status HostThreadWindows::Cancel() {
-  Status error;
+    Status error;
 
-  DWORD result = ::QueueUserAPC(::ExitThreadProxy, m_thread, 0);
-  error.SetError(result, eErrorTypeWin32);
-  return error;
+    DWORD result = ::QueueUserAPC(::ExitThreadProxy, m_thread, 0);
+    error.SetError(result, eErrorTypeWin32);
+    return error;
 }
 
 lldb::tid_t HostThreadWindows::GetThreadId() const {
-  return ::GetThreadId(m_thread);
+    return ::GetThreadId(m_thread);
 }
 
 void HostThreadWindows::Reset() {
-  if (m_owns_handle && m_thread != LLDB_INVALID_HOST_THREAD)
-    ::CloseHandle(m_thread);
+    if (m_owns_handle && m_thread != LLDB_INVALID_HOST_THREAD)
+        ::CloseHandle(m_thread);
 
-  HostNativeThreadBase::Reset();
+    HostNativeThreadBase::Reset();
 }
 
 bool HostThreadWindows::EqualsThread(lldb::thread_t thread) const {
-  return GetThreadId() == ::GetThreadId(thread);
+    return GetThreadId() == ::GetThreadId(thread);
 }

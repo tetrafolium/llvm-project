@@ -20,16 +20,16 @@ typedef int __scudo_mallinfo_data_t;
 #endif
 
 struct __scudo_mallinfo {
-  __scudo_mallinfo_data_t arena;
-  __scudo_mallinfo_data_t ordblks;
-  __scudo_mallinfo_data_t smblks;
-  __scudo_mallinfo_data_t hblks;
-  __scudo_mallinfo_data_t hblkhd;
-  __scudo_mallinfo_data_t usmblks;
-  __scudo_mallinfo_data_t fsmblks;
-  __scudo_mallinfo_data_t uordblks;
-  __scudo_mallinfo_data_t fordblks;
-  __scudo_mallinfo_data_t keepcost;
+    __scudo_mallinfo_data_t arena;
+    __scudo_mallinfo_data_t ordblks;
+    __scudo_mallinfo_data_t smblks;
+    __scudo_mallinfo_data_t hblks;
+    __scudo_mallinfo_data_t hblkhd;
+    __scudo_mallinfo_data_t usmblks;
+    __scudo_mallinfo_data_t fsmblks;
+    __scudo_mallinfo_data_t uordblks;
+    __scudo_mallinfo_data_t fordblks;
+    __scudo_mallinfo_data_t keepcost;
 };
 
 // Android sometimes includes malloc.h no matter what, which yields to

@@ -25,40 +25,40 @@ namespace __asan {
 
 // Conservative upper limit.
 uptr PremapShadowSize() {
-  uptr granularity = GetMmapGranularity();
-  return RoundUpTo(GetMaxVirtualAddress() >> SHADOW_SCALE, granularity);
+    uptr granularity = GetMmapGranularity();
+    return RoundUpTo(GetMaxVirtualAddress() >> SHADOW_SCALE, granularity);
 }
 
 // Returns an address aligned to 8 pages, such that one page on the left and
 // PremapShadowSize() bytes on the right of it are mapped r/o.
 uptr PremapShadow() {
-  return MapDynamicShadow(PremapShadowSize(), /*mmap_alignment_scale*/ 3,
-                          /*min_shadow_base_alignment*/ 0, kHighMemEnd);
+    return MapDynamicShadow(PremapShadowSize(), /*mmap_alignment_scale*/ 3,
+                            /*min_shadow_base_alignment*/ 0, kHighMemEnd);
 }
 
 bool PremapShadowFailed() {
-  uptr shadow = reinterpret_cast<uptr>(&__asan_shadow);
-  uptr resolver = reinterpret_cast<uptr>(&__asan_premap_shadow);
-  // shadow == resolver is how Android KitKat and older handles ifunc.
-  // shadow == 0 just in case.
-  if (shadow == 0 || shadow == resolver)
-    return true;
-  return false;
+    uptr shadow = reinterpret_cast<uptr>(&__asan_shadow);
+    uptr resolver = reinterpret_cast<uptr>(&__asan_premap_shadow);
+    // shadow == resolver is how Android KitKat and older handles ifunc.
+    // shadow == 0 just in case.
+    if (shadow == 0 || shadow == resolver)
+        return true;
+    return false;
 }
 } // namespace __asan
 
 extern "C" {
-decltype(__asan_shadow)* __asan_premap_shadow() {
-  // The resolver may be called multiple times. Map the shadow just once.
-  static uptr premapped_shadow = 0;
-  if (!premapped_shadow) premapped_shadow = __asan::PremapShadow();
-  return reinterpret_cast<decltype(__asan_shadow)*>(premapped_shadow);
-}
+    decltype(__asan_shadow)* __asan_premap_shadow() {
+        // The resolver may be called multiple times. Map the shadow just once.
+        static uptr premapped_shadow = 0;
+        if (!premapped_shadow) premapped_shadow = __asan::PremapShadow();
+        return reinterpret_cast<decltype(__asan_shadow)*>(premapped_shadow);
+    }
 
 // __asan_shadow is a "function" that has the same address as the first byte of
 // the shadow mapping.
-INTERFACE_ATTRIBUTE __attribute__((ifunc("__asan_premap_shadow"))) void
-__asan_shadow();
+    INTERFACE_ATTRIBUTE __attribute__((ifunc("__asan_premap_shadow"))) void
+    __asan_shadow();
 }
 
 #endif // ASAN_PREMAP_SHADOW

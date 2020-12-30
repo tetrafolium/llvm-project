@@ -16,7 +16,7 @@ class OwningRewritePatternList;
 
 /// Collect a set of patterns to convert from the ArmSVE dialect to LLVM.
 void populateArmSVEToLLVMConversionPatterns(LLVMTypeConverter &converter,
-                                            OwningRewritePatternList &patterns);
+        OwningRewritePatternList &patterns);
 
 } // namespace mlir
 

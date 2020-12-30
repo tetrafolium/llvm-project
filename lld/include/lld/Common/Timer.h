@@ -22,35 +22,37 @@ namespace lld {
 class Timer;
 
 struct ScopedTimer {
-  explicit ScopedTimer(Timer &t);
+    explicit ScopedTimer(Timer &t);
 
-  ~ScopedTimer();
+    ~ScopedTimer();
 
-  void stop();
+    void stop();
 
-  std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
 
-  Timer *t = nullptr;
+    Timer *t = nullptr;
 };
 
 class Timer {
 public:
-  Timer(llvm::StringRef name, Timer &parent);
+    Timer(llvm::StringRef name, Timer &parent);
 
-  static Timer &root();
+    static Timer &root();
 
-  void addToTotal(std::chrono::nanoseconds time) { total += time.count(); }
-  void print();
+    void addToTotal(std::chrono::nanoseconds time) {
+        total += time.count();
+    }
+    void print();
 
-  double millis() const;
+    double millis() const;
 
 private:
-  explicit Timer(llvm::StringRef name);
-  void print(int depth, double totalDuration, bool recurse = true) const;
+    explicit Timer(llvm::StringRef name);
+    void print(int depth, double totalDuration, bool recurse = true) const;
 
-  std::atomic<std::chrono::nanoseconds::rep> total;
-  std::vector<Timer *> children;
-  std::string name;
+    std::atomic<std::chrono::nanoseconds::rep> total;
+    std::vector<Timer *> children;
+    std::string name;
 };
 
 } // namespace lld

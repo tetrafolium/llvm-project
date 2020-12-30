@@ -28,8 +28,8 @@ class CheckerManager;
 
 class AnalysisAction : public ASTFrontendAction {
 protected:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
-                                                 StringRef InFile) override;
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
+            StringRef InFile) override;
 };
 
 /// Frontend action to parse model files.
@@ -42,15 +42,17 @@ protected:
 /// parsed, the function definitions will be collected into a StringMap.
 class ParseModelFileAction : public ASTFrontendAction {
 public:
-  ParseModelFileAction(llvm::StringMap<Stmt *> &Bodies);
-  bool isModelParsingAction() const override { return true; }
+    ParseModelFileAction(llvm::StringMap<Stmt *> &Bodies);
+    bool isModelParsingAction() const override {
+        return true;
+    }
 
 protected:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
-                                                 StringRef InFile) override;
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
+            StringRef InFile) override;
 
 private:
-  llvm::StringMap<Stmt *> &Bodies;
+    llvm::StringMap<Stmt *> &Bodies;
 };
 
 } // namespace ento

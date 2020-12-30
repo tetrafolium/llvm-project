@@ -36,19 +36,19 @@ class TargetInstrInfo;
 class TargetRegisterClass;
 class TargetRegisterInfo;
 
-  /// Contains all the state necessary for anti-dep breaking.
+/// Contains all the state necessary for anti-dep breaking.
 class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepState {
-  public:
+public:
     /// Information about a register reference within a liverange
     struct RegisterReference {
-      /// The registers operand
-      MachineOperand *Operand;
+        /// The registers operand
+        MachineOperand *Operand;
 
-      /// The register class
-      const TargetRegisterClass *RC;
+        /// The register class
+        const TargetRegisterClass *RC;
     };
 
-  private:
+private:
     /// Number of non-virtual target registers (i.e. TRI->getNumRegs()).
     const unsigned NumTargetRegs;
 
@@ -76,17 +76,23 @@ class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepState {
     /// up), or ~0u if the register is live.
     std::vector<unsigned> DefIndices;
 
-  public:
+public:
     AggressiveAntiDepState(const unsigned TargetRegs, MachineBasicBlock *BB);
 
     /// Return the kill indices.
-    std::vector<unsigned> &GetKillIndices() { return KillIndices; }
+    std::vector<unsigned> &GetKillIndices() {
+        return KillIndices;
+    }
 
     /// Return the define indices.
-    std::vector<unsigned> &GetDefIndices() { return DefIndices; }
+    std::vector<unsigned> &GetDefIndices() {
+        return DefIndices;
+    }
 
     /// Return the RegRefs map.
-    std::multimap<unsigned, RegisterReference>& GetRegRefs() { return RegRefs; }
+    std::multimap<unsigned, RegisterReference>& GetRegRefs() {
+        return RegRefs;
+    }
 
     // Get the group for a register. The returned value is
     // the index of the GroupNode representing the group.
@@ -95,10 +101,10 @@ class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepState {
     // Return a vector of the registers belonging to a group.
     // If RegRefs is non-NULL then only included referenced registers.
     void GetGroupRegs(
-       unsigned Group,
-       std::vector<unsigned> &Regs,
-       std::multimap<unsigned,
-         AggressiveAntiDepState::RegisterReference> *RegRefs);
+        unsigned Group,
+        std::vector<unsigned> &Regs,
+        std::multimap<unsigned,
+        AggressiveAntiDepState::RegisterReference> *RegRefs);
 
     // Union Reg1's and Reg2's groups to form a new group.
     // Return the index of the GroupNode representing the group.
@@ -111,10 +117,10 @@ class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepState {
 
     /// Return true if Reg is live.
     bool IsLive(unsigned Reg);
-  };
+};
 
-  class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepBreaker
-      : public AntiDepBreaker {
+class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepBreaker
+    : public AntiDepBreaker {
     MachineFunction &MF;
     MachineRegisterInfo &MRI;
     const TargetInstrInfo *TII;
@@ -128,10 +134,10 @@ class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepState {
     /// The state used to identify and rename anti-dependence registers.
     AggressiveAntiDepState *State = nullptr;
 
-  public:
+public:
     AggressiveAntiDepBreaker(MachineFunction &MFi,
-                          const RegisterClassInfo &RCI,
-                          TargetSubtargetInfo::RegClassVector& CriticalPathRCs);
+                             const RegisterClassInfo &RCI,
+                             TargetSubtargetInfo::RegClassVector& CriticalPathRCs);
     ~AggressiveAntiDepBreaker() override;
 
     /// Initialize anti-dep breaking for a new basic block.
@@ -153,7 +159,7 @@ class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepState {
     /// Finish anti-dep breaking for a basic block.
     void FinishBlock() override;
 
-  private:
+private:
     /// Keep track of a position in the allocation order for each regclass.
     using RenameOrderType = std::map<const TargetRegisterClass *, unsigned>;
 
@@ -176,7 +182,7 @@ class LLVM_LIBRARY_VISIBILITY AggressiveAntiDepState {
     bool FindSuitableFreeRegisters(unsigned AntiDepGroupIndex,
                                    RenameOrderType& RenameOrder,
                                    std::map<unsigned, unsigned> &RenameMap);
-  };
+};
 
 } // end namespace llvm
 

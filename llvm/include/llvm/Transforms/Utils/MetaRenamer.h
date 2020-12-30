@@ -19,7 +19,7 @@
 
 namespace llvm {
 struct MetaRenamerPass : PassInfoMixin<MetaRenamerPass> {
-  PreservedAnalyses run(Module &, ModuleAnalysisManager &);
+    PreservedAnalyses run(Module &, ModuleAnalysisManager &);
 };
 } // namespace llvm
 

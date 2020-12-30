@@ -29,20 +29,20 @@
 namespace __sanitizer {
 
 class LibbacktraceSymbolizer final : public SymbolizerTool {
- public:
-  static LibbacktraceSymbolizer *get(LowLevelAllocator *alloc);
+public:
+    static LibbacktraceSymbolizer *get(LowLevelAllocator *alloc);
 
-  bool SymbolizePC(uptr addr, SymbolizedStack *stack) override;
+    bool SymbolizePC(uptr addr, SymbolizedStack *stack) override;
 
-  bool SymbolizeData(uptr addr, DataInfo *info) override;
+    bool SymbolizeData(uptr addr, DataInfo *info) override;
 
-  // May return NULL if demangling failed.
-  const char *Demangle(const char *name) override;
+    // May return NULL if demangling failed.
+    const char *Demangle(const char *name) override;
 
- private:
-  explicit LibbacktraceSymbolizer(void *state) : state_(state) {}
+private:
+    explicit LibbacktraceSymbolizer(void *state) : state_(state) {}
 
-  void *state_;  // Leaked.
+    void *state_;  // Leaked.
 };
 
 }  // namespace __sanitizer

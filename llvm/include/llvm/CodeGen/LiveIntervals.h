@@ -51,7 +51,7 @@ class raw_ostream;
 class TargetInstrInfo;
 class VirtRegMap;
 
-  class LiveIntervals : public MachineFunctionPass {
+class LiveIntervals : public MachineFunctionPass {
     MachineFunction* MF;
     MachineRegisterInfo* MRI;
     const TargetRegisterInfo* TRI;
@@ -95,7 +95,7 @@ class VirtRegMap;
     /// interference.
     SmallVector<LiveRange*, 0> RegUnitRanges;
 
-  public:
+public:
     static char ID;
 
     LiveIntervals();
@@ -112,45 +112,45 @@ class VirtRegMap;
                                 const MachineBasicBlock *MBB);
 
     LiveInterval &getInterval(Register Reg) {
-      if (hasInterval(Reg))
-        return *VirtRegIntervals[Reg.id()];
+        if (hasInterval(Reg))
+            return *VirtRegIntervals[Reg.id()];
 
-      return createAndComputeVirtRegInterval(Reg);
+        return createAndComputeVirtRegInterval(Reg);
     }
 
     const LiveInterval &getInterval(Register Reg) const {
-      return const_cast<LiveIntervals*>(this)->getInterval(Reg);
+        return const_cast<LiveIntervals*>(this)->getInterval(Reg);
     }
 
     bool hasInterval(Register Reg) const {
-      return VirtRegIntervals.inBounds(Reg.id()) &&
-             VirtRegIntervals[Reg.id()];
+        return VirtRegIntervals.inBounds(Reg.id()) &&
+               VirtRegIntervals[Reg.id()];
     }
 
     /// Interval creation.
     LiveInterval &createEmptyInterval(Register Reg) {
-      assert(!hasInterval(Reg) && "Interval already exists!");
-      VirtRegIntervals.grow(Reg.id());
-      VirtRegIntervals[Reg.id()] = createInterval(Reg);
-      return *VirtRegIntervals[Reg.id()];
+        assert(!hasInterval(Reg) && "Interval already exists!");
+        VirtRegIntervals.grow(Reg.id());
+        VirtRegIntervals[Reg.id()] = createInterval(Reg);
+        return *VirtRegIntervals[Reg.id()];
     }
 
     LiveInterval &createAndComputeVirtRegInterval(Register Reg) {
-      LiveInterval &LI = createEmptyInterval(Reg);
-      computeVirtRegInterval(LI);
-      return LI;
+        LiveInterval &LI = createEmptyInterval(Reg);
+        computeVirtRegInterval(LI);
+        return LI;
     }
 
     /// Interval removal.
     void removeInterval(Register Reg) {
-      delete VirtRegIntervals[Reg];
-      VirtRegIntervals[Reg] = nullptr;
+        delete VirtRegIntervals[Reg];
+        VirtRegIntervals[Reg] = nullptr;
     }
 
     /// Given a register and an instruction, adds a live segment from that
     /// instruction to the end of its MBB.
     LiveInterval::Segment addSegmentToEndOfBlock(Register Reg,
-                                                 MachineInstr &startInst);
+            MachineInstr &startInst);
 
     /// After removing some uses of a register, shrink its live range to just
     /// the remaining uses. This method does not compute reaching defs for new
@@ -185,7 +185,7 @@ class VirtRegMap;
                          ArrayRef<SlotIndex> Undefs);
 
     void extendToIndices(LiveRange &LR, ArrayRef<SlotIndex> Indices) {
-      extendToIndices(LR, Indices, /*Undefs=*/{});
+        extendToIndices(LR, Indices, /*Undefs=*/ {});
     }
 
     /// If \p LR has a live value at \p Kill, prune its live range by removing
@@ -204,85 +204,87 @@ class VirtRegMap;
     /// LiveRange and all the LiveRanges of the subranges if any.
     LLVM_ATTRIBUTE_UNUSED void pruneValue(LiveInterval &, SlotIndex,
                                           SmallVectorImpl<SlotIndex> *) {
-      llvm_unreachable(
-          "Use pruneValue on the main LiveRange and on each subrange");
+        llvm_unreachable(
+            "Use pruneValue on the main LiveRange and on each subrange");
     }
 
     SlotIndexes *getSlotIndexes() const {
-      return Indexes;
+        return Indexes;
     }
 
     AAResults *getAliasAnalysis() const {
-      return AA;
+        return AA;
     }
 
     /// Returns true if the specified machine instr has been removed or was
     /// never entered in the map.
     bool isNotInMIMap(const MachineInstr &Instr) const {
-      return !Indexes->hasIndex(Instr);
+        return !Indexes->hasIndex(Instr);
     }
 
     /// Returns the base index of the given instruction.
     SlotIndex getInstructionIndex(const MachineInstr &Instr) const {
-      return Indexes->getInstructionIndex(Instr);
+        return Indexes->getInstructionIndex(Instr);
     }
 
     /// Returns the instruction associated with the given index.
     MachineInstr* getInstructionFromIndex(SlotIndex index) const {
-      return Indexes->getInstructionFromIndex(index);
+        return Indexes->getInstructionFromIndex(index);
     }
 
     /// Return the first index in the given basic block.
     SlotIndex getMBBStartIdx(const MachineBasicBlock *mbb) const {
-      return Indexes->getMBBStartIdx(mbb);
+        return Indexes->getMBBStartIdx(mbb);
     }
 
     /// Return the last index in the given basic block.
     SlotIndex getMBBEndIdx(const MachineBasicBlock *mbb) const {
-      return Indexes->getMBBEndIdx(mbb);
+        return Indexes->getMBBEndIdx(mbb);
     }
 
     bool isLiveInToMBB(const LiveRange &LR,
                        const MachineBasicBlock *mbb) const {
-      return LR.liveAt(getMBBStartIdx(mbb));
+        return LR.liveAt(getMBBStartIdx(mbb));
     }
 
     bool isLiveOutOfMBB(const LiveRange &LR,
                         const MachineBasicBlock *mbb) const {
-      return LR.liveAt(getMBBEndIdx(mbb).getPrevSlot());
+        return LR.liveAt(getMBBEndIdx(mbb).getPrevSlot());
     }
 
     MachineBasicBlock* getMBBFromIndex(SlotIndex index) const {
-      return Indexes->getMBBFromIndex(index);
+        return Indexes->getMBBFromIndex(index);
     }
 
     void insertMBBInMaps(MachineBasicBlock *MBB,
                          MachineInstr *InsertionPoint = nullptr) {
-      Indexes->insertMBBInMaps(MBB, InsertionPoint);
-      assert(unsigned(MBB->getNumber()) == RegMaskBlocks.size() &&
-             "Blocks must be added in order.");
-      RegMaskBlocks.push_back(std::make_pair(RegMaskSlots.size(), 0));
+        Indexes->insertMBBInMaps(MBB, InsertionPoint);
+        assert(unsigned(MBB->getNumber()) == RegMaskBlocks.size() &&
+               "Blocks must be added in order.");
+        RegMaskBlocks.push_back(std::make_pair(RegMaskSlots.size(), 0));
     }
 
     SlotIndex InsertMachineInstrInMaps(MachineInstr &MI) {
-      return Indexes->insertMachineInstrInMaps(MI);
+        return Indexes->insertMachineInstrInMaps(MI);
     }
 
     void InsertMachineInstrRangeInMaps(MachineBasicBlock::iterator B,
                                        MachineBasicBlock::iterator E) {
-      for (MachineBasicBlock::iterator I = B; I != E; ++I)
-        Indexes->insertMachineInstrInMaps(*I);
+        for (MachineBasicBlock::iterator I = B; I != E; ++I)
+            Indexes->insertMachineInstrInMaps(*I);
     }
 
     void RemoveMachineInstrFromMaps(MachineInstr &MI) {
-      Indexes->removeMachineInstrFromMaps(MI);
+        Indexes->removeMachineInstrFromMaps(MI);
     }
 
     SlotIndex ReplaceMachineInstrInMaps(MachineInstr &MI, MachineInstr &NewMI) {
-      return Indexes->replaceMachineInstrInMaps(MI, NewMI);
+        return Indexes->replaceMachineInstrInMaps(MI, NewMI);
     }
 
-    VNInfo::Allocator& getVNInfoAllocator() { return VNInfoAllocator; }
+    VNInfo::Allocator& getVNInfoAllocator() {
+        return VNInfoAllocator;
+    }
 
     void getAnalysisUsage(AnalysisUsage &AU) const override;
     void releaseMemory() override;
@@ -349,24 +351,28 @@ class VirtRegMap;
 
     /// Returns a sorted array of slot indices of all instructions with
     /// register mask operands.
-    ArrayRef<SlotIndex> getRegMaskSlots() const { return RegMaskSlots; }
+    ArrayRef<SlotIndex> getRegMaskSlots() const {
+        return RegMaskSlots;
+    }
 
     /// Returns a sorted array of slot indices of all instructions with register
     /// mask operands in the basic block numbered \p MBBNum.
     ArrayRef<SlotIndex> getRegMaskSlotsInBlock(unsigned MBBNum) const {
-      std::pair<unsigned, unsigned> P = RegMaskBlocks[MBBNum];
-      return getRegMaskSlots().slice(P.first, P.second);
+        std::pair<unsigned, unsigned> P = RegMaskBlocks[MBBNum];
+        return getRegMaskSlots().slice(P.first, P.second);
     }
 
     /// Returns an array of register mask pointers corresponding to
     /// getRegMaskSlots().
-    ArrayRef<const uint32_t*> getRegMaskBits() const { return RegMaskBits; }
+    ArrayRef<const uint32_t*> getRegMaskBits() const {
+        return RegMaskBits;
+    }
 
     /// Returns an array of mask pointers corresponding to
     /// getRegMaskSlotsInBlock(MBBNum).
     ArrayRef<const uint32_t*> getRegMaskBitsInBlock(unsigned MBBNum) const {
-      std::pair<unsigned, unsigned> P = RegMaskBlocks[MBBNum];
-      return getRegMaskBits().slice(P.first, P.second);
+        std::pair<unsigned, unsigned> P = RegMaskBlocks[MBBNum];
+        return getRegMaskBits().slice(P.first, P.second);
     }
 
     /// Test if \p LI is live across any register mask instructions, and
@@ -392,31 +398,31 @@ class VirtRegMap;
     /// Return the live range for register unit \p Unit. It will be computed if
     /// it doesn't exist.
     LiveRange &getRegUnit(unsigned Unit) {
-      LiveRange *LR = RegUnitRanges[Unit];
-      if (!LR) {
-        // Compute missing ranges on demand.
-        // Use segment set to speed-up initial computation of the live range.
-        RegUnitRanges[Unit] = LR = new LiveRange(UseSegmentSetForPhysRegs);
-        computeRegUnitRange(*LR, Unit);
-      }
-      return *LR;
+        LiveRange *LR = RegUnitRanges[Unit];
+        if (!LR) {
+            // Compute missing ranges on demand.
+            // Use segment set to speed-up initial computation of the live range.
+            RegUnitRanges[Unit] = LR = new LiveRange(UseSegmentSetForPhysRegs);
+            computeRegUnitRange(*LR, Unit);
+        }
+        return *LR;
     }
 
     /// Return the live range for register unit \p Unit if it has already been
     /// computed, or nullptr if it hasn't been computed yet.
     LiveRange *getCachedRegUnit(unsigned Unit) {
-      return RegUnitRanges[Unit];
+        return RegUnitRanges[Unit];
     }
 
     const LiveRange *getCachedRegUnit(unsigned Unit) const {
-      return RegUnitRanges[Unit];
+        return RegUnitRanges[Unit];
     }
 
     /// Remove computed live range for register unit \p Unit. Subsequent uses
     /// should rely on on-demand recomputation.
     void removeRegUnit(unsigned Unit) {
-      delete RegUnitRanges[Unit];
-      RegUnitRanges[Unit] = nullptr;
+        delete RegUnitRanges[Unit];
+        RegUnitRanges[Unit] = nullptr;
     }
 
     /// Remove associated live ranges for the register units associated with \p
@@ -424,8 +430,8 @@ class VirtRegMap;
     /// method can result in inconsistent liveness tracking if multiple phyical
     /// registers share a regunit, and should be used cautiously.
     void removeAllRegUnitsForPhysReg(MCRegister Reg) {
-      for (MCRegUnitIterator Units(Reg, TRI); Units.isValid(); ++Units)
-        removeRegUnit(*Units);
+        for (MCRegUnitIterator Units(Reg, TRI); Units.isValid(); ++Units)
+            removeRegUnit(*Units);
     }
 
     /// Remove value numbers and related live segments starting at position
@@ -446,7 +452,7 @@ class VirtRegMap;
     /// have any segments or value numbers.
     void constructMainRangeFromSubranges(LiveInterval &LI);
 
-  private:
+private:
     /// Compute live intervals for all virtual registers.
     void computeVirtRegs();
 
@@ -488,7 +494,7 @@ class VirtRegMap;
                              LaneBitmask LaneMask = LaneBitmask::getAll());
 
     class HMEditor;
-  };
+};
 
 } // end namespace llvm
 

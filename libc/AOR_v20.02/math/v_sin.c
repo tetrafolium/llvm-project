@@ -11,16 +11,16 @@
 #if V_SUPPORTED
 
 static const double Poly[] = {
-/* worst-case error is 3.5 ulp.
-   abs error: 0x1.be222a58p-53 in [-pi/2, pi/2].  */
--0x1.9f4a9c8b21dc9p-41,
- 0x1.60e88a10163f2p-33,
--0x1.ae6361b7254e7p-26,
- 0x1.71de382e8d62bp-19,
--0x1.a01a019aeb4ffp-13,
- 0x1.111111110b25ep-7,
--0x1.55555555554c3p-3,
-};
+    /* worst-case error is 3.5 ulp.
+       abs error: 0x1.be222a58p-53 in [-pi/2, pi/2].  */
+    -0x1.9f4a9c8b21dc9p-41,
+        0x1.60e88a10163f2p-33,
+        -0x1.ae6361b7254e7p-26,
+        0x1.71de382e8d62bp-19,
+        -0x1.a01a019aeb4ffp-13,
+        0x1.111111110b25ep-7,
+        -0x1.55555555554c3p-3,
+    };
 
 #define C7 v_f64 (Poly[0])
 #define C6 v_f64 (Poly[1])
@@ -42,46 +42,46 @@ VPCS_ATTR
 __attribute__ ((noinline)) static v_f64_t
 specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 {
-  return v_call_f64 (sin, x, y, cmp);
+    return v_call_f64 (sin, x, y, cmp);
 }
 
 VPCS_ATTR
 v_f64_t
 V_NAME(sin) (v_f64_t x)
 {
-  v_f64_t n, r, r2, y;
-  v_u64_t sign, odd, cmp;
+    v_f64_t n, r, r2, y;
+    v_u64_t sign, odd, cmp;
 
-  r = v_as_f64_u64 (v_as_u64_f64 (x) & AbsMask);
-  sign = v_as_u64_f64 (x) & ~AbsMask;
-  cmp = v_cond_u64 (v_as_u64_f64 (r) >= v_as_u64_f64 (RangeVal));
+    r = v_as_f64_u64 (v_as_u64_f64 (x) & AbsMask);
+    sign = v_as_u64_f64 (x) & ~AbsMask;
+    cmp = v_cond_u64 (v_as_u64_f64 (r) >= v_as_u64_f64 (RangeVal));
 
-  /* n = rint(|x|/pi).  */
-  n = v_fma_f64 (InvPi, r, Shift);
-  odd = v_as_u64_f64 (n) << 63;
-  n -= Shift;
+    /* n = rint(|x|/pi).  */
+    n = v_fma_f64 (InvPi, r, Shift);
+    odd = v_as_u64_f64 (n) << 63;
+    n -= Shift;
 
-  /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  r = v_fma_f64 (-Pi1, n, r);
-  r = v_fma_f64 (-Pi2, n, r);
-  r = v_fma_f64 (-Pi3, n, r);
+    /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
+    r = v_fma_f64 (-Pi1, n, r);
+    r = v_fma_f64 (-Pi2, n, r);
+    r = v_fma_f64 (-Pi3, n, r);
 
-  /* sin(r) poly approx.  */
-  r2 = r * r;
-  y = v_fma_f64 (C7, r2, C6);
-  y = v_fma_f64 (y, r2, C5);
-  y = v_fma_f64 (y, r2, C4);
-  y = v_fma_f64 (y, r2, C3);
-  y = v_fma_f64 (y, r2, C2);
-  y = v_fma_f64 (y, r2, C1);
-  y = v_fma_f64 (y * r2, r, r);
+    /* sin(r) poly approx.  */
+    r2 = r * r;
+    y = v_fma_f64 (C7, r2, C6);
+    y = v_fma_f64 (y, r2, C5);
+    y = v_fma_f64 (y, r2, C4);
+    y = v_fma_f64 (y, r2, C3);
+    y = v_fma_f64 (y, r2, C2);
+    y = v_fma_f64 (y, r2, C1);
+    y = v_fma_f64 (y * r2, r, r);
 
-  /* sign.  */
-  y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign ^ odd);
+    /* sign.  */
+    y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign ^ odd);
 
-  if (unlikely (v_any_u64 (cmp)))
-    return specialcase (x, y, cmp);
-  return y;
+    if (unlikely (v_any_u64 (cmp)))
+        return specialcase (x, y, cmp);
+    return y;
 }
 VPCS_ALIAS
 #endif

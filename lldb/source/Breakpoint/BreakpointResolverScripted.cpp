@@ -31,130 +31,130 @@ BreakpointResolverScripted::BreakpointResolverScripted(
     : BreakpointResolver(bkpt, BreakpointResolver::PythonResolver),
       m_class_name(std::string(class_name)), m_depth(depth),
       m_args_ptr(args_data) {
-  CreateImplementationIfNeeded(bkpt);
+    CreateImplementationIfNeeded(bkpt);
 }
 
 void BreakpointResolverScripted::CreateImplementationIfNeeded(
     BreakpointSP breakpoint_sp) {
-  if (m_implementation_sp)
-    return;
+    if (m_implementation_sp)
+        return;
 
-  if (m_class_name.empty())
-    return;
+    if (m_class_name.empty())
+        return;
 
-  if (!breakpoint_sp)
-    return;
+    if (!breakpoint_sp)
+        return;
 
-  TargetSP target_sp = breakpoint_sp->GetTargetSP();
-  ScriptInterpreter *script_interp = target_sp->GetDebugger()
-                                              .GetScriptInterpreter();
-  if (!script_interp)
-    return;
+    TargetSP target_sp = breakpoint_sp->GetTargetSP();
+    ScriptInterpreter *script_interp = target_sp->GetDebugger()
+                                       .GetScriptInterpreter();
+    if (!script_interp)
+        return;
 
-  m_implementation_sp = script_interp->CreateScriptedBreakpointResolver(
-      m_class_name.c_str(), m_args_ptr, breakpoint_sp);
+    m_implementation_sp = script_interp->CreateScriptedBreakpointResolver(
+                              m_class_name.c_str(), m_args_ptr, breakpoint_sp);
 }
 
 void BreakpointResolverScripted::NotifyBreakpointSet() {
-  CreateImplementationIfNeeded(GetBreakpoint());
+    CreateImplementationIfNeeded(GetBreakpoint());
 }
 
 BreakpointResolver *
 BreakpointResolverScripted::CreateFromStructuredData(
     const BreakpointSP &bkpt, const StructuredData::Dictionary &options_dict,
     Status &error) {
-  llvm::StringRef class_name;
-  bool success;
-  
-  success = options_dict.GetValueForKeyAsString(
-      GetKey(OptionNames::PythonClassName), class_name);
-  if (!success) {
-    error.SetErrorString("BRFL::CFSD: Couldn't find class name entry.");
-    return nullptr;
-  }
-  // The Python function will actually provide the search depth, this is a
-  // placeholder.
-  lldb::SearchDepth depth = lldb::eSearchDepthTarget;
-  
-  StructuredDataImpl *args_data_impl = new StructuredDataImpl();
-  StructuredData::Dictionary *args_dict = nullptr;
-  success = options_dict.GetValueForKeyAsDictionary(
-    GetKey(OptionNames::ScriptArgs), args_dict);
-  if (success) {
-      args_data_impl->SetObjectSP(args_dict->shared_from_this());
-  }
-  return new BreakpointResolverScripted(bkpt, class_name, depth, 
-                                        args_data_impl);
+    llvm::StringRef class_name;
+    bool success;
+
+    success = options_dict.GetValueForKeyAsString(
+                  GetKey(OptionNames::PythonClassName), class_name);
+    if (!success) {
+        error.SetErrorString("BRFL::CFSD: Couldn't find class name entry.");
+        return nullptr;
+    }
+    // The Python function will actually provide the search depth, this is a
+    // placeholder.
+    lldb::SearchDepth depth = lldb::eSearchDepthTarget;
+
+    StructuredDataImpl *args_data_impl = new StructuredDataImpl();
+    StructuredData::Dictionary *args_dict = nullptr;
+    success = options_dict.GetValueForKeyAsDictionary(
+                  GetKey(OptionNames::ScriptArgs), args_dict);
+    if (success) {
+        args_data_impl->SetObjectSP(args_dict->shared_from_this());
+    }
+    return new BreakpointResolverScripted(bkpt, class_name, depth,
+                                          args_data_impl);
 }
 
 StructuredData::ObjectSP
 BreakpointResolverScripted::SerializeToStructuredData() {
-  StructuredData::DictionarySP options_dict_sp(
-      new StructuredData::Dictionary());
+    StructuredData::DictionarySP options_dict_sp(
+        new StructuredData::Dictionary());
 
-  options_dict_sp->AddStringItem(GetKey(OptionNames::PythonClassName),
+    options_dict_sp->AddStringItem(GetKey(OptionNames::PythonClassName),
                                    m_class_name);
-  if (m_args_ptr->IsValid())
-      options_dict_sp->AddItem(GetKey(OptionNames::ScriptArgs),
-          m_args_ptr->GetObjectSP());
+    if (m_args_ptr->IsValid())
+        options_dict_sp->AddItem(GetKey(OptionNames::ScriptArgs),
+                                 m_args_ptr->GetObjectSP());
 
-  return WrapOptionsDict(options_dict_sp);
+    return WrapOptionsDict(options_dict_sp);
 }
 
 ScriptInterpreter *BreakpointResolverScripted::GetScriptInterpreter() {
-  return GetBreakpoint()->GetTarget().GetDebugger().GetScriptInterpreter();
+    return GetBreakpoint()->GetTarget().GetDebugger().GetScriptInterpreter();
 }
 
 Searcher::CallbackReturn BreakpointResolverScripted::SearchCallback(
     SearchFilter &filter, SymbolContext &context, Address *addr) {
-  bool should_continue = true;
-  if (!m_implementation_sp)
+    bool should_continue = true;
+    if (!m_implementation_sp)
+        return Searcher::eCallbackReturnStop;
+
+    ScriptInterpreter *interp = GetScriptInterpreter();
+    should_continue = interp->ScriptedBreakpointResolverSearchCallback(
+                          m_implementation_sp,
+                          &context);
+    if (should_continue)
+        return Searcher::eCallbackReturnContinue;
+
     return Searcher::eCallbackReturnStop;
-
-  ScriptInterpreter *interp = GetScriptInterpreter();
-  should_continue = interp->ScriptedBreakpointResolverSearchCallback(
-      m_implementation_sp,
-      &context);
-  if (should_continue)
-    return Searcher::eCallbackReturnContinue;
-
-  return Searcher::eCallbackReturnStop;
 }
 
 lldb::SearchDepth
 BreakpointResolverScripted::GetDepth() {
-  lldb::SearchDepth depth = lldb::eSearchDepthModule;
-  if (m_implementation_sp) {
-    ScriptInterpreter *interp = GetScriptInterpreter();
-    depth = interp->ScriptedBreakpointResolverSearchDepth(
-        m_implementation_sp);
-  }
-  return depth;
+    lldb::SearchDepth depth = lldb::eSearchDepthModule;
+    if (m_implementation_sp) {
+        ScriptInterpreter *interp = GetScriptInterpreter();
+        depth = interp->ScriptedBreakpointResolverSearchDepth(
+                    m_implementation_sp);
+    }
+    return depth;
 }
 
 void BreakpointResolverScripted::GetDescription(Stream *s) {
-  StructuredData::GenericSP generic_sp;
-  std::string short_help;
+    StructuredData::GenericSP generic_sp;
+    std::string short_help;
 
-  if (m_implementation_sp) {
-    ScriptInterpreter *interp = GetScriptInterpreter();
-    interp->GetShortHelpForCommandObject(m_implementation_sp,
-                                         short_help);
-  }
-  if (!short_help.empty())
-    s->PutCString(short_help.c_str());
-  else
-    s->Printf("python class = %s", m_class_name.c_str());
+    if (m_implementation_sp) {
+        ScriptInterpreter *interp = GetScriptInterpreter();
+        interp->GetShortHelpForCommandObject(m_implementation_sp,
+                                             short_help);
+    }
+    if (!short_help.empty())
+        s->PutCString(short_help.c_str());
+    else
+        s->Printf("python class = %s", m_class_name.c_str());
 }
 
 void BreakpointResolverScripted::Dump(Stream *s) const {}
 
 lldb::BreakpointResolverSP
 BreakpointResolverScripted::CopyForBreakpoint(BreakpointSP &breakpoint) {
-  // FIXME: Have to make a copy of the arguments from the m_args_ptr and then
-  // pass that to the new resolver.
-  lldb::BreakpointResolverSP ret_sp(
-      new BreakpointResolverScripted(breakpoint, m_class_name, m_depth, 
-                                     nullptr));
-  return ret_sp;
+    // FIXME: Have to make a copy of the arguments from the m_args_ptr and then
+    // pass that to the new resolver.
+    lldb::BreakpointResolverSP ret_sp(
+        new BreakpointResolverScripted(breakpoint, m_class_name, m_depth,
+                                       nullptr));
+    return ret_sp;
 }

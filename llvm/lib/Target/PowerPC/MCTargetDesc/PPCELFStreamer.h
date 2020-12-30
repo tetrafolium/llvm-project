@@ -26,25 +26,25 @@ class MCContext;
 class MCSubtargetInfo;
 
 class PPCELFStreamer : public MCELFStreamer {
-  // We need to keep track of the last label we emitted (only one) because
-  // depending on whether the label is on the same line as an aligned
-  // instruction or not, the label may refer to the instruction or the nop.
-  MCSymbol *LastLabel;
-  SMLoc LastLabelLoc;
+    // We need to keep track of the last label we emitted (only one) because
+    // depending on whether the label is on the same line as an aligned
+    // instruction or not, the label may refer to the instruction or the nop.
+    MCSymbol *LastLabel;
+    SMLoc LastLabelLoc;
 
 public:
-  PPCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> MAB,
-                 std::unique_ptr<MCObjectWriter> OW,
-                 std::unique_ptr<MCCodeEmitter> Emitter);
+    PPCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> MAB,
+                   std::unique_ptr<MCObjectWriter> OW,
+                   std::unique_ptr<MCCodeEmitter> Emitter);
 
-  void emitInstruction(const MCInst &Inst, const MCSubtargetInfo &STI) override;
+    void emitInstruction(const MCInst &Inst, const MCSubtargetInfo &STI) override;
 
-  // EmitLabel updates LastLabel and LastLabelLoc when a new label is emitted.
-  void emitLabel(MCSymbol *Symbol, SMLoc Loc = SMLoc()) override;
+    // EmitLabel updates LastLabel and LastLabelLoc when a new label is emitted.
+    void emitLabel(MCSymbol *Symbol, SMLoc Loc = SMLoc()) override;
 private:
-  void emitPrefixedInstruction(const MCInst &Inst, const MCSubtargetInfo &STI);
-  void emitGOTToPCRelReloc(const MCInst &Inst);
-  void emitGOTToPCRelLabel(const MCInst &Inst);
+    void emitPrefixedInstruction(const MCInst &Inst, const MCSubtargetInfo &STI);
+    void emitGOTToPCRelReloc(const MCInst &Inst);
+    void emitGOTToPCRelLabel(const MCInst &Inst);
 };
 
 // Check if the instruction Inst is part of a pair of instructions that make up

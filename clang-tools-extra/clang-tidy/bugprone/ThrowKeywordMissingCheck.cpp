@@ -17,30 +17,30 @@ namespace tidy {
 namespace bugprone {
 
 void ThrowKeywordMissingCheck::registerMatchers(MatchFinder *Finder) {
-  auto CtorInitializerList =
-      cxxConstructorDecl(hasAnyConstructorInitializer(anything()));
+    auto CtorInitializerList =
+        cxxConstructorDecl(hasAnyConstructorInitializer(anything()));
 
-  Finder->addMatcher(
-      expr(anyOf(cxxFunctionalCastExpr(), cxxBindTemporaryExpr(),
-                 cxxTemporaryObjectExpr()),
-           hasType(cxxRecordDecl(
-               isSameOrDerivedFrom(matchesName("[Ee]xception|EXCEPTION")))),
-           unless(anyOf(hasAncestor(stmt(
-                            anyOf(cxxThrowExpr(), callExpr(), returnStmt()))),
-                        hasAncestor(varDecl()),
-                        allOf(hasAncestor(CtorInitializerList),
-                              unless(hasAncestor(cxxCatchStmt()))))))
-          .bind("temporary-exception-not-thrown"),
-      this); 
+    Finder->addMatcher(
+        expr(anyOf(cxxFunctionalCastExpr(), cxxBindTemporaryExpr(),
+                   cxxTemporaryObjectExpr()),
+             hasType(cxxRecordDecl(
+                         isSameOrDerivedFrom(matchesName("[Ee]xception|EXCEPTION")))),
+             unless(anyOf(hasAncestor(stmt(
+                                          anyOf(cxxThrowExpr(), callExpr(), returnStmt()))),
+                          hasAncestor(varDecl()),
+                          allOf(hasAncestor(CtorInitializerList),
+                                unless(hasAncestor(cxxCatchStmt()))))))
+        .bind("temporary-exception-not-thrown"),
+        this);
 }
 
 void ThrowKeywordMissingCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *TemporaryExpr =
-      Result.Nodes.getNodeAs<Expr>("temporary-exception-not-thrown");
+    const auto *TemporaryExpr =
+        Result.Nodes.getNodeAs<Expr>("temporary-exception-not-thrown");
 
-  diag(TemporaryExpr->getBeginLoc(), "suspicious exception object created but "
-                                     "not thrown; did you mean 'throw %0'?")
-      << TemporaryExpr->getType().getBaseTypeIdentifier()->getName();
+    diag(TemporaryExpr->getBeginLoc(), "suspicious exception object created but "
+         "not thrown; did you mean 'throw %0'?")
+            << TemporaryExpr->getType().getBaseTypeIdentifier()->getName();
 }
 
 } // namespace bugprone

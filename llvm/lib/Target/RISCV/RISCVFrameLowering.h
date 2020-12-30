@@ -21,58 +21,58 @@ class RISCVSubtarget;
 
 class RISCVFrameLowering : public TargetFrameLowering {
 public:
-  explicit RISCVFrameLowering(const RISCVSubtarget &STI)
-      : TargetFrameLowering(StackGrowsDown,
-                            /*StackAlignment=*/Align(16),
-                            /*LocalAreaOffset=*/0),
-        STI(STI) {}
+    explicit RISCVFrameLowering(const RISCVSubtarget &STI)
+        : TargetFrameLowering(StackGrowsDown,
+                              /*StackAlignment=*/Align(16),
+                              /*LocalAreaOffset=*/0),
+          STI(STI) {}
 
-  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
-  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+    void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+    void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-  StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
-                                     Register &FrameReg) const override;
+    StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
+                                       Register &FrameReg) const override;
 
-  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
-                            RegScavenger *RS) const override;
+    void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+                              RegScavenger *RS) const override;
 
-  void processFunctionBeforeFrameFinalized(MachineFunction &MF,
-                                           RegScavenger *RS) const override;
+    void processFunctionBeforeFrameFinalized(MachineFunction &MF,
+            RegScavenger *RS) const override;
 
-  bool hasFP(const MachineFunction &MF) const override;
+    bool hasFP(const MachineFunction &MF) const override;
 
-  bool hasBP(const MachineFunction &MF) const;
+    bool hasBP(const MachineFunction &MF) const;
 
-  bool hasReservedCallFrame(const MachineFunction &MF) const override;
-  MachineBasicBlock::iterator
-  eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
-                                MachineBasicBlock::iterator MI) const override;
-  bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
-                                 MachineBasicBlock::iterator MI,
-                                 ArrayRef<CalleeSavedInfo> CSI,
-                                 const TargetRegisterInfo *TRI) const override;
-  bool
-  restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
-                              MachineBasicBlock::iterator MI,
-                              MutableArrayRef<CalleeSavedInfo> CSI,
-                              const TargetRegisterInfo *TRI) const override;
+    bool hasReservedCallFrame(const MachineFunction &MF) const override;
+    MachineBasicBlock::iterator
+    eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
+                                  MachineBasicBlock::iterator MI) const override;
+    bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
+                                   MachineBasicBlock::iterator MI,
+                                   ArrayRef<CalleeSavedInfo> CSI,
+                                   const TargetRegisterInfo *TRI) const override;
+    bool
+    restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
+                                MachineBasicBlock::iterator MI,
+                                MutableArrayRef<CalleeSavedInfo> CSI,
+                                const TargetRegisterInfo *TRI) const override;
 
-  // Get the first stack adjustment amount for SplitSPAdjust.
-  // Return 0 if we don't want to to split the SP adjustment in prologue and
-  // epilogue.
-  uint64_t getFirstSPAdjustAmount(const MachineFunction &MF) const;
+    // Get the first stack adjustment amount for SplitSPAdjust.
+    // Return 0 if we don't want to to split the SP adjustment in prologue and
+    // epilogue.
+    uint64_t getFirstSPAdjustAmount(const MachineFunction &MF) const;
 
-  bool canUseAsPrologue(const MachineBasicBlock &MBB) const override;
-  bool canUseAsEpilogue(const MachineBasicBlock &MBB) const override;
+    bool canUseAsPrologue(const MachineBasicBlock &MBB) const override;
+    bool canUseAsEpilogue(const MachineBasicBlock &MBB) const override;
 
 protected:
-  const RISCVSubtarget &STI;
+    const RISCVSubtarget &STI;
 
 private:
-  void determineFrameLayout(MachineFunction &MF) const;
-  void adjustReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
-                 const DebugLoc &DL, Register DestReg, Register SrcReg,
-                 int64_t Val, MachineInstr::MIFlag Flag) const;
+    void determineFrameLayout(MachineFunction &MF) const;
+    void adjustReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
+                   const DebugLoc &DL, Register DestReg, Register SrcReg,
+                   int64_t Val, MachineInstr::MIFlag Flag) const;
 };
 }
 #endif

@@ -26,47 +26,47 @@ SystemInitializerTest::SystemInitializerTest() = default;
 SystemInitializerTest::~SystemInitializerTest() = default;
 
 llvm::Error SystemInitializerTest::Initialize() {
-  if (auto e = SystemInitializerCommon::Initialize())
-    return e;
+    if (auto e = SystemInitializerCommon::Initialize())
+        return e;
 
-  // Initialize LLVM and Clang
-  llvm::InitializeAllTargets();
-  llvm::InitializeAllAsmPrinters();
-  llvm::InitializeAllTargetMCs();
-  llvm::InitializeAllDisassemblers();
+    // Initialize LLVM and Clang
+    llvm::InitializeAllTargets();
+    llvm::InitializeAllAsmPrinters();
+    llvm::InitializeAllTargetMCs();
+    llvm::InitializeAllDisassemblers();
 
 #define LLDB_SCRIPT_PLUGIN(p)
 #define LLDB_PLUGIN(p) LLDB_PLUGIN_INITIALIZE(p);
 #include "Plugins/Plugins.def"
 
-  // We ignored all the script interpreter earlier, so initialize
-  // ScriptInterpreterNone explicitly.
-  LLDB_PLUGIN_INITIALIZE(ScriptInterpreterNone);
+    // We ignored all the script interpreter earlier, so initialize
+    // ScriptInterpreterNone explicitly.
+    LLDB_PLUGIN_INITIALIZE(ScriptInterpreterNone);
 
-  // Scan for any system or user LLDB plug-ins
-  PluginManager::Initialize();
+    // Scan for any system or user LLDB plug-ins
+    PluginManager::Initialize();
 
-  // The process settings need to know about installed plug-ins, so the
-  // Settings must be initialized AFTER PluginManager::Initialize is called.
-  Debugger::SettingsInitialize();
+    // The process settings need to know about installed plug-ins, so the
+    // Settings must be initialized AFTER PluginManager::Initialize is called.
+    Debugger::SettingsInitialize();
 
-  return llvm::Error::success();
+    return llvm::Error::success();
 }
 
 void SystemInitializerTest::Terminate() {
-  Debugger::SettingsTerminate();
+    Debugger::SettingsTerminate();
 
-  // Terminate and unload and loaded system or user LLDB plug-ins
-  PluginManager::Terminate();
+    // Terminate and unload and loaded system or user LLDB plug-ins
+    PluginManager::Terminate();
 
 #define LLDB_SCRIPT_PLUGIN(p)
 #define LLDB_PLUGIN(p) LLDB_PLUGIN_TERMINATE(p);
 #include "Plugins/Plugins.def"
 
-  // We ignored all the script interpreter earlier, so terminate
-  // ScriptInterpreterNone explicitly.
-  LLDB_PLUGIN_INITIALIZE(ScriptInterpreterNone);
+    // We ignored all the script interpreter earlier, so terminate
+    // ScriptInterpreterNone explicitly.
+    LLDB_PLUGIN_INITIALIZE(ScriptInterpreterNone);
 
-  // Now shutdown the common parts, in reverse order.
-  SystemInitializerCommon::Terminate();
+    // Now shutdown the common parts, in reverse order.
+    SystemInitializerCommon::Terminate();
 }

@@ -10,20 +10,20 @@
 #define LLVM_CLANG_EDIT_REWRITERS_H
 
 namespace clang {
-  class ObjCMessageExpr;
-  class ObjCMethodDecl;
-  class ObjCInterfaceDecl;
-  class ObjCProtocolDecl;
-  class NSAPI;
-  class EnumDecl;
-  class TypedefDecl;
-  class ParentMap;
+class ObjCMessageExpr;
+class ObjCMethodDecl;
+class ObjCInterfaceDecl;
+class ObjCProtocolDecl;
+class NSAPI;
+class EnumDecl;
+class TypedefDecl;
+class ParentMap;
 
 namespace edit {
-  class Commit;
+class Commit;
 
 bool rewriteObjCRedundantCallWithLiteral(const ObjCMessageExpr *Msg,
-                                         const NSAPI &NS, Commit &commit);
+        const NSAPI &NS, Commit &commit);
 
 bool rewriteToObjCLiteralSyntax(const ObjCMessageExpr *Msg,
                                 const NSAPI &NS, Commit &commit,

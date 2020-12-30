@@ -29,20 +29,20 @@ class CFGBlock;
 // from the destination node and cache the results to prevent work
 // duplication.
 class CFGReverseBlockReachabilityAnalysis {
-  using ReachableSet = llvm::BitVector;
-  using ReachableMap = llvm::DenseMap<unsigned, ReachableSet>;
+    using ReachableSet = llvm::BitVector;
+    using ReachableMap = llvm::DenseMap<unsigned, ReachableSet>;
 
-  ReachableSet analyzed;
-  ReachableMap reachable;
+    ReachableSet analyzed;
+    ReachableMap reachable;
 
 public:
-  CFGReverseBlockReachabilityAnalysis(const CFG &cfg);
+    CFGReverseBlockReachabilityAnalysis(const CFG &cfg);
 
-  /// Returns true if the block 'Dst' can be reached from block 'Src'.
-  bool isReachable(const CFGBlock *Src, const CFGBlock *Dst);
+    /// Returns true if the block 'Dst' can be reached from block 'Src'.
+    bool isReachable(const CFGBlock *Src, const CFGBlock *Dst);
 
 private:
-  void mapReachability(const CFGBlock *Dst);
+    void mapReachability(const CFGBlock *Dst);
 };
 
 } // namespace clang

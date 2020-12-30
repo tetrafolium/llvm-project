@@ -23,10 +23,10 @@ namespace cert {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cert-flp30-c.html
 class FloatLoopCounter : public ClangTidyCheck {
 public:
-  FloatLoopCounter(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    FloatLoopCounter(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace cert

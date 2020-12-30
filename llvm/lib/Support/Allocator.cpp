@@ -19,11 +19,11 @@ namespace detail {
 
 void printBumpPtrAllocatorStats(unsigned NumSlabs, size_t BytesAllocated,
                                 size_t TotalMemory) {
-  errs() << "\nNumber of memory regions: " << NumSlabs << '\n'
-         << "Bytes used: " << BytesAllocated << '\n'
-         << "Bytes allocated: " << TotalMemory << '\n'
-         << "Bytes wasted: " << (TotalMemory - BytesAllocated)
-         << " (includes alignment, etc)\n";
+    errs() << "\nNumber of memory regions: " << NumSlabs << '\n'
+           << "Bytes used: " << BytesAllocated << '\n'
+           << "Bytes allocated: " << TotalMemory << '\n'
+           << "Bytes wasted: " << (TotalMemory - BytesAllocated)
+           << " (includes alignment, etc)\n";
 }
 
 } // End namespace detail.
@@ -31,9 +31,9 @@ void printBumpPtrAllocatorStats(unsigned NumSlabs, size_t BytesAllocated,
 void PrintRecyclerStats(size_t Size,
                         size_t Align,
                         size_t FreeListSize) {
-  errs() << "Recycler element size: " << Size << '\n'
-         << "Recycler element alignment: " << Align << '\n'
-         << "Number of elements free for recycling: " << FreeListSize << '\n';
+    errs() << "Recycler element size: " << Size << '\n'
+           << "Recycler element alignment: " << Align << '\n'
+           << "Number of elements free for recycling: " << FreeListSize << '\n';
 }
 
 }

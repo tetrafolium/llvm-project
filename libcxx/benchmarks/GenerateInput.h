@@ -91,7 +91,8 @@ inline std::vector<IntT> getReverseSortedIntegerInputs(size_t N) {
 
 template <class IntT>
 std::vector<IntT> getPipeOrganIntegerInputs(size_t N) {
-    std::vector<IntT> v; v.reserve(N);
+    std::vector<IntT> v;
+    v.reserve(N);
     for (size_t i = 0; i < N/2; ++i) v.push_back(i);
     for (size_t i = N/2; i < N; ++i) v.push_back(N - i);
     return v;

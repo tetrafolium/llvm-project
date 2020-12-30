@@ -17,40 +17,40 @@ namespace llvm {
 namespace yaml {
 
 void MappingTraits<ArchYAML::Archive>::mapping(IO &IO, ArchYAML::Archive &A) {
-  assert(!IO.getContext() && "The IO context is initialized already");
-  IO.setContext(&A);
-  IO.mapTag("!Arch", true);
-  IO.mapOptional("Magic", A.Magic, "!<arch>\n");
-  IO.mapOptional("Members", A.Members);
-  IO.mapOptional("Content", A.Content);
-  IO.setContext(nullptr);
+    assert(!IO.getContext() && "The IO context is initialized already");
+    IO.setContext(&A);
+    IO.mapTag("!Arch", true);
+    IO.mapOptional("Magic", A.Magic, "!<arch>\n");
+    IO.mapOptional("Members", A.Members);
+    IO.mapOptional("Content", A.Content);
+    IO.setContext(nullptr);
 }
 
 std::string MappingTraits<ArchYAML::Archive>::validate(IO &,
-                                                       ArchYAML::Archive &A) {
-  if (A.Members && A.Content)
-    return "\"Content\" and \"Members\" cannot be used together";
-  return "";
+        ArchYAML::Archive &A) {
+    if (A.Members && A.Content)
+        return "\"Content\" and \"Members\" cannot be used together";
+    return "";
 }
 
 void MappingTraits<ArchYAML::Archive::Child>::mapping(
     IO &IO, ArchYAML::Archive::Child &E) {
-  assert(IO.getContext() && "The IO context is not initialized");
-  for (auto &P : E.Fields)
-    IO.mapOptional(P.first.data(), P.second.Value, P.second.DefaultValue);
-  IO.mapOptional("Content", E.Content);
-  IO.mapOptional("PaddingByte", E.PaddingByte);
+    assert(IO.getContext() && "The IO context is not initialized");
+    for (auto &P : E.Fields)
+        IO.mapOptional(P.first.data(), P.second.Value, P.second.DefaultValue);
+    IO.mapOptional("Content", E.Content);
+    IO.mapOptional("PaddingByte", E.PaddingByte);
 }
 
 std::string
 MappingTraits<ArchYAML::Archive::Child>::validate(IO &,
-                                                  ArchYAML::Archive::Child &C) {
-  for (auto &P : C.Fields)
-    if (P.second.Value.size() > P.second.MaxLength)
-      return ("the maximum length of \"" + P.first + "\" field is " +
-              Twine(P.second.MaxLength))
-          .str();
-  return "";
+        ArchYAML::Archive::Child &C) {
+    for (auto &P : C.Fields)
+        if (P.second.Value.size() > P.second.MaxLength)
+            return ("the maximum length of \"" + P.first + "\" field is " +
+                    Twine(P.second.MaxLength))
+                   .str();
+    return "";
 }
 
 } // end namespace yaml

@@ -20,27 +20,27 @@ namespace wasm {
 
 class Writer {
 public:
-  Writer(Object &Obj, Buffer &Buf) : Obj(Obj), Buf(Buf) {}
-  Error write();
+    Writer(Object &Obj, Buffer &Buf) : Obj(Obj), Buf(Buf) {}
+    Error write();
 
 private:
-  using SectionHeader = SmallVector<char, 8>;
-  Object &Obj;
-  Buffer &Buf;
-  std::vector<SectionHeader> SectionHeaders;
+    using SectionHeader = SmallVector<char, 8>;
+    Object &Obj;
+    Buffer &Buf;
+    std::vector<SectionHeader> SectionHeaders;
 
-  /// Generate a wasm section section header for S.
-  /// The header consists of
-  /// * A one-byte section ID (aka the section type).
-  /// * The size of the section contents, encoded as ULEB128.
-  /// * If the section is a custom section (type 0) it also has a name, which is
-  ///   encoded as a length-prefixed string. The encoded section size *includes*
-  ///   this string.
-  /// See https://webassembly.github.io/spec/core/binary/modules.html#sections
-  /// Return the header and store the total size in SectionSize.
-  static SectionHeader createSectionHeader(const Section &S,
-                                           size_t &SectionSize);
-  size_t finalize();
+    /// Generate a wasm section section header for S.
+    /// The header consists of
+    /// * A one-byte section ID (aka the section type).
+    /// * The size of the section contents, encoded as ULEB128.
+    /// * If the section is a custom section (type 0) it also has a name, which is
+    ///   encoded as a length-prefixed string. The encoded section size *includes*
+    ///   this string.
+    /// See https://webassembly.github.io/spec/core/binary/modules.html#sections
+    /// Return the header and store the total size in SectionSize.
+    static SectionHeader createSectionHeader(const Section &S,
+            size_t &SectionSize);
+    size_t finalize();
 };
 
 } // end namespace wasm

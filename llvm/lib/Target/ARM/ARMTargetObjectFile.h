@@ -16,27 +16,27 @@ namespace llvm {
 
 class ARMElfTargetObjectFile : public TargetLoweringObjectFileELF {
 public:
-  ARMElfTargetObjectFile()
-      : TargetLoweringObjectFileELF() {
-    PLTRelativeVariantKind = MCSymbolRefExpr::VK_ARM_PREL31;
-  }
+    ARMElfTargetObjectFile()
+        : TargetLoweringObjectFileELF() {
+        PLTRelativeVariantKind = MCSymbolRefExpr::VK_ARM_PREL31;
+    }
 
-  void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
+    void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
-  const MCExpr *getTTypeGlobalReference(const GlobalValue *GV,
-                                        unsigned Encoding,
-                                        const TargetMachine &TM,
-                                        MachineModuleInfo *MMI,
-                                        MCStreamer &Streamer) const override;
+    const MCExpr *getTTypeGlobalReference(const GlobalValue *GV,
+                                          unsigned Encoding,
+                                          const TargetMachine &TM,
+                                          MachineModuleInfo *MMI,
+                                          MCStreamer &Streamer) const override;
 
-  /// Describe a TLS variable address within debug info.
-  const MCExpr *getDebugThreadLocalSymbol(const MCSymbol *Sym) const override;
+    /// Describe a TLS variable address within debug info.
+    const MCExpr *getDebugThreadLocalSymbol(const MCSymbol *Sym) const override;
 
-  MCSection *getExplicitSectionGlobal(const GlobalObject *GO, SectionKind Kind,
+    MCSection *getExplicitSectionGlobal(const GlobalObject *GO, SectionKind Kind,
+                                        const TargetMachine &TM) const override;
+
+    MCSection *SelectSectionForGlobal(const GlobalObject *GO, SectionKind Kind,
                                       const TargetMachine &TM) const override;
-
-  MCSection *SelectSectionForGlobal(const GlobalObject *GO, SectionKind Kind,
-                                    const TargetMachine &TM) const override;
 };
 
 } // end namespace llvm

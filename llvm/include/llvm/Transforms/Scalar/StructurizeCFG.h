@@ -13,7 +13,7 @@
 
 namespace llvm {
 struct StructurizeCFGPass : PassInfoMixin<StructurizeCFGPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // namespace llvm
 

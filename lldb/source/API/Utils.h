@@ -15,15 +15,15 @@
 namespace lldb_private {
 
 template <typename T> std::unique_ptr<T> clone(const std::unique_ptr<T> &src) {
-  if (src)
-    return std::make_unique<T>(*src);
-  return nullptr;
+    if (src)
+        return std::make_unique<T>(*src);
+    return nullptr;
 }
 
 template <typename T> std::shared_ptr<T> clone(const std::shared_ptr<T> &src) {
-  if (src)
-    return std::make_shared<T>(*src);
-  return nullptr;
+    if (src)
+        return std::make_shared<T>(*src);
+    return nullptr;
 }
 
 } // namespace lldb_private

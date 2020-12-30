@@ -29,36 +29,36 @@ namespace clang_fuzzer {
 static std::vector<const char *> CLArgs;
 
 const std::vector<const char *>& GetCLArgs() {
-  return CLArgs;
+    return CLArgs;
 }
 
 }
 
 extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-  InitializeAllTargets();
-  InitializeAllTargetMCs();
-  InitializeAllAsmPrinters();
-  InitializeAllAsmParsers();
-  
-  PassRegistry &Registry = *PassRegistry::getPassRegistry();
-  initializeCore(Registry);
-  initializeScalarOpts(Registry);
-  initializeVectorization(Registry);
-  initializeIPO(Registry);
-  initializeAnalysis(Registry);
-  initializeTransformUtils(Registry);
-  initializeInstCombine(Registry);
-  initializeAggressiveInstCombine(Registry);
-  initializeInstrumentation(Registry);
-  initializeTarget(Registry);
+    InitializeAllTargets();
+    InitializeAllTargetMCs();
+    InitializeAllAsmPrinters();
+    InitializeAllAsmParsers();
 
-  CLArgs.push_back("-O2");
-  for (int I = 1; I < *argc; I++) {
-    if (strcmp((*argv)[I], "-ignore_remaining_args=1") == 0) {
-      for (I++; I < *argc; I++)
-        CLArgs.push_back((*argv)[I]);
-      break;
+    PassRegistry &Registry = *PassRegistry::getPassRegistry();
+    initializeCore(Registry);
+    initializeScalarOpts(Registry);
+    initializeVectorization(Registry);
+    initializeIPO(Registry);
+    initializeAnalysis(Registry);
+    initializeTransformUtils(Registry);
+    initializeInstCombine(Registry);
+    initializeAggressiveInstCombine(Registry);
+    initializeInstrumentation(Registry);
+    initializeTarget(Registry);
+
+    CLArgs.push_back("-O2");
+    for (int I = 1; I < *argc; I++) {
+        if (strcmp((*argv)[I], "-ignore_remaining_args=1") == 0) {
+            for (I++; I < *argc; I++)
+                CLArgs.push_back((*argv)[I]);
+            break;
+        }
     }
-  }
-  return 0;
+    return 0;
 }

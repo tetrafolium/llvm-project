@@ -17,19 +17,19 @@
  */
 __isl_give MULTI(BASE) *FN(MULTI(BASE),coalesce)(__isl_take MULTI(BASE) *multi)
 {
-	int i;
+    int i;
 
-	if (!multi)
-		return NULL;
+    if (!multi)
+        return NULL;
 
-	for (i = 0; i < multi->n; ++i) {
-		EL *el = FN(EL,copy)(multi->u.p[i]);
-		el = FN(EL,coalesce)(el);
-		if (!el)
-			return FN(MULTI(BASE),free)(multi);
-		FN(EL,free)(multi->u.p[i]);
-		multi->u.p[i] = el;
-	}
+    for (i = 0; i < multi->n; ++i) {
+        EL *el = FN(EL,copy)(multi->u.p[i]);
+        el = FN(EL,coalesce)(el);
+        if (!el)
+            return FN(MULTI(BASE),free)(multi);
+        FN(EL,free)(multi->u.p[i]);
+        multi->u.p[i] = el;
+    }
 
-	return multi;
+    return multi;
 }

@@ -30,113 +30,113 @@ static const char *g_not_supported_error = "Not supported";
 }
 
 UDPSocket::UDPSocket(NativeSocket socket) : Socket(ProtocolUdp, true, true) {
-  m_socket = socket;
+    m_socket = socket;
 }
 
 UDPSocket::UDPSocket(bool should_close, bool child_processes_inherit)
     : Socket(ProtocolUdp, should_close, child_processes_inherit) {}
 
 size_t UDPSocket::Send(const void *buf, const size_t num_bytes) {
-  return ::sendto(m_socket, static_cast<const char *>(buf), num_bytes, 0,
-                  m_sockaddr, m_sockaddr.GetLength());
+    return ::sendto(m_socket, static_cast<const char *>(buf), num_bytes, 0,
+                    m_sockaddr, m_sockaddr.GetLength());
 }
 
 Status UDPSocket::Connect(llvm::StringRef name) {
-  return Status("%s", g_not_supported_error);
+    return Status("%s", g_not_supported_error);
 }
 
 Status UDPSocket::Listen(llvm::StringRef name, int backlog) {
-  return Status("%s", g_not_supported_error);
+    return Status("%s", g_not_supported_error);
 }
 
 Status UDPSocket::Accept(Socket *&socket) {
-  return Status("%s", g_not_supported_error);
+    return Status("%s", g_not_supported_error);
 }
 
 llvm::Expected<std::unique_ptr<UDPSocket>>
 UDPSocket::Connect(llvm::StringRef name, bool child_processes_inherit) {
-  std::unique_ptr<UDPSocket> socket;
+    std::unique_ptr<UDPSocket> socket;
 
-  Log *log(lldb_private::GetLogIfAnyCategoriesSet(LIBLLDB_LOG_CONNECTION));
-  LLDB_LOG(log, "host/port = {0}", name);
+    Log *log(lldb_private::GetLogIfAnyCategoriesSet(LIBLLDB_LOG_CONNECTION));
+    LLDB_LOG(log, "host/port = {0}", name);
 
-  Status error;
-  std::string host_str;
-  std::string port_str;
-  int32_t port = INT32_MIN;
-  if (!DecodeHostAndPort(name, host_str, port_str, port, &error))
-    return error.ToError();
+    Status error;
+    std::string host_str;
+    std::string port_str;
+    int32_t port = INT32_MIN;
+    if (!DecodeHostAndPort(name, host_str, port_str, port, &error))
+        return error.ToError();
 
-  // At this point we have setup the receive port, now we need to setup the UDP
-  // send socket
+    // At this point we have setup the receive port, now we need to setup the UDP
+    // send socket
 
-  struct addrinfo hints;
-  struct addrinfo *service_info_list = nullptr;
+    struct addrinfo hints;
+    struct addrinfo *service_info_list = nullptr;
 
-  ::memset(&hints, 0, sizeof(hints));
-  hints.ai_family = kDomain;
-  hints.ai_socktype = kType;
-  int err = ::getaddrinfo(host_str.c_str(), port_str.c_str(), &hints,
-                          &service_info_list);
-  if (err != 0) {
-    error.SetErrorStringWithFormat(
+    ::memset(&hints, 0, sizeof(hints));
+    hints.ai_family = kDomain;
+    hints.ai_socktype = kType;
+    int err = ::getaddrinfo(host_str.c_str(), port_str.c_str(), &hints,
+                            &service_info_list);
+    if (err != 0) {
+        error.SetErrorStringWithFormat(
 #if defined(_WIN32) && defined(UNICODE)
-        "getaddrinfo(%s, %s, &hints, &info) returned error %i (%S)",
+            "getaddrinfo(%s, %s, &hints, &info) returned error %i (%S)",
 #else
-        "getaddrinfo(%s, %s, &hints, &info) returned error %i (%s)",
+            "getaddrinfo(%s, %s, &hints, &info) returned error %i (%s)",
 #endif
-        host_str.c_str(), port_str.c_str(), err, gai_strerror(err));
-    return error.ToError();
-  }
+            host_str.c_str(), port_str.c_str(), err, gai_strerror(err));
+        return error.ToError();
+    }
 
-  for (struct addrinfo *service_info_ptr = service_info_list;
-       service_info_ptr != nullptr;
-       service_info_ptr = service_info_ptr->ai_next) {
-    auto send_fd = CreateSocket(
-        service_info_ptr->ai_family, service_info_ptr->ai_socktype,
-        service_info_ptr->ai_protocol, child_processes_inherit, error);
-    if (error.Success()) {
-      socket.reset(new UDPSocket(send_fd));
-      socket->m_sockaddr = service_info_ptr;
-      break;
-    } else
-      continue;
-  }
+    for (struct addrinfo *service_info_ptr = service_info_list;
+            service_info_ptr != nullptr;
+            service_info_ptr = service_info_ptr->ai_next) {
+        auto send_fd = CreateSocket(
+                           service_info_ptr->ai_family, service_info_ptr->ai_socktype,
+                           service_info_ptr->ai_protocol, child_processes_inherit, error);
+        if (error.Success()) {
+            socket.reset(new UDPSocket(send_fd));
+            socket->m_sockaddr = service_info_ptr;
+            break;
+        } else
+            continue;
+    }
 
-  ::freeaddrinfo(service_info_list);
+    ::freeaddrinfo(service_info_list);
 
-  if (!socket)
-    return error.ToError();
+    if (!socket)
+        return error.ToError();
 
-  SocketAddress bind_addr;
+    SocketAddress bind_addr;
 
-  // Only bind to the loopback address if we are expecting a connection from
-  // localhost to avoid any firewall issues.
-  const bool bind_addr_success = (host_str == "127.0.0.1" || host_str == "localhost")
-                                     ? bind_addr.SetToLocalhost(kDomain, port)
-                                     : bind_addr.SetToAnyAddress(kDomain, port);
+    // Only bind to the loopback address if we are expecting a connection from
+    // localhost to avoid any firewall issues.
+    const bool bind_addr_success = (host_str == "127.0.0.1" || host_str == "localhost")
+                                   ? bind_addr.SetToLocalhost(kDomain, port)
+                                   : bind_addr.SetToAnyAddress(kDomain, port);
 
-  if (!bind_addr_success) {
-    error.SetErrorString("Failed to get hostspec to bind for");
-    return error.ToError();
-  }
+    if (!bind_addr_success) {
+        error.SetErrorString("Failed to get hostspec to bind for");
+        return error.ToError();
+    }
 
-  bind_addr.SetPort(0); // Let the source port # be determined dynamically
+    bind_addr.SetPort(0); // Let the source port # be determined dynamically
 
-  err = ::bind(socket->GetNativeSocket(), bind_addr, bind_addr.GetLength());
+    err = ::bind(socket->GetNativeSocket(), bind_addr, bind_addr.GetLength());
 
-  struct sockaddr_in source_info;
-  socklen_t address_len = sizeof (struct sockaddr_in);
-  err = ::getsockname(socket->GetNativeSocket(),
-                      (struct sockaddr *)&source_info, &address_len);
+    struct sockaddr_in source_info;
+    socklen_t address_len = sizeof (struct sockaddr_in);
+    err = ::getsockname(socket->GetNativeSocket(),
+                        (struct sockaddr *)&source_info, &address_len);
 
-  return std::move(socket);
+    return std::move(socket);
 }
 
 std::string UDPSocket::GetRemoteConnectionURI() const {
-  if (m_socket != kInvalidSocketValue) {
-    return std::string(llvm::formatv(
-        "udp://[{0}]:{1}", m_sockaddr.GetIPAddress(), m_sockaddr.GetPort()));
-  }
-  return "";
+    if (m_socket != kInvalidSocketValue) {
+        return std::string(llvm::formatv(
+                               "udp://[{0}]:{1}", m_sockaddr.GetIPAddress(), m_sockaddr.GetPort()));
+    }
+    return "";
 }

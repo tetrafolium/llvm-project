@@ -32,93 +32,93 @@ namespace llvm {
 // memory manager.
 class ForwardingMemoryManager : public llvm::RTDyldMemoryManager {
 public:
-  void setMemMgr(std::unique_ptr<RuntimeDyld::MemoryManager> MemMgr) {
-    this->MemMgr = std::move(MemMgr);
-  }
+    void setMemMgr(std::unique_ptr<RuntimeDyld::MemoryManager> MemMgr) {
+        this->MemMgr = std::move(MemMgr);
+    }
 
-  void setResolver(std::shared_ptr<LegacyJITSymbolResolver> Resolver) {
-    this->Resolver = std::move(Resolver);
-  }
+    void setResolver(std::shared_ptr<LegacyJITSymbolResolver> Resolver) {
+        this->Resolver = std::move(Resolver);
+    }
 
-  uint8_t *allocateCodeSection(uintptr_t Size, unsigned Alignment,
-                               unsigned SectionID,
-                               StringRef SectionName) override {
-    return MemMgr->allocateCodeSection(Size, Alignment, SectionID, SectionName);
-  }
+    uint8_t *allocateCodeSection(uintptr_t Size, unsigned Alignment,
+                                 unsigned SectionID,
+                                 StringRef SectionName) override {
+        return MemMgr->allocateCodeSection(Size, Alignment, SectionID, SectionName);
+    }
 
-  uint8_t *allocateDataSection(uintptr_t Size, unsigned Alignment,
-                               unsigned SectionID, StringRef SectionName,
-                               bool IsReadOnly) override {
-    return MemMgr->allocateDataSection(Size, Alignment, SectionID, SectionName,
-                                       IsReadOnly);
-  }
+    uint8_t *allocateDataSection(uintptr_t Size, unsigned Alignment,
+                                 unsigned SectionID, StringRef SectionName,
+                                 bool IsReadOnly) override {
+        return MemMgr->allocateDataSection(Size, Alignment, SectionID, SectionName,
+                                           IsReadOnly);
+    }
 
-  void reserveAllocationSpace(uintptr_t CodeSize, uint32_t CodeAlign,
-                              uintptr_t RODataSize, uint32_t RODataAlign,
-                              uintptr_t RWDataSize,
-                              uint32_t RWDataAlign) override {
-    MemMgr->reserveAllocationSpace(CodeSize, CodeAlign, RODataSize, RODataAlign,
-                                   RWDataSize, RWDataAlign);
-  }
+    void reserveAllocationSpace(uintptr_t CodeSize, uint32_t CodeAlign,
+                                uintptr_t RODataSize, uint32_t RODataAlign,
+                                uintptr_t RWDataSize,
+                                uint32_t RWDataAlign) override {
+        MemMgr->reserveAllocationSpace(CodeSize, CodeAlign, RODataSize, RODataAlign,
+                                       RWDataSize, RWDataAlign);
+    }
 
-  bool needsToReserveAllocationSpace() override {
-    return MemMgr->needsToReserveAllocationSpace();
-  }
+    bool needsToReserveAllocationSpace() override {
+        return MemMgr->needsToReserveAllocationSpace();
+    }
 
-  void registerEHFrames(uint8_t *Addr, uint64_t LoadAddr,
-                        size_t Size) override {
-    MemMgr->registerEHFrames(Addr, LoadAddr, Size);
-  }
+    void registerEHFrames(uint8_t *Addr, uint64_t LoadAddr,
+                          size_t Size) override {
+        MemMgr->registerEHFrames(Addr, LoadAddr, Size);
+    }
 
-  void deregisterEHFrames() override {
-    MemMgr->deregisterEHFrames();
-  }
+    void deregisterEHFrames() override {
+        MemMgr->deregisterEHFrames();
+    }
 
-  bool finalizeMemory(std::string *ErrMsg = nullptr) override {
-    return MemMgr->finalizeMemory(ErrMsg);
-  }
+    bool finalizeMemory(std::string *ErrMsg = nullptr) override {
+        return MemMgr->finalizeMemory(ErrMsg);
+    }
 
-  void notifyObjectLoaded(RuntimeDyld &RTDyld,
-                          const object::ObjectFile &Obj) override {
-    MemMgr->notifyObjectLoaded(RTDyld, Obj);
-  }
+    void notifyObjectLoaded(RuntimeDyld &RTDyld,
+                            const object::ObjectFile &Obj) override {
+        MemMgr->notifyObjectLoaded(RTDyld, Obj);
+    }
 
-  // Don't hide the sibling notifyObjectLoaded from RTDyldMemoryManager.
-  using RTDyldMemoryManager::notifyObjectLoaded;
+    // Don't hide the sibling notifyObjectLoaded from RTDyldMemoryManager.
+    using RTDyldMemoryManager::notifyObjectLoaded;
 
-  JITSymbol findSymbol(const std::string &Name) override {
-    return Resolver->findSymbol(Name);
-  }
+    JITSymbol findSymbol(const std::string &Name) override {
+        return Resolver->findSymbol(Name);
+    }
 
-  JITSymbol
-  findSymbolInLogicalDylib(const std::string &Name) override {
-    return Resolver->findSymbolInLogicalDylib(Name);
-  }
+    JITSymbol
+    findSymbolInLogicalDylib(const std::string &Name) override {
+        return Resolver->findSymbolInLogicalDylib(Name);
+    }
 
 private:
-  std::unique_ptr<RuntimeDyld::MemoryManager> MemMgr;
-  std::shared_ptr<LegacyJITSymbolResolver> Resolver;
+    std::unique_ptr<RuntimeDyld::MemoryManager> MemMgr;
+    std::shared_ptr<LegacyJITSymbolResolver> Resolver;
 };
 
 template <typename RemoteT>
 class RemoteResolver : public LegacyJITSymbolResolver {
 public:
 
-  RemoteResolver(RemoteT &R) : R(R) {}
+    RemoteResolver(RemoteT &R) : R(R) {}
 
-  JITSymbol findSymbol(const std::string &Name) override {
-    if (auto Addr = R.getSymbolAddress(Name))
-      return JITSymbol(*Addr, JITSymbolFlags::Exported);
-    else
-      return Addr.takeError();
-  }
+    JITSymbol findSymbol(const std::string &Name) override {
+        if (auto Addr = R.getSymbolAddress(Name))
+            return JITSymbol(*Addr, JITSymbolFlags::Exported);
+        else
+            return Addr.takeError();
+    }
 
-  JITSymbol findSymbolInLogicalDylib(const std::string &Name) override {
-    return nullptr;
-  }
+    JITSymbol findSymbolInLogicalDylib(const std::string &Name) override {
+        return nullptr;
+    }
 
 public:
-  RemoteT &R;
+    RemoteT &R;
 };
 }
 

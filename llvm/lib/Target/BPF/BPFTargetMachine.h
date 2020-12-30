@@ -18,29 +18,31 @@
 
 namespace llvm {
 class BPFTargetMachine : public LLVMTargetMachine {
-  std::unique_ptr<TargetLoweringObjectFile> TLOF;
-  BPFSubtarget Subtarget;
+    std::unique_ptr<TargetLoweringObjectFile> TLOF;
+    BPFSubtarget Subtarget;
 
 public:
-  BPFTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                   StringRef FS, const TargetOptions &Options,
-                   Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                   CodeGenOpt::Level OL, bool JIT);
+    BPFTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                     StringRef FS, const TargetOptions &Options,
+                     Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                     CodeGenOpt::Level OL, bool JIT);
 
-  const BPFSubtarget *getSubtargetImpl() const { return &Subtarget; }
-  const BPFSubtarget *getSubtargetImpl(const Function &) const override {
-    return &Subtarget;
-  }
+    const BPFSubtarget *getSubtargetImpl() const {
+        return &Subtarget;
+    }
+    const BPFSubtarget *getSubtargetImpl(const Function &) const override {
+        return &Subtarget;
+    }
 
-  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-  TargetLoweringObjectFile *getObjFileLowering() const override {
-    return TLOF.get();
-  }
+    TargetLoweringObjectFile *getObjFileLowering() const override {
+        return TLOF.get();
+    }
 
-  void adjustPassManager(PassManagerBuilder &) override;
-  void registerPassBuilderCallbacks(PassBuilder &PB,
-                                    bool DebugPassManager) override;
+    void adjustPassManager(PassManagerBuilder &) override;
+    void registerPassBuilderCallbacks(PassBuilder &PB,
+                                      bool DebugPassManager) override;
 };
 }
 

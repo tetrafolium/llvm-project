@@ -83,7 +83,7 @@ terminate() _NOEXCEPT
         if (exception_header)
         {
             _Unwind_Exception* unwind_exception =
-                reinterpret_cast<_Unwind_Exception*>(exception_header + 1) - 1;
+            reinterpret_cast<_Unwind_Exception*>(exception_header + 1) - 1;
             if (__isOurExceptionClass(unwind_exception))
                 __terminate(exception_header->terminateHandler);
         }
@@ -93,7 +93,7 @@ terminate() _NOEXCEPT
 }
 
 extern "C" {
-new_handler __cxa_new_handler = 0;
+    new_handler __cxa_new_handler = 0;
 }
 
 new_handler

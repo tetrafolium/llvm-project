@@ -37,248 +37,280 @@ namespace clang {
 
 static std::unique_ptr<FrontendAction>
 CreateFrontendBaseAction(CompilerInstance &CI) {
-  using namespace clang::frontend;
-  StringRef Action("unknown");
-  (void)Action;
+    using namespace clang::frontend;
+    StringRef Action("unknown");
+    (void)Action;
 
-  switch (CI.getFrontendOpts().ProgramAction) {
-  case ASTDeclList:            return std::make_unique<ASTDeclListAction>();
-  case ASTDump:                return std::make_unique<ASTDumpAction>();
-  case ASTPrint:               return std::make_unique<ASTPrintAction>();
-  case ASTView:                return std::make_unique<ASTViewAction>();
-  case DumpCompilerOptions:
-    return std::make_unique<DumpCompilerOptionsAction>();
-  case DumpRawTokens:          return std::make_unique<DumpRawTokensAction>();
-  case DumpTokens:             return std::make_unique<DumpTokensAction>();
-  case EmitAssembly:           return std::make_unique<EmitAssemblyAction>();
-  case EmitBC:                 return std::make_unique<EmitBCAction>();
-  case EmitHTML:               return std::make_unique<HTMLPrintAction>();
-  case EmitLLVM:               return std::make_unique<EmitLLVMAction>();
-  case EmitLLVMOnly:           return std::make_unique<EmitLLVMOnlyAction>();
-  case EmitCodeGenOnly:        return std::make_unique<EmitCodeGenOnlyAction>();
-  case EmitObj:                return std::make_unique<EmitObjAction>();
-  case FixIt:                  return std::make_unique<FixItAction>();
-  case GenerateModule:
-    return std::make_unique<GenerateModuleFromModuleMapAction>();
-  case GenerateModuleInterface:
-    return std::make_unique<GenerateModuleInterfaceAction>();
-  case GenerateHeaderModule:
-    return std::make_unique<GenerateHeaderModuleAction>();
-  case GeneratePCH:            return std::make_unique<GeneratePCHAction>();
-  case GenerateInterfaceStubs:
-    return std::make_unique<GenerateInterfaceStubsAction>();
-  case InitOnly:               return std::make_unique<InitOnlyAction>();
-  case ParseSyntaxOnly:        return std::make_unique<SyntaxOnlyAction>();
-  case ModuleFileInfo:         return std::make_unique<DumpModuleInfoAction>();
-  case VerifyPCH:              return std::make_unique<VerifyPCHAction>();
-  case TemplightDump:          return std::make_unique<TemplightDumpAction>();
+    switch (CI.getFrontendOpts().ProgramAction) {
+    case ASTDeclList:
+        return std::make_unique<ASTDeclListAction>();
+    case ASTDump:
+        return std::make_unique<ASTDumpAction>();
+    case ASTPrint:
+        return std::make_unique<ASTPrintAction>();
+    case ASTView:
+        return std::make_unique<ASTViewAction>();
+    case DumpCompilerOptions:
+        return std::make_unique<DumpCompilerOptionsAction>();
+    case DumpRawTokens:
+        return std::make_unique<DumpRawTokensAction>();
+    case DumpTokens:
+        return std::make_unique<DumpTokensAction>();
+    case EmitAssembly:
+        return std::make_unique<EmitAssemblyAction>();
+    case EmitBC:
+        return std::make_unique<EmitBCAction>();
+    case EmitHTML:
+        return std::make_unique<HTMLPrintAction>();
+    case EmitLLVM:
+        return std::make_unique<EmitLLVMAction>();
+    case EmitLLVMOnly:
+        return std::make_unique<EmitLLVMOnlyAction>();
+    case EmitCodeGenOnly:
+        return std::make_unique<EmitCodeGenOnlyAction>();
+    case EmitObj:
+        return std::make_unique<EmitObjAction>();
+    case FixIt:
+        return std::make_unique<FixItAction>();
+    case GenerateModule:
+        return std::make_unique<GenerateModuleFromModuleMapAction>();
+    case GenerateModuleInterface:
+        return std::make_unique<GenerateModuleInterfaceAction>();
+    case GenerateHeaderModule:
+        return std::make_unique<GenerateHeaderModuleAction>();
+    case GeneratePCH:
+        return std::make_unique<GeneratePCHAction>();
+    case GenerateInterfaceStubs:
+        return std::make_unique<GenerateInterfaceStubsAction>();
+    case InitOnly:
+        return std::make_unique<InitOnlyAction>();
+    case ParseSyntaxOnly:
+        return std::make_unique<SyntaxOnlyAction>();
+    case ModuleFileInfo:
+        return std::make_unique<DumpModuleInfoAction>();
+    case VerifyPCH:
+        return std::make_unique<VerifyPCHAction>();
+    case TemplightDump:
+        return std::make_unique<TemplightDumpAction>();
 
-  case PluginAction: {
-    for (const FrontendPluginRegistry::entry &Plugin :
-         FrontendPluginRegistry::entries()) {
-      if (Plugin.getName() == CI.getFrontendOpts().ActionName) {
-        std::unique_ptr<PluginASTAction> P(Plugin.instantiate());
-        if ((P->getActionType() != PluginASTAction::ReplaceAction &&
-             P->getActionType() != PluginASTAction::Cmdline) ||
-            !P->ParseArgs(
-                CI,
-                CI.getFrontendOpts().PluginArgs[std::string(Plugin.getName())]))
-          return nullptr;
-        return std::move(P);
-      }
+    case PluginAction: {
+        for (const FrontendPluginRegistry::entry &Plugin :
+                FrontendPluginRegistry::entries()) {
+            if (Plugin.getName() == CI.getFrontendOpts().ActionName) {
+                std::unique_ptr<PluginASTAction> P(Plugin.instantiate());
+                if ((P->getActionType() != PluginASTAction::ReplaceAction &&
+                        P->getActionType() != PluginASTAction::Cmdline) ||
+                        !P->ParseArgs(
+                            CI,
+                            CI.getFrontendOpts().PluginArgs[std::string(Plugin.getName())]))
+                    return nullptr;
+                return std::move(P);
+            }
+        }
+
+        CI.getDiagnostics().Report(diag::err_fe_invalid_plugin_name)
+                << CI.getFrontendOpts().ActionName;
+        return nullptr;
     }
 
-    CI.getDiagnostics().Report(diag::err_fe_invalid_plugin_name)
-      << CI.getFrontendOpts().ActionName;
-    return nullptr;
-  }
+    case PrintPreamble:
+        return std::make_unique<PrintPreambleAction>();
+    case PrintPreprocessedInput: {
+        if (CI.getPreprocessorOutputOpts().RewriteIncludes ||
+                CI.getPreprocessorOutputOpts().RewriteImports)
+            return std::make_unique<RewriteIncludesAction>();
+        return std::make_unique<PrintPreprocessedAction>();
+    }
 
-  case PrintPreamble:          return std::make_unique<PrintPreambleAction>();
-  case PrintPreprocessedInput: {
-    if (CI.getPreprocessorOutputOpts().RewriteIncludes ||
-        CI.getPreprocessorOutputOpts().RewriteImports)
-      return std::make_unique<RewriteIncludesAction>();
-    return std::make_unique<PrintPreprocessedAction>();
-  }
-
-  case RewriteMacros:          return std::make_unique<RewriteMacrosAction>();
-  case RewriteTest:            return std::make_unique<RewriteTestAction>();
+    case RewriteMacros:
+        return std::make_unique<RewriteMacrosAction>();
+    case RewriteTest:
+        return std::make_unique<RewriteTestAction>();
 #if CLANG_ENABLE_OBJC_REWRITER
-  case RewriteObjC:            return std::make_unique<RewriteObjCAction>();
+    case RewriteObjC:
+        return std::make_unique<RewriteObjCAction>();
 #else
-  case RewriteObjC:            Action = "RewriteObjC"; break;
+    case RewriteObjC:
+        Action = "RewriteObjC";
+        break;
 #endif
 #if CLANG_ENABLE_ARCMT
-  case MigrateSource:
-    return std::make_unique<arcmt::MigrateSourceAction>();
+    case MigrateSource:
+        return std::make_unique<arcmt::MigrateSourceAction>();
 #else
-  case MigrateSource:          Action = "MigrateSource"; break;
+    case MigrateSource:
+        Action = "MigrateSource";
+        break;
 #endif
 #if CLANG_ENABLE_STATIC_ANALYZER
-  case RunAnalysis:            return std::make_unique<ento::AnalysisAction>();
+    case RunAnalysis:
+        return std::make_unique<ento::AnalysisAction>();
 #else
-  case RunAnalysis:            Action = "RunAnalysis"; break;
+    case RunAnalysis:
+        Action = "RunAnalysis";
+        break;
 #endif
-  case RunPreprocessorOnly:    return std::make_unique<PreprocessOnlyAction>();
-  case PrintDependencyDirectivesSourceMinimizerOutput:
-    return std::make_unique<PrintDependencyDirectivesSourceMinimizerAction>();
-  }
+    case RunPreprocessorOnly:
+        return std::make_unique<PreprocessOnlyAction>();
+    case PrintDependencyDirectivesSourceMinimizerOutput:
+        return std::make_unique<PrintDependencyDirectivesSourceMinimizerAction>();
+    }
 
 #if !CLANG_ENABLE_ARCMT || !CLANG_ENABLE_STATIC_ANALYZER \
   || !CLANG_ENABLE_OBJC_REWRITER
-  CI.getDiagnostics().Report(diag::err_fe_action_not_available) << Action;
-  return 0;
+    CI.getDiagnostics().Report(diag::err_fe_action_not_available) << Action;
+    return 0;
 #else
-  llvm_unreachable("Invalid program action!");
+    llvm_unreachable("Invalid program action!");
 #endif
 }
 
 std::unique_ptr<FrontendAction>
 CreateFrontendAction(CompilerInstance &CI) {
-  // Create the underlying action.
-  std::unique_ptr<FrontendAction> Act = CreateFrontendBaseAction(CI);
-  if (!Act)
-    return nullptr;
+    // Create the underlying action.
+    std::unique_ptr<FrontendAction> Act = CreateFrontendBaseAction(CI);
+    if (!Act)
+        return nullptr;
 
-  const FrontendOptions &FEOpts = CI.getFrontendOpts();
+    const FrontendOptions &FEOpts = CI.getFrontendOpts();
 
-  if (FEOpts.FixAndRecompile) {
-    Act = std::make_unique<FixItRecompile>(std::move(Act));
-  }
+    if (FEOpts.FixAndRecompile) {
+        Act = std::make_unique<FixItRecompile>(std::move(Act));
+    }
 
 #if CLANG_ENABLE_ARCMT
-  if (CI.getFrontendOpts().ProgramAction != frontend::MigrateSource &&
-      CI.getFrontendOpts().ProgramAction != frontend::GeneratePCH) {
-    // Potentially wrap the base FE action in an ARC Migrate Tool action.
-    switch (FEOpts.ARCMTAction) {
-    case FrontendOptions::ARCMT_None:
-      break;
-    case FrontendOptions::ARCMT_Check:
-      Act = std::make_unique<arcmt::CheckAction>(std::move(Act));
-      break;
-    case FrontendOptions::ARCMT_Modify:
-      Act = std::make_unique<arcmt::ModifyAction>(std::move(Act));
-      break;
-    case FrontendOptions::ARCMT_Migrate:
-      Act = std::make_unique<arcmt::MigrateAction>(std::move(Act),
-                                     FEOpts.MTMigrateDir,
-                                     FEOpts.ARCMTMigrateReportOut,
-                                     FEOpts.ARCMTMigrateEmitARCErrors);
-      break;
-    }
+    if (CI.getFrontendOpts().ProgramAction != frontend::MigrateSource &&
+            CI.getFrontendOpts().ProgramAction != frontend::GeneratePCH) {
+        // Potentially wrap the base FE action in an ARC Migrate Tool action.
+        switch (FEOpts.ARCMTAction) {
+        case FrontendOptions::ARCMT_None:
+            break;
+        case FrontendOptions::ARCMT_Check:
+            Act = std::make_unique<arcmt::CheckAction>(std::move(Act));
+            break;
+        case FrontendOptions::ARCMT_Modify:
+            Act = std::make_unique<arcmt::ModifyAction>(std::move(Act));
+            break;
+        case FrontendOptions::ARCMT_Migrate:
+            Act = std::make_unique<arcmt::MigrateAction>(std::move(Act),
+                    FEOpts.MTMigrateDir,
+                    FEOpts.ARCMTMigrateReportOut,
+                    FEOpts.ARCMTMigrateEmitARCErrors);
+            break;
+        }
 
-    if (FEOpts.ObjCMTAction != FrontendOptions::ObjCMT_None) {
-      Act = std::make_unique<arcmt::ObjCMigrateAction>(std::move(Act),
-                                                        FEOpts.MTMigrateDir,
-                                                        FEOpts.ObjCMTAction);
+        if (FEOpts.ObjCMTAction != FrontendOptions::ObjCMT_None) {
+            Act = std::make_unique<arcmt::ObjCMigrateAction>(std::move(Act),
+                    FEOpts.MTMigrateDir,
+                    FEOpts.ObjCMTAction);
+        }
     }
-  }
 #endif
 
-  // If there are any AST files to merge, create a frontend action
-  // adaptor to perform the merge.
-  if (!FEOpts.ASTMergeFiles.empty())
-    Act = std::make_unique<ASTMergeAction>(std::move(Act),
-                                            FEOpts.ASTMergeFiles);
+    // If there are any AST files to merge, create a frontend action
+    // adaptor to perform the merge.
+    if (!FEOpts.ASTMergeFiles.empty())
+        Act = std::make_unique<ASTMergeAction>(std::move(Act),
+                                               FEOpts.ASTMergeFiles);
 
-  return Act;
+    return Act;
 }
 
 bool ExecuteCompilerInvocation(CompilerInstance *Clang) {
-  // Honor -help.
-  if (Clang->getFrontendOpts().ShowHelp) {
-    driver::getDriverOptTable().PrintHelp(
-        llvm::outs(), "clang -cc1 [options] file...",
-        "LLVM 'Clang' Compiler: http://clang.llvm.org",
-        /*Include=*/driver::options::CC1Option,
-        /*Exclude=*/0, /*ShowAllAliases=*/false);
-    return true;
-  }
-
-  // Honor -version.
-  //
-  // FIXME: Use a better -version message?
-  if (Clang->getFrontendOpts().ShowVersion) {
-    llvm::cl::PrintVersionMessage();
-    return true;
-  }
-
-  // Load any requested plugins.
-  for (const std::string &Path : Clang->getFrontendOpts().Plugins) {
-    std::string Error;
-    if (llvm::sys::DynamicLibrary::LoadLibraryPermanently(Path.c_str(), &Error))
-      Clang->getDiagnostics().Report(diag::err_fe_unable_to_load_plugin)
-        << Path << Error;
-  }
-
-  // Check if any of the loaded plugins replaces the main AST action
-  for (const FrontendPluginRegistry::entry &Plugin :
-       FrontendPluginRegistry::entries()) {
-    std::unique_ptr<PluginASTAction> P(Plugin.instantiate());
-    if (P->getActionType() == PluginASTAction::ReplaceAction) {
-      Clang->getFrontendOpts().ProgramAction = clang::frontend::PluginAction;
-      Clang->getFrontendOpts().ActionName = Plugin.getName().str();
-      break;
+    // Honor -help.
+    if (Clang->getFrontendOpts().ShowHelp) {
+        driver::getDriverOptTable().PrintHelp(
+            llvm::outs(), "clang -cc1 [options] file...",
+            "LLVM 'Clang' Compiler: http://clang.llvm.org",
+            /*Include=*/driver::options::CC1Option,
+            /*Exclude=*/0, /*ShowAllAliases=*/false);
+        return true;
     }
-  }
 
-  // Honor -mllvm.
-  //
-  // FIXME: Remove this, one day.
-  // This should happen AFTER plugins have been loaded!
-  if (!Clang->getFrontendOpts().LLVMArgs.empty()) {
-    unsigned NumArgs = Clang->getFrontendOpts().LLVMArgs.size();
-    auto Args = std::make_unique<const char*[]>(NumArgs + 2);
-    Args[0] = "clang (LLVM option parsing)";
-    for (unsigned i = 0; i != NumArgs; ++i)
-      Args[i + 1] = Clang->getFrontendOpts().LLVMArgs[i].c_str();
-    Args[NumArgs + 1] = nullptr;
-    llvm::cl::ParseCommandLineOptions(NumArgs + 1, Args.get());
-  }
+    // Honor -version.
+    //
+    // FIXME: Use a better -version message?
+    if (Clang->getFrontendOpts().ShowVersion) {
+        llvm::cl::PrintVersionMessage();
+        return true;
+    }
+
+    // Load any requested plugins.
+    for (const std::string &Path : Clang->getFrontendOpts().Plugins) {
+        std::string Error;
+        if (llvm::sys::DynamicLibrary::LoadLibraryPermanently(Path.c_str(), &Error))
+            Clang->getDiagnostics().Report(diag::err_fe_unable_to_load_plugin)
+                    << Path << Error;
+    }
+
+    // Check if any of the loaded plugins replaces the main AST action
+    for (const FrontendPluginRegistry::entry &Plugin :
+            FrontendPluginRegistry::entries()) {
+        std::unique_ptr<PluginASTAction> P(Plugin.instantiate());
+        if (P->getActionType() == PluginASTAction::ReplaceAction) {
+            Clang->getFrontendOpts().ProgramAction = clang::frontend::PluginAction;
+            Clang->getFrontendOpts().ActionName = Plugin.getName().str();
+            break;
+        }
+    }
+
+    // Honor -mllvm.
+    //
+    // FIXME: Remove this, one day.
+    // This should happen AFTER plugins have been loaded!
+    if (!Clang->getFrontendOpts().LLVMArgs.empty()) {
+        unsigned NumArgs = Clang->getFrontendOpts().LLVMArgs.size();
+        auto Args = std::make_unique<const char*[]>(NumArgs + 2);
+        Args[0] = "clang (LLVM option parsing)";
+        for (unsigned i = 0; i != NumArgs; ++i)
+            Args[i + 1] = Clang->getFrontendOpts().LLVMArgs[i].c_str();
+        Args[NumArgs + 1] = nullptr;
+        llvm::cl::ParseCommandLineOptions(NumArgs + 1, Args.get());
+    }
 
 #if CLANG_ENABLE_STATIC_ANALYZER
-  // These should happen AFTER plugins have been loaded!
+    // These should happen AFTER plugins have been loaded!
 
-  AnalyzerOptions &AnOpts = *Clang->getAnalyzerOpts();
+    AnalyzerOptions &AnOpts = *Clang->getAnalyzerOpts();
 
-  // Honor -analyzer-checker-help and -analyzer-checker-help-hidden.
-  if (AnOpts.ShowCheckerHelp || AnOpts.ShowCheckerHelpAlpha ||
-      AnOpts.ShowCheckerHelpDeveloper) {
-    ento::printCheckerHelp(llvm::outs(), *Clang);
-    return true;
-  }
+    // Honor -analyzer-checker-help and -analyzer-checker-help-hidden.
+    if (AnOpts.ShowCheckerHelp || AnOpts.ShowCheckerHelpAlpha ||
+            AnOpts.ShowCheckerHelpDeveloper) {
+        ento::printCheckerHelp(llvm::outs(), *Clang);
+        return true;
+    }
 
-  // Honor -analyzer-checker-option-help.
-  if (AnOpts.ShowCheckerOptionList || AnOpts.ShowCheckerOptionAlphaList ||
-      AnOpts.ShowCheckerOptionDeveloperList) {
-    ento::printCheckerConfigList(llvm::outs(), *Clang);
-    return true;
-  }
+    // Honor -analyzer-checker-option-help.
+    if (AnOpts.ShowCheckerOptionList || AnOpts.ShowCheckerOptionAlphaList ||
+            AnOpts.ShowCheckerOptionDeveloperList) {
+        ento::printCheckerConfigList(llvm::outs(), *Clang);
+        return true;
+    }
 
-  // Honor -analyzer-list-enabled-checkers.
-  if (AnOpts.ShowEnabledCheckerList) {
-    ento::printEnabledCheckerList(llvm::outs(), *Clang);
-    return true;
-  }
+    // Honor -analyzer-list-enabled-checkers.
+    if (AnOpts.ShowEnabledCheckerList) {
+        ento::printEnabledCheckerList(llvm::outs(), *Clang);
+        return true;
+    }
 
-  // Honor -analyzer-config-help.
-  if (AnOpts.ShowConfigOptionsList) {
-    ento::printAnalyzerConfigList(llvm::outs());
-    return true;
-  }
+    // Honor -analyzer-config-help.
+    if (AnOpts.ShowConfigOptionsList) {
+        ento::printAnalyzerConfigList(llvm::outs());
+        return true;
+    }
 #endif
 
-  // If there were errors in processing arguments, don't do anything else.
-  if (Clang->getDiagnostics().hasErrorOccurred())
-    return false;
-  // Create and execute the frontend action.
-  std::unique_ptr<FrontendAction> Act(CreateFrontendAction(*Clang));
-  if (!Act)
-    return false;
-  bool Success = Clang->ExecuteAction(*Act);
-  if (Clang->getFrontendOpts().DisableFree)
-    llvm::BuryPointer(std::move(Act));
-  return Success;
+    // If there were errors in processing arguments, don't do anything else.
+    if (Clang->getDiagnostics().hasErrorOccurred())
+        return false;
+    // Create and execute the frontend action.
+    std::unique_ptr<FrontendAction> Act(CreateFrontendAction(*Clang));
+    if (!Act)
+        return false;
+    bool Success = Clang->ExecuteAction(*Act);
+    if (Clang->getFrontendOpts().DisableFree)
+        llvm::BuryPointer(std::move(Act));
+    return Success;
 }
 
 } // namespace clang

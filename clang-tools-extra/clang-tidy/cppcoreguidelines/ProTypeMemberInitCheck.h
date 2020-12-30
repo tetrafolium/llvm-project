@@ -32,46 +32,46 @@ namespace cppcoreguidelines {
 ///     multiple in-class initializer fixits for the same  member.
 class ProTypeMemberInitCheck : public ClangTidyCheck {
 public:
-  ProTypeMemberInitCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    ProTypeMemberInitCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-  // Checks Type.6 part 1:
-  // Issue a diagnostic for any constructor of a non-trivially-constructible
-  // type that does not initialize all member variables.
-  //
-  // To fix: Write a data member initializer, or mention it in the member
-  // initializer list.
-  void checkMissingMemberInitializer(ASTContext &Context,
-                                     const CXXRecordDecl &ClassDecl,
-                                     const CXXConstructorDecl *Ctor);
+    // Checks Type.6 part 1:
+    // Issue a diagnostic for any constructor of a non-trivially-constructible
+    // type that does not initialize all member variables.
+    //
+    // To fix: Write a data member initializer, or mention it in the member
+    // initializer list.
+    void checkMissingMemberInitializer(ASTContext &Context,
+                                       const CXXRecordDecl &ClassDecl,
+                                       const CXXConstructorDecl *Ctor);
 
-  // A subtle side effect of Type.6 part 2:
-  // Make sure to initialize trivially constructible base classes.
-  void checkMissingBaseClassInitializer(const ASTContext &Context,
-                                        const CXXRecordDecl &ClassDecl,
-                                        const CXXConstructorDecl *Ctor);
+    // A subtle side effect of Type.6 part 2:
+    // Make sure to initialize trivially constructible base classes.
+    void checkMissingBaseClassInitializer(const ASTContext &Context,
+                                          const CXXRecordDecl &ClassDecl,
+                                          const CXXConstructorDecl *Ctor);
 
-  // Checks Type.6 part 2:
-  // Issue a diagnostic when constructing an object of a trivially constructible
-  // type without () or {} to initialize its members.
-  //
-  // To fix: Add () or {}.
-  void checkUninitializedTrivialType(const ASTContext &Context,
-                                     const VarDecl *Var);
+    // Checks Type.6 part 2:
+    // Issue a diagnostic when constructing an object of a trivially constructible
+    // type without () or {} to initialize its members.
+    //
+    // To fix: Add () or {}.
+    void checkUninitializedTrivialType(const ASTContext &Context,
+                                       const VarDecl *Var);
 
-  // Whether arrays need to be initialized or not. Default is false.
-  bool IgnoreArrays;
+    // Whether arrays need to be initialized or not. Default is false.
+    bool IgnoreArrays;
 
-  // Whether fix-its for initialization of fundamental type use assignment
-  // instead of brace initialization. Only effective in C++11 mode. Default is
-  // false.
-  bool UseAssignment;
+    // Whether fix-its for initialization of fundamental type use assignment
+    // instead of brace initialization. Only effective in C++11 mode. Default is
+    // false.
+    bool UseAssignment;
 };
 
 } // namespace cppcoreguidelines

@@ -71,7 +71,7 @@ OwningSPIRVModuleRef
 combine(llvm::MutableArrayRef<ModuleOp> modules,
         OpBuilder &combinedModuleBuilder,
         llvm::function_ref<void(ModuleOp, StringRef, StringRef)>
-            symbRenameListener);
+        symbRenameListener);
 } // namespace spirv
 } // namespace mlir
 

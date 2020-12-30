@@ -29,24 +29,26 @@
 #define __constant__ __attribute__((constant))
 
 #if !defined(__cplusplus) || __cplusplus < 201103L
-  #define nullptr NULL;
+#define nullptr NULL;
 #endif
 
 #if __HIP_ENABLE_DEVICE_MALLOC__
 extern "C" __device__ void *__hip_malloc(size_t __size);
 extern "C" __device__ void *__hip_free(void *__ptr);
 static inline __device__ void *malloc(size_t __size) {
-  return __hip_malloc(__size);
-}
-static inline __device__ void *free(void *__ptr) { return __hip_free(__ptr); }
-#else
-static inline __device__ void *malloc(size_t __size) {
-  __builtin_trap();
-  return nullptr;
+    return __hip_malloc(__size);
 }
 static inline __device__ void *free(void *__ptr) {
-  __builtin_trap();
-  return nullptr;
+    return __hip_free(__ptr);
+}
+#else
+static inline __device__ void *malloc(size_t __size) {
+    __builtin_trap();
+    return nullptr;
+}
+static inline __device__ void *free(void *__ptr) {
+    __builtin_trap();
+    return nullptr;
 }
 #endif
 

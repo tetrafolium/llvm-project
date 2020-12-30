@@ -54,46 +54,48 @@ namespace utils {
 /// \endcode
 class IncludeInserter {
 public:
-  /// Initializes the IncludeInserter using the IncludeStyle \p Style.
-  /// In most cases the \p Style will be retrieved from the ClangTidyOptions
-  /// using \code
-  ///   Options.getLocalOrGlobal("IncludeStyle", <DefaultStyle>)
-  /// \endcode
-  explicit IncludeInserter(IncludeSorter::IncludeStyle Style);
+    /// Initializes the IncludeInserter using the IncludeStyle \p Style.
+    /// In most cases the \p Style will be retrieved from the ClangTidyOptions
+    /// using \code
+    ///   Options.getLocalOrGlobal("IncludeStyle", <DefaultStyle>)
+    /// \endcode
+    explicit IncludeInserter(IncludeSorter::IncludeStyle Style);
 
-  /// Registers this with the Preprocessor \p PP, must be called before this
-  /// class is used.
-  void registerPreprocessor(Preprocessor *PP);
+    /// Registers this with the Preprocessor \p PP, must be called before this
+    /// class is used.
+    void registerPreprocessor(Preprocessor *PP);
 
-  /// Creates a \p Header inclusion directive fixit in the File \p FileID.
-  /// When \p Header is enclosed in angle brackets, uses angle brackets in the
-  /// inclusion directive, otherwise uses quotes.
-  /// Returns ``llvm::None`` on error or if the inclusion directive already
-  /// exists.
-  llvm::Optional<FixItHint> createIncludeInsertion(FileID FileID,
-                                                   llvm::StringRef Header);
+    /// Creates a \p Header inclusion directive fixit in the File \p FileID.
+    /// When \p Header is enclosed in angle brackets, uses angle brackets in the
+    /// inclusion directive, otherwise uses quotes.
+    /// Returns ``llvm::None`` on error or if the inclusion directive already
+    /// exists.
+    llvm::Optional<FixItHint> createIncludeInsertion(FileID FileID,
+            llvm::StringRef Header);
 
-  /// Creates a \p Header inclusion directive fixit in the main file.
-  /// When \p Header is enclosed in angle brackets, uses angle brackets in the
-  /// inclusion directive, otherwise uses quotes.
-  /// Returns ``llvm::None`` on error or if the inclusion directive already
-  /// exists.
-  llvm::Optional<FixItHint>
-  createMainFileIncludeInsertion(llvm::StringRef Header);
+    /// Creates a \p Header inclusion directive fixit in the main file.
+    /// When \p Header is enclosed in angle brackets, uses angle brackets in the
+    /// inclusion directive, otherwise uses quotes.
+    /// Returns ``llvm::None`` on error or if the inclusion directive already
+    /// exists.
+    llvm::Optional<FixItHint>
+    createMainFileIncludeInsertion(llvm::StringRef Header);
 
-  IncludeSorter::IncludeStyle getStyle() const { return Style; }
+    IncludeSorter::IncludeStyle getStyle() const {
+        return Style;
+    }
 
 private:
-  void addInclude(StringRef FileName, bool IsAngled,
-                  SourceLocation HashLocation, SourceLocation EndLocation);
+    void addInclude(StringRef FileName, bool IsAngled,
+                    SourceLocation HashLocation, SourceLocation EndLocation);
 
-  IncludeSorter &getOrCreate(FileID FileID);
+    IncludeSorter &getOrCreate(FileID FileID);
 
-  llvm::DenseMap<FileID, std::unique_ptr<IncludeSorter>> IncludeSorterByFile;
-  llvm::DenseMap<FileID, llvm::StringSet<>> InsertedHeaders;
-  const SourceManager *SourceMgr{nullptr};
-  const IncludeSorter::IncludeStyle Style;
-  friend class IncludeInserterCallback;
+    llvm::DenseMap<FileID, std::unique_ptr<IncludeSorter>> IncludeSorterByFile;
+    llvm::DenseMap<FileID, llvm::StringSet<>> InsertedHeaders;
+    const SourceManager *SourceMgr{nullptr};
+    const IncludeSorter::IncludeStyle Style;
+    friend class IncludeInserterCallback;
 };
 
 } // namespace utils

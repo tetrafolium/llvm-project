@@ -19,20 +19,20 @@ class TargetRegisterInfo;
 /// Add the accumulator chaining constraint to a PBQP graph
 class A57ChainingConstraint : public PBQPRAConstraint {
 public:
-  // Add A57 specific constraints to the PBQP graph.
-  void apply(PBQPRAGraph &G) override;
+    // Add A57 specific constraints to the PBQP graph.
+    void apply(PBQPRAGraph &G) override;
 
 private:
-  SmallSetVector<unsigned, 32> Chains;
-  const TargetRegisterInfo *TRI;
+    SmallSetVector<unsigned, 32> Chains;
+    const TargetRegisterInfo *TRI;
 
-  // Add the accumulator chaining constraint, inside the chain, i.e. so that
-  // parity(Rd) == parity(Ra).
-  // \return true if a constraint was added
-  bool addIntraChainConstraint(PBQPRAGraph &G, unsigned Rd, unsigned Ra);
+    // Add the accumulator chaining constraint, inside the chain, i.e. so that
+    // parity(Rd) == parity(Ra).
+    // \return true if a constraint was added
+    bool addIntraChainConstraint(PBQPRAGraph &G, unsigned Rd, unsigned Ra);
 
-  // Add constraints between existing chains
-  void addInterChainConstraint(PBQPRAGraph &G, unsigned Rd, unsigned Ra);
+    // Add constraints between existing chains
+    void addInterChainConstraint(PBQPRAGraph &G, unsigned Rd, unsigned Ra);
 };
 
 } // end namespace llvm

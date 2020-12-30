@@ -48,29 +48,29 @@ bool isBitcodeWriterPass(Pass *P);
 /// Note that this is intended for use with the new pass manager. To construct
 /// a pass for the legacy pass manager, use the function above.
 class BitcodeWriterPass : public PassInfoMixin<BitcodeWriterPass> {
-  raw_ostream &OS;
-  bool ShouldPreserveUseListOrder;
-  bool EmitSummaryIndex;
-  bool EmitModuleHash;
+    raw_ostream &OS;
+    bool ShouldPreserveUseListOrder;
+    bool EmitSummaryIndex;
+    bool EmitModuleHash;
 
 public:
-  /// Construct a bitcode writer pass around a particular output stream.
-  ///
-  /// If \c ShouldPreserveUseListOrder, encode use-list order so it can be
-  /// reproduced when deserialized.
-  ///
-  /// If \c EmitSummaryIndex, emit the summary index (currently
-  /// for use in ThinLTO optimization).
-  explicit BitcodeWriterPass(raw_ostream &OS,
-                             bool ShouldPreserveUseListOrder = false,
-                             bool EmitSummaryIndex = false,
-                             bool EmitModuleHash = false)
-      : OS(OS), ShouldPreserveUseListOrder(ShouldPreserveUseListOrder),
-  EmitSummaryIndex(EmitSummaryIndex), EmitModuleHash(EmitModuleHash) {}
+    /// Construct a bitcode writer pass around a particular output stream.
+    ///
+    /// If \c ShouldPreserveUseListOrder, encode use-list order so it can be
+    /// reproduced when deserialized.
+    ///
+    /// If \c EmitSummaryIndex, emit the summary index (currently
+    /// for use in ThinLTO optimization).
+    explicit BitcodeWriterPass(raw_ostream &OS,
+                               bool ShouldPreserveUseListOrder = false,
+                               bool EmitSummaryIndex = false,
+                               bool EmitModuleHash = false)
+        : OS(OS), ShouldPreserveUseListOrder(ShouldPreserveUseListOrder),
+          EmitSummaryIndex(EmitSummaryIndex), EmitModuleHash(EmitModuleHash) {}
 
-  /// Run the bitcode writer pass, and output the module to the selected
-  /// output stream.
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
+    /// Run the bitcode writer pass, and output the module to the selected
+    /// output stream.
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
 };
 
 }

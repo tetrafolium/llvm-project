@@ -37,46 +37,46 @@ struct VerifierSupport;
 
 /// Verify that the TBAA Metadatas are valid.
 class TBAAVerifier {
-  VerifierSupport *Diagnostic = nullptr;
+    VerifierSupport *Diagnostic = nullptr;
 
-  /// Helper to diagnose a failure
-  template <typename... Tys> void CheckFailed(Tys &&... Args);
+    /// Helper to diagnose a failure
+    template <typename... Tys> void CheckFailed(Tys &&... Args);
 
-  /// Cache of TBAA base nodes that have already been visited.  This cachce maps
-  /// a node that has been visited to a pair (IsInvalid, BitWidth) where
-  ///
-  ///  \c IsInvalid is true iff the node is invalid.
-  ///  \c BitWidth, if non-zero, is the bitwidth of the integer used to denoting
-  ///    the offset of the access.  If zero, only a zero offset is allowed.
-  ///
-  /// \c BitWidth has no meaning if \c IsInvalid is true.
-  using TBAABaseNodeSummary = std::pair<bool, unsigned>;
-  DenseMap<const MDNode *, TBAABaseNodeSummary> TBAABaseNodes;
+    /// Cache of TBAA base nodes that have already been visited.  This cachce maps
+    /// a node that has been visited to a pair (IsInvalid, BitWidth) where
+    ///
+    ///  \c IsInvalid is true iff the node is invalid.
+    ///  \c BitWidth, if non-zero, is the bitwidth of the integer used to denoting
+    ///    the offset of the access.  If zero, only a zero offset is allowed.
+    ///
+    /// \c BitWidth has no meaning if \c IsInvalid is true.
+    using TBAABaseNodeSummary = std::pair<bool, unsigned>;
+    DenseMap<const MDNode *, TBAABaseNodeSummary> TBAABaseNodes;
 
-  /// Maps an alleged scalar TBAA node to a boolean that is true if the said
-  /// TBAA node is a valid scalar TBAA node or false otherwise.
-  DenseMap<const MDNode *, bool> TBAAScalarNodes;
+    /// Maps an alleged scalar TBAA node to a boolean that is true if the said
+    /// TBAA node is a valid scalar TBAA node or false otherwise.
+    DenseMap<const MDNode *, bool> TBAAScalarNodes;
 
-  /// \name Helper functions used by \c visitTBAAMetadata.
-  /// @{
-  MDNode *getFieldNodeFromTBAABaseNode(Instruction &I, const MDNode *BaseNode,
-                                       APInt &Offset, bool IsNewFormat);
-  TBAAVerifier::TBAABaseNodeSummary verifyTBAABaseNode(Instruction &I,
-                                                       const MDNode *BaseNode,
-                                                       bool IsNewFormat);
-  TBAABaseNodeSummary verifyTBAABaseNodeImpl(Instruction &I,
-                                             const MDNode *BaseNode,
-                                             bool IsNewFormat);
+    /// \name Helper functions used by \c visitTBAAMetadata.
+    /// @{
+    MDNode *getFieldNodeFromTBAABaseNode(Instruction &I, const MDNode *BaseNode,
+                                         APInt &Offset, bool IsNewFormat);
+    TBAAVerifier::TBAABaseNodeSummary verifyTBAABaseNode(Instruction &I,
+            const MDNode *BaseNode,
+            bool IsNewFormat);
+    TBAABaseNodeSummary verifyTBAABaseNodeImpl(Instruction &I,
+            const MDNode *BaseNode,
+            bool IsNewFormat);
 
-  bool isValidScalarTBAANode(const MDNode *MD);
-  /// @}
+    bool isValidScalarTBAANode(const MDNode *MD);
+    /// @}
 
 public:
-  TBAAVerifier(VerifierSupport *Diagnostic = nullptr)
-      : Diagnostic(Diagnostic) {}
-  /// Visit an instruction and return true if it is valid, return false if an
-  /// invalid TBAA is attached.
-  bool visitTBAAMetadata(Instruction &I, const MDNode *MD);
+    TBAAVerifier(VerifierSupport *Diagnostic = nullptr)
+        : Diagnostic(Diagnostic) {}
+    /// Visit an instruction and return true if it is valid, return false if an
+    /// invalid TBAA is attached.
+    bool visitTBAAMetadata(Instruction &I, const MDNode *MD);
 };
 
 /// Check a function for errors, useful for use when debugging a
@@ -105,18 +105,20 @@ FunctionPass *createVerifierPass(bool FatalErrors = true);
 /// Check a module for errors, and report separate error states for IR
 /// and debug info errors.
 class VerifierAnalysis : public AnalysisInfoMixin<VerifierAnalysis> {
-  friend AnalysisInfoMixin<VerifierAnalysis>;
+    friend AnalysisInfoMixin<VerifierAnalysis>;
 
-  static AnalysisKey Key;
+    static AnalysisKey Key;
 
 public:
-  struct Result {
-    bool IRBroken, DebugInfoBroken;
-  };
+    struct Result {
+        bool IRBroken, DebugInfoBroken;
+    };
 
-  Result run(Module &M, ModuleAnalysisManager &);
-  Result run(Function &F, FunctionAnalysisManager &);
-  static bool isRequired() { return true; }
+    Result run(Module &M, ModuleAnalysisManager &);
+    Result run(Function &F, FunctionAnalysisManager &);
+    static bool isRequired() {
+        return true;
+    }
 };
 
 /// Check a module for errors, but report debug info errors separately.
@@ -135,14 +137,16 @@ bool verifyModule(bool &BrokenDebugInfo, const Module &M, raw_ostream *OS);
 /// Note that this creates a pass suitable for the legacy pass manager. It has
 /// nothing to do with \c VerifierPass.
 class VerifierPass : public PassInfoMixin<VerifierPass> {
-  bool FatalErrors;
+    bool FatalErrors;
 
 public:
-  explicit VerifierPass(bool FatalErrors = true) : FatalErrors(FatalErrors) {}
+    explicit VerifierPass(bool FatalErrors = true) : FatalErrors(FatalErrors) {}
 
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 };
 
 } // end namespace llvm

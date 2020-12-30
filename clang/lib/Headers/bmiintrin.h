@@ -34,7 +34,7 @@
 static __inline__ unsigned short __RELAXED_FN_ATTRS
 __tzcnt_u16(unsigned short __X)
 {
-  return __builtin_ia32_tzcnt_u16(__X);
+    return __builtin_ia32_tzcnt_u16(__X);
 }
 
 /// Counts the number of trailing zero bits in the operand.
@@ -50,7 +50,7 @@ __tzcnt_u16(unsigned short __X)
 static __inline__ unsigned int __RELAXED_FN_ATTRS
 __tzcnt_u32(unsigned int __X)
 {
-  return __builtin_ia32_tzcnt_u32(__X);
+    return __builtin_ia32_tzcnt_u32(__X);
 }
 
 /// Counts the number of trailing zero bits in the operand.
@@ -66,7 +66,7 @@ __tzcnt_u32(unsigned int __X)
 static __inline__ int __RELAXED_FN_ATTRS
 _mm_tzcnt_32(unsigned int __X)
 {
-  return __builtin_ia32_tzcnt_u32(__X);
+    return __builtin_ia32_tzcnt_u32(__X);
 }
 
 #define _tzcnt_u32(a)     (__tzcnt_u32((a)))
@@ -86,7 +86,7 @@ _mm_tzcnt_32(unsigned int __X)
 static __inline__ unsigned long long __RELAXED_FN_ATTRS
 __tzcnt_u64(unsigned long long __X)
 {
-  return __builtin_ia32_tzcnt_u64(__X);
+    return __builtin_ia32_tzcnt_u64(__X);
 }
 
 /// Counts the number of trailing zero bits in the operand.
@@ -102,7 +102,7 @@ __tzcnt_u64(unsigned long long __X)
 static __inline__ long long __RELAXED_FN_ATTRS
 _mm_tzcnt_64(unsigned long long __X)
 {
-  return __builtin_ia32_tzcnt_u64(__X);
+    return __builtin_ia32_tzcnt_u64(__X);
 }
 
 #define _tzcnt_u64(a)     (__tzcnt_u64((a)))
@@ -142,7 +142,7 @@ _mm_tzcnt_64(unsigned long long __X)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 __andn_u32(unsigned int __X, unsigned int __Y)
 {
-  return ~__X & __Y;
+    return ~__X & __Y;
 }
 
 /* AMD-specified, double-leading-underscore version of BEXTR */
@@ -165,7 +165,7 @@ __andn_u32(unsigned int __X, unsigned int __Y)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 __bextr_u32(unsigned int __X, unsigned int __Y)
 {
-  return __builtin_ia32_bextr_u32(__X, __Y);
+    return __builtin_ia32_bextr_u32(__X, __Y);
 }
 
 /* Intel-specified, single-leading-underscore version of BEXTR */
@@ -190,7 +190,7 @@ __bextr_u32(unsigned int __X, unsigned int __Y)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 _bextr_u32(unsigned int __X, unsigned int __Y, unsigned int __Z)
 {
-  return __builtin_ia32_bextr_u32 (__X, ((__Y & 0xff) | ((__Z & 0xff) << 8)));
+    return __builtin_ia32_bextr_u32 (__X, ((__Y & 0xff) | ((__Z & 0xff) << 8)));
 }
 
 /* Intel-specified, single-leading-underscore version of BEXTR2 */
@@ -212,7 +212,7 @@ _bextr_u32(unsigned int __X, unsigned int __Y, unsigned int __Z)
 /// \see __bextr_u32
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 _bextr2_u32(unsigned int __X, unsigned int __Y) {
-  return __builtin_ia32_bextr_u32(__X, __Y);
+    return __builtin_ia32_bextr_u32(__X, __Y);
 }
 
 /// Clears all bits in the source except for the least significant bit
@@ -229,7 +229,7 @@ _bextr2_u32(unsigned int __X, unsigned int __Y) {
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 __blsi_u32(unsigned int __X)
 {
-  return __X & -__X;
+    return __X & -__X;
 }
 
 /// Creates a mask whose bits are set to 1, using bit 0 up to and
@@ -246,7 +246,7 @@ __blsi_u32(unsigned int __X)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 __blsmsk_u32(unsigned int __X)
 {
-  return __X ^ (__X - 1);
+    return __X ^ (__X - 1);
 }
 
 /// Clears the least significant bit that is set to 1 in the source
@@ -263,7 +263,7 @@ __blsmsk_u32(unsigned int __X)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 __blsr_u32(unsigned int __X)
 {
-  return __X & (__X - 1);
+    return __X & (__X - 1);
 }
 
 #ifdef __x86_64__
@@ -293,7 +293,7 @@ __blsr_u32(unsigned int __X)
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 __andn_u64 (unsigned long long __X, unsigned long long __Y)
 {
-  return ~__X & __Y;
+    return ~__X & __Y;
 }
 
 /* AMD-specified, double-leading-underscore version of BEXTR */
@@ -316,7 +316,7 @@ __andn_u64 (unsigned long long __X, unsigned long long __Y)
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 __bextr_u64(unsigned long long __X, unsigned long long __Y)
 {
-  return __builtin_ia32_bextr_u64(__X, __Y);
+    return __builtin_ia32_bextr_u64(__X, __Y);
 }
 
 /* Intel-specified, single-leading-underscore version of BEXTR */
@@ -341,7 +341,7 @@ __bextr_u64(unsigned long long __X, unsigned long long __Y)
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 _bextr_u64(unsigned long long __X, unsigned int __Y, unsigned int __Z)
 {
-  return __builtin_ia32_bextr_u64 (__X, ((__Y & 0xff) | ((__Z & 0xff) << 8)));
+    return __builtin_ia32_bextr_u64 (__X, ((__Y & 0xff) | ((__Z & 0xff) << 8)));
 }
 
 /* Intel-specified, single-leading-underscore version of BEXTR2 */
@@ -363,7 +363,7 @@ _bextr_u64(unsigned long long __X, unsigned int __Y, unsigned int __Z)
 /// \see __bextr_u64
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 _bextr2_u64(unsigned long long __X, unsigned long long __Y) {
-  return __builtin_ia32_bextr_u64(__X, __Y);
+    return __builtin_ia32_bextr_u64(__X, __Y);
 }
 
 /// Clears all bits in the source except for the least significant bit
@@ -380,7 +380,7 @@ _bextr2_u64(unsigned long long __X, unsigned long long __Y) {
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 __blsi_u64(unsigned long long __X)
 {
-  return __X & -__X;
+    return __X & -__X;
 }
 
 /// Creates a mask whose bits are set to 1, using bit 0 up to and
@@ -397,7 +397,7 @@ __blsi_u64(unsigned long long __X)
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 __blsmsk_u64(unsigned long long __X)
 {
-  return __X ^ (__X - 1);
+    return __X ^ (__X - 1);
 }
 
 /// Clears the least significant bit that is set to 1 in the source
@@ -414,7 +414,7 @@ __blsmsk_u64(unsigned long long __X)
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 __blsr_u64(unsigned long long __X)
 {
-  return __X & (__X - 1);
+    return __X & (__X - 1);
 }
 
 #endif /* __x86_64__ */

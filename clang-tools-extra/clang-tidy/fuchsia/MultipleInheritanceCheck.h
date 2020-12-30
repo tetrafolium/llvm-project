@@ -21,26 +21,28 @@ namespace fuchsia {
 /// http://clang.llvm.org/extra/clang-tidy/checks/fuchsia-multiple-inheritance.html
 class MultipleInheritanceCheck : public ClangTidyCheck {
 public:
-  MultipleInheritanceCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    MultipleInheritanceCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
-  void onEndOfTranslationUnit() override { InterfaceMap.clear(); }
+    void onEndOfTranslationUnit() override {
+        InterfaceMap.clear();
+    }
 
 private:
-  void addNodeToInterfaceMap(const CXXRecordDecl *Node, bool isInterface);
-  bool getInterfaceStatus(const CXXRecordDecl *Node, bool &isInterface) const;
-  bool isCurrentClassInterface(const CXXRecordDecl *Node) const;
-  bool isInterface(const CXXRecordDecl *Node);
+    void addNodeToInterfaceMap(const CXXRecordDecl *Node, bool isInterface);
+    bool getInterfaceStatus(const CXXRecordDecl *Node, bool &isInterface) const;
+    bool isCurrentClassInterface(const CXXRecordDecl *Node) const;
+    bool isInterface(const CXXRecordDecl *Node);
 
-  // Contains the identity of each named CXXRecord as an interface.  This is
-  // used to memoize lookup speeds and improve performance from O(N^2) to O(N),
-  // where N is the number of classes.
-  llvm::StringMap<bool> InterfaceMap;
+    // Contains the identity of each named CXXRecord as an interface.  This is
+    // used to memoize lookup speeds and improve performance from O(N^2) to O(N),
+    // where N is the number of classes.
+    llvm::StringMap<bool> InterfaceMap;
 };
 
 } // namespace fuchsia

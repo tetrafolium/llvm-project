@@ -17,17 +17,17 @@ class TypeIndex;
 
 class TypeSymbolEmitter {
 private:
-  TypeSymbolEmitter(const TypeSymbolEmitter &) = delete;
-  TypeSymbolEmitter &operator=(const TypeSymbolEmitter &) = delete;
+    TypeSymbolEmitter(const TypeSymbolEmitter &) = delete;
+    TypeSymbolEmitter &operator=(const TypeSymbolEmitter &) = delete;
 
 protected:
-  TypeSymbolEmitter() {}
+    TypeSymbolEmitter() {}
 
 public:
-  virtual ~TypeSymbolEmitter() {}
+    virtual ~TypeSymbolEmitter() {}
 
 public:
-  virtual void writeUserDefinedType(TypeIndex TI, StringRef Name) = 0;
+    virtual void writeUserDefinedType(TypeIndex TI, StringRef Name) = 0;
 };
 }
 }

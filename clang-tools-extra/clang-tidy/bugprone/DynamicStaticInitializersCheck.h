@@ -27,17 +27,17 @@ namespace bugprone {
 ///     empty string between ";" if there are other filename extensions.
 class DynamicStaticInitializersCheck : public ClangTidyCheck {
 public:
-  DynamicStaticInitializersCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus && !LangOpts.ThreadsafeStatics;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    DynamicStaticInitializersCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus && !LangOpts.ThreadsafeStatics;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  const std::string RawStringHeaderFileExtensions;
-  utils::FileExtensionsSet HeaderFileExtensions;
+    const std::string RawStringHeaderFileExtensions;
+    utils::FileExtensionsSet HeaderFileExtensions;
 };
 
 } // namespace bugprone

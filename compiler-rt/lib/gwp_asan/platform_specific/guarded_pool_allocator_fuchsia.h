@@ -14,7 +14,7 @@
 
 namespace gwp_asan {
 struct PlatformSpecificMapData {
-  zx_handle_t Vmar;
+    zx_handle_t Vmar;
 };
 } // namespace gwp_asan
 

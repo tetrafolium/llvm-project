@@ -23,7 +23,7 @@ namespace clang {
 /// with the C99 grammar productions.  Low precedences numbers bind
 /// more weakly than high numbers.
 namespace prec {
-  enum Level {
+enum Level {
     Unknown         = 0,    // Not binary operator.
     Comma           = 1,    // ,
     Assignment      = 2,    // =, *=, /=, %=, +=, -=, <<=, >>=, &=, ^=, |=
@@ -40,7 +40,7 @@ namespace prec {
     Additive        = 13,   // -, +
     Multiplicative  = 14,   // *, /, %
     PointerToMember = 15    // .*, ->*
-  };
+};
 }
 
 /// Return the precedence of the specified binary operator token.

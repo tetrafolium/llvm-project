@@ -45,9 +45,9 @@ raw_ostream& dumpPDBSourceCompression(raw_ostream& OS, uint32_t Compression);
 
 template <typename T>
 void dumpSymbolField(raw_ostream &OS, StringRef Name, T Value, int Indent) {
-  OS << "\n";
-  OS.indent(Indent);
-  OS << Name << ": " << Value;
+    OS << "\n";
+    OS.indent(Indent);
+    OS << Name << ": " << Value;
 }
 
 } // end namespace pdb

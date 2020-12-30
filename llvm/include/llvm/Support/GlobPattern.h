@@ -28,29 +28,29 @@ class StringRef;
 
 class GlobPattern {
 public:
-  static Expected<GlobPattern> create(StringRef Pat);
-  bool match(StringRef S) const;
+    static Expected<GlobPattern> create(StringRef Pat);
+    bool match(StringRef S) const;
 
-  // Returns true for glob pattern "*". Can be used to avoid expensive
-  // preparation/acquisition of the input for match().
-  bool isTrivialMatchAll() const {
-    if (Prefix && Prefix->empty()) {
-      assert(!Suffix);
-      return true;
+    // Returns true for glob pattern "*". Can be used to avoid expensive
+    // preparation/acquisition of the input for match().
+    bool isTrivialMatchAll() const {
+        if (Prefix && Prefix->empty()) {
+            assert(!Suffix);
+            return true;
+        }
+        return false;
     }
-    return false;
-  }
 
 private:
-  bool matchOne(ArrayRef<BitVector> Pat, StringRef S) const;
+    bool matchOne(ArrayRef<BitVector> Pat, StringRef S) const;
 
-  // Parsed glob pattern.
-  std::vector<BitVector> Tokens;
+    // Parsed glob pattern.
+    std::vector<BitVector> Tokens;
 
-  // The following members are for optimization.
-  Optional<StringRef> Exact;
-  Optional<StringRef> Prefix;
-  Optional<StringRef> Suffix;
+    // The following members are for optimization.
+    Optional<StringRef> Exact;
+    Optional<StringRef> Prefix;
+    Optional<StringRef> Suffix;
 };
 }
 

@@ -24,46 +24,46 @@ HostNativeThreadBase::HostNativeThreadBase(thread_t thread)
     : m_thread(thread), m_result(0) {}
 
 lldb::thread_t HostNativeThreadBase::GetSystemHandle() const {
-  return m_thread;
+    return m_thread;
 }
 
 lldb::thread_result_t HostNativeThreadBase::GetResult() const {
-  return m_result;
+    return m_result;
 }
 
 bool HostNativeThreadBase::IsJoinable() const {
-  return m_thread != LLDB_INVALID_HOST_THREAD;
+    return m_thread != LLDB_INVALID_HOST_THREAD;
 }
 
 void HostNativeThreadBase::Reset() {
-  m_thread = LLDB_INVALID_HOST_THREAD;
-  m_result = 0;
+    m_thread = LLDB_INVALID_HOST_THREAD;
+    m_result = 0;
 }
 
 bool HostNativeThreadBase::EqualsThread(lldb::thread_t thread) const {
-  return m_thread == thread;
+    return m_thread == thread;
 }
 
 lldb::thread_t HostNativeThreadBase::Release() {
-  lldb::thread_t result = m_thread;
-  m_thread = LLDB_INVALID_HOST_THREAD;
-  m_result = 0;
+    lldb::thread_t result = m_thread;
+    m_thread = LLDB_INVALID_HOST_THREAD;
+    m_result = 0;
 
-  return result;
+    return result;
 }
 
 lldb::thread_result_t
 HostNativeThreadBase::ThreadCreateTrampoline(lldb::thread_arg_t arg) {
-  ThreadLauncher::HostThreadCreateInfo *info =
-      (ThreadLauncher::HostThreadCreateInfo *)arg;
-  llvm::set_thread_name(info->thread_name);
+    ThreadLauncher::HostThreadCreateInfo *info =
+        (ThreadLauncher::HostThreadCreateInfo *)arg;
+    llvm::set_thread_name(info->thread_name);
 
-  thread_func_t thread_fptr = info->thread_fptr;
-  thread_arg_t thread_arg = info->thread_arg;
+    thread_func_t thread_fptr = info->thread_fptr;
+    thread_arg_t thread_arg = info->thread_arg;
 
-  Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_THREAD));
-  LLDB_LOGF(log, "thread created");
+    Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_THREAD));
+    LLDB_LOGF(log, "thread created");
 
-  delete info;
-  return thread_fptr(thread_arg);
+    delete info;
+    return thread_fptr(thread_arg);
 }

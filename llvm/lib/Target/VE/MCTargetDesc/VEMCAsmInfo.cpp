@@ -23,19 +23,19 @@ void VEELFMCAsmInfo::anchor() {}
 
 VEELFMCAsmInfo::VEELFMCAsmInfo(const Triple &TheTriple) {
 
-  CodePointerSize = CalleeSaveStackSlotSize = 8;
-  MaxInstLength = MinInstAlignment = 8;
+    CodePointerSize = CalleeSaveStackSlotSize = 8;
+    MaxInstLength = MinInstAlignment = 8;
 
-  // VE uses ".*byte" directive for unaligned data.
-  Data8bitsDirective = "\t.byte\t";
-  Data16bitsDirective = "\t.2byte\t";
-  Data32bitsDirective = "\t.4byte\t";
-  Data64bitsDirective = "\t.8byte\t";
+    // VE uses ".*byte" directive for unaligned data.
+    Data8bitsDirective = "\t.byte\t";
+    Data16bitsDirective = "\t.2byte\t";
+    Data32bitsDirective = "\t.4byte\t";
+    Data64bitsDirective = "\t.8byte\t";
 
-  // Uses '.section' before '.bss' directive.  VE requires this although
-  // assembler manual says sinple '.bss' is supported.
-  UsesELFSectionDirectiveForBSS = true;
+    // Uses '.section' before '.bss' directive.  VE requires this although
+    // assembler manual says sinple '.bss' is supported.
+    UsesELFSectionDirectiveForBSS = true;
 
-  SupportsDebugInformation = true;
-  UseIntegratedAssembler = false;
+    SupportsDebugInformation = true;
+    UseIntegratedAssembler = false;
 }

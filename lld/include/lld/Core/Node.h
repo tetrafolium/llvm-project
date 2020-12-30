@@ -26,47 +26,53 @@ namespace lld {
 // Currently only GroupEnd node is defined as a meta node.
 class Node {
 public:
-  enum class Kind { File, GroupEnd };
+    enum class Kind { File, GroupEnd };
 
-  explicit Node(Kind type) : _kind(type) {}
-  virtual ~Node() = default;
+    explicit Node(Kind type) : _kind(type) {}
+    virtual ~Node() = default;
 
-  virtual Kind kind() const { return _kind; }
+    virtual Kind kind() const {
+        return _kind;
+    }
 
 private:
-  Kind _kind;
+    Kind _kind;
 };
 
 // This is a marker for --end-group. getSize() returns the number of
 // files between the corresponding --start-group and this marker.
 class GroupEnd : public Node {
 public:
-  explicit GroupEnd(int size) : Node(Kind::GroupEnd), _size(size) {}
+    explicit GroupEnd(int size) : Node(Kind::GroupEnd), _size(size) {}
 
-  int getSize() const { return _size; }
+    int getSize() const {
+        return _size;
+    }
 
-  static bool classof(const Node *a) {
-    return a->kind() == Kind::GroupEnd;
-  }
+    static bool classof(const Node *a) {
+        return a->kind() == Kind::GroupEnd;
+    }
 
 private:
-  int _size;
+    int _size;
 };
 
 // A container of File.
 class FileNode : public Node {
 public:
-  explicit FileNode(std::unique_ptr<File> f)
-      : Node(Node::Kind::File), _file(std::move(f)) {}
+    explicit FileNode(std::unique_ptr<File> f)
+        : Node(Node::Kind::File), _file(std::move(f)) {}
 
-  static bool classof(const Node *a) {
-    return a->kind() == Node::Kind::File;
-  }
+    static bool classof(const Node *a) {
+        return a->kind() == Node::Kind::File;
+    }
 
-  File *getFile() { return _file.get(); }
+    File *getFile() {
+        return _file.get();
+    }
 
 protected:
-  std::unique_ptr<File> _file;
+    std::unique_ptr<File> _file;
 };
 
 } // end namespace lld

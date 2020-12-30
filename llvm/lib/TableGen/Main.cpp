@@ -47,7 +47,7 @@ IncludeDirs("I", cl::desc("Directory of include files"),
 
 static cl::list<std::string>
 MacroNames("D", cl::desc("Name of the macro to be defined"),
-            cl::value_desc("macro name"), cl::Prefix);
+           cl::value_desc("macro name"), cl::Prefix);
 
 static cl::opt<bool>
 WriteIfChanged("write-if-changed", cl::desc("Only write output if it changed"));
@@ -56,9 +56,9 @@ static cl::opt<bool>
 TimePhases("time-phases", cl::desc("Time phases of parser and backend"));
 
 static int reportError(const char *ProgName, Twine Msg) {
-  errs() << ProgName << ": " << Msg;
-  errs().flush();
-  return 1;
+    errs() << ProgName << ": " << Msg;
+    errs().flush();
+    return 1;
 }
 
 /// Create a dependency file for `-d` option.
@@ -66,96 +66,96 @@ static int reportError(const char *ProgName, Twine Msg) {
 /// This functionality is really only for the benefit of the build system.
 /// It is similar to GCC's `-M*` family of options.
 static int createDependencyFile(const TGParser &Parser, const char *argv0) {
-  if (OutputFilename == "-")
-    return reportError(argv0, "the option -d must be used together with -o\n");
+    if (OutputFilename == "-")
+        return reportError(argv0, "the option -d must be used together with -o\n");
 
-  std::error_code EC;
-  ToolOutputFile DepOut(DependFilename, EC, sys::fs::OF_None);
-  if (EC)
-    return reportError(argv0, "error opening " + DependFilename + ":" +
-                                  EC.message() + "\n");
-  DepOut.os() << OutputFilename << ":";
-  for (const auto &Dep : Parser.getDependencies()) {
-    DepOut.os() << ' ' << Dep;
-  }
-  DepOut.os() << "\n";
-  DepOut.keep();
-  return 0;
+    std::error_code EC;
+    ToolOutputFile DepOut(DependFilename, EC, sys::fs::OF_None);
+    if (EC)
+        return reportError(argv0, "error opening " + DependFilename + ":" +
+                           EC.message() + "\n");
+    DepOut.os() << OutputFilename << ":";
+    for (const auto &Dep : Parser.getDependencies()) {
+        DepOut.os() << ' ' << Dep;
+    }
+    DepOut.os() << "\n";
+    DepOut.keep();
+    return 0;
 }
 
 int llvm::TableGenMain(const char *argv0, TableGenMainFn *MainFn) {
-  RecordKeeper Records;
+    RecordKeeper Records;
 
-  if (TimePhases)
-    Records.startPhaseTiming();
+    if (TimePhases)
+        Records.startPhaseTiming();
 
-  // Parse the input file.
+    // Parse the input file.
 
-  Records.startTimer("Parse, build records");
-  ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
-      MemoryBuffer::getFileOrSTDIN(InputFilename);
-  if (std::error_code EC = FileOrErr.getError())
-    return reportError(argv0, "Could not open input file '" + InputFilename +
-                                  "': " + EC.message() + "\n");
+    Records.startTimer("Parse, build records");
+    ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
+                                            MemoryBuffer::getFileOrSTDIN(InputFilename);
+    if (std::error_code EC = FileOrErr.getError())
+        return reportError(argv0, "Could not open input file '" + InputFilename +
+                           "': " + EC.message() + "\n");
 
-  Records.saveInputFilename(InputFilename);
+    Records.saveInputFilename(InputFilename);
 
-  // Tell SrcMgr about this buffer, which is what TGParser will pick up.
-  SrcMgr.AddNewSourceBuffer(std::move(*FileOrErr), SMLoc());
+    // Tell SrcMgr about this buffer, which is what TGParser will pick up.
+    SrcMgr.AddNewSourceBuffer(std::move(*FileOrErr), SMLoc());
 
-  // Record the location of the include directory so that the lexer can find
-  // it later.
-  SrcMgr.setIncludeDirs(IncludeDirs);
+    // Record the location of the include directory so that the lexer can find
+    // it later.
+    SrcMgr.setIncludeDirs(IncludeDirs);
 
-  TGParser Parser(SrcMgr, MacroNames, Records);
+    TGParser Parser(SrcMgr, MacroNames, Records);
 
-  if (Parser.ParseFile())
-    return 1;
-  Records.stopTimer();
+    if (Parser.ParseFile())
+        return 1;
+    Records.stopTimer();
 
-  // Write output to memory.
-  Records.startBackendTimer("Backend overall");
-  std::string OutString;
-  raw_string_ostream Out(OutString);
-  unsigned status = MainFn(Out, Records);
-  Records.stopBackendTimer();
-  if (status)
-    return 1;
+    // Write output to memory.
+    Records.startBackendTimer("Backend overall");
+    std::string OutString;
+    raw_string_ostream Out(OutString);
+    unsigned status = MainFn(Out, Records);
+    Records.stopBackendTimer();
+    if (status)
+        return 1;
 
-  // Always write the depfile, even if the main output hasn't changed.
-  // If it's missing, Ninja considers the output dirty.  If this was below
-  // the early exit below and someone deleted the .inc.d file but not the .inc
-  // file, tablegen would never write the depfile.
-  if (!DependFilename.empty()) {
-    if (int Ret = createDependencyFile(Parser, argv0))
-      return Ret;
-  }
+    // Always write the depfile, even if the main output hasn't changed.
+    // If it's missing, Ninja considers the output dirty.  If this was below
+    // the early exit below and someone deleted the .inc.d file but not the .inc
+    // file, tablegen would never write the depfile.
+    if (!DependFilename.empty()) {
+        if (int Ret = createDependencyFile(Parser, argv0))
+            return Ret;
+    }
 
-  Records.startTimer("Write output");
-  bool WriteFile = true;
-  if (WriteIfChanged) {
-    // Only updates the real output file if there are any differences.
-    // This prevents recompilation of all the files depending on it if there
-    // aren't any.
-    if (auto ExistingOrErr = MemoryBuffer::getFile(OutputFilename))
-      if (std::move(ExistingOrErr.get())->getBuffer() == Out.str())
-        WriteFile = false;
-  }
-  if (WriteFile) {
-    std::error_code EC;
-    ToolOutputFile OutFile(OutputFilename, EC, sys::fs::OF_None);
-    if (EC)
-      return reportError(argv0, "error opening " + OutputFilename + ": " +
-                                    EC.message() + "\n");
-    OutFile.os() << Out.str();
-    if (ErrorsPrinted == 0)
-      OutFile.keep();
-  }
-  
-  Records.stopTimer();
-  Records.stopPhaseTiming();
+    Records.startTimer("Write output");
+    bool WriteFile = true;
+    if (WriteIfChanged) {
+        // Only updates the real output file if there are any differences.
+        // This prevents recompilation of all the files depending on it if there
+        // aren't any.
+        if (auto ExistingOrErr = MemoryBuffer::getFile(OutputFilename))
+            if (std::move(ExistingOrErr.get())->getBuffer() == Out.str())
+                WriteFile = false;
+    }
+    if (WriteFile) {
+        std::error_code EC;
+        ToolOutputFile OutFile(OutputFilename, EC, sys::fs::OF_None);
+        if (EC)
+            return reportError(argv0, "error opening " + OutputFilename + ": " +
+                               EC.message() + "\n");
+        OutFile.os() << Out.str();
+        if (ErrorsPrinted == 0)
+            OutFile.keep();
+    }
 
-  if (ErrorsPrinted > 0)
-    return reportError(argv0, Twine(ErrorsPrinted) + " errors.\n");
-  return 0;
+    Records.stopTimer();
+    Records.stopPhaseTiming();
+
+    if (ErrorsPrinted > 0)
+        return reportError(argv0, Twine(ErrorsPrinted) + " errors.\n");
+    return 0;
 }

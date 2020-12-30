@@ -7,29 +7,29 @@
 #include <deque>
 
 struct A {
-  int a;
-  A(int a) : a(a) {}
+    int a;
+    A(int a) : a(a) {}
 };
 
 using log_t = std::deque<A>;
 
 static void __attribute__((noinline, optnone)) escape(log_t &log) {
-  static volatile log_t *sink;
-  sink = &log;
+    static volatile log_t *sink;
+    sink = &log;
 }
 
 int main() {
-  log_t log;
-  log.push_back(1234);
-  log.push_back(56789);
-  escape(log);
-  // DEBUGGER: break 25
-  while (!log.empty()) {
-    auto record = log.front();
-    log.pop_front();
+    log_t log;
+    log.push_back(1234);
+    log.push_back(56789);
     escape(log);
-    // DEBUGGER: break 30
-  }
+    // DEBUGGER: break 25
+    while (!log.empty()) {
+        auto record = log.front();
+        log.pop_front();
+        escape(log);
+        // DEBUGGER: break 30
+    }
 }
 
 // DEBUGGER: r

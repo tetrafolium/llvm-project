@@ -22,16 +22,16 @@ using namespace llvm;
 namespace {
 class FuncletLayout : public MachineFunctionPass {
 public:
-  static char ID; // Pass identification, replacement for typeid
-  FuncletLayout() : MachineFunctionPass(ID) {
-    initializeFuncletLayoutPass(*PassRegistry::getPassRegistry());
-  }
+    static char ID; // Pass identification, replacement for typeid
+    FuncletLayout() : MachineFunctionPass(ID) {
+        initializeFuncletLayoutPass(*PassRegistry::getPassRegistry());
+    }
 
-  bool runOnMachineFunction(MachineFunction &F) override;
-  MachineFunctionProperties getRequiredProperties() const override {
-    return MachineFunctionProperties().set(
-        MachineFunctionProperties::Property::NoVRegs);
-  }
+    bool runOnMachineFunction(MachineFunction &F) override;
+    MachineFunctionProperties getRequiredProperties() const override {
+        return MachineFunctionProperties().set(
+                   MachineFunctionProperties::Property::NoVRegs);
+    }
 };
 }
 
@@ -41,22 +41,22 @@ INITIALIZE_PASS(FuncletLayout, DEBUG_TYPE,
                 "Contiguously Lay Out Funclets", false, false)
 
 bool FuncletLayout::runOnMachineFunction(MachineFunction &F) {
-  // Even though this gets information from getEHScopeMembership(), this pass is
-  // only necessary for funclet-based EH personalities, in which these EH scopes
-  // are outlined at the end.
-  DenseMap<const MachineBasicBlock *, int> FuncletMembership =
-      getEHScopeMembership(F);
-  if (FuncletMembership.empty())
-    return false;
+    // Even though this gets information from getEHScopeMembership(), this pass is
+    // only necessary for funclet-based EH personalities, in which these EH scopes
+    // are outlined at the end.
+    DenseMap<const MachineBasicBlock *, int> FuncletMembership =
+        getEHScopeMembership(F);
+    if (FuncletMembership.empty())
+        return false;
 
-  F.sort([&](MachineBasicBlock &X, MachineBasicBlock &Y) {
-    auto FuncletX = FuncletMembership.find(&X);
-    auto FuncletY = FuncletMembership.find(&Y);
-    assert(FuncletX != FuncletMembership.end());
-    assert(FuncletY != FuncletMembership.end());
-    return FuncletX->second < FuncletY->second;
-  });
+    F.sort([&](MachineBasicBlock &X, MachineBasicBlock &Y) {
+        auto FuncletX = FuncletMembership.find(&X);
+        auto FuncletY = FuncletMembership.find(&Y);
+        assert(FuncletX != FuncletMembership.end());
+        assert(FuncletY != FuncletMembership.end());
+        return FuncletX->second < FuncletY->second;
+    });
 
-  // Conservatively assume we changed something.
-  return true;
+    // Conservatively assume we changed something.
+    return true;
 }

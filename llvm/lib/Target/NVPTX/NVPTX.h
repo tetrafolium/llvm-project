@@ -24,12 +24,12 @@ class MachineFunctionPass;
 
 namespace NVPTXCC {
 enum CondCodes {
-  EQ,
-  NE,
-  LT,
-  LE,
-  GT,
-  GE
+    EQ,
+    NE,
+    LT,
+    LE,
+    GT,
+    GE
 };
 }
 
@@ -49,8 +49,8 @@ MachineFunctionPass *createNVPTXProxyRegErasurePass();
 
 namespace NVPTX {
 enum DrvInterface {
-  NVCL,
-  CUDA
+    NVCL,
+    CUDA
 };
 
 // A field inside TSFlags needs a shift and a mask. The usage is
@@ -59,97 +59,97 @@ enum DrvInterface {
 // The enum keeps the mask, the shift, and all valid values of the
 // field in one place.
 enum VecInstType {
-  VecInstTypeShift = 0,
-  VecInstTypeMask = 0xF,
+    VecInstTypeShift = 0,
+    VecInstTypeMask = 0xF,
 
-  VecNOP = 0,
-  VecLoad = 1,
-  VecStore = 2,
-  VecBuild = 3,
-  VecShuffle = 4,
-  VecExtract = 5,
-  VecInsert = 6,
-  VecDest = 7,
-  VecOther = 15
+    VecNOP = 0,
+    VecLoad = 1,
+    VecStore = 2,
+    VecBuild = 3,
+    VecShuffle = 4,
+    VecExtract = 5,
+    VecInsert = 6,
+    VecDest = 7,
+    VecOther = 15
 };
 
 enum SimpleMove {
-  SimpleMoveMask = 0x10,
-  SimpleMoveShift = 4
+    SimpleMoveMask = 0x10,
+    SimpleMoveShift = 4
 };
 enum LoadStore {
-  isLoadMask = 0x20,
-  isLoadShift = 5,
-  isStoreMask = 0x40,
-  isStoreShift = 6
+    isLoadMask = 0x20,
+    isLoadShift = 5,
+    isStoreMask = 0x40,
+    isStoreShift = 6
 };
 
 namespace PTXLdStInstCode {
 enum AddressSpace {
-  GENERIC = 0,
-  GLOBAL = 1,
-  CONSTANT = 2,
-  SHARED = 3,
-  PARAM = 4,
-  LOCAL = 5
+    GENERIC = 0,
+    GLOBAL = 1,
+    CONSTANT = 2,
+    SHARED = 3,
+    PARAM = 4,
+    LOCAL = 5
 };
 enum FromType {
-  Unsigned = 0,
-  Signed,
-  Float,
-  Untyped
+    Unsigned = 0,
+    Signed,
+    Float,
+    Untyped
 };
 enum VecType {
-  Scalar = 1,
-  V2 = 2,
-  V4 = 4
+    Scalar = 1,
+    V2 = 2,
+    V4 = 4
 };
 }
 
 /// PTXCvtMode - Conversion code enumeration
 namespace PTXCvtMode {
 enum CvtMode {
-  NONE = 0,
-  RNI,
-  RZI,
-  RMI,
-  RPI,
-  RN,
-  RZ,
-  RM,
-  RP,
+    NONE = 0,
+    RNI,
+    RZI,
+    RMI,
+    RPI,
+    RN,
+    RZ,
+    RM,
+    RP,
 
-  BASE_MASK = 0x0F,
-  FTZ_FLAG = 0x10,
-  SAT_FLAG = 0x20
+    BASE_MASK = 0x0F,
+    FTZ_FLAG = 0x10,
+    SAT_FLAG = 0x20
 };
 }
 
 /// PTXCmpMode - Comparison mode enumeration
 namespace PTXCmpMode {
 enum CmpMode {
-  EQ = 0,
-  NE,
-  LT,
-  LE,
-  GT,
-  GE,
-  LO,
-  LS,
-  HI,
-  HS,
-  EQU,
-  NEU,
-  LTU,
-  LEU,
-  GTU,
-  GEU,
-  NUM,
-  // NAN is a MACRO
-  NotANumber,
+    EQ = 0,
+    NE,
+    LT,
+    LE,
+    GT,
+    GE,
+    LO,
+    LS,
+    HI,
+    HS,
+    EQU,
+    NEU,
+    LTU,
+    LEU,
+    GTU,
+    GEU,
+    NUM,
+    // NAN is a MACRO
+    NotANumber,
 
-  BASE_MASK = 0xFF,
-  FTZ_FLAG = 0x100
+    BASE_MASK = 0xFF,
+    FTZ_FLAG = 0x100
 };
 }
 }

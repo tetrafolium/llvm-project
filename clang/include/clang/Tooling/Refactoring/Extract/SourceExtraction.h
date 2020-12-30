@@ -23,26 +23,28 @@ namespace tooling {
 /// Determines which semicolons should be inserted during extraction.
 class ExtractionSemicolonPolicy {
 public:
-  bool isNeededInExtractedFunction() const {
-    return IsNeededInExtractedFunction;
-  }
+    bool isNeededInExtractedFunction() const {
+        return IsNeededInExtractedFunction;
+    }
 
-  bool isNeededInOriginalFunction() const { return IsNeededInOriginalFunction; }
+    bool isNeededInOriginalFunction() const {
+        return IsNeededInOriginalFunction;
+    }
 
-  /// Returns the semicolon insertion policy that is needed for extraction of
-  /// the given statement from the given source range.
-  static ExtractionSemicolonPolicy compute(const Stmt *S,
-                                           SourceRange &ExtractedRange,
-                                           const SourceManager &SM,
-                                           const LangOptions &LangOpts);
+    /// Returns the semicolon insertion policy that is needed for extraction of
+    /// the given statement from the given source range.
+    static ExtractionSemicolonPolicy compute(const Stmt *S,
+            SourceRange &ExtractedRange,
+            const SourceManager &SM,
+            const LangOptions &LangOpts);
 
 private:
-  ExtractionSemicolonPolicy(bool IsNeededInExtractedFunction,
-                            bool IsNeededInOriginalFunction)
-      : IsNeededInExtractedFunction(IsNeededInExtractedFunction),
-        IsNeededInOriginalFunction(IsNeededInOriginalFunction) {}
-  bool IsNeededInExtractedFunction;
-  bool IsNeededInOriginalFunction;
+    ExtractionSemicolonPolicy(bool IsNeededInExtractedFunction,
+                              bool IsNeededInOriginalFunction)
+        : IsNeededInExtractedFunction(IsNeededInExtractedFunction),
+          IsNeededInOriginalFunction(IsNeededInOriginalFunction) {}
+    bool IsNeededInExtractedFunction;
+    bool IsNeededInOriginalFunction;
 };
 
 } // end namespace tooling

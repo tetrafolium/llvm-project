@@ -27,20 +27,20 @@ class Pass;
 /// and validate/satisfy pass dependencies.
 class PassManager {
 public:
-  void add(std::unique_ptr<Pass> pass) {
-    _passes.push_back(std::move(pass));
-  }
+    void add(std::unique_ptr<Pass> pass) {
+        _passes.push_back(std::move(pass));
+    }
 
-  llvm::Error runOnFile(SimpleFile &file) {
-    for (std::unique_ptr<Pass> &pass : _passes)
-      if (llvm::Error EC = pass->perform(file))
-        return EC;
-    return llvm::Error::success();
-  }
+    llvm::Error runOnFile(SimpleFile &file) {
+        for (std::unique_ptr<Pass> &pass : _passes)
+            if (llvm::Error EC = pass->perform(file))
+                return EC;
+        return llvm::Error::success();
+    }
 
 private:
-  /// Passes in the order they should run.
-  std::vector<std::unique_ptr<Pass>> _passes;
+    /// Passes in the order they should run.
+    std::vector<std::unique_ptr<Pass>> _passes;
 };
 } // end namespace lld
 

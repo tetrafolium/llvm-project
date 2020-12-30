@@ -28,7 +28,8 @@ static constexpr char cDigitsLut[200] = {
     '7', '5', '7', '6', '7', '7', '7', '8', '7', '9', '8', '0', '8', '1', '8',
     '2', '8', '3', '8', '4', '8', '5', '8', '6', '8', '7', '8', '8', '8', '9',
     '9', '0', '9', '1', '9', '2', '9', '3', '9', '4', '9', '5', '9', '6', '9',
-    '7', '9', '8', '9', '9'};
+    '7', '9', '8', '9', '9'
+};
 
 template <typename T>
 inline _LIBCPP_INLINE_VISIBILITY char*
@@ -139,7 +140,7 @@ __u64toa(uint64_t value, char* buffer) _NOEXCEPT
     else
     {
         const uint32_t a =
-            static_cast<uint32_t>(value / 10000000000000000);  // 1 to 1844
+        static_cast<uint32_t>(value / 10000000000000000);  // 1 to 1844
         value %= 10000000000000000;
 
         buffer = append4_no_zeros(buffer, a);

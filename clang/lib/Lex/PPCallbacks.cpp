@@ -24,7 +24,7 @@ PPChainedCallbacks::~PPChainedCallbacks() = default;
 void PPChainedCallbacks::HasInclude(SourceLocation Loc, StringRef FileName,
                                     bool IsAngled, Optional<FileEntryRef> File,
                                     SrcMgr::CharacteristicKind FileType) {
-  First->HasInclude(Loc, FileName, IsAngled, File, FileType);
-  Second->HasInclude(Loc, FileName, IsAngled, File, FileType);
+    First->HasInclude(Loc, FileName, IsAngled, File, FileType);
+    Second->HasInclude(Loc, FileName, IsAngled, File, FileType);
 }
 

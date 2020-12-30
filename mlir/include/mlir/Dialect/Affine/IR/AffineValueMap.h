@@ -33,60 +33,72 @@ namespace mlir {
 // AffineDimExpr and AffineSymbolExpr in the underlying AffineMap.
 class AffineValueMap {
 public:
-  // Creates an empty AffineValueMap (users should call 'reset' to reset map
-  // and operands).
-  AffineValueMap() {}
-  AffineValueMap(AffineMap map, ValueRange operands, ValueRange results = {});
+    // Creates an empty AffineValueMap (users should call 'reset' to reset map
+    // and operands).
+    AffineValueMap() {}
+    AffineValueMap(AffineMap map, ValueRange operands, ValueRange results = {});
 
-  ~AffineValueMap();
+    ~AffineValueMap();
 
-  // Resets this AffineValueMap with 'map', 'operands', and 'results'.
-  void reset(AffineMap map, ValueRange operands, ValueRange results = {});
+    // Resets this AffineValueMap with 'map', 'operands', and 'results'.
+    void reset(AffineMap map, ValueRange operands, ValueRange results = {});
 
-  /// Return the value map that is the difference of value maps 'a' and 'b',
-  /// represented as an affine map and its operands. The output map + operands
-  /// are canonicalized and simplified.
-  static void difference(const AffineValueMap &a, const AffineValueMap &b,
-                         AffineValueMap *res);
+    /// Return the value map that is the difference of value maps 'a' and 'b',
+    /// represented as an affine map and its operands. The output map + operands
+    /// are canonicalized and simplified.
+    static void difference(const AffineValueMap &a, const AffineValueMap &b,
+                           AffineValueMap *res);
 
-  /// Return true if the idx^th result can be proved to be a multiple of
-  /// 'factor', false otherwise.
-  inline bool isMultipleOf(unsigned idx, int64_t factor) const;
+    /// Return true if the idx^th result can be proved to be a multiple of
+    /// 'factor', false otherwise.
+    inline bool isMultipleOf(unsigned idx, int64_t factor) const;
 
-  /// Return true if the idx^th result depends on 'value', false otherwise.
-  bool isFunctionOf(unsigned idx, Value value) const;
+    /// Return true if the idx^th result depends on 'value', false otherwise.
+    bool isFunctionOf(unsigned idx, Value value) const;
 
-  /// Return true if the result at 'idx' is a constant, false
-  /// otherwise.
-  bool isConstant(unsigned idx) const;
+    /// Return true if the result at 'idx' is a constant, false
+    /// otherwise.
+    bool isConstant(unsigned idx) const;
 
-  /// Return true if this is an identity map.
-  bool isIdentity() const;
+    /// Return true if this is an identity map.
+    bool isIdentity() const;
 
-  void setResult(unsigned i, AffineExpr e) { map.setResult(i, e); }
-  AffineExpr getResult(unsigned i) { return map.getResult(i); }
-  inline unsigned getNumOperands() const { return operands.size(); }
-  inline unsigned getNumDims() const { return map.getNumDims(); }
-  inline unsigned getNumSymbols() const { return map.getNumSymbols(); }
-  inline unsigned getNumResults() const { return map.getNumResults(); }
+    void setResult(unsigned i, AffineExpr e) {
+        map.setResult(i, e);
+    }
+    AffineExpr getResult(unsigned i) {
+        return map.getResult(i);
+    }
+    inline unsigned getNumOperands() const {
+        return operands.size();
+    }
+    inline unsigned getNumDims() const {
+        return map.getNumDims();
+    }
+    inline unsigned getNumSymbols() const {
+        return map.getNumSymbols();
+    }
+    inline unsigned getNumResults() const {
+        return map.getNumResults();
+    }
 
-  Value getOperand(unsigned i) const;
-  ArrayRef<Value> getOperands() const;
-  AffineMap getAffineMap() const;
+    Value getOperand(unsigned i) const;
+    ArrayRef<Value> getOperands() const;
+    AffineMap getAffineMap() const;
 
-  /// Attempts to canonicalize the map and operands. Return success if the map
-  /// and/or operands have been modified.
-  LogicalResult canonicalize();
+    /// Attempts to canonicalize the map and operands. Return success if the map
+    /// and/or operands have been modified.
+    LogicalResult canonicalize();
 
 private:
-  // A mutable affine map.
-  MutableAffineMap map;
+    // A mutable affine map.
+    MutableAffineMap map;
 
-  // TODO: make these trailing objects?
-  /// The SSA operands binding to the dim's and symbols of 'map'.
-  SmallVector<Value, 4> operands;
-  /// The SSA results binding to the results of 'map'.
-  SmallVector<Value, 4> results;
+    // TODO: make these trailing objects?
+    /// The SSA operands binding to the dim's and symbols of 'map'.
+    SmallVector<Value, 4> operands;
+    /// The SSA results binding to the results of 'map'.
+    SmallVector<Value, 4> results;
 };
 
 } // namespace mlir

@@ -19,18 +19,18 @@ InstrumentationRuntimeStopInfo::InstrumentationRuntimeStopInfo(
     Thread &thread, std::string description,
     StructuredData::ObjectSP additional_data)
     : StopInfo(thread, 0) {
-  m_extended_info = additional_data;
-  m_description = description;
+    m_extended_info = additional_data;
+    m_description = description;
 }
 
 const char *InstrumentationRuntimeStopInfo::GetDescription() {
-  return m_description.c_str();
+    return m_description.c_str();
 }
 
 StopInfoSP
 InstrumentationRuntimeStopInfo::CreateStopReasonWithInstrumentationData(
     Thread &thread, std::string description,
     StructuredData::ObjectSP additionalData) {
-  return StopInfoSP(
-      new InstrumentationRuntimeStopInfo(thread, description, additionalData));
+    return StopInfoSP(
+               new InstrumentationRuntimeStopInfo(thread, description, additionalData));
 }

@@ -39,41 +39,41 @@ namespace mlir {
 /// are handled and explicitly fail if wanted.
 class SPIRVTypeConverter : public TypeConverter {
 public:
-  explicit SPIRVTypeConverter(spirv::TargetEnvAttr targetAttr);
+    explicit SPIRVTypeConverter(spirv::TargetEnvAttr targetAttr);
 
-  /// Gets the number of bytes used for a type when converted to SPIR-V
-  /// type. Note that it doesnt account for whether the type is legal for a
-  /// SPIR-V target (described by spirv::TargetEnvAttr). Returns None on
-  /// failure.
-  static Optional<int64_t> getConvertedTypeNumBytes(Type);
+    /// Gets the number of bytes used for a type when converted to SPIR-V
+    /// type. Note that it doesnt account for whether the type is legal for a
+    /// SPIR-V target (described by spirv::TargetEnvAttr). Returns None on
+    /// failure.
+    static Optional<int64_t> getConvertedTypeNumBytes(Type);
 
-  /// Gets the SPIR-V correspondence for the standard index type.
-  static Type getIndexType(MLIRContext *context);
+    /// Gets the SPIR-V correspondence for the standard index type.
+    static Type getIndexType(MLIRContext *context);
 
-  /// Returns the corresponding memory space for memref given a SPIR-V storage
-  /// class.
-  static unsigned getMemorySpaceForStorageClass(spirv::StorageClass);
+    /// Returns the corresponding memory space for memref given a SPIR-V storage
+    /// class.
+    static unsigned getMemorySpaceForStorageClass(spirv::StorageClass);
 
-  /// Returns the SPIR-V storage class given a memory space for memref. Return
-  /// llvm::None if the memory space does not map to any SPIR-V storage class.
-  static Optional<spirv::StorageClass>
-  getStorageClassForMemorySpace(unsigned space);
+    /// Returns the SPIR-V storage class given a memory space for memref. Return
+    /// llvm::None if the memory space does not map to any SPIR-V storage class.
+    static Optional<spirv::StorageClass>
+    getStorageClassForMemorySpace(unsigned space);
 
 private:
-  spirv::TargetEnv targetEnv;
+    spirv::TargetEnv targetEnv;
 };
 
 /// Base class to define a conversion pattern to lower `SourceOp` into SPIR-V.
 template <typename SourceOp>
 class SPIRVOpLowering : public OpConversionPattern<SourceOp> {
 public:
-  SPIRVOpLowering(MLIRContext *context, SPIRVTypeConverter &typeConverter,
-                  PatternBenefit benefit = 1)
-      : OpConversionPattern<SourceOp>(context, benefit),
-        typeConverter(typeConverter) {}
+    SPIRVOpLowering(MLIRContext *context, SPIRVTypeConverter &typeConverter,
+                    PatternBenefit benefit = 1)
+        : OpConversionPattern<SourceOp>(context, benefit),
+          typeConverter(typeConverter) {}
 
 protected:
-  SPIRVTypeConverter &typeConverter;
+    SPIRVTypeConverter &typeConverter;
 };
 
 /// Appends to a pattern list additional patterns for translating the builtin
@@ -90,24 +90,24 @@ class FuncOp;
 
 class SPIRVConversionTarget : public ConversionTarget {
 public:
-  /// Creates a SPIR-V conversion target for the given target environment.
-  static std::unique_ptr<SPIRVConversionTarget> get(TargetEnvAttr targetAttr);
+    /// Creates a SPIR-V conversion target for the given target environment.
+    static std::unique_ptr<SPIRVConversionTarget> get(TargetEnvAttr targetAttr);
 
 private:
-  explicit SPIRVConversionTarget(TargetEnvAttr targetAttr);
+    explicit SPIRVConversionTarget(TargetEnvAttr targetAttr);
 
-  // Be explicit that instance of this class cannot be copied or moved: there
-  // are lambdas capturing fields of the instance.
-  SPIRVConversionTarget(const SPIRVConversionTarget &) = delete;
-  SPIRVConversionTarget(SPIRVConversionTarget &&) = delete;
-  SPIRVConversionTarget &operator=(const SPIRVConversionTarget &) = delete;
-  SPIRVConversionTarget &operator=(SPIRVConversionTarget &&) = delete;
+    // Be explicit that instance of this class cannot be copied or moved: there
+    // are lambdas capturing fields of the instance.
+    SPIRVConversionTarget(const SPIRVConversionTarget &) = delete;
+    SPIRVConversionTarget(SPIRVConversionTarget &&) = delete;
+    SPIRVConversionTarget &operator=(const SPIRVConversionTarget &) = delete;
+    SPIRVConversionTarget &operator=(SPIRVConversionTarget &&) = delete;
 
-  /// Returns true if the given `op` is legal to use under the current target
-  /// environment.
-  bool isLegalOp(Operation *op);
+    /// Returns true if the given `op` is legal to use under the current target
+    /// environment.
+    bool isLegalOp(Operation *op);
 
-  TargetEnv targetEnv;
+    TargetEnv targetEnv;
 };
 
 /// Returns the value for the given `builtin` variable. This function gets or

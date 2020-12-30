@@ -38,32 +38,32 @@ _CLC_DEFINE_UNARY_BUILTIN(half, sqrt, __clc_sqrt, half)
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 #ifdef __AMDGCN__
-  #define __clc_builtin_rsq __builtin_amdgcn_rsq
+#define __clc_builtin_rsq __builtin_amdgcn_rsq
 #else
-  #define __clc_builtin_rsq __builtin_r600_recipsqrt_ieee
+#define __clc_builtin_rsq __builtin_r600_recipsqrt_ieee
 #endif
 
 _CLC_OVERLOAD _CLC_DEF double sqrt(double x) {
 
-  uint vcc = x < 0x1p-767;
-  uint exp0 = vcc ? 0x100 : 0;
-  unsigned exp1 = vcc ? 0xffffff80 : 0;
+    uint vcc = x < 0x1p-767;
+    uint exp0 = vcc ? 0x100 : 0;
+    unsigned exp1 = vcc ? 0xffffff80 : 0;
 
-  double v01 = ldexp(x, exp0);
-  double v23 = __clc_builtin_rsq(v01);
-  double v45 = v01 * v23;
-  v23 = v23 * 0.5;
+    double v01 = ldexp(x, exp0);
+    double v23 = __clc_builtin_rsq(v01);
+    double v45 = v01 * v23;
+    v23 = v23 * 0.5;
 
-  double v67 = fma(-v23, v45, 0.5);
-  v45 = fma(v45, v67, v45);
-  double v89 = fma(-v45, v45, v01);
-  v23 = fma(v23, v67, v23);
-  v45 = fma(v89, v23, v45);
-  v67 = fma(-v45, v45, v01);
-  v23 = fma(v67, v23, v45);
+    double v67 = fma(-v23, v45, 0.5);
+    v45 = fma(v45, v67, v45);
+    double v89 = fma(-v45, v45, v01);
+    v23 = fma(v23, v67, v23);
+    v45 = fma(v89, v23, v45);
+    v67 = fma(-v45, v45, v01);
+    v23 = fma(v67, v23, v45);
 
-  v23 = ldexp(v23, exp1);
-  return ((x == __builtin_inf()) || (x == 0.0)) ? v01 : v23;
+    v23 = ldexp(v23, exp1);
+    return ((x == __builtin_inf()) || (x == 0.0)) ? v01 : v23;
 }
 
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, double, sqrt, double);

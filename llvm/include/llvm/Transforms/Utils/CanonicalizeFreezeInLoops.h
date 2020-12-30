@@ -24,8 +24,8 @@ class LPMUpdater;
 class CanonicalizeFreezeInLoopsPass
     : public PassInfoMixin<CanonicalizeFreezeInLoopsPass> {
 public:
-  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
+    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
 } // end namespace llvm

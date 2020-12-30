@@ -18,13 +18,13 @@ namespace edit {
 
 class EditsReceiver {
 public:
-  virtual ~EditsReceiver() = default;
+    virtual ~EditsReceiver() = default;
 
-  virtual void insert(SourceLocation loc, StringRef text) = 0;
-  virtual void replace(CharSourceRange range, StringRef text) = 0;
+    virtual void insert(SourceLocation loc, StringRef text) = 0;
+    virtual void replace(CharSourceRange range, StringRef text) = 0;
 
-  /// By default it calls replace with an empty string.
-  virtual void remove(CharSourceRange range);
+    /// By default it calls replace with an empty string.
+    virtual void remove(CharSourceRange range);
 };
 
 } // namespace edit

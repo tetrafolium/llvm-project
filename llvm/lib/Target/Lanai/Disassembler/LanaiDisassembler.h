@@ -21,14 +21,14 @@ namespace llvm {
 
 class LanaiDisassembler : public MCDisassembler {
 public:
-  LanaiDisassembler(const MCSubtargetInfo &STI, MCContext &Ctx);
+    LanaiDisassembler(const MCSubtargetInfo &STI, MCContext &Ctx);
 
-  ~LanaiDisassembler() override = default;
+    ~LanaiDisassembler() override = default;
 
-  // getInstruction - See MCDisassembler.
-  MCDisassembler::DecodeStatus
-  getInstruction(MCInst &Instr, uint64_t &Size, ArrayRef<uint8_t> Bytes,
-                 uint64_t Address, raw_ostream &CStream) const override;
+    // getInstruction - See MCDisassembler.
+    MCDisassembler::DecodeStatus
+    getInstruction(MCInst &Instr, uint64_t &Size, ArrayRef<uint8_t> Bytes,
+                   uint64_t Address, raw_ostream &CStream) const override;
 };
 
 } // end namespace llvm

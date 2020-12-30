@@ -22,7 +22,7 @@
 
 namespace llvm {
 struct BreakCriticalEdgesPass : public PassInfoMixin<BreakCriticalEdgesPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // namespace llvm
 #endif // LLVM_TRANSFORMS_UTILS_BREAKCRITICALEDGES_H

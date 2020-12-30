@@ -29,7 +29,7 @@ struct __has_pointer_type : false_type {};
 
 template <class _Tp>
 struct __has_pointer_type<_Tp,
-          typename __void_t<typename _Tp::pointer>::type> : true_type {};
+           typename __void_t<typename _Tp::pointer>::type> : true_type {};
 
 namespace __pointer_type_imp
 {
@@ -59,7 +59,7 @@ struct __has_const_pointer : false_type {};
 
 template <class _Tp>
 struct __has_const_pointer<_Tp,
-            typename __void_t<typename _Tp::const_pointer>::type> : true_type {};
+           typename __void_t<typename _Tp::const_pointer>::type> : true_type {};
 
 template <class _Tp, class _Ptr, class _Alloc, bool = __has_const_pointer<_Alloc>::value>
 struct __const_pointer
@@ -82,7 +82,7 @@ struct __has_void_pointer : false_type {};
 
 template <class _Tp>
 struct __has_void_pointer<_Tp,
-               typename __void_t<typename _Tp::void_pointer>::type> : true_type {};
+           typename __void_t<typename _Tp::void_pointer>::type> : true_type {};
 
 template <class _Ptr, class _Alloc, bool = __has_void_pointer<_Alloc>::value>
 struct __void_pointer
@@ -105,7 +105,7 @@ struct __has_const_void_pointer : false_type {};
 
 template <class _Tp>
 struct __has_const_void_pointer<_Tp,
-            typename __void_t<typename _Tp::const_void_pointer>::type> : true_type {};
+           typename __void_t<typename _Tp::const_void_pointer>::type> : true_type {};
 
 template <class _Ptr, class _Alloc, bool = __has_const_void_pointer<_Alloc>::value>
 struct __const_void_pointer
@@ -128,7 +128,7 @@ struct __has_size_type : false_type {};
 
 template <class _Tp>
 struct __has_size_type<_Tp,
-               typename __void_t<typename _Tp::size_type>::type> : true_type {};
+           typename __void_t<typename _Tp::size_type>::type> : true_type {};
 
 template <class _Alloc, class _DiffType, bool = __has_size_type<_Alloc>::value>
 struct __size_type
@@ -147,8 +147,8 @@ struct __has_propagate_on_container_copy_assignment : false_type {};
 
 template <class _Tp>
 struct __has_propagate_on_container_copy_assignment<_Tp,
-    typename __void_t<typename _Tp::propagate_on_container_copy_assignment>::type>
-        : true_type {};
+           typename __void_t<typename _Tp::propagate_on_container_copy_assignment>::type>
+           : true_type {};
 
 template <class _Alloc, bool = __has_propagate_on_container_copy_assignment<_Alloc>::value>
 struct __propagate_on_container_copy_assignment
@@ -168,7 +168,7 @@ struct __has_propagate_on_container_move_assignment : false_type {};
 template <class _Tp>
 struct __has_propagate_on_container_move_assignment<_Tp,
            typename __void_t<typename _Tp::propagate_on_container_move_assignment>::type>
-               : true_type {};
+           : true_type {};
 
 template <class _Alloc, bool = __has_propagate_on_container_move_assignment<_Alloc>::value>
 struct __propagate_on_container_move_assignment
@@ -188,7 +188,7 @@ struct __has_propagate_on_container_swap : false_type {};
 template <class _Tp>
 struct __has_propagate_on_container_swap<_Tp,
            typename __void_t<typename _Tp::propagate_on_container_swap>::type>
-               : true_type {};
+           : true_type {};
 
 template <class _Alloc, bool = __has_propagate_on_container_swap<_Alloc>::value>
 struct __propagate_on_container_swap
@@ -208,7 +208,7 @@ struct __has_is_always_equal : false_type {};
 template <class _Tp>
 struct __has_is_always_equal<_Tp,
            typename __void_t<typename _Tp::is_always_equal>::type>
-               : true_type {};
+           : true_type {};
 
 template <class _Alloc, bool = __has_is_always_equal<_Alloc>::value>
 struct __is_always_equal
@@ -226,7 +226,10 @@ template <class _Tp, class _Up, bool = __has_rebind<_Tp, _Up>::value>
 struct __has_rebind_other
 {
 private:
-    struct __two {char __lx; char __lxx;};
+    struct __two {
+        char __lx;
+        char __lxx;
+    };
     template <class _Xp> static __two __test(...);
     _LIBCPP_SUPPRESS_DEPRECATED_PUSH
     template <class _Xp> static char __test(typename _Xp::template rebind<_Up>::other* = 0);
@@ -269,19 +272,19 @@ _LIBCPP_SUPPRESS_DEPRECATED_PUSH
 template <class _Alloc, class _SizeType, class _ConstVoidPtr>
 auto
 __has_allocate_hint_test(_Alloc&& __a, _SizeType&& __sz, _ConstVoidPtr&& __p)
-    -> decltype((void)__a.allocate(__sz, __p), true_type());
+-> decltype((void)__a.allocate(__sz, __p), true_type());
 _LIBCPP_SUPPRESS_DEPRECATED_POP
 
 template <class _Alloc, class _SizeType, class _ConstVoidPtr>
 auto
 __has_allocate_hint_test(const _Alloc& __a, _SizeType&& __sz, _ConstVoidPtr&& __p)
-    -> false_type;
+-> false_type;
 
 template <class _Alloc, class _SizeType, class _ConstVoidPtr>
 struct __has_allocate_hint
-    : decltype(_VSTD::__has_allocate_hint_test(declval<_Alloc>(),
-                                               declval<_SizeType>(),
-                                               declval<_ConstVoidPtr>()))
+: decltype(_VSTD::__has_allocate_hint_test(declval<_Alloc>(),
+           declval<_SizeType>(),
+           declval<_ConstVoidPtr>()))
 {
 };
 
@@ -297,7 +300,7 @@ struct __has_allocate_hint
 
 _LIBCPP_SUPPRESS_DEPRECATED_PUSH
 template <class _Alloc, class ..._Args,
-    class = decltype(_VSTD::declval<_Alloc>().construct(_VSTD::declval<_Args>()...))>
+          class = decltype(_VSTD::declval<_Alloc>().construct(_VSTD::declval<_Args>()...))>
 static true_type __test_has_construct(int);
 _LIBCPP_SUPPRESS_DEPRECATED_POP
 
@@ -313,18 +316,18 @@ _LIBCPP_SUPPRESS_DEPRECATED_PUSH
 template <class _Alloc, class _Pointer>
 auto
 __has_destroy_test(_Alloc&& __a, _Pointer&& __p)
-    -> decltype(__a.destroy(__p), true_type());
+-> decltype(__a.destroy(__p), true_type());
 _LIBCPP_SUPPRESS_DEPRECATED_POP
 
 template <class _Alloc, class _Pointer>
 auto
 __has_destroy_test(const _Alloc& __a, _Pointer&& __p)
-    -> false_type;
+-> false_type;
 
 template <class _Alloc, class _Pointer>
 struct __has_destroy
-    : decltype(_VSTD::__has_destroy_test(declval<_Alloc>(),
-                                         declval<_Pointer>()))
+: decltype(_VSTD::__has_destroy_test(declval<_Alloc>(),
+                                     declval<_Pointer>()))
 {
 };
 
@@ -332,33 +335,33 @@ _LIBCPP_SUPPRESS_DEPRECATED_PUSH
 template <class _Alloc>
 auto
 __has_max_size_test(_Alloc&& __a)
-    -> decltype(__a.max_size(), true_type());
+-> decltype(__a.max_size(), true_type());
 _LIBCPP_SUPPRESS_DEPRECATED_POP
 
 template <class _Alloc>
 auto
 __has_max_size_test(const volatile _Alloc& __a)
-    -> false_type;
+-> false_type;
 
 template <class _Alloc>
 struct __has_max_size
-    : decltype(_VSTD::__has_max_size_test(declval<_Alloc&>()))
+: decltype(_VSTD::__has_max_size_test(declval<_Alloc&>()))
 {
 };
 
 template <class _Alloc>
 auto
 __has_select_on_container_copy_construction_test(_Alloc&& __a)
-    -> decltype(__a.select_on_container_copy_construction(), true_type());
+-> decltype(__a.select_on_container_copy_construction(), true_type());
 
 template <class _Alloc>
 auto
 __has_select_on_container_copy_construction_test(const volatile _Alloc& __a)
-    -> false_type;
+-> false_type;
 
 template <class _Alloc>
 struct __has_select_on_container_copy_construction
-    : decltype(_VSTD::__has_select_on_container_copy_construction_test(declval<_Alloc&>()))
+: decltype(_VSTD::__has_select_on_container_copy_construction_test(declval<_Alloc&>()))
 {
 };
 
@@ -369,7 +372,7 @@ struct __has_destroy : false_type {};
 
 template <class _Alloc, class _Pointer>
 struct __has_destroy<_Alloc, _Pointer, typename __void_t<
-    decltype(_VSTD::declval<_Alloc>().destroy(_VSTD::declval<_Pointer>()))
+decltype(_VSTD::declval<_Alloc>().destroy(_VSTD::declval<_Pointer>()))
 >::type> : true_type {};
 
 template <class _Alloc>
@@ -407,8 +410,8 @@ struct __is_default_allocator<_VSTD::allocator<_Tp> > : true_type {};
 
 
 template <class _Alloc,
-    bool = __has_construct<_Alloc, typename _Alloc::value_type*,  typename _Alloc::value_type&&>::value && !__is_default_allocator<_Alloc>::value
-    >
+          bool = __has_construct<_Alloc, typename _Alloc::value_type*,  typename _Alloc::value_type&&>::value && !__is_default_allocator<_Alloc>::value
+          >
 struct __is_cpp17_move_insertable;
 template <class _Alloc>
 struct __is_cpp17_move_insertable<_Alloc, true> : true_type {};
@@ -416,8 +419,8 @@ template <class _Alloc>
 struct __is_cpp17_move_insertable<_Alloc, false> : is_move_constructible<typename _Alloc::value_type> {};
 
 template <class _Alloc,
-    bool = __has_construct<_Alloc, typename _Alloc::value_type*, const typename _Alloc::value_type&>::value && !__is_default_allocator<_Alloc>::value
-    >
+          bool = __has_construct<_Alloc, typename _Alloc::value_type*, const typename _Alloc::value_type&>::value && !__is_default_allocator<_Alloc>::value
+          >
 struct __is_cpp17_copy_insertable;
 template <class _Alloc>
 struct __is_cpp17_copy_insertable<_Alloc, true> : __is_cpp17_move_insertable<_Alloc> {};
@@ -425,7 +428,7 @@ template <class _Alloc>
 struct __is_cpp17_copy_insertable<_Alloc, false> : integral_constant<bool,
     is_copy_constructible<typename _Alloc::value_type>::value &&
     __is_cpp17_move_insertable<_Alloc>::value>
-  {};
+{};
 
 
 
@@ -444,132 +447,149 @@ struct _LIBCPP_TEMPLATE_VIS allocator_traits
     typedef typename __size_type<allocator_type, difference_type>::type size_type;
 
     typedef typename __propagate_on_container_copy_assignment<allocator_type>::type
-                     propagate_on_container_copy_assignment;
+    propagate_on_container_copy_assignment;
     typedef typename __propagate_on_container_move_assignment<allocator_type>::type
-                     propagate_on_container_move_assignment;
+    propagate_on_container_move_assignment;
     typedef typename __propagate_on_container_swap<allocator_type>::type
-                     propagate_on_container_swap;
+    propagate_on_container_swap;
     typedef typename __is_always_equal<allocator_type>::type
-                     is_always_equal;
+    is_always_equal;
 
 #ifndef _LIBCPP_CXX03_LANG
     template <class _Tp> using rebind_alloc =
-                  typename __allocator_traits_rebind<allocator_type, _Tp>::type;
+        typename __allocator_traits_rebind<allocator_type, _Tp>::type;
     template <class _Tp> using rebind_traits = allocator_traits<rebind_alloc<_Tp> >;
 #else  // _LIBCPP_CXX03_LANG
     template <class _Tp> struct rebind_alloc
-        {typedef typename __allocator_traits_rebind<allocator_type, _Tp>::type other;};
+    {
+        typedef typename __allocator_traits_rebind<allocator_type, _Tp>::type other;
+    };
     template <class _Tp> struct rebind_traits
-        {typedef allocator_traits<typename rebind_alloc<_Tp>::other> other;};
+    {
+        typedef allocator_traits<typename rebind_alloc<_Tp>::other> other;
+    };
 #endif  // _LIBCPP_CXX03_LANG
 
     _LIBCPP_NODISCARD_AFTER_CXX17 _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static pointer allocate(allocator_type& __a, size_type __n)
-        {return __a.allocate(__n);}
+    {
+        return __a.allocate(__n);
+    }
     _LIBCPP_NODISCARD_AFTER_CXX17 _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static pointer allocate(allocator_type& __a, size_type __n, const_void_pointer __hint)
-        {return __allocate(__a, __n, __hint,
-            __has_allocate_hint<allocator_type, size_type, const_void_pointer>());}
+    {   return __allocate(__a, __n, __hint,
+                          __has_allocate_hint<allocator_type, size_type, const_void_pointer>());
+    }
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static void deallocate(allocator_type& __a, pointer __p, size_type __n) _NOEXCEPT
-        {__a.deallocate(__p, __n);}
+    {__a.deallocate(__p, __n);}
 
     template <class _Tp, class... _Args>
-        _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
-        static void construct(allocator_type& __a, _Tp* __p, _Args&&... __args)
-            {__construct(__has_construct<allocator_type, _Tp*, _Args...>(),
-                         __a, __p, _VSTD::forward<_Args>(__args)...);}
+    _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
+    static void construct(allocator_type& __a, _Tp* __p, _Args&&... __args)
+    {   __construct(__has_construct<allocator_type, _Tp*, _Args...>(),
+                    __a, __p, _VSTD::forward<_Args>(__args)...);
+    }
 
     template <class _Tp>
-        _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
-        static void destroy(allocator_type& __a, _Tp* __p)
-            {__destroy(__has_destroy<allocator_type, _Tp*>(), __a, __p);}
+    _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
+    static void destroy(allocator_type& __a, _Tp* __p)
+    {
+        __destroy(__has_destroy<allocator_type, _Tp*>(), __a, __p);
+    }
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static size_type max_size(const allocator_type& __a) _NOEXCEPT
-        {return __max_size(__has_max_size<const allocator_type>(), __a);}
+    {return __max_size(__has_max_size<const allocator_type>(), __a);}
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static allocator_type
-        select_on_container_copy_construction(const allocator_type& __a)
-            {return __select_on_container_copy_construction(
-                __has_select_on_container_copy_construction<const allocator_type>(),
-                __a);}
+    select_on_container_copy_construction(const allocator_type& __a)
+    {   return __select_on_container_copy_construction(
+                   __has_select_on_container_copy_construction<const allocator_type>(),
+                   __a);
+    }
 
 private:
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static pointer __allocate(allocator_type& __a, size_type __n,
-        const_void_pointer __hint, true_type)
-        {
-            _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-            return __a.allocate(__n, __hint);
-            _LIBCPP_SUPPRESS_DEPRECATED_POP
-        }
+                              const_void_pointer __hint, true_type)
+    {
+        _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        return __a.allocate(__n, __hint);
+        _LIBCPP_SUPPRESS_DEPRECATED_POP
+    }
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static pointer __allocate(allocator_type& __a, size_type __n,
-        const_void_pointer, false_type)
-        {return __a.allocate(__n);}
+                              const_void_pointer, false_type)
+    {
+        return __a.allocate(__n);
+    }
 
     template <class _Tp, class... _Args>
-        _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
-        static void __construct(true_type, allocator_type& __a, _Tp* __p, _Args&&... __args)
-            {
-                _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-                __a.construct(__p, _VSTD::forward<_Args>(__args)...);
-                _LIBCPP_SUPPRESS_DEPRECATED_POP
-            }
+    _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
+    static void __construct(true_type, allocator_type& __a, _Tp* __p, _Args&&... __args)
+    {
+        _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        __a.construct(__p, _VSTD::forward<_Args>(__args)...);
+        _LIBCPP_SUPPRESS_DEPRECATED_POP
+    }
 
     template <class _Tp, class... _Args>
-        _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
-        static void __construct(false_type, allocator_type&, _Tp* __p, _Args&&... __args)
-            {
+    _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
+    static void __construct(false_type, allocator_type&, _Tp* __p, _Args&&... __args)
+    {
 #if _LIBCPP_STD_VER > 17
-                _VSTD::construct_at(__p, _VSTD::forward<_Args>(__args)...);
+        _VSTD::construct_at(__p, _VSTD::forward<_Args>(__args)...);
 #else
-                ::new ((void*)__p) _Tp(_VSTD::forward<_Args>(__args)...);
+        ::new ((void*)__p) _Tp(_VSTD::forward<_Args>(__args)...);
 #endif
-            }
+    }
 
     template <class _Tp>
-        _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
-        static void __destroy(true_type, allocator_type& __a, _Tp* __p)
-            {
-                _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-                __a.destroy(__p);
-                _LIBCPP_SUPPRESS_DEPRECATED_POP
-            }
+    _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
+    static void __destroy(true_type, allocator_type& __a, _Tp* __p)
+    {
+        _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        __a.destroy(__p);
+        _LIBCPP_SUPPRESS_DEPRECATED_POP
+    }
     template <class _Tp>
-        _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
-        static void __destroy(false_type, allocator_type&, _Tp* __p)
-            {
+    _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
+    static void __destroy(false_type, allocator_type&, _Tp* __p)
+    {
 #if _LIBCPP_STD_VER > 17
-                _VSTD::destroy_at(__p);
+        _VSTD::destroy_at(__p);
 #else
-                __p->~_Tp();
+        __p->~_Tp();
 #endif
-            }
+    }
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static size_type __max_size(true_type, const allocator_type& __a) _NOEXCEPT
-            {
-                _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-                return __a.max_size();
-                _LIBCPP_SUPPRESS_DEPRECATED_POP
-            }
+    {
+        _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        return __a.max_size();
+        _LIBCPP_SUPPRESS_DEPRECATED_POP
+    }
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static size_type __max_size(false_type, const allocator_type&) _NOEXCEPT
-            {return numeric_limits<size_type>::max() / sizeof(value_type);}
+    {return numeric_limits<size_type>::max() / sizeof(value_type);}
 
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static allocator_type
-        __select_on_container_copy_construction(true_type, const allocator_type& __a)
-            {return __a.select_on_container_copy_construction();}
+    __select_on_container_copy_construction(true_type, const allocator_type& __a)
+    {
+        return __a.select_on_container_copy_construction();
+    }
     _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17
     static allocator_type
-        __select_on_container_copy_construction(false_type, const allocator_type& __a)
-            {return __a;}
+    __select_on_container_copy_construction(false_type, const allocator_type& __a)
+    {
+        return __a;
+    }
 };
 
 template <class _Traits, class _Tp>

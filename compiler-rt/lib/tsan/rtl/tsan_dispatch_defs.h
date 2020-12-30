@@ -38,12 +38,12 @@ typedef unsigned long dispatch_io_type_t;
 typedef unsigned long dispatch_io_close_flags_t;
 
 extern "C" {
-void *dispatch_get_context(dispatch_object_t object);
-void dispatch_retain(dispatch_object_t object);
-void dispatch_release(dispatch_object_t object);
+    void *dispatch_get_context(dispatch_object_t object);
+    void dispatch_retain(dispatch_object_t object);
+    void dispatch_release(dispatch_object_t object);
 
-extern const dispatch_block_t _dispatch_data_destructor_free;
-extern const dispatch_block_t _dispatch_data_destructor_munmap;
+    extern const dispatch_block_t _dispatch_data_destructor_free;
+    extern const dispatch_block_t _dispatch_data_destructor_munmap;
 } // extern "C"
 
 #define DISPATCH_DATA_DESTRUCTOR_DEFAULT nullptr

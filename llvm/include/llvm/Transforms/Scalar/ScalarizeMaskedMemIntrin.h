@@ -22,7 +22,7 @@ namespace llvm {
 
 struct ScalarizeMaskedMemIntrinPass
     : public PassInfoMixin<ScalarizeMaskedMemIntrinPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // end namespace llvm
 

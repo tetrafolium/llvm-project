@@ -27,29 +27,29 @@ TextDiagnosticPrinter::~TextDiagnosticPrinter() {}
 
 void TextDiagnosticPrinter::HandleDiagnostic(
     clang::DiagnosticsEngine::Level level, const clang::Diagnostic &info) {
-  // Default implementation (Warnings/errors count).
-  DiagnosticConsumer::HandleDiagnostic(level, info);
+    // Default implementation (Warnings/errors count).
+    DiagnosticConsumer::HandleDiagnostic(level, info);
 
-  // Render the diagnostic message into a temporary buffer eagerly. We'll use
-  // this later as we print out the diagnostic to the terminal.
-  llvm::SmallString<100> outStr;
-  info.FormatDiagnostic(outStr);
+    // Render the diagnostic message into a temporary buffer eagerly. We'll use
+    // this later as we print out the diagnostic to the terminal.
+    llvm::SmallString<100> outStr;
+    info.FormatDiagnostic(outStr);
 
-  llvm::raw_svector_ostream DiagMessageStream(outStr);
+    llvm::raw_svector_ostream DiagMessageStream(outStr);
 
-  if (!prefix_.empty())
-    os_ << prefix_ << ": ";
+    if (!prefix_.empty())
+        os_ << prefix_ << ": ";
 
-  // We only emit diagnostics in contexts that lack valid source locations.
-  assert(!info.getLocation().isValid() &&
-      "Diagnostics with valid source location are not supported");
+    // We only emit diagnostics in contexts that lack valid source locations.
+    assert(!info.getLocation().isValid() &&
+           "Diagnostics with valid source location are not supported");
 
-  Fortran::frontend::TextDiagnostic::PrintDiagnosticLevel(
-      os_, level, diagOpts_->ShowColors);
-  Fortran::frontend::TextDiagnostic::PrintDiagnosticMessage(os_,
-      /*IsSupplemental=*/level == clang::DiagnosticsEngine::Note,
-      DiagMessageStream.str(), diagOpts_->ShowColors);
+    Fortran::frontend::TextDiagnostic::PrintDiagnosticLevel(
+        os_, level, diagOpts_->ShowColors);
+    Fortran::frontend::TextDiagnostic::PrintDiagnosticMessage(os_,
+            /*IsSupplemental=*/level == clang::DiagnosticsEngine::Note,
+            DiagMessageStream.str(), diagOpts_->ShowColors);
 
-  os_.flush();
-  return;
+    os_.flush();
+    return;
 }

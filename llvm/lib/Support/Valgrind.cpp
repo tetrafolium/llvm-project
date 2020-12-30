@@ -20,7 +20,7 @@
 #include <valgrind/valgrind.h>
 
 static bool InitNotUnderValgrind() {
-  return !RUNNING_ON_VALGRIND;
+    return !RUNNING_ON_VALGRIND;
 }
 
 // This bool is negated from what we'd expect because code may run before it
@@ -30,22 +30,22 @@ static bool InitNotUnderValgrind() {
 static const bool NotUnderValgrind = InitNotUnderValgrind();
 
 bool llvm::sys::RunningOnValgrind() {
-  if (NotUnderValgrind)
-    return false;
-  return RUNNING_ON_VALGRIND;
+    if (NotUnderValgrind)
+        return false;
+    return RUNNING_ON_VALGRIND;
 }
 
 void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {
-  if (NotUnderValgrind)
-    return;
+    if (NotUnderValgrind)
+        return;
 
-  VALGRIND_DISCARD_TRANSLATIONS(Addr, Len);
+    VALGRIND_DISCARD_TRANSLATIONS(Addr, Len);
 }
 
 #else  // !HAVE_VALGRIND_VALGRIND_H
 
 bool llvm::sys::RunningOnValgrind() {
-  return false;
+    return false;
 }
 
 void llvm::sys::ValgrindDiscardTranslations(const void *Addr, size_t Len) {

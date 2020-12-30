@@ -30,10 +30,10 @@ namespace bugprone {
 /// properly.
 class MacroParenthesesCheck : public ClangTidyCheck {
 public:
-  MacroParenthesesCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
+    MacroParenthesesCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
 };
 
 } // namespace bugprone

@@ -20,35 +20,35 @@ class DWARFUnit;
 
 class NameToDIE {
 public:
-  NameToDIE() : m_map() {}
+    NameToDIE() : m_map() {}
 
-  ~NameToDIE() {}
+    ~NameToDIE() {}
 
-  void Dump(lldb_private::Stream *s);
+    void Dump(lldb_private::Stream *s);
 
-  void Insert(lldb_private::ConstString name, const DIERef &die_ref);
+    void Insert(lldb_private::ConstString name, const DIERef &die_ref);
 
-  void Append(const NameToDIE &other);
+    void Append(const NameToDIE &other);
 
-  void Finalize();
+    void Finalize();
 
-  bool Find(lldb_private::ConstString name,
-            llvm::function_ref<bool(DIERef ref)> callback) const;
+    bool Find(lldb_private::ConstString name,
+              llvm::function_ref<bool(DIERef ref)> callback) const;
 
-  bool Find(const lldb_private::RegularExpression &regex,
-            llvm::function_ref<bool(DIERef ref)> callback) const;
+    bool Find(const lldb_private::RegularExpression &regex,
+              llvm::function_ref<bool(DIERef ref)> callback) const;
 
-  void
-  FindAllEntriesForUnit(const DWARFUnit &unit,
-                        llvm::function_ref<bool(DIERef ref)> callback) const;
+    void
+    FindAllEntriesForUnit(const DWARFUnit &unit,
+                          llvm::function_ref<bool(DIERef ref)> callback) const;
 
-  void
-  ForEach(std::function<bool(lldb_private::ConstString name,
-                             const DIERef &die_ref)> const
-              &callback) const;
+    void
+    ForEach(std::function<bool(lldb_private::ConstString name,
+                               const DIERef &die_ref)> const
+            &callback) const;
 
 protected:
-  lldb_private::UniqueCStringMap<DIERef> m_map;
+    lldb_private::UniqueCStringMap<DIERef> m_map;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_SYMBOLFILE_DWARF_NAMETODIE_H

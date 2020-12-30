@@ -131,8 +131,8 @@
 
 template <typename... Arguments>
 NOINLINE static void log(const char *fmt, Arguments... parameters) {
-  printf(fmt, (int)GetBlockIdInKernel(), (int)GetThreadIdInBlock(),
-         (int)GetWarpId(), (int)GetLaneId(), parameters...);
+    printf(fmt, (int)GetBlockIdInKernel(), (int)GetThreadIdInBlock(),
+           (int)GetWarpId(), (int)GetLaneId(), parameters...);
 }
 
 #endif
@@ -141,13 +141,15 @@ NOINLINE static void log(const char *fmt, Arguments... parameters) {
 template <typename... Arguments>
 NOINLINE static void check(bool cond, const char *fmt,
                            Arguments... parameters) {
-  if (!cond)
-    printf(fmt, (int)GetBlockIdInKernel(), (int)GetThreadIdInBlock(),
-           (int)GetWarpId(), (int)GetLaneId(), parameters...);
-  assert(cond);
+    if (!cond)
+        printf(fmt, (int)GetBlockIdInKernel(), (int)GetThreadIdInBlock(),
+               (int)GetWarpId(), (int)GetLaneId(), parameters...);
+    assert(cond);
 }
 
-NOINLINE static void check(bool cond) { assert(cond); }
+NOINLINE static void check(bool cond) {
+    assert(cond);
+}
 #endif
 
 // set flags that are tested (inclusion properties)

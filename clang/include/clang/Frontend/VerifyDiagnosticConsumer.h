@@ -184,146 +184,150 @@ class TextDiagnosticBuffer;
 /// \endcode
 ///
 class VerifyDiagnosticConsumer: public DiagnosticConsumer,
-                                public CommentHandler {
+    public CommentHandler {
 public:
-  /// Directive - Abstract class representing a parsed verify directive.
-  ///
-  class Directive {
-  public:
-    static std::unique_ptr<Directive>
-    create(bool RegexKind, SourceLocation DirectiveLoc,
-           SourceLocation DiagnosticLoc, bool MatchAnyFileAndLine,
-           bool MatchAnyLine, StringRef Text, unsigned Min, unsigned Max);
+    /// Directive - Abstract class representing a parsed verify directive.
+    ///
+    class Directive {
+    public:
+        static std::unique_ptr<Directive>
+        create(bool RegexKind, SourceLocation DirectiveLoc,
+               SourceLocation DiagnosticLoc, bool MatchAnyFileAndLine,
+               bool MatchAnyLine, StringRef Text, unsigned Min, unsigned Max);
 
-  public:
-    /// Constant representing n or more matches.
-    static const unsigned MaxCount = std::numeric_limits<unsigned>::max();
+    public:
+        /// Constant representing n or more matches.
+        static const unsigned MaxCount = std::numeric_limits<unsigned>::max();
 
-    SourceLocation DirectiveLoc;
-    SourceLocation DiagnosticLoc;
-    const std::string Text;
-    unsigned Min, Max;
-    bool MatchAnyLine;
-    bool MatchAnyFileAndLine; // `MatchAnyFileAndLine` implies `MatchAnyLine`.
+        SourceLocation DirectiveLoc;
+        SourceLocation DiagnosticLoc;
+        const std::string Text;
+        unsigned Min, Max;
+        bool MatchAnyLine;
+        bool MatchAnyFileAndLine; // `MatchAnyFileAndLine` implies `MatchAnyLine`.
 
-    Directive(const Directive &) = delete;
-    Directive &operator=(const Directive &) = delete;
-    virtual ~Directive() = default;
+        Directive(const Directive &) = delete;
+        Directive &operator=(const Directive &) = delete;
+        virtual ~Directive() = default;
 
-    // Returns true if directive text is valid.
-    // Otherwise returns false and populates E.
-    virtual bool isValid(std::string &Error) = 0;
+        // Returns true if directive text is valid.
+        // Otherwise returns false and populates E.
+        virtual bool isValid(std::string &Error) = 0;
 
-    // Returns true on match.
-    virtual bool match(StringRef S) = 0;
+        // Returns true on match.
+        virtual bool match(StringRef S) = 0;
 
-  protected:
-    Directive(SourceLocation DirectiveLoc, SourceLocation DiagnosticLoc,
-              bool MatchAnyFileAndLine, bool MatchAnyLine, StringRef Text,
-              unsigned Min, unsigned Max)
-        : DirectiveLoc(DirectiveLoc), DiagnosticLoc(DiagnosticLoc), Text(Text),
-          Min(Min), Max(Max), MatchAnyLine(MatchAnyLine || MatchAnyFileAndLine),
-          MatchAnyFileAndLine(MatchAnyFileAndLine) {
-      assert(!DirectiveLoc.isInvalid() && "DirectiveLoc is invalid!");
-      assert((!DiagnosticLoc.isInvalid() || MatchAnyLine) &&
-             "DiagnosticLoc is invalid!");
-    }
-  };
+    protected:
+        Directive(SourceLocation DirectiveLoc, SourceLocation DiagnosticLoc,
+                  bool MatchAnyFileAndLine, bool MatchAnyLine, StringRef Text,
+                  unsigned Min, unsigned Max)
+            : DirectiveLoc(DirectiveLoc), DiagnosticLoc(DiagnosticLoc), Text(Text),
+              Min(Min), Max(Max), MatchAnyLine(MatchAnyLine || MatchAnyFileAndLine),
+              MatchAnyFileAndLine(MatchAnyFileAndLine) {
+            assert(!DirectiveLoc.isInvalid() && "DirectiveLoc is invalid!");
+            assert((!DiagnosticLoc.isInvalid() || MatchAnyLine) &&
+                   "DiagnosticLoc is invalid!");
+        }
+    };
 
-  using DirectiveList = std::vector<std::unique_ptr<Directive>>;
+    using DirectiveList = std::vector<std::unique_ptr<Directive>>;
 
-  /// ExpectedData - owns directive objects and deletes on destructor.
-  struct ExpectedData {
-    DirectiveList Errors;
-    DirectiveList Warnings;
-    DirectiveList Remarks;
-    DirectiveList Notes;
+    /// ExpectedData - owns directive objects and deletes on destructor.
+    struct ExpectedData {
+        DirectiveList Errors;
+        DirectiveList Warnings;
+        DirectiveList Remarks;
+        DirectiveList Notes;
 
-    void Reset() {
-      Errors.clear();
-      Warnings.clear();
-      Remarks.clear();
-      Notes.clear();
-    }
-  };
+        void Reset() {
+            Errors.clear();
+            Warnings.clear();
+            Remarks.clear();
+            Notes.clear();
+        }
+    };
 
-  enum DirectiveStatus {
-    HasNoDirectives,
-    HasNoDirectivesReported,
-    HasExpectedNoDiagnostics,
-    HasOtherExpectedDirectives
-  };
+    enum DirectiveStatus {
+        HasNoDirectives,
+        HasNoDirectivesReported,
+        HasExpectedNoDiagnostics,
+        HasOtherExpectedDirectives
+    };
 
-  class MarkerTracker;
+    class MarkerTracker;
 
 private:
-  DiagnosticsEngine &Diags;
-  DiagnosticConsumer *PrimaryClient;
-  std::unique_ptr<DiagnosticConsumer> PrimaryClientOwner;
-  std::unique_ptr<TextDiagnosticBuffer> Buffer;
-  std::unique_ptr<MarkerTracker> Markers;
-  const Preprocessor *CurrentPreprocessor = nullptr;
-  const LangOptions *LangOpts = nullptr;
-  SourceManager *SrcManager = nullptr;
-  unsigned ActiveSourceFiles = 0;
-  DirectiveStatus Status;
-  ExpectedData ED;
+    DiagnosticsEngine &Diags;
+    DiagnosticConsumer *PrimaryClient;
+    std::unique_ptr<DiagnosticConsumer> PrimaryClientOwner;
+    std::unique_ptr<TextDiagnosticBuffer> Buffer;
+    std::unique_ptr<MarkerTracker> Markers;
+    const Preprocessor *CurrentPreprocessor = nullptr;
+    const LangOptions *LangOpts = nullptr;
+    SourceManager *SrcManager = nullptr;
+    unsigned ActiveSourceFiles = 0;
+    DirectiveStatus Status;
+    ExpectedData ED;
 
-  void CheckDiagnostics();
+    void CheckDiagnostics();
 
-  void setSourceManager(SourceManager &SM) {
-    assert((!SrcManager || SrcManager == &SM) && "SourceManager changed!");
-    SrcManager = &SM;
-  }
+    void setSourceManager(SourceManager &SM) {
+        assert((!SrcManager || SrcManager == &SM) && "SourceManager changed!");
+        SrcManager = &SM;
+    }
 
-  // These facilities are used for validation in debug builds.
-  class UnparsedFileStatus {
-    llvm::PointerIntPair<const FileEntry *, 1, bool> Data;
+    // These facilities are used for validation in debug builds.
+    class UnparsedFileStatus {
+        llvm::PointerIntPair<const FileEntry *, 1, bool> Data;
 
-  public:
-    UnparsedFileStatus(const FileEntry *File, bool FoundDirectives)
-        : Data(File, FoundDirectives) {}
+    public:
+        UnparsedFileStatus(const FileEntry *File, bool FoundDirectives)
+            : Data(File, FoundDirectives) {}
 
-    const FileEntry *getFile() const { return Data.getPointer(); }
-    bool foundDirectives() const { return Data.getInt(); }
-  };
+        const FileEntry *getFile() const {
+            return Data.getPointer();
+        }
+        bool foundDirectives() const {
+            return Data.getInt();
+        }
+    };
 
-  using ParsedFilesMap = llvm::DenseMap<FileID, const FileEntry *>;
-  using UnparsedFilesMap = llvm::DenseMap<FileID, UnparsedFileStatus>;
+    using ParsedFilesMap = llvm::DenseMap<FileID, const FileEntry *>;
+    using UnparsedFilesMap = llvm::DenseMap<FileID, UnparsedFileStatus>;
 
-  ParsedFilesMap ParsedFiles;
-  UnparsedFilesMap UnparsedFiles;
+    ParsedFilesMap ParsedFiles;
+    UnparsedFilesMap UnparsedFiles;
 
 public:
-  /// Create a new verifying diagnostic client, which will issue errors to
-  /// the currently-attached diagnostic client when a diagnostic does not match
-  /// what is expected (as indicated in the source file).
-  VerifyDiagnosticConsumer(DiagnosticsEngine &Diags);
-  ~VerifyDiagnosticConsumer() override;
+    /// Create a new verifying diagnostic client, which will issue errors to
+    /// the currently-attached diagnostic client when a diagnostic does not match
+    /// what is expected (as indicated in the source file).
+    VerifyDiagnosticConsumer(DiagnosticsEngine &Diags);
+    ~VerifyDiagnosticConsumer() override;
 
-  void BeginSourceFile(const LangOptions &LangOpts,
-                       const Preprocessor *PP) override;
+    void BeginSourceFile(const LangOptions &LangOpts,
+                         const Preprocessor *PP) override;
 
-  void EndSourceFile() override;
+    void EndSourceFile() override;
 
-  enum ParsedStatus {
-    /// File has been processed via HandleComment.
-    IsParsed,
+    enum ParsedStatus {
+        /// File has been processed via HandleComment.
+        IsParsed,
 
-    /// File has diagnostics and may have directives.
-    IsUnparsed,
+        /// File has diagnostics and may have directives.
+        IsUnparsed,
 
-    /// File has diagnostics but guaranteed no directives.
-    IsUnparsedNoDirectives
-  };
+        /// File has diagnostics but guaranteed no directives.
+        IsUnparsedNoDirectives
+    };
 
-  /// Update lists of parsed and unparsed files.
-  void UpdateParsedFileStatus(SourceManager &SM, FileID FID, ParsedStatus PS);
+    /// Update lists of parsed and unparsed files.
+    void UpdateParsedFileStatus(SourceManager &SM, FileID FID, ParsedStatus PS);
 
-  bool HandleComment(Preprocessor &PP, SourceRange Comment) override;
+    bool HandleComment(Preprocessor &PP, SourceRange Comment) override;
 
-  void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
-                        const Diagnostic &Info) override;
+    void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
+                          const Diagnostic &Info) override;
 };
 
 } // namespace clang

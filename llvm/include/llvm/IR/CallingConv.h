@@ -20,13 +20,13 @@ namespace llvm {
 ///
 namespace CallingConv {
 
-  /// LLVM IR allows to use arbitrary numbers as calling convention identifiers.
-  using ID = unsigned;
+/// LLVM IR allows to use arbitrary numbers as calling convention identifiers.
+using ID = unsigned;
 
-  /// A set of enums which specify the assigned numeric values for known llvm
-  /// calling conventions.
-  /// LLVM Calling Convention Representation
-  enum {
+/// A set of enums which specify the assigned numeric values for known llvm
+/// calling conventions.
+/// LLVM Calling Convention Representation
+enum {
     /// C - The default llvm calling convention, compatible with C.  This
     /// convention is the only calling convention that supports varargs calls.
     /// As with typical C calling conventions, the callee/caller have to
@@ -246,7 +246,7 @@ namespace CallingConv {
 
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023
-  };
+};
 
 } // end namespace CallingConv
 

@@ -18,20 +18,20 @@ namespace pdb {
 class DbiStream;
 
 class NativeExeSymbol : public NativeRawSymbol {
-  // EXE symbol is the authority on the various symbol types.
-  DbiStream *Dbi = nullptr;
+    // EXE symbol is the authority on the various symbol types.
+    DbiStream *Dbi = nullptr;
 
 public:
-  NativeExeSymbol(NativeSession &Session, SymIndexId Id);
+    NativeExeSymbol(NativeSession &Session, SymIndexId Id);
 
-  std::unique_ptr<IPDBEnumSymbols>
-  findChildren(PDB_SymType Type) const override;
+    std::unique_ptr<IPDBEnumSymbols>
+    findChildren(PDB_SymType Type) const override;
 
-  uint32_t getAge() const override;
-  std::string getSymbolsFileName() const override;
-  codeview::GUID getGuid() const override;
-  bool hasCTypes() const override;
-  bool hasPrivateSymbols() const override;
+    uint32_t getAge() const override;
+    std::string getSymbolsFileName() const override;
+    codeview::GUID getGuid() const override;
+    bool hasCTypes() const override;
+    bool hasPrivateSymbols() const override;
 };
 
 } // namespace pdb

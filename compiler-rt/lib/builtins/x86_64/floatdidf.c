@@ -8,6 +8,8 @@
 
 #include "../int_lib.h"
 
-double __floatdidf(int64_t a) { return (double)a; }
+double __floatdidf(int64_t a) {
+    return (double)a;
+}
 
 #endif // __x86_64__

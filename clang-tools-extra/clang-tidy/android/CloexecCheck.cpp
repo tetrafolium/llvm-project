@@ -24,15 +24,15 @@ namespace {
 // end of the string. Else, add <Mode>.
 std::string buildFixMsgForStringFlag(const Expr *Arg, const SourceManager &SM,
                                      const LangOptions &LangOpts, char Mode) {
-  if (Arg->getBeginLoc().isMacroID())
-    return (Lexer::getSourceText(
-                CharSourceRange::getTokenRange(Arg->getSourceRange()), SM,
-                LangOpts) +
-            " \"" + Twine(Mode) + "\"")
-        .str();
+    if (Arg->getBeginLoc().isMacroID())
+        return (Lexer::getSourceText(
+                    CharSourceRange::getTokenRange(Arg->getSourceRange()), SM,
+                    LangOpts) +
+                " \"" + Twine(Mode) + "\"")
+               .str();
 
-  StringRef SR = cast<StringLiteral>(Arg->IgnoreParenCasts())->getString();
-  return ("\"" + SR + Twine(Mode) + "\"").str();
+    StringRef SR = cast<StringLiteral>(Arg->IgnoreParenCasts())->getString();
+    return ("\"" + SR + Twine(Mode) + "\"").str();
 }
 } // namespace
 
@@ -42,70 +42,70 @@ const char *CloexecCheck::FuncBindingStr ="func";
 
 void CloexecCheck::registerMatchersImpl(
     MatchFinder *Finder, internal::Matcher<FunctionDecl> Function) {
-  // We assume all the checked APIs are C functions.
-  Finder->addMatcher(
-      callExpr(
-          callee(functionDecl(isExternC(), Function).bind(FuncDeclBindingStr)))
-          .bind(FuncBindingStr),
-      this);
+    // We assume all the checked APIs are C functions.
+    Finder->addMatcher(
+        callExpr(
+            callee(functionDecl(isExternC(), Function).bind(FuncDeclBindingStr)))
+        .bind(FuncBindingStr),
+        this);
 }
 
 void CloexecCheck::insertMacroFlag(const MatchFinder::MatchResult &Result,
                                    StringRef MacroFlag, int ArgPos) {
-  const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
-  const auto *FlagArg = MatchedCall->getArg(ArgPos);
-  const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>(FuncDeclBindingStr);
-  SourceManager &SM = *Result.SourceManager;
+    const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
+    const auto *FlagArg = MatchedCall->getArg(ArgPos);
+    const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>(FuncDeclBindingStr);
+    SourceManager &SM = *Result.SourceManager;
 
-  if (utils::exprHasBitFlagWithSpelling(FlagArg->IgnoreParenCasts(), SM,
-                                        Result.Context->getLangOpts(),
-                                        MacroFlag))
-    return;
+    if (utils::exprHasBitFlagWithSpelling(FlagArg->IgnoreParenCasts(), SM,
+                                          Result.Context->getLangOpts(),
+                                          MacroFlag))
+        return;
 
-  SourceLocation EndLoc =
-      Lexer::getLocForEndOfToken(SM.getFileLoc(FlagArg->getEndLoc()), 0, SM,
-                                 Result.Context->getLangOpts());
+    SourceLocation EndLoc =
+        Lexer::getLocForEndOfToken(SM.getFileLoc(FlagArg->getEndLoc()), 0, SM,
+                                   Result.Context->getLangOpts());
 
-  diag(EndLoc, "%0 should use %1 where possible")
-      << FD << MacroFlag
-      << FixItHint::CreateInsertion(EndLoc, (Twine(" | ") + MacroFlag).str());
+    diag(EndLoc, "%0 should use %1 where possible")
+            << FD << MacroFlag
+            << FixItHint::CreateInsertion(EndLoc, (Twine(" | ") + MacroFlag).str());
 }
 
 void CloexecCheck::replaceFunc(const MatchFinder::MatchResult &Result,
                                StringRef WarningMsg, StringRef FixMsg) {
-  const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
-  diag(MatchedCall->getBeginLoc(), WarningMsg)
-      << FixItHint::CreateReplacement(MatchedCall->getSourceRange(), FixMsg);
+    const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
+    diag(MatchedCall->getBeginLoc(), WarningMsg)
+            << FixItHint::CreateReplacement(MatchedCall->getSourceRange(), FixMsg);
 }
 
 void CloexecCheck::insertStringFlag(
     const ast_matchers::MatchFinder::MatchResult &Result, const char Mode,
     const int ArgPos) {
-  const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
-  const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>(FuncDeclBindingStr);
-  const auto *ModeArg = MatchedCall->getArg(ArgPos);
+    const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
+    const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>(FuncDeclBindingStr);
+    const auto *ModeArg = MatchedCall->getArg(ArgPos);
 
-  // Check if the <Mode> may be in the mode string.
-  const auto *ModeStr = dyn_cast<StringLiteral>(ModeArg->IgnoreParenCasts());
-  if (!ModeStr || (ModeStr->getString().find(Mode) != StringRef::npos))
-    return;
+    // Check if the <Mode> may be in the mode string.
+    const auto *ModeStr = dyn_cast<StringLiteral>(ModeArg->IgnoreParenCasts());
+    if (!ModeStr || (ModeStr->getString().find(Mode) != StringRef::npos))
+        return;
 
-  std::string ReplacementText = buildFixMsgForStringFlag(
-      ModeArg, *Result.SourceManager, Result.Context->getLangOpts(), Mode);
+    std::string ReplacementText = buildFixMsgForStringFlag(
+                                      ModeArg, *Result.SourceManager, Result.Context->getLangOpts(), Mode);
 
-  diag(ModeArg->getBeginLoc(), "use %0 mode '%1' to set O_CLOEXEC")
-      << FD << std::string(1, Mode)
-      << FixItHint::CreateReplacement(ModeArg->getSourceRange(),
-                                      ReplacementText);
+    diag(ModeArg->getBeginLoc(), "use %0 mode '%1' to set O_CLOEXEC")
+            << FD << std::string(1, Mode)
+            << FixItHint::CreateReplacement(ModeArg->getSourceRange(),
+                                            ReplacementText);
 }
 
 StringRef CloexecCheck::getSpellingArg(const MatchFinder::MatchResult &Result,
                                        int N) const {
-  const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
-  const SourceManager &SM = *Result.SourceManager;
-  return Lexer::getSourceText(
-      CharSourceRange::getTokenRange(MatchedCall->getArg(N)->getSourceRange()),
-      SM, Result.Context->getLangOpts());
+    const auto *MatchedCall = Result.Nodes.getNodeAs<CallExpr>(FuncBindingStr);
+    const SourceManager &SM = *Result.SourceManager;
+    return Lexer::getSourceText(
+               CharSourceRange::getTokenRange(MatchedCall->getArg(N)->getSourceRange()),
+               SM, Result.Context->getLangOpts());
 }
 
 } // namespace android

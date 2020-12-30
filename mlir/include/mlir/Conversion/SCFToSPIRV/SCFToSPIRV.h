@@ -24,13 +24,15 @@ class SPIRVTypeConverter;
 struct ScfToSPIRVContextImpl;
 
 struct ScfToSPIRVContext {
-  ScfToSPIRVContext();
-  ~ScfToSPIRVContext();
+    ScfToSPIRVContext();
+    ~ScfToSPIRVContext();
 
-  ScfToSPIRVContextImpl *getImpl() { return impl.get(); }
+    ScfToSPIRVContextImpl *getImpl() {
+        return impl.get();
+    }
 
 private:
-  std::unique_ptr<ScfToSPIRVContextImpl> impl;
+    std::unique_ptr<ScfToSPIRVContextImpl> impl;
 };
 
 /// Collects a set of patterns to lower from scf.for, scf.if, and

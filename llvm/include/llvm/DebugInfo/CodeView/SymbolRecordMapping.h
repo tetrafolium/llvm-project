@@ -19,15 +19,15 @@ class BinaryStreamWriter;
 namespace codeview {
 class SymbolRecordMapping : public SymbolVisitorCallbacks {
 public:
-  explicit SymbolRecordMapping(BinaryStreamReader &Reader,
-                               CodeViewContainer Container)
-      : IO(Reader), Container(Container) {}
-  explicit SymbolRecordMapping(BinaryStreamWriter &Writer,
-                               CodeViewContainer Container)
-      : IO(Writer), Container(Container) {}
+    explicit SymbolRecordMapping(BinaryStreamReader &Reader,
+                                 CodeViewContainer Container)
+        : IO(Reader), Container(Container) {}
+    explicit SymbolRecordMapping(BinaryStreamWriter &Writer,
+                                 CodeViewContainer Container)
+        : IO(Writer), Container(Container) {}
 
-  Error visitSymbolBegin(CVSymbol &Record) override;
-  Error visitSymbolEnd(CVSymbol &Record) override;
+    Error visitSymbolBegin(CVSymbol &Record) override;
+    Error visitSymbolEnd(CVSymbol &Record) override;
 
 #define SYMBOL_RECORD(EnumName, EnumVal, Name)                                 \
   Error visitKnownRecord(CVSymbol &CVR, Name &Record) override;
@@ -35,10 +35,10 @@ public:
 #include "llvm/DebugInfo/CodeView/CodeViewSymbols.def"
 
 private:
-  Optional<SymbolKind> Kind;
+    Optional<SymbolKind> Kind;
 
-  CodeViewRecordIO IO;
-  CodeViewContainer Container;
+    CodeViewRecordIO IO;
+    CodeViewContainer Container;
 };
 }
 }

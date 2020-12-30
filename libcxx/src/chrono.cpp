@@ -49,34 +49,34 @@ namespace chrono
 #if defined(_LIBCPP_WIN32API)
 
 static system_clock::time_point __libcpp_system_clock_now() {
-  // FILETIME is in 100ns units
-  using filetime_duration =
-      _VSTD::chrono::duration<__int64,
-                              _VSTD::ratio_multiply<_VSTD::ratio<100, 1>,
-                                                    nanoseconds::period>>;
+    // FILETIME is in 100ns units
+    using filetime_duration =
+        _VSTD::chrono::duration<__int64,
+        _VSTD::ratio_multiply<_VSTD::ratio<100, 1>,
+        nanoseconds::period>>;
 
-  // The Windows epoch is Jan 1 1601, the Unix epoch Jan 1 1970.
-  static _LIBCPP_CONSTEXPR const seconds nt_to_unix_epoch{11644473600};
+    // The Windows epoch is Jan 1 1601, the Unix epoch Jan 1 1970.
+    static _LIBCPP_CONSTEXPR const seconds nt_to_unix_epoch{11644473600};
 
-  FILETIME ft;
+    FILETIME ft;
 #if _WIN32_WINNT >= _WIN32_WINNT_WIN8 && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-  GetSystemTimePreciseAsFileTime(&ft);
+    GetSystemTimePreciseAsFileTime(&ft);
 #else
-  GetSystemTimeAsFileTime(&ft);
+    GetSystemTimeAsFileTime(&ft);
 #endif
 
-  filetime_duration d{(static_cast<__int64>(ft.dwHighDateTime) << 32) |
-                       static_cast<__int64>(ft.dwLowDateTime)};
-  return system_clock::time_point(duration_cast<system_clock::duration>(d - nt_to_unix_epoch));
+    filetime_duration d{(static_cast<__int64>(ft.dwHighDateTime) << 32) |
+                        static_cast<__int64>(ft.dwLowDateTime)};
+    return system_clock::time_point(duration_cast<system_clock::duration>(d - nt_to_unix_epoch));
 }
 
 #elif defined(CLOCK_REALTIME) && defined(_LIBCPP_USE_CLOCK_GETTIME)
 
 static system_clock::time_point __libcpp_system_clock_now() {
-  struct timespec tp;
-  if (0 != clock_gettime(CLOCK_REALTIME, &tp))
-    __throw_system_error(errno, "clock_gettime(CLOCK_REALTIME) failed");
-  return system_clock::time_point(seconds(tp.tv_sec) + microseconds(tp.tv_nsec / 1000));
+    struct timespec tp;
+    if (0 != clock_gettime(CLOCK_REALTIME, &tp))
+        __throw_system_error(errno, "clock_gettime(CLOCK_REALTIME) failed");
+    return system_clock::time_point(seconds(tp.tv_sec) + microseconds(tp.tv_nsec / 1000));
 }
 
 #else
@@ -149,11 +149,11 @@ __QueryPerformanceFrequency()
 }
 
 static steady_clock::time_point __libcpp_steady_clock_now() {
-  static const LARGE_INTEGER freq = __QueryPerformanceFrequency();
+    static const LARGE_INTEGER freq = __QueryPerformanceFrequency();
 
-  LARGE_INTEGER counter;
-  (void) QueryPerformanceCounter(&counter);
-  return steady_clock::time_point(steady_clock::duration(counter.QuadPart * nano::den / freq.QuadPart));
+    LARGE_INTEGER counter;
+    (void) QueryPerformanceCounter(&counter);
+    return steady_clock::time_point(steady_clock::duration(counter.QuadPart * nano::den / freq.QuadPart));
 }
 
 #elif defined(CLOCK_MONOTONIC)

@@ -21,84 +21,84 @@ class CommandInterpreterRunResult;
 namespace lldb {
 
 class LLDB_API SBCommandInterpreterRunOptions {
-  friend class SBDebugger;
-  friend class SBCommandInterpreter;
+    friend class SBDebugger;
+    friend class SBCommandInterpreter;
 
 public:
-  SBCommandInterpreterRunOptions();
-  SBCommandInterpreterRunOptions(const SBCommandInterpreterRunOptions &rhs);
-  ~SBCommandInterpreterRunOptions();
+    SBCommandInterpreterRunOptions();
+    SBCommandInterpreterRunOptions(const SBCommandInterpreterRunOptions &rhs);
+    ~SBCommandInterpreterRunOptions();
 
-  SBCommandInterpreterRunOptions &
-  operator=(const SBCommandInterpreterRunOptions &rhs);
+    SBCommandInterpreterRunOptions &
+    operator=(const SBCommandInterpreterRunOptions &rhs);
 
-  bool GetStopOnContinue() const;
+    bool GetStopOnContinue() const;
 
-  void SetStopOnContinue(bool);
+    void SetStopOnContinue(bool);
 
-  bool GetStopOnError() const;
+    bool GetStopOnError() const;
 
-  void SetStopOnError(bool);
+    void SetStopOnError(bool);
 
-  bool GetStopOnCrash() const;
+    bool GetStopOnCrash() const;
 
-  void SetStopOnCrash(bool);
+    void SetStopOnCrash(bool);
 
-  bool GetEchoCommands() const;
+    bool GetEchoCommands() const;
 
-  void SetEchoCommands(bool);
+    void SetEchoCommands(bool);
 
-  bool GetEchoCommentCommands() const;
+    bool GetEchoCommentCommands() const;
 
-  void SetEchoCommentCommands(bool echo);
+    void SetEchoCommentCommands(bool echo);
 
-  bool GetPrintResults() const;
+    bool GetPrintResults() const;
 
-  void SetPrintResults(bool);
+    void SetPrintResults(bool);
 
-  bool GetAddToHistory() const;
+    bool GetAddToHistory() const;
 
-  void SetAddToHistory(bool);
+    void SetAddToHistory(bool);
 
-  bool GetAutoHandleEvents() const;
+    bool GetAutoHandleEvents() const;
 
-  void SetAutoHandleEvents(bool);
+    void SetAutoHandleEvents(bool);
 
-  bool GetSpawnThread() const;
+    bool GetSpawnThread() const;
 
-  void SetSpawnThread(bool);
+    void SetSpawnThread(bool);
 
 private:
-  lldb_private::CommandInterpreterRunOptions *get() const;
+    lldb_private::CommandInterpreterRunOptions *get() const;
 
-  lldb_private::CommandInterpreterRunOptions &ref() const;
+    lldb_private::CommandInterpreterRunOptions &ref() const;
 
-  // This is set in the constructor and will always be valid.
-  mutable std::unique_ptr<lldb_private::CommandInterpreterRunOptions>
-      m_opaque_up;
+    // This is set in the constructor and will always be valid.
+    mutable std::unique_ptr<lldb_private::CommandInterpreterRunOptions>
+    m_opaque_up;
 };
 
 class LLDB_API SBCommandInterpreterRunResult {
-  friend class SBDebugger;
-  friend class SBCommandInterpreter;
+    friend class SBDebugger;
+    friend class SBCommandInterpreter;
 
 public:
-  SBCommandInterpreterRunResult();
-  SBCommandInterpreterRunResult(const SBCommandInterpreterRunResult &rhs);
-  ~SBCommandInterpreterRunResult();
+    SBCommandInterpreterRunResult();
+    SBCommandInterpreterRunResult(const SBCommandInterpreterRunResult &rhs);
+    ~SBCommandInterpreterRunResult();
 
-  SBCommandInterpreterRunResult &
-  operator=(const SBCommandInterpreterRunResult &rhs);
+    SBCommandInterpreterRunResult &
+    operator=(const SBCommandInterpreterRunResult &rhs);
 
-  int GetNumberOfErrors() const;
-  lldb::CommandInterpreterResult GetResult() const;
+    int GetNumberOfErrors() const;
+    lldb::CommandInterpreterResult GetResult() const;
 
 private:
-  SBCommandInterpreterRunResult(
-      const lldb_private::CommandInterpreterRunResult &rhs);
+    SBCommandInterpreterRunResult(
+        const lldb_private::CommandInterpreterRunResult &rhs);
 
-  // This is set in the constructor and will always be valid.
-  std::unique_ptr<lldb_private::CommandInterpreterRunResult> m_opaque_up;
+    // This is set in the constructor and will always be valid.
+    std::unique_ptr<lldb_private::CommandInterpreterRunResult> m_opaque_up;
 };
 
 } // namespace lldb

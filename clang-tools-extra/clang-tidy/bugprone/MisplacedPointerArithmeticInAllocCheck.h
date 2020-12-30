@@ -22,11 +22,11 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-misplaced-operator-in-alloc.html
 class MisplacedPointerArithmeticInAllocCheck : public ClangTidyCheck {
 public:
-  MisplacedPointerArithmeticInAllocCheck(StringRef Name,
-                                         ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    MisplacedPointerArithmeticInAllocCheck(StringRef Name,
+                                           ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace bugprone

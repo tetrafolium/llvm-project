@@ -18,11 +18,11 @@ struct DeallocateStmt;
 namespace Fortran::semantics {
 class DeallocateChecker : public virtual BaseChecker {
 public:
-  DeallocateChecker(SemanticsContext &context) : context_{context} {}
-  void Leave(const parser::DeallocateStmt &);
+    DeallocateChecker(SemanticsContext &context) : context_{context} {}
+    void Leave(const parser::DeallocateStmt &);
 
 private:
-  SemanticsContext &context_;
+    SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_DEALLOCATE_H_

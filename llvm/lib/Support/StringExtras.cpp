@@ -21,13 +21,13 @@ using namespace llvm;
 /// occurrence of string 's1' in string 's2', ignoring case.  Returns
 /// the offset of s2 in s1 or npos if s2 cannot be found.
 StringRef::size_type llvm::StrInStrNoCase(StringRef s1, StringRef s2) {
-  size_t N = s2.size(), M = s1.size();
-  if (N > M)
+    size_t N = s2.size(), M = s1.size();
+    if (N > M)
+        return StringRef::npos;
+    for (size_t i = 0, e = M - N + 1; i != e; ++i)
+        if (s1.substr(i, N).equals_lower(s2))
+            return i;
     return StringRef::npos;
-  for (size_t i = 0, e = M - N + 1; i != e; ++i)
-    if (s1.substr(i, N).equals_lower(s2))
-      return i;
-  return StringRef::npos;
 }
 
 /// getToken - This function extracts one token from source, ignoring any
@@ -37,14 +37,14 @@ StringRef::size_type llvm::StrInStrNoCase(StringRef s1, StringRef s2) {
 /// The function returns a pair containing the extracted token and the
 /// remaining tail string.
 std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
-                                               StringRef Delimiters) {
-  // Figure out where the token starts.
-  StringRef::size_type Start = Source.find_first_not_of(Delimiters);
+        StringRef Delimiters) {
+    // Figure out where the token starts.
+    StringRef::size_type Start = Source.find_first_not_of(Delimiters);
 
-  // Find the next occurrence of the delimiter.
-  StringRef::size_type End = Source.find_first_of(Delimiters, Start);
+    // Find the next occurrence of the delimiter.
+    StringRef::size_type End = Source.find_first_of(Delimiters, Start);
 
-  return std::make_pair(Source.slice(Start, End), Source.substr(End));
+    return std::make_pair(Source.slice(Start, End), Source.substr(End));
 }
 
 /// SplitString - Split up the specified string according to the specified
@@ -52,86 +52,86 @@ std::pair<StringRef, StringRef> llvm::getToken(StringRef Source,
 void llvm::SplitString(StringRef Source,
                        SmallVectorImpl<StringRef> &OutFragments,
                        StringRef Delimiters) {
-  std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
-  while (!S.first.empty()) {
-    OutFragments.push_back(S.first);
-    S = getToken(S.second, Delimiters);
-  }
+    std::pair<StringRef, StringRef> S = getToken(Source, Delimiters);
+    while (!S.first.empty()) {
+        OutFragments.push_back(S.first);
+        S = getToken(S.second, Delimiters);
+    }
 }
 
 void llvm::printEscapedString(StringRef Name, raw_ostream &Out) {
-  for (unsigned i = 0, e = Name.size(); i != e; ++i) {
-    unsigned char C = Name[i];
-    if (C == '\\')
-      Out << '\\' << C;
-    else if (isPrint(C) && C != '"')
-      Out << C;
-    else
-      Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
-  }
+    for (unsigned i = 0, e = Name.size(); i != e; ++i) {
+        unsigned char C = Name[i];
+        if (C == '\\')
+            Out << '\\' << C;
+        else if (isPrint(C) && C != '"')
+            Out << C;
+        else
+            Out << '\\' << hexdigit(C >> 4) << hexdigit(C & 0x0F);
+    }
 }
 
 void llvm::printHTMLEscaped(StringRef String, raw_ostream &Out) {
-  for (char C : String) {
-    if (C == '&')
-      Out << "&amp;";
-    else if (C == '<')
-      Out << "&lt;";
-    else if (C == '>')
-      Out << "&gt;";
-    else if (C == '\"')
-      Out << "&quot;";
-    else if (C == '\'')
-      Out << "&apos;";
-    else
-      Out << C;
-  }
+    for (char C : String) {
+        if (C == '&')
+            Out << "&amp;";
+        else if (C == '<')
+            Out << "&lt;";
+        else if (C == '>')
+            Out << "&gt;";
+        else if (C == '\"')
+            Out << "&quot;";
+        else if (C == '\'')
+            Out << "&apos;";
+        else
+            Out << C;
+    }
 }
 
 void llvm::printLowerCase(StringRef String, raw_ostream &Out) {
-  for (const char C : String)
-    Out << toLower(C);
+    for (const char C : String)
+        Out << toLower(C);
 }
 
 std::string llvm::convertToSnakeFromCamelCase(StringRef input) {
-  if (input.empty())
-    return "";
+    if (input.empty())
+        return "";
 
-  std::string snakeCase;
-  snakeCase.reserve(input.size());
-  for (char c : input) {
-    if (!std::isupper(c)) {
-      snakeCase.push_back(c);
-      continue;
+    std::string snakeCase;
+    snakeCase.reserve(input.size());
+    for (char c : input) {
+        if (!std::isupper(c)) {
+            snakeCase.push_back(c);
+            continue;
+        }
+
+        if (!snakeCase.empty() && snakeCase.back() != '_')
+            snakeCase.push_back('_');
+        snakeCase.push_back(llvm::toLower(c));
     }
-
-    if (!snakeCase.empty() && snakeCase.back() != '_')
-      snakeCase.push_back('_');
-    snakeCase.push_back(llvm::toLower(c));
-  }
-  return snakeCase;
+    return snakeCase;
 }
 
 std::string llvm::convertToCamelFromSnakeCase(StringRef input,
-                                              bool capitalizeFirst) {
-  if (input.empty())
-    return "";
+        bool capitalizeFirst) {
+    if (input.empty())
+        return "";
 
-  std::string output;
-  output.reserve(input.size());
+    std::string output;
+    output.reserve(input.size());
 
-  // Push the first character, capatilizing if necessary.
-  if (capitalizeFirst && std::islower(input.front()))
-    output.push_back(llvm::toUpper(input.front()));
-  else
-    output.push_back(input.front());
-
-  // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
-  for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
-    if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
-      output.push_back(llvm::toUpper(input[++pos]));
+    // Push the first character, capatilizing if necessary.
+    if (capitalizeFirst && std::islower(input.front()))
+        output.push_back(llvm::toUpper(input.front()));
     else
-      output.push_back(input[pos]);
-  }
-  return output;
+        output.push_back(input.front());
+
+    // Walk the input converting any `*_[a-z]` snake case into `*[A-Z]` camelCase.
+    for (size_t pos = 1, e = input.size(); pos < e; ++pos) {
+        if (input[pos] == '_' && pos != (e - 1) && std::islower(input[pos + 1]))
+            output.push_back(llvm::toUpper(input[++pos]));
+        else
+            output.push_back(input[pos]);
+    }
+    return output;
 }

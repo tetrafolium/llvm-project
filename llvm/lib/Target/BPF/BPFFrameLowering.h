@@ -20,21 +20,21 @@ class BPFSubtarget;
 
 class BPFFrameLowering : public TargetFrameLowering {
 public:
-  explicit BPFFrameLowering(const BPFSubtarget &sti)
-      : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(8), 0) {}
+    explicit BPFFrameLowering(const BPFSubtarget &sti)
+        : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(8), 0) {}
 
-  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
-  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+    void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+    void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-  bool hasFP(const MachineFunction &MF) const override;
-  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
-                            RegScavenger *RS) const override;
+    bool hasFP(const MachineFunction &MF) const override;
+    void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+                              RegScavenger *RS) const override;
 
-  MachineBasicBlock::iterator
-  eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
-                                MachineBasicBlock::iterator MI) const override {
-    return MBB.erase(MI);
-  }
+    MachineBasicBlock::iterator
+    eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
+                                  MachineBasicBlock::iterator MI) const override {
+        return MBB.erase(MI);
+    }
 };
 }
 #endif

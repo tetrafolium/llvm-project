@@ -30,43 +30,43 @@ RemarkStreamer::RemarkStreamer(
       Filename(FilenameIn ? Optional<std::string>(FilenameIn->str()) : None) {}
 
 Error RemarkStreamer::setFilter(StringRef Filter) {
-  Regex R = Regex(Filter);
-  std::string RegexError;
-  if (!R.isValid(RegexError))
-    return createStringError(std::make_error_code(std::errc::invalid_argument),
-                             RegexError.data());
-  PassFilter = std::move(R);
-  return Error::success();
+    Regex R = Regex(Filter);
+    std::string RegexError;
+    if (!R.isValid(RegexError))
+        return createStringError(std::make_error_code(std::errc::invalid_argument),
+                                 RegexError.data());
+    PassFilter = std::move(R);
+    return Error::success();
 }
 
 bool RemarkStreamer::matchesFilter(StringRef Str) {
-  if (PassFilter)
-    return PassFilter->match(Str);
-  // No filter means all strings pass.
-  return true;
+    if (PassFilter)
+        return PassFilter->match(Str);
+    // No filter means all strings pass.
+    return true;
 }
 
 bool RemarkStreamer::needsSection() const {
-  if (EnableRemarksSection == cl::BOU_TRUE)
-    return true;
+    if (EnableRemarksSection == cl::BOU_TRUE)
+        return true;
 
-  if (EnableRemarksSection == cl::BOU_FALSE)
-    return false;
+    if (EnableRemarksSection == cl::BOU_FALSE)
+        return false;
 
-  assert(EnableRemarksSection == cl::BOU_UNSET);
+    assert(EnableRemarksSection == cl::BOU_UNSET);
 
-  // We only need a section if we're in separate mode.
-  if (RemarkSerializer->Mode != remarks::SerializerMode::Separate)
-    return false;
+    // We only need a section if we're in separate mode.
+    if (RemarkSerializer->Mode != remarks::SerializerMode::Separate)
+        return false;
 
-  // Only some formats need a section:
-  // * bitstream
-  // * yaml-strtab
-  switch (RemarkSerializer->SerializerFormat) {
-  case remarks::Format::YAMLStrTab:
-  case remarks::Format::Bitstream:
-    return true;
-  default:
-    return false;
-  }
+    // Only some formats need a section:
+    // * bitstream
+    // * yaml-strtab
+    switch (RemarkSerializer->SerializerFormat) {
+    case remarks::Format::YAMLStrTab:
+    case remarks::Format::Bitstream:
+        return true;
+    default:
+        return false;
+    }
 }

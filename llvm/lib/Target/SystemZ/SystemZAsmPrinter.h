@@ -24,31 +24,33 @@ class raw_ostream;
 
 class LLVM_LIBRARY_VISIBILITY SystemZAsmPrinter : public AsmPrinter {
 private:
-  StackMaps SM;
+    StackMaps SM;
 
 public:
-  SystemZAsmPrinter(TargetMachine &TM, std::unique_ptr<MCStreamer> Streamer)
-      : AsmPrinter(TM, std::move(Streamer)), SM(*this) {}
+    SystemZAsmPrinter(TargetMachine &TM, std::unique_ptr<MCStreamer> Streamer)
+        : AsmPrinter(TM, std::move(Streamer)), SM(*this) {}
 
-  // Override AsmPrinter.
-  StringRef getPassName() const override { return "SystemZ Assembly Printer"; }
-  void emitInstruction(const MachineInstr *MI) override;
-  void emitMachineConstantPoolValue(MachineConstantPoolValue *MCPV) override;
-  void emitEndOfAsmFile(Module &M) override;
-  bool PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
-                       const char *ExtraCode, raw_ostream &OS) override;
-  bool PrintAsmMemoryOperand(const MachineInstr *MI, unsigned OpNo,
-                             const char *ExtraCode, raw_ostream &OS) override;
+    // Override AsmPrinter.
+    StringRef getPassName() const override {
+        return "SystemZ Assembly Printer";
+    }
+    void emitInstruction(const MachineInstr *MI) override;
+    void emitMachineConstantPoolValue(MachineConstantPoolValue *MCPV) override;
+    void emitEndOfAsmFile(Module &M) override;
+    bool PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
+                         const char *ExtraCode, raw_ostream &OS) override;
+    bool PrintAsmMemoryOperand(const MachineInstr *MI, unsigned OpNo,
+                               const char *ExtraCode, raw_ostream &OS) override;
 
-  bool doInitialization(Module &M) override {
-    SM.reset();
-    return AsmPrinter::doInitialization(M);
-  }
+    bool doInitialization(Module &M) override {
+        SM.reset();
+        return AsmPrinter::doInitialization(M);
+    }
 
 private:
-  void LowerFENTRY_CALL(const MachineInstr &MI, SystemZMCInstLower &MCIL);
-  void LowerSTACKMAP(const MachineInstr &MI);
-  void LowerPATCHPOINT(const MachineInstr &MI, SystemZMCInstLower &Lower);
+    void LowerFENTRY_CALL(const MachineInstr &MI, SystemZMCInstLower &MCIL);
+    void LowerSTACKMAP(const MachineInstr &MI);
+    void LowerPATCHPOINT(const MachineInstr &MI, SystemZMCInstLower &Lower);
 };
 } // end namespace llvm
 

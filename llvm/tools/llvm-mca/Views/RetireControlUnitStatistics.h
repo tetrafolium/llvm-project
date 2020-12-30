@@ -36,22 +36,22 @@ namespace llvm {
 namespace mca {
 
 class RetireControlUnitStatistics : public View {
-  using Histogram = std::map<unsigned, unsigned>;
-  Histogram RetiredPerCycle;
+    using Histogram = std::map<unsigned, unsigned>;
+    Histogram RetiredPerCycle;
 
-  unsigned NumRetired;
-  unsigned NumCycles;
-  unsigned TotalROBEntries;
-  unsigned EntriesInUse;
-  unsigned MaxUsedEntries;
-  unsigned SumOfUsedEntries;
+    unsigned NumRetired;
+    unsigned NumCycles;
+    unsigned TotalROBEntries;
+    unsigned EntriesInUse;
+    unsigned MaxUsedEntries;
+    unsigned SumOfUsedEntries;
 
 public:
-  RetireControlUnitStatistics(const MCSchedModel &SM);
+    RetireControlUnitStatistics(const MCSchedModel &SM);
 
-  void onEvent(const HWInstructionEvent &Event) override;
-  void onCycleEnd() override;
-  void printView(llvm::raw_ostream &OS) const override;
+    void onEvent(const HWInstructionEvent &Event) override;
+    void onCycleEnd() override;
+    void printView(llvm::raw_ostream &OS) const override;
 };
 
 } // namespace mca

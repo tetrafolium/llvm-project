@@ -11,17 +11,17 @@
 using namespace llvm;
 
 Target &llvm::getTheNVPTXTarget32() {
-  static Target TheNVPTXTarget32;
-  return TheNVPTXTarget32;
+    static Target TheNVPTXTarget32;
+    return TheNVPTXTarget32;
 }
 Target &llvm::getTheNVPTXTarget64() {
-  static Target TheNVPTXTarget64;
-  return TheNVPTXTarget64;
+    static Target TheNVPTXTarget64;
+    return TheNVPTXTarget64;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeNVPTXTargetInfo() {
-  RegisterTarget<Triple::nvptx> X(getTheNVPTXTarget32(), "nvptx",
-                                  "NVIDIA PTX 32-bit", "NVPTX");
-  RegisterTarget<Triple::nvptx64> Y(getTheNVPTXTarget64(), "nvptx64",
-                                    "NVIDIA PTX 64-bit", "NVPTX");
+    RegisterTarget<Triple::nvptx> X(getTheNVPTXTarget32(), "nvptx",
+                                    "NVIDIA PTX 32-bit", "NVPTX");
+    RegisterTarget<Triple::nvptx64> Y(getTheNVPTXTarget64(), "nvptx64",
+                                      "NVIDIA PTX 64-bit", "NVPTX");
 }

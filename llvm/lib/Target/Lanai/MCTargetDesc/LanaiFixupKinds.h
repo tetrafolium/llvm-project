@@ -22,19 +22,19 @@ namespace Lanai {
 // in LanaiAsmBackend.cpp.
 //
 enum Fixups {
-  // Results in R_Lanai_NONE
-  FIXUP_LANAI_NONE = FirstTargetFixupKind,
+    // Results in R_Lanai_NONE
+    FIXUP_LANAI_NONE = FirstTargetFixupKind,
 
-  FIXUP_LANAI_21,   // 21-bit symbol relocation
-  FIXUP_LANAI_21_F, // 21-bit symbol relocation, last two bits masked to 0
-  FIXUP_LANAI_25,   // 25-bit branch targets
-  FIXUP_LANAI_32,   // general 32-bit relocation
-  FIXUP_LANAI_HI16, // upper 16-bits of a symbolic relocation
-  FIXUP_LANAI_LO16, // lower 16-bits of a symbolic relocation
+    FIXUP_LANAI_21,   // 21-bit symbol relocation
+    FIXUP_LANAI_21_F, // 21-bit symbol relocation, last two bits masked to 0
+    FIXUP_LANAI_25,   // 25-bit branch targets
+    FIXUP_LANAI_32,   // general 32-bit relocation
+    FIXUP_LANAI_HI16, // upper 16-bits of a symbolic relocation
+    FIXUP_LANAI_LO16, // lower 16-bits of a symbolic relocation
 
-  // Marker
-  LastTargetFixupKind,
-  NumTargetFixupKinds = LastTargetFixupKind - FirstTargetFixupKind
+    // Marker
+    LastTargetFixupKind,
+    NumTargetFixupKinds = LastTargetFixupKind - FirstTargetFixupKind
 };
 } // namespace Lanai
 } // namespace llvm

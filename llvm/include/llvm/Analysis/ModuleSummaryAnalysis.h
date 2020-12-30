@@ -43,32 +43,36 @@ ModuleSummaryIndex buildModuleSummaryIndex(
 /// Analysis pass to provide the ModuleSummaryIndex object.
 class ModuleSummaryIndexAnalysis
     : public AnalysisInfoMixin<ModuleSummaryIndexAnalysis> {
-  friend AnalysisInfoMixin<ModuleSummaryIndexAnalysis>;
+    friend AnalysisInfoMixin<ModuleSummaryIndexAnalysis>;
 
-  static AnalysisKey Key;
+    static AnalysisKey Key;
 
 public:
-  using Result = ModuleSummaryIndex;
+    using Result = ModuleSummaryIndex;
 
-  Result run(Module &M, ModuleAnalysisManager &AM);
+    Result run(Module &M, ModuleAnalysisManager &AM);
 };
 
 /// Legacy wrapper pass to provide the ModuleSummaryIndex object.
 class ModuleSummaryIndexWrapperPass : public ModulePass {
-  Optional<ModuleSummaryIndex> Index;
+    Optional<ModuleSummaryIndex> Index;
 
 public:
-  static char ID;
+    static char ID;
 
-  ModuleSummaryIndexWrapperPass();
+    ModuleSummaryIndexWrapperPass();
 
-  /// Get the index built by pass
-  ModuleSummaryIndex &getIndex() { return *Index; }
-  const ModuleSummaryIndex &getIndex() const { return *Index; }
+    /// Get the index built by pass
+    ModuleSummaryIndex &getIndex() {
+        return *Index;
+    }
+    const ModuleSummaryIndex &getIndex() const {
+        return *Index;
+    }
 
-  bool runOnModule(Module &M) override;
-  bool doFinalization(Module &M) override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnModule(Module &M) override;
+    bool doFinalization(Module &M) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 //===--------------------------------------------------------------------===//
@@ -80,15 +84,17 @@ ModulePass *createModuleSummaryIndexWrapperPass();
 
 /// Legacy wrapper pass to provide the ModuleSummaryIndex object.
 class ImmutableModuleSummaryIndexWrapperPass : public ImmutablePass {
-  const ModuleSummaryIndex *Index;
+    const ModuleSummaryIndex *Index;
 
 public:
-  static char ID;
+    static char ID;
 
-  ImmutableModuleSummaryIndexWrapperPass(
-      const ModuleSummaryIndex *Index = nullptr);
-  const ModuleSummaryIndex *getIndex() const { return Index; }
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    ImmutableModuleSummaryIndexWrapperPass(
+        const ModuleSummaryIndex *Index = nullptr);
+    const ModuleSummaryIndex *getIndex() const {
+        return Index;
+    }
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 //===--------------------------------------------------------------------===//

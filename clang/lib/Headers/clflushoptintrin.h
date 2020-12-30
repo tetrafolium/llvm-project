@@ -19,7 +19,7 @@
 
 static __inline__ void __DEFAULT_FN_ATTRS
 _mm_clflushopt(void const * __m) {
-  __builtin_ia32_clflushopt(__m);
+    __builtin_ia32_clflushopt(__m);
 }
 
 #undef __DEFAULT_FN_ATTRS

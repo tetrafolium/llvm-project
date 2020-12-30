@@ -17,251 +17,251 @@ class SBTypeList;
 
 class LLDB_API SBTypeMember {
 public:
-  SBTypeMember();
+    SBTypeMember();
 
-  SBTypeMember(const lldb::SBTypeMember &rhs);
+    SBTypeMember(const lldb::SBTypeMember &rhs);
 
-  ~SBTypeMember();
+    ~SBTypeMember();
 
-  lldb::SBTypeMember &operator=(const lldb::SBTypeMember &rhs);
+    lldb::SBTypeMember &operator=(const lldb::SBTypeMember &rhs);
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  const char *GetName();
+    const char *GetName();
 
-  lldb::SBType GetType();
+    lldb::SBType GetType();
 
-  uint64_t GetOffsetInBytes();
+    uint64_t GetOffsetInBytes();
 
-  uint64_t GetOffsetInBits();
+    uint64_t GetOffsetInBits();
 
-  bool IsBitfield();
+    bool IsBitfield();
 
-  uint32_t GetBitfieldSizeInBits();
+    uint32_t GetBitfieldSizeInBits();
 
-  bool GetDescription(lldb::SBStream &description,
-                      lldb::DescriptionLevel description_level);
+    bool GetDescription(lldb::SBStream &description,
+                        lldb::DescriptionLevel description_level);
 
 protected:
-  friend class SBType;
+    friend class SBType;
 
-  void reset(lldb_private::TypeMemberImpl *);
+    void reset(lldb_private::TypeMemberImpl *);
 
-  lldb_private::TypeMemberImpl &ref();
+    lldb_private::TypeMemberImpl &ref();
 
-  const lldb_private::TypeMemberImpl &ref() const;
+    const lldb_private::TypeMemberImpl &ref() const;
 
-  std::unique_ptr<lldb_private::TypeMemberImpl> m_opaque_up;
+    std::unique_ptr<lldb_private::TypeMemberImpl> m_opaque_up;
 };
 
 class SBTypeMemberFunction {
 public:
-  SBTypeMemberFunction();
+    SBTypeMemberFunction();
 
-  SBTypeMemberFunction(const lldb::SBTypeMemberFunction &rhs);
+    SBTypeMemberFunction(const lldb::SBTypeMemberFunction &rhs);
 
-  ~SBTypeMemberFunction();
+    ~SBTypeMemberFunction();
 
-  lldb::SBTypeMemberFunction &operator=(const lldb::SBTypeMemberFunction &rhs);
+    lldb::SBTypeMemberFunction &operator=(const lldb::SBTypeMemberFunction &rhs);
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  const char *GetName();
+    const char *GetName();
 
-  const char *GetDemangledName();
+    const char *GetDemangledName();
 
-  const char *GetMangledName();
+    const char *GetMangledName();
 
-  lldb::SBType GetType();
+    lldb::SBType GetType();
 
-  lldb::SBType GetReturnType();
+    lldb::SBType GetReturnType();
 
-  uint32_t GetNumberOfArguments();
+    uint32_t GetNumberOfArguments();
 
-  lldb::SBType GetArgumentTypeAtIndex(uint32_t);
+    lldb::SBType GetArgumentTypeAtIndex(uint32_t);
 
-  lldb::MemberFunctionKind GetKind();
+    lldb::MemberFunctionKind GetKind();
 
-  bool GetDescription(lldb::SBStream &description,
-                      lldb::DescriptionLevel description_level);
+    bool GetDescription(lldb::SBStream &description,
+                        lldb::DescriptionLevel description_level);
 
 protected:
-  friend class SBType;
+    friend class SBType;
 
-  void reset(lldb_private::TypeMemberFunctionImpl *);
+    void reset(lldb_private::TypeMemberFunctionImpl *);
 
-  lldb_private::TypeMemberFunctionImpl &ref();
+    lldb_private::TypeMemberFunctionImpl &ref();
 
-  const lldb_private::TypeMemberFunctionImpl &ref() const;
+    const lldb_private::TypeMemberFunctionImpl &ref() const;
 
-  lldb::TypeMemberFunctionImplSP m_opaque_sp;
+    lldb::TypeMemberFunctionImplSP m_opaque_sp;
 };
 
 class SBType {
 public:
-  SBType();
+    SBType();
 
-  SBType(const lldb::SBType &rhs);
+    SBType(const lldb::SBType &rhs);
 
-  ~SBType();
+    ~SBType();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  uint64_t GetByteSize();
+    uint64_t GetByteSize();
 
-  bool IsPointerType();
+    bool IsPointerType();
 
-  bool IsReferenceType();
+    bool IsReferenceType();
 
-  bool IsFunctionType();
+    bool IsFunctionType();
 
-  bool IsPolymorphicClass();
+    bool IsPolymorphicClass();
 
-  bool IsArrayType();
+    bool IsArrayType();
 
-  bool IsVectorType();
+    bool IsVectorType();
 
-  bool IsTypedefType();
+    bool IsTypedefType();
 
-  bool IsAnonymousType();
+    bool IsAnonymousType();
 
-  bool IsScopedEnumerationType();
+    bool IsScopedEnumerationType();
 
-  lldb::SBType GetPointerType();
+    lldb::SBType GetPointerType();
 
-  lldb::SBType GetPointeeType();
+    lldb::SBType GetPointeeType();
 
-  lldb::SBType GetReferenceType();
+    lldb::SBType GetReferenceType();
 
-  lldb::SBType GetTypedefedType();
+    lldb::SBType GetTypedefedType();
 
-  lldb::SBType GetDereferencedType();
+    lldb::SBType GetDereferencedType();
 
-  lldb::SBType GetUnqualifiedType();
+    lldb::SBType GetUnqualifiedType();
 
-  lldb::SBType GetArrayElementType();
+    lldb::SBType GetArrayElementType();
 
-  lldb::SBType GetArrayType(uint64_t size);
+    lldb::SBType GetArrayType(uint64_t size);
 
-  lldb::SBType GetVectorElementType();
+    lldb::SBType GetVectorElementType();
 
-  lldb::SBType GetCanonicalType();
+    lldb::SBType GetCanonicalType();
 
-  lldb::SBType GetEnumerationIntegerType();
+    lldb::SBType GetEnumerationIntegerType();
 
-  // Get the "lldb::BasicType" enumeration for a type. If a type is not a basic
-  // type eBasicTypeInvalid will be returned
-  lldb::BasicType GetBasicType();
+    // Get the "lldb::BasicType" enumeration for a type. If a type is not a basic
+    // type eBasicTypeInvalid will be returned
+    lldb::BasicType GetBasicType();
 
-  // The call below confusing and should really be renamed to "CreateBasicType"
-  lldb::SBType GetBasicType(lldb::BasicType type);
+    // The call below confusing and should really be renamed to "CreateBasicType"
+    lldb::SBType GetBasicType(lldb::BasicType type);
 
-  uint32_t GetNumberOfFields();
+    uint32_t GetNumberOfFields();
 
-  uint32_t GetNumberOfDirectBaseClasses();
+    uint32_t GetNumberOfDirectBaseClasses();
 
-  uint32_t GetNumberOfVirtualBaseClasses();
+    uint32_t GetNumberOfVirtualBaseClasses();
 
-  lldb::SBTypeMember GetFieldAtIndex(uint32_t idx);
+    lldb::SBTypeMember GetFieldAtIndex(uint32_t idx);
 
-  lldb::SBTypeMember GetDirectBaseClassAtIndex(uint32_t idx);
+    lldb::SBTypeMember GetDirectBaseClassAtIndex(uint32_t idx);
 
-  lldb::SBTypeMember GetVirtualBaseClassAtIndex(uint32_t idx);
+    lldb::SBTypeMember GetVirtualBaseClassAtIndex(uint32_t idx);
 
-  lldb::SBTypeEnumMemberList GetEnumMembers();
+    lldb::SBTypeEnumMemberList GetEnumMembers();
 
-  uint32_t GetNumberOfTemplateArguments();
+    uint32_t GetNumberOfTemplateArguments();
 
-  lldb::SBType GetTemplateArgumentType(uint32_t idx);
+    lldb::SBType GetTemplateArgumentType(uint32_t idx);
 
-  lldb::TemplateArgumentKind GetTemplateArgumentKind(uint32_t idx);
+    lldb::TemplateArgumentKind GetTemplateArgumentKind(uint32_t idx);
 
-  lldb::SBType GetFunctionReturnType();
+    lldb::SBType GetFunctionReturnType();
 
-  lldb::SBTypeList GetFunctionArgumentTypes();
+    lldb::SBTypeList GetFunctionArgumentTypes();
 
-  uint32_t GetNumberOfMemberFunctions();
+    uint32_t GetNumberOfMemberFunctions();
 
-  lldb::SBTypeMemberFunction GetMemberFunctionAtIndex(uint32_t idx);
+    lldb::SBTypeMemberFunction GetMemberFunctionAtIndex(uint32_t idx);
 
-  lldb::SBModule GetModule();
+    lldb::SBModule GetModule();
 
-  const char *GetName();
+    const char *GetName();
 
-  const char *GetDisplayTypeName();
+    const char *GetDisplayTypeName();
 
-  lldb::TypeClass GetTypeClass();
+    lldb::TypeClass GetTypeClass();
 
-  bool IsTypeComplete();
+    bool IsTypeComplete();
 
-  uint32_t GetTypeFlags();
+    uint32_t GetTypeFlags();
 
-  bool GetDescription(lldb::SBStream &description,
-                      lldb::DescriptionLevel description_level);
+    bool GetDescription(lldb::SBStream &description,
+                        lldb::DescriptionLevel description_level);
 
-  lldb::SBType &operator=(const lldb::SBType &rhs);
+    lldb::SBType &operator=(const lldb::SBType &rhs);
 
-  bool operator==(lldb::SBType &rhs);
+    bool operator==(lldb::SBType &rhs);
 
-  bool operator!=(lldb::SBType &rhs);
+    bool operator!=(lldb::SBType &rhs);
 
 protected:
-  lldb_private::TypeImpl &ref();
+    lldb_private::TypeImpl &ref();
 
-  const lldb_private::TypeImpl &ref() const;
+    const lldb_private::TypeImpl &ref() const;
 
-  lldb::TypeImplSP GetSP();
+    lldb::TypeImplSP GetSP();
 
-  void SetSP(const lldb::TypeImplSP &type_impl_sp);
+    void SetSP(const lldb::TypeImplSP &type_impl_sp);
 
-  lldb::TypeImplSP m_opaque_sp;
+    lldb::TypeImplSP m_opaque_sp;
 
-  friend class SBFunction;
-  friend class SBModule;
-  friend class SBTarget;
-  friend class SBTypeEnumMember;
-  friend class SBTypeEnumMemberList;
-  friend class SBTypeNameSpecifier;
-  friend class SBTypeMember;
-  friend class SBTypeMemberFunction;
-  friend class SBTypeList;
-  friend class SBValue;
+    friend class SBFunction;
+    friend class SBModule;
+    friend class SBTarget;
+    friend class SBTypeEnumMember;
+    friend class SBTypeEnumMemberList;
+    friend class SBTypeNameSpecifier;
+    friend class SBTypeMember;
+    friend class SBTypeMemberFunction;
+    friend class SBTypeList;
+    friend class SBValue;
 
-  SBType(const lldb_private::CompilerType &);
-  SBType(const lldb::TypeSP &);
-  SBType(const lldb::TypeImplSP &);
+    SBType(const lldb_private::CompilerType &);
+    SBType(const lldb::TypeSP &);
+    SBType(const lldb::TypeImplSP &);
 };
 
 class SBTypeList {
 public:
-  SBTypeList();
+    SBTypeList();
 
-  SBTypeList(const lldb::SBTypeList &rhs);
+    SBTypeList(const lldb::SBTypeList &rhs);
 
-  ~SBTypeList();
+    ~SBTypeList();
 
-  lldb::SBTypeList &operator=(const lldb::SBTypeList &rhs);
+    lldb::SBTypeList &operator=(const lldb::SBTypeList &rhs);
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid();
+    bool IsValid();
 
-  void Append(lldb::SBType type);
+    void Append(lldb::SBType type);
 
-  lldb::SBType GetTypeAtIndex(uint32_t index);
+    lldb::SBType GetTypeAtIndex(uint32_t index);
 
-  uint32_t GetSize();
+    uint32_t GetSize();
 
 private:
-  std::unique_ptr<lldb_private::TypeListImpl> m_opaque_up;
-  friend class SBModule;
-  friend class SBCompileUnit;
+    std::unique_ptr<lldb_private::TypeListImpl> m_opaque_up;
+    friend class SBModule;
+    friend class SBCompileUnit;
 };
 
 } // namespace lldb

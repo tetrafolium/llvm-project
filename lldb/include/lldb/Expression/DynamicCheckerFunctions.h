@@ -29,33 +29,35 @@ class ExecutionContext;
 /// it available to IRDynamicChecks to use.
 class DynamicCheckerFunctions {
 public:
-  enum DynamicCheckerFunctionsKind {
-    DCF_Clang,
-  };
+    enum DynamicCheckerFunctionsKind {
+        DCF_Clang,
+    };
 
-  DynamicCheckerFunctions(DynamicCheckerFunctionsKind kind) : m_kind(kind) {}
-  virtual ~DynamicCheckerFunctions() = default;
+    DynamicCheckerFunctions(DynamicCheckerFunctionsKind kind) : m_kind(kind) {}
+    virtual ~DynamicCheckerFunctions() = default;
 
-  /// Install the utility functions into a process.  This binds the instance
-  /// of DynamicCheckerFunctions to that process.
-  ///
-  /// \param[in] diagnostic_manager
-  ///     A diagnostic manager to report errors to.
-  ///
-  /// \param[in] exe_ctx
-  ///     The execution context to install the functions into.
-  ///
-  /// \return
-  ///     True on success; false on failure, or if the functions have
-  ///     already been installed.
-  virtual bool Install(DiagnosticManager &diagnostic_manager,
-                       ExecutionContext &exe_ctx) = 0;
-  virtual bool DoCheckersExplainStop(lldb::addr_t addr, Stream &message) = 0;
+    /// Install the utility functions into a process.  This binds the instance
+    /// of DynamicCheckerFunctions to that process.
+    ///
+    /// \param[in] diagnostic_manager
+    ///     A diagnostic manager to report errors to.
+    ///
+    /// \param[in] exe_ctx
+    ///     The execution context to install the functions into.
+    ///
+    /// \return
+    ///     True on success; false on failure, or if the functions have
+    ///     already been installed.
+    virtual bool Install(DiagnosticManager &diagnostic_manager,
+                         ExecutionContext &exe_ctx) = 0;
+    virtual bool DoCheckersExplainStop(lldb::addr_t addr, Stream &message) = 0;
 
-  DynamicCheckerFunctionsKind GetKind() const { return m_kind; }
+    DynamicCheckerFunctionsKind GetKind() const {
+        return m_kind;
+    }
 
 private:
-  const DynamicCheckerFunctionsKind m_kind;
+    const DynamicCheckerFunctionsKind m_kind;
 };
 } // namespace lldb_private
 

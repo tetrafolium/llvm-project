@@ -37,10 +37,10 @@ namespace IDFCalculatorDetail {
 /// May be specialized if, for example, one wouldn't like to return nullpointer
 /// successors.
 template <class NodeTy, bool IsPostDom> struct ChildrenGetterTy {
-  using NodeRef = typename GraphTraits<NodeTy>::NodeRef;
-  using ChildrenTy = SmallVector<NodeRef, 8>;
+    using NodeRef = typename GraphTraits<NodeTy>::NodeRef;
+    using ChildrenTy = SmallVector<NodeRef, 8>;
 
-  ChildrenTy get(const NodeRef &N);
+    ChildrenTy get(const NodeRef &N);
 };
 
 } // end of namespace IDFCalculatorDetail
@@ -56,57 +56,57 @@ template <class NodeTy, bool IsPostDom> struct ChildrenGetterTy {
 /// The template parameters should be of a CFG block type.
 template <class NodeTy, bool IsPostDom> class IDFCalculatorBase {
 public:
-  using OrderedNodeTy =
-      std::conditional_t<IsPostDom, Inverse<NodeTy *>, NodeTy *>;
-  using ChildrenGetterTy =
-      IDFCalculatorDetail::ChildrenGetterTy<NodeTy, IsPostDom>;
+    using OrderedNodeTy =
+        std::conditional_t<IsPostDom, Inverse<NodeTy *>, NodeTy *>;
+    using ChildrenGetterTy =
+        IDFCalculatorDetail::ChildrenGetterTy<NodeTy, IsPostDom>;
 
-  IDFCalculatorBase(DominatorTreeBase<NodeTy, IsPostDom> &DT) : DT(DT) {}
+    IDFCalculatorBase(DominatorTreeBase<NodeTy, IsPostDom> &DT) : DT(DT) {}
 
-  IDFCalculatorBase(DominatorTreeBase<NodeTy, IsPostDom> &DT,
-                    const ChildrenGetterTy &C)
-      : DT(DT), ChildrenGetter(C) {}
+    IDFCalculatorBase(DominatorTreeBase<NodeTy, IsPostDom> &DT,
+                      const ChildrenGetterTy &C)
+        : DT(DT), ChildrenGetter(C) {}
 
-  /// Give the IDF calculator the set of blocks in which the value is
-  /// defined.  This is equivalent to the set of starting blocks it should be
-  /// calculating the IDF for (though later gets pruned based on liveness).
-  ///
-  /// Note: This set *must* live for the entire lifetime of the IDF calculator.
-  void setDefiningBlocks(const SmallPtrSetImpl<NodeTy *> &Blocks) {
-    DefBlocks = &Blocks;
-  }
+    /// Give the IDF calculator the set of blocks in which the value is
+    /// defined.  This is equivalent to the set of starting blocks it should be
+    /// calculating the IDF for (though later gets pruned based on liveness).
+    ///
+    /// Note: This set *must* live for the entire lifetime of the IDF calculator.
+    void setDefiningBlocks(const SmallPtrSetImpl<NodeTy *> &Blocks) {
+        DefBlocks = &Blocks;
+    }
 
-  /// Give the IDF calculator the set of blocks in which the value is
-  /// live on entry to the block.   This is used to prune the IDF calculation to
-  /// not include blocks where any phi insertion would be dead.
-  ///
-  /// Note: This set *must* live for the entire lifetime of the IDF calculator.
-  void setLiveInBlocks(const SmallPtrSetImpl<NodeTy *> &Blocks) {
-    LiveInBlocks = &Blocks;
-    useLiveIn = true;
-  }
+    /// Give the IDF calculator the set of blocks in which the value is
+    /// live on entry to the block.   This is used to prune the IDF calculation to
+    /// not include blocks where any phi insertion would be dead.
+    ///
+    /// Note: This set *must* live for the entire lifetime of the IDF calculator.
+    void setLiveInBlocks(const SmallPtrSetImpl<NodeTy *> &Blocks) {
+        LiveInBlocks = &Blocks;
+        useLiveIn = true;
+    }
 
-  /// Reset the live-in block set to be empty, and tell the IDF
-  /// calculator to not use liveness anymore.
-  void resetLiveInBlocks() {
-    LiveInBlocks = nullptr;
-    useLiveIn = false;
-  }
+    /// Reset the live-in block set to be empty, and tell the IDF
+    /// calculator to not use liveness anymore.
+    void resetLiveInBlocks() {
+        LiveInBlocks = nullptr;
+        useLiveIn = false;
+    }
 
-  /// Calculate iterated dominance frontiers
-  ///
-  /// This uses the linear-time phi algorithm based on DJ-graphs mentioned in
-  /// the file-level comment.  It performs DF->IDF pruning using the live-in
-  /// set, to avoid computing the IDF for blocks where an inserted PHI node
-  /// would be dead.
-  void calculate(SmallVectorImpl<NodeTy *> &IDFBlocks);
+    /// Calculate iterated dominance frontiers
+    ///
+    /// This uses the linear-time phi algorithm based on DJ-graphs mentioned in
+    /// the file-level comment.  It performs DF->IDF pruning using the live-in
+    /// set, to avoid computing the IDF for blocks where an inserted PHI node
+    /// would be dead.
+    void calculate(SmallVectorImpl<NodeTy *> &IDFBlocks);
 
 private:
-  DominatorTreeBase<NodeTy, IsPostDom> &DT;
-  ChildrenGetterTy ChildrenGetter;
-  bool useLiveIn = false;
-  const SmallPtrSetImpl<NodeTy *> *LiveInBlocks;
-  const SmallPtrSetImpl<NodeTy *> *DefBlocks;
+    DominatorTreeBase<NodeTy, IsPostDom> &DT;
+    ChildrenGetterTy ChildrenGetter;
+    bool useLiveIn = false;
+    const SmallPtrSetImpl<NodeTy *> *LiveInBlocks;
+    const SmallPtrSetImpl<NodeTy *> *DefBlocks;
 };
 
 //===----------------------------------------------------------------------===//
@@ -118,11 +118,11 @@ namespace IDFCalculatorDetail {
 template <class NodeTy, bool IsPostDom>
 typename ChildrenGetterTy<NodeTy, IsPostDom>::ChildrenTy
 ChildrenGetterTy<NodeTy, IsPostDom>::get(const NodeRef &N) {
-  using OrderedNodeTy =
-      typename IDFCalculatorBase<NodeTy, IsPostDom>::OrderedNodeTy;
+    using OrderedNodeTy =
+        typename IDFCalculatorBase<NodeTy, IsPostDom>::OrderedNodeTy;
 
-  auto Children = children<OrderedNodeTy>(N);
-  return {Children.begin(), Children.end()};
+    auto Children = children<OrderedNodeTy>(N);
+    return {Children.begin(), Children.end()};
 }
 
 } // end of namespace IDFCalculatorDetail
@@ -130,78 +130,78 @@ ChildrenGetterTy<NodeTy, IsPostDom>::get(const NodeRef &N) {
 template <class NodeTy, bool IsPostDom>
 void IDFCalculatorBase<NodeTy, IsPostDom>::calculate(
     SmallVectorImpl<NodeTy *> &IDFBlocks) {
-  // Use a priority queue keyed on dominator tree level so that inserted nodes
-  // are handled from the bottom of the dominator tree upwards. We also augment
-  // the level with a DFS number to ensure that the blocks are ordered in a
-  // deterministic way.
-  using DomTreeNodePair =
-      std::pair<DomTreeNodeBase<NodeTy> *, std::pair<unsigned, unsigned>>;
-  using IDFPriorityQueue =
-      std::priority_queue<DomTreeNodePair, SmallVector<DomTreeNodePair, 32>,
-                          less_second>;
+    // Use a priority queue keyed on dominator tree level so that inserted nodes
+    // are handled from the bottom of the dominator tree upwards. We also augment
+    // the level with a DFS number to ensure that the blocks are ordered in a
+    // deterministic way.
+    using DomTreeNodePair =
+        std::pair<DomTreeNodeBase<NodeTy> *, std::pair<unsigned, unsigned>>;
+    using IDFPriorityQueue =
+        std::priority_queue<DomTreeNodePair, SmallVector<DomTreeNodePair, 32>,
+        less_second>;
 
-  IDFPriorityQueue PQ;
+    IDFPriorityQueue PQ;
 
-  DT.updateDFSNumbers();
+    DT.updateDFSNumbers();
 
-  SmallVector<DomTreeNodeBase<NodeTy> *, 32> Worklist;
-  SmallPtrSet<DomTreeNodeBase<NodeTy> *, 32> VisitedPQ;
-  SmallPtrSet<DomTreeNodeBase<NodeTy> *, 32> VisitedWorklist;
+    SmallVector<DomTreeNodeBase<NodeTy> *, 32> Worklist;
+    SmallPtrSet<DomTreeNodeBase<NodeTy> *, 32> VisitedPQ;
+    SmallPtrSet<DomTreeNodeBase<NodeTy> *, 32> VisitedWorklist;
 
-  for (NodeTy *BB : *DefBlocks)
-    if (DomTreeNodeBase<NodeTy> *Node = DT.getNode(BB)) {
-      PQ.push({Node, std::make_pair(Node->getLevel(), Node->getDFSNumIn())});
-      VisitedWorklist.insert(Node);
+    for (NodeTy *BB : *DefBlocks)
+        if (DomTreeNodeBase<NodeTy> *Node = DT.getNode(BB)) {
+            PQ.push({Node, std::make_pair(Node->getLevel(), Node->getDFSNumIn())});
+            VisitedWorklist.insert(Node);
+        }
+
+    while (!PQ.empty()) {
+        DomTreeNodePair RootPair = PQ.top();
+        PQ.pop();
+        DomTreeNodeBase<NodeTy> *Root = RootPair.first;
+        unsigned RootLevel = RootPair.second.first;
+
+        // Walk all dominator tree children of Root, inspecting their CFG edges with
+        // targets elsewhere on the dominator tree. Only targets whose level is at
+        // most Root's level are added to the iterated dominance frontier of the
+        // definition set.
+
+        assert(Worklist.empty());
+        Worklist.push_back(Root);
+
+        while (!Worklist.empty()) {
+            DomTreeNodeBase<NodeTy> *Node = Worklist.pop_back_val();
+            NodeTy *BB = Node->getBlock();
+            // Succ is the successor in the direction we are calculating IDF, so it is
+            // successor for IDF, and predecessor for Reverse IDF.
+            auto DoWork = [&](NodeTy *Succ) {
+                DomTreeNodeBase<NodeTy> *SuccNode = DT.getNode(Succ);
+
+                const unsigned SuccLevel = SuccNode->getLevel();
+                if (SuccLevel > RootLevel)
+                    return;
+
+                if (!VisitedPQ.insert(SuccNode).second)
+                    return;
+
+                NodeTy *SuccBB = SuccNode->getBlock();
+                if (useLiveIn && !LiveInBlocks->count(SuccBB))
+                    return;
+
+                IDFBlocks.emplace_back(SuccBB);
+                if (!DefBlocks->count(SuccBB))
+                    PQ.push(std::make_pair(
+                                SuccNode, std::make_pair(SuccLevel, SuccNode->getDFSNumIn())));
+            };
+
+            for (auto Succ : ChildrenGetter.get(BB))
+                DoWork(Succ);
+
+            for (auto DomChild : *Node) {
+                if (VisitedWorklist.insert(DomChild).second)
+                    Worklist.push_back(DomChild);
+            }
+        }
     }
-
-  while (!PQ.empty()) {
-    DomTreeNodePair RootPair = PQ.top();
-    PQ.pop();
-    DomTreeNodeBase<NodeTy> *Root = RootPair.first;
-    unsigned RootLevel = RootPair.second.first;
-
-    // Walk all dominator tree children of Root, inspecting their CFG edges with
-    // targets elsewhere on the dominator tree. Only targets whose level is at
-    // most Root's level are added to the iterated dominance frontier of the
-    // definition set.
-
-    assert(Worklist.empty());
-    Worklist.push_back(Root);
-
-    while (!Worklist.empty()) {
-      DomTreeNodeBase<NodeTy> *Node = Worklist.pop_back_val();
-      NodeTy *BB = Node->getBlock();
-      // Succ is the successor in the direction we are calculating IDF, so it is
-      // successor for IDF, and predecessor for Reverse IDF.
-      auto DoWork = [&](NodeTy *Succ) {
-        DomTreeNodeBase<NodeTy> *SuccNode = DT.getNode(Succ);
-
-        const unsigned SuccLevel = SuccNode->getLevel();
-        if (SuccLevel > RootLevel)
-          return;
-
-        if (!VisitedPQ.insert(SuccNode).second)
-          return;
-
-        NodeTy *SuccBB = SuccNode->getBlock();
-        if (useLiveIn && !LiveInBlocks->count(SuccBB))
-          return;
-
-        IDFBlocks.emplace_back(SuccBB);
-        if (!DefBlocks->count(SuccBB))
-          PQ.push(std::make_pair(
-              SuccNode, std::make_pair(SuccLevel, SuccNode->getDFSNumIn())));
-      };
-
-      for (auto Succ : ChildrenGetter.get(BB))
-        DoWork(Succ);
-
-      for (auto DomChild : *Node) {
-        if (VisitedWorklist.insert(DomChild).second)
-          Worklist.push_back(DomChild);
-      }
-    }
-  }
 }
 
 } // end of namespace llvm

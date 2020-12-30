@@ -27,55 +27,55 @@ class ProcessGDBRemote;
 
 class GDBRemoteCommunicationServer : public GDBRemoteCommunication {
 public:
-  using PacketHandler =
-      std::function<PacketResult(StringExtractorGDBRemote &packet,
-                                 Status &error, bool &interrupt, bool &quit)>;
+    using PacketHandler =
+        std::function<PacketResult(StringExtractorGDBRemote &packet,
+                                   Status &error, bool &interrupt, bool &quit)>;
 
-  GDBRemoteCommunicationServer(const char *comm_name,
-                               const char *listener_name);
+    GDBRemoteCommunicationServer(const char *comm_name,
+                                 const char *listener_name);
 
-  ~GDBRemoteCommunicationServer() override;
+    ~GDBRemoteCommunicationServer() override;
 
-  void
-  RegisterPacketHandler(StringExtractorGDBRemote::ServerPacketType packet_type,
-                        PacketHandler handler);
+    void
+    RegisterPacketHandler(StringExtractorGDBRemote::ServerPacketType packet_type,
+                          PacketHandler handler);
 
-  PacketResult GetPacketAndSendResponse(Timeout<std::micro> timeout,
-                                        Status &error, bool &interrupt,
-                                        bool &quit);
+    PacketResult GetPacketAndSendResponse(Timeout<std::micro> timeout,
+                                          Status &error, bool &interrupt,
+                                          bool &quit);
 
-  // After connecting, do a little handshake with the client to make sure
-  // we are at least communicating
-  bool HandshakeWithClient();
+    // After connecting, do a little handshake with the client to make sure
+    // we are at least communicating
+    bool HandshakeWithClient();
 
 protected:
-  std::map<StringExtractorGDBRemote::ServerPacketType, PacketHandler>
-      m_packet_handlers;
-  bool m_exit_now; // use in asynchronous handling to indicate process should
-                   // exit.
+    std::map<StringExtractorGDBRemote::ServerPacketType, PacketHandler>
+    m_packet_handlers;
+    bool m_exit_now; // use in asynchronous handling to indicate process should
+    // exit.
 
-  bool m_send_error_strings = false; // If the client enables this then
-                                     // we will send error strings as well.
+    bool m_send_error_strings = false; // If the client enables this then
+    // we will send error strings as well.
 
-  PacketResult Handle_QErrorStringEnable(StringExtractorGDBRemote &packet);
+    PacketResult Handle_QErrorStringEnable(StringExtractorGDBRemote &packet);
 
-  PacketResult SendErrorResponse(const Status &error);
+    PacketResult SendErrorResponse(const Status &error);
 
-  PacketResult SendErrorResponse(llvm::Error error);
+    PacketResult SendErrorResponse(llvm::Error error);
 
-  PacketResult SendUnimplementedResponse(const char *packet);
+    PacketResult SendUnimplementedResponse(const char *packet);
 
-  PacketResult SendErrorResponse(uint8_t error);
+    PacketResult SendErrorResponse(uint8_t error);
 
-  PacketResult SendIllFormedResponse(const StringExtractorGDBRemote &packet,
-                                     const char *error_message);
+    PacketResult SendIllFormedResponse(const StringExtractorGDBRemote &packet,
+                                       const char *error_message);
 
-  PacketResult SendOKResponse();
+    PacketResult SendOKResponse();
 
 private:
-  GDBRemoteCommunicationServer(const GDBRemoteCommunicationServer &) = delete;
-  const GDBRemoteCommunicationServer &
-  operator=(const GDBRemoteCommunicationServer &) = delete;
+    GDBRemoteCommunicationServer(const GDBRemoteCommunicationServer &) = delete;
+    const GDBRemoteCommunicationServer &
+    operator=(const GDBRemoteCommunicationServer &) = delete;
 };
 
 } // namespace process_gdb_remote

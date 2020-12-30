@@ -20,86 +20,94 @@ using namespace llvm;
 #define DEBUG_TYPE "hexagon-mcexpr"
 
 HexagonMCExpr *HexagonMCExpr::create(MCExpr const *Expr, MCContext &Ctx) {
-  return new (Ctx) HexagonMCExpr(Expr);
+    return new (Ctx) HexagonMCExpr(Expr);
 }
 
 bool HexagonMCExpr::evaluateAsRelocatableImpl(MCValue &Res,
-                                              MCAsmLayout const *Layout,
-                                              MCFixup const *Fixup) const {
-  return Expr->evaluateAsRelocatable(Res, Layout, Fixup);
+        MCAsmLayout const *Layout,
+        MCFixup const *Fixup) const {
+    return Expr->evaluateAsRelocatable(Res, Layout, Fixup);
 }
 
 void HexagonMCExpr::visitUsedExpr(MCStreamer &Streamer) const {
-  Streamer.visitUsedExpr(*Expr);
+    Streamer.visitUsedExpr(*Expr);
 }
 
 MCFragment *llvm::HexagonMCExpr::findAssociatedFragment() const {
-  return Expr->findAssociatedFragment();
+    return Expr->findAssociatedFragment();
 }
 
 static void fixELFSymbolsInTLSFixupsImpl(const MCExpr *Expr, MCAssembler &Asm) {
-  switch (Expr->getKind()) {
-  case MCExpr::Target:
-    llvm_unreachable("Cannot handle nested target MCExpr");
-    break;
-  case MCExpr::Constant:
-    break;
+    switch (Expr->getKind()) {
+    case MCExpr::Target:
+        llvm_unreachable("Cannot handle nested target MCExpr");
+        break;
+    case MCExpr::Constant:
+        break;
 
-  case MCExpr::Binary: {
-    const MCBinaryExpr *be = cast<MCBinaryExpr>(Expr);
-    fixELFSymbolsInTLSFixupsImpl(be->getLHS(), Asm);
-    fixELFSymbolsInTLSFixupsImpl(be->getRHS(), Asm);
-    break;
-  }
-  case MCExpr::SymbolRef: {
-    const MCSymbolRefExpr &symRef = *cast<MCSymbolRefExpr>(Expr);
-    switch (symRef.getKind()) {
-    default:
-      return;
-    case MCSymbolRefExpr::VK_Hexagon_GD_GOT:
-    case MCSymbolRefExpr::VK_Hexagon_LD_GOT:
-    case MCSymbolRefExpr::VK_Hexagon_GD_PLT:
-    case MCSymbolRefExpr::VK_Hexagon_LD_PLT:
-    case MCSymbolRefExpr::VK_Hexagon_IE:
-    case MCSymbolRefExpr::VK_Hexagon_IE_GOT:
-    case MCSymbolRefExpr::VK_TPREL:
-      break;
+    case MCExpr::Binary: {
+        const MCBinaryExpr *be = cast<MCBinaryExpr>(Expr);
+        fixELFSymbolsInTLSFixupsImpl(be->getLHS(), Asm);
+        fixELFSymbolsInTLSFixupsImpl(be->getRHS(), Asm);
+        break;
     }
-    cast<MCSymbolELF>(symRef.getSymbol()).setType(ELF::STT_TLS);
-    break;
-  }
-  case MCExpr::Unary:
-    fixELFSymbolsInTLSFixupsImpl(cast<MCUnaryExpr>(Expr)->getSubExpr(), Asm);
-    break;
-  }
+    case MCExpr::SymbolRef: {
+        const MCSymbolRefExpr &symRef = *cast<MCSymbolRefExpr>(Expr);
+        switch (symRef.getKind()) {
+        default:
+            return;
+        case MCSymbolRefExpr::VK_Hexagon_GD_GOT:
+        case MCSymbolRefExpr::VK_Hexagon_LD_GOT:
+        case MCSymbolRefExpr::VK_Hexagon_GD_PLT:
+        case MCSymbolRefExpr::VK_Hexagon_LD_PLT:
+        case MCSymbolRefExpr::VK_Hexagon_IE:
+        case MCSymbolRefExpr::VK_Hexagon_IE_GOT:
+        case MCSymbolRefExpr::VK_TPREL:
+            break;
+        }
+        cast<MCSymbolELF>(symRef.getSymbol()).setType(ELF::STT_TLS);
+        break;
+    }
+    case MCExpr::Unary:
+        fixELFSymbolsInTLSFixupsImpl(cast<MCUnaryExpr>(Expr)->getSubExpr(), Asm);
+        break;
+    }
 }
 
 void HexagonMCExpr::fixELFSymbolsInTLSFixups(MCAssembler &Asm) const {
-  auto expr = getExpr();
-  fixELFSymbolsInTLSFixupsImpl(expr, Asm);
+    auto expr = getExpr();
+    fixELFSymbolsInTLSFixupsImpl(expr, Asm);
 }
 
-MCExpr const *HexagonMCExpr::getExpr() const { return Expr; }
+MCExpr const *HexagonMCExpr::getExpr() const {
+    return Expr;
+}
 
 void HexagonMCExpr::setMustExtend(bool Val) {
-  assert((!Val || !MustNotExtend) && "Extension contradiction");
-  MustExtend = Val;
+    assert((!Val || !MustNotExtend) && "Extension contradiction");
+    MustExtend = Val;
 }
 
-bool HexagonMCExpr::mustExtend() const { return MustExtend; }
+bool HexagonMCExpr::mustExtend() const {
+    return MustExtend;
+}
 void HexagonMCExpr::setMustNotExtend(bool Val) {
-  assert((!Val || !MustExtend) && "Extension contradiction");
-  MustNotExtend = Val;
+    assert((!Val || !MustExtend) && "Extension contradiction");
+    MustNotExtend = Val;
 }
-bool HexagonMCExpr::mustNotExtend() const { return MustNotExtend; }
+bool HexagonMCExpr::mustNotExtend() const {
+    return MustNotExtend;
+}
 
-bool HexagonMCExpr::s27_2_reloc() const { return S27_2_reloc; }
+bool HexagonMCExpr::s27_2_reloc() const {
+    return S27_2_reloc;
+}
 void HexagonMCExpr::setS27_2_reloc(bool Val) {
-  S27_2_reloc = Val;
+    S27_2_reloc = Val;
 }
 
 bool HexagonMCExpr::classof(MCExpr const *E) {
-  return E->getKind() == MCExpr::Target;
+    return E->getKind() == MCExpr::Target;
 }
 
 HexagonMCExpr::HexagonMCExpr(MCExpr const *Expr)
@@ -107,13 +115,13 @@ HexagonMCExpr::HexagonMCExpr(MCExpr const *Expr)
       SignMismatch(false) {}
 
 void HexagonMCExpr::printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const {
-  Expr->print(OS, MAI);
+    Expr->print(OS, MAI);
 }
 
 void HexagonMCExpr::setSignMismatch(bool Val) {
-  SignMismatch = Val;
+    SignMismatch = Val;
 }
 
 bool HexagonMCExpr::signMismatch() const {
-  return SignMismatch;
+    return SignMismatch;
 }

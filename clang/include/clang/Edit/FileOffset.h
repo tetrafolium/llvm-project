@@ -16,47 +16,53 @@ namespace clang {
 namespace edit {
 
 class FileOffset {
-  FileID FID;
-  unsigned Offs = 0;
+    FileID FID;
+    unsigned Offs = 0;
 
 public:
-  FileOffset() = default;
-  FileOffset(FileID fid, unsigned offs) : FID(fid), Offs(offs) {}
+    FileOffset() = default;
+    FileOffset(FileID fid, unsigned offs) : FID(fid), Offs(offs) {}
 
-  bool isInvalid() const { return FID.isInvalid(); }
+    bool isInvalid() const {
+        return FID.isInvalid();
+    }
 
-  FileID getFID() const { return FID; }
-  unsigned getOffset() const { return Offs; }
+    FileID getFID() const {
+        return FID;
+    }
+    unsigned getOffset() const {
+        return Offs;
+    }
 
-  FileOffset getWithOffset(unsigned offset) const {
-    FileOffset NewOffs = *this;
-    NewOffs.Offs += offset;
-    return NewOffs;
-  }
+    FileOffset getWithOffset(unsigned offset) const {
+        FileOffset NewOffs = *this;
+        NewOffs.Offs += offset;
+        return NewOffs;
+    }
 
-  friend bool operator==(FileOffset LHS, FileOffset RHS) {
-    return LHS.FID == RHS.FID && LHS.Offs == RHS.Offs;
-  }
+    friend bool operator==(FileOffset LHS, FileOffset RHS) {
+        return LHS.FID == RHS.FID && LHS.Offs == RHS.Offs;
+    }
 
-  friend bool operator!=(FileOffset LHS, FileOffset RHS) {
-    return !(LHS == RHS);
-  }
+    friend bool operator!=(FileOffset LHS, FileOffset RHS) {
+        return !(LHS == RHS);
+    }
 
-  friend bool operator<(FileOffset LHS, FileOffset RHS) {
-    return std::tie(LHS.FID, LHS.Offs) < std::tie(RHS.FID, RHS.Offs);
-  }
+    friend bool operator<(FileOffset LHS, FileOffset RHS) {
+        return std::tie(LHS.FID, LHS.Offs) < std::tie(RHS.FID, RHS.Offs);
+    }
 
-  friend bool operator>(FileOffset LHS, FileOffset RHS) {
-    return RHS < LHS;
-  }
+    friend bool operator>(FileOffset LHS, FileOffset RHS) {
+        return RHS < LHS;
+    }
 
-  friend bool operator>=(FileOffset LHS, FileOffset RHS) {
-    return !(LHS < RHS);
-  }
+    friend bool operator>=(FileOffset LHS, FileOffset RHS) {
+        return !(LHS < RHS);
+    }
 
-  friend bool operator<=(FileOffset LHS, FileOffset RHS) {
-    return !(RHS < LHS);
-  }
+    friend bool operator<=(FileOffset LHS, FileOffset RHS) {
+        return !(RHS < LHS);
+    }
 };
 
 } // namespace edit

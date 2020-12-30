@@ -15,19 +15,19 @@ namespace clang {
 namespace tidy {
 namespace bugprone {
 
-/// Finds ``cnd_wait``, ``cnd_timedwait``, ``wait``, ``wait_for``, or 
-/// ``wait_until`` function calls when the function is not invoked from a loop 
-/// that checks whether a condition predicate holds or the function has a 
+/// Finds ``cnd_wait``, ``cnd_timedwait``, ``wait``, ``wait_for``, or
+/// ``wait_until`` function calls when the function is not invoked from a loop
+/// that checks whether a condition predicate holds or the function has a
 /// condition parameter.
 ///
 /// For the user-facing documentation see:
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-spuriously-wake-up-functions.html
 class SpuriouslyWakeUpFunctionsCheck : public ClangTidyCheck {
 public:
-  SpuriouslyWakeUpFunctionsCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    SpuriouslyWakeUpFunctionsCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace bugprone

@@ -13,8 +13,8 @@ _CLC_DEFINE_RELATIONAL_BINARY(int, isgreaterequal, __builtin_isgreaterequal, flo
 // The scalar version of isgreaterequal(double, double) returns an int, but the vector versions
 // return long.
 
-_CLC_DEF _CLC_OVERLOAD int isgreaterequal(double x, double y){
-	return __builtin_isgreaterequal(x, y);
+_CLC_DEF _CLC_OVERLOAD int isgreaterequal(double x, double y) {
+    return __builtin_isgreaterequal(x, y);
 }
 
 _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(long, isgreaterequal, double, double)
@@ -27,8 +27,8 @@ _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(long, isgreaterequal, double, double)
 // The scalar version of isgreaterequal(half, half) returns an int, but the vector versions
 // return short.
 
-_CLC_DEF _CLC_OVERLOAD int isgreaterequal(half x, half y){
-	return __builtin_isgreaterequal(x, y);
+_CLC_DEF _CLC_OVERLOAD int isgreaterequal(half x, half y) {
+    return __builtin_isgreaterequal(x, y);
 }
 
 _CLC_DEFINE_RELATIONAL_BINARY_VEC_ALL(short, isgreaterequal, half, half)

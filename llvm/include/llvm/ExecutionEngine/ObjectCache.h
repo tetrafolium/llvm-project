@@ -21,20 +21,20 @@ class Module;
 /// ExecutionEngine for the purpose of avoiding compilation for Modules that
 /// have already been compiled and an object file is available.
 class ObjectCache {
-  virtual void anchor();
+    virtual void anchor();
 
 public:
-  ObjectCache() = default;
+    ObjectCache() = default;
 
-  virtual ~ObjectCache() = default;
+    virtual ~ObjectCache() = default;
 
-  /// notifyObjectCompiled - Provides a pointer to compiled code for Module M.
-  virtual void notifyObjectCompiled(const Module *M, MemoryBufferRef Obj) = 0;
+    /// notifyObjectCompiled - Provides a pointer to compiled code for Module M.
+    virtual void notifyObjectCompiled(const Module *M, MemoryBufferRef Obj) = 0;
 
-  /// Returns a pointer to a newly allocated MemoryBuffer that contains the
-  /// object which corresponds with Module M, or 0 if an object is not
-  /// available.
-  virtual std::unique_ptr<MemoryBuffer> getObject(const Module* M) = 0;
+    /// Returns a pointer to a newly allocated MemoryBuffer that contains the
+    /// object which corresponds with Module M, or 0 if an object is not
+    /// available.
+    virtual std::unique_ptr<MemoryBuffer> getObject(const Module* M) = 0;
 };
 
 } // end namespace llvm

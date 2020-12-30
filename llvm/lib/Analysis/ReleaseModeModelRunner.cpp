@@ -32,59 +32,59 @@ const char FetchPrefix[] = "fetch_";
 /// SavedModel for efficient execution.
 class ReleaseModeModelRunner final : public MLModelRunner {
 public:
-  ReleaseModeModelRunner(LLVMContext &Ctx);
-  virtual ~ReleaseModeModelRunner() = default;
+    ReleaseModeModelRunner(LLVMContext &Ctx);
+    virtual ~ReleaseModeModelRunner() = default;
 
-  bool run() override;
+    bool run() override;
 
-  void setFeature(FeatureIndex Index, int64_t Value) override;
-  int64_t getFeature(int Index) const override;
+    void setFeature(FeatureIndex Index, int64_t Value) override;
+    int64_t getFeature(int Index) const override;
 
 private:
-  std::vector<int32_t> FeatureIndices;
-  int32_t ResultIndex = -1;
-  std::unique_ptr<llvm::InlinerSizeModel> CompiledModel;
+    std::vector<int32_t> FeatureIndices;
+    int32_t ResultIndex = -1;
+    std::unique_ptr<llvm::InlinerSizeModel> CompiledModel;
 };
 } // namespace
 
 ReleaseModeModelRunner::ReleaseModeModelRunner(LLVMContext &Ctx)
     : MLModelRunner(Ctx),
       CompiledModel(std::make_unique<llvm::InlinerSizeModel>()) {
-  assert(CompiledModel && "The CompiledModel should be valid");
+    assert(CompiledModel && "The CompiledModel should be valid");
 
-  FeatureIndices.reserve(NumberOfFeatures);
+    FeatureIndices.reserve(NumberOfFeatures);
 
-  for (size_t I = 0; I < NumberOfFeatures; ++I) {
-    const int Index =
-        CompiledModel->LookupArgIndex(FeedPrefix + FeatureNameMap[I]);
-    assert(Index >= 0 && "Cannot find Feature in inlining model");
-    FeatureIndices[I] = Index;
-  }
+    for (size_t I = 0; I < NumberOfFeatures; ++I) {
+        const int Index =
+            CompiledModel->LookupArgIndex(FeedPrefix + FeatureNameMap[I]);
+        assert(Index >= 0 && "Cannot find Feature in inlining model");
+        FeatureIndices[I] = Index;
+    }
 
-  ResultIndex =
-      CompiledModel->LookupResultIndex(std::string(FetchPrefix) + DecisionName);
-  assert(ResultIndex >= 0 && "Cannot find DecisionName in inlining model");
+    ResultIndex =
+        CompiledModel->LookupResultIndex(std::string(FetchPrefix) + DecisionName);
+    assert(ResultIndex >= 0 && "Cannot find DecisionName in inlining model");
 }
 
 int64_t ReleaseModeModelRunner::getFeature(int Index) const {
-  return *static_cast<int64_t *>(
-      CompiledModel->arg_data(FeatureIndices[Index]));
+    return *static_cast<int64_t *>(
+               CompiledModel->arg_data(FeatureIndices[Index]));
 }
 
 void ReleaseModeModelRunner::setFeature(FeatureIndex Index, int64_t Value) {
-  *static_cast<int64_t *>(CompiledModel->arg_data(
-      FeatureIndices[static_cast<size_t>(Index)])) = Value;
+    *static_cast<int64_t *>(CompiledModel->arg_data(
+                                FeatureIndices[static_cast<size_t>(Index)])) = Value;
 }
 
 bool ReleaseModeModelRunner::run() {
-  CompiledModel->Run();
-  return static_cast<bool>(
-      *static_cast<int64_t *>(CompiledModel->result_data(ResultIndex)));
+    CompiledModel->Run();
+    return static_cast<bool>(
+               *static_cast<int64_t *>(CompiledModel->result_data(ResultIndex)));
 }
 
 std::unique_ptr<InlineAdvisor>
 llvm::getReleaseModeAdvisor(Module &M, ModuleAnalysisManager &MAM) {
-  auto AOTRunner = std::make_unique<ReleaseModeModelRunner>(M.getContext());
-  return std::make_unique<MLInlineAdvisor>(M, MAM, std::move(AOTRunner));
+    auto AOTRunner = std::make_unique<ReleaseModeModelRunner>(M.getContext());
+    return std::make_unique<MLInlineAdvisor>(M, MAM, std::move(AOTRunner));
 }
 #endif // defined(LLVM_HAVE_TF_AOT)

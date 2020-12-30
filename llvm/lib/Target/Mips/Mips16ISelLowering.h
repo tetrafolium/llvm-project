@@ -16,8 +16,8 @@
 #include "MipsISelLowering.h"
 
 namespace llvm {
-  class Mips16TargetLowering : public MipsTargetLowering  {
-  public:
+class Mips16TargetLowering : public MipsTargetLowering  {
+public:
     explicit Mips16TargetLowering(const MipsTargetMachine &TM,
                                   const MipsSubtarget &STI);
 
@@ -30,7 +30,7 @@ namespace llvm {
     EmitInstrWithCustomInserter(MachineInstr &MI,
                                 MachineBasicBlock *MBB) const override;
 
-  private:
+private:
     bool isEligibleForTailCallOptimization(
         const CCState &CCInfo, unsigned NextStackOffset,
         const MipsFunctionInfo &FI) const override;
@@ -38,10 +38,10 @@ namespace llvm {
     void setMips16HardFloatLibCalls();
 
     unsigned int
-      getMips16HelperFunctionStubNumber(ArgListTy &Args) const;
+    getMips16HelperFunctionStubNumber(ArgListTy &Args) const;
 
     const char *getMips16HelperFunction
-      (Type* RetTy, ArgListTy &Args, bool &needHelper) const;
+    (Type* RetTy, ArgListTy &Args, bool &needHelper) const;
 
     void
     getOpndList(SmallVectorImpl<SDValue> &Ops,
@@ -76,7 +76,7 @@ namespace llvm {
     MachineBasicBlock *emitFEXT_CCRXI16_ins(unsigned SltiOpc, unsigned SltiXOpc,
                                             MachineInstr &MI,
                                             MachineBasicBlock *BB) const;
-  };
+};
 }
 
 #endif

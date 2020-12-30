@@ -29,67 +29,75 @@ namespace tooling {
 ///   - `getClangStripDependencyFileAdjuster()`
 class StandaloneToolExecutor : public ToolExecutor {
 public:
-  static const char *ExecutorName;
+    static const char *ExecutorName;
 
-  /// Init with \p CompilationDatabase and the paths of all files to be
-  /// proccessed.
-  StandaloneToolExecutor(
-      const CompilationDatabase &Compilations,
-      llvm::ArrayRef<std::string> SourcePaths,
-      IntrusiveRefCntPtr<llvm::vfs::FileSystem> BaseFS =
-          llvm::vfs::getRealFileSystem(),
-      std::shared_ptr<PCHContainerOperations> PCHContainerOps =
-          std::make_shared<PCHContainerOperations>());
+    /// Init with \p CompilationDatabase and the paths of all files to be
+    /// proccessed.
+    StandaloneToolExecutor(
+        const CompilationDatabase &Compilations,
+        llvm::ArrayRef<std::string> SourcePaths,
+        IntrusiveRefCntPtr<llvm::vfs::FileSystem> BaseFS =
+            llvm::vfs::getRealFileSystem(),
+        std::shared_ptr<PCHContainerOperations> PCHContainerOps =
+            std::make_shared<PCHContainerOperations>());
 
-  /// Init with \p CommonOptionsParser. This is expected to be used by
-  /// `createExecutorFromCommandLineArgs` based on commandline options.
-  ///
-  /// The executor takes ownership of \p Options.
-  StandaloneToolExecutor(
-      CommonOptionsParser Options,
-      std::shared_ptr<PCHContainerOperations> PCHContainerOps =
-          std::make_shared<PCHContainerOperations>());
+    /// Init with \p CommonOptionsParser. This is expected to be used by
+    /// `createExecutorFromCommandLineArgs` based on commandline options.
+    ///
+    /// The executor takes ownership of \p Options.
+    StandaloneToolExecutor(
+        CommonOptionsParser Options,
+        std::shared_ptr<PCHContainerOperations> PCHContainerOps =
+            std::make_shared<PCHContainerOperations>());
 
-  StringRef getExecutorName() const override { return ExecutorName; }
+    StringRef getExecutorName() const override {
+        return ExecutorName;
+    }
 
-  using ToolExecutor::execute;
+    using ToolExecutor::execute;
 
-  llvm::Error
-  execute(llvm::ArrayRef<
-          std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
-              Actions) override;
+    llvm::Error
+    execute(llvm::ArrayRef<
+            std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
+            Actions) override;
 
-  /// Set a \c DiagnosticConsumer to use during parsing.
-  void setDiagnosticConsumer(DiagnosticConsumer *DiagConsumer) {
-    Tool.setDiagnosticConsumer(DiagConsumer);
-  }
+    /// Set a \c DiagnosticConsumer to use during parsing.
+    void setDiagnosticConsumer(DiagnosticConsumer *DiagConsumer) {
+        Tool.setDiagnosticConsumer(DiagConsumer);
+    }
 
-  ExecutionContext *getExecutionContext() override { return &Context; };
+    ExecutionContext *getExecutionContext() override {
+        return &Context;
+    };
 
-  ToolResults *getToolResults() override { return &Results; }
+    ToolResults *getToolResults() override {
+        return &Results;
+    }
 
-  llvm::ArrayRef<std::string> getSourcePaths() const {
-    return Tool.getSourcePaths();
-  }
+    llvm::ArrayRef<std::string> getSourcePaths() const {
+        return Tool.getSourcePaths();
+    }
 
-  void mapVirtualFile(StringRef FilePath, StringRef Content) override {
-    Tool.mapVirtualFile(FilePath, Content);
-  }
+    void mapVirtualFile(StringRef FilePath, StringRef Content) override {
+        Tool.mapVirtualFile(FilePath, Content);
+    }
 
-  /// Returns the file manager used in the tool.
-  ///
-  /// The file manager is shared between all translation units.
-  FileManager &getFiles() { return Tool.getFiles(); }
+    /// Returns the file manager used in the tool.
+    ///
+    /// The file manager is shared between all translation units.
+    FileManager &getFiles() {
+        return Tool.getFiles();
+    }
 
 private:
-  // Used to store the parser when the executor is initialized with parser.
-  llvm::Optional<CommonOptionsParser> OptionsParser;
-  // FIXME: The standalone executor is currently just a wrapper of `ClangTool`.
-  // Merge `ClangTool` implementation into the this.
-  ClangTool Tool;
-  ExecutionContext Context;
-  InMemoryToolResults Results;
-  ArgumentsAdjuster ArgsAdjuster;
+    // Used to store the parser when the executor is initialized with parser.
+    llvm::Optional<CommonOptionsParser> OptionsParser;
+    // FIXME: The standalone executor is currently just a wrapper of `ClangTool`.
+    // Merge `ClangTool` implementation into the this.
+    ClangTool Tool;
+    ExecutionContext Context;
+    InMemoryToolResults Results;
+    ArgumentsAdjuster ArgsAdjuster;
 };
 
 } // end namespace tooling

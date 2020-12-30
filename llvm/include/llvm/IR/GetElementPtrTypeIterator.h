@@ -27,8 +27,8 @@
 
 namespace llvm {
 
-  template<typename ItTy = User::const_op_iterator>
-  class generic_gep_type_iterator
+template<typename ItTy = User::const_op_iterator>
+class generic_gep_type_iterator
     : public std::iterator<std::forward_iterator_tag, Type *, ptrdiff_t> {
     using super = std::iterator<std::forward_iterator_tag, Type *, ptrdiff_t>;
 
@@ -39,26 +39,26 @@ namespace llvm {
 
     generic_gep_type_iterator() = default;
 
-  public:
+public:
     static generic_gep_type_iterator begin(Type *Ty, ItTy It) {
-      generic_gep_type_iterator I;
-      I.CurTy = Ty;
-      I.OpIt = It;
-      return I;
+        generic_gep_type_iterator I;
+        I.CurTy = Ty;
+        I.OpIt = It;
+        return I;
     }
 
     static generic_gep_type_iterator end(ItTy It) {
-      generic_gep_type_iterator I;
-      I.OpIt = It;
-      return I;
+        generic_gep_type_iterator I;
+        I.OpIt = It;
+        return I;
     }
 
     bool operator==(const generic_gep_type_iterator& x) const {
-      return OpIt == x.OpIt;
+        return OpIt == x.OpIt;
     }
 
     bool operator!=(const generic_gep_type_iterator& x) const {
-      return !operator==(x);
+        return !operator==(x);
     }
 
     // FIXME: Make this the iterator's operator*() after the 4.0 release.
@@ -66,32 +66,36 @@ namespace llvm {
     // temporarily not giving this iterator an operator*() to avoid a subtle
     // semantics break.
     Type *getIndexedType() const {
-      if (auto *T = CurTy.dyn_cast<Type *>())
-        return T;
-      return CurTy.get<StructType *>()->getTypeAtIndex(getOperand());
+        if (auto *T = CurTy.dyn_cast<Type *>())
+            return T;
+        return CurTy.get<StructType *>()->getTypeAtIndex(getOperand());
     }
 
-    Value *getOperand() const { return const_cast<Value *>(&**OpIt); }
+    Value *getOperand() const {
+        return const_cast<Value *>(&**OpIt);
+    }
 
     generic_gep_type_iterator& operator++() {   // Preincrement
-      Type *Ty = getIndexedType();
-      if (auto *ATy = dyn_cast<ArrayType>(Ty)) {
-        CurTy = ATy->getElementType();
-        NumElements = ATy->getNumElements();
-      } else if (auto *VTy = dyn_cast<VectorType>(Ty)) {
-        CurTy = VTy->getElementType();
-        if (isa<ScalableVectorType>(VTy))
-          NumElements = Unbounded;
-        else
-          NumElements = cast<FixedVectorType>(VTy)->getNumElements();
-      } else
-        CurTy = dyn_cast<StructType>(Ty);
-      ++OpIt;
-      return *this;
+        Type *Ty = getIndexedType();
+        if (auto *ATy = dyn_cast<ArrayType>(Ty)) {
+            CurTy = ATy->getElementType();
+            NumElements = ATy->getNumElements();
+        } else if (auto *VTy = dyn_cast<VectorType>(Ty)) {
+            CurTy = VTy->getElementType();
+            if (isa<ScalableVectorType>(VTy))
+                NumElements = Unbounded;
+            else
+                NumElements = cast<FixedVectorType>(VTy)->getNumElements();
+        } else
+            CurTy = dyn_cast<StructType>(Ty);
+        ++OpIt;
+        return *this;
     }
 
     generic_gep_type_iterator operator++(int) { // Postincrement
-      generic_gep_type_iterator tmp = *this; ++*this; return tmp;
+        generic_gep_type_iterator tmp = *this;
+        ++*this;
+        return tmp;
     }
 
     // All of the below API is for querying properties of the "outer type", i.e.
@@ -109,60 +113,66 @@ namespace llvm {
     // we should provide a more minimal API here that exposes not much more than
     // that.
 
-    bool isStruct() const { return CurTy.is<StructType *>(); }
-    bool isSequential() const { return CurTy.is<Type *>(); }
+    bool isStruct() const {
+        return CurTy.is<StructType *>();
+    }
+    bool isSequential() const {
+        return CurTy.is<Type *>();
+    }
 
-    StructType *getStructType() const { return CurTy.get<StructType *>(); }
+    StructType *getStructType() const {
+        return CurTy.get<StructType *>();
+    }
 
     StructType *getStructTypeOrNull() const {
-      return CurTy.dyn_cast<StructType *>();
+        return CurTy.dyn_cast<StructType *>();
     }
 
     bool isBoundedSequential() const {
-      return isSequential() && NumElements != Unbounded;
+        return isSequential() && NumElements != Unbounded;
     }
 
     uint64_t getSequentialNumElements() const {
-      assert(isBoundedSequential());
-      return NumElements;
+        assert(isBoundedSequential());
+        return NumElements;
     }
-  };
+};
 
-  using gep_type_iterator = generic_gep_type_iterator<>;
+using gep_type_iterator = generic_gep_type_iterator<>;
 
-  inline gep_type_iterator gep_type_begin(const User *GEP) {
+inline gep_type_iterator gep_type_begin(const User *GEP) {
     auto *GEPOp = cast<GEPOperator>(GEP);
     return gep_type_iterator::begin(
-        GEPOp->getSourceElementType(),
-        GEP->op_begin() + 1);
-  }
+               GEPOp->getSourceElementType(),
+               GEP->op_begin() + 1);
+}
 
-  inline gep_type_iterator gep_type_end(const User *GEP) {
+inline gep_type_iterator gep_type_end(const User *GEP) {
     return gep_type_iterator::end(GEP->op_end());
-  }
+}
 
-  inline gep_type_iterator gep_type_begin(const User &GEP) {
+inline gep_type_iterator gep_type_begin(const User &GEP) {
     auto &GEPOp = cast<GEPOperator>(GEP);
     return gep_type_iterator::begin(
-        GEPOp.getSourceElementType(),
-        GEP.op_begin() + 1);
-  }
+               GEPOp.getSourceElementType(),
+               GEP.op_begin() + 1);
+}
 
-  inline gep_type_iterator gep_type_end(const User &GEP) {
+inline gep_type_iterator gep_type_end(const User &GEP) {
     return gep_type_iterator::end(GEP.op_end());
-  }
+}
 
-  template<typename T>
-  inline generic_gep_type_iterator<const T *>
-  gep_type_begin(Type *Op0, ArrayRef<T> A) {
+template<typename T>
+inline generic_gep_type_iterator<const T *>
+gep_type_begin(Type *Op0, ArrayRef<T> A) {
     return generic_gep_type_iterator<const T *>::begin(Op0, A.begin());
-  }
+}
 
-  template<typename T>
-  inline generic_gep_type_iterator<const T *>
-  gep_type_end(Type * /*Op0*/, ArrayRef<T> A) {
+template<typename T>
+inline generic_gep_type_iterator<const T *>
+gep_type_end(Type * /*Op0*/, ArrayRef<T> A) {
     return generic_gep_type_iterator<const T *>::end(A.end());
-  }
+}
 
 } // end namespace llvm
 

@@ -22,43 +22,47 @@ namespace llvm {
 namespace codeview {
 
 class DebugCrossModuleExportsSubsectionRef final : public DebugSubsectionRef {
-  using ReferenceArray = FixedStreamArray<CrossModuleExport>;
-  using Iterator = ReferenceArray::Iterator;
+    using ReferenceArray = FixedStreamArray<CrossModuleExport>;
+    using Iterator = ReferenceArray::Iterator;
 
 public:
-  DebugCrossModuleExportsSubsectionRef()
-      : DebugSubsectionRef(DebugSubsectionKind::CrossScopeExports) {}
+    DebugCrossModuleExportsSubsectionRef()
+        : DebugSubsectionRef(DebugSubsectionKind::CrossScopeExports) {}
 
-  static bool classof(const DebugSubsectionRef *S) {
-    return S->kind() == DebugSubsectionKind::CrossScopeExports;
-  }
+    static bool classof(const DebugSubsectionRef *S) {
+        return S->kind() == DebugSubsectionKind::CrossScopeExports;
+    }
 
-  Error initialize(BinaryStreamReader Reader);
-  Error initialize(BinaryStreamRef Stream);
+    Error initialize(BinaryStreamReader Reader);
+    Error initialize(BinaryStreamRef Stream);
 
-  Iterator begin() const { return References.begin(); }
-  Iterator end() const { return References.end(); }
+    Iterator begin() const {
+        return References.begin();
+    }
+    Iterator end() const {
+        return References.end();
+    }
 
 private:
-  FixedStreamArray<CrossModuleExport> References;
+    FixedStreamArray<CrossModuleExport> References;
 };
 
 class DebugCrossModuleExportsSubsection final : public DebugSubsection {
 public:
-  DebugCrossModuleExportsSubsection()
-      : DebugSubsection(DebugSubsectionKind::CrossScopeExports) {}
+    DebugCrossModuleExportsSubsection()
+        : DebugSubsection(DebugSubsectionKind::CrossScopeExports) {}
 
-  static bool classof(const DebugSubsection *S) {
-    return S->kind() == DebugSubsectionKind::CrossScopeExports;
-  }
+    static bool classof(const DebugSubsection *S) {
+        return S->kind() == DebugSubsectionKind::CrossScopeExports;
+    }
 
-  void addMapping(uint32_t Local, uint32_t Global);
+    void addMapping(uint32_t Local, uint32_t Global);
 
-  uint32_t calculateSerializedSize() const override;
-  Error commit(BinaryStreamWriter &Writer) const override;
+    uint32_t calculateSerializedSize() const override;
+    Error commit(BinaryStreamWriter &Writer) const override;
 
 private:
-  std::map<uint32_t, uint32_t> Mappings;
+    std::map<uint32_t, uint32_t> Mappings;
 };
 
 } // end namespace codeview

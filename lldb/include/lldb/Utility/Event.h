@@ -34,92 +34,94 @@ namespace lldb_private {
 
 // lldb::EventData
 class EventData {
-  friend class Event;
+    friend class Event;
 
 public:
-  EventData();
+    EventData();
 
-  virtual ~EventData();
+    virtual ~EventData();
 
-  virtual ConstString GetFlavor() const = 0;
+    virtual ConstString GetFlavor() const = 0;
 
-  virtual void Dump(Stream *s) const;
+    virtual void Dump(Stream *s) const;
 
 private:
-  virtual void DoOnRemoval(Event *event_ptr) {}
+    virtual void DoOnRemoval(Event *event_ptr) {}
 
-  EventData(const EventData &) = delete;
-  const EventData &operator=(const EventData &) = delete;
+    EventData(const EventData &) = delete;
+    const EventData &operator=(const EventData &) = delete;
 };
 
 // lldb::EventDataBytes
 class EventDataBytes : public EventData {
 public:
-  // Constructors
-  EventDataBytes();
+    // Constructors
+    EventDataBytes();
 
-  EventDataBytes(const char *cstr);
+    EventDataBytes(const char *cstr);
 
-  EventDataBytes(llvm::StringRef str);
+    EventDataBytes(llvm::StringRef str);
 
-  EventDataBytes(const void *src, size_t src_len);
+    EventDataBytes(const void *src, size_t src_len);
 
-  ~EventDataBytes() override;
+    ~EventDataBytes() override;
 
-  // Member functions
-  ConstString GetFlavor() const override;
+    // Member functions
+    ConstString GetFlavor() const override;
 
-  void Dump(Stream *s) const override;
+    void Dump(Stream *s) const override;
 
-  const void *GetBytes() const;
+    const void *GetBytes() const;
 
-  size_t GetByteSize() const;
+    size_t GetByteSize() const;
 
-  void SetBytes(const void *src, size_t src_len);
+    void SetBytes(const void *src, size_t src_len);
 
-  void SwapBytes(std::string &new_bytes);
+    void SwapBytes(std::string &new_bytes);
 
-  void SetBytesFromCString(const char *cstr);
+    void SetBytesFromCString(const char *cstr);
 
-  // Static functions
-  static const EventDataBytes *GetEventDataFromEvent(const Event *event_ptr);
+    // Static functions
+    static const EventDataBytes *GetEventDataFromEvent(const Event *event_ptr);
 
-  static const void *GetBytesFromEvent(const Event *event_ptr);
+    static const void *GetBytesFromEvent(const Event *event_ptr);
 
-  static size_t GetByteSizeFromEvent(const Event *event_ptr);
+    static size_t GetByteSizeFromEvent(const Event *event_ptr);
 
-  static ConstString GetFlavorString();
+    static ConstString GetFlavorString();
 
 private:
-  std::string m_bytes;
+    std::string m_bytes;
 
-  EventDataBytes(const EventDataBytes &) = delete;
-  const EventDataBytes &operator=(const EventDataBytes &) = delete;
+    EventDataBytes(const EventDataBytes &) = delete;
+    const EventDataBytes &operator=(const EventDataBytes &) = delete;
 };
 
 class EventDataReceipt : public EventData {
 public:
-  EventDataReceipt() : EventData(), m_predicate(false) {}
+    EventDataReceipt() : EventData(), m_predicate(false) {}
 
-  ~EventDataReceipt() override {}
+    ~EventDataReceipt() override {}
 
-  static ConstString GetFlavorString() {
-    static ConstString g_flavor("Process::ProcessEventData");
-    return g_flavor;
-  }
+    static ConstString GetFlavorString() {
+        static ConstString g_flavor("Process::ProcessEventData");
+        return g_flavor;
+    }
 
-  ConstString GetFlavor() const override { return GetFlavorString(); }
+    ConstString GetFlavor() const override {
+        return GetFlavorString();
+    }
 
-  bool WaitForEventReceived(const Timeout<std::micro> &timeout = llvm::None) {
-    return m_predicate.WaitForValueEqualTo(true, timeout);
-  }
+    bool WaitForEventReceived(const Timeout<std::micro> &timeout = llvm::None) {
+        return m_predicate.WaitForValueEqualTo(true, timeout);
+    }
 
 private:
-  Predicate<bool> m_predicate;
+    Predicate<bool> m_predicate;
 
-  void DoOnRemoval(Event *event_ptr) override {
-    m_predicate.SetValue(true, eBroadcastAlways);
-  }
+    void DoOnRemoval(Event *event_ptr) override {
+        m_predicate.SetValue(true, eBroadcastAlways);
+    }
 };
 
 /// This class handles one or more StructuredData::Dictionary entries
@@ -127,128 +129,140 @@ private:
 
 class EventDataStructuredData : public EventData {
 public:
-  // Constructors
-  EventDataStructuredData();
+    // Constructors
+    EventDataStructuredData();
 
-  EventDataStructuredData(const lldb::ProcessSP &process_sp,
-                          const StructuredData::ObjectSP &object_sp,
-                          const lldb::StructuredDataPluginSP &plugin_sp);
+    EventDataStructuredData(const lldb::ProcessSP &process_sp,
+                            const StructuredData::ObjectSP &object_sp,
+                            const lldb::StructuredDataPluginSP &plugin_sp);
 
-  ~EventDataStructuredData() override;
+    ~EventDataStructuredData() override;
 
-  // Member functions
-  ConstString GetFlavor() const override;
+    // Member functions
+    ConstString GetFlavor() const override;
 
-  void Dump(Stream *s) const override;
+    void Dump(Stream *s) const override;
 
-  const lldb::ProcessSP &GetProcess() const;
+    const lldb::ProcessSP &GetProcess() const;
 
-  const StructuredData::ObjectSP &GetObject() const;
+    const StructuredData::ObjectSP &GetObject() const;
 
-  const lldb::StructuredDataPluginSP &GetStructuredDataPlugin() const;
+    const lldb::StructuredDataPluginSP &GetStructuredDataPlugin() const;
 
-  void SetProcess(const lldb::ProcessSP &process_sp);
+    void SetProcess(const lldb::ProcessSP &process_sp);
 
-  void SetObject(const StructuredData::ObjectSP &object_sp);
+    void SetObject(const StructuredData::ObjectSP &object_sp);
 
-  void SetStructuredDataPlugin(const lldb::StructuredDataPluginSP &plugin_sp);
+    void SetStructuredDataPlugin(const lldb::StructuredDataPluginSP &plugin_sp);
 
-  // Static functions
-  static const EventDataStructuredData *
-  GetEventDataFromEvent(const Event *event_ptr);
+    // Static functions
+    static const EventDataStructuredData *
+    GetEventDataFromEvent(const Event *event_ptr);
 
-  static lldb::ProcessSP GetProcessFromEvent(const Event *event_ptr);
+    static lldb::ProcessSP GetProcessFromEvent(const Event *event_ptr);
 
-  static StructuredData::ObjectSP GetObjectFromEvent(const Event *event_ptr);
+    static StructuredData::ObjectSP GetObjectFromEvent(const Event *event_ptr);
 
-  static lldb::StructuredDataPluginSP
-  GetPluginFromEvent(const Event *event_ptr);
+    static lldb::StructuredDataPluginSP
+    GetPluginFromEvent(const Event *event_ptr);
 
-  static ConstString GetFlavorString();
+    static ConstString GetFlavorString();
 
 private:
-  lldb::ProcessSP m_process_sp;
-  StructuredData::ObjectSP m_object_sp;
-  lldb::StructuredDataPluginSP m_plugin_sp;
+    lldb::ProcessSP m_process_sp;
+    StructuredData::ObjectSP m_object_sp;
+    lldb::StructuredDataPluginSP m_plugin_sp;
 
-  EventDataStructuredData(const EventDataStructuredData &) = delete;
-  const EventDataStructuredData &
-  operator=(const EventDataStructuredData &) = delete;
+    EventDataStructuredData(const EventDataStructuredData &) = delete;
+    const EventDataStructuredData &
+    operator=(const EventDataStructuredData &) = delete;
 };
 
 // lldb::Event
 class Event {
-  friend class Listener;
-  friend class EventData;
-  friend class Broadcaster::BroadcasterImpl;
+    friend class Listener;
+    friend class EventData;
+    friend class Broadcaster::BroadcasterImpl;
 
 public:
-  Event(Broadcaster *broadcaster, uint32_t event_type,
-        EventData *data = nullptr);
+    Event(Broadcaster *broadcaster, uint32_t event_type,
+          EventData *data = nullptr);
 
-  Event(Broadcaster *broadcaster, uint32_t event_type,
-        const lldb::EventDataSP &event_data_sp);
+    Event(Broadcaster *broadcaster, uint32_t event_type,
+          const lldb::EventDataSP &event_data_sp);
 
-  Event(uint32_t event_type, EventData *data = nullptr);
+    Event(uint32_t event_type, EventData *data = nullptr);
 
-  Event(uint32_t event_type, const lldb::EventDataSP &event_data_sp);
+    Event(uint32_t event_type, const lldb::EventDataSP &event_data_sp);
 
-  ~Event();
+    ~Event();
 
-  void Dump(Stream *s) const;
+    void Dump(Stream *s) const;
 
-  EventData *GetData() { return m_data_sp.get(); }
+    EventData *GetData() {
+        return m_data_sp.get();
+    }
 
-  const EventData *GetData() const { return m_data_sp.get(); }
+    const EventData *GetData() const {
+        return m_data_sp.get();
+    }
 
-  void SetData(EventData *new_data) { m_data_sp.reset(new_data); }
+    void SetData(EventData *new_data) {
+        m_data_sp.reset(new_data);
+    }
 
-  uint32_t GetType() const { return m_type; }
+    uint32_t GetType() const {
+        return m_type;
+    }
 
-  void SetType(uint32_t new_type) { m_type = new_type; }
+    void SetType(uint32_t new_type) {
+        m_type = new_type;
+    }
 
-  Broadcaster *GetBroadcaster() const {
-    Broadcaster::BroadcasterImplSP broadcaster_impl_sp =
-        m_broadcaster_wp.lock();
-    if (broadcaster_impl_sp)
-      return broadcaster_impl_sp->GetBroadcaster();
-    else
-      return nullptr;
-  }
+    Broadcaster *GetBroadcaster() const {
+        Broadcaster::BroadcasterImplSP broadcaster_impl_sp =
+            m_broadcaster_wp.lock();
+        if (broadcaster_impl_sp)
+            return broadcaster_impl_sp->GetBroadcaster();
+        else
+            return nullptr;
+    }
 
-  bool BroadcasterIs(Broadcaster *broadcaster) {
-    Broadcaster::BroadcasterImplSP broadcaster_impl_sp =
-        m_broadcaster_wp.lock();
-    if (broadcaster_impl_sp)
-      return broadcaster_impl_sp->GetBroadcaster() == broadcaster;
-    else
-      return false;
-  }
+    bool BroadcasterIs(Broadcaster *broadcaster) {
+        Broadcaster::BroadcasterImplSP broadcaster_impl_sp =
+            m_broadcaster_wp.lock();
+        if (broadcaster_impl_sp)
+            return broadcaster_impl_sp->GetBroadcaster() == broadcaster;
+        else
+            return false;
+    }
 
-  void Clear() { m_data_sp.reset(); }
+    void Clear() {
+        m_data_sp.reset();
+    }
 
 private:
-  // This is only called by Listener when it pops an event off the queue for
-  // the listener.  It calls the Event Data's DoOnRemoval() method, which is
-  // virtual and can be overridden by the specific data classes.
+    // This is only called by Listener when it pops an event off the queue for
+    // the listener.  It calls the Event Data's DoOnRemoval() method, which is
+    // virtual and can be overridden by the specific data classes.
 
-  void DoOnRemoval();
+    void DoOnRemoval();
 
-  // Called by Broadcaster::BroadcastEvent prior to letting all the listeners
-  // know about it update the contained broadcaster so that events can be
-  // popped off one queue and re-broadcast to others.
-  void SetBroadcaster(Broadcaster *broadcaster) {
-    m_broadcaster_wp = broadcaster->GetBroadcasterImpl();
-  }
+    // Called by Broadcaster::BroadcastEvent prior to letting all the listeners
+    // know about it update the contained broadcaster so that events can be
+    // popped off one queue and re-broadcast to others.
+    void SetBroadcaster(Broadcaster *broadcaster) {
+        m_broadcaster_wp = broadcaster->GetBroadcasterImpl();
+    }
 
-  Broadcaster::BroadcasterImplWP
-      m_broadcaster_wp;        // The broadcaster that sent this event
-  uint32_t m_type;             // The bit describing this event
-  lldb::EventDataSP m_data_sp; // User specific data for this event
+    Broadcaster::BroadcasterImplWP
+    m_broadcaster_wp;        // The broadcaster that sent this event
+    uint32_t m_type;             // The bit describing this event
+    lldb::EventDataSP m_data_sp; // User specific data for this event
 
-  Event(const Event &) = delete;
-  const Event &operator=(const Event &) = delete;
-  Event() = delete;
+    Event(const Event &) = delete;
+    const Event &operator=(const Event &) = delete;
+    Event() = delete;
 };
 
 } // namespace lldb_private

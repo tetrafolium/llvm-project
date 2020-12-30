@@ -26,32 +26,34 @@ namespace llvm {
 class RuntimeDyldCOFF : public RuntimeDyldImpl {
 
 public:
-  std::unique_ptr<RuntimeDyld::LoadedObjectInfo>
-  loadObject(const object::ObjectFile &Obj) override;
-  bool isCompatibleFile(const object::ObjectFile &Obj) const override;
+    std::unique_ptr<RuntimeDyld::LoadedObjectInfo>
+    loadObject(const object::ObjectFile &Obj) override;
+    bool isCompatibleFile(const object::ObjectFile &Obj) const override;
 
-  static std::unique_ptr<RuntimeDyldCOFF>
-  create(Triple::ArchType Arch, RuntimeDyld::MemoryManager &MemMgr,
-         JITSymbolResolver &Resolver);
+    static std::unique_ptr<RuntimeDyldCOFF>
+    create(Triple::ArchType Arch, RuntimeDyld::MemoryManager &MemMgr,
+           JITSymbolResolver &Resolver);
 
 protected:
-  RuntimeDyldCOFF(RuntimeDyld::MemoryManager &MemMgr,
-                  JITSymbolResolver &Resolver, unsigned PointerSize,
-                  uint32_t PointerReloc)
-      : RuntimeDyldImpl(MemMgr, Resolver), PointerSize(PointerSize),
-        PointerReloc(PointerReloc) {
-    assert((PointerSize == 4 || PointerSize == 8) && "Unexpected pointer size");
-  }
+    RuntimeDyldCOFF(RuntimeDyld::MemoryManager &MemMgr,
+                    JITSymbolResolver &Resolver, unsigned PointerSize,
+                    uint32_t PointerReloc)
+        : RuntimeDyldImpl(MemMgr, Resolver), PointerSize(PointerSize),
+          PointerReloc(PointerReloc) {
+        assert((PointerSize == 4 || PointerSize == 8) && "Unexpected pointer size");
+    }
 
-  uint64_t getSymbolOffset(const SymbolRef &Sym);
-  uint64_t getDLLImportOffset(unsigned SectionID, StubMap &Stubs,
-                              StringRef Name, bool SetSectionIDMinus1 = false);
+    uint64_t getSymbolOffset(const SymbolRef &Sym);
+    uint64_t getDLLImportOffset(unsigned SectionID, StubMap &Stubs,
+                                StringRef Name, bool SetSectionIDMinus1 = false);
 
-  static constexpr StringRef getImportSymbolPrefix() { return "__imp_"; }
+    static constexpr StringRef getImportSymbolPrefix() {
+        return "__imp_";
+    }
 
 private:
-  unsigned PointerSize;
-  uint32_t PointerReloc;
+    unsigned PointerSize;
+    uint32_t PointerReloc;
 };
 
 } // end namespace llvm

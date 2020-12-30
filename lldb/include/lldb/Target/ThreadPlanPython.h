@@ -31,48 +31,52 @@ namespace lldb_private {
 
 class ThreadPlanPython : public ThreadPlan {
 public:
-  ThreadPlanPython(Thread &thread, const char *class_name, 
-                   StructuredDataImpl *args_data);
-  ~ThreadPlanPython() override;
+    ThreadPlanPython(Thread &thread, const char *class_name,
+                     StructuredDataImpl *args_data);
+    ~ThreadPlanPython() override;
 
-  void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
+    void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
 
-  bool ValidatePlan(Stream *error) override;
+    bool ValidatePlan(Stream *error) override;
 
-  bool ShouldStop(Event *event_ptr) override;
+    bool ShouldStop(Event *event_ptr) override;
 
-  bool MischiefManaged() override;
+    bool MischiefManaged() override;
 
-  bool WillStop() override;
+    bool WillStop() override;
 
-  bool StopOthers() override { return m_stop_others; }
+    bool StopOthers() override {
+        return m_stop_others;
+    }
 
-  void SetStopOthers(bool new_value) override { m_stop_others = new_value; }
+    void SetStopOthers(bool new_value) override {
+        m_stop_others = new_value;
+    }
 
-  void DidPush() override;
+    void DidPush() override;
 
-  bool IsPlanStale() override;
+    bool IsPlanStale() override;
 
 protected:
-  bool DoPlanExplainsStop(Event *event_ptr) override;
+    bool DoPlanExplainsStop(Event *event_ptr) override;
 
-  lldb::StateType GetPlanRunState() override;
-  
-  ScriptInterpreter *GetScriptInterpreter();
+    lldb::StateType GetPlanRunState() override;
+
+    ScriptInterpreter *GetScriptInterpreter();
 
 private:
-  std::string m_class_name;
-  StructuredDataImpl *m_args_data; // We own this, but the implementation
-                                   // has to manage the UP (since that is
-                                   // how it gets stored in the
-                                   // SBStructuredData).
-  std::string m_error_str;
-  StructuredData::ObjectSP m_implementation_sp;
-  bool m_did_push;
-  bool m_stop_others;
+    std::string m_class_name;
+    StructuredDataImpl *m_args_data; // We own this, but the implementation
+    // has to manage the UP (since that is
+    // how it gets stored in the
+    // SBStructuredData).
+    std::string m_error_str;
+    StructuredData::ObjectSP m_implementation_sp;
+    bool m_did_push;
+    bool m_stop_others;
 
-  ThreadPlanPython(const ThreadPlanPython &) = delete;
-  const ThreadPlanPython &operator=(const ThreadPlanPython &) = delete;
+    ThreadPlanPython(const ThreadPlanPython &) = delete;
+    const ThreadPlanPython &operator=(const ThreadPlanPython &) = delete;
 };
 
 } // namespace lldb_private

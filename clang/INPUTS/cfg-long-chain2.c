@@ -12,9 +12,9 @@
 #define EXPAND_4096_BRANCHES(i, x, y) EXPAND_2048_BRANCHES(i, x, y) EXPAND_2048_BRANCHES(i + 2048, x, y)
 
 unsigned cfg_long_chain_multiple_exit(unsigned x) {
-  unsigned y = 0;
-#define BRANCH(i, x, y) if (((x % 13171) + ++y) < i) { int var = x / 13171 + y; return var; } 
-  EXPAND_4096_BRANCHES(1, x, y);
+    unsigned y = 0;
+#define BRANCH(i, x, y) if (((x % 13171) + ++y) < i) { int var = x / 13171 + y; return var; }
+    EXPAND_4096_BRANCHES(1, x, y);
 #undef BRANCH
-  return 42;
+    return 42;
 }

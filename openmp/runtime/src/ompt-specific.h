@@ -69,10 +69,10 @@ ompt_sync_region_t __ompt_get_barrier_kind(enum barrier_type, kmp_info_t *);
 #define OMPT_STR_MATCH(haystack, needle) __kmp_str_match(haystack, 0, needle)
 
 inline void *__ompt_load_return_address(int gtid) {
-  kmp_info_t *thr = __kmp_threads[gtid];
-  void *return_address = thr->th.ompt_thread_info.return_address;
-  thr->th.ompt_thread_info.return_address = NULL;
-  return return_address;
+    kmp_info_t *thr = __kmp_threads[gtid];
+    void *return_address = thr->th.ompt_thread_info.return_address;
+    thr->th.ompt_thread_info.return_address = NULL;
+    return return_address;
 }
 
 /*#define OMPT_STORE_RETURN_ADDRESS(gtid) \
@@ -94,39 +94,39 @@ inline void *__ompt_load_return_address(int gtid) {
 //******************************************************************************
 
 inline kmp_info_t *ompt_get_thread_gtid(int gtid) {
-  return (gtid >= 0) ? __kmp_thread_from_gtid(gtid) : NULL;
+    return (gtid >= 0) ? __kmp_thread_from_gtid(gtid) : NULL;
 }
 
 inline kmp_info_t *ompt_get_thread() {
-  int gtid = __kmp_get_gtid();
-  return ompt_get_thread_gtid(gtid);
+    int gtid = __kmp_get_gtid();
+    return ompt_get_thread_gtid(gtid);
 }
 
 inline void ompt_set_thread_state(kmp_info_t *thread, ompt_state_t state) {
-  thread->th.ompt_thread_info.state = state;
+    thread->th.ompt_thread_info.state = state;
 }
 
 inline const char *ompt_get_runtime_version() {
-  return &__kmp_version_lib_ver[KMP_VERSION_MAGIC_LEN];
+    return &__kmp_version_lib_ver[KMP_VERSION_MAGIC_LEN];
 }
 
 class OmptReturnAddressGuard {
 private:
-  bool SetAddress{false};
-  int Gtid;
+    bool SetAddress{false};
+    int Gtid;
 
 public:
-  OmptReturnAddressGuard(int Gtid, void *ReturnAddress) : Gtid(Gtid) {
-    if (ompt_enabled.enabled && Gtid >= 0 && __kmp_threads[Gtid] &&
-        !__kmp_threads[Gtid]->th.ompt_thread_info.return_address) {
-      SetAddress = true;
-      __kmp_threads[Gtid]->th.ompt_thread_info.return_address = ReturnAddress;
+    OmptReturnAddressGuard(int Gtid, void *ReturnAddress) : Gtid(Gtid) {
+        if (ompt_enabled.enabled && Gtid >= 0 && __kmp_threads[Gtid] &&
+                !__kmp_threads[Gtid]->th.ompt_thread_info.return_address) {
+            SetAddress = true;
+            __kmp_threads[Gtid]->th.ompt_thread_info.return_address = ReturnAddress;
+        }
     }
-  }
-  ~OmptReturnAddressGuard() {
-    if (SetAddress)
-      __kmp_threads[Gtid]->th.ompt_thread_info.return_address = NULL;
-  }
+    ~OmptReturnAddressGuard() {
+        if (SetAddress)
+            __kmp_threads[Gtid]->th.ompt_thread_info.return_address = NULL;
+    }
 };
 
 #endif // OMPT_SUPPORT

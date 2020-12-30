@@ -52,7 +52,7 @@ _CLC_DEF _CLC_OVERLOAD float __clc_remainder(float x, float y)
         q = (q << 1) | c;
         xr -= c ? yr : 0.0f;
         xr += xr;
-	--k;
+        --k;
     }
 
     c = xr > yr;

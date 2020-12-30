@@ -24,17 +24,17 @@ namespace yaml {
 class IO;
 
 struct YamlObjectFile {
-  std::unique_ptr<ArchYAML::Archive> Arch;
-  std::unique_ptr<ELFYAML::Object> Elf;
-  std::unique_ptr<COFFYAML::Object> Coff;
-  std::unique_ptr<MachOYAML::Object> MachO;
-  std::unique_ptr<MachOYAML::UniversalBinary> FatMachO;
-  std::unique_ptr<MinidumpYAML::Object> Minidump;
-  std::unique_ptr<WasmYAML::Object> Wasm;
+    std::unique_ptr<ArchYAML::Archive> Arch;
+    std::unique_ptr<ELFYAML::Object> Elf;
+    std::unique_ptr<COFFYAML::Object> Coff;
+    std::unique_ptr<MachOYAML::Object> MachO;
+    std::unique_ptr<MachOYAML::UniversalBinary> FatMachO;
+    std::unique_ptr<MinidumpYAML::Object> Minidump;
+    std::unique_ptr<WasmYAML::Object> Wasm;
 };
 
 template <> struct MappingTraits<YamlObjectFile> {
-  static void mapping(IO &IO, YamlObjectFile &ObjectFile);
+    static void mapping(IO &IO, YamlObjectFile &ObjectFile);
 };
 
 } // end namespace yaml

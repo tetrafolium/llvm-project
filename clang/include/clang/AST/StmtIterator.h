@@ -26,131 +26,133 @@ class VariableArrayType;
 
 class StmtIteratorBase {
 protected:
-  enum {
-    StmtMode = 0x0,
-    SizeOfTypeVAMode = 0x1,
-    DeclGroupMode = 0x2,
-    Flags = 0x3
-  };
+    enum {
+        StmtMode = 0x0,
+        SizeOfTypeVAMode = 0x1,
+        DeclGroupMode = 0x2,
+        Flags = 0x3
+    };
 
-  union {
-    Stmt **stmt;
-    Decl **DGI;
-  };
-  uintptr_t RawVAPtr = 0;
-  Decl **DGE;
+    union {
+        Stmt **stmt;
+        Decl **DGI;
+    };
+    uintptr_t RawVAPtr = 0;
+    Decl **DGE;
 
-  StmtIteratorBase(Stmt **s) : stmt(s) {}
-  StmtIteratorBase(const VariableArrayType *t);
-  StmtIteratorBase(Decl **dgi, Decl **dge);
-  StmtIteratorBase() : stmt(nullptr) {}
+    StmtIteratorBase(Stmt **s) : stmt(s) {}
+    StmtIteratorBase(const VariableArrayType *t);
+    StmtIteratorBase(Decl **dgi, Decl **dge);
+    StmtIteratorBase() : stmt(nullptr) {}
 
-  bool inDeclGroup() const {
-    return (RawVAPtr & Flags) == DeclGroupMode;
-  }
+    bool inDeclGroup() const {
+        return (RawVAPtr & Flags) == DeclGroupMode;
+    }
 
-  bool inSizeOfTypeVA() const {
-    return (RawVAPtr & Flags) == SizeOfTypeVAMode;
-  }
+    bool inSizeOfTypeVA() const {
+        return (RawVAPtr & Flags) == SizeOfTypeVAMode;
+    }
 
-  bool inStmt() const {
-    return (RawVAPtr & Flags) == StmtMode;
-  }
+    bool inStmt() const {
+        return (RawVAPtr & Flags) == StmtMode;
+    }
 
-  const VariableArrayType *getVAPtr() const {
-    return reinterpret_cast<const VariableArrayType*>(RawVAPtr & ~Flags);
-  }
+    const VariableArrayType *getVAPtr() const {
+        return reinterpret_cast<const VariableArrayType*>(RawVAPtr & ~Flags);
+    }
 
-  void setVAPtr(const VariableArrayType *P) {
-    assert(inDeclGroup() || inSizeOfTypeVA());
-    RawVAPtr = reinterpret_cast<uintptr_t>(P) | (RawVAPtr & Flags);
-  }
+    void setVAPtr(const VariableArrayType *P) {
+        assert(inDeclGroup() || inSizeOfTypeVA());
+        RawVAPtr = reinterpret_cast<uintptr_t>(P) | (RawVAPtr & Flags);
+    }
 
-  void NextDecl(bool ImmediateAdvance = true);
-  bool HandleDecl(Decl* D);
-  void NextVA();
+    void NextDecl(bool ImmediateAdvance = true);
+    bool HandleDecl(Decl* D);
+    void NextVA();
 
-  Stmt*& GetDeclExpr() const;
+    Stmt*& GetDeclExpr() const;
 };
 
 template <typename DERIVED, typename REFERENCE>
 class StmtIteratorImpl : public StmtIteratorBase,
-                         public std::iterator<std::forward_iterator_tag,
-                                              REFERENCE, ptrdiff_t,
-                                              REFERENCE, REFERENCE> {
+    public std::iterator<std::forward_iterator_tag,
+    REFERENCE, ptrdiff_t,
+    REFERENCE, REFERENCE> {
 protected:
-  StmtIteratorImpl(const StmtIteratorBase& RHS) : StmtIteratorBase(RHS) {}
+    StmtIteratorImpl(const StmtIteratorBase& RHS) : StmtIteratorBase(RHS) {}
 
 public:
-  StmtIteratorImpl() = default;
-  StmtIteratorImpl(Stmt **s) : StmtIteratorBase(s) {}
-  StmtIteratorImpl(Decl **dgi, Decl **dge) : StmtIteratorBase(dgi, dge) {}
-  StmtIteratorImpl(const VariableArrayType *t) : StmtIteratorBase(t) {}
+    StmtIteratorImpl() = default;
+    StmtIteratorImpl(Stmt **s) : StmtIteratorBase(s) {}
+    StmtIteratorImpl(Decl **dgi, Decl **dge) : StmtIteratorBase(dgi, dge) {}
+    StmtIteratorImpl(const VariableArrayType *t) : StmtIteratorBase(t) {}
 
-  DERIVED& operator++() {
-    if (inStmt())
-      ++stmt;
-    else if (getVAPtr())
-      NextVA();
-    else
-      NextDecl();
+    DERIVED& operator++() {
+        if (inStmt())
+            ++stmt;
+        else if (getVAPtr())
+            NextVA();
+        else
+            NextDecl();
 
-    return static_cast<DERIVED&>(*this);
-  }
+        return static_cast<DERIVED&>(*this);
+    }
 
-  DERIVED operator++(int) {
-    DERIVED tmp = static_cast<DERIVED&>(*this);
-    operator++();
-    return tmp;
-  }
+    DERIVED operator++(int) {
+        DERIVED tmp = static_cast<DERIVED&>(*this);
+        operator++();
+        return tmp;
+    }
 
-  friend bool operator==(const DERIVED &LHS, const DERIVED &RHS) {
-    return LHS.stmt == RHS.stmt && LHS.DGI == RHS.DGI &&
-           LHS.RawVAPtr == RHS.RawVAPtr;
-  }
+    friend bool operator==(const DERIVED &LHS, const DERIVED &RHS) {
+        return LHS.stmt == RHS.stmt && LHS.DGI == RHS.DGI &&
+               LHS.RawVAPtr == RHS.RawVAPtr;
+    }
 
-  friend bool operator!=(const DERIVED &LHS, const DERIVED &RHS) {
-    return !(LHS == RHS);
-  }
+    friend bool operator!=(const DERIVED &LHS, const DERIVED &RHS) {
+        return !(LHS == RHS);
+    }
 
-  REFERENCE operator*() const {
-    return inStmt() ? *stmt : GetDeclExpr();
-  }
+    REFERENCE operator*() const {
+        return inStmt() ? *stmt : GetDeclExpr();
+    }
 
-  REFERENCE operator->() const { return operator*(); }
+    REFERENCE operator->() const {
+        return operator*();
+    }
 };
 
 struct ConstStmtIterator;
 
 struct StmtIterator : public StmtIteratorImpl<StmtIterator, Stmt*&> {
-  explicit StmtIterator() = default;
-  StmtIterator(Stmt** S) : StmtIteratorImpl<StmtIterator, Stmt*&>(S) {}
-  StmtIterator(Decl** dgi, Decl** dge)
-      : StmtIteratorImpl<StmtIterator, Stmt*&>(dgi, dge) {}
-  StmtIterator(const VariableArrayType *t)
-      : StmtIteratorImpl<StmtIterator, Stmt*&>(t) {}
+    explicit StmtIterator() = default;
+    StmtIterator(Stmt** S) : StmtIteratorImpl<StmtIterator, Stmt*&>(S) {}
+    StmtIterator(Decl** dgi, Decl** dge)
+        : StmtIteratorImpl<StmtIterator, Stmt*&>(dgi, dge) {}
+    StmtIterator(const VariableArrayType *t)
+        : StmtIteratorImpl<StmtIterator, Stmt*&>(t) {}
 
 private:
-  StmtIterator(const StmtIteratorBase &RHS)
-      : StmtIteratorImpl<StmtIterator, Stmt *&>(RHS) {}
+    StmtIterator(const StmtIteratorBase &RHS)
+        : StmtIteratorImpl<StmtIterator, Stmt *&>(RHS) {}
 
-  inline friend StmtIterator
-  cast_away_const(const ConstStmtIterator &RHS);
+    inline friend StmtIterator
+    cast_away_const(const ConstStmtIterator &RHS);
 };
 
 struct ConstStmtIterator : public StmtIteratorImpl<ConstStmtIterator,
-                                                   const Stmt*> {
-  explicit ConstStmtIterator() = default;
-  ConstStmtIterator(const StmtIterator& RHS)
-      : StmtIteratorImpl<ConstStmtIterator, const Stmt*>(RHS) {}
+    const Stmt*> {
+    explicit ConstStmtIterator() = default;
+    ConstStmtIterator(const StmtIterator& RHS)
+        : StmtIteratorImpl<ConstStmtIterator, const Stmt*>(RHS) {}
 
-  ConstStmtIterator(Stmt * const *S)
-      : StmtIteratorImpl<ConstStmtIterator, const Stmt *>(
-            const_cast<Stmt **>(S)) {}
+    ConstStmtIterator(Stmt * const *S)
+        : StmtIteratorImpl<ConstStmtIterator, const Stmt *>(
+              const_cast<Stmt **>(S)) {}
 };
 
 inline StmtIterator cast_away_const(const ConstStmtIterator &RHS) {
-  return RHS;
+    return RHS;
 }
 
 } // namespace clang

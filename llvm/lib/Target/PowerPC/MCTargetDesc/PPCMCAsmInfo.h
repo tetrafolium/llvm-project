@@ -21,17 +21,17 @@ namespace llvm {
 class Triple;
 
 class PPCELFMCAsmInfo : public MCAsmInfoELF {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit PPCELFMCAsmInfo(bool is64Bit, const Triple &);
+    explicit PPCELFMCAsmInfo(bool is64Bit, const Triple &);
 };
 
 class PPCXCOFFMCAsmInfo : public MCAsmInfoXCOFF {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit PPCXCOFFMCAsmInfo(bool is64Bit, const Triple &);
+    explicit PPCXCOFFMCAsmInfo(bool is64Bit, const Triple &);
 };
 
 } // namespace llvm

@@ -30,63 +30,69 @@ namespace edsc {
 /// setting and restoring of insertion points.
 class ScopedContext {
 public:
-  ScopedContext(OpBuilder &b);
-  ScopedContext(OpBuilder &b, Location location);
+    ScopedContext(OpBuilder &b);
+    ScopedContext(OpBuilder &b, Location location);
 
-  /// Sets the insertion point of the builder to 'newInsertPt' for the duration
-  /// of the scope. The existing insertion point of the builder is restored on
-  /// destruction.
-  ScopedContext(OpBuilder &b, OpBuilder::InsertPoint newInsertPt,
-                Location location);
-  ~ScopedContext();
+    /// Sets the insertion point of the builder to 'newInsertPt' for the duration
+    /// of the scope. The existing insertion point of the builder is restored on
+    /// destruction.
+    ScopedContext(OpBuilder &b, OpBuilder::InsertPoint newInsertPt,
+                  Location location);
+    ~ScopedContext();
 
-  static MLIRContext *getContext();
-  static OpBuilder &getBuilderRef();
-  static Location getLocation();
+    static MLIRContext *getContext();
+    static OpBuilder &getBuilderRef();
+    static Location getLocation();
 
 private:
-  /// Only NestedBuilder (which is used to create an operation with a body)
-  /// may access private members in order to implement scoping.
-  friend class NestedBuilder;
+    /// Only NestedBuilder (which is used to create an operation with a body)
+    /// may access private members in order to implement scoping.
+    friend class NestedBuilder;
 
-  ScopedContext() = delete;
-  ScopedContext(const ScopedContext &) = delete;
-  ScopedContext &operator=(const ScopedContext &) = delete;
+    ScopedContext() = delete;
+    ScopedContext(const ScopedContext &) = delete;
+    ScopedContext &operator=(const ScopedContext &) = delete;
 
-  static ScopedContext *&getCurrentScopedContext();
+    static ScopedContext *&getCurrentScopedContext();
 
-  /// Top level OpBuilder.
-  OpBuilder &builder;
-  /// Guard to the previous insertion point.
-  OpBuilder::InsertionGuard guard;
-  /// Current location.
-  Location location;
-  /// Parent context we return into.
-  ScopedContext *enclosingScopedContext;
+    /// Top level OpBuilder.
+    OpBuilder &builder;
+    /// Guard to the previous insertion point.
+    OpBuilder::InsertionGuard guard;
+    /// Current location.
+    Location location;
+    /// Parent context we return into.
+    ScopedContext *enclosingScopedContext;
 };
 
 template <typename Op>
 struct ValueBuilder {
-  template <typename... Args>
-  ValueBuilder(Args... args) {
-    value = ScopedContext::getBuilderRef()
+    template <typename... Args>
+    ValueBuilder(Args... args) {
+        value = ScopedContext::getBuilderRef()
                 .create<Op>(ScopedContext::getLocation(), args...)
                 .getResult();
-  }
-  operator Value() { return value; }
-  Value value;
+    }
+    operator Value() {
+        return value;
+    }
+    Value value;
 };
 
 template <typename Op>
 struct OperationBuilder {
-  template <typename... Args>
-  OperationBuilder(Args... args) {
-    op = ScopedContext::getBuilderRef().create<Op>(ScopedContext::getLocation(),
-                                                   args...);
-  }
-  operator Op() { return op; }
-  operator Operation *() { return op.getOperation(); }
-  Op op;
+    template <typename... Args>
+    OperationBuilder(Args... args) {
+        op = ScopedContext::getBuilderRef().create<Op>(ScopedContext::getLocation(),
+                args...);
+    }
+    operator Op() {
+        return op;
+    }
+    operator Operation *() {
+        return op.getOperation();
+    }
+    Op op;
 };
 
 /// Creates a block in the region that contains the insertion block of the
@@ -131,42 +137,50 @@ Block *buildInNewBlock(Region &region, TypeRange argTypes,
 ///      makeGenericLinalgOp({A({m, n}), B({k, n})}, {C({m, n})}, ... );
 /// ```
 struct StructuredIndexed {
-  StructuredIndexed(Value v) : value(v) {}
-  StructuredIndexed(Type t) : type(t) {}
-  StructuredIndexed operator()(ArrayRef<AffineExpr> indexings) {
-    return value ? StructuredIndexed(value, indexings)
-                 : StructuredIndexed(type, indexings);
-  }
+    StructuredIndexed(Value v) : value(v) {}
+    StructuredIndexed(Type t) : type(t) {}
+    StructuredIndexed operator()(ArrayRef<AffineExpr> indexings) {
+        return value ? StructuredIndexed(value, indexings)
+               : StructuredIndexed(type, indexings);
+    }
 
-  StructuredIndexed(Value v, ArrayRef<AffineExpr> indexings)
-      : value(v), exprs(indexings.begin(), indexings.end()) {
-    assert((v.getType().isa<MemRefType, RankedTensorType, VectorType>()) &&
-           "MemRef, RankedTensor or Vector expected");
-  }
-  StructuredIndexed(Type t, ArrayRef<AffineExpr> indexings)
-      : type(t), exprs(indexings.begin(), indexings.end()) {
-    assert((t.isa<MemRefType, RankedTensorType, VectorType>()) &&
-           "MemRef, RankedTensor or Vector expected");
-  }
+    StructuredIndexed(Value v, ArrayRef<AffineExpr> indexings)
+        : value(v), exprs(indexings.begin(), indexings.end()) {
+        assert((v.getType().isa<MemRefType, RankedTensorType, VectorType>()) &&
+               "MemRef, RankedTensor or Vector expected");
+    }
+    StructuredIndexed(Type t, ArrayRef<AffineExpr> indexings)
+        : type(t), exprs(indexings.begin(), indexings.end()) {
+        assert((t.isa<MemRefType, RankedTensorType, VectorType>()) &&
+               "MemRef, RankedTensor or Vector expected");
+    }
 
-  bool hasValue() const { return (bool)value; }
-  Value getValue() const {
-    assert(value && "StructuredIndexed Value not set.");
-    return value;
-  }
-  Type getType() const {
-    assert((value || type) && "StructuredIndexed Value and Type not set.");
-    return value ? value.getType() : type;
-  }
-  ArrayRef<AffineExpr> getExprs() const { return exprs; }
-  operator Value() const { return getValue(); }
-  operator Type() const { return getType(); }
+    bool hasValue() const {
+        return (bool)value;
+    }
+    Value getValue() const {
+        assert(value && "StructuredIndexed Value not set.");
+        return value;
+    }
+    Type getType() const {
+        assert((value || type) && "StructuredIndexed Value and Type not set.");
+        return value ? value.getType() : type;
+    }
+    ArrayRef<AffineExpr> getExprs() const {
+        return exprs;
+    }
+    operator Value() const {
+        return getValue();
+    }
+    operator Type() const {
+        return getType();
+    }
 
 private:
-  // Only one of Value or type may be set.
-  Type type;
-  Value value;
-  SmallVector<AffineExpr, 4> exprs;
+    // Only one of Value or type may be set.
+    Type type;
+    Value value;
+    SmallVector<AffineExpr, 4> exprs;
 };
 
 /// A TemplatedIndexedValue brings an index notation over the template Load and
@@ -176,163 +190,173 @@ private:
 template <typename Load, typename Store>
 class TemplatedIndexedValue {
 public:
-  explicit TemplatedIndexedValue(Value v) : value(v) {}
+    explicit TemplatedIndexedValue(Value v) : value(v) {}
 
-  TemplatedIndexedValue(const TemplatedIndexedValue &rhs) = default;
+    TemplatedIndexedValue(const TemplatedIndexedValue &rhs) = default;
 
-  TemplatedIndexedValue operator()() { return *this; }
-  /// Returns a new `TemplatedIndexedValue`.
-  TemplatedIndexedValue operator()(Value index) {
-    TemplatedIndexedValue res(value);
-    res.indices.push_back(index);
-    return res;
-  }
-  template <typename... Args>
-  TemplatedIndexedValue operator()(Value index, Args... indices) {
-    return TemplatedIndexedValue(value, index).append(indices...);
-  }
-  TemplatedIndexedValue operator()(ValueRange indices) {
-    return TemplatedIndexedValue(value, indices);
-  }
+    TemplatedIndexedValue operator()() {
+        return *this;
+    }
+    /// Returns a new `TemplatedIndexedValue`.
+    TemplatedIndexedValue operator()(Value index) {
+        TemplatedIndexedValue res(value);
+        res.indices.push_back(index);
+        return res;
+    }
+    template <typename... Args>
+    TemplatedIndexedValue operator()(Value index, Args... indices) {
+        return TemplatedIndexedValue(value, index).append(indices...);
+    }
+    TemplatedIndexedValue operator()(ValueRange indices) {
+        return TemplatedIndexedValue(value, indices);
+    }
 
-  /// Emits a `store`.
-  Store operator=(const TemplatedIndexedValue &rhs) {
-    return Store(rhs, value, indices);
-  }
-  Store operator=(Value rhs) { return Store(rhs, value, indices); }
+    /// Emits a `store`.
+    Store operator=(const TemplatedIndexedValue &rhs) {
+        return Store(rhs, value, indices);
+    }
+    Store operator=(Value rhs) {
+        return Store(rhs, value, indices);
+    }
 
-  /// Emits a `load` when converting to a Value.
-  operator Value() const { return Load(value, indices); }
+    /// Emits a `load` when converting to a Value.
+    operator Value() const {
+        return Load(value, indices);
+    }
 
-  /// Returns the base memref.
-  Value getBase() const { return value; }
+    /// Returns the base memref.
+    Value getBase() const {
+        return value;
+    }
 
-  /// Returns the underlying memref.
-  MemRefType getMemRefType() const {
-    return value.getType().template cast<MemRefType>();
-  }
+    /// Returns the underlying memref.
+    MemRefType getMemRefType() const {
+        return value.getType().template cast<MemRefType>();
+    }
 
-  /// Returns the underlying MemRef elemental type cast as `T`.
-  template <typename T>
-  T getElementalTypeAs() const {
-    return value.getType()
-        .template cast<MemRefType>()
-        .getElementType()
-        .template cast<T>();
-  }
+    /// Returns the underlying MemRef elemental type cast as `T`.
+    template <typename T>
+    T getElementalTypeAs() const {
+        return value.getType()
+               .template cast<MemRefType>()
+               .getElementType()
+               .template cast<T>();
+    }
 
-  /// Arithmetic operator overloadings.
-  Value operator+(Value e);
-  Value operator-(Value e);
-  Value operator*(Value e);
-  Value operator/(Value e);
-  Value operator%(Value e);
-  Value operator^(Value e);
-  Value operator+(TemplatedIndexedValue e) {
-    return *this + static_cast<Value>(e);
-  }
-  Value operator-(TemplatedIndexedValue e) {
-    return *this - static_cast<Value>(e);
-  }
-  Value operator*(TemplatedIndexedValue e) {
-    return *this * static_cast<Value>(e);
-  }
-  Value operator/(TemplatedIndexedValue e) {
-    return *this / static_cast<Value>(e);
-  }
-  Value operator%(TemplatedIndexedValue e) {
-    return *this % static_cast<Value>(e);
-  }
-  Value operator^(TemplatedIndexedValue e) {
-    return *this ^ static_cast<Value>(e);
-  }
+    /// Arithmetic operator overloadings.
+    Value operator+(Value e);
+    Value operator-(Value e);
+    Value operator*(Value e);
+    Value operator/(Value e);
+    Value operator%(Value e);
+    Value operator^(Value e);
+    Value operator+(TemplatedIndexedValue e) {
+        return *this + static_cast<Value>(e);
+    }
+    Value operator-(TemplatedIndexedValue e) {
+        return *this - static_cast<Value>(e);
+    }
+    Value operator*(TemplatedIndexedValue e) {
+        return *this * static_cast<Value>(e);
+    }
+    Value operator/(TemplatedIndexedValue e) {
+        return *this / static_cast<Value>(e);
+    }
+    Value operator%(TemplatedIndexedValue e) {
+        return *this % static_cast<Value>(e);
+    }
+    Value operator^(TemplatedIndexedValue e) {
+        return *this ^ static_cast<Value>(e);
+    }
 
-  /// Assignment-arithmetic operator overloadings.
-  Store operator+=(Value e);
-  Store operator-=(Value e);
-  Store operator*=(Value e);
-  Store operator/=(Value e);
-  Store operator%=(Value e);
-  Store operator^=(Value e);
-  Store operator+=(TemplatedIndexedValue e) {
-    return this->operator+=(static_cast<Value>(e));
-  }
-  Store operator-=(TemplatedIndexedValue e) {
-    return this->operator-=(static_cast<Value>(e));
-  }
-  Store operator*=(TemplatedIndexedValue e) {
-    return this->operator*=(static_cast<Value>(e));
-  }
-  Store operator/=(TemplatedIndexedValue e) {
-    return this->operator/=(static_cast<Value>(e));
-  }
-  Store operator%=(TemplatedIndexedValue e) {
-    return this->operator%=(static_cast<Value>(e));
-  }
-  Store operator^=(TemplatedIndexedValue e) {
-    return this->operator^=(static_cast<Value>(e));
-  }
+    /// Assignment-arithmetic operator overloadings.
+    Store operator+=(Value e);
+    Store operator-=(Value e);
+    Store operator*=(Value e);
+    Store operator/=(Value e);
+    Store operator%=(Value e);
+    Store operator^=(Value e);
+    Store operator+=(TemplatedIndexedValue e) {
+        return this->operator+=(static_cast<Value>(e));
+    }
+    Store operator-=(TemplatedIndexedValue e) {
+        return this->operator-=(static_cast<Value>(e));
+    }
+    Store operator*=(TemplatedIndexedValue e) {
+        return this->operator*=(static_cast<Value>(e));
+    }
+    Store operator/=(TemplatedIndexedValue e) {
+        return this->operator/=(static_cast<Value>(e));
+    }
+    Store operator%=(TemplatedIndexedValue e) {
+        return this->operator%=(static_cast<Value>(e));
+    }
+    Store operator^=(TemplatedIndexedValue e) {
+        return this->operator^=(static_cast<Value>(e));
+    }
 
-  /// Logical operator overloadings.
-  Value operator&&(Value e);
-  Value operator||(Value e);
-  Value operator&&(TemplatedIndexedValue e) {
-    return *this && static_cast<Value>(e);
-  }
-  Value operator||(TemplatedIndexedValue e) {
-    return *this || static_cast<Value>(e);
-  }
+    /// Logical operator overloadings.
+    Value operator&&(Value e);
+    Value operator||(Value e);
+    Value operator&&(TemplatedIndexedValue e) {
+        return *this && static_cast<Value>(e);
+    }
+    Value operator||(TemplatedIndexedValue e) {
+        return *this || static_cast<Value>(e);
+    }
 
-  /// Comparison operator overloadings.
-  Value eq(Value e);
-  Value ne(Value e);
-  Value slt(Value e);
-  Value sle(Value e);
-  Value sgt(Value e);
-  Value sge(Value e);
-  Value ult(Value e);
-  Value ule(Value e);
-  Value ugt(Value e);
-  Value uge(Value e);
-  Value slt(TemplatedIndexedValue e) {
-    return slt(*this, static_cast<Value>(e));
-  }
-  Value sle(TemplatedIndexedValue e) {
-    return sle(*this, static_cast<Value>(e));
-  }
-  Value sgt(TemplatedIndexedValue e) {
-    return sgt(*this, static_cast<Value>(e));
-  }
-  Value sge(TemplatedIndexedValue e) {
-    return sge(*this, static_cast<Value>(e));
-  }
-  Value ult(TemplatedIndexedValue e) {
-    return ult(*this, static_cast<Value>(e));
-  }
-  Value ule(TemplatedIndexedValue e) {
-    return ule(*this, static_cast<Value>(e));
-  }
-  Value ugt(TemplatedIndexedValue e) {
-    return ugt(*this, static_cast<Value>(e));
-  }
-  Value uge(TemplatedIndexedValue e) {
-    return uge(*this, static_cast<Value>(e));
-  }
+    /// Comparison operator overloadings.
+    Value eq(Value e);
+    Value ne(Value e);
+    Value slt(Value e);
+    Value sle(Value e);
+    Value sgt(Value e);
+    Value sge(Value e);
+    Value ult(Value e);
+    Value ule(Value e);
+    Value ugt(Value e);
+    Value uge(Value e);
+    Value slt(TemplatedIndexedValue e) {
+        return slt(*this, static_cast<Value>(e));
+    }
+    Value sle(TemplatedIndexedValue e) {
+        return sle(*this, static_cast<Value>(e));
+    }
+    Value sgt(TemplatedIndexedValue e) {
+        return sgt(*this, static_cast<Value>(e));
+    }
+    Value sge(TemplatedIndexedValue e) {
+        return sge(*this, static_cast<Value>(e));
+    }
+    Value ult(TemplatedIndexedValue e) {
+        return ult(*this, static_cast<Value>(e));
+    }
+    Value ule(TemplatedIndexedValue e) {
+        return ule(*this, static_cast<Value>(e));
+    }
+    Value ugt(TemplatedIndexedValue e) {
+        return ugt(*this, static_cast<Value>(e));
+    }
+    Value uge(TemplatedIndexedValue e) {
+        return uge(*this, static_cast<Value>(e));
+    }
 
 private:
-  TemplatedIndexedValue(Value value, ValueRange indices)
-      : value(value), indices(indices.begin(), indices.end()) {}
+    TemplatedIndexedValue(Value value, ValueRange indices)
+        : value(value), indices(indices.begin(), indices.end()) {}
 
-  TemplatedIndexedValue &append() { return *this; }
+    TemplatedIndexedValue &append() {
+        return *this;
+    }
 
-  template <typename T, typename... Args>
-  TemplatedIndexedValue &append(T index, Args... indices) {
-    this->indices.push_back(static_cast<Value>(index));
-    append(indices...);
-    return *this;
-  }
-  Value value;
-  SmallVector<Value, 8> indices;
+    template <typename T, typename... Args>
+    TemplatedIndexedValue &append(T index, Args... indices) {
+        this->indices.push_back(static_cast<Value>(index));
+        append(indices...);
+        return *this;
+    }
+    Value value;
+    SmallVector<Value, 8> indices;
 };
 
 } // namespace edsc

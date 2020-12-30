@@ -13,7 +13,7 @@
 namespace __llvm_libc {
 
 void LLVM_LIBC_ENTRYPOINT(bzero)(void *ptr, size_t count) {
-  GeneralPurposeMemset(reinterpret_cast<char *>(ptr), 0, count);
+    GeneralPurposeMemset(reinterpret_cast<char *>(ptr), 0, count);
 }
 
 } // namespace __llvm_libc

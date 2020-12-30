@@ -7,18 +7,18 @@
 
 const float TestPi = 3.14;
 struct S {
-  static const char TestCharA = 'a';
+    static const char TestCharA = 'a';
 };
 enum TestEnum : int {
-  ENUM_POS = 2147000000,
-  ENUM_NEG = -2147000000,
+    ENUM_POS = 2147000000,
+    ENUM_NEG = -2147000000,
 };
 void useConst(int) {}
 int main() {
-  useConst(TestPi);
-  useConst(S::TestCharA);
-  useConst(ENUM_NEG); // DexLabel('stop')
-  return 0;
+    useConst(TestPi);
+    useConst(S::TestCharA);
+    useConst(ENUM_NEG); // DexLabel('stop')
+    return 0;
 }
 
 // DexExpectWatchValue('TestPi', 3.140000104904175, on_line='stop')

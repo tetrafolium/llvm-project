@@ -35,19 +35,19 @@ using preStatementType =
 // Functions to handle unparsing of analyzed expressions and related
 // objects rather than their original parse trees.
 struct AnalyzedObjectsAsFortran {
-  std::function<void(llvm::raw_ostream &, const evaluate::GenericExprWrapper &)>
-      expr;
-  std::function<void(
-      llvm::raw_ostream &, const evaluate::GenericAssignmentWrapper &)>
-      assignment;
-  std::function<void(llvm::raw_ostream &, const evaluate::ProcedureRef &)> call;
+    std::function<void(llvm::raw_ostream &, const evaluate::GenericExprWrapper &)>
+    expr;
+    std::function<void(
+        llvm::raw_ostream &, const evaluate::GenericAssignmentWrapper &)>
+    assignment;
+    std::function<void(llvm::raw_ostream &, const evaluate::ProcedureRef &)> call;
 };
 
 // Converts parsed program to out as Fortran.
 void Unparse(llvm::raw_ostream &out, const Program &program,
-    Encoding encoding = Encoding::UTF_8, bool capitalizeKeywords = true,
-    bool backslashEscapes = true, preStatementType *preStatement = nullptr,
-    AnalyzedObjectsAsFortran * = nullptr);
+             Encoding encoding = Encoding::UTF_8, bool capitalizeKeywords = true,
+             bool backslashEscapes = true, preStatementType *preStatement = nullptr,
+             AnalyzedObjectsAsFortran * = nullptr);
 } // namespace Fortran::parser
 
 #endif

@@ -20,11 +20,11 @@ namespace lldb_private {
 /// internally by SBDebugger to initialize the system.
 class SystemInitializerFull : public SystemInitializerCommon {
 public:
-  SystemInitializerFull();
-  ~SystemInitializerFull() override;
+    SystemInitializerFull();
+    ~SystemInitializerFull() override;
 
-  llvm::Error Initialize() override;
-  void Terminate() override;
+    llvm::Error Initialize() override;
+    void Terminate() override;
 };
 
 } // namespace lldb_private

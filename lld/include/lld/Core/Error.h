@@ -23,12 +23,12 @@ namespace lld {
 const std::error_category &YamlReaderCategory();
 
 enum class YamlReaderError {
-  unknown_keyword,
-  illegal_value
+    unknown_keyword,
+    illegal_value
 };
 
 inline std::error_code make_error_code(YamlReaderError e) {
-  return std::error_code(static_cast<int>(e), YamlReaderCategory());
+    return std::error_code(static_cast<int>(e), YamlReaderCategory());
 }
 
 /// Creates an error_code object that has associated with it an arbitrary
@@ -45,17 +45,19 @@ std::error_code make_dynamic_error_code(StringRef msg);
 /// this class can be used to describe the error via a string message.
 class GenericError : public llvm::ErrorInfo<GenericError> {
 public:
-  static char ID;
-  GenericError(Twine Msg);
-  const std::string &getMessage() const { return Msg; }
-  void log(llvm::raw_ostream &OS) const override;
+    static char ID;
+    GenericError(Twine Msg);
+    const std::string &getMessage() const {
+        return Msg;
+    }
+    void log(llvm::raw_ostream &OS) const override;
 
-  std::error_code convertToErrorCode() const override {
-    return make_dynamic_error_code(getMessage());
-  }
+    std::error_code convertToErrorCode() const override {
+        return make_dynamic_error_code(getMessage());
+    }
 
 private:
-  std::string Msg;
+    std::string Msg;
 };
 
 } // end namespace lld

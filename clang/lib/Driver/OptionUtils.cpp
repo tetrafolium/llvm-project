@@ -19,15 +19,15 @@ template <typename IntTy>
 IntTy getLastArgIntValueImpl(const ArgList &Args, OptSpecifier Id,
                              IntTy Default, DiagnosticsEngine *Diags,
                              unsigned Base) {
-  IntTy Res = Default;
-  if (Arg *A = Args.getLastArg(Id)) {
-    if (StringRef(A->getValue()).getAsInteger(Base, Res)) {
-      if (Diags)
-        Diags->Report(diag::err_drv_invalid_int_value)
-            << A->getAsString(Args) << A->getValue();
+    IntTy Res = Default;
+    if (Arg *A = Args.getLastArg(Id)) {
+        if (StringRef(A->getValue()).getAsInteger(Base, Res)) {
+            if (Diags)
+                Diags->Report(diag::err_drv_invalid_int_value)
+                        << A->getAsString(Args) << A->getValue();
+        }
     }
-  }
-  return Res;
+    return Res;
 }
 } // namespace
 
@@ -35,13 +35,13 @@ namespace clang {
 
 int getLastArgIntValue(const ArgList &Args, OptSpecifier Id, int Default,
                        DiagnosticsEngine *Diags, unsigned Base) {
-  return getLastArgIntValueImpl<int>(Args, Id, Default, Diags, Base);
+    return getLastArgIntValueImpl<int>(Args, Id, Default, Diags, Base);
 }
 
 uint64_t getLastArgUInt64Value(const ArgList &Args, OptSpecifier Id,
                                uint64_t Default, DiagnosticsEngine *Diags,
                                unsigned Base) {
-  return getLastArgIntValueImpl<uint64_t>(Args, Id, Default, Diags, Base);
+    return getLastArgIntValueImpl<uint64_t>(Args, Id, Default, Diags, Base);
 }
 
 } // namespace clang

@@ -24,22 +24,34 @@ struct ComparisonOptions;
 /// Within a tree, this identifies a node by its preorder offset.
 struct NodeId {
 private:
-  static constexpr int InvalidNodeId = -1;
+    static constexpr int InvalidNodeId = -1;
 
 public:
-  int Id;
+    int Id;
 
-  NodeId() : Id(InvalidNodeId) {}
-  NodeId(int Id) : Id(Id) {}
+    NodeId() : Id(InvalidNodeId) {}
+    NodeId(int Id) : Id(Id) {}
 
-  operator int() const { return Id; }
-  NodeId &operator++() { return ++Id, *this; }
-  NodeId &operator--() { return --Id, *this; }
-  // Support defining iterators on NodeId.
-  NodeId &operator*() { return *this; }
+    operator int() const {
+        return Id;
+    }
+    NodeId &operator++() {
+        return ++Id, *this;
+    }
+    NodeId &operator--() {
+        return --Id, *this;
+    }
+    // Support defining iterators on NodeId.
+    NodeId &operator*() {
+        return *this;
+    }
 
-  bool isValid() const { return Id != InvalidNodeId; }
-  bool isInvalid() const { return Id == InvalidNodeId; }
+    bool isValid() const {
+        return Id != InvalidNodeId;
+    }
+    bool isInvalid() const {
+        return Id == InvalidNodeId;
+    }
 };
 
 } // end namespace diff

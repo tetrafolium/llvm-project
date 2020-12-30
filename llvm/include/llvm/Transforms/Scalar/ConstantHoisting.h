@@ -68,136 +68,136 @@ namespace consthoist {
 /// Keeps track of the user of a constant and the operand index where the
 /// constant is used.
 struct ConstantUser {
-  Instruction *Inst;
-  unsigned OpndIdx;
+    Instruction *Inst;
+    unsigned OpndIdx;
 
-  ConstantUser(Instruction *Inst, unsigned Idx) : Inst(Inst), OpndIdx(Idx) {}
+    ConstantUser(Instruction *Inst, unsigned Idx) : Inst(Inst), OpndIdx(Idx) {}
 };
 
 using ConstantUseListType = SmallVector<ConstantUser, 8>;
 
 /// Keeps track of a constant candidate and its uses.
 struct ConstantCandidate {
-  ConstantUseListType Uses;
-  // If the candidate is a ConstantExpr (currely only constant GEP expressions
-  // whose base pointers are GlobalVariables are supported), ConstInt records
-  // its offset from the base GV, ConstExpr tracks the candidate GEP expr.
-  ConstantInt *ConstInt;
-  ConstantExpr *ConstExpr;
-  unsigned CumulativeCost = 0;
+    ConstantUseListType Uses;
+    // If the candidate is a ConstantExpr (currely only constant GEP expressions
+    // whose base pointers are GlobalVariables are supported), ConstInt records
+    // its offset from the base GV, ConstExpr tracks the candidate GEP expr.
+    ConstantInt *ConstInt;
+    ConstantExpr *ConstExpr;
+    unsigned CumulativeCost = 0;
 
-  ConstantCandidate(ConstantInt *ConstInt, ConstantExpr *ConstExpr=nullptr) :
-      ConstInt(ConstInt), ConstExpr(ConstExpr) {}
+    ConstantCandidate(ConstantInt *ConstInt, ConstantExpr *ConstExpr=nullptr) :
+        ConstInt(ConstInt), ConstExpr(ConstExpr) {}
 
-  /// Add the user to the use list and update the cost.
-  void addUser(Instruction *Inst, unsigned Idx, unsigned Cost) {
-    CumulativeCost += Cost;
-    Uses.push_back(ConstantUser(Inst, Idx));
-  }
+    /// Add the user to the use list and update the cost.
+    void addUser(Instruction *Inst, unsigned Idx, unsigned Cost) {
+        CumulativeCost += Cost;
+        Uses.push_back(ConstantUser(Inst, Idx));
+    }
 };
 
 /// This represents a constant that has been rebased with respect to a
 /// base constant. The difference to the base constant is recorded in Offset.
 struct RebasedConstantInfo {
-  ConstantUseListType Uses;
-  Constant *Offset;
-  Type *Ty;
+    ConstantUseListType Uses;
+    Constant *Offset;
+    Type *Ty;
 
-  RebasedConstantInfo(ConstantUseListType &&Uses, Constant *Offset,
-      Type *Ty=nullptr) : Uses(std::move(Uses)), Offset(Offset), Ty(Ty) {}
+    RebasedConstantInfo(ConstantUseListType &&Uses, Constant *Offset,
+                        Type *Ty=nullptr) : Uses(std::move(Uses)), Offset(Offset), Ty(Ty) {}
 };
 
 using RebasedConstantListType = SmallVector<RebasedConstantInfo, 4>;
 
 /// A base constant and all its rebased constants.
 struct ConstantInfo {
-  // If the candidate is a ConstantExpr (currely only constant GEP expressions
-  // whose base pointers are GlobalVariables are supported), ConstInt records
-  // its offset from the base GV, ConstExpr tracks the candidate GEP expr.
-  ConstantInt *BaseInt;
-  ConstantExpr *BaseExpr;
-  RebasedConstantListType RebasedConstants;
+    // If the candidate is a ConstantExpr (currely only constant GEP expressions
+    // whose base pointers are GlobalVariables are supported), ConstInt records
+    // its offset from the base GV, ConstExpr tracks the candidate GEP expr.
+    ConstantInt *BaseInt;
+    ConstantExpr *BaseExpr;
+    RebasedConstantListType RebasedConstants;
 };
 
 } // end namespace consthoist
 
 class ConstantHoistingPass : public PassInfoMixin<ConstantHoistingPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-  // Glue for old PM.
-  bool runImpl(Function &F, TargetTransformInfo &TTI, DominatorTree &DT,
-               BlockFrequencyInfo *BFI, BasicBlock &Entry,
-               ProfileSummaryInfo *PSI);
+    // Glue for old PM.
+    bool runImpl(Function &F, TargetTransformInfo &TTI, DominatorTree &DT,
+                 BlockFrequencyInfo *BFI, BasicBlock &Entry,
+                 ProfileSummaryInfo *PSI);
 
-  void cleanup() {
-    ClonedCastMap.clear();
-    ConstIntCandVec.clear();
-    for (auto MapEntry : ConstGEPCandMap)
-      MapEntry.second.clear();
-    ConstGEPCandMap.clear();
-    ConstIntInfoVec.clear();
-    for (auto MapEntry : ConstGEPInfoMap)
-      MapEntry.second.clear();
-    ConstGEPInfoMap.clear();
-  }
+    void cleanup() {
+        ClonedCastMap.clear();
+        ConstIntCandVec.clear();
+        for (auto MapEntry : ConstGEPCandMap)
+            MapEntry.second.clear();
+        ConstGEPCandMap.clear();
+        ConstIntInfoVec.clear();
+        for (auto MapEntry : ConstGEPInfoMap)
+            MapEntry.second.clear();
+        ConstGEPInfoMap.clear();
+    }
 
 private:
-  using ConstPtrUnionType = PointerUnion<ConstantInt *, ConstantExpr *>;
-  using ConstCandMapType = DenseMap<ConstPtrUnionType, unsigned>;
+    using ConstPtrUnionType = PointerUnion<ConstantInt *, ConstantExpr *>;
+    using ConstCandMapType = DenseMap<ConstPtrUnionType, unsigned>;
 
-  const TargetTransformInfo *TTI;
-  DominatorTree *DT;
-  BlockFrequencyInfo *BFI;
-  LLVMContext *Ctx;
-  const DataLayout *DL;
-  BasicBlock *Entry;
-  ProfileSummaryInfo *PSI;
+    const TargetTransformInfo *TTI;
+    DominatorTree *DT;
+    BlockFrequencyInfo *BFI;
+    LLVMContext *Ctx;
+    const DataLayout *DL;
+    BasicBlock *Entry;
+    ProfileSummaryInfo *PSI;
 
-  /// Keeps track of constant candidates found in the function.
-  using ConstCandVecType = std::vector<consthoist::ConstantCandidate>;
-  using GVCandVecMapType = MapVector<GlobalVariable *, ConstCandVecType>;
-  ConstCandVecType ConstIntCandVec;
-  GVCandVecMapType ConstGEPCandMap;
+    /// Keeps track of constant candidates found in the function.
+    using ConstCandVecType = std::vector<consthoist::ConstantCandidate>;
+    using GVCandVecMapType = MapVector<GlobalVariable *, ConstCandVecType>;
+    ConstCandVecType ConstIntCandVec;
+    GVCandVecMapType ConstGEPCandMap;
 
-  /// These are the final constants we decided to hoist.
-  using ConstInfoVecType = SmallVector<consthoist::ConstantInfo, 8>;
-  using GVInfoVecMapType = MapVector<GlobalVariable *, ConstInfoVecType>;
-  ConstInfoVecType ConstIntInfoVec;
-  GVInfoVecMapType ConstGEPInfoMap;
+    /// These are the final constants we decided to hoist.
+    using ConstInfoVecType = SmallVector<consthoist::ConstantInfo, 8>;
+    using GVInfoVecMapType = MapVector<GlobalVariable *, ConstInfoVecType>;
+    ConstInfoVecType ConstIntInfoVec;
+    GVInfoVecMapType ConstGEPInfoMap;
 
-  /// Keep track of cast instructions we already cloned.
-  MapVector<Instruction *, Instruction *> ClonedCastMap;
+    /// Keep track of cast instructions we already cloned.
+    MapVector<Instruction *, Instruction *> ClonedCastMap;
 
-  Instruction *findMatInsertPt(Instruction *Inst, unsigned Idx = ~0U) const;
-  SetVector<Instruction *>
-  findConstantInsertionPoint(const consthoist::ConstantInfo &ConstInfo) const;
-  void collectConstantCandidates(ConstCandMapType &ConstCandMap,
-                                 Instruction *Inst, unsigned Idx,
-                                 ConstantInt *ConstInt);
-  void collectConstantCandidates(ConstCandMapType &ConstCandMap,
-                                 Instruction *Inst, unsigned Idx,
-                                 ConstantExpr *ConstExpr);
-  void collectConstantCandidates(ConstCandMapType &ConstCandMap,
-                                 Instruction *Inst, unsigned Idx);
-  void collectConstantCandidates(ConstCandMapType &ConstCandMap,
-                                 Instruction *Inst);
-  void collectConstantCandidates(Function &Fn);
-  void findAndMakeBaseConstant(ConstCandVecType::iterator S,
-                               ConstCandVecType::iterator E,
-      SmallVectorImpl<consthoist::ConstantInfo> &ConstInfoVec);
-  unsigned maximizeConstantsInRange(ConstCandVecType::iterator S,
-                                    ConstCandVecType::iterator E,
-                                    ConstCandVecType::iterator &MaxCostItr);
-  // If BaseGV is nullptr, find base among Constant Integer candidates;
-  // otherwise find base among constant GEPs sharing BaseGV as base pointer.
-  void findBaseConstants(GlobalVariable *BaseGV);
-  void emitBaseConstants(Instruction *Base, Constant *Offset, Type *Ty,
-                         const consthoist::ConstantUser &ConstUser);
-  // If BaseGV is nullptr, emit Constant Integer base; otherwise emit
-  // constant GEP base.
-  bool emitBaseConstants(GlobalVariable *BaseGV);
-  void deleteDeadCastInst() const;
+    Instruction *findMatInsertPt(Instruction *Inst, unsigned Idx = ~0U) const;
+    SetVector<Instruction *>
+    findConstantInsertionPoint(const consthoist::ConstantInfo &ConstInfo) const;
+    void collectConstantCandidates(ConstCandMapType &ConstCandMap,
+                                   Instruction *Inst, unsigned Idx,
+                                   ConstantInt *ConstInt);
+    void collectConstantCandidates(ConstCandMapType &ConstCandMap,
+                                   Instruction *Inst, unsigned Idx,
+                                   ConstantExpr *ConstExpr);
+    void collectConstantCandidates(ConstCandMapType &ConstCandMap,
+                                   Instruction *Inst, unsigned Idx);
+    void collectConstantCandidates(ConstCandMapType &ConstCandMap,
+                                   Instruction *Inst);
+    void collectConstantCandidates(Function &Fn);
+    void findAndMakeBaseConstant(ConstCandVecType::iterator S,
+                                 ConstCandVecType::iterator E,
+                                 SmallVectorImpl<consthoist::ConstantInfo> &ConstInfoVec);
+    unsigned maximizeConstantsInRange(ConstCandVecType::iterator S,
+                                      ConstCandVecType::iterator E,
+                                      ConstCandVecType::iterator &MaxCostItr);
+    // If BaseGV is nullptr, find base among Constant Integer candidates;
+    // otherwise find base among constant GEPs sharing BaseGV as base pointer.
+    void findBaseConstants(GlobalVariable *BaseGV);
+    void emitBaseConstants(Instruction *Base, Constant *Offset, Type *Ty,
+                           const consthoist::ConstantUser &ConstUser);
+    // If BaseGV is nullptr, emit Constant Integer base; otherwise emit
+    // constant GEP base.
+    bool emitBaseConstants(GlobalVariable *BaseGV);
+    void deleteDeadCastInst() const;
 };
 
 } // end namespace llvm

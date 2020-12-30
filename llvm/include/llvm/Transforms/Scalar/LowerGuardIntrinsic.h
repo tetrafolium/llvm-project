@@ -19,7 +19,7 @@
 namespace llvm {
 
 struct LowerGuardIntrinsicPass : PassInfoMixin<LowerGuardIntrinsicPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 }

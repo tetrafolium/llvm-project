@@ -13,14 +13,14 @@ using namespace lldb_private;
 
 bool BreakpointPrecondition::EvaluatePrecondition(
     StoppointCallbackContext &context) {
-  return false;
+    return false;
 }
 
 void BreakpointPrecondition::GetDescription(Stream &stream,
-                                            lldb::DescriptionLevel level) {}
+        lldb::DescriptionLevel level) {}
 
 Status BreakpointPrecondition::ConfigurePrecondition(Args &args) {
-  Status error;
-  error.SetErrorString("Base breakpoint precondition has no options.");
-  return error;
+    Status error;
+    error.SetErrorString("Base breakpoint precondition has no options.");
+    return error;
 }

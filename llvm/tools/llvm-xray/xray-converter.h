@@ -21,20 +21,20 @@ namespace llvm {
 namespace xray {
 
 class TraceConverter {
-  FuncIdConversionHelper &FuncIdHelper;
-  bool Symbolize;
+    FuncIdConversionHelper &FuncIdHelper;
+    bool Symbolize;
 
 public:
-  TraceConverter(FuncIdConversionHelper &FuncIdHelper, bool Symbolize = false)
-      : FuncIdHelper(FuncIdHelper), Symbolize(Symbolize) {}
+    TraceConverter(FuncIdConversionHelper &FuncIdHelper, bool Symbolize = false)
+        : FuncIdHelper(FuncIdHelper), Symbolize(Symbolize) {}
 
-  void exportAsYAML(const Trace &Records, raw_ostream &OS);
-  void exportAsRAWv1(const Trace &Records, raw_ostream &OS);
+    void exportAsYAML(const Trace &Records, raw_ostream &OS);
+    void exportAsRAWv1(const Trace &Records, raw_ostream &OS);
 
-  /// For this conversion, the Function records within each thread are expected
-  /// to be in sorted TSC order. The trace event format encodes stack traces, so
-  /// the linear history is essential for correct output.
-  void exportAsChromeTraceEventFormat(const Trace &Records, raw_ostream &OS);
+    /// For this conversion, the Function records within each thread are expected
+    /// to be in sorted TSC order. The trace event format encodes stack traces, so
+    /// the linear history is essential for correct output.
+    void exportAsChromeTraceEventFormat(const Trace &Records, raw_ostream &OS);
 };
 
 } // namespace xray

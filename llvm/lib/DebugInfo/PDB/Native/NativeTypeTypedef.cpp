@@ -14,16 +14,16 @@ NativeTypeTypedef::~NativeTypeTypedef() {}
 void NativeTypeTypedef::dump(raw_ostream &OS, int Indent,
                              PdbSymbolIdField ShowIdFields,
                              PdbSymbolIdField RecurseIdFields) const {
-  NativeRawSymbol::dump(OS, Indent, ShowIdFields, RecurseIdFields);
-  dumpSymbolField(OS, "name", getName(), Indent);
-  dumpSymbolIdField(OS, "typeId", getTypeId(), Indent, Session,
-                    PdbSymbolIdField::Type, ShowIdFields, RecurseIdFields);
+    NativeRawSymbol::dump(OS, Indent, ShowIdFields, RecurseIdFields);
+    dumpSymbolField(OS, "name", getName(), Indent);
+    dumpSymbolIdField(OS, "typeId", getTypeId(), Indent, Session,
+                      PdbSymbolIdField::Type, ShowIdFields, RecurseIdFields);
 }
 
 std::string NativeTypeTypedef::getName() const {
-  return std::string(Record.Name);
+    return std::string(Record.Name);
 }
 
 SymIndexId NativeTypeTypedef::getTypeId() const {
-  return Session.getSymbolCache().findSymbolByTypeIndex(Record.Type);
+    return Session.getSymbolCache().findSymbolByTypeIndex(Record.Type);
 }

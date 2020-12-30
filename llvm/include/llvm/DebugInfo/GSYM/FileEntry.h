@@ -24,43 +24,43 @@ namespace gsym {
 /// strings and saves space.
 struct FileEntry {
 
-  /// Offsets in the string table.
-  /// @{
-  uint32_t Dir = 0;
-  uint32_t Base = 0;
-  /// @}
+    /// Offsets in the string table.
+    /// @{
+    uint32_t Dir = 0;
+    uint32_t Base = 0;
+    /// @}
 
-  FileEntry() = default;
-  FileEntry(uint32_t D, uint32_t B) : Dir(D), Base(B) {}
+    FileEntry() = default;
+    FileEntry(uint32_t D, uint32_t B) : Dir(D), Base(B) {}
 
-  // Implement operator== so that FileEntry can be used as key in
-  // unordered containers.
-  bool operator==(const FileEntry &RHS) const {
-    return Base == RHS.Base && Dir == RHS.Dir;
-  };
-  bool operator!=(const FileEntry &RHS) const {
-    return Base != RHS.Base || Dir != RHS.Dir;
-  };
+    // Implement operator== so that FileEntry can be used as key in
+    // unordered containers.
+    bool operator==(const FileEntry &RHS) const {
+        return Base == RHS.Base && Dir == RHS.Dir;
+    };
+    bool operator!=(const FileEntry &RHS) const {
+        return Base != RHS.Base || Dir != RHS.Dir;
+    };
 };
 
 } // namespace gsym
 
 template <> struct DenseMapInfo<gsym::FileEntry> {
-  static inline gsym::FileEntry getEmptyKey() {
-    uint32_t key = DenseMapInfo<uint32_t>::getEmptyKey();
-    return gsym::FileEntry(key, key);
-  }
-  static inline gsym::FileEntry getTombstoneKey() {
-    uint32_t key = DenseMapInfo<uint32_t>::getTombstoneKey();
-    return gsym::FileEntry(key, key);
-  }
-  static unsigned getHashValue(const gsym::FileEntry &Val) {
-    return llvm::hash_combine(DenseMapInfo<uint32_t>::getHashValue(Val.Dir),
-                              DenseMapInfo<uint32_t>::getHashValue(Val.Base));
-  }
-  static bool isEqual(const gsym::FileEntry &LHS, const gsym::FileEntry &RHS) {
-    return LHS == RHS;
-  }
+    static inline gsym::FileEntry getEmptyKey() {
+        uint32_t key = DenseMapInfo<uint32_t>::getEmptyKey();
+        return gsym::FileEntry(key, key);
+    }
+    static inline gsym::FileEntry getTombstoneKey() {
+        uint32_t key = DenseMapInfo<uint32_t>::getTombstoneKey();
+        return gsym::FileEntry(key, key);
+    }
+    static unsigned getHashValue(const gsym::FileEntry &Val) {
+        return llvm::hash_combine(DenseMapInfo<uint32_t>::getHashValue(Val.Dir),
+                                  DenseMapInfo<uint32_t>::getHashValue(Val.Base));
+    }
+    static bool isEqual(const gsym::FileEntry &LHS, const gsym::FileEntry &RHS) {
+        return LHS == RHS;
+    }
 };
 
 } // namespace llvm

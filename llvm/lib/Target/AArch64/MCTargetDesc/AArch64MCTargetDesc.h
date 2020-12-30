@@ -37,8 +37,8 @@ class raw_ostream;
 class raw_pwrite_stream;
 
 MCCodeEmitter *createAArch64MCCodeEmitter(const MCInstrInfo &MCII,
-                                          const MCRegisterInfo &MRI,
-                                          MCContext &Ctx);
+        const MCRegisterInfo &MRI,
+        MCContext &Ctx);
 MCAsmBackend *createAArch64leAsmBackend(const Target &T,
                                         const MCSubtargetInfo &STI,
                                         const MCRegisterInfo &MRI,
@@ -58,12 +58,12 @@ createAArch64MachObjectWriter(uint32_t CPUType, uint32_t CPUSubtype,
 std::unique_ptr<MCObjectTargetWriter> createAArch64WinCOFFObjectWriter();
 
 MCTargetStreamer *createAArch64AsmTargetStreamer(MCStreamer &S,
-                                                 formatted_raw_ostream &OS,
-                                                 MCInstPrinter *InstPrint,
-                                                 bool isVerboseAsm);
+        formatted_raw_ostream &OS,
+        MCInstPrinter *InstPrint,
+        bool isVerboseAsm);
 
 MCTargetStreamer *createAArch64ObjectTargetStreamer(MCStreamer &S,
-                                                    const MCSubtargetInfo &STI);
+        const MCSubtargetInfo &STI);
 
 namespace AArch64_MC {
 void initLLVMToCVRegMapping(MCRegisterInfo *MRI);

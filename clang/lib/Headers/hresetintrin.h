@@ -39,7 +39,7 @@
 static __inline void __DEFAULT_FN_ATTRS
 _hreset(int __eax)
 {
-  __asm__ ("hreset $0" :: "a"(__eax));
+    __asm__ ("hreset $0" :: "a"(__eax));
 }
 
 #undef __DEFAULT_FN_ATTRS

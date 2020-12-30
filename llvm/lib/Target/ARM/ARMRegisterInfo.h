@@ -20,9 +20,9 @@ namespace llvm {
 class ARMSubtarget;
 
 struct ARMRegisterInfo : public ARMBaseRegisterInfo {
-  virtual void anchor();
+    virtual void anchor();
 public:
-  ARMRegisterInfo();
+    ARMRegisterInfo();
 };
 
 } // end namespace llvm

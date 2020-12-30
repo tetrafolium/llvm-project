@@ -19,20 +19,20 @@ namespace ContainerBenchmarks {
 
 template <class Container>
 void BM_ConstructSize(benchmark::State& st, Container) {
-  auto size = st.range(0);
-  for (auto _ : st) {
-    Container c(size);
-    DoNotOptimizeData(c);
-  }
+    auto size = st.range(0);
+    for (auto _ : st) {
+        Container c(size);
+        DoNotOptimizeData(c);
+    }
 }
 
 template <class Container>
 void BM_ConstructSizeValue(benchmark::State& st, Container, typename Container::value_type const& val) {
-  const auto size = st.range(0);
-  for (auto _ : st) {
-    Container c(size, val);
-    DoNotOptimizeData(c);
-  }
+    const auto size = st.range(0);
+    for (auto _ : st) {
+        Container c(size, val);
+        DoNotOptimizeData(c);
+    }
 }
 
 template <class Container, class GenInputs>

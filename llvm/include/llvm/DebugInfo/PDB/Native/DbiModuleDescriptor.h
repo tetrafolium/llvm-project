@@ -22,48 +22,48 @@ namespace llvm {
 namespace pdb {
 
 class DbiModuleDescriptor {
-  friend class DbiStreamBuilder;
+    friend class DbiStreamBuilder;
 
 public:
-  DbiModuleDescriptor() = default;
-  DbiModuleDescriptor(const DbiModuleDescriptor &Info) = default;
-  DbiModuleDescriptor &operator=(const DbiModuleDescriptor &Info) = default;
+    DbiModuleDescriptor() = default;
+    DbiModuleDescriptor(const DbiModuleDescriptor &Info) = default;
+    DbiModuleDescriptor &operator=(const DbiModuleDescriptor &Info) = default;
 
-  static Error initialize(BinaryStreamRef Stream, DbiModuleDescriptor &Info);
+    static Error initialize(BinaryStreamRef Stream, DbiModuleDescriptor &Info);
 
-  bool hasECInfo() const;
-  uint16_t getTypeServerIndex() const;
-  uint16_t getModuleStreamIndex() const;
-  uint32_t getSymbolDebugInfoByteSize() const;
-  uint32_t getC11LineInfoByteSize() const;
-  uint32_t getC13LineInfoByteSize() const;
-  uint32_t getNumberOfFiles() const;
-  uint32_t getSourceFileNameIndex() const;
-  uint32_t getPdbFilePathNameIndex() const;
+    bool hasECInfo() const;
+    uint16_t getTypeServerIndex() const;
+    uint16_t getModuleStreamIndex() const;
+    uint32_t getSymbolDebugInfoByteSize() const;
+    uint32_t getC11LineInfoByteSize() const;
+    uint32_t getC13LineInfoByteSize() const;
+    uint32_t getNumberOfFiles() const;
+    uint32_t getSourceFileNameIndex() const;
+    uint32_t getPdbFilePathNameIndex() const;
 
-  StringRef getModuleName() const;
-  StringRef getObjFileName() const;
+    StringRef getModuleName() const;
+    StringRef getObjFileName() const;
 
-  uint32_t getRecordLength() const;
+    uint32_t getRecordLength() const;
 
-  const SectionContrib &getSectionContrib() const;
+    const SectionContrib &getSectionContrib() const;
 
 private:
-  StringRef ModuleName;
-  StringRef ObjFileName;
-  const ModuleInfoHeader *Layout = nullptr;
+    StringRef ModuleName;
+    StringRef ObjFileName;
+    const ModuleInfoHeader *Layout = nullptr;
 };
 
 } // end namespace pdb
 
 template <> struct VarStreamArrayExtractor<pdb::DbiModuleDescriptor> {
-  Error operator()(BinaryStreamRef Stream, uint32_t &Length,
-                   pdb::DbiModuleDescriptor &Info) {
-    if (auto EC = pdb::DbiModuleDescriptor::initialize(Stream, Info))
-      return EC;
-    Length = Info.getRecordLength();
-    return Error::success();
-  }
+    Error operator()(BinaryStreamRef Stream, uint32_t &Length,
+                     pdb::DbiModuleDescriptor &Info) {
+        if (auto EC = pdb::DbiModuleDescriptor::initialize(Stream, Info))
+            return EC;
+        Length = Info.getRecordLength();
+        return Error::success();
+    }
 };
 
 } // end namespace llvm

@@ -26,19 +26,19 @@ namespace mpi {
 
 class Request {
 public:
-  enum State : unsigned char { Nonblocking, Wait };
+    enum State : unsigned char { Nonblocking, Wait };
 
-  Request(State S) : CurrentState{S} {}
+    Request(State S) : CurrentState{S} {}
 
-  void Profile(llvm::FoldingSetNodeID &Id) const {
-    Id.AddInteger(CurrentState);
-  }
+    void Profile(llvm::FoldingSetNodeID &Id) const {
+        Id.AddInteger(CurrentState);
+    }
 
-  bool operator==(const Request &ToCompare) const {
-    return CurrentState == ToCompare.CurrentState;
-  }
+    bool operator==(const Request &ToCompare) const {
+        return CurrentState == ToCompare.CurrentState;
+    }
 
-  const State CurrentState;
+    const State CurrentState;
 };
 
 // The RequestMap stores MPI requests which are identified by their memory
@@ -47,18 +47,18 @@ public:
 // available in an arbitrary amount of translation units.
 struct RequestMap {};
 typedef llvm::ImmutableMap<const clang::ento::MemRegion *,
-                           clang::ento::mpi::Request>
-    RequestMapImpl;
+        clang::ento::mpi::Request>
+        RequestMapImpl;
 
 } // end of namespace: mpi
 
 template <>
 struct ProgramStateTrait<mpi::RequestMap>
     : public ProgramStatePartialTrait<mpi::RequestMapImpl> {
-  static void *GDMIndex() {
-    static int index = 0;
-    return &index;
-  }
+    static void *GDMIndex() {
+        static int index = 0;
+        return &index;
+    }
 };
 
 } // end of namespace: ento

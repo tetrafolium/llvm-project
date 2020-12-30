@@ -55,149 +55,150 @@ std::mutex MappingMutex;
 
 struct InstrOrderFile {
 private:
-  GlobalVariable *OrderFileBuffer;
-  GlobalVariable *BufferIdx;
-  GlobalVariable *BitMap;
-  ArrayType *BufferTy;
-  ArrayType *MapTy;
+    GlobalVariable *OrderFileBuffer;
+    GlobalVariable *BufferIdx;
+    GlobalVariable *BitMap;
+    ArrayType *BufferTy;
+    ArrayType *MapTy;
 
 public:
-  InstrOrderFile() {}
+    InstrOrderFile() {}
 
-  void createOrderFileData(Module &M) {
-    LLVMContext &Ctx = M.getContext();
-    int NumFunctions = 0;
-    for (Function &F : M) {
-      if (!F.isDeclaration())
-        NumFunctions++;
+    void createOrderFileData(Module &M) {
+        LLVMContext &Ctx = M.getContext();
+        int NumFunctions = 0;
+        for (Function &F : M) {
+            if (!F.isDeclaration())
+                NumFunctions++;
+        }
+
+        BufferTy =
+            ArrayType::get(Type::getInt64Ty(Ctx), INSTR_ORDER_FILE_BUFFER_SIZE);
+        Type *IdxTy = Type::getInt32Ty(Ctx);
+        MapTy = ArrayType::get(Type::getInt8Ty(Ctx), NumFunctions);
+
+        // Create the global variables.
+        std::string SymbolName = INSTR_PROF_ORDERFILE_BUFFER_NAME_STR;
+        OrderFileBuffer = new GlobalVariable(M, BufferTy, false, GlobalValue::LinkOnceODRLinkage,
+                                             Constant::getNullValue(BufferTy), SymbolName);
+        Triple TT = Triple(M.getTargetTriple());
+        OrderFileBuffer->setSection(
+            getInstrProfSectionName(IPSK_orderfile, TT.getObjectFormat()));
+
+        std::string IndexName = INSTR_PROF_ORDERFILE_BUFFER_IDX_NAME_STR;
+        BufferIdx = new GlobalVariable(M, IdxTy, false, GlobalValue::LinkOnceODRLinkage,
+                                       Constant::getNullValue(IdxTy), IndexName);
+
+        std::string BitMapName = "bitmap_0";
+        BitMap = new GlobalVariable(M, MapTy, false, GlobalValue::PrivateLinkage,
+                                    Constant::getNullValue(MapTy), BitMapName);
     }
 
-    BufferTy =
-        ArrayType::get(Type::getInt64Ty(Ctx), INSTR_ORDER_FILE_BUFFER_SIZE);
-    Type *IdxTy = Type::getInt32Ty(Ctx);
-    MapTy = ArrayType::get(Type::getInt8Ty(Ctx), NumFunctions);
+    // Generate the code sequence in the entry block of each function to
+    // update the buffer.
+    void generateCodeSequence(Module &M, Function &F, int FuncId) {
+        if (!ClOrderFileWriteMapping.empty()) {
+            std::lock_guard<std::mutex> LogLock(MappingMutex);
+            std::error_code EC;
+            llvm::raw_fd_ostream OS(ClOrderFileWriteMapping, EC,
+                                    llvm::sys::fs::OF_Append);
+            if (EC) {
+                report_fatal_error(Twine("Failed to open ") + ClOrderFileWriteMapping +
+                                   " to save mapping file for order file instrumentation\n");
+            } else {
+                std::stringstream stream;
+                stream << std::hex << MD5Hash(F.getName());
+                std::string singleLine = "MD5 " + stream.str() + " " +
+                                         std::string(F.getName()) + '\n';
+                OS << singleLine;
+            }
+        }
 
-    // Create the global variables.
-    std::string SymbolName = INSTR_PROF_ORDERFILE_BUFFER_NAME_STR;
-    OrderFileBuffer = new GlobalVariable(M, BufferTy, false, GlobalValue::LinkOnceODRLinkage,
-                           Constant::getNullValue(BufferTy), SymbolName);
-    Triple TT = Triple(M.getTargetTriple());
-    OrderFileBuffer->setSection(
-        getInstrProfSectionName(IPSK_orderfile, TT.getObjectFormat()));
+        BasicBlock *OrigEntry = &F.getEntryBlock();
 
-    std::string IndexName = INSTR_PROF_ORDERFILE_BUFFER_IDX_NAME_STR;
-    BufferIdx = new GlobalVariable(M, IdxTy, false, GlobalValue::LinkOnceODRLinkage,
-                           Constant::getNullValue(IdxTy), IndexName);
+        LLVMContext &Ctx = M.getContext();
+        IntegerType *Int32Ty = Type::getInt32Ty(Ctx);
+        IntegerType *Int8Ty = Type::getInt8Ty(Ctx);
 
-    std::string BitMapName = "bitmap_0";
-    BitMap = new GlobalVariable(M, MapTy, false, GlobalValue::PrivateLinkage,
-                                Constant::getNullValue(MapTy), BitMapName);
-  }
+        // Create a new entry block for instrumentation. We will check the bitmap
+        // in this basic block.
+        BasicBlock *NewEntry =
+            BasicBlock::Create(M.getContext(), "order_file_entry", &F, OrigEntry);
+        IRBuilder<> entryB(NewEntry);
+        // Create a basic block for updating the circular buffer.
+        BasicBlock *UpdateOrderFileBB =
+            BasicBlock::Create(M.getContext(), "order_file_set", &F, OrigEntry);
+        IRBuilder<> updateB(UpdateOrderFileBB);
 
-  // Generate the code sequence in the entry block of each function to
-  // update the buffer.
-  void generateCodeSequence(Module &M, Function &F, int FuncId) {
-    if (!ClOrderFileWriteMapping.empty()) {
-      std::lock_guard<std::mutex> LogLock(MappingMutex);
-      std::error_code EC;
-      llvm::raw_fd_ostream OS(ClOrderFileWriteMapping, EC,
-                              llvm::sys::fs::OF_Append);
-      if (EC) {
-        report_fatal_error(Twine("Failed to open ") + ClOrderFileWriteMapping +
-                           " to save mapping file for order file instrumentation\n");
-      } else {
-        std::stringstream stream;
-        stream << std::hex << MD5Hash(F.getName());
-        std::string singleLine = "MD5 " + stream.str() + " " +
-                                 std::string(F.getName()) + '\n';
-        OS << singleLine;
-      }
+        // Check the bitmap, if it is already 1, do nothing.
+        // Otherwise, set the bit, grab the index, update the buffer.
+        Value *IdxFlags[] = {ConstantInt::get(Int32Ty, 0),
+                             ConstantInt::get(Int32Ty, FuncId)
+                            };
+        Value *MapAddr = entryB.CreateGEP(MapTy, BitMap, IdxFlags, "");
+        LoadInst *loadBitMap = entryB.CreateLoad(Int8Ty, MapAddr, "");
+        entryB.CreateStore(ConstantInt::get(Int8Ty, 1), MapAddr);
+        Value *IsNotExecuted =
+            entryB.CreateICmpEQ(loadBitMap, ConstantInt::get(Int8Ty, 0));
+        entryB.CreateCondBr(IsNotExecuted, UpdateOrderFileBB, OrigEntry);
+
+        // Fill up UpdateOrderFileBB: grab the index, update the buffer!
+        Value *IdxVal = updateB.CreateAtomicRMW(
+                            AtomicRMWInst::Add, BufferIdx, ConstantInt::get(Int32Ty, 1),
+                            AtomicOrdering::SequentiallyConsistent);
+        // We need to wrap around the index to fit it inside the buffer.
+        Value *WrappedIdx = updateB.CreateAnd(
+                                IdxVal, ConstantInt::get(Int32Ty, INSTR_ORDER_FILE_BUFFER_MASK));
+        Value *BufferGEPIdx[] = {ConstantInt::get(Int32Ty, 0), WrappedIdx};
+        Value *BufferAddr =
+            updateB.CreateGEP(BufferTy, OrderFileBuffer, BufferGEPIdx, "");
+        updateB.CreateStore(ConstantInt::get(Type::getInt64Ty(Ctx), MD5Hash(F.getName())),
+                            BufferAddr);
+        updateB.CreateBr(OrigEntry);
     }
 
-    BasicBlock *OrigEntry = &F.getEntryBlock();
+    bool run(Module &M) {
+        createOrderFileData(M);
 
-    LLVMContext &Ctx = M.getContext();
-    IntegerType *Int32Ty = Type::getInt32Ty(Ctx);
-    IntegerType *Int8Ty = Type::getInt8Ty(Ctx);
+        int FuncId = 0;
+        for (Function &F : M) {
+            if (F.isDeclaration())
+                continue;
+            generateCodeSequence(M, F, FuncId);
+            ++FuncId;
+        }
 
-    // Create a new entry block for instrumentation. We will check the bitmap
-    // in this basic block.
-    BasicBlock *NewEntry =
-        BasicBlock::Create(M.getContext(), "order_file_entry", &F, OrigEntry);
-    IRBuilder<> entryB(NewEntry);
-    // Create a basic block for updating the circular buffer.
-    BasicBlock *UpdateOrderFileBB =
-        BasicBlock::Create(M.getContext(), "order_file_set", &F, OrigEntry);
-    IRBuilder<> updateB(UpdateOrderFileBB);
-
-    // Check the bitmap, if it is already 1, do nothing.
-    // Otherwise, set the bit, grab the index, update the buffer.
-    Value *IdxFlags[] = {ConstantInt::get(Int32Ty, 0),
-                         ConstantInt::get(Int32Ty, FuncId)};
-    Value *MapAddr = entryB.CreateGEP(MapTy, BitMap, IdxFlags, "");
-    LoadInst *loadBitMap = entryB.CreateLoad(Int8Ty, MapAddr, "");
-    entryB.CreateStore(ConstantInt::get(Int8Ty, 1), MapAddr);
-    Value *IsNotExecuted =
-        entryB.CreateICmpEQ(loadBitMap, ConstantInt::get(Int8Ty, 0));
-    entryB.CreateCondBr(IsNotExecuted, UpdateOrderFileBB, OrigEntry);
-
-    // Fill up UpdateOrderFileBB: grab the index, update the buffer!
-    Value *IdxVal = updateB.CreateAtomicRMW(
-        AtomicRMWInst::Add, BufferIdx, ConstantInt::get(Int32Ty, 1),
-        AtomicOrdering::SequentiallyConsistent);
-    // We need to wrap around the index to fit it inside the buffer.
-    Value *WrappedIdx = updateB.CreateAnd(
-        IdxVal, ConstantInt::get(Int32Ty, INSTR_ORDER_FILE_BUFFER_MASK));
-    Value *BufferGEPIdx[] = {ConstantInt::get(Int32Ty, 0), WrappedIdx};
-    Value *BufferAddr =
-        updateB.CreateGEP(BufferTy, OrderFileBuffer, BufferGEPIdx, "");
-    updateB.CreateStore(ConstantInt::get(Type::getInt64Ty(Ctx), MD5Hash(F.getName())),
-                        BufferAddr);
-    updateB.CreateBr(OrigEntry);
-  }
-
-  bool run(Module &M) {
-    createOrderFileData(M);
-
-    int FuncId = 0;
-    for (Function &F : M) {
-      if (F.isDeclaration())
-        continue;
-      generateCodeSequence(M, F, FuncId);
-      ++FuncId;
+        return true;
     }
-
-    return true;
-  }
 
 }; // End of InstrOrderFile struct
 
 class InstrOrderFileLegacyPass : public ModulePass {
 public:
-  static char ID;
+    static char ID;
 
-  InstrOrderFileLegacyPass() : ModulePass(ID) {
-    initializeInstrOrderFileLegacyPassPass(
-        *PassRegistry::getPassRegistry());
-  }
+    InstrOrderFileLegacyPass() : ModulePass(ID) {
+        initializeInstrOrderFileLegacyPassPass(
+            *PassRegistry::getPassRegistry());
+    }
 
-  bool runOnModule(Module &M) override;
+    bool runOnModule(Module &M) override;
 };
 
 } // End anonymous namespace
 
 bool InstrOrderFileLegacyPass::runOnModule(Module &M) {
-  if (skipModule(M))
-    return false;
+    if (skipModule(M))
+        return false;
 
-  return InstrOrderFile().run(M);
+    return InstrOrderFile().run(M);
 }
 
 PreservedAnalyses
 InstrOrderFilePass::run(Module &M, ModuleAnalysisManager &AM) {
-  if (InstrOrderFile().run(M))
-    return PreservedAnalyses::none();
-  return PreservedAnalyses::all();
+    if (InstrOrderFile().run(M))
+        return PreservedAnalyses::none();
+    return PreservedAnalyses::all();
 }
 
 INITIALIZE_PASS_BEGIN(InstrOrderFileLegacyPass, "instrorderfile",
@@ -208,5 +209,5 @@ INITIALIZE_PASS_END(InstrOrderFileLegacyPass, "instrorderfile",
 char InstrOrderFileLegacyPass::ID = 0;
 
 ModulePass *llvm::createInstrOrderFilePass() {
-  return new InstrOrderFileLegacyPass();
+    return new InstrOrderFileLegacyPass();
 }

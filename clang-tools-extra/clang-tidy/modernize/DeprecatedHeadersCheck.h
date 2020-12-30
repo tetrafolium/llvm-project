@@ -34,13 +34,13 @@ namespace modernize {
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-deprecated-headers.html
 class DeprecatedHeadersCheck : public ClangTidyCheck {
 public:
-  DeprecatedHeadersCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
+    DeprecatedHeadersCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
 };
 
 } // namespace modernize

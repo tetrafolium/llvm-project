@@ -16,15 +16,15 @@
 using namespace clang;
 
 bool ASTConsumer::HandleTopLevelDecl(DeclGroupRef D) {
-  return true;
+    return true;
 }
 
 void ASTConsumer::HandleInterestingDecl(DeclGroupRef D) {
-  HandleTopLevelDecl(D);
+    HandleTopLevelDecl(D);
 }
 
 void ASTConsumer::HandleTopLevelDeclInObjCContainer(DeclGroupRef D) {}
 
 void ASTConsumer::HandleImplicitImportDecl(ImportDecl *D) {
-  HandleTopLevelDecl(DeclGroupRef(D));
+    HandleTopLevelDecl(DeclGroupRef(D));
 }

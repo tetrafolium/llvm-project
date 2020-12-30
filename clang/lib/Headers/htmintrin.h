@@ -129,21 +129,21 @@ typedef uintptr_t tfhar_t;
    of Operation chapter 5-91.  */
 
 struct __htm_tdb {
-  unsigned char format;                /*   0 */
-  unsigned char flags;
-  unsigned char reserved1[4];
-  unsigned short nesting_depth;
-  unsigned long long abort_code;       /*   8 */
-  unsigned long long conflict_token;   /*  16 */
-  unsigned long long atia;             /*  24 */
-  unsigned char eaid;                  /*  32 */
-  unsigned char dxc;
-  unsigned char reserved2[2];
-  unsigned int program_int_id;
-  unsigned long long exception_id;     /*  40 */
-  unsigned long long bea;              /*  48 */
-  unsigned char reserved3[72];         /*  56 */
-  unsigned long long gprs[16];         /* 128 */
+    unsigned char format;                /*   0 */
+    unsigned char flags;
+    unsigned char reserved1[4];
+    unsigned short nesting_depth;
+    unsigned long long abort_code;       /*   8 */
+    unsigned long long conflict_token;   /*  16 */
+    unsigned long long atia;             /*  24 */
+    unsigned char eaid;                  /*  32 */
+    unsigned char dxc;
+    unsigned char reserved2[2];
+    unsigned int program_int_id;
+    unsigned long long exception_id;     /*  40 */
+    unsigned long long bea;              /*  48 */
+    unsigned char reserved3[72];         /*  56 */
+    unsigned long long gprs[16];         /* 128 */
 } __attribute__((__packed__, __aligned__ (8)));
 
 
@@ -152,25 +152,25 @@ struct __htm_tdb {
 static __inline int __attribute__((__always_inline__, __nodebug__))
 __builtin_tbegin_retry_null (int __retry)
 {
-  int cc, i = 0;
+    int cc, i = 0;
 
-  while ((cc = __builtin_tbegin(0)) == _HTM_TBEGIN_TRANSIENT
-         && i++ < __retry)
-    __builtin_tx_assist(i);
+    while ((cc = __builtin_tbegin(0)) == _HTM_TBEGIN_TRANSIENT
+            && i++ < __retry)
+        __builtin_tx_assist(i);
 
-  return cc;
+    return cc;
 }
 
 static __inline int __attribute__((__always_inline__, __nodebug__))
 __builtin_tbegin_retry_tdb (void *__tdb, int __retry)
 {
-  int cc, i = 0;
+    int cc, i = 0;
 
-  while ((cc = __builtin_tbegin(__tdb)) == _HTM_TBEGIN_TRANSIENT
-         && i++ < __retry)
-    __builtin_tx_assist(i);
+    while ((cc = __builtin_tbegin(__tdb)) == _HTM_TBEGIN_TRANSIENT
+            && i++ < __retry)
+        __builtin_tx_assist(i);
 
-  return cc;
+    return cc;
 }
 
 #define __builtin_tbegin_retry(tdb, retry) \
@@ -181,25 +181,25 @@ __builtin_tbegin_retry_tdb (void *__tdb, int __retry)
 static __inline int __attribute__((__always_inline__, __nodebug__))
 __builtin_tbegin_retry_nofloat_null (int __retry)
 {
-  int cc, i = 0;
+    int cc, i = 0;
 
-  while ((cc = __builtin_tbegin_nofloat(0)) == _HTM_TBEGIN_TRANSIENT
-         && i++ < __retry)
-    __builtin_tx_assist(i);
+    while ((cc = __builtin_tbegin_nofloat(0)) == _HTM_TBEGIN_TRANSIENT
+            && i++ < __retry)
+        __builtin_tx_assist(i);
 
-  return cc;
+    return cc;
 }
 
 static __inline int __attribute__((__always_inline__, __nodebug__))
 __builtin_tbegin_retry_nofloat_tdb (void *__tdb, int __retry)
 {
-  int cc, i = 0;
+    int cc, i = 0;
 
-  while ((cc = __builtin_tbegin_nofloat(__tdb)) == _HTM_TBEGIN_TRANSIENT
-         && i++ < __retry)
-    __builtin_tx_assist(i);
+    while ((cc = __builtin_tbegin_nofloat(__tdb)) == _HTM_TBEGIN_TRANSIENT
+            && i++ < __retry)
+        __builtin_tx_assist(i);
 
-  return cc;
+    return cc;
 }
 
 #define __builtin_tbegin_retry_nofloat(tdb, retry) \

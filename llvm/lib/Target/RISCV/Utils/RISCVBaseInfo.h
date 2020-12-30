@@ -26,212 +26,212 @@ namespace llvm {
 // instruction info tracks. All definitions must match RISCVInstrFormats.td.
 namespace RISCVII {
 enum {
-  InstFormatPseudo = 0,
-  InstFormatR = 1,
-  InstFormatR4 = 2,
-  InstFormatI = 3,
-  InstFormatS = 4,
-  InstFormatB = 5,
-  InstFormatU = 6,
-  InstFormatJ = 7,
-  InstFormatCR = 8,
-  InstFormatCI = 9,
-  InstFormatCSS = 10,
-  InstFormatCIW = 11,
-  InstFormatCL = 12,
-  InstFormatCS = 13,
-  InstFormatCA = 14,
-  InstFormatCB = 15,
-  InstFormatCJ = 16,
-  InstFormatOther = 17,
+    InstFormatPseudo = 0,
+    InstFormatR = 1,
+    InstFormatR4 = 2,
+    InstFormatI = 3,
+    InstFormatS = 4,
+    InstFormatB = 5,
+    InstFormatU = 6,
+    InstFormatJ = 7,
+    InstFormatCR = 8,
+    InstFormatCI = 9,
+    InstFormatCSS = 10,
+    InstFormatCIW = 11,
+    InstFormatCL = 12,
+    InstFormatCS = 13,
+    InstFormatCA = 14,
+    InstFormatCB = 15,
+    InstFormatCJ = 16,
+    InstFormatOther = 17,
 
-  InstFormatMask = 31,
+    InstFormatMask = 31,
 
-  ConstraintOffset = 5,
-  ConstraintMask = 0b1111
+    ConstraintOffset = 5,
+    ConstraintMask = 0b1111
 };
 
 // Match with the definitions in RISCVInstrFormatsV.td
 enum RVVConstraintType {
-  NoConstraint = 0,
-  VS2Constraint = 0b0001,
-  VS1Constraint = 0b0010,
-  VMConstraint = 0b0100,
-  OneInput = 0b1000,
+    NoConstraint = 0,
+    VS2Constraint = 0b0001,
+    VS1Constraint = 0b0010,
+    VMConstraint = 0b0100,
+    OneInput = 0b1000,
 
-  // Illegal instructions:
-  //
-  // * The destination vector register group for a masked vector instruction
-  // cannot overlap the source mask register (v0), unless the destination vector
-  // register is being written with a mask value (e.g., comparisons) or the
-  // scalar result of a reduction.
-  //
-  // * Widening: The destination vector register group cannot overlap a source
-  // vector register group of a different EEW
-  //
-  // * Narrowing: The destination vector register group cannot overlap the
-  // first source vector register group
-  //
-  // * For vadc and vsbc, an illegal instruction exception is raised if the
-  // destination vector register is v0.
-  //
-  // * For vmadc and vmsbc, an illegal instruction exception is raised if the
-  // destination vector register overlaps a source vector register group.
-  //
-  // * viota: An illegal instruction exception is raised if the destination
-  // vector register group overlaps the source vector mask register. If the
-  // instruction is masked, an illegal instruction exception is issued if the
-  // destination vector register group overlaps v0.
-  //
-  // * v[f]slide[1]up: The destination vector register group for vslideup cannot
-  // overlap the source vector register group.
-  //
-  // * vrgather: The destination vector register group cannot overlap with the
-  // source vector register groups.
-  //
-  // * vcompress: The destination vector register group cannot overlap the
-  // source vector register group or the source mask register
-  WidenV = VS2Constraint | VS1Constraint | VMConstraint,
-  WidenW = VS1Constraint | VMConstraint,
-  WidenCvt = VS2Constraint | VMConstraint | OneInput,
-  Narrow = VS2Constraint | VMConstraint,
-  NarrowCvt = VS2Constraint | VMConstraint | OneInput,
-  Vmadc = VS2Constraint | VS1Constraint,
-  Iota = VS2Constraint | VMConstraint | OneInput,
-  SlideUp = VS2Constraint | VMConstraint,
-  Vrgather = VS2Constraint | VS1Constraint | VMConstraint,
-  Vcompress = VS2Constraint | VS1Constraint,
+    // Illegal instructions:
+    //
+    // * The destination vector register group for a masked vector instruction
+    // cannot overlap the source mask register (v0), unless the destination vector
+    // register is being written with a mask value (e.g., comparisons) or the
+    // scalar result of a reduction.
+    //
+    // * Widening: The destination vector register group cannot overlap a source
+    // vector register group of a different EEW
+    //
+    // * Narrowing: The destination vector register group cannot overlap the
+    // first source vector register group
+    //
+    // * For vadc and vsbc, an illegal instruction exception is raised if the
+    // destination vector register is v0.
+    //
+    // * For vmadc and vmsbc, an illegal instruction exception is raised if the
+    // destination vector register overlaps a source vector register group.
+    //
+    // * viota: An illegal instruction exception is raised if the destination
+    // vector register group overlaps the source vector mask register. If the
+    // instruction is masked, an illegal instruction exception is issued if the
+    // destination vector register group overlaps v0.
+    //
+    // * v[f]slide[1]up: The destination vector register group for vslideup cannot
+    // overlap the source vector register group.
+    //
+    // * vrgather: The destination vector register group cannot overlap with the
+    // source vector register groups.
+    //
+    // * vcompress: The destination vector register group cannot overlap the
+    // source vector register group or the source mask register
+    WidenV = VS2Constraint | VS1Constraint | VMConstraint,
+    WidenW = VS1Constraint | VMConstraint,
+    WidenCvt = VS2Constraint | VMConstraint | OneInput,
+    Narrow = VS2Constraint | VMConstraint,
+    NarrowCvt = VS2Constraint | VMConstraint | OneInput,
+    Vmadc = VS2Constraint | VS1Constraint,
+    Iota = VS2Constraint | VMConstraint | OneInput,
+    SlideUp = VS2Constraint | VMConstraint,
+    Vrgather = VS2Constraint | VS1Constraint | VMConstraint,
+    Vcompress = VS2Constraint | VS1Constraint,
 };
 
 // RISC-V Specific Machine Operand Flags
 enum {
-  MO_None = 0,
-  MO_CALL = 1,
-  MO_PLT = 2,
-  MO_LO = 3,
-  MO_HI = 4,
-  MO_PCREL_LO = 5,
-  MO_PCREL_HI = 6,
-  MO_GOT_HI = 7,
-  MO_TPREL_LO = 8,
-  MO_TPREL_HI = 9,
-  MO_TPREL_ADD = 10,
-  MO_TLS_GOT_HI = 11,
-  MO_TLS_GD_HI = 12,
+    MO_None = 0,
+    MO_CALL = 1,
+    MO_PLT = 2,
+    MO_LO = 3,
+    MO_HI = 4,
+    MO_PCREL_LO = 5,
+    MO_PCREL_HI = 6,
+    MO_GOT_HI = 7,
+    MO_TPREL_LO = 8,
+    MO_TPREL_HI = 9,
+    MO_TPREL_ADD = 10,
+    MO_TLS_GOT_HI = 11,
+    MO_TLS_GD_HI = 12,
 
-  // Used to differentiate between target-specific "direct" flags and "bitmask"
-  // flags. A machine operand can only have one "direct" flag, but can have
-  // multiple "bitmask" flags.
-  MO_DIRECT_FLAG_MASK = 15
+    // Used to differentiate between target-specific "direct" flags and "bitmask"
+    // flags. A machine operand can only have one "direct" flag, but can have
+    // multiple "bitmask" flags.
+    MO_DIRECT_FLAG_MASK = 15
 };
 } // namespace RISCVII
 
 namespace RISCVOp {
 enum OperandType : unsigned {
-  OPERAND_FIRST_RISCV_IMM = MCOI::OPERAND_FIRST_TARGET,
-  OPERAND_UIMM4 = OPERAND_FIRST_RISCV_IMM,
-  OPERAND_UIMM5,
-  OPERAND_UIMM12,
-  OPERAND_SIMM12,
-  OPERAND_UIMM20,
-  OPERAND_UIMMLOG2XLEN,
-  OPERAND_LAST_RISCV_IMM = OPERAND_UIMMLOG2XLEN
+    OPERAND_FIRST_RISCV_IMM = MCOI::OPERAND_FIRST_TARGET,
+    OPERAND_UIMM4 = OPERAND_FIRST_RISCV_IMM,
+    OPERAND_UIMM5,
+    OPERAND_UIMM12,
+    OPERAND_SIMM12,
+    OPERAND_UIMM20,
+    OPERAND_UIMMLOG2XLEN,
+    OPERAND_LAST_RISCV_IMM = OPERAND_UIMMLOG2XLEN
 };
 } // namespace RISCVOp
 
 // Describes the predecessor/successor bits used in the FENCE instruction.
 namespace RISCVFenceField {
 enum FenceField {
-  I = 8,
-  O = 4,
-  R = 2,
-  W = 1
+    I = 8,
+    O = 4,
+    R = 2,
+    W = 1
 };
 }
 
 // Describes the supported floating point rounding mode encodings.
 namespace RISCVFPRndMode {
 enum RoundingMode {
-  RNE = 0,
-  RTZ = 1,
-  RDN = 2,
-  RUP = 3,
-  RMM = 4,
-  DYN = 7,
-  Invalid
+    RNE = 0,
+    RTZ = 1,
+    RDN = 2,
+    RUP = 3,
+    RMM = 4,
+    DYN = 7,
+    Invalid
 };
 
 inline static StringRef roundingModeToString(RoundingMode RndMode) {
-  switch (RndMode) {
-  default:
-    llvm_unreachable("Unknown floating point rounding mode");
-  case RISCVFPRndMode::RNE:
-    return "rne";
-  case RISCVFPRndMode::RTZ:
-    return "rtz";
-  case RISCVFPRndMode::RDN:
-    return "rdn";
-  case RISCVFPRndMode::RUP:
-    return "rup";
-  case RISCVFPRndMode::RMM:
-    return "rmm";
-  case RISCVFPRndMode::DYN:
-    return "dyn";
-  }
+    switch (RndMode) {
+    default:
+        llvm_unreachable("Unknown floating point rounding mode");
+    case RISCVFPRndMode::RNE:
+        return "rne";
+    case RISCVFPRndMode::RTZ:
+        return "rtz";
+    case RISCVFPRndMode::RDN:
+        return "rdn";
+    case RISCVFPRndMode::RUP:
+        return "rup";
+    case RISCVFPRndMode::RMM:
+        return "rmm";
+    case RISCVFPRndMode::DYN:
+        return "dyn";
+    }
 }
 
 inline static RoundingMode stringToRoundingMode(StringRef Str) {
-  return StringSwitch<RoundingMode>(Str)
-      .Case("rne", RISCVFPRndMode::RNE)
-      .Case("rtz", RISCVFPRndMode::RTZ)
-      .Case("rdn", RISCVFPRndMode::RDN)
-      .Case("rup", RISCVFPRndMode::RUP)
-      .Case("rmm", RISCVFPRndMode::RMM)
-      .Case("dyn", RISCVFPRndMode::DYN)
-      .Default(RISCVFPRndMode::Invalid);
+    return StringSwitch<RoundingMode>(Str)
+           .Case("rne", RISCVFPRndMode::RNE)
+           .Case("rtz", RISCVFPRndMode::RTZ)
+           .Case("rdn", RISCVFPRndMode::RDN)
+           .Case("rup", RISCVFPRndMode::RUP)
+           .Case("rmm", RISCVFPRndMode::RMM)
+           .Case("dyn", RISCVFPRndMode::DYN)
+           .Default(RISCVFPRndMode::Invalid);
 }
 
 inline static bool isValidRoundingMode(unsigned Mode) {
-  switch (Mode) {
-  default:
-    return false;
-  case RISCVFPRndMode::RNE:
-  case RISCVFPRndMode::RTZ:
-  case RISCVFPRndMode::RDN:
-  case RISCVFPRndMode::RUP:
-  case RISCVFPRndMode::RMM:
-  case RISCVFPRndMode::DYN:
-    return true;
-  }
+    switch (Mode) {
+    default:
+        return false;
+    case RISCVFPRndMode::RNE:
+    case RISCVFPRndMode::RTZ:
+    case RISCVFPRndMode::RDN:
+    case RISCVFPRndMode::RUP:
+    case RISCVFPRndMode::RMM:
+    case RISCVFPRndMode::DYN:
+        return true;
+    }
 }
 } // namespace RISCVFPRndMode
 
 namespace RISCVSysReg {
 struct SysReg {
-  const char *Name;
-  unsigned Encoding;
-  const char *AltName;
-  // FIXME: add these additional fields when needed.
-  // Privilege Access: Read, Write, Read-Only.
-  // unsigned ReadWrite;
-  // Privilege Mode: User, System or Machine.
-  // unsigned Mode;
-  // Check field name.
-  // unsigned Extra;
-  // Register number without the privilege bits.
-  // unsigned Number;
-  FeatureBitset FeaturesRequired;
-  bool isRV32Only;
+    const char *Name;
+    unsigned Encoding;
+    const char *AltName;
+    // FIXME: add these additional fields when needed.
+    // Privilege Access: Read, Write, Read-Only.
+    // unsigned ReadWrite;
+    // Privilege Mode: User, System or Machine.
+    // unsigned Mode;
+    // Check field name.
+    // unsigned Extra;
+    // Register number without the privilege bits.
+    // unsigned Number;
+    FeatureBitset FeaturesRequired;
+    bool isRV32Only;
 
-  bool haveRequiredFeatures(FeatureBitset ActiveFeatures) const {
-    // Not in 32-bit mode.
-    if (isRV32Only && ActiveFeatures[RISCV::Feature64Bit])
-      return false;
-    // No required feature associated with the system register.
-    if (FeaturesRequired.none())
-      return true;
-    return (FeaturesRequired & ActiveFeatures) == FeaturesRequired;
-  }
+    bool haveRequiredFeatures(FeatureBitset ActiveFeatures) const {
+        // Not in 32-bit mode.
+        if (isRV32Only && ActiveFeatures[RISCV::Feature64Bit])
+            return false;
+        // No required feature associated with the system register.
+        if (FeaturesRequired.none())
+            return true;
+        return (FeaturesRequired & ActiveFeatures) == FeaturesRequired;
+    }
 };
 
 #define GET_SysRegsList_DECL
@@ -241,14 +241,14 @@ struct SysReg {
 namespace RISCVABI {
 
 enum ABI {
-  ABI_ILP32,
-  ABI_ILP32F,
-  ABI_ILP32D,
-  ABI_ILP32E,
-  ABI_LP64,
-  ABI_LP64F,
-  ABI_LP64D,
-  ABI_Unknown
+    ABI_ILP32,
+    ABI_ILP32F,
+    ABI_ILP32D,
+    ABI_ILP32E,
+    ABI_LP64,
+    ABI_LP64F,
+    ABI_LP64D,
+    ABI_Unknown
 };
 
 // Returns the target ABI, or else a StringError if the requested ABIName is
@@ -331,36 +331,36 @@ constexpr MVT vbool64_t = MVT::nxv1i1;
 } // namespace RISCVVMVTs
 
 enum class RISCVVSEW {
-  SEW_8 = 0,
-  SEW_16,
-  SEW_32,
-  SEW_64,
-  SEW_128,
-  SEW_256,
-  SEW_512,
-  SEW_1024,
+    SEW_8 = 0,
+    SEW_16,
+    SEW_32,
+    SEW_64,
+    SEW_128,
+    SEW_256,
+    SEW_512,
+    SEW_1024,
 };
 
 enum class RISCVVLMUL {
-  LMUL_1 = 0,
-  LMUL_2,
-  LMUL_4,
-  LMUL_8,
-  LMUL_RESERVED,
-  LMUL_F8,
-  LMUL_F4,
-  LMUL_F2
+    LMUL_1 = 0,
+    LMUL_2,
+    LMUL_4,
+    LMUL_8,
+    LMUL_RESERVED,
+    LMUL_F8,
+    LMUL_F4,
+    LMUL_F2
 };
 
 namespace RISCVVType {
 // Is this a SEW value that can be encoded into the VTYPE format.
 inline static bool isValidSEW(unsigned SEW) {
-  return isPowerOf2_32(SEW) && SEW >= 8 && SEW <= 1024;
+    return isPowerOf2_32(SEW) && SEW >= 8 && SEW <= 1024;
 }
 
 // Is this a LMUL value that can be encoded into the VTYPE format.
 inline static bool isValidLMUL(unsigned LMUL, bool Fractional) {
-  return isPowerOf2_32(LMUL) && LMUL <= 8 && (!Fractional || LMUL != 1);
+    return isPowerOf2_32(LMUL) && LMUL <= 8 && (!Fractional || LMUL != 1);
 }
 
 // Encode VTYPE into the binary format used by the the VSETVLI instruction which
@@ -377,32 +377,36 @@ inline static bool isValidLMUL(unsigned LMUL, bool Fractional) {
 // TODO: This format will change for the V extensions spec v1.0.
 inline static unsigned encodeVTYPE(RISCVVLMUL VLMUL, RISCVVSEW VSEW,
                                    bool TailAgnostic, bool MaskAgnostic) {
-  unsigned VLMULBits = static_cast<unsigned>(VLMUL);
-  unsigned VSEWBits = static_cast<unsigned>(VSEW);
-  unsigned VTypeI =
-      ((VLMULBits & 0x4) << 3) | (VSEWBits << 2) | (VLMULBits & 0x3);
-  if (TailAgnostic)
-    VTypeI |= 0x40;
-  if (MaskAgnostic)
-    VTypeI |= 0x80;
+    unsigned VLMULBits = static_cast<unsigned>(VLMUL);
+    unsigned VSEWBits = static_cast<unsigned>(VSEW);
+    unsigned VTypeI =
+        ((VLMULBits & 0x4) << 3) | (VSEWBits << 2) | (VLMULBits & 0x3);
+    if (TailAgnostic)
+        VTypeI |= 0x40;
+    if (MaskAgnostic)
+        VTypeI |= 0x80;
 
-  return VTypeI;
+    return VTypeI;
 }
 
 // TODO: This format will change for the V extensions spec v1.0.
 inline static RISCVVLMUL getVLMUL(unsigned VType) {
-  unsigned VLMUL = (VType & 0x3) | ((VType & 0x20) >> 3);
-  return static_cast<RISCVVLMUL>(VLMUL);
+    unsigned VLMUL = (VType & 0x3) | ((VType & 0x20) >> 3);
+    return static_cast<RISCVVLMUL>(VLMUL);
 }
 
 inline static RISCVVSEW getVSEW(unsigned VType) {
-  unsigned VSEW = (VType >> 2) & 0x7;
-  return static_cast<RISCVVSEW>(VSEW);
+    unsigned VSEW = (VType >> 2) & 0x7;
+    return static_cast<RISCVVSEW>(VSEW);
 }
 
-inline static bool isTailAgnostic(unsigned VType) { return VType & 0x40; }
+inline static bool isTailAgnostic(unsigned VType) {
+    return VType & 0x40;
+}
 
-inline static bool isMaskAgnostic(unsigned VType) { return VType & 0x80; }
+inline static bool isMaskAgnostic(unsigned VType) {
+    return VType & 0x80;
+}
 
 void printVType(unsigned VType, raw_ostream &OS);
 
@@ -415,21 +419,29 @@ namespace RISCVVPseudosTable {
 static const uint8_t InvalidIndex = 0x80;
 
 struct PseudoInfo {
-  unsigned int Pseudo;
-  unsigned int BaseInstr;
-  uint8_t VLIndex;
-  uint8_t SEWIndex;
-  uint8_t MergeOpIndex;
-  uint8_t VLMul;
-  bool HasDummyMask;
+    unsigned int Pseudo;
+    unsigned int BaseInstr;
+    uint8_t VLIndex;
+    uint8_t SEWIndex;
+    uint8_t MergeOpIndex;
+    uint8_t VLMul;
+    bool HasDummyMask;
 
-  int getVLIndex() const { return static_cast<int8_t>(VLIndex); }
+    int getVLIndex() const {
+        return static_cast<int8_t>(VLIndex);
+    }
 
-  int getSEWIndex() const { return static_cast<int8_t>(SEWIndex); }
+    int getSEWIndex() const {
+        return static_cast<int8_t>(SEWIndex);
+    }
 
-  int getMergeOpIndex() const { return static_cast<int8_t>(MergeOpIndex); }
+    int getMergeOpIndex() const {
+        return static_cast<int8_t>(MergeOpIndex);
+    }
 
-  bool hasDummyMask() const { return HasDummyMask; }
+    bool hasDummyMask() const {
+        return HasDummyMask;
+    }
 };
 
 using namespace RISCV;

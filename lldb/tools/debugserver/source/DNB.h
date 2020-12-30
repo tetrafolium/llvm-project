@@ -45,7 +45,7 @@ nub_bool_t DNBSetArchitecture(const char *arch);
 nub_process_t DNBProcessLaunch(
     RNBContext *ctx, const char *path, char const *argv[], const char *envp[],
     const char *working_directory, // NULL => don't change, non-NULL => set
-                                   // working directory for inferior to this
+    // working directory for inferior to this
     const char *stdin_path, const char *stdout_path, const char *stderr_path,
     bool no_stdio, int disable_aslr, const char *event_data, char *err_str,
     size_t err_len);
@@ -139,8 +139,8 @@ const char *DNBGetDeploymentInfo(nub_process_t pid, bool is_executable,
                                  uint32_t &minor_version,
                                  uint32_t &patch_version);
 nub_bool_t DNBProcessSetNameToAddressCallback(nub_process_t pid,
-                                              DNBCallbackNameToAddress callback,
-                                              void *baton) DNB_EXPORT;
+        DNBCallbackNameToAddress callback,
+        void *baton) DNB_EXPORT;
 nub_bool_t DNBProcessSetSharedLibraryInfoCallback(
     nub_process_t pid, DNBCallbackCopyExecutableImageInfos callback,
     void *baton) DNB_EXPORT;
@@ -151,7 +151,7 @@ nub_size_t DNBProcessGetAvailableSTDOUT(nub_process_t pid, char *buf,
 nub_size_t DNBProcessGetAvailableSTDERR(nub_process_t pid, char *buf,
                                         nub_size_t buf_size) DNB_EXPORT;
 nub_size_t DNBProcessGetAvailableProfileData(nub_process_t pid, char *buf,
-                                             nub_size_t buf_size) DNB_EXPORT;
+        nub_size_t buf_size) DNB_EXPORT;
 nub_size_t DNBProcessGetStopCount(nub_process_t pid) DNB_EXPORT;
 uint32_t DNBProcessGetCPUType(nub_process_t pid) DNB_EXPORT;
 size_t DNBGetAllInfos(std::vector<struct kinfo_proc> &proc_infos);
@@ -174,32 +174,32 @@ DNBThreadGetIdentifierInfo(nub_process_t pid, nub_thread_t tid,
                            thread_identifier_info_data_t *ident_info);
 nub_state_t DNBThreadGetState(nub_process_t pid, nub_thread_t tid);
 nub_bool_t DNBThreadGetRegisterValueByID(nub_process_t pid, nub_thread_t tid,
-                                         uint32_t set, uint32_t reg,
-                                         DNBRegisterValue *value);
+        uint32_t set, uint32_t reg,
+        DNBRegisterValue *value);
 nub_bool_t DNBThreadSetRegisterValueByID(nub_process_t pid, nub_thread_t tid,
-                                         uint32_t set, uint32_t reg,
-                                         const DNBRegisterValue *value);
+        uint32_t set, uint32_t reg,
+        const DNBRegisterValue *value);
 nub_size_t DNBThreadGetRegisterContext(nub_process_t pid, nub_thread_t tid,
                                        void *buf, size_t buf_len);
 nub_size_t DNBThreadSetRegisterContext(nub_process_t pid, nub_thread_t tid,
                                        const void *buf, size_t buf_len);
 uint32_t DNBThreadSaveRegisterState(nub_process_t pid, nub_thread_t tid);
 nub_bool_t DNBThreadRestoreRegisterState(nub_process_t pid, nub_thread_t tid,
-                                         uint32_t save_id);
+        uint32_t save_id);
 nub_bool_t DNBThreadGetRegisterValueByName(nub_process_t pid, nub_thread_t tid,
-                                           uint32_t set, const char *name,
-                                           DNBRegisterValue *value);
+        uint32_t set, const char *name,
+        DNBRegisterValue *value);
 nub_bool_t DNBThreadGetStopReason(nub_process_t pid, nub_thread_t tid,
                                   DNBThreadStopInfo *stop_info);
 const char *DNBThreadGetInfo(nub_process_t pid, nub_thread_t tid);
 Genealogy::ThreadActivitySP DNBGetGenealogyInfoForThread(nub_process_t pid,
-                                                         nub_thread_t tid,
-                                                         bool &timed_out);
+        nub_thread_t tid,
+        bool &timed_out);
 Genealogy::ProcessExecutableInfoSP DNBGetGenealogyImageInfo(nub_process_t pid,
-                                                            size_t idx);
+        size_t idx);
 ThreadInfo::QoS DNBGetRequestedQoSForThread(nub_process_t pid, nub_thread_t tid,
-                                            nub_addr_t tsd,
-                                            uint64_t dti_qos_class_index);
+        nub_addr_t tsd,
+        uint64_t dti_qos_class_index);
 nub_addr_t DNBGetPThreadT(nub_process_t pid, nub_thread_t tid);
 nub_addr_t DNBGetDispatchQueueT(nub_process_t pid, nub_thread_t tid);
 nub_addr_t

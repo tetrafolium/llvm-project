@@ -30,71 +30,73 @@ namespace {
 /// identity layout ones.
 struct SimplifyAffineStructures
     : public SimplifyAffineStructuresBase<SimplifyAffineStructures> {
-  void runOnFunction() override;
+    void runOnFunction() override;
 
-  /// Utility to simplify an affine attribute and update its entry in the parent
-  /// operation if necessary.
-  template <typename AttributeT>
-  void simplifyAndUpdateAttribute(Operation *op, Identifier name,
-                                  AttributeT attr) {
-    auto &simplified = simplifiedAttributes[attr];
-    if (simplified == attr)
-      return;
+    /// Utility to simplify an affine attribute and update its entry in the parent
+    /// operation if necessary.
+    template <typename AttributeT>
+    void simplifyAndUpdateAttribute(Operation *op, Identifier name,
+                                    AttributeT attr) {
+        auto &simplified = simplifiedAttributes[attr];
+        if (simplified == attr)
+            return;
 
-    // This is a newly encountered attribute.
-    if (!simplified) {
-      // Try to simplify the value of the attribute.
-      auto value = attr.getValue();
-      auto simplifiedValue = simplify(value);
-      if (simplifiedValue == value) {
-        simplified = attr;
-        return;
-      }
-      simplified = AttributeT::get(simplifiedValue);
+        // This is a newly encountered attribute.
+        if (!simplified) {
+            // Try to simplify the value of the attribute.
+            auto value = attr.getValue();
+            auto simplifiedValue = simplify(value);
+            if (simplifiedValue == value) {
+                simplified = attr;
+                return;
+            }
+            simplified = AttributeT::get(simplifiedValue);
+        }
+
+        // Simplification was successful, so update the attribute.
+        op->setAttr(name, simplified);
     }
 
-    // Simplification was successful, so update the attribute.
-    op->setAttr(name, simplified);
-  }
+    IntegerSet simplify(IntegerSet set) {
+        return simplifyIntegerSet(set);
+    }
 
-  IntegerSet simplify(IntegerSet set) { return simplifyIntegerSet(set); }
+    /// Performs basic affine map simplifications.
+    AffineMap simplify(AffineMap map) {
+        MutableAffineMap mMap(map);
+        mMap.simplify();
+        return mMap.getAffineMap();
+    }
 
-  /// Performs basic affine map simplifications.
-  AffineMap simplify(AffineMap map) {
-    MutableAffineMap mMap(map);
-    mMap.simplify();
-    return mMap.getAffineMap();
-  }
-
-  DenseMap<Attribute, Attribute> simplifiedAttributes;
+    DenseMap<Attribute, Attribute> simplifiedAttributes;
 };
 
 } // end anonymous namespace
 
 std::unique_ptr<OperationPass<FuncOp>>
 mlir::createSimplifyAffineStructuresPass() {
-  return std::make_unique<SimplifyAffineStructures>();
+    return std::make_unique<SimplifyAffineStructures>();
 }
 
 void SimplifyAffineStructures::runOnFunction() {
-  auto func = getFunction();
-  simplifiedAttributes.clear();
-  OwningRewritePatternList patterns;
-  AffineForOp::getCanonicalizationPatterns(patterns, func.getContext());
-  AffineIfOp::getCanonicalizationPatterns(patterns, func.getContext());
-  AffineApplyOp::getCanonicalizationPatterns(patterns, func.getContext());
-  FrozenRewritePatternList frozenPatterns(std::move(patterns));
-  func.walk([&](Operation *op) {
-    for (auto attr : op->getAttrs()) {
-      if (auto mapAttr = attr.second.dyn_cast<AffineMapAttr>())
-        simplifyAndUpdateAttribute(op, attr.first, mapAttr);
-      else if (auto setAttr = attr.second.dyn_cast<IntegerSetAttr>())
-        simplifyAndUpdateAttribute(op, attr.first, setAttr);
-    }
+    auto func = getFunction();
+    simplifiedAttributes.clear();
+    OwningRewritePatternList patterns;
+    AffineForOp::getCanonicalizationPatterns(patterns, func.getContext());
+    AffineIfOp::getCanonicalizationPatterns(patterns, func.getContext());
+    AffineApplyOp::getCanonicalizationPatterns(patterns, func.getContext());
+    FrozenRewritePatternList frozenPatterns(std::move(patterns));
+    func.walk([&](Operation *op) {
+        for (auto attr : op->getAttrs()) {
+            if (auto mapAttr = attr.second.dyn_cast<AffineMapAttr>())
+                simplifyAndUpdateAttribute(op, attr.first, mapAttr);
+            else if (auto setAttr = attr.second.dyn_cast<IntegerSetAttr>())
+                simplifyAndUpdateAttribute(op, attr.first, setAttr);
+        }
 
-    // The simplification of the attribute will likely simplify the op. Try to
-    // fold / apply canonicalization patterns when we have affine dialect ops.
-    if (isa<AffineForOp, AffineIfOp, AffineApplyOp>(op))
-      applyOpPatternsAndFold(op, frozenPatterns);
-  });
+        // The simplification of the attribute will likely simplify the op. Try to
+        // fold / apply canonicalization patterns when we have affine dialect ops.
+        if (isa<AffineForOp, AffineIfOp, AffineApplyOp>(op))
+            applyOpPatternsAndFold(op, frozenPatterns);
+    });
 }

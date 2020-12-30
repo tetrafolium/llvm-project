@@ -16,15 +16,15 @@
 namespace lldb_vscode {
 
 struct SourceReference {
-  std::string content;
-  llvm::DenseMap<lldb::addr_t, int64_t> addr_to_line;
+    std::string content;
+    llvm::DenseMap<lldb::addr_t, int64_t> addr_to_line;
 
-  int64_t GetLineForPC(lldb::addr_t pc) const {
-    auto addr_line = addr_to_line.find(pc);
-    if (addr_line != addr_to_line.end())
-      return addr_line->second;
-    return 0;
-  }
+    int64_t GetLineForPC(lldb::addr_t pc) const {
+        auto addr_line = addr_to_line.find(pc);
+        if (addr_line != addr_to_line.end())
+            return addr_line->second;
+        return 0;
+    }
 };
 
 } // namespace lldb_vscode

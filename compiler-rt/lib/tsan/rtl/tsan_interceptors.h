@@ -7,24 +7,24 @@
 namespace __tsan {
 
 class ScopedInterceptor {
- public:
-  ScopedInterceptor(ThreadState *thr, const char *fname, uptr pc);
-  ~ScopedInterceptor();
-  void DisableIgnores();
-  void EnableIgnores();
- private:
-  ThreadState *const thr_;
-  const uptr pc_;
-  bool in_ignored_lib_;
-  bool ignoring_;
+public:
+    ScopedInterceptor(ThreadState *thr, const char *fname, uptr pc);
+    ~ScopedInterceptor();
+    void DisableIgnores();
+    void EnableIgnores();
+private:
+    ThreadState *const thr_;
+    const uptr pc_;
+    bool in_ignored_lib_;
+    bool ignoring_;
 };
 
 LibIgnore *libignore();
 
 #if !SANITIZER_GO
 inline bool in_symbolizer() {
-  cur_thread_init();
-  return UNLIKELY(cur_thread()->in_symbolizer);
+    cur_thread_init();
+    return UNLIKELY(cur_thread()->in_symbolizer);
 }
 #endif
 

@@ -18,45 +18,49 @@ namespace trace_intel_pt {
 
 class CommandObjectTraceStartIntelPT : public CommandObjectIterateOverThreads {
 public:
-  class CommandOptions : public Options {
-  public:
-    CommandOptions() : Options() { OptionParsingStarting(nullptr); }
+    class CommandOptions : public Options {
+    public:
+        CommandOptions() : Options() {
+            OptionParsingStarting(nullptr);
+        }
 
-    ~CommandOptions() override = default;
+        ~CommandOptions() override = default;
 
-    Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_arg,
-                          ExecutionContext *execution_context) override;
+        Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_arg,
+                              ExecutionContext *execution_context) override;
 
-    void OptionParsingStarting(ExecutionContext *execution_context) override;
+        void OptionParsingStarting(ExecutionContext *execution_context) override;
 
-    llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
+        llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
 
-    size_t m_size_in_kb;
-    uint32_t m_custom_config;
-  };
+        size_t m_size_in_kb;
+        uint32_t m_custom_config;
+    };
 
-  CommandObjectTraceStartIntelPT(CommandInterpreter &interpreter)
-      : CommandObjectIterateOverThreads(
-            interpreter, "thread trace start",
-            "Start tracing one or more threads with intel-pt. "
-            "Defaults to the current thread. Thread indices can be "
-            "specified as arguments.\n Use the thread-index \"all\" to trace "
-            "all threads.",
-            "thread trace start [<thread-index> <thread-index> ...] "
-            "[<intel-pt-options>]",
-            lldb::eCommandRequiresProcess | lldb::eCommandTryTargetAPILock |
-                lldb::eCommandProcessMustBeLaunched |
-                lldb::eCommandProcessMustBePaused),
-        m_options() {}
+    CommandObjectTraceStartIntelPT(CommandInterpreter &interpreter)
+        : CommandObjectIterateOverThreads(
+              interpreter, "thread trace start",
+              "Start tracing one or more threads with intel-pt. "
+              "Defaults to the current thread. Thread indices can be "
+              "specified as arguments.\n Use the thread-index \"all\" to trace "
+              "all threads.",
+              "thread trace start [<thread-index> <thread-index> ...] "
+              "[<intel-pt-options>]",
+              lldb::eCommandRequiresProcess | lldb::eCommandTryTargetAPILock |
+              lldb::eCommandProcessMustBeLaunched |
+              lldb::eCommandProcessMustBePaused),
+          m_options() {}
 
-  ~CommandObjectTraceStartIntelPT() override = default;
+    ~CommandObjectTraceStartIntelPT() override = default;
 
-  Options *GetOptions() override { return &m_options; }
+    Options *GetOptions() override {
+        return &m_options;
+    }
 
 protected:
-  bool HandleOneThread(lldb::tid_t tid, CommandReturnObject &result) override;
+    bool HandleOneThread(lldb::tid_t tid, CommandReturnObject &result) override;
 
-  CommandOptions m_options;
+    CommandOptions m_options;
 };
 
 } // namespace trace_intel_pt

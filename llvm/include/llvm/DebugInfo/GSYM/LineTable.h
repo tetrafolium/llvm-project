@@ -116,112 +116,120 @@ class FileWriter;
 /// LTOC_AdvancePC opcode and all special opcodes. All other opcodes
 /// only modify the current "Row", or cause the line table to end.
 class LineTable {
-  typedef std::vector<gsym::LineEntry> Collection;
-  Collection Lines; ///< All line entries in the line table.
+    typedef std::vector<gsym::LineEntry> Collection;
+    Collection Lines; ///< All line entries in the line table.
 public:
-  /// Lookup a single address within a line table's data.
-  ///
-  /// Clients have the option to decode an entire line table using
-  /// LineTable::decode() or just find a single matching entry using this
-  /// function. The benefit of using this function is that parsed LineEntry
-  /// objects that do not match will not be stored in an array. This will avoid
-  /// memory allocation costs and parsing can stop once a match has been found.
-  ///
-  /// \param Data The binary stream to read the data from. This object must
-  /// have the data for the LineTable object starting at offset zero. The data
-  /// can contain more data than needed.
-  ///
-  /// \param BaseAddr The base address to use when decoding the line table.
-  /// This will be the FunctionInfo's start address and will be used to
-  /// initialize the line table row prior to parsing any opcodes.
-  ///
-  /// \returns An LineEntry object if a match is found, error otherwise.
-  static Expected<LineEntry> lookup(DataExtractor &Data, uint64_t BaseAddr,
-                                    uint64_t Addr);
+    /// Lookup a single address within a line table's data.
+    ///
+    /// Clients have the option to decode an entire line table using
+    /// LineTable::decode() or just find a single matching entry using this
+    /// function. The benefit of using this function is that parsed LineEntry
+    /// objects that do not match will not be stored in an array. This will avoid
+    /// memory allocation costs and parsing can stop once a match has been found.
+    ///
+    /// \param Data The binary stream to read the data from. This object must
+    /// have the data for the LineTable object starting at offset zero. The data
+    /// can contain more data than needed.
+    ///
+    /// \param BaseAddr The base address to use when decoding the line table.
+    /// This will be the FunctionInfo's start address and will be used to
+    /// initialize the line table row prior to parsing any opcodes.
+    ///
+    /// \returns An LineEntry object if a match is found, error otherwise.
+    static Expected<LineEntry> lookup(DataExtractor &Data, uint64_t BaseAddr,
+                                      uint64_t Addr);
 
-  /// Decode an LineTable object from a binary data stream.
-  ///
-  /// \param Data The binary stream to read the data from. This object must
-  /// have the data for the LineTable object starting at offset zero. The data
-  /// can contain more data than needed.
-  ///
-  /// \param BaseAddr The base address to use when decoding the line table.
-  /// This will be the FunctionInfo's start address and will be used to
-  /// initialize the line table row prior to parsing any opcodes.
-  ///
-  /// \returns An LineTable or an error describing the issue that was
-  /// encountered during decoding.
-  static llvm::Expected<LineTable> decode(DataExtractor &Data,
-                                          uint64_t BaseAddr);
-  /// Encode this LineTable object into FileWriter stream.
-  ///
-  /// \param O The binary stream to write the data to at the current file
-  /// position.
-  ///
-  /// \param BaseAddr The base address to use when decoding the line table.
-  /// This will be the FunctionInfo's start address.
-  ///
-  /// \returns An error object that indicates success or failure or the
-  /// encoding process.
-  llvm::Error encode(FileWriter &O, uint64_t BaseAddr) const;
-  bool empty() const { return Lines.empty(); }
-  void clear() { Lines.clear(); }
-  /// Return the first line entry if the line table isn't empty.
-  ///
-  /// \returns An optional line entry with the first line entry if the line
-  /// table isn't empty, or llvm::None if the line table is emtpy.
-  Optional<LineEntry> first() const {
-    if (Lines.empty())
-      return llvm::None;
-    return Lines.front();
-  }
-  /// Return the last line entry if the line table isn't empty.
-  ///
-  /// \returns An optional line entry with the last line entry if the line
-  /// table isn't empty, or llvm::None if the line table is emtpy.
-  Optional<LineEntry> last() const {
-    if (Lines.empty())
-      return llvm::None;
-    return Lines.back();
-  }
-  void push(const LineEntry &LE) {
-    Lines.push_back(LE);
-  }
-  size_t isValid() const {
-    return !Lines.empty();
-  }
-  size_t size() const {
-    return Lines.size();
-  }
-  LineEntry &get(size_t i) {
-    assert(i < Lines.size());
-    return Lines[i];
-  }
-  const LineEntry &get(size_t i) const {
-    assert(i < Lines.size());
-    return Lines[i];
-  }
-  LineEntry &operator[](size_t i) {
-    return get(i);
-  }
-  const LineEntry &operator[](size_t i) const {
-    return get(i);
-  }
-  bool operator==(const LineTable &RHS) const {
-    return Lines == RHS.Lines;
-  }
-  bool operator!=(const LineTable &RHS) const {
-    return Lines != RHS.Lines;
-  }
-  bool operator<(const LineTable &RHS) const {
-    const auto LHSSize = Lines.size();
-    const auto RHSSize = RHS.Lines.size();
-    if (LHSSize == RHSSize)
-      return Lines < RHS.Lines;
-    return LHSSize < RHSSize;
-  }
-  Collection::const_iterator begin() const { return Lines.begin(); }
-  Collection::const_iterator end() const { return Lines.end(); }
+    /// Decode an LineTable object from a binary data stream.
+    ///
+    /// \param Data The binary stream to read the data from. This object must
+    /// have the data for the LineTable object starting at offset zero. The data
+    /// can contain more data than needed.
+    ///
+    /// \param BaseAddr The base address to use when decoding the line table.
+    /// This will be the FunctionInfo's start address and will be used to
+    /// initialize the line table row prior to parsing any opcodes.
+    ///
+    /// \returns An LineTable or an error describing the issue that was
+    /// encountered during decoding.
+    static llvm::Expected<LineTable> decode(DataExtractor &Data,
+                                            uint64_t BaseAddr);
+    /// Encode this LineTable object into FileWriter stream.
+    ///
+    /// \param O The binary stream to write the data to at the current file
+    /// position.
+    ///
+    /// \param BaseAddr The base address to use when decoding the line table.
+    /// This will be the FunctionInfo's start address.
+    ///
+    /// \returns An error object that indicates success or failure or the
+    /// encoding process.
+    llvm::Error encode(FileWriter &O, uint64_t BaseAddr) const;
+    bool empty() const {
+        return Lines.empty();
+    }
+    void clear() {
+        Lines.clear();
+    }
+    /// Return the first line entry if the line table isn't empty.
+    ///
+    /// \returns An optional line entry with the first line entry if the line
+    /// table isn't empty, or llvm::None if the line table is emtpy.
+    Optional<LineEntry> first() const {
+        if (Lines.empty())
+            return llvm::None;
+        return Lines.front();
+    }
+    /// Return the last line entry if the line table isn't empty.
+    ///
+    /// \returns An optional line entry with the last line entry if the line
+    /// table isn't empty, or llvm::None if the line table is emtpy.
+    Optional<LineEntry> last() const {
+        if (Lines.empty())
+            return llvm::None;
+        return Lines.back();
+    }
+    void push(const LineEntry &LE) {
+        Lines.push_back(LE);
+    }
+    size_t isValid() const {
+        return !Lines.empty();
+    }
+    size_t size() const {
+        return Lines.size();
+    }
+    LineEntry &get(size_t i) {
+        assert(i < Lines.size());
+        return Lines[i];
+    }
+    const LineEntry &get(size_t i) const {
+        assert(i < Lines.size());
+        return Lines[i];
+    }
+    LineEntry &operator[](size_t i) {
+        return get(i);
+    }
+    const LineEntry &operator[](size_t i) const {
+        return get(i);
+    }
+    bool operator==(const LineTable &RHS) const {
+        return Lines == RHS.Lines;
+    }
+    bool operator!=(const LineTable &RHS) const {
+        return Lines != RHS.Lines;
+    }
+    bool operator<(const LineTable &RHS) const {
+        const auto LHSSize = Lines.size();
+        const auto RHSSize = RHS.Lines.size();
+        if (LHSSize == RHSSize)
+            return Lines < RHS.Lines;
+        return LHSSize < RHSSize;
+    }
+    Collection::const_iterator begin() const {
+        return Lines.begin();
+    }
+    Collection::const_iterator end() const {
+        return Lines.end();
+    }
 
 };
 

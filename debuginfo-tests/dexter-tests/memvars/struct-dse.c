@@ -10,23 +10,25 @@
 //// Check debug-info for the escaped struct variable num is reasonable.
 
 #include <stdio.h>
-struct Nums { int a, b, c; };
+struct Nums {
+    int a, b, c;
+};
 struct Nums glob;
 __attribute__((__noinline__))
 void esc(struct Nums* nums) {
-  glob = *nums;
+    glob = *nums;
 }
 
 __attribute__((__noinline__))
 int main() {
-  struct Nums nums = { .c=1 };       //// Dead store.
-  printf("s1 nums.c: %d\n", nums.c); // DexLabel('s1')
+    struct Nums nums = { .c=1 };       //// Dead store.
+    printf("s1 nums.c: %d\n", nums.c); // DexLabel('s1')
 
-  nums.c = 2;                        //// Killing store.
-  printf("s2 nums.c: %d\n", nums.c); // DexLabel('s2')
+    nums.c = 2;                        //// Killing store.
+    printf("s2 nums.c: %d\n", nums.c); // DexLabel('s2')
 
-  esc(&nums);                        //// Force nums to live on the stack.
-  return 0;                          // DexLabel('s3')
+    esc(&nums);                        //// Force nums to live on the stack.
+    return 0;                          // DexLabel('s3')
 }
 
 // DexExpectWatchValue('nums.c', '1', on_line='s1')

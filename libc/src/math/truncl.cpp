@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 long double LLVM_LIBC_ENTRYPOINT(truncl)(long double x) {
-  return fputil::trunc(x);
+    return fputil::trunc(x);
 }
 
 } // namespace __llvm_libc

@@ -47,47 +47,59 @@ class EvaluationResultImpl;
 /// inputs and outputs.
 class TensorSpec final {
 public:
-  template <typename T>
-  static TensorSpec createSpec(const std::string &Name,
-                               const std::vector<int64_t> &Shape,
-                               int Port = 0) {
-    return TensorSpec(Name, Port, getDataType<T>(), Shape);
-  }
+    template <typename T>
+    static TensorSpec createSpec(const std::string &Name,
+                                 const std::vector<int64_t> &Shape,
+                                 int Port = 0) {
+        return TensorSpec(Name, Port, getDataType<T>(), Shape);
+    }
 
-  const std::string &name() const { return Name; }
-  int port() const { return Port; }
-  int typeIndex() const { return TypeIndex; }
-  const std::vector<int64_t> &shape() const { return Shape; }
+    const std::string &name() const {
+        return Name;
+    }
+    int port() const {
+        return Port;
+    }
+    int typeIndex() const {
+        return TypeIndex;
+    }
+    const std::vector<int64_t> &shape() const {
+        return Shape;
+    }
 
-  bool operator==(const TensorSpec &Other) const {
-    return Name == Other.Name && Port == Other.Port &&
-           TypeIndex == Other.TypeIndex && Shape == Other.Shape;
-  }
+    bool operator==(const TensorSpec &Other) const {
+        return Name == Other.Name && Port == Other.Port &&
+               TypeIndex == Other.TypeIndex && Shape == Other.Shape;
+    }
 
-  bool operator!=(const TensorSpec &Other) const { return !(*this == Other); }
+    bool operator!=(const TensorSpec &Other) const {
+        return !(*this == Other);
+    }
 
-  /// Get the number of elements in a tensor with this shape.
-  size_t getElementCount() const { return ElementCount; }
-  /// Get the size, in bytes, of one element.
-  size_t getElementByteSize() const;
+    /// Get the number of elements in a tensor with this shape.
+    size_t getElementCount() const {
+        return ElementCount;
+    }
+    /// Get the size, in bytes, of one element.
+    size_t getElementByteSize() const;
 
-  template <typename T> bool isElementType() const {
-    return getDataType<T>() == TypeIndex;
-  }
+    template <typename T> bool isElementType() const {
+        return getDataType<T>() == TypeIndex;
+    }
 
 private:
-  TensorSpec(const std::string &Name, int Port, int TypeIndex,
-             const std::vector<int64_t> &Shape);
+    TensorSpec(const std::string &Name, int Port, int TypeIndex,
+               const std::vector<int64_t> &Shape);
 
-  template <typename T> static int getDataType() {
-    llvm_unreachable("Undefined tensor type");
-  }
+    template <typename T> static int getDataType() {
+        llvm_unreachable("Undefined tensor type");
+    }
 
-  std::string Name;
-  int Port = 0;
-  int TypeIndex = 0;
-  std::vector<int64_t> Shape;
-  size_t ElementCount = 0;
+    std::string Name;
+    int Port = 0;
+    int TypeIndex = 0;
+    std::vector<int64_t> Shape;
+    size_t ElementCount = 0;
 };
 
 /// Construct a TensorSpec from a JSON dictionary of the form:
@@ -98,11 +110,11 @@ private:
 /// For the "type" field, see the C++ primitive types used in
 /// TFUTILS_SUPPORTED_TYPES.
 Optional<TensorSpec> getTensorSpecFromJSON(LLVMContext &Ctx,
-                                           const json::Value &Value);
+        const json::Value &Value);
 
 struct LoggedFeatureSpec {
-  TensorSpec Spec;
-  Optional<std::string> LoggingName;
+    TensorSpec Spec;
+    Optional<std::string> LoggingName;
 };
 
 /// Load the output specs. If SpecFileOverride is not empty, that path is used.
@@ -111,8 +123,8 @@ struct LoggedFeatureSpec {
 /// The first output tensor name must match ExpectedDecisionName.
 /// In case of error, the return is None and the error is logged.
 Optional<std::vector<LoggedFeatureSpec>>
-loadOutputSpecs(LLVMContext &Ctx, StringRef ExpectedDecisionName,
-                StringRef ModelPath, StringRef SpecFileOverride = StringRef());
+                                      loadOutputSpecs(LLVMContext &Ctx, StringRef ExpectedDecisionName,
+                                              StringRef ModelPath, StringRef SpecFileOverride = StringRef());
 
 /// Logging utility - given an ordered specification of features, and assuming
 /// a scalar reward, allow logging feature values and rewards, and then print
@@ -135,108 +147,110 @@ loadOutputSpecs(LLVMContext &Ctx, StringRef ExpectedDecisionName,
 /// At the end, call print to generate the protobuf.
 class Logger final {
 public:
-  /// Construct a Logger. If IncludeReward is false, then logReward shouldn't
-  /// be called, and the reward feature won't be printed out.
-  Logger(const std::vector<LoggedFeatureSpec> &FeatureSpecs,
-         const TensorSpec &RewardSpec, bool IncludeReward)
-      : FeatureSpecs(FeatureSpecs), RewardSpec(RewardSpec),
-        RawLogData(FeatureSpecs.size() + IncludeReward),
-        IncludeReward(IncludeReward) {}
+    /// Construct a Logger. If IncludeReward is false, then logReward shouldn't
+    /// be called, and the reward feature won't be printed out.
+    Logger(const std::vector<LoggedFeatureSpec> &FeatureSpecs,
+           const TensorSpec &RewardSpec, bool IncludeReward)
+        : FeatureSpecs(FeatureSpecs), RewardSpec(RewardSpec),
+          RawLogData(FeatureSpecs.size() + IncludeReward),
+          IncludeReward(IncludeReward) {}
 
-  template <typename T> void logReward(T Value) {
-    assert(IncludeReward);
-    logTensorValue(RawLogData.size() - 1, &Value);
-  }
+    template <typename T> void logReward(T Value) {
+        assert(IncludeReward);
+        logTensorValue(RawLogData.size() - 1, &Value);
+    }
 
-  template <typename T> void logFinalReward(T Value) {
-    assert(RawLogData.back().empty());
-    logReward(Value);
-  }
+    template <typename T> void logFinalReward(T Value) {
+        assert(RawLogData.back().empty());
+        logReward(Value);
+    }
 
-  template <typename T>
-  void logTensorValue(size_t FeatureID, const T *Value, size_t Size = 1) {
-    const char *Start = reinterpret_cast<const char *>(Value);
-    const char *End = Start + sizeof(T) * Size;
-    RawLogData[FeatureID].insert(RawLogData[FeatureID].end(), Start, End);
-  }
+    template <typename T>
+    void logTensorValue(size_t FeatureID, const T *Value, size_t Size = 1) {
+        const char *Start = reinterpret_cast<const char *>(Value);
+        const char *End = Start + sizeof(T) * Size;
+        RawLogData[FeatureID].insert(RawLogData[FeatureID].end(), Start, End);
+    }
 
-  void print(raw_ostream &OS);
+    void print(raw_ostream &OS);
 
 private:
-  std::vector<LoggedFeatureSpec> FeatureSpecs;
-  TensorSpec RewardSpec;
-  /// RawData has one entry per feature, plus one more for the reward.
-  /// Each feature's values are then stored in a vector, in succession.
-  /// This means the ith event is stored at [*][i]
-  std::vector<std::vector<char>> RawLogData;
-  const bool IncludeReward;
+    std::vector<LoggedFeatureSpec> FeatureSpecs;
+    TensorSpec RewardSpec;
+    /// RawData has one entry per feature, plus one more for the reward.
+    /// Each feature's values are then stored in a vector, in succession.
+    /// This means the ith event is stored at [*][i]
+    std::vector<std::vector<char>> RawLogData;
+    const bool IncludeReward;
 };
 
 class TFModelEvaluator final {
 public:
-  /// The result of a model evaluation. Handles the lifetime of the output
-  /// tensors, which means that their values need to be used before
-  /// the EvaluationResult's dtor is called.
-  class EvaluationResult {
-  public:
-    EvaluationResult(const EvaluationResult &) = delete;
-    EvaluationResult &operator=(const EvaluationResult &Other) = delete;
+    /// The result of a model evaluation. Handles the lifetime of the output
+    /// tensors, which means that their values need to be used before
+    /// the EvaluationResult's dtor is called.
+    class EvaluationResult {
+    public:
+        EvaluationResult(const EvaluationResult &) = delete;
+        EvaluationResult &operator=(const EvaluationResult &Other) = delete;
 
-    EvaluationResult(EvaluationResult &&Other);
-    EvaluationResult &operator=(EvaluationResult &&Other);
+        EvaluationResult(EvaluationResult &&Other);
+        EvaluationResult &operator=(EvaluationResult &&Other);
 
-    ~EvaluationResult();
+        ~EvaluationResult();
 
-    /// Get a (const) pointer to the first element of the tensor at Index.
-    template <typename T> T *getTensorValue(size_t Index) {
-      return static_cast<T *>(getUntypedTensorValue(Index));
+        /// Get a (const) pointer to the first element of the tensor at Index.
+        template <typename T> T *getTensorValue(size_t Index) {
+            return static_cast<T *>(getUntypedTensorValue(Index));
+        }
+
+        template <typename T> const T *getTensorValue(size_t Index) const {
+            return static_cast<T *>(getUntypedTensorValue(Index));
+        }
+
+        /// Get a (const) pointer to the untyped data of the tensor.
+        void *getUntypedTensorValue(size_t Index);
+        const void *getUntypedTensorValue(size_t Index) const;
+
+    private:
+        friend class TFModelEvaluator;
+        EvaluationResult(std::unique_ptr<EvaluationResultImpl> Impl);
+        std::unique_ptr<EvaluationResultImpl> Impl;
+    };
+
+    TFModelEvaluator(StringRef SavedModelPath,
+                     const std::vector<TensorSpec> &InputSpecs,
+                     const std::vector<TensorSpec> &OutputSpecs,
+                     const char *Tags = "serve");
+    TFModelEvaluator(StringRef SavedModelPath,
+                     const std::vector<TensorSpec> &InputSpecs,
+                     function_ref<TensorSpec(size_t)> GetOutputSpecs,
+                     size_t OutputSpecsSize, const char *Tags = "serve");
+
+    ~TFModelEvaluator();
+    TFModelEvaluator(const TFModelEvaluator &) = delete;
+    TFModelEvaluator(TFModelEvaluator &&) = delete;
+
+    /// Evaluate the model, assuming it is valid. Returns None if the evaluation
+    /// fails or the model is invalid, or an EvaluationResult otherwise. The
+    /// inputs are assumed to have been already provided via getInput(). When
+    /// returning None, it also invalidates this object.
+    Optional<EvaluationResult> evaluate();
+
+    /// Provides access to the input vector.
+    template <typename T> T *getInput(size_t Index) {
+        return static_cast<T *>(getUntypedInput(Index));
     }
 
-    template <typename T> const T *getTensorValue(size_t Index) const {
-      return static_cast<T *>(getUntypedTensorValue(Index));
+    /// Returns true if the tensorflow model was loaded successfully, false
+    /// otherwise.
+    bool isValid() const {
+        return !!Impl;
     }
-
-    /// Get a (const) pointer to the untyped data of the tensor.
-    void *getUntypedTensorValue(size_t Index);
-    const void *getUntypedTensorValue(size_t Index) const;
-
-  private:
-    friend class TFModelEvaluator;
-    EvaluationResult(std::unique_ptr<EvaluationResultImpl> Impl);
-    std::unique_ptr<EvaluationResultImpl> Impl;
-  };
-
-  TFModelEvaluator(StringRef SavedModelPath,
-                   const std::vector<TensorSpec> &InputSpecs,
-                   const std::vector<TensorSpec> &OutputSpecs,
-                   const char *Tags = "serve");
-  TFModelEvaluator(StringRef SavedModelPath,
-                   const std::vector<TensorSpec> &InputSpecs,
-                   function_ref<TensorSpec(size_t)> GetOutputSpecs,
-                   size_t OutputSpecsSize, const char *Tags = "serve");
-
-  ~TFModelEvaluator();
-  TFModelEvaluator(const TFModelEvaluator &) = delete;
-  TFModelEvaluator(TFModelEvaluator &&) = delete;
-
-  /// Evaluate the model, assuming it is valid. Returns None if the evaluation
-  /// fails or the model is invalid, or an EvaluationResult otherwise. The
-  /// inputs are assumed to have been already provided via getInput(). When
-  /// returning None, it also invalidates this object.
-  Optional<EvaluationResult> evaluate();
-
-  /// Provides access to the input vector.
-  template <typename T> T *getInput(size_t Index) {
-    return static_cast<T *>(getUntypedInput(Index));
-  }
-
-  /// Returns true if the tensorflow model was loaded successfully, false
-  /// otherwise.
-  bool isValid() const { return !!Impl; }
 
 private:
-  void *getUntypedInput(size_t Index);
-  std::unique_ptr<TFModelEvaluatorImpl> Impl;
+    void *getUntypedInput(size_t Index);
+    std::unique_ptr<TFModelEvaluatorImpl> Impl;
 };
 
 /// List of supported types, as a pair:

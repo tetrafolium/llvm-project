@@ -45,12 +45,12 @@ extern "C" {
 /* 7.17.3 Order and consistency */
 
 typedef enum memory_order {
-  memory_order_relaxed = __ATOMIC_RELAXED,
-  memory_order_consume = __ATOMIC_CONSUME,
-  memory_order_acquire = __ATOMIC_ACQUIRE,
-  memory_order_release = __ATOMIC_RELEASE,
-  memory_order_acq_rel = __ATOMIC_ACQ_REL,
-  memory_order_seq_cst = __ATOMIC_SEQ_CST
+    memory_order_relaxed = __ATOMIC_RELAXED,
+    memory_order_consume = __ATOMIC_CONSUME,
+    memory_order_acquire = __ATOMIC_ACQUIRE,
+    memory_order_release = __ATOMIC_RELEASE,
+    memory_order_acq_rel = __ATOMIC_ACQ_REL,
+    memory_order_seq_cst = __ATOMIC_SEQ_CST
 } memory_order;
 
 #define kill_dependency(y) (y)
@@ -146,7 +146,9 @@ typedef _Atomic(uintmax_t)          atomic_uintmax_t;
 
 /* 7.17.8 Atomic flag type and operations */
 
-typedef struct atomic_flag { atomic_bool _Value; } atomic_flag;
+typedef struct atomic_flag {
+    atomic_bool _Value;
+} atomic_flag;
 
 #define ATOMIC_FLAG_INIT { 0 }
 

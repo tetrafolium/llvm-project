@@ -19,7 +19,7 @@ struct Flags {
 #include "msan_flags.inc"
 #undef MSAN_FLAG
 
-  void SetDefaults();
+    void SetDefaults();
 };
 
 Flags *flags();

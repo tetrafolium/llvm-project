@@ -29,41 +29,45 @@ namespace orc {
 
 class IRCompileLayer : public IRLayer {
 public:
-  class IRCompiler {
-  public:
-    IRCompiler(IRSymbolMapper::ManglingOptions MO) : MO(std::move(MO)) {}
-    virtual ~IRCompiler();
-    const IRSymbolMapper::ManglingOptions &getManglingOptions() const {
-      return MO;
+    class IRCompiler {
+    public:
+        IRCompiler(IRSymbolMapper::ManglingOptions MO) : MO(std::move(MO)) {}
+        virtual ~IRCompiler();
+        const IRSymbolMapper::ManglingOptions &getManglingOptions() const {
+            return MO;
+        }
+        virtual Expected<std::unique_ptr<MemoryBuffer>> operator()(Module &M) = 0;
+
+    protected:
+        IRSymbolMapper::ManglingOptions &manglingOptions() {
+            return MO;
+        }
+
+    private:
+        IRSymbolMapper::ManglingOptions MO;
+    };
+
+    using NotifyCompiledFunction = std::function<void(
+                                       MaterializationResponsibility &R, ThreadSafeModule TSM)>;
+
+    IRCompileLayer(ExecutionSession &ES, ObjectLayer &BaseLayer,
+                   std::unique_ptr<IRCompiler> Compile);
+
+    IRCompiler &getCompiler() {
+        return *Compile;
     }
-    virtual Expected<std::unique_ptr<MemoryBuffer>> operator()(Module &M) = 0;
 
-  protected:
-    IRSymbolMapper::ManglingOptions &manglingOptions() { return MO; }
+    void setNotifyCompiled(NotifyCompiledFunction NotifyCompiled);
 
-  private:
-    IRSymbolMapper::ManglingOptions MO;
-  };
-
-  using NotifyCompiledFunction = std::function<void(
-      MaterializationResponsibility &R, ThreadSafeModule TSM)>;
-
-  IRCompileLayer(ExecutionSession &ES, ObjectLayer &BaseLayer,
-                 std::unique_ptr<IRCompiler> Compile);
-
-  IRCompiler &getCompiler() { return *Compile; }
-
-  void setNotifyCompiled(NotifyCompiledFunction NotifyCompiled);
-
-  void emit(std::unique_ptr<MaterializationResponsibility> R,
-            ThreadSafeModule TSM) override;
+    void emit(std::unique_ptr<MaterializationResponsibility> R,
+              ThreadSafeModule TSM) override;
 
 private:
-  mutable std::mutex IRLayerMutex;
-  ObjectLayer &BaseLayer;
-  std::unique_ptr<IRCompiler> Compile;
-  const IRSymbolMapper::ManglingOptions *ManglingOpts;
-  NotifyCompiledFunction NotifyCompiled = NotifyCompiledFunction();
+    mutable std::mutex IRLayerMutex;
+    ObjectLayer &BaseLayer;
+    std::unique_ptr<IRCompiler> Compile;
+    const IRSymbolMapper::ManglingOptions *ManglingOpts;
+    NotifyCompiledFunction NotifyCompiled = NotifyCompiledFunction();
 };
 
 } // end namespace orc

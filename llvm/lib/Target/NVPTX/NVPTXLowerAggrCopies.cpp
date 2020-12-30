@@ -36,105 +36,105 @@ namespace {
 
 // actual analysis class, which is a functionpass
 struct NVPTXLowerAggrCopies : public FunctionPass {
-  static char ID;
+    static char ID;
 
-  NVPTXLowerAggrCopies() : FunctionPass(ID) {}
+    NVPTXLowerAggrCopies() : FunctionPass(ID) {}
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addPreserved<StackProtector>();
-    AU.addRequired<TargetTransformInfoWrapperPass>();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addPreserved<StackProtector>();
+        AU.addRequired<TargetTransformInfoWrapperPass>();
+    }
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 
-  static const unsigned MaxAggrCopySize = 128;
+    static const unsigned MaxAggrCopySize = 128;
 
-  StringRef getPassName() const override {
-    return "Lower aggregate copies/intrinsics into loops";
-  }
+    StringRef getPassName() const override {
+        return "Lower aggregate copies/intrinsics into loops";
+    }
 };
 
 char NVPTXLowerAggrCopies::ID = 0;
 
 bool NVPTXLowerAggrCopies::runOnFunction(Function &F) {
-  SmallVector<LoadInst *, 4> AggrLoads;
-  SmallVector<MemIntrinsic *, 4> MemCalls;
+    SmallVector<LoadInst *, 4> AggrLoads;
+    SmallVector<MemIntrinsic *, 4> MemCalls;
 
-  const DataLayout &DL = F.getParent()->getDataLayout();
-  LLVMContext &Context = F.getParent()->getContext();
-  const TargetTransformInfo &TTI =
-      getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
+    const DataLayout &DL = F.getParent()->getDataLayout();
+    LLVMContext &Context = F.getParent()->getContext();
+    const TargetTransformInfo &TTI =
+        getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
 
-  // Collect all aggregate loads and mem* calls.
-  for (Function::iterator BI = F.begin(), BE = F.end(); BI != BE; ++BI) {
-    for (BasicBlock::iterator II = BI->begin(), IE = BI->end(); II != IE;
-         ++II) {
-      if (LoadInst *LI = dyn_cast<LoadInst>(II)) {
-        if (!LI->hasOneUse())
-          continue;
+    // Collect all aggregate loads and mem* calls.
+    for (Function::iterator BI = F.begin(), BE = F.end(); BI != BE; ++BI) {
+        for (BasicBlock::iterator II = BI->begin(), IE = BI->end(); II != IE;
+                ++II) {
+            if (LoadInst *LI = dyn_cast<LoadInst>(II)) {
+                if (!LI->hasOneUse())
+                    continue;
 
-        if (DL.getTypeStoreSize(LI->getType()) < MaxAggrCopySize)
-          continue;
+                if (DL.getTypeStoreSize(LI->getType()) < MaxAggrCopySize)
+                    continue;
 
-        if (StoreInst *SI = dyn_cast<StoreInst>(LI->user_back())) {
-          if (SI->getOperand(0) != LI)
-            continue;
-          AggrLoads.push_back(LI);
+                if (StoreInst *SI = dyn_cast<StoreInst>(LI->user_back())) {
+                    if (SI->getOperand(0) != LI)
+                        continue;
+                    AggrLoads.push_back(LI);
+                }
+            } else if (MemIntrinsic *IntrCall = dyn_cast<MemIntrinsic>(II)) {
+                // Convert intrinsic calls with variable size or with constant size
+                // larger than the MaxAggrCopySize threshold.
+                if (ConstantInt *LenCI = dyn_cast<ConstantInt>(IntrCall->getLength())) {
+                    if (LenCI->getZExtValue() >= MaxAggrCopySize) {
+                        MemCalls.push_back(IntrCall);
+                    }
+                } else {
+                    MemCalls.push_back(IntrCall);
+                }
+            }
         }
-      } else if (MemIntrinsic *IntrCall = dyn_cast<MemIntrinsic>(II)) {
-        // Convert intrinsic calls with variable size or with constant size
-        // larger than the MaxAggrCopySize threshold.
-        if (ConstantInt *LenCI = dyn_cast<ConstantInt>(IntrCall->getLength())) {
-          if (LenCI->getZExtValue() >= MaxAggrCopySize) {
-            MemCalls.push_back(IntrCall);
-          }
-        } else {
-          MemCalls.push_back(IntrCall);
+    }
+
+    if (AggrLoads.size() == 0 && MemCalls.size() == 0) {
+        return false;
+    }
+
+    //
+    // Do the transformation of an aggr load/copy/set to a loop
+    //
+    for (LoadInst *LI : AggrLoads) {
+        auto *SI = cast<StoreInst>(*LI->user_begin());
+        Value *SrcAddr = LI->getOperand(0);
+        Value *DstAddr = SI->getOperand(1);
+        unsigned NumLoads = DL.getTypeStoreSize(LI->getType());
+        ConstantInt *CopyLen =
+            ConstantInt::get(Type::getInt32Ty(Context), NumLoads);
+
+        createMemCpyLoopKnownSize(/* ConvertedInst */ SI,
+                /* SrcAddr */ SrcAddr, /* DstAddr */ DstAddr,
+                /* CopyLen */ CopyLen,
+                /* SrcAlign */ LI->getAlign(),
+                /* DestAlign */ SI->getAlign(),
+                /* SrcIsVolatile */ LI->isVolatile(),
+                /* DstIsVolatile */ SI->isVolatile(), TTI);
+
+        SI->eraseFromParent();
+        LI->eraseFromParent();
+    }
+
+    // Transform mem* intrinsic calls.
+    for (MemIntrinsic *MemCall : MemCalls) {
+        if (MemCpyInst *Memcpy = dyn_cast<MemCpyInst>(MemCall)) {
+            expandMemCpyAsLoop(Memcpy, TTI);
+        } else if (MemMoveInst *Memmove = dyn_cast<MemMoveInst>(MemCall)) {
+            expandMemMoveAsLoop(Memmove);
+        } else if (MemSetInst *Memset = dyn_cast<MemSetInst>(MemCall)) {
+            expandMemSetAsLoop(Memset);
         }
-      }
+        MemCall->eraseFromParent();
     }
-  }
 
-  if (AggrLoads.size() == 0 && MemCalls.size() == 0) {
-    return false;
-  }
-
-  //
-  // Do the transformation of an aggr load/copy/set to a loop
-  //
-  for (LoadInst *LI : AggrLoads) {
-    auto *SI = cast<StoreInst>(*LI->user_begin());
-    Value *SrcAddr = LI->getOperand(0);
-    Value *DstAddr = SI->getOperand(1);
-    unsigned NumLoads = DL.getTypeStoreSize(LI->getType());
-    ConstantInt *CopyLen =
-        ConstantInt::get(Type::getInt32Ty(Context), NumLoads);
-
-    createMemCpyLoopKnownSize(/* ConvertedInst */ SI,
-                              /* SrcAddr */ SrcAddr, /* DstAddr */ DstAddr,
-                              /* CopyLen */ CopyLen,
-                              /* SrcAlign */ LI->getAlign(),
-                              /* DestAlign */ SI->getAlign(),
-                              /* SrcIsVolatile */ LI->isVolatile(),
-                              /* DstIsVolatile */ SI->isVolatile(), TTI);
-
-    SI->eraseFromParent();
-    LI->eraseFromParent();
-  }
-
-  // Transform mem* intrinsic calls.
-  for (MemIntrinsic *MemCall : MemCalls) {
-    if (MemCpyInst *Memcpy = dyn_cast<MemCpyInst>(MemCall)) {
-      expandMemCpyAsLoop(Memcpy, TTI);
-    } else if (MemMoveInst *Memmove = dyn_cast<MemMoveInst>(MemCall)) {
-      expandMemMoveAsLoop(Memmove);
-    } else if (MemSetInst *Memset = dyn_cast<MemSetInst>(MemCall)) {
-      expandMemSetAsLoop(Memset);
-    }
-    MemCall->eraseFromParent();
-  }
-
-  return true;
+    return true;
 }
 
 } // namespace
@@ -148,5 +148,5 @@ INITIALIZE_PASS(NVPTXLowerAggrCopies, "nvptx-lower-aggr-copies",
                 false, false)
 
 FunctionPass *llvm::createLowerAggrCopies() {
-  return new NVPTXLowerAggrCopies();
+    return new NVPTXLowerAggrCopies();
 }

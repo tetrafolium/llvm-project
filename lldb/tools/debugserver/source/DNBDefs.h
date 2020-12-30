@@ -63,31 +63,31 @@ typedef uint32_t nub_bool_t;
 #define WATCH_TYPE_WRITE (1u << 1)
 
 enum nub_state_t {
-  eStateInvalid = 0,
-  eStateUnloaded,
-  eStateAttaching,
-  eStateLaunching,
-  eStateStopped,
-  eStateRunning,
-  eStateStepping,
-  eStateCrashed,
-  eStateDetached,
-  eStateExited,
-  eStateSuspended
+    eStateInvalid = 0,
+    eStateUnloaded,
+    eStateAttaching,
+    eStateLaunching,
+    eStateStopped,
+    eStateRunning,
+    eStateStepping,
+    eStateCrashed,
+    eStateDetached,
+    eStateExited,
+    eStateSuspended
 };
 
 enum nub_launch_flavor_t {
-  eLaunchFlavorDefault = 0,
-  eLaunchFlavorPosixSpawn = 1,
-  eLaunchFlavorForkExec = 2,
+    eLaunchFlavorDefault = 0,
+    eLaunchFlavorPosixSpawn = 1,
+    eLaunchFlavorForkExec = 2,
 #ifdef WITH_SPRINGBOARD
-  eLaunchFlavorSpringBoard = 3,
+    eLaunchFlavorSpringBoard = 3,
 #endif
 #ifdef WITH_BKS
-  eLaunchFlavorBKS = 4,
+    eLaunchFlavorBKS = 4,
 #endif
 #ifdef WITH_FBS
-  eLaunchFlavorFBS = 5
+    eLaunchFlavorFBS = 5
 #endif
 };
 
@@ -100,18 +100,18 @@ enum nub_launch_flavor_t {
    (s) == eStateExited)
 
 enum {
-  eEventProcessRunningStateChanged =
-      1 << 0, // The process has changed state to running
-  eEventProcessStoppedStateChanged =
-      1 << 1, // The process has changed state to stopped
-  eEventSharedLibsStateChange =
-      1 << 2, // Shared libraries loaded/unloaded state has changed
-  eEventStdioAvailable = 1 << 3, // Something is available on stdout/stderr
-  eEventProfileDataAvailable = 1 << 4, // Profile data ready for retrieval
-  kAllEventsMask = eEventProcessRunningStateChanged |
-                   eEventProcessStoppedStateChanged |
-                   eEventSharedLibsStateChange | eEventStdioAvailable |
-                   eEventProfileDataAvailable
+    eEventProcessRunningStateChanged =
+        1 << 0, // The process has changed state to running
+    eEventProcessStoppedStateChanged =
+        1 << 1, // The process has changed state to stopped
+    eEventSharedLibsStateChange =
+        1 << 2, // Shared libraries loaded/unloaded state has changed
+    eEventStdioAvailable = 1 << 3, // Something is available on stdout/stderr
+    eEventProfileDataAvailable = 1 << 4, // Profile data ready for retrieval
+    kAllEventsMask = eEventProcessRunningStateChanged |
+                     eEventProcessStoppedStateChanged |
+                     eEventSharedLibsStateChange | eEventStdioAvailable |
+                     eEventProfileDataAvailable
 };
 
 #define LOG_VERBOSE (1u << 0)
@@ -164,80 +164,80 @@ enum {
   12 // The register that would contain pointer size or less argument 8 (if any)
 
 enum DNBRegisterType {
-  InvalidRegType = 0,
-  Uint,    // unsigned integer
-  Sint,    // signed integer
-  IEEE754, // float
-  Vector   // vector registers
+    InvalidRegType = 0,
+    Uint,    // unsigned integer
+    Sint,    // signed integer
+    IEEE754, // float
+    Vector   // vector registers
 };
 
 enum DNBRegisterFormat {
-  InvalidRegFormat = 0,
-  Binary,
-  Decimal,
-  Hex,
-  Float,
-  VectorOfSInt8,
-  VectorOfUInt8,
-  VectorOfSInt16,
-  VectorOfUInt16,
-  VectorOfSInt32,
-  VectorOfUInt32,
-  VectorOfFloat32,
-  VectorOfUInt128
+    InvalidRegFormat = 0,
+    Binary,
+    Decimal,
+    Hex,
+    Float,
+    VectorOfSInt8,
+    VectorOfUInt8,
+    VectorOfSInt16,
+    VectorOfUInt16,
+    VectorOfSInt32,
+    VectorOfUInt32,
+    VectorOfFloat32,
+    VectorOfUInt128
 };
 
 struct DNBRegisterInfo {
-  uint32_t set;     // Register set
-  uint32_t reg;     // Register number
-  const char *name; // Name of this register
-  const char *alt;  // Alternate name
-  uint16_t type;    // Type of the register bits (DNBRegisterType)
-  uint16_t format;  // Default format for display (DNBRegisterFormat),
-  uint32_t size;    // Size in bytes of the register
-  uint32_t offset;  // Offset from the beginning of the register context
-  uint32_t
-      reg_ehframe;    // eh_frame register number (INVALID_NUB_REGNUM when none)
-  uint32_t reg_dwarf; // DWARF register number (INVALID_NUB_REGNUM when none)
-  uint32_t
-      reg_generic; // Generic register number (INVALID_NUB_REGNUM when none)
-  uint32_t reg_debugserver; // The debugserver register number we'll use over
-                            // gdb-remote protocol (INVALID_NUB_REGNUM when
-                            // none)
-  const char **value_regs;  // If this register is a part of other registers,
-                            // list the register names terminated by NULL
-  const char **update_regs; // If modifying this register will invalidate other
-                            // registers, list the register names terminated by
-                            // NULL
+    uint32_t set;     // Register set
+    uint32_t reg;     // Register number
+    const char *name; // Name of this register
+    const char *alt;  // Alternate name
+    uint16_t type;    // Type of the register bits (DNBRegisterType)
+    uint16_t format;  // Default format for display (DNBRegisterFormat),
+    uint32_t size;    // Size in bytes of the register
+    uint32_t offset;  // Offset from the beginning of the register context
+    uint32_t
+    reg_ehframe;    // eh_frame register number (INVALID_NUB_REGNUM when none)
+    uint32_t reg_dwarf; // DWARF register number (INVALID_NUB_REGNUM when none)
+    uint32_t
+    reg_generic; // Generic register number (INVALID_NUB_REGNUM when none)
+    uint32_t reg_debugserver; // The debugserver register number we'll use over
+    // gdb-remote protocol (INVALID_NUB_REGNUM when
+    // none)
+    const char **value_regs;  // If this register is a part of other registers,
+    // list the register names terminated by NULL
+    const char **update_regs; // If modifying this register will invalidate other
+    // registers, list the register names terminated by
+    // NULL
 };
 
 struct DNBRegisterSetInfo {
-  const char *name;                        // Name of this register set
-  const struct DNBRegisterInfo *registers; // An array of register descriptions
-  nub_size_t num_registers; // The number of registers in REGISTERS array above
+    const char *name;                        // Name of this register set
+    const struct DNBRegisterInfo *registers; // An array of register descriptions
+    nub_size_t num_registers; // The number of registers in REGISTERS array above
 };
 
 struct DNBThreadResumeAction {
-  nub_thread_t tid;  // The thread ID that this action applies to,
-                     // INVALID_NUB_THREAD for the default thread action
-  nub_state_t state; // Valid values are eStateStopped/eStateSuspended,
-                     // eStateRunning, and eStateStepping.
-  int signal;        // When resuming this thread, resume it with this signal
-  nub_addr_t addr; // If not INVALID_NUB_ADDRESS, then set the PC for the thread
-                   // to ADDR before resuming/stepping
+    nub_thread_t tid;  // The thread ID that this action applies to,
+    // INVALID_NUB_THREAD for the default thread action
+    nub_state_t state; // Valid values are eStateStopped/eStateSuspended,
+    // eStateRunning, and eStateStepping.
+    int signal;        // When resuming this thread, resume it with this signal
+    nub_addr_t addr; // If not INVALID_NUB_ADDRESS, then set the PC for the thread
+    // to ADDR before resuming/stepping
 };
 
 enum DNBThreadStopType {
-  eStopTypeInvalid = 0,
-  eStopTypeSignal,
-  eStopTypeException,
-  eStopTypeExec
+    eStopTypeInvalid = 0,
+    eStopTypeSignal,
+    eStopTypeException,
+    eStopTypeExec
 };
 
 enum DNBMemoryPermissions {
-  eMemoryPermissionsWritable = (1 << 0),
-  eMemoryPermissionsReadable = (1 << 1),
-  eMemoryPermissionsExecutable = (1 << 2)
+    eMemoryPermissionsWritable = (1 << 0),
+    eMemoryPermissionsReadable = (1 << 1),
+    eMemoryPermissionsExecutable = (1 << 2)
 };
 
 #define DNB_THREAD_STOP_INFO_MAX_DESC_LENGTH 256
@@ -247,49 +247,49 @@ enum DNBMemoryPermissions {
 //
 // Describes the reason a thread stopped.
 struct DNBThreadStopInfo {
-  DNBThreadStopType reason;
-  char description[DNB_THREAD_STOP_INFO_MAX_DESC_LENGTH];
-  union {
-    // eStopTypeSignal
-    struct {
-      uint32_t signo;
-    } signal;
+    DNBThreadStopType reason;
+    char description[DNB_THREAD_STOP_INFO_MAX_DESC_LENGTH];
+    union {
+        // eStopTypeSignal
+        struct {
+            uint32_t signo;
+        } signal;
 
-    // eStopTypeException
-    struct {
-      uint32_t type;
-      nub_size_t data_count;
-      nub_addr_t data[DNB_THREAD_STOP_INFO_MAX_EXC_DATA];
-    } exception;
-  } details;
+        // eStopTypeException
+        struct {
+            uint32_t type;
+            nub_size_t data_count;
+            nub_addr_t data[DNB_THREAD_STOP_INFO_MAX_EXC_DATA];
+        } exception;
+    } details;
 };
 
 struct DNBRegisterValue {
-  struct DNBRegisterInfo info; // Register information for this register
-  union {
-    int8_t sint8;
-    int16_t sint16;
-    int32_t sint32;
-    int64_t sint64;
-    uint8_t uint8;
-    uint16_t uint16;
-    uint32_t uint32;
-    uint64_t uint64;
-    float float32;
-    double float64;
-    int8_t v_sint8[64];
-    int16_t v_sint16[32];
-    int32_t v_sint32[16];
-    int64_t v_sint64[8];
-    uint8_t v_uint8[64];
-    uint16_t v_uint16[32];
-    uint32_t v_uint32[16];
-    uint64_t v_uint64[8];
-    float v_float32[16];
-    double v_float64[8];
-    void *pointer;
-    char *c_str;
-  } value;
+    struct DNBRegisterInfo info; // Register information for this register
+    union {
+        int8_t sint8;
+        int16_t sint16;
+        int32_t sint32;
+        int64_t sint64;
+        uint8_t uint8;
+        uint16_t uint16;
+        uint32_t uint32;
+        uint64_t uint64;
+        float float32;
+        double float64;
+        int8_t v_sint8[64];
+        int16_t v_sint16[32];
+        int32_t v_sint32[16];
+        int64_t v_sint64[8];
+        uint8_t v_uint8[64];
+        uint16_t v_uint16[32];
+        uint32_t v_uint32[16];
+        uint64_t v_uint64[8];
+        float v_float32[16];
+        double v_float64[8];
+        void *pointer;
+        char *c_str;
+    } value;
 };
 
 enum DNBSharedLibraryState { eShlibStateUnloaded = 0, eShlibStateLoaded = 1 };
@@ -299,57 +299,57 @@ enum DNBSharedLibraryState { eShlibStateUnloaded = 0, eShlibStateLoaded = 1 };
 #endif
 
 struct DNBSegment {
-  char name[DNB_MAX_SEGMENT_NAME_LENGTH];
-  nub_addr_t addr;
-  nub_addr_t size;
+    char name[DNB_MAX_SEGMENT_NAME_LENGTH];
+    nub_addr_t addr;
+    nub_addr_t size;
 };
 
 struct DNBExecutableImageInfo {
-  char name[PATH_MAX]; // Name of the executable image (usually a full path)
-  uint32_t
-      state; // State of the executable image (see enum DNBSharedLibraryState)
-  nub_addr_t header_addr; // Executable header address
-  uuid_t uuid;            // Unique identifier for matching with symbols
-  uint32_t
-      num_segments; // Number of contiguous memory segments to in SEGMENTS array
-  DNBSegment *segments; // Array of contiguous memory segments in executable
+    char name[PATH_MAX]; // Name of the executable image (usually a full path)
+    uint32_t
+    state; // State of the executable image (see enum DNBSharedLibraryState)
+    nub_addr_t header_addr; // Executable header address
+    uuid_t uuid;            // Unique identifier for matching with symbols
+    uint32_t
+    num_segments; // Number of contiguous memory segments to in SEGMENTS array
+    DNBSegment *segments; // Array of contiguous memory segments in executable
 };
 
 struct DNBRegionInfo {
-  nub_addr_t addr;
-  nub_addr_t size;
-  uint32_t permissions;
+    nub_addr_t addr;
+    nub_addr_t size;
+    uint32_t permissions;
 };
 
 enum DNBProfileDataScanType {
-  eProfileHostCPU = (1 << 0),
-  eProfileCPU = (1 << 1),
+    eProfileHostCPU = (1 << 0),
+    eProfileCPU = (1 << 1),
 
-  eProfileThreadsCPU =
-      (1 << 2), // By default excludes eProfileThreadName and eProfileQueueName.
-  eProfileThreadName =
-      (1 << 3), // Assume eProfileThreadsCPU, get thread name as well.
-  eProfileQueueName =
-      (1 << 4), // Assume eProfileThreadsCPU, get queue name as well.
+    eProfileThreadsCPU =
+        (1 << 2), // By default excludes eProfileThreadName and eProfileQueueName.
+    eProfileThreadName =
+        (1 << 3), // Assume eProfileThreadsCPU, get thread name as well.
+    eProfileQueueName =
+        (1 << 4), // Assume eProfileThreadsCPU, get queue name as well.
 
-  eProfileHostMemory = (1 << 5),
+    eProfileHostMemory = (1 << 5),
 
-  eProfileMemory = (1 << 6),
-  eProfileMemoryAnonymous =
-      (1 << 8), // Assume eProfileMemory, get Anonymous memory as well.
+    eProfileMemory = (1 << 6),
+    eProfileMemoryAnonymous =
+        (1 << 8), // Assume eProfileMemory, get Anonymous memory as well.
 
-  eProfileEnergy = (1 << 9),
-  eProfileEnergyCPUCap = (1 << 10),
+    eProfileEnergy = (1 << 9),
+    eProfileEnergyCPUCap = (1 << 10),
 
-  eProfileMemoryCap = (1 << 15),
+    eProfileMemoryCap = (1 << 15),
 
-  eProfileAll = 0xffffffff
+    eProfileAll = 0xffffffff
 };
 
 typedef nub_addr_t (*DNBCallbackNameToAddress)(nub_process_t pid,
-                                               const char *name,
-                                               const char *shlib_regex,
-                                               void *baton);
+        const char *name,
+        const char *shlib_regex,
+        void *baton);
 typedef nub_size_t (*DNBCallbackCopyExecutableImageInfos)(
     nub_process_t pid, struct DNBExecutableImageInfo **image_infos,
     nub_bool_t only_changed, void *baton);

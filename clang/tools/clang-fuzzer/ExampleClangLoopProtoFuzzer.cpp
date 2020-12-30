@@ -24,6 +24,6 @@
 using namespace clang_fuzzer;
 
 DEFINE_BINARY_PROTO_FUZZER(const LoopFunction &input) {
-  auto S = LoopFunctionToString(input);
-  HandleCXX(S, GetCLArgs());
+    auto S = LoopFunctionToString(input);
+    HandleCXX(S, GetCLArgs());
 }

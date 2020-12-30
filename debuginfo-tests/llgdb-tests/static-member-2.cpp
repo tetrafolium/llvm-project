@@ -24,10 +24,10 @@
 
 class C {
 public:
-  const static int a = 4;
-  static int b;
-  static int c;
-  int d;
+    const static int a = 4;
+    static int b;
+    static int c;
+    int d;
 };
 
 int C::c = 15;

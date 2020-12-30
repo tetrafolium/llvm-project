@@ -293,7 +293,7 @@ typedef std::weak_ptr<lldb_private::BreakpointSite> BreakpointSiteWP;
 typedef std::shared_ptr<lldb_private::BreakpointLocation> BreakpointLocationSP;
 typedef std::weak_ptr<lldb_private::BreakpointLocation> BreakpointLocationWP;
 typedef std::shared_ptr<lldb_private::BreakpointPrecondition>
-    BreakpointPreconditionSP;
+BreakpointPreconditionSP;
 typedef std::shared_ptr<lldb_private::BreakpointResolver> BreakpointResolverSP;
 typedef std::shared_ptr<lldb_private::Broadcaster> BroadcasterSP;
 typedef std::shared_ptr<lldb_private::BroadcasterManager> BroadcasterManagerSP;
@@ -309,15 +309,15 @@ typedef std::shared_ptr<lldb_private::Debugger> DebuggerSP;
 typedef std::weak_ptr<lldb_private::Debugger> DebuggerWP;
 typedef std::shared_ptr<lldb_private::Disassembler> DisassemblerSP;
 typedef std::unique_ptr<lldb_private::DynamicCheckerFunctions>
-    DynamicCheckerFunctionsUP;
+DynamicCheckerFunctionsUP;
 typedef std::shared_ptr<lldb_private::DynamicLoader> DynamicLoaderSP;
 typedef std::unique_ptr<lldb_private::DynamicLoader> DynamicLoaderUP;
 typedef std::shared_ptr<lldb_private::Event> EventSP;
 typedef std::shared_ptr<lldb_private::EventData> EventDataSP;
 typedef std::shared_ptr<lldb_private::EventDataStructuredData>
-    EventDataStructuredDataSP;
+EventDataStructuredDataSP;
 typedef std::shared_ptr<lldb_private::ExecutionContextRef>
-    ExecutionContextRefSP;
+ExecutionContextRefSP;
 typedef std::shared_ptr<lldb_private::ExpressionVariable> ExpressionVariableSP;
 typedef std::unique_ptr<lldb_private::File> FileUP;
 typedef std::shared_ptr<lldb_private::File> FileSP;
@@ -327,7 +327,7 @@ typedef std::shared_ptr<lldb_private::FuncUnwinders> FuncUnwindersSP;
 typedef std::shared_ptr<lldb_private::InlineFunctionInfo> InlineFunctionInfoSP;
 typedef std::shared_ptr<lldb_private::Instruction> InstructionSP;
 typedef std::shared_ptr<lldb_private::InstrumentationRuntime>
-    InstrumentationRuntimeSP;
+InstrumentationRuntimeSP;
 typedef std::shared_ptr<lldb_private::IOHandler> IOHandlerSP;
 typedef std::shared_ptr<lldb_private::IOObject> IOObjectSP;
 typedef std::shared_ptr<lldb_private::IRExecutionUnit> IRExecutionUnitSP;
@@ -346,9 +346,9 @@ typedef std::weak_ptr<lldb_private::Module> ModuleWP;
 typedef std::shared_ptr<lldb_private::ObjectFile> ObjectFileSP;
 typedef std::weak_ptr<lldb_private::ObjectFile> ObjectFileWP;
 typedef std::shared_ptr<lldb_private::ObjectFileJITDelegate>
-    ObjectFileJITDelegateSP;
+ObjectFileJITDelegateSP;
 typedef std::weak_ptr<lldb_private::ObjectFileJITDelegate>
-    ObjectFileJITDelegateWP;
+ObjectFileJITDelegateWP;
 typedef std::unique_ptr<lldb_private::OperatingSystem> OperatingSystemUP;
 typedef std::shared_ptr<lldb_private::OptionValue> OptionValueSP;
 typedef std::weak_ptr<lldb_private::OptionValue> OptionValueWP;
@@ -357,16 +357,16 @@ typedef std::shared_ptr<lldb_private::OptionValueArgs> OptionValueArgsSP;
 typedef std::shared_ptr<lldb_private::OptionValueArray> OptionValueArraySP;
 typedef std::shared_ptr<lldb_private::OptionValueBoolean> OptionValueBooleanSP;
 typedef std::shared_ptr<lldb_private::OptionValueDictionary>
-    OptionValueDictionarySP;
+OptionValueDictionarySP;
 typedef std::shared_ptr<lldb_private::OptionValueFileSpec>
-    OptionValueFileSpecSP;
+OptionValueFileSpecSP;
 typedef std::shared_ptr<lldb_private::OptionValueFileSpecList>
-    OptionValueFileSpecListSP;
+OptionValueFileSpecListSP;
 typedef std::shared_ptr<lldb_private::OptionValueFormat> OptionValueFormatSP;
 typedef std::shared_ptr<lldb_private::OptionValuePathMappings>
-    OptionValuePathMappingsSP;
+OptionValuePathMappingsSP;
 typedef std::shared_ptr<lldb_private::OptionValueProperties>
-    OptionValuePropertiesSP;
+OptionValuePropertiesSP;
 typedef std::shared_ptr<lldb_private::OptionValueRegex> OptionValueRegexSP;
 typedef std::shared_ptr<lldb_private::OptionValueSInt64> OptionValueSInt64SP;
 typedef std::shared_ptr<lldb_private::OptionValueString> OptionValueStringSP;
@@ -386,9 +386,9 @@ typedef std::weak_ptr<lldb_private::Queue> QueueWP;
 typedef std::shared_ptr<lldb_private::QueueItem> QueueItemSP;
 typedef std::shared_ptr<lldb_private::REPL> REPLSP;
 typedef std::shared_ptr<lldb_private::RecognizedStackFrame>
-    RecognizedStackFrameSP;
+RecognizedStackFrameSP;
 typedef std::shared_ptr<lldb_private::ScriptSummaryFormat>
-    ScriptSummaryFormatSP;
+ScriptSummaryFormatSP;
 typedef std::shared_ptr<lldb_private::ScriptInterpreter> ScriptInterpreterSP;
 typedef std::unique_ptr<lldb_private::ScriptInterpreter> ScriptInterpreterUP;
 typedef std::shared_ptr<lldb_private::Section> SectionSP;
@@ -403,29 +403,29 @@ typedef std::unique_ptr<lldb_private::StackFrame> StackFrameUP;
 typedef std::weak_ptr<lldb_private::StackFrame> StackFrameWP;
 typedef std::shared_ptr<lldb_private::StackFrameList> StackFrameListSP;
 typedef std::shared_ptr<lldb_private::StackFrameRecognizer>
-    StackFrameRecognizerSP;
+StackFrameRecognizerSP;
 typedef std::unique_ptr<lldb_private::StackFrameRecognizerManager>
-    StackFrameRecognizerManagerUP;
+StackFrameRecognizerManagerUP;
 typedef std::shared_ptr<lldb_private::StopInfo> StopInfoSP;
 typedef std::shared_ptr<lldb_private::Stream> StreamSP;
 typedef std::weak_ptr<lldb_private::Stream> StreamWP;
 typedef std::shared_ptr<lldb_private::StreamFile> StreamFileSP;
 typedef std::shared_ptr<lldb_private::StringSummaryFormat>
-    StringTypeSummaryImplSP;
+StringTypeSummaryImplSP;
 typedef std::unique_ptr<lldb_private::StructuredDataImpl> StructuredDataImplUP;
 typedef std::shared_ptr<lldb_private::StructuredDataPlugin>
-    StructuredDataPluginSP;
+StructuredDataPluginSP;
 typedef std::weak_ptr<lldb_private::StructuredDataPlugin>
-    StructuredDataPluginWP;
+StructuredDataPluginWP;
 typedef std::shared_ptr<lldb_private::SymbolFile> SymbolFileSP;
 typedef std::shared_ptr<lldb_private::SymbolFileType> SymbolFileTypeSP;
 typedef std::weak_ptr<lldb_private::SymbolFileType> SymbolFileTypeWP;
 typedef std::shared_ptr<lldb_private::SymbolContextSpecifier>
-    SymbolContextSpecifierSP;
+SymbolContextSpecifierSP;
 typedef std::unique_ptr<lldb_private::SymbolVendor> SymbolVendorUP;
 typedef std::shared_ptr<lldb_private::SyntheticChildren> SyntheticChildrenSP;
 typedef std::shared_ptr<lldb_private::SyntheticChildrenFrontEnd>
-    SyntheticChildrenFrontEndSP;
+SyntheticChildrenFrontEndSP;
 typedef std::shared_ptr<lldb_private::Target> TargetSP;
 typedef std::weak_ptr<lldb_private::Target> TargetWP;
 typedef std::shared_ptr<lldb_private::TargetProperties> TargetPropertiesSP;
@@ -442,17 +442,17 @@ typedef std::weak_ptr<lldb_private::Type> TypeWP;
 typedef std::shared_ptr<lldb_private::TypeCategoryImpl> TypeCategoryImplSP;
 typedef std::shared_ptr<lldb_private::TypeImpl> TypeImplSP;
 typedef std::shared_ptr<lldb_private::TypeMemberFunctionImpl>
-    TypeMemberFunctionImplSP;
+TypeMemberFunctionImplSP;
 typedef std::shared_ptr<lldb_private::TypeEnumMemberImpl> TypeEnumMemberImplSP;
 typedef std::shared_ptr<lldb_private::TypeFilterImpl> TypeFilterImplSP;
 typedef std::shared_ptr<lldb_private::TypeSystem> TypeSystemSP;
 typedef std::shared_ptr<lldb_private::TypeFormatImpl> TypeFormatImplSP;
 typedef std::shared_ptr<lldb_private::TypeNameSpecifierImpl>
-    TypeNameSpecifierImplSP;
+TypeNameSpecifierImplSP;
 typedef std::shared_ptr<lldb_private::TypeSummaryImpl> TypeSummaryImplSP;
 typedef std::shared_ptr<lldb_private::TypeSummaryOptions> TypeSummaryOptionsSP;
 typedef std::shared_ptr<lldb_private::ScriptedSyntheticChildren>
-    ScriptedSyntheticChildrenSP;
+ScriptedSyntheticChildrenSP;
 typedef std::shared_ptr<lldb_private::UnixSignals> UnixSignalsSP;
 typedef std::weak_ptr<lldb_private::UnixSignals> UnixSignalsWP;
 typedef std::shared_ptr<lldb_private::UnwindAssembly> UnwindAssemblySP;

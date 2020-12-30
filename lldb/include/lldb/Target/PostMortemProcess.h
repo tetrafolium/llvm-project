@@ -22,9 +22,11 @@ namespace lldb_private {
 /// class.
 class PostMortemProcess : public Process {
 public:
-  using Process::Process;
+    using Process::Process;
 
-  bool IsLiveDebugSession() const override { return false; }
+    bool IsLiveDebugSession() const override {
+        return false;
+    }
 };
 
 } // namespace lldb_private

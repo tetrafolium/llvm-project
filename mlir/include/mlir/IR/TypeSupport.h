@@ -29,43 +29,47 @@ class MLIRContext;
 /// a registered Type.
 class AbstractType {
 public:
-  /// Look up the specified abstract type in the MLIRContext and return a
-  /// reference to it.
-  static const AbstractType &lookup(TypeID typeID, MLIRContext *context);
+    /// Look up the specified abstract type in the MLIRContext and return a
+    /// reference to it.
+    static const AbstractType &lookup(TypeID typeID, MLIRContext *context);
 
-  /// This method is used by Dialect objects when they register the list of
-  /// types they contain.
-  template <typename T> static AbstractType get(Dialect &dialect) {
-    return AbstractType(dialect, T::getInterfaceMap(), T::getTypeID());
-  }
+    /// This method is used by Dialect objects when they register the list of
+    /// types they contain.
+    template <typename T> static AbstractType get(Dialect &dialect) {
+        return AbstractType(dialect, T::getInterfaceMap(), T::getTypeID());
+    }
 
-  /// Return the dialect this type was registered to.
-  Dialect &getDialect() const { return const_cast<Dialect &>(dialect); }
+    /// Return the dialect this type was registered to.
+    Dialect &getDialect() const {
+        return const_cast<Dialect &>(dialect);
+    }
 
-  /// Returns an instance of the concept object for the given interface if it
-  /// was registered to this type, null otherwise. This should not be used
-  /// directly.
-  template <typename T> typename T::Concept *getInterface() const {
-    return interfaceMap.lookup<T>();
-  }
+    /// Returns an instance of the concept object for the given interface if it
+    /// was registered to this type, null otherwise. This should not be used
+    /// directly.
+    template <typename T> typename T::Concept *getInterface() const {
+        return interfaceMap.lookup<T>();
+    }
 
-  /// Return the unique identifier representing the concrete type class.
-  TypeID getTypeID() const { return typeID; }
+    /// Return the unique identifier representing the concrete type class.
+    TypeID getTypeID() const {
+        return typeID;
+    }
 
 private:
-  AbstractType(Dialect &dialect, detail::InterfaceMap &&interfaceMap,
-               TypeID typeID)
-      : dialect(dialect), interfaceMap(std::move(interfaceMap)),
-        typeID(typeID) {}
+    AbstractType(Dialect &dialect, detail::InterfaceMap &&interfaceMap,
+                 TypeID typeID)
+        : dialect(dialect), interfaceMap(std::move(interfaceMap)),
+          typeID(typeID) {}
 
-  /// This is the dialect that this type was registered to.
-  Dialect &dialect;
+    /// This is the dialect that this type was registered to.
+    Dialect &dialect;
 
-  /// This is a collection of the interfaces registered to this type.
-  detail::InterfaceMap interfaceMap;
+    /// This is a collection of the interfaces registered to this type.
+    detail::InterfaceMap interfaceMap;
 
-  /// The unique identifier of the derived Type class.
-  TypeID typeID;
+    /// The unique identifier of the derived Type class.
+    TypeID typeID;
 };
 
 //===----------------------------------------------------------------------===//
@@ -78,29 +82,29 @@ struct TypeUniquer;
 
 /// Base storage class appearing in a Type.
 class TypeStorage : public StorageUniquer::BaseStorage {
-  friend detail::TypeUniquer;
-  friend StorageUniquer;
+    friend detail::TypeUniquer;
+    friend StorageUniquer;
 
 public:
-  /// Return the abstract type descriptor for this type.
-  const AbstractType &getAbstractType() {
-    assert(abstractType && "Malformed type storage object.");
-    return *abstractType;
-  }
+    /// Return the abstract type descriptor for this type.
+    const AbstractType &getAbstractType() {
+        assert(abstractType && "Malformed type storage object.");
+        return *abstractType;
+    }
 
 protected:
-  /// This constructor is used by derived classes as part of the TypeUniquer.
-  TypeStorage() : abstractType(nullptr) {}
+    /// This constructor is used by derived classes as part of the TypeUniquer.
+    TypeStorage() : abstractType(nullptr) {}
 
 private:
-  /// Set the abstract type for this storage instance. This is used by the
-  /// TypeUniquer when initializing a newly constructed type storage object.
-  void initialize(const AbstractType &abstractTy) {
-    abstractType = &abstractTy;
-  }
+    /// Set the abstract type for this storage instance. This is used by the
+    /// TypeUniquer when initializing a newly constructed type storage object.
+    void initialize(const AbstractType &abstractTy) {
+        abstractType = &abstractTy;
+    }
 
-  /// The abstract description for this type.
-  const AbstractType *abstractType;
+    /// The abstract description for this type.
+    const AbstractType *abstractType;
 };
 
 /// Default storage type for types that require no additional initialization or
@@ -122,67 +126,67 @@ namespace detail {
 /// A utility class to get, or create, unique instances of types within an
 /// MLIRContext. This class manages all creation and uniquing of types.
 struct TypeUniquer {
-  /// Get an uniqued instance of a parametric type T.
-  template <typename T, typename... Args>
-  static typename std::enable_if_t<
-      !std::is_same<typename T::ImplType, TypeStorage>::value, T>
-  get(MLIRContext *ctx, Args &&...args) {
+    /// Get an uniqued instance of a parametric type T.
+    template <typename T, typename... Args>
+    static typename std::enable_if_t<
+    !std::is_same<typename T::ImplType, TypeStorage>::value, T>
+    get(MLIRContext *ctx, Args &&...args) {
 #ifndef NDEBUG
-    if (!ctx->getTypeUniquer().isParametricStorageInitialized(T::getTypeID()))
-      llvm::report_fatal_error(llvm::Twine("can't create type '") +
-                               llvm::getTypeName<T>() +
-                               "' because storage uniquer isn't initialized: "
-                               "the dialect was likely not loaded.");
+        if (!ctx->getTypeUniquer().isParametricStorageInitialized(T::getTypeID()))
+            llvm::report_fatal_error(llvm::Twine("can't create type '") +
+                                     llvm::getTypeName<T>() +
+                                     "' because storage uniquer isn't initialized: "
+                                     "the dialect was likely not loaded.");
 #endif
-    return ctx->getTypeUniquer().get<typename T::ImplType>(
+        return ctx->getTypeUniquer().get<typename T::ImplType>(
         [&](TypeStorage *storage) {
-          storage->initialize(AbstractType::lookup(T::getTypeID(), ctx));
+            storage->initialize(AbstractType::lookup(T::getTypeID(), ctx));
         },
         T::getTypeID(), std::forward<Args>(args)...);
-  }
-  /// Get an uniqued instance of a singleton type T.
-  template <typename T>
-  static typename std::enable_if_t<
-      std::is_same<typename T::ImplType, TypeStorage>::value, T>
-  get(MLIRContext *ctx) {
+    }
+    /// Get an uniqued instance of a singleton type T.
+    template <typename T>
+    static typename std::enable_if_t<
+    std::is_same<typename T::ImplType, TypeStorage>::value, T>
+    get(MLIRContext *ctx) {
 #ifndef NDEBUG
-    if (!ctx->getTypeUniquer().isSingletonStorageInitialized(T::getTypeID()))
-      llvm::report_fatal_error(llvm::Twine("can't create type '") +
-                               llvm::getTypeName<T>() +
-                               "' because storage uniquer isn't initialized: "
-                               "the dialect was likely not loaded.");
+        if (!ctx->getTypeUniquer().isSingletonStorageInitialized(T::getTypeID()))
+            llvm::report_fatal_error(llvm::Twine("can't create type '") +
+                                     llvm::getTypeName<T>() +
+                                     "' because storage uniquer isn't initialized: "
+                                     "the dialect was likely not loaded.");
 #endif
-    return ctx->getTypeUniquer().get<typename T::ImplType>(T::getTypeID());
-  }
+        return ctx->getTypeUniquer().get<typename T::ImplType>(T::getTypeID());
+    }
 
-  /// Change the mutable component of the given type instance in the provided
-  /// context.
-  template <typename T, typename... Args>
-  static LogicalResult mutate(MLIRContext *ctx, typename T::ImplType *impl,
-                              Args &&...args) {
-    assert(impl && "cannot mutate null type");
-    return ctx->getTypeUniquer().mutate(T::getTypeID(), impl,
-                                        std::forward<Args>(args)...);
-  }
+    /// Change the mutable component of the given type instance in the provided
+    /// context.
+    template <typename T, typename... Args>
+    static LogicalResult mutate(MLIRContext *ctx, typename T::ImplType *impl,
+                                Args &&...args) {
+        assert(impl && "cannot mutate null type");
+        return ctx->getTypeUniquer().mutate(T::getTypeID(), impl,
+                                            std::forward<Args>(args)...);
+    }
 
-  /// Register a parametric type instance T with the uniquer.
-  template <typename T>
-  static typename std::enable_if_t<
-      !std::is_same<typename T::ImplType, TypeStorage>::value>
-  registerType(MLIRContext *ctx) {
-    ctx->getTypeUniquer().registerParametricStorageType<typename T::ImplType>(
-        T::getTypeID());
-  }
-  /// Register a singleton type instance T with the uniquer.
-  template <typename T>
-  static typename std::enable_if_t<
-      std::is_same<typename T::ImplType, TypeStorage>::value>
-  registerType(MLIRContext *ctx) {
-    ctx->getTypeUniquer().registerSingletonStorageType<TypeStorage>(
+    /// Register a parametric type instance T with the uniquer.
+    template <typename T>
+    static typename std::enable_if_t<
+    !std::is_same<typename T::ImplType, TypeStorage>::value>
+    registerType(MLIRContext *ctx) {
+        ctx->getTypeUniquer().registerParametricStorageType<typename T::ImplType>(
+            T::getTypeID());
+    }
+    /// Register a singleton type instance T with the uniquer.
+    template <typename T>
+    static typename std::enable_if_t<
+    std::is_same<typename T::ImplType, TypeStorage>::value>
+    registerType(MLIRContext *ctx) {
+        ctx->getTypeUniquer().registerSingletonStorageType<TypeStorage>(
         T::getTypeID(), [&](TypeStorage *storage) {
-          storage->initialize(AbstractType::lookup(T::getTypeID(), ctx));
+            storage->initialize(AbstractType::lookup(T::getTypeID(), ctx));
         });
-  }
+    }
 };
 } // namespace detail
 

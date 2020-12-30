@@ -28,46 +28,46 @@ using namespace llvm::ore;
 #define REMARK_PASS DEBUG_TYPE
 
 static void runImpl(Function &F) {
-  if (!OptimizationRemarkEmitter::allowExtraAnalysis(F, REMARK_PASS))
-    return;
+    if (!OptimizationRemarkEmitter::allowExtraAnalysis(F, REMARK_PASS))
+        return;
 
-  OptimizationRemarkEmitter ORE(&F);
-  // For now, just generate a summary of the annotated instructions.
-  MapVector<StringRef, unsigned> Mapping;
-  for (Instruction &I : instructions(F)) {
-    if (!I.hasMetadata(LLVMContext::MD_annotation))
-      continue;
-    for (const MDOperand &Op :
-         I.getMetadata(LLVMContext::MD_annotation)->operands()) {
-      auto Iter = Mapping.insert({cast<MDString>(Op.get())->getString(), 0});
-      Iter.first->second++;
+    OptimizationRemarkEmitter ORE(&F);
+    // For now, just generate a summary of the annotated instructions.
+    MapVector<StringRef, unsigned> Mapping;
+    for (Instruction &I : instructions(F)) {
+        if (!I.hasMetadata(LLVMContext::MD_annotation))
+            continue;
+        for (const MDOperand &Op :
+                I.getMetadata(LLVMContext::MD_annotation)->operands()) {
+            auto Iter = Mapping.insert({cast<MDString>(Op.get())->getString(), 0});
+            Iter.first->second++;
+        }
     }
-  }
 
-  Instruction *IP = &*F.begin()->begin();
-  for (const auto &KV : Mapping)
-    ORE.emit(OptimizationRemarkAnalysis(REMARK_PASS, "AnnotationSummary", IP)
-             << "Annotated " << NV("count", KV.second) << " instructions with "
-             << NV("type", KV.first));
+    Instruction *IP = &*F.begin()->begin();
+    for (const auto &KV : Mapping)
+        ORE.emit(OptimizationRemarkAnalysis(REMARK_PASS, "AnnotationSummary", IP)
+                 << "Annotated " << NV("count", KV.second) << " instructions with "
+                 << NV("type", KV.first));
 }
 
 namespace {
 
 struct AnnotationRemarksLegacy : public FunctionPass {
-  static char ID;
+    static char ID;
 
-  AnnotationRemarksLegacy() : FunctionPass(ID) {
-    initializeAnnotationRemarksLegacyPass(*PassRegistry::getPassRegistry());
-  }
+    AnnotationRemarksLegacy() : FunctionPass(ID) {
+        initializeAnnotationRemarksLegacyPass(*PassRegistry::getPassRegistry());
+    }
 
-  bool runOnFunction(Function &F) override {
-    runImpl(F);
-    return false;
-  }
+    bool runOnFunction(Function &F) override {
+        runImpl(F);
+        return false;
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesAll();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesAll();
+    }
 };
 
 } // end anonymous namespace
@@ -80,11 +80,11 @@ INITIALIZE_PASS_END(AnnotationRemarksLegacy, "annotation-remarks",
                     "Annotation Remarks", false, false)
 
 FunctionPass *llvm::createAnnotationRemarksLegacyPass() {
-  return new AnnotationRemarksLegacy();
+    return new AnnotationRemarksLegacy();
 }
 
 PreservedAnalyses AnnotationRemarksPass::run(Function &F,
-                                             FunctionAnalysisManager &AM) {
-  runImpl(F);
-  return PreservedAnalyses::all();
+        FunctionAnalysisManager &AM) {
+    runImpl(F);
+    return PreservedAnalyses::all();
 }

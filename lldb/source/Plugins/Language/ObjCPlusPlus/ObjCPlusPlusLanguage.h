@@ -16,36 +16,40 @@
 namespace lldb_private {
 
 class ObjCPlusPlusLanguage : public Language {
-  ClangHighlighter m_highlighter;
+    ClangHighlighter m_highlighter;
 
 public:
-  ObjCPlusPlusLanguage() = default;
+    ObjCPlusPlusLanguage() = default;
 
-  ~ObjCPlusPlusLanguage() override = default;
+    ~ObjCPlusPlusLanguage() override = default;
 
-  lldb::LanguageType GetLanguageType() const override {
-    return lldb::eLanguageTypeObjC_plus_plus;
-  }
+    lldb::LanguageType GetLanguageType() const override {
+        return lldb::eLanguageTypeObjC_plus_plus;
+    }
 
-  llvm::StringRef GetNilReferenceSummaryString() override { return "nil"; }
+    llvm::StringRef GetNilReferenceSummaryString() override {
+        return "nil";
+    }
 
-  bool IsSourceFile(llvm::StringRef file_path) const override;
+    bool IsSourceFile(llvm::StringRef file_path) const override;
 
-  const Highlighter *GetHighlighter() const override { return &m_highlighter; }
+    const Highlighter *GetHighlighter() const override {
+        return &m_highlighter;
+    }
 
-  // Static Functions
-  static void Initialize();
+    // Static Functions
+    static void Initialize();
 
-  static void Terminate();
+    static void Terminate();
 
-  static lldb_private::Language *CreateInstance(lldb::LanguageType language);
+    static lldb_private::Language *CreateInstance(lldb::LanguageType language);
 
-  static lldb_private::ConstString GetPluginNameStatic();
+    static lldb_private::ConstString GetPluginNameStatic();
 
-  // PluginInterface protocol
-  ConstString GetPluginName() override;
+    // PluginInterface protocol
+    ConstString GetPluginName() override;
 
-  uint32_t GetPluginVersion() override;
+    uint32_t GetPluginVersion() override;
 };
 
 } // namespace lldb_private

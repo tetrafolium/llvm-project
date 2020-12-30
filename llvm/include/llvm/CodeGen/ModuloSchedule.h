@@ -77,293 +77,307 @@ class LiveIntervals;
 /// maintain a Cycle and Stage.
 class ModuloSchedule {
 private:
-  /// The block containing the loop instructions.
-  MachineLoop *Loop;
+    /// The block containing the loop instructions.
+    MachineLoop *Loop;
 
-  /// The instructions to be generated, in total order. Cycle provides a partial
-  /// order; the total order within cycles has been decided by the schedule
-  /// producer.
-  std::vector<MachineInstr *> ScheduledInstrs;
+    /// The instructions to be generated, in total order. Cycle provides a partial
+    /// order; the total order within cycles has been decided by the schedule
+    /// producer.
+    std::vector<MachineInstr *> ScheduledInstrs;
 
-  /// The cycle for each instruction.
-  DenseMap<MachineInstr *, int> Cycle;
+    /// The cycle for each instruction.
+    DenseMap<MachineInstr *, int> Cycle;
 
-  /// The stage for each instruction.
-  DenseMap<MachineInstr *, int> Stage;
+    /// The stage for each instruction.
+    DenseMap<MachineInstr *, int> Stage;
 
-  /// The number of stages in this schedule (Max(Stage) + 1).
-  int NumStages;
+    /// The number of stages in this schedule (Max(Stage) + 1).
+    int NumStages;
 
 public:
-  /// Create a new ModuloSchedule.
-  /// \arg ScheduledInstrs The new loop instructions, in total resequenced
-  ///    order.
-  /// \arg Cycle Cycle index for all instructions in ScheduledInstrs. Cycle does
-  ///    not need to start at zero. ScheduledInstrs must be partially ordered by
-  ///    Cycle.
-  /// \arg Stage Stage index for all instructions in ScheduleInstrs.
-  ModuloSchedule(MachineFunction &MF, MachineLoop *Loop,
-                 std::vector<MachineInstr *> ScheduledInstrs,
-                 DenseMap<MachineInstr *, int> Cycle,
-                 DenseMap<MachineInstr *, int> Stage)
-      : Loop(Loop), ScheduledInstrs(ScheduledInstrs), Cycle(std::move(Cycle)),
-        Stage(std::move(Stage)) {
-    NumStages = 0;
-    for (auto &KV : this->Stage)
-      NumStages = std::max(NumStages, KV.second);
-    ++NumStages;
-  }
+    /// Create a new ModuloSchedule.
+    /// \arg ScheduledInstrs The new loop instructions, in total resequenced
+    ///    order.
+    /// \arg Cycle Cycle index for all instructions in ScheduledInstrs. Cycle does
+    ///    not need to start at zero. ScheduledInstrs must be partially ordered by
+    ///    Cycle.
+    /// \arg Stage Stage index for all instructions in ScheduleInstrs.
+    ModuloSchedule(MachineFunction &MF, MachineLoop *Loop,
+                   std::vector<MachineInstr *> ScheduledInstrs,
+                   DenseMap<MachineInstr *, int> Cycle,
+                   DenseMap<MachineInstr *, int> Stage)
+        : Loop(Loop), ScheduledInstrs(ScheduledInstrs), Cycle(std::move(Cycle)),
+          Stage(std::move(Stage)) {
+        NumStages = 0;
+        for (auto &KV : this->Stage)
+            NumStages = std::max(NumStages, KV.second);
+        ++NumStages;
+    }
 
-  /// Return the single-block loop being scheduled.
-  MachineLoop *getLoop() const { return Loop; }
+    /// Return the single-block loop being scheduled.
+    MachineLoop *getLoop() const {
+        return Loop;
+    }
 
-  /// Return the number of stages contained in this schedule, which is the
-  /// largest stage index + 1.
-  int getNumStages() const { return NumStages; }
+    /// Return the number of stages contained in this schedule, which is the
+    /// largest stage index + 1.
+    int getNumStages() const {
+        return NumStages;
+    }
 
-  /// Return the first cycle in the schedule, which is the cycle index of the
-  /// first instruction.
-  int getFirstCycle() { return Cycle[ScheduledInstrs.front()]; }
+    /// Return the first cycle in the schedule, which is the cycle index of the
+    /// first instruction.
+    int getFirstCycle() {
+        return Cycle[ScheduledInstrs.front()];
+    }
 
-  /// Return the final cycle in the schedule, which is the cycle index of the
-  /// last instruction.
-  int getFinalCycle() { return Cycle[ScheduledInstrs.back()]; }
+    /// Return the final cycle in the schedule, which is the cycle index of the
+    /// last instruction.
+    int getFinalCycle() {
+        return Cycle[ScheduledInstrs.back()];
+    }
 
-  /// Return the stage that MI is scheduled in, or -1.
-  int getStage(MachineInstr *MI) {
-    auto I = Stage.find(MI);
-    return I == Stage.end() ? -1 : I->second;
-  }
+    /// Return the stage that MI is scheduled in, or -1.
+    int getStage(MachineInstr *MI) {
+        auto I = Stage.find(MI);
+        return I == Stage.end() ? -1 : I->second;
+    }
 
-  /// Return the cycle that MI is scheduled at, or -1.
-  int getCycle(MachineInstr *MI) {
-    auto I = Cycle.find(MI);
-    return I == Cycle.end() ? -1 : I->second;
-  }
+    /// Return the cycle that MI is scheduled at, or -1.
+    int getCycle(MachineInstr *MI) {
+        auto I = Cycle.find(MI);
+        return I == Cycle.end() ? -1 : I->second;
+    }
 
-  /// Set the stage of a newly created instruction.
-  void setStage(MachineInstr *MI, int MIStage) {
-    assert(Stage.count(MI) == 0);
-    Stage[MI] = MIStage;
-  }
+    /// Set the stage of a newly created instruction.
+    void setStage(MachineInstr *MI, int MIStage) {
+        assert(Stage.count(MI) == 0);
+        Stage[MI] = MIStage;
+    }
 
-  /// Return the rescheduled instructions in order.
-  ArrayRef<MachineInstr *> getInstructions() { return ScheduledInstrs; }
+    /// Return the rescheduled instructions in order.
+    ArrayRef<MachineInstr *> getInstructions() {
+        return ScheduledInstrs;
+    }
 
-  void dump() { print(dbgs()); }
-  void print(raw_ostream &OS);
+    void dump() {
+        print(dbgs());
+    }
+    void print(raw_ostream &OS);
 };
 
 /// The ModuloScheduleExpander takes a ModuloSchedule and expands it in-place,
 /// rewriting the old loop and inserting prologs and epilogs as required.
 class ModuloScheduleExpander {
 public:
-  using InstrChangesTy = DenseMap<MachineInstr *, std::pair<unsigned, int64_t>>;
+    using InstrChangesTy = DenseMap<MachineInstr *, std::pair<unsigned, int64_t>>;
 
 private:
-  using ValueMapTy = DenseMap<unsigned, unsigned>;
-  using MBBVectorTy = SmallVectorImpl<MachineBasicBlock *>;
-  using InstrMapTy = DenseMap<MachineInstr *, MachineInstr *>;
+    using ValueMapTy = DenseMap<unsigned, unsigned>;
+    using MBBVectorTy = SmallVectorImpl<MachineBasicBlock *>;
+    using InstrMapTy = DenseMap<MachineInstr *, MachineInstr *>;
 
-  ModuloSchedule &Schedule;
-  MachineFunction &MF;
-  const TargetSubtargetInfo &ST;
-  MachineRegisterInfo &MRI;
-  const TargetInstrInfo *TII;
-  LiveIntervals &LIS;
+    ModuloSchedule &Schedule;
+    MachineFunction &MF;
+    const TargetSubtargetInfo &ST;
+    MachineRegisterInfo &MRI;
+    const TargetInstrInfo *TII;
+    LiveIntervals &LIS;
 
-  MachineBasicBlock *BB;
-  MachineBasicBlock *Preheader;
-  MachineBasicBlock *NewKernel = nullptr;
-  std::unique_ptr<TargetInstrInfo::PipelinerLoopInfo> LoopInfo;
+    MachineBasicBlock *BB;
+    MachineBasicBlock *Preheader;
+    MachineBasicBlock *NewKernel = nullptr;
+    std::unique_ptr<TargetInstrInfo::PipelinerLoopInfo> LoopInfo;
 
-  /// Map for each register and the max difference between its uses and def.
-  /// The first element in the pair is the max difference in stages. The
-  /// second is true if the register defines a Phi value and loop value is
-  /// scheduled before the Phi.
-  std::map<unsigned, std::pair<unsigned, bool>> RegToStageDiff;
+    /// Map for each register and the max difference between its uses and def.
+    /// The first element in the pair is the max difference in stages. The
+    /// second is true if the register defines a Phi value and loop value is
+    /// scheduled before the Phi.
+    std::map<unsigned, std::pair<unsigned, bool>> RegToStageDiff;
 
-  /// Instructions to change when emitting the final schedule.
-  InstrChangesTy InstrChanges;
+    /// Instructions to change when emitting the final schedule.
+    InstrChangesTy InstrChanges;
 
-  void generatePipelinedLoop();
-  void generateProlog(unsigned LastStage, MachineBasicBlock *KernelBB,
-                      ValueMapTy *VRMap, MBBVectorTy &PrologBBs);
-  void generateEpilog(unsigned LastStage, MachineBasicBlock *KernelBB,
-                      ValueMapTy *VRMap, MBBVectorTy &EpilogBBs,
-                      MBBVectorTy &PrologBBs);
-  void generateExistingPhis(MachineBasicBlock *NewBB, MachineBasicBlock *BB1,
-                            MachineBasicBlock *BB2, MachineBasicBlock *KernelBB,
-                            ValueMapTy *VRMap, InstrMapTy &InstrMap,
-                            unsigned LastStageNum, unsigned CurStageNum,
-                            bool IsLast);
-  void generatePhis(MachineBasicBlock *NewBB, MachineBasicBlock *BB1,
-                    MachineBasicBlock *BB2, MachineBasicBlock *KernelBB,
-                    ValueMapTy *VRMap, InstrMapTy &InstrMap,
-                    unsigned LastStageNum, unsigned CurStageNum, bool IsLast);
-  void removeDeadInstructions(MachineBasicBlock *KernelBB,
-                              MBBVectorTy &EpilogBBs);
-  void splitLifetimes(MachineBasicBlock *KernelBB, MBBVectorTy &EpilogBBs);
-  void addBranches(MachineBasicBlock &PreheaderBB, MBBVectorTy &PrologBBs,
-                   MachineBasicBlock *KernelBB, MBBVectorTy &EpilogBBs,
-                   ValueMapTy *VRMap);
-  bool computeDelta(MachineInstr &MI, unsigned &Delta);
-  void updateMemOperands(MachineInstr &NewMI, MachineInstr &OldMI,
-                         unsigned Num);
-  MachineInstr *cloneInstr(MachineInstr *OldMI, unsigned CurStageNum,
-                           unsigned InstStageNum);
-  MachineInstr *cloneAndChangeInstr(MachineInstr *OldMI, unsigned CurStageNum,
-                                    unsigned InstStageNum);
-  void updateInstruction(MachineInstr *NewMI, bool LastDef,
-                         unsigned CurStageNum, unsigned InstrStageNum,
-                         ValueMapTy *VRMap);
-  MachineInstr *findDefInLoop(unsigned Reg);
-  unsigned getPrevMapVal(unsigned StageNum, unsigned PhiStage, unsigned LoopVal,
-                         unsigned LoopStage, ValueMapTy *VRMap,
-                         MachineBasicBlock *BB);
-  void rewritePhiValues(MachineBasicBlock *NewBB, unsigned StageNum,
-                        ValueMapTy *VRMap, InstrMapTy &InstrMap);
-  void rewriteScheduledInstr(MachineBasicBlock *BB, InstrMapTy &InstrMap,
-                             unsigned CurStageNum, unsigned PhiNum,
-                             MachineInstr *Phi, unsigned OldReg,
-                             unsigned NewReg, unsigned PrevReg = 0);
-  bool isLoopCarried(MachineInstr &Phi);
+    void generatePipelinedLoop();
+    void generateProlog(unsigned LastStage, MachineBasicBlock *KernelBB,
+                        ValueMapTy *VRMap, MBBVectorTy &PrologBBs);
+    void generateEpilog(unsigned LastStage, MachineBasicBlock *KernelBB,
+                        ValueMapTy *VRMap, MBBVectorTy &EpilogBBs,
+                        MBBVectorTy &PrologBBs);
+    void generateExistingPhis(MachineBasicBlock *NewBB, MachineBasicBlock *BB1,
+                              MachineBasicBlock *BB2, MachineBasicBlock *KernelBB,
+                              ValueMapTy *VRMap, InstrMapTy &InstrMap,
+                              unsigned LastStageNum, unsigned CurStageNum,
+                              bool IsLast);
+    void generatePhis(MachineBasicBlock *NewBB, MachineBasicBlock *BB1,
+                      MachineBasicBlock *BB2, MachineBasicBlock *KernelBB,
+                      ValueMapTy *VRMap, InstrMapTy &InstrMap,
+                      unsigned LastStageNum, unsigned CurStageNum, bool IsLast);
+    void removeDeadInstructions(MachineBasicBlock *KernelBB,
+                                MBBVectorTy &EpilogBBs);
+    void splitLifetimes(MachineBasicBlock *KernelBB, MBBVectorTy &EpilogBBs);
+    void addBranches(MachineBasicBlock &PreheaderBB, MBBVectorTy &PrologBBs,
+                     MachineBasicBlock *KernelBB, MBBVectorTy &EpilogBBs,
+                     ValueMapTy *VRMap);
+    bool computeDelta(MachineInstr &MI, unsigned &Delta);
+    void updateMemOperands(MachineInstr &NewMI, MachineInstr &OldMI,
+                           unsigned Num);
+    MachineInstr *cloneInstr(MachineInstr *OldMI, unsigned CurStageNum,
+                             unsigned InstStageNum);
+    MachineInstr *cloneAndChangeInstr(MachineInstr *OldMI, unsigned CurStageNum,
+                                      unsigned InstStageNum);
+    void updateInstruction(MachineInstr *NewMI, bool LastDef,
+                           unsigned CurStageNum, unsigned InstrStageNum,
+                           ValueMapTy *VRMap);
+    MachineInstr *findDefInLoop(unsigned Reg);
+    unsigned getPrevMapVal(unsigned StageNum, unsigned PhiStage, unsigned LoopVal,
+                           unsigned LoopStage, ValueMapTy *VRMap,
+                           MachineBasicBlock *BB);
+    void rewritePhiValues(MachineBasicBlock *NewBB, unsigned StageNum,
+                          ValueMapTy *VRMap, InstrMapTy &InstrMap);
+    void rewriteScheduledInstr(MachineBasicBlock *BB, InstrMapTy &InstrMap,
+                               unsigned CurStageNum, unsigned PhiNum,
+                               MachineInstr *Phi, unsigned OldReg,
+                               unsigned NewReg, unsigned PrevReg = 0);
+    bool isLoopCarried(MachineInstr &Phi);
 
-  /// Return the max. number of stages/iterations that can occur between a
-  /// register definition and its uses.
-  unsigned getStagesForReg(int Reg, unsigned CurStage) {
-    std::pair<unsigned, bool> Stages = RegToStageDiff[Reg];
-    if ((int)CurStage > Schedule.getNumStages() - 1 && Stages.first == 0 &&
-        Stages.second)
-      return 1;
-    return Stages.first;
-  }
+    /// Return the max. number of stages/iterations that can occur between a
+    /// register definition and its uses.
+    unsigned getStagesForReg(int Reg, unsigned CurStage) {
+        std::pair<unsigned, bool> Stages = RegToStageDiff[Reg];
+        if ((int)CurStage > Schedule.getNumStages() - 1 && Stages.first == 0 &&
+                Stages.second)
+            return 1;
+        return Stages.first;
+    }
 
-  /// The number of stages for a Phi is a little different than other
-  /// instructions. The minimum value computed in RegToStageDiff is 1
-  /// because we assume the Phi is needed for at least 1 iteration.
-  /// This is not the case if the loop value is scheduled prior to the
-  /// Phi in the same stage.  This function returns the number of stages
-  /// or iterations needed between the Phi definition and any uses.
-  unsigned getStagesForPhi(int Reg) {
-    std::pair<unsigned, bool> Stages = RegToStageDiff[Reg];
-    if (Stages.second)
-      return Stages.first;
-    return Stages.first - 1;
-  }
+    /// The number of stages for a Phi is a little different than other
+    /// instructions. The minimum value computed in RegToStageDiff is 1
+    /// because we assume the Phi is needed for at least 1 iteration.
+    /// This is not the case if the loop value is scheduled prior to the
+    /// Phi in the same stage.  This function returns the number of stages
+    /// or iterations needed between the Phi definition and any uses.
+    unsigned getStagesForPhi(int Reg) {
+        std::pair<unsigned, bool> Stages = RegToStageDiff[Reg];
+        if (Stages.second)
+            return Stages.first;
+        return Stages.first - 1;
+    }
 
 public:
-  /// Create a new ModuloScheduleExpander.
-  /// \arg InstrChanges Modifications to make to instructions with memory
-  ///   operands.
-  /// FIXME: InstrChanges is opaque and is an implementation detail of an
-  ///   optimization in MachinePipeliner that crosses abstraction boundaries.
-  ModuloScheduleExpander(MachineFunction &MF, ModuloSchedule &S,
-                         LiveIntervals &LIS, InstrChangesTy InstrChanges)
-      : Schedule(S), MF(MF), ST(MF.getSubtarget()), MRI(MF.getRegInfo()),
-        TII(ST.getInstrInfo()), LIS(LIS),
-        InstrChanges(std::move(InstrChanges)) {}
+    /// Create a new ModuloScheduleExpander.
+    /// \arg InstrChanges Modifications to make to instructions with memory
+    ///   operands.
+    /// FIXME: InstrChanges is opaque and is an implementation detail of an
+    ///   optimization in MachinePipeliner that crosses abstraction boundaries.
+    ModuloScheduleExpander(MachineFunction &MF, ModuloSchedule &S,
+                           LiveIntervals &LIS, InstrChangesTy InstrChanges)
+        : Schedule(S), MF(MF), ST(MF.getSubtarget()), MRI(MF.getRegInfo()),
+          TII(ST.getInstrInfo()), LIS(LIS),
+          InstrChanges(std::move(InstrChanges)) {}
 
-  /// Performs the actual expansion.
-  void expand();
-  /// Performs final cleanup after expansion.
-  void cleanup();
+    /// Performs the actual expansion.
+    void expand();
+    /// Performs final cleanup after expansion.
+    void cleanup();
 
-  /// Returns the newly rewritten kernel block, or nullptr if this was
-  /// optimized away.
-  MachineBasicBlock *getRewrittenKernel() { return NewKernel; }
+    /// Returns the newly rewritten kernel block, or nullptr if this was
+    /// optimized away.
+    MachineBasicBlock *getRewrittenKernel() {
+        return NewKernel;
+    }
 };
 
 /// A reimplementation of ModuloScheduleExpander. It works by generating a
 /// standalone kernel loop and peeling out the prologs and epilogs.
 class PeelingModuloScheduleExpander {
 public:
-  PeelingModuloScheduleExpander(MachineFunction &MF, ModuloSchedule &S,
-                                LiveIntervals *LIS)
-      : Schedule(S), MF(MF), ST(MF.getSubtarget()), MRI(MF.getRegInfo()),
-        TII(ST.getInstrInfo()), LIS(LIS) {}
+    PeelingModuloScheduleExpander(MachineFunction &MF, ModuloSchedule &S,
+                                  LiveIntervals *LIS)
+        : Schedule(S), MF(MF), ST(MF.getSubtarget()), MRI(MF.getRegInfo()),
+          TII(ST.getInstrInfo()), LIS(LIS) {}
 
-  void expand();
+    void expand();
 
-  /// Runs ModuloScheduleExpander and treats it as a golden input to validate
-  /// aspects of the code generated by PeelingModuloScheduleExpander.
-  void validateAgainstModuloScheduleExpander();
+    /// Runs ModuloScheduleExpander and treats it as a golden input to validate
+    /// aspects of the code generated by PeelingModuloScheduleExpander.
+    void validateAgainstModuloScheduleExpander();
 
 protected:
-  ModuloSchedule &Schedule;
-  MachineFunction &MF;
-  const TargetSubtargetInfo &ST;
-  MachineRegisterInfo &MRI;
-  const TargetInstrInfo *TII;
-  LiveIntervals *LIS;
+    ModuloSchedule &Schedule;
+    MachineFunction &MF;
+    const TargetSubtargetInfo &ST;
+    MachineRegisterInfo &MRI;
+    const TargetInstrInfo *TII;
+    LiveIntervals *LIS;
 
-  /// The original loop block that gets rewritten in-place.
-  MachineBasicBlock *BB;
-  /// The original loop preheader.
-  MachineBasicBlock *Preheader;
-  /// All prolog and epilog blocks.
-  SmallVector<MachineBasicBlock *, 4> Prologs, Epilogs;
-  /// For every block, the stages that are produced.
-  DenseMap<MachineBasicBlock *, BitVector> LiveStages;
-  /// For every block, the stages that are available. A stage can be available
-  /// but not produced (in the epilog) or produced but not available (in the
-  /// prolog).
-  DenseMap<MachineBasicBlock *, BitVector> AvailableStages;
-  /// When peeling the epilogue keep track of the distance between the phi
-  /// nodes and the kernel.
-  DenseMap<MachineInstr *, unsigned> PhiNodeLoopIteration;
+    /// The original loop block that gets rewritten in-place.
+    MachineBasicBlock *BB;
+    /// The original loop preheader.
+    MachineBasicBlock *Preheader;
+    /// All prolog and epilog blocks.
+    SmallVector<MachineBasicBlock *, 4> Prologs, Epilogs;
+    /// For every block, the stages that are produced.
+    DenseMap<MachineBasicBlock *, BitVector> LiveStages;
+    /// For every block, the stages that are available. A stage can be available
+    /// but not produced (in the epilog) or produced but not available (in the
+    /// prolog).
+    DenseMap<MachineBasicBlock *, BitVector> AvailableStages;
+    /// When peeling the epilogue keep track of the distance between the phi
+    /// nodes and the kernel.
+    DenseMap<MachineInstr *, unsigned> PhiNodeLoopIteration;
 
-  /// CanonicalMIs and BlockMIs form a bidirectional map between any of the
-  /// loop kernel clones.
-  DenseMap<MachineInstr *, MachineInstr *> CanonicalMIs;
-  DenseMap<std::pair<MachineBasicBlock *, MachineInstr *>, MachineInstr *>
-      BlockMIs;
+    /// CanonicalMIs and BlockMIs form a bidirectional map between any of the
+    /// loop kernel clones.
+    DenseMap<MachineInstr *, MachineInstr *> CanonicalMIs;
+    DenseMap<std::pair<MachineBasicBlock *, MachineInstr *>, MachineInstr *>
+    BlockMIs;
 
-  /// State passed from peelKernel to peelPrologAndEpilogs().
-  std::deque<MachineBasicBlock *> PeeledFront, PeeledBack;
-  /// Illegal phis that need to be deleted once we re-link stages.
-  SmallVector<MachineInstr *, 4> IllegalPhisToDelete;
+    /// State passed from peelKernel to peelPrologAndEpilogs().
+    std::deque<MachineBasicBlock *> PeeledFront, PeeledBack;
+    /// Illegal phis that need to be deleted once we re-link stages.
+    SmallVector<MachineInstr *, 4> IllegalPhisToDelete;
 
-  /// Converts BB from the original loop body to the rewritten, pipelined
-  /// steady-state.
-  void rewriteKernel();
+    /// Converts BB from the original loop body to the rewritten, pipelined
+    /// steady-state.
+    void rewriteKernel();
 
-  /// Peels one iteration of the rewritten kernel (BB) in the specified
-  /// direction.
-  MachineBasicBlock *peelKernel(LoopPeelDirection LPD);
-  // Delete instructions whose stage is less than MinStage in the given basic
-  // block.
-  void filterInstructions(MachineBasicBlock *MB, int MinStage);
-  // Move instructions of the given stage from sourceBB to DestBB. Remap the phi
-  // instructions to keep a valid IR.
-  void moveStageBetweenBlocks(MachineBasicBlock *DestBB,
-                              MachineBasicBlock *SourceBB, unsigned Stage);
-  /// Peel the kernel forwards and backwards to produce prologs and epilogs,
-  /// and stitch them together.
-  void peelPrologAndEpilogs();
-  /// All prolog and epilog blocks are clones of the kernel, so any produced
-  /// register in one block has an corollary in all other blocks.
-  Register getEquivalentRegisterIn(Register Reg, MachineBasicBlock *BB);
-  /// Change all users of MI, if MI is predicated out
-  /// (LiveStages[MI->getParent()] == false).
-  void rewriteUsesOf(MachineInstr *MI);
-  /// Insert branches between prologs, kernel and epilogs.
-  void fixupBranches();
-  /// Create a poor-man's LCSSA by cloning only the PHIs from the kernel block
-  /// to a block dominated by all prologs and epilogs. This allows us to treat
-  /// the loop exiting block as any other kernel clone.
-  MachineBasicBlock *CreateLCSSAExitingBlock();
-  /// Helper to get the stage of an instruction in the schedule.
-  unsigned getStage(MachineInstr *MI) {
-    if (CanonicalMIs.count(MI))
-      MI = CanonicalMIs[MI];
-    return Schedule.getStage(MI);
-  }
-  /// Helper function to find the right canonical register for a phi instruction
-  /// coming from a peeled out prologue.
-  Register getPhiCanonicalReg(MachineInstr* CanonicalPhi, MachineInstr* Phi);
-  /// Target loop info before kernel peeling.
-  std::unique_ptr<TargetInstrInfo::PipelinerLoopInfo> LoopInfo;
+    /// Peels one iteration of the rewritten kernel (BB) in the specified
+    /// direction.
+    MachineBasicBlock *peelKernel(LoopPeelDirection LPD);
+    // Delete instructions whose stage is less than MinStage in the given basic
+    // block.
+    void filterInstructions(MachineBasicBlock *MB, int MinStage);
+    // Move instructions of the given stage from sourceBB to DestBB. Remap the phi
+    // instructions to keep a valid IR.
+    void moveStageBetweenBlocks(MachineBasicBlock *DestBB,
+                                MachineBasicBlock *SourceBB, unsigned Stage);
+    /// Peel the kernel forwards and backwards to produce prologs and epilogs,
+    /// and stitch them together.
+    void peelPrologAndEpilogs();
+    /// All prolog and epilog blocks are clones of the kernel, so any produced
+    /// register in one block has an corollary in all other blocks.
+    Register getEquivalentRegisterIn(Register Reg, MachineBasicBlock *BB);
+    /// Change all users of MI, if MI is predicated out
+    /// (LiveStages[MI->getParent()] == false).
+    void rewriteUsesOf(MachineInstr *MI);
+    /// Insert branches between prologs, kernel and epilogs.
+    void fixupBranches();
+    /// Create a poor-man's LCSSA by cloning only the PHIs from the kernel block
+    /// to a block dominated by all prologs and epilogs. This allows us to treat
+    /// the loop exiting block as any other kernel clone.
+    MachineBasicBlock *CreateLCSSAExitingBlock();
+    /// Helper to get the stage of an instruction in the schedule.
+    unsigned getStage(MachineInstr *MI) {
+        if (CanonicalMIs.count(MI))
+            MI = CanonicalMIs[MI];
+        return Schedule.getStage(MI);
+    }
+    /// Helper function to find the right canonical register for a phi instruction
+    /// coming from a peeled out prologue.
+    Register getPhiCanonicalReg(MachineInstr* CanonicalPhi, MachineInstr* Phi);
+    /// Target loop info before kernel peeling.
+    std::unique_ptr<TargetInstrInfo::PipelinerLoopInfo> LoopInfo;
 };
 
 /// Expander that simply annotates each scheduled instruction with a post-instr
@@ -373,15 +387,15 @@ protected:
 /// roundtripped in MIR. The syntax is:
 ///   MYINST %0, post-instr-symbol <mcsymbol Stage-1_Cycle-5>
 class ModuloScheduleTestAnnotater {
-  MachineFunction &MF;
-  ModuloSchedule &S;
+    MachineFunction &MF;
+    ModuloSchedule &S;
 
 public:
-  ModuloScheduleTestAnnotater(MachineFunction &MF, ModuloSchedule &S)
-      : MF(MF), S(S) {}
+    ModuloScheduleTestAnnotater(MachineFunction &MF, ModuloSchedule &S)
+        : MF(MF), S(S) {}
 
-  /// Performs the annotation.
-  void annotate();
+    /// Performs the annotation.
+    void annotate();
 };
 
 } // end namespace llvm

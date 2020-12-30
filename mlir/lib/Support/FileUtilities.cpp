@@ -20,28 +20,28 @@ using namespace mlir;
 
 std::unique_ptr<llvm::MemoryBuffer>
 mlir::openInputFile(StringRef inputFilename, std::string *errorMessage) {
-  auto fileOrErr = llvm::MemoryBuffer::getFileOrSTDIN(inputFilename);
-  if (std::error_code error = fileOrErr.getError()) {
-    if (errorMessage)
-      *errorMessage = "cannot open input file '" + inputFilename.str() +
-                      "': " + error.message();
-    return nullptr;
-  }
+    auto fileOrErr = llvm::MemoryBuffer::getFileOrSTDIN(inputFilename);
+    if (std::error_code error = fileOrErr.getError()) {
+        if (errorMessage)
+            *errorMessage = "cannot open input file '" + inputFilename.str() +
+                            "': " + error.message();
+        return nullptr;
+    }
 
-  return std::move(*fileOrErr);
+    return std::move(*fileOrErr);
 }
 
 std::unique_ptr<llvm::ToolOutputFile>
 mlir::openOutputFile(StringRef outputFilename, std::string *errorMessage) {
-  std::error_code error;
-  auto result = std::make_unique<llvm::ToolOutputFile>(outputFilename, error,
-                                                       llvm::sys::fs::F_None);
-  if (error) {
-    if (errorMessage)
-      *errorMessage = "cannot open output file '" + outputFilename.str() +
-                      "': " + error.message();
-    return nullptr;
-  }
+    std::error_code error;
+    auto result = std::make_unique<llvm::ToolOutputFile>(outputFilename, error,
+                  llvm::sys::fs::F_None);
+    if (error) {
+        if (errorMessage)
+            *errorMessage = "cannot open output file '" + outputFilename.str() +
+                            "': " + error.message();
+        return nullptr;
+    }
 
-  return result;
+    return result;
 }

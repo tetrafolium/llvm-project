@@ -63,80 +63,80 @@ class Record;
 
 class SetTheory {
 public:
-  using RecVec = std::vector<Record *>;
-  using RecSet = SmallSetVector<Record *, 16>;
+    using RecVec = std::vector<Record *>;
+    using RecSet = SmallSetVector<Record *, 16>;
 
-  /// Operator - A callback representing a DAG operator.
-  class Operator {
-    virtual void anchor();
+    /// Operator - A callback representing a DAG operator.
+    class Operator {
+        virtual void anchor();
 
-  public:
-    virtual ~Operator() = default;
+    public:
+        virtual ~Operator() = default;
 
-    /// apply - Apply this operator to Expr's arguments and insert the result
-    /// in Elts.
-    virtual void apply(SetTheory&, DagInit *Expr, RecSet &Elts,
-                       ArrayRef<SMLoc> Loc) = 0;
-  };
+        /// apply - Apply this operator to Expr's arguments and insert the result
+        /// in Elts.
+        virtual void apply(SetTheory&, DagInit *Expr, RecSet &Elts,
+                           ArrayRef<SMLoc> Loc) = 0;
+    };
 
-  /// Expander - A callback function that can transform a Record representing a
-  /// set into a fully expanded list of elements. Expanders provide a way for
-  /// users to define named sets that can be used in DAG expressions.
-  class Expander {
-    virtual void anchor();
+    /// Expander - A callback function that can transform a Record representing a
+    /// set into a fully expanded list of elements. Expanders provide a way for
+    /// users to define named sets that can be used in DAG expressions.
+    class Expander {
+        virtual void anchor();
 
-  public:
-    virtual ~Expander() = default;
+    public:
+        virtual ~Expander() = default;
 
-    virtual void expand(SetTheory&, Record*, RecSet &Elts) = 0;
-  };
+        virtual void expand(SetTheory&, Record*, RecSet &Elts) = 0;
+    };
 
 private:
-  // Map set defs to their fully expanded contents. This serves as a memoization
-  // cache and it makes it possible to return const references on queries.
-  using ExpandMap = std::map<Record *, RecVec>;
-  ExpandMap Expansions;
+    // Map set defs to their fully expanded contents. This serves as a memoization
+    // cache and it makes it possible to return const references on queries.
+    using ExpandMap = std::map<Record *, RecVec>;
+    ExpandMap Expansions;
 
-  // Known DAG operators by name.
-  StringMap<std::unique_ptr<Operator>> Operators;
+    // Known DAG operators by name.
+    StringMap<std::unique_ptr<Operator>> Operators;
 
-  // Typed expanders by class name.
-  StringMap<std::unique_ptr<Expander>> Expanders;
+    // Typed expanders by class name.
+    StringMap<std::unique_ptr<Expander>> Expanders;
 
 public:
-  /// Create a SetTheory instance with only the standard operators.
-  SetTheory();
+    /// Create a SetTheory instance with only the standard operators.
+    SetTheory();
 
-  /// addExpander - Add an expander for Records with the named super class.
-  void addExpander(StringRef ClassName, std::unique_ptr<Expander>);
+    /// addExpander - Add an expander for Records with the named super class.
+    void addExpander(StringRef ClassName, std::unique_ptr<Expander>);
 
-  /// addFieldExpander - Add an expander for ClassName that simply evaluates
-  /// FieldName in the Record to get the set elements.  That is all that is
-  /// needed for a class like:
-  ///
-  ///   class Set<dag d> {
-  ///     dag Elts = d;
-  ///   }
-  ///
-  void addFieldExpander(StringRef ClassName, StringRef FieldName);
+    /// addFieldExpander - Add an expander for ClassName that simply evaluates
+    /// FieldName in the Record to get the set elements.  That is all that is
+    /// needed for a class like:
+    ///
+    ///   class Set<dag d> {
+    ///     dag Elts = d;
+    ///   }
+    ///
+    void addFieldExpander(StringRef ClassName, StringRef FieldName);
 
-  /// addOperator - Add a DAG operator.
-  void addOperator(StringRef Name, std::unique_ptr<Operator>);
+    /// addOperator - Add a DAG operator.
+    void addOperator(StringRef Name, std::unique_ptr<Operator>);
 
-  /// evaluate - Evaluate Expr and append the resulting set to Elts.
-  void evaluate(Init *Expr, RecSet &Elts, ArrayRef<SMLoc> Loc);
+    /// evaluate - Evaluate Expr and append the resulting set to Elts.
+    void evaluate(Init *Expr, RecSet &Elts, ArrayRef<SMLoc> Loc);
 
-  /// evaluate - Evaluate a sequence of Inits and append to Elts.
-  template<typename Iter>
-  void evaluate(Iter begin, Iter end, RecSet &Elts, ArrayRef<SMLoc> Loc) {
-    while (begin != end)
-      evaluate(*begin++, Elts, Loc);
-  }
+    /// evaluate - Evaluate a sequence of Inits and append to Elts.
+    template<typename Iter>
+    void evaluate(Iter begin, Iter end, RecSet &Elts, ArrayRef<SMLoc> Loc) {
+        while (begin != end)
+            evaluate(*begin++, Elts, Loc);
+    }
 
-  /// expand - Expand a record into a set of elements if possible.  Return a
-  /// pointer to the expanded elements, or NULL if Set cannot be expanded
-  /// further.
-  const RecVec *expand(Record *Set);
+    /// expand - Expand a record into a set of elements if possible.  Return a
+    /// pointer to the expanded elements, or NULL if Set cannot be expanded
+    /// further.
+    const RecVec *expand(Record *Set);
 };
 
 } // end namespace llvm

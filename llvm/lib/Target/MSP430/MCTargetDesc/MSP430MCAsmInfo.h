@@ -19,10 +19,10 @@ namespace llvm {
 class Triple;
 
 class MSP430MCAsmInfo : public MCAsmInfoELF {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit MSP430MCAsmInfo(const Triple &TT, const MCTargetOptions &Options);
+    explicit MSP430MCAsmInfo(const Triple &TT, const MCTargetOptions &Options);
 };
 
 } // namespace llvm

@@ -20,18 +20,18 @@
 #include <vector>
 
 namespace llvm {
-  class CodeGenInstruction;
-  class Record;
+class CodeGenInstruction;
+class Record;
 
-  struct AsmWriterOperand {
+struct AsmWriterOperand {
     enum OpType {
-      // Output this text surrounded by quotes to the asm.
-      isLiteralTextOperand,
-      // This is the name of a routine to call to print the operand.
-      isMachineInstrOperand,
-      // Output this text verbatim to the asm writer.  It is code that
-      // will output some text to the asm.
-      isLiteralStatementOperand
+        // Output this text surrounded by quotes to the asm.
+        isLiteralTextOperand,
+        // This is the name of a routine to call to print the operand.
+        isMachineInstrOperand,
+        // Output this text verbatim to the asm writer.  It is code that
+        // will output some text to the asm.
+        isLiteralStatementOperand
     } OperandType;
 
     /// MiOpNo - For isMachineInstrOperand, this is the operand number of the
@@ -55,7 +55,7 @@ namespace llvm {
 
     AsmWriterOperand(const std::string &LitStr,
                      OpType op = isLiteralTextOperand)
-    : OperandType(op), Str(LitStr) {}
+        : OperandType(op), Str(LitStr) {}
 
     AsmWriterOperand(const std::string &Printer, unsigned _MIOpNo,
                      const std::string &Modifier,
@@ -64,21 +64,21 @@ namespace llvm {
           PCRel(PCRel) {}
 
     bool operator!=(const AsmWriterOperand &Other) const {
-      if (OperandType != Other.OperandType || Str != Other.Str) return true;
-      if (OperandType == isMachineInstrOperand)
-        return MIOpNo != Other.MIOpNo || MiModifier != Other.MiModifier;
-      return false;
+        if (OperandType != Other.OperandType || Str != Other.Str) return true;
+        if (OperandType == isMachineInstrOperand)
+            return MIOpNo != Other.MIOpNo || MiModifier != Other.MiModifier;
+        return false;
     }
     bool operator==(const AsmWriterOperand &Other) const {
-      return !operator!=(Other);
+        return !operator!=(Other);
     }
 
     /// getCode - Return the code that prints this operand.
     std::string getCode(bool PassSubtarget) const;
-  };
+};
 
-  class AsmWriterInst {
-  public:
+class AsmWriterInst {
+public:
     std::vector<AsmWriterOperand> Operands;
     const CodeGenInstruction *CGI;
     unsigned CGIIndex;
@@ -91,17 +91,17 @@ namespace llvm {
     /// differing operand number.  Otherwise return ~0.
     unsigned MatchesAllButOneOp(const AsmWriterInst &Other) const;
 
-  private:
+private:
     void AddLiteralString(const std::string &Str) {
-      // If the last operand was already a literal text string, append this to
-      // it, otherwise add a new operand.
-      if (!Operands.empty() &&
-          Operands.back().OperandType == AsmWriterOperand::isLiteralTextOperand)
-        Operands.back().Str.append(Str);
-      else
-        Operands.push_back(AsmWriterOperand(Str));
+        // If the last operand was already a literal text string, append this to
+        // it, otherwise add a new operand.
+        if (!Operands.empty() &&
+                Operands.back().OperandType == AsmWriterOperand::isLiteralTextOperand)
+            Operands.back().Str.append(Str);
+        else
+            Operands.push_back(AsmWriterOperand(Str));
     }
-  };
+};
 }
 
 #endif

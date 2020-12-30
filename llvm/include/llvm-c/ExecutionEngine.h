@@ -41,18 +41,18 @@ typedef struct LLVMOpaqueExecutionEngine *LLVMExecutionEngineRef;
 typedef struct LLVMOpaqueMCJITMemoryManager *LLVMMCJITMemoryManagerRef;
 
 struct LLVMMCJITCompilerOptions {
-  unsigned OptLevel;
-  LLVMCodeModel CodeModel;
-  LLVMBool NoFramePointerElim;
-  LLVMBool EnableFastISel;
-  LLVMMCJITMemoryManagerRef MCJMM;
+    unsigned OptLevel;
+    LLVMCodeModel CodeModel;
+    LLVMBool NoFramePointerElim;
+    LLVMBool EnableFastISel;
+    LLVMMCJITMemoryManagerRef MCJMM;
 };
 
 /*===-- Operations on generic values --------------------------------------===*/
 
 LLVMGenericValueRef LLVMCreateGenericValueOfInt(LLVMTypeRef Ty,
-                                                unsigned long long N,
-                                                LLVMBool IsSigned);
+        unsigned long long N,
+        LLVMBool IsSigned);
 
 LLVMGenericValueRef LLVMCreateGenericValueOfPointer(void *P);
 
@@ -61,7 +61,7 @@ LLVMGenericValueRef LLVMCreateGenericValueOfFloat(LLVMTypeRef Ty, double N);
 unsigned LLVMGenericValueIntWidth(LLVMGenericValueRef GenValRef);
 
 unsigned long long LLVMGenericValueToInt(LLVMGenericValueRef GenVal,
-                                         LLVMBool IsSigned);
+        LLVMBool IsSigned);
 
 void *LLVMGenericValueToPointer(LLVMGenericValueRef GenVal);
 
@@ -72,8 +72,8 @@ void LLVMDisposeGenericValue(LLVMGenericValueRef GenVal);
 /*===-- Operations on execution engines -----------------------------------===*/
 
 LLVMBool LLVMCreateExecutionEngineForModule(LLVMExecutionEngineRef *OutEE,
-                                            LLVMModuleRef M,
-                                            char **OutError);
+        LLVMModuleRef M,
+        char **OutError);
 
 LLVMBool LLVMCreateInterpreterForModule(LLVMExecutionEngineRef *OutInterp,
                                         LLVMModuleRef M,
@@ -85,7 +85,7 @@ LLVMBool LLVMCreateJITCompilerForModule(LLVMExecutionEngineRef *OutJIT,
                                         char **OutError);
 
 void LLVMInitializeMCJITCompilerOptions(
-  struct LLVMMCJITCompilerOptions *Options, size_t SizeOfOptions);
+    struct LLVMMCJITCompilerOptions *Options, size_t SizeOfOptions);
 
 /**
  * Create an MCJIT execution engine for a module, with the given options. It is
@@ -105,9 +105,9 @@ void LLVMInitializeMCJITCompilerOptions(
  * LLVMCreateMCJITCompilerForModule(&jit, mod, 0, 0, &error);
  */
 LLVMBool LLVMCreateMCJITCompilerForModule(
-  LLVMExecutionEngineRef *OutJIT, LLVMModuleRef M,
-  struct LLVMMCJITCompilerOptions *Options, size_t SizeOfOptions,
-  char **OutError);
+    LLVMExecutionEngineRef *OutJIT, LLVMModuleRef M,
+    struct LLVMMCJITCompilerOptions *Options, size_t SizeOfOptions,
+    char **OutError);
 
 void LLVMDisposeExecutionEngine(LLVMExecutionEngineRef EE);
 
@@ -157,13 +157,13 @@ LLVMBool LLVMExecutionEngineGetErrMsg(LLVMExecutionEngineRef EE,
 /*===-- Operations on memory managers -------------------------------------===*/
 
 typedef uint8_t *(*LLVMMemoryManagerAllocateCodeSectionCallback)(
-  void *Opaque, uintptr_t Size, unsigned Alignment, unsigned SectionID,
-  const char *SectionName);
+    void *Opaque, uintptr_t Size, unsigned Alignment, unsigned SectionID,
+    const char *SectionName);
 typedef uint8_t *(*LLVMMemoryManagerAllocateDataSectionCallback)(
-  void *Opaque, uintptr_t Size, unsigned Alignment, unsigned SectionID,
-  const char *SectionName, LLVMBool IsReadOnly);
+    void *Opaque, uintptr_t Size, unsigned Alignment, unsigned SectionID,
+    const char *SectionName, LLVMBool IsReadOnly);
 typedef LLVMBool (*LLVMMemoryManagerFinalizeMemoryCallback)(
-  void *Opaque, char **ErrMsg);
+    void *Opaque, char **ErrMsg);
 typedef void (*LLVMMemoryManagerDestroyCallback)(void *Opaque);
 
 /**
@@ -178,11 +178,11 @@ typedef void (*LLVMMemoryManagerDestroyCallback)(void *Opaque);
  *   success, 1 on error.
  */
 LLVMMCJITMemoryManagerRef LLVMCreateSimpleMCJITMemoryManager(
-  void *Opaque,
-  LLVMMemoryManagerAllocateCodeSectionCallback AllocateCodeSection,
-  LLVMMemoryManagerAllocateDataSectionCallback AllocateDataSection,
-  LLVMMemoryManagerFinalizeMemoryCallback FinalizeMemory,
-  LLVMMemoryManagerDestroyCallback Destroy);
+    void *Opaque,
+    LLVMMemoryManagerAllocateCodeSectionCallback AllocateCodeSection,
+    LLVMMemoryManagerAllocateDataSectionCallback AllocateDataSection,
+    LLVMMemoryManagerFinalizeMemoryCallback FinalizeMemory,
+    LLVMMemoryManagerDestroyCallback Destroy);
 
 void LLVMDisposeMCJITMemoryManager(LLVMMCJITMemoryManagerRef MM);
 

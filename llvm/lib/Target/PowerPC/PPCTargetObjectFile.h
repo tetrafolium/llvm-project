@@ -15,9 +15,9 @@
 
 namespace llvm {
 
-  /// PPC64LinuxTargetObjectFile - This implementation is used for
-  /// 64-bit PowerPC Linux.
-  class PPC64LinuxTargetObjectFile : public TargetLoweringObjectFileELF {
+/// PPC64LinuxTargetObjectFile - This implementation is used for
+/// 64-bit PowerPC Linux.
+class PPC64LinuxTargetObjectFile : public TargetLoweringObjectFileELF {
 
     void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
@@ -26,7 +26,7 @@ namespace llvm {
 
     /// Describe a TLS variable address within debug info.
     const MCExpr *getDebugThreadLocalSymbol(const MCSymbol *Sym) const override;
-  };
+};
 
 }  // end namespace llvm
 

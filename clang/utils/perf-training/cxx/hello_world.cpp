@@ -3,6 +3,6 @@
 #include <iostream>
 
 int main(int, char**) {
-  std::cout << "Hello, World!";
-  return 0;
+    std::cout << "Hello, World!";
+    return 0;
 }

@@ -29,12 +29,12 @@ using namespace llvm;
 
 void sys::MemoryFence() {
 #if LLVM_HAS_ATOMICS == 0
-  return;
+    return;
 #else
 #  if defined(GNU_ATOMICS)
-  __sync_synchronize();
+    __sync_synchronize();
 #  elif defined(_MSC_VER)
-  MemoryBarrier();
+    MemoryBarrier();
 #  else
 # error No memory fence implementation for your platform!
 #  endif
@@ -45,14 +45,14 @@ sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
                                   sys::cas_flag new_value,
                                   sys::cas_flag old_value) {
 #if LLVM_HAS_ATOMICS == 0
-  sys::cas_flag result = *ptr;
-  if (result == old_value)
-    *ptr = new_value;
-  return result;
+    sys::cas_flag result = *ptr;
+    if (result == old_value)
+        *ptr = new_value;
+    return result;
 #elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
+    return __sync_val_compare_and_swap(ptr, old_value, new_value);
 #elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
+    return InterlockedCompareExchange(ptr, new_value, old_value);
 #else
 #  error No compare-and-swap implementation for your platform!
 #endif

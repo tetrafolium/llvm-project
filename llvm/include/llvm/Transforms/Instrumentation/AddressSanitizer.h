@@ -22,53 +22,55 @@ namespace llvm {
 
 /// Frontend-provided metadata for source location.
 struct LocationMetadata {
-  StringRef Filename;
-  int LineNo = 0;
-  int ColumnNo = 0;
+    StringRef Filename;
+    int LineNo = 0;
+    int ColumnNo = 0;
 
-  LocationMetadata() = default;
+    LocationMetadata() = default;
 
-  bool empty() const { return Filename.empty(); }
-  void parse(MDNode *MDN);
+    bool empty() const {
+        return Filename.empty();
+    }
+    void parse(MDNode *MDN);
 };
 
 /// Frontend-provided metadata for global variables.
 class GlobalsMetadata {
 public:
-  struct Entry {
-    LocationMetadata SourceLoc;
-    StringRef Name;
-    bool IsDynInit = false;
-    bool IsExcluded = false;
+    struct Entry {
+        LocationMetadata SourceLoc;
+        StringRef Name;
+        bool IsDynInit = false;
+        bool IsExcluded = false;
 
-    Entry() = default;
-  };
+        Entry() = default;
+    };
 
-  /// Create a default uninitialized GlobalsMetadata instance.
-  GlobalsMetadata() = default;
+    /// Create a default uninitialized GlobalsMetadata instance.
+    GlobalsMetadata() = default;
 
-  /// Create an initialized GlobalsMetadata instance.
-  GlobalsMetadata(Module &M);
+    /// Create an initialized GlobalsMetadata instance.
+    GlobalsMetadata(Module &M);
 
-  /// Returns metadata entry for a given global.
-  Entry get(GlobalVariable *G) const {
-    auto Pos = Entries.find(G);
-    return (Pos != Entries.end()) ? Pos->second : Entry();
-  }
+    /// Returns metadata entry for a given global.
+    Entry get(GlobalVariable *G) const {
+        auto Pos = Entries.find(G);
+        return (Pos != Entries.end()) ? Pos->second : Entry();
+    }
 
-  /// Handle invalidation from the pass manager.
-  /// These results are never invalidated.
-  bool invalidate(Module &, const PreservedAnalyses &,
-                  ModuleAnalysisManager::Invalidator &) {
-    return false;
-  }
-  bool invalidate(Function &, const PreservedAnalyses &,
-                  FunctionAnalysisManager::Invalidator &) {
-    return false;
-  }
+    /// Handle invalidation from the pass manager.
+    /// These results are never invalidated.
+    bool invalidate(Module &, const PreservedAnalyses &,
+                    ModuleAnalysisManager::Invalidator &) {
+        return false;
+    }
+    bool invalidate(Function &, const PreservedAnalyses &,
+                    FunctionAnalysisManager::Invalidator &) {
+        return false;
+    }
 
 private:
-  DenseMap<GlobalVariable *, Entry> Entries;
+    DenseMap<GlobalVariable *, Entry> Entries;
 };
 
 /// The ASanGlobalsMetadataAnalysis initializes and returns a GlobalsMetadata
@@ -80,13 +82,13 @@ private:
 class ASanGlobalsMetadataAnalysis
     : public AnalysisInfoMixin<ASanGlobalsMetadataAnalysis> {
 public:
-  using Result = GlobalsMetadata;
+    using Result = GlobalsMetadata;
 
-  Result run(Module &, ModuleAnalysisManager &);
+    Result run(Module &, ModuleAnalysisManager &);
 
 private:
-  friend AnalysisInfoMixin<ASanGlobalsMetadataAnalysis>;
-  static AnalysisKey Key;
+    friend AnalysisInfoMixin<ASanGlobalsMetadataAnalysis>;
+    static AnalysisKey Key;
 };
 
 /// Public interface to the address sanitizer pass for instrumenting code to
@@ -98,16 +100,18 @@ private:
 /// surrounding requested memory to be checked for invalid accesses.
 class AddressSanitizerPass : public PassInfoMixin<AddressSanitizerPass> {
 public:
-  explicit AddressSanitizerPass(bool CompileKernel = false,
-                                bool Recover = false,
-                                bool UseAfterScope = false);
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    explicit AddressSanitizerPass(bool CompileKernel = false,
+                                  bool Recover = false,
+                                  bool UseAfterScope = false);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 
 private:
-  bool CompileKernel;
-  bool Recover;
-  bool UseAfterScope;
+    bool CompileKernel;
+    bool Recover;
+    bool UseAfterScope;
 };
 
 /// Public interface to the address sanitizer module pass for instrumenting code
@@ -118,24 +122,26 @@ private:
 class ModuleAddressSanitizerPass
     : public PassInfoMixin<ModuleAddressSanitizerPass> {
 public:
-  explicit ModuleAddressSanitizerPass(bool CompileKernel = false,
-                                      bool Recover = false,
-                                      bool UseGlobalGC = true,
-                                      bool UseOdrIndicator = false);
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
-  static bool isRequired() { return true; }
+    explicit ModuleAddressSanitizerPass(bool CompileKernel = false,
+                                        bool Recover = false,
+                                        bool UseGlobalGC = true,
+                                        bool UseOdrIndicator = false);
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    static bool isRequired() {
+        return true;
+    }
 
 private:
-  bool CompileKernel;
-  bool Recover;
-  bool UseGlobalGC;
-  bool UseOdrIndicator;
+    bool CompileKernel;
+    bool Recover;
+    bool UseGlobalGC;
+    bool UseOdrIndicator;
 };
 
 // Insert AddressSanitizer (address sanity checking) instrumentation
 FunctionPass *createAddressSanitizerFunctionPass(bool CompileKernel = false,
-                                                 bool Recover = false,
-                                                 bool UseAfterScope = false);
+        bool Recover = false,
+        bool UseAfterScope = false);
 ModulePass *createModuleAddressSanitizerLegacyPassPass(
     bool CompileKernel = false, bool Recover = false, bool UseGlobalsGC = true,
     bool UseOdrIndicator = true);

@@ -18,17 +18,17 @@ using namespace clang::targets;
 
 void SPIRTargetInfo::getTargetDefines(const LangOptions &Opts,
                                       MacroBuilder &Builder) const {
-  DefineStd(Builder, "SPIR", Opts);
+    DefineStd(Builder, "SPIR", Opts);
 }
 
 void SPIR32TargetInfo::getTargetDefines(const LangOptions &Opts,
                                         MacroBuilder &Builder) const {
-  SPIRTargetInfo::getTargetDefines(Opts, Builder);
-  DefineStd(Builder, "SPIR32", Opts);
+    SPIRTargetInfo::getTargetDefines(Opts, Builder);
+    DefineStd(Builder, "SPIR32", Opts);
 }
 
 void SPIR64TargetInfo::getTargetDefines(const LangOptions &Opts,
                                         MacroBuilder &Builder) const {
-  SPIRTargetInfo::getTargetDefines(Opts, Builder);
-  DefineStd(Builder, "SPIR64", Opts);
+    SPIRTargetInfo::getTargetDefines(Opts, Builder);
+    DefineStd(Builder, "SPIR64", Opts);
 }

@@ -39,7 +39,7 @@ __rs_default::~__rs_default()
 {
 #ifndef _LIBCPP_HAS_NO_THREADS
     if (--__c_ == 0)
-       __libcpp_mutex_unlock(&__rs_mut);
+        __libcpp_mutex_unlock(&__rs_mut);
 #else
     --__c_;
 #endif

@@ -24,10 +24,10 @@ namespace llvm {
 /// HexagonII - This namespace holds all of the target specific flags that
 /// instruction info tracks.
 namespace HexagonII {
-  unsigned const TypeCVI_FIRST = TypeCVI_4SLOT_MPY;
-  unsigned const TypeCVI_LAST = TypeCVI_ZW;
+unsigned const TypeCVI_FIRST = TypeCVI_4SLOT_MPY;
+unsigned const TypeCVI_LAST = TypeCVI_ZW;
 
-  enum AddrMode {
+enum AddrMode {
     NoAddrMode     = 0,  // No addressing mode
     Absolute       = 1,  // Absolute addressing mode
     AbsoluteSet    = 2,  // Absolute set addressing mode
@@ -35,20 +35,20 @@ namespace HexagonII {
     BaseLongOffset = 4,  // Indirect with long offset
     BaseRegOffset  = 5,  // Indirect with register offset
     PostInc        = 6   // Post increment addressing mode
-  };
+};
 
-  enum MemAccessSize {
+enum MemAccessSize {
     NoMemAccess = 0,
     ByteAccess,
     HalfWordAccess,
     WordAccess,
     DoubleWordAccess,
     HVXVectorAccess
-  };
+};
 
-  // MCInstrDesc TSFlags
-  // *** Must match HexagonInstrFormat*.td ***
-  enum {
+// MCInstrDesc TSFlags
+// *** Must match HexagonInstrFormat*.td ***
+enum {
     // This 7-bit field describes the insn type.
     TypePos = 0,
     TypeMask = 0x7f,
@@ -163,12 +163,12 @@ namespace HexagonII {
 
     isCVIPos = 63,
     isCVIMask = 0x1,
-  };
+};
 
-  // *** The code above must match HexagonInstrFormat*.td *** //
+// *** The code above must match HexagonInstrFormat*.td *** //
 
-  // Hexagon specific MO operand flag mask.
-  enum HexagonMOTargetFlagVal {
+// Hexagon specific MO operand flag mask.
+enum HexagonMOTargetFlagVal {
     // Hexagon-specific MachineOperand target flags.
     //
     // When changing these, make sure to update
@@ -217,10 +217,10 @@ namespace HexagonII {
 
     // Union of all bitmasks (currently only HMOTF_ConstExtended).
     MO_Bitmasks = HMOTF_ConstExtended
-  };
+};
 
-  // Hexagon Sub-instruction classes.
-  enum SubInstructionGroup {
+// Hexagon Sub-instruction classes.
+enum SubInstructionGroup {
     HSIG_None = 0,
     HSIG_L1,
     HSIG_L2,
@@ -228,26 +228,26 @@ namespace HexagonII {
     HSIG_S2,
     HSIG_A,
     HSIG_Compound
-  };
+};
 
-  // Hexagon Compound classes.
-  enum CompoundGroup {
+// Hexagon Compound classes.
+enum CompoundGroup {
     HCG_None = 0,
     HCG_A,
     HCG_B,
     HCG_C
-  };
+};
 
-  enum InstParseBits {
+enum InstParseBits {
     INST_PARSE_MASK       = 0x0000c000,
     INST_PARSE_PACKET_END = 0x0000c000,
     INST_PARSE_LOOP_END   = 0x00008000,
     INST_PARSE_NOT_END    = 0x00004000,
     INST_PARSE_DUPLEX     = 0x00000000,
     INST_PARSE_EXTENDER   = 0x00000000
-  };
+};
 
-  enum InstIClassBits : unsigned {
+enum InstIClassBits : unsigned {
     INST_ICLASS_MASK      = 0xf0000000,
     INST_ICLASS_EXTENDER  = 0x00000000,
     INST_ICLASS_J_1       = 0x10000000,
@@ -265,18 +265,23 @@ namespace HexagonII {
     INST_ICLASS_XTYPE_3   = 0xd0000000,
     INST_ICLASS_XTYPE_4   = 0xe0000000,
     INST_ICLASS_ALU32_3   = 0xf0000000
-  };
+};
 
-  LLVM_ATTRIBUTE_UNUSED
-  static unsigned getMemAccessSizeInBytes(MemAccessSize S) {
+LLVM_ATTRIBUTE_UNUSED
+static unsigned getMemAccessSizeInBytes(MemAccessSize S) {
     switch (S) {
-      case ByteAccess:        return 1;
-      case HalfWordAccess:    return 2;
-      case WordAccess:        return 4;
-      case DoubleWordAccess:  return 8;
-      default:                return 0;
+    case ByteAccess:
+        return 1;
+    case HalfWordAccess:
+        return 2;
+    case WordAccess:
+        return 4;
+    case DoubleWordAccess:
+        return 8;
+    default:
+        return 0;
     }
-  }
+}
 } // end namespace HexagonII
 
 } // end namespace llvm

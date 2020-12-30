@@ -25,22 +25,22 @@ extern "C" int posix_memalign (void **, size_t, size_t) throw ();
 static __inline void *
 _mm_malloc (size_t size, size_t alignment)
 {
-  /* PowerPC64 ELF V2 ABI requires quadword alignment.  */
-  size_t vec_align = sizeof (__vector float);
-  void *ptr;
+    /* PowerPC64 ELF V2 ABI requires quadword alignment.  */
+    size_t vec_align = sizeof (__vector float);
+    void *ptr;
 
-  if (alignment < vec_align)
-    alignment = vec_align;
-  if (posix_memalign (&ptr, alignment, size) == 0)
-    return ptr;
-  else
-    return NULL;
+    if (alignment < vec_align)
+        alignment = vec_align;
+    if (posix_memalign (&ptr, alignment, size) == 0)
+        return ptr;
+    else
+        return NULL;
 }
 
 static __inline void
 _mm_free (void * ptr)
 {
-  free (ptr);
+    free (ptr);
 }
 
 #else

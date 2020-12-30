@@ -30,9 +30,9 @@ using namespace llvm;
 
 bool llvm::llvm_is_multithreaded() {
 #if LLVM_ENABLE_THREADS != 0
-  return true;
+    return true;
 #else
-  return false;
+    return false;
 #endif
 }
 
@@ -41,41 +41,49 @@ bool llvm::llvm_is_multithreaded() {
 // Support for non-Win32, non-pthread implementation.
 void llvm::llvm_execute_on_thread(void (*Fn)(void *), void *UserData,
                                   llvm::Optional<unsigned> StackSizeInBytes) {
-  (void)StackSizeInBytes;
-  Fn(UserData);
+    (void)StackSizeInBytes;
+    Fn(UserData);
 }
 
-uint64_t llvm::get_threadid() { return 0; }
+uint64_t llvm::get_threadid() {
+    return 0;
+}
 
-uint32_t llvm::get_max_thread_name_length() { return 0; }
+uint32_t llvm::get_max_thread_name_length() {
+    return 0;
+}
 
 void llvm::set_thread_name(const Twine &Name) {}
 
-void llvm::get_thread_name(SmallVectorImpl<char> &Name) { Name.clear(); }
+void llvm::get_thread_name(SmallVectorImpl<char> &Name) {
+    Name.clear();
+}
 
-llvm::BitVector llvm::get_thread_affinity_mask() { return {}; }
+llvm::BitVector llvm::get_thread_affinity_mask() {
+    return {};
+}
 
 unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
-  // When threads are disabled, ensure clients will loop at least once.
-  return 1;
+    // When threads are disabled, ensure clients will loop at least once.
+    return 1;
 }
 
 #if LLVM_ENABLE_THREADS == 0
 void llvm::llvm_execute_on_thread_async(
     llvm::unique_function<void()> Func,
     llvm::Optional<unsigned> StackSizeInBytes) {
-  (void)Func;
-  (void)StackSizeInBytes;
-  report_fatal_error("Spawning a detached thread doesn't make sense with no "
-                     "threading support");
+    (void)Func;
+    (void)StackSizeInBytes;
+    report_fatal_error("Spawning a detached thread doesn't make sense with no "
+                       "threading support");
 }
 #else
 // Support for non-Win32, non-pthread implementation.
 void llvm::llvm_execute_on_thread_async(
     llvm::unique_function<void()> Func,
     llvm::Optional<unsigned> StackSizeInBytes) {
-  (void)StackSizeInBytes;
-  std::thread(std::move(Func)).detach();
+    (void)StackSizeInBytes;
+    std::thread(std::move(Func)).detach();
 }
 #endif
 
@@ -84,21 +92,21 @@ void llvm::llvm_execute_on_thread_async(
 int computeHostNumHardwareThreads();
 
 unsigned llvm::ThreadPoolStrategy::compute_thread_count() const {
-  int MaxThreadCount = UseHyperThreads ? computeHostNumHardwareThreads()
-                                       : sys::getHostNumPhysicalCores();
-  if (MaxThreadCount <= 0)
-    MaxThreadCount = 1;
-  if (ThreadsRequested == 0)
-    return MaxThreadCount;
-  if (!Limit)
-    return ThreadsRequested;
-  return std::min((unsigned)MaxThreadCount, ThreadsRequested);
+    int MaxThreadCount = UseHyperThreads ? computeHostNumHardwareThreads()
+                         : sys::getHostNumPhysicalCores();
+    if (MaxThreadCount <= 0)
+        MaxThreadCount = 1;
+    if (ThreadsRequested == 0)
+        return MaxThreadCount;
+    if (!Limit)
+        return ThreadsRequested;
+    return std::min((unsigned)MaxThreadCount, ThreadsRequested);
 }
 
 namespace {
 struct SyncThreadInfo {
-  void (*UserFn)(void *);
-  void *UserData;
+    void (*UserFn)(void *);
+    void *UserData;
 };
 
 using AsyncThreadInfo = llvm::unique_function<void()>;
@@ -117,37 +125,37 @@ enum class JoiningPolicy { Join, Detach };
 void llvm::llvm_execute_on_thread(void (*Fn)(void *), void *UserData,
                                   llvm::Optional<unsigned> StackSizeInBytes) {
 
-  SyncThreadInfo Info = {Fn, UserData};
-  llvm_execute_on_thread_impl(threadFuncSync, &Info, StackSizeInBytes,
-                              JoiningPolicy::Join);
+    SyncThreadInfo Info = {Fn, UserData};
+    llvm_execute_on_thread_impl(threadFuncSync, &Info, StackSizeInBytes,
+                                JoiningPolicy::Join);
 }
 
 void llvm::llvm_execute_on_thread_async(
     llvm::unique_function<void()> Func,
     llvm::Optional<unsigned> StackSizeInBytes) {
-  llvm_execute_on_thread_impl(&threadFuncAsync,
-                              new AsyncThreadInfo(std::move(Func)),
-                              StackSizeInBytes, JoiningPolicy::Detach);
+    llvm_execute_on_thread_impl(&threadFuncAsync,
+                                new AsyncThreadInfo(std::move(Func)),
+                                StackSizeInBytes, JoiningPolicy::Detach);
 }
 
 #endif
 
 Optional<ThreadPoolStrategy>
 llvm::get_threadpool_strategy(StringRef Num, ThreadPoolStrategy Default) {
-  if (Num == "all")
-    return llvm::hardware_concurrency();
-  if (Num.empty())
-    return Default;
-  unsigned V;
-  if (Num.getAsInteger(10, V))
-    return None; // malformed 'Num' value
-  if (V == 0)
-    return Default;
+    if (Num == "all")
+        return llvm::hardware_concurrency();
+    if (Num.empty())
+        return Default;
+    unsigned V;
+    if (Num.getAsInteger(10, V))
+        return None; // malformed 'Num' value
+    if (V == 0)
+        return Default;
 
-  // Do not take the Default into account. This effectively disables
-  // heavyweight_hardware_concurrency() if the user asks for any number of
-  // threads on the cmd-line.
-  ThreadPoolStrategy S = llvm::hardware_concurrency();
-  S.ThreadsRequested = V;
-  return S;
+    // Do not take the Default into account. This effectively disables
+    // heavyweight_hardware_concurrency() if the user asks for any number of
+    // threads on the cmd-line.
+    ThreadPoolStrategy S = llvm::hardware_concurrency();
+    S.ThreadsRequested = V;
+    return S;
 }

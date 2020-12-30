@@ -23,19 +23,21 @@ NativeEnumSymbols::NativeEnumSymbols(NativeSession &PDBSession,
     : Symbols(std::move(Symbols)), Index(0), Session(PDBSession) {}
 
 uint32_t NativeEnumSymbols::getChildCount() const {
-  return static_cast<uint32_t>(Symbols.size());
+    return static_cast<uint32_t>(Symbols.size());
 }
 
 std::unique_ptr<PDBSymbol>
 NativeEnumSymbols::getChildAtIndex(uint32_t N) const {
-  if (N < Symbols.size()) {
-    return Session.getSymbolCache().getSymbolById(Symbols[N]);
-  }
-  return nullptr;
+    if (N < Symbols.size()) {
+        return Session.getSymbolCache().getSymbolById(Symbols[N]);
+    }
+    return nullptr;
 }
 
 std::unique_ptr<PDBSymbol> NativeEnumSymbols::getNext() {
-  return getChildAtIndex(Index++);
+    return getChildAtIndex(Index++);
 }
 
-void NativeEnumSymbols::reset() { Index = 0; }
+void NativeEnumSymbols::reset() {
+    Index = 0;
+}

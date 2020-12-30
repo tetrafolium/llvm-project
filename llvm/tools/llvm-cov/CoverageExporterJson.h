@@ -19,15 +19,15 @@ namespace llvm {
 
 class CoverageExporterJson : public CoverageExporter {
 public:
-  CoverageExporterJson(const coverage::CoverageMapping &CoverageMapping,
-                       const CoverageViewOptions &Options, raw_ostream &OS)
-      : CoverageExporter(CoverageMapping, Options, OS) {}
+    CoverageExporterJson(const coverage::CoverageMapping &CoverageMapping,
+                         const CoverageViewOptions &Options, raw_ostream &OS)
+        : CoverageExporter(CoverageMapping, Options, OS) {}
 
-  /// Render the CoverageMapping object.
-  void renderRoot(const CoverageFilters &IgnoreFilters) override;
+    /// Render the CoverageMapping object.
+    void renderRoot(const CoverageFilters &IgnoreFilters) override;
 
-  /// Render the CoverageMapping object for specified source files.
-  void renderRoot(ArrayRef<std::string> SourceFiles) override;
+    /// Render the CoverageMapping object for specified source files.
+    void renderRoot(ArrayRef<std::string> SourceFiles) override;
 };
 
 } // end namespace llvm

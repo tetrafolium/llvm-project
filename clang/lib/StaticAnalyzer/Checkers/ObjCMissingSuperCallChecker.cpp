@@ -30,8 +30,8 @@ using namespace ento;
 
 namespace {
 struct SelectorDescriptor {
-  const char *SelectorName;
-  unsigned ArgumentCount;
+    const char *SelectorName;
+    unsigned ArgumentCount;
 };
 
 //===----------------------------------------------------------------------===//
@@ -40,21 +40,21 @@ struct SelectorDescriptor {
 
 class FindSuperCallVisitor : public RecursiveASTVisitor<FindSuperCallVisitor> {
 public:
-  explicit FindSuperCallVisitor(Selector S) : DoesCallSuper(false), Sel(S) {}
+    explicit FindSuperCallVisitor(Selector S) : DoesCallSuper(false), Sel(S) {}
 
-  bool VisitObjCMessageExpr(ObjCMessageExpr *E) {
-    if (E->getSelector() == Sel)
-      if (E->getReceiverKind() == ObjCMessageExpr::SuperInstance)
-        DoesCallSuper = true;
+    bool VisitObjCMessageExpr(ObjCMessageExpr *E) {
+        if (E->getSelector() == Sel)
+            if (E->getReceiverKind() == ObjCMessageExpr::SuperInstance)
+                DoesCallSuper = true;
 
-    // Recurse if we didn't find the super call yet.
-    return !DoesCallSuper;
-  }
+        // Recurse if we didn't find the super call yet.
+        return !DoesCallSuper;
+    }
 
-  bool DoesCallSuper;
+    bool DoesCallSuper;
 
 private:
-  Selector Sel;
+    Selector Sel;
 };
 
 //===----------------------------------------------------------------------===//
@@ -62,20 +62,20 @@ private:
 //===----------------------------------------------------------------------===//
 
 class ObjCSuperCallChecker : public Checker<
-                                      check::ASTDecl<ObjCImplementationDecl> > {
+    check::ASTDecl<ObjCImplementationDecl> > {
 public:
-  ObjCSuperCallChecker() : IsInitialized(false) {}
+    ObjCSuperCallChecker() : IsInitialized(false) {}
 
-  void checkASTDecl(const ObjCImplementationDecl *D, AnalysisManager &Mgr,
-                    BugReporter &BR) const;
+    void checkASTDecl(const ObjCImplementationDecl *D, AnalysisManager &Mgr,
+                      BugReporter &BR) const;
 private:
-  bool isCheckableClass(const ObjCImplementationDecl *D,
-                        StringRef &SuperclassName) const;
-  void initializeSelectors(ASTContext &Ctx) const;
-  void fillSelectors(ASTContext &Ctx, ArrayRef<SelectorDescriptor> Sel,
-                     StringRef ClassName) const;
-  mutable llvm::StringMap<llvm::SmallPtrSet<Selector, 16>> SelectorsForClass;
-  mutable bool IsInitialized;
+    bool isCheckableClass(const ObjCImplementationDecl *D,
+                          StringRef &SuperclassName) const;
+    void initializeSelectors(ASTContext &Ctx) const;
+    void fillSelectors(ASTContext &Ctx, ArrayRef<SelectorDescriptor> Sel,
+                       StringRef ClassName) const;
+    mutable llvm::StringMap<llvm::SmallPtrSet<Selector, 16>> SelectorsForClass;
+    mutable bool IsInitialized;
 };
 
 }
@@ -86,131 +86,135 @@ private:
 /// \param D The declaration to check for superclasses.
 /// \param[out] SuperclassName On return, the found superclass name.
 bool ObjCSuperCallChecker::isCheckableClass(const ObjCImplementationDecl *D,
-                                            StringRef &SuperclassName) const {
-  const ObjCInterfaceDecl *ID = D->getClassInterface()->getSuperClass();
-  for ( ; ID ; ID = ID->getSuperClass())
-  {
-    SuperclassName = ID->getIdentifier()->getName();
-    if (SelectorsForClass.count(SuperclassName))
-      return true;
-  }
-  return false;
+        StringRef &SuperclassName) const {
+    const ObjCInterfaceDecl *ID = D->getClassInterface()->getSuperClass();
+    for ( ; ID ; ID = ID->getSuperClass())
+    {
+        SuperclassName = ID->getIdentifier()->getName();
+        if (SelectorsForClass.count(SuperclassName))
+            return true;
+    }
+    return false;
 }
 
 void ObjCSuperCallChecker::fillSelectors(ASTContext &Ctx,
-                                         ArrayRef<SelectorDescriptor> Sel,
-                                         StringRef ClassName) const {
-  llvm::SmallPtrSet<Selector, 16> &ClassSelectors =
-      SelectorsForClass[ClassName];
-  // Fill the Selectors SmallSet with all selectors we want to check.
-  for (ArrayRef<SelectorDescriptor>::iterator I = Sel.begin(), E = Sel.end();
-       I != E; ++I) {
-    SelectorDescriptor Descriptor = *I;
-    assert(Descriptor.ArgumentCount <= 1); // No multi-argument selectors yet.
+        ArrayRef<SelectorDescriptor> Sel,
+        StringRef ClassName) const {
+    llvm::SmallPtrSet<Selector, 16> &ClassSelectors =
+        SelectorsForClass[ClassName];
+    // Fill the Selectors SmallSet with all selectors we want to check.
+    for (ArrayRef<SelectorDescriptor>::iterator I = Sel.begin(), E = Sel.end();
+            I != E; ++I) {
+        SelectorDescriptor Descriptor = *I;
+        assert(Descriptor.ArgumentCount <= 1); // No multi-argument selectors yet.
 
-    // Get the selector.
-    IdentifierInfo *II = &Ctx.Idents.get(Descriptor.SelectorName);
+        // Get the selector.
+        IdentifierInfo *II = &Ctx.Idents.get(Descriptor.SelectorName);
 
-    Selector Sel = Ctx.Selectors.getSelector(Descriptor.ArgumentCount, &II);
-    ClassSelectors.insert(Sel);
-  }
+        Selector Sel = Ctx.Selectors.getSelector(Descriptor.ArgumentCount, &II);
+        ClassSelectors.insert(Sel);
+    }
 }
 
 void ObjCSuperCallChecker::initializeSelectors(ASTContext &Ctx) const {
 
-  { // Initialize selectors for: UIViewController
-    const SelectorDescriptor Selectors[] = {
-      { "addChildViewController", 1 },
-      { "viewDidAppear", 1 },
-      { "viewDidDisappear", 1 },
-      { "viewWillAppear", 1 },
-      { "viewWillDisappear", 1 },
-      { "removeFromParentViewController", 0 },
-      { "didReceiveMemoryWarning", 0 },
-      { "viewDidUnload", 0 },
-      { "viewDidLoad", 0 },
-      { "viewWillUnload", 0 },
-      { "updateViewConstraints", 0 },
-      { "encodeRestorableStateWithCoder", 1 },
-      { "restoreStateWithCoder", 1 }};
+    {   // Initialize selectors for: UIViewController
+        const SelectorDescriptor Selectors[] = {
+            { "addChildViewController", 1 },
+            { "viewDidAppear", 1 },
+            { "viewDidDisappear", 1 },
+            { "viewWillAppear", 1 },
+            { "viewWillDisappear", 1 },
+            { "removeFromParentViewController", 0 },
+            { "didReceiveMemoryWarning", 0 },
+            { "viewDidUnload", 0 },
+            { "viewDidLoad", 0 },
+            { "viewWillUnload", 0 },
+            { "updateViewConstraints", 0 },
+            { "encodeRestorableStateWithCoder", 1 },
+            { "restoreStateWithCoder", 1 }
+        };
 
-    fillSelectors(Ctx, Selectors, "UIViewController");
-  }
+        fillSelectors(Ctx, Selectors, "UIViewController");
+    }
 
-  { // Initialize selectors for: UIResponder
-    const SelectorDescriptor Selectors[] = {
-      { "resignFirstResponder", 0 }};
+    {   // Initialize selectors for: UIResponder
+        const SelectorDescriptor Selectors[] = {
+            { "resignFirstResponder", 0 }
+        };
 
-    fillSelectors(Ctx, Selectors, "UIResponder");
-  }
+        fillSelectors(Ctx, Selectors, "UIResponder");
+    }
 
-  { // Initialize selectors for: NSResponder
-    const SelectorDescriptor Selectors[] = {
-      { "encodeRestorableStateWithCoder", 1 },
-      { "restoreStateWithCoder", 1 }};
+    {   // Initialize selectors for: NSResponder
+        const SelectorDescriptor Selectors[] = {
+            { "encodeRestorableStateWithCoder", 1 },
+            { "restoreStateWithCoder", 1 }
+        };
 
-    fillSelectors(Ctx, Selectors, "NSResponder");
-  }
+        fillSelectors(Ctx, Selectors, "NSResponder");
+    }
 
-  { // Initialize selectors for: NSDocument
-    const SelectorDescriptor Selectors[] = {
-      { "encodeRestorableStateWithCoder", 1 },
-      { "restoreStateWithCoder", 1 }};
+    {   // Initialize selectors for: NSDocument
+        const SelectorDescriptor Selectors[] = {
+            { "encodeRestorableStateWithCoder", 1 },
+            { "restoreStateWithCoder", 1 }
+        };
 
-    fillSelectors(Ctx, Selectors, "NSDocument");
-  }
+        fillSelectors(Ctx, Selectors, "NSDocument");
+    }
 
-  IsInitialized = true;
+    IsInitialized = true;
 }
 
 void ObjCSuperCallChecker::checkASTDecl(const ObjCImplementationDecl *D,
                                         AnalysisManager &Mgr,
                                         BugReporter &BR) const {
-  ASTContext &Ctx = BR.getContext();
+    ASTContext &Ctx = BR.getContext();
 
-  // We need to initialize the selector table once.
-  if (!IsInitialized)
-    initializeSelectors(Ctx);
+    // We need to initialize the selector table once.
+    if (!IsInitialized)
+        initializeSelectors(Ctx);
 
-  // Find out whether this class has a superclass that we are supposed to check.
-  StringRef SuperclassName;
-  if (!isCheckableClass(D, SuperclassName))
-    return;
+    // Find out whether this class has a superclass that we are supposed to check.
+    StringRef SuperclassName;
+    if (!isCheckableClass(D, SuperclassName))
+        return;
 
 
-  // Iterate over all instance methods.
-  for (auto *MD : D->instance_methods()) {
-    Selector S = MD->getSelector();
-    // Find out whether this is a selector that we want to check.
-    if (!SelectorsForClass[SuperclassName].count(S))
-      continue;
+    // Iterate over all instance methods.
+    for (auto *MD : D->instance_methods()) {
+        Selector S = MD->getSelector();
+        // Find out whether this is a selector that we want to check.
+        if (!SelectorsForClass[SuperclassName].count(S))
+            continue;
 
-    // Check if the method calls its superclass implementation.
-    if (MD->getBody())
-    {
-      FindSuperCallVisitor Visitor(S);
-      Visitor.TraverseDecl(MD);
+        // Check if the method calls its superclass implementation.
+        if (MD->getBody())
+        {
+            FindSuperCallVisitor Visitor(S);
+            Visitor.TraverseDecl(MD);
 
-      // It doesn't call super, emit a diagnostic.
-      if (!Visitor.DoesCallSuper) {
-        PathDiagnosticLocation DLoc =
-          PathDiagnosticLocation::createEnd(MD->getBody(),
-                                            BR.getSourceManager(),
-                                            Mgr.getAnalysisDeclContext(D));
+            // It doesn't call super, emit a diagnostic.
+            if (!Visitor.DoesCallSuper) {
+                PathDiagnosticLocation DLoc =
+                    PathDiagnosticLocation::createEnd(MD->getBody(),
+                                                      BR.getSourceManager(),
+                                                      Mgr.getAnalysisDeclContext(D));
 
-        const char *Name = "Missing call to superclass";
-        SmallString<320> Buf;
-        llvm::raw_svector_ostream os(Buf);
+                const char *Name = "Missing call to superclass";
+                SmallString<320> Buf;
+                llvm::raw_svector_ostream os(Buf);
 
-        os << "The '" << S.getAsString()
-           << "' instance method in " << SuperclassName.str() << " subclass '"
-           << *D << "' is missing a [super " << S.getAsString() << "] call";
+                os << "The '" << S.getAsString()
+                   << "' instance method in " << SuperclassName.str() << " subclass '"
+                   << *D << "' is missing a [super " << S.getAsString() << "] call";
 
-        BR.EmitBasicReport(MD, this, Name, categories::CoreFoundationObjectiveC,
-                           os.str(), DLoc);
-      }
+                BR.EmitBasicReport(MD, this, Name, categories::CoreFoundationObjectiveC,
+                                   os.str(), DLoc);
+            }
+        }
     }
-  }
 }
 
 
@@ -219,11 +223,11 @@ void ObjCSuperCallChecker::checkASTDecl(const ObjCImplementationDecl *D,
 //===----------------------------------------------------------------------===//
 
 void ento::registerObjCSuperCallChecker(CheckerManager &Mgr) {
-  Mgr.registerChecker<ObjCSuperCallChecker>();
+    Mgr.registerChecker<ObjCSuperCallChecker>();
 }
 
 bool ento::shouldRegisterObjCSuperCallChecker(const CheckerManager &mgr) {
-  return true;
+    return true;
 }
 
 /*

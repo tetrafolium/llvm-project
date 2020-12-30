@@ -430,8 +430,8 @@
 static __inline__ __m128d __DEFAULT_FN_ATTRS
 _mm_blendv_pd (__m128d __V1, __m128d __V2, __m128d __M)
 {
-  return (__m128d) __builtin_ia32_blendvpd ((__v2df)__V1, (__v2df)__V2,
-                                            (__v2df)__M);
+    return (__m128d) __builtin_ia32_blendvpd ((__v2df)__V1, (__v2df)__V2,
+            (__v2df)__M);
 }
 
 /// Returns a 128-bit vector of [4 x float] where the values are
@@ -457,8 +457,8 @@ _mm_blendv_pd (__m128d __V1, __m128d __V2, __m128d __M)
 static __inline__ __m128 __DEFAULT_FN_ATTRS
 _mm_blendv_ps (__m128 __V1, __m128 __V2, __m128 __M)
 {
-  return (__m128) __builtin_ia32_blendvps ((__v4sf)__V1, (__v4sf)__V2,
-                                           (__v4sf)__M);
+    return (__m128) __builtin_ia32_blendvps ((__v4sf)__V1, (__v4sf)__V2,
+            (__v4sf)__M);
 }
 
 /// Returns a 128-bit vector of [16 x i8] where the values are selected
@@ -484,8 +484,8 @@ _mm_blendv_ps (__m128 __V1, __m128 __V2, __m128 __M)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_blendv_epi8 (__m128i __V1, __m128i __V2, __m128i __M)
 {
-  return (__m128i) __builtin_ia32_pblendvb128 ((__v16qi)__V1, (__v16qi)__V2,
-                                               (__v16qi)__M);
+    return (__m128i) __builtin_ia32_pblendvb128 ((__v16qi)__V1, (__v16qi)__V2,
+            (__v16qi)__M);
 }
 
 /// Returns a 128-bit vector of [8 x i16] where the values are selected
@@ -533,7 +533,7 @@ _mm_blendv_epi8 (__m128i __V1, __m128i __V2, __m128i __M)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_mullo_epi32 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) ((__v4su)__V1 * (__v4su)__V2);
+    return (__m128i) ((__v4su)__V1 * (__v4su)__V2);
 }
 
 /// Multiplies corresponding even-indexed elements of two 128-bit
@@ -553,7 +553,7 @@ _mm_mullo_epi32 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_mul_epi32 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pmuldq128 ((__v4si)__V1, (__v4si)__V2);
+    return (__m128i) __builtin_ia32_pmuldq128 ((__v4si)__V1, (__v4si)__V2);
 }
 
 /* SSE4 Floating Point Dot Product Instructions.  */
@@ -644,7 +644,7 @@ _mm_mul_epi32 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_stream_load_si128 (__m128i const *__V)
 {
-  return (__m128i) __builtin_nontemporal_load ((const __v2di *) __V);
+    return (__m128i) __builtin_nontemporal_load ((const __v2di *) __V);
 }
 
 /* SSE4 Packed Integer Min/Max Instructions.  */
@@ -664,7 +664,7 @@ _mm_stream_load_si128 (__m128i const *__V)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_min_epi8 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pminsb128 ((__v16qi) __V1, (__v16qi) __V2);
+    return (__m128i) __builtin_ia32_pminsb128 ((__v16qi) __V1, (__v16qi) __V2);
 }
 
 /// Compares the corresponding elements of two 128-bit vectors of
@@ -683,7 +683,7 @@ _mm_min_epi8 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_max_epi8 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pmaxsb128 ((__v16qi) __V1, (__v16qi) __V2);
+    return (__m128i) __builtin_ia32_pmaxsb128 ((__v16qi) __V1, (__v16qi) __V2);
 }
 
 /// Compares the corresponding elements of two 128-bit vectors of
@@ -702,7 +702,7 @@ _mm_max_epi8 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_min_epu16 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pminuw128 ((__v8hi) __V1, (__v8hi) __V2);
+    return (__m128i) __builtin_ia32_pminuw128 ((__v8hi) __V1, (__v8hi) __V2);
 }
 
 /// Compares the corresponding elements of two 128-bit vectors of
@@ -721,7 +721,7 @@ _mm_min_epu16 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_max_epu16 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pmaxuw128 ((__v8hi) __V1, (__v8hi) __V2);
+    return (__m128i) __builtin_ia32_pmaxuw128 ((__v8hi) __V1, (__v8hi) __V2);
 }
 
 /// Compares the corresponding elements of two 128-bit vectors of
@@ -740,7 +740,7 @@ _mm_max_epu16 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_min_epi32 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pminsd128 ((__v4si) __V1, (__v4si) __V2);
+    return (__m128i) __builtin_ia32_pminsd128 ((__v4si) __V1, (__v4si) __V2);
 }
 
 /// Compares the corresponding elements of two 128-bit vectors of
@@ -759,7 +759,7 @@ _mm_min_epi32 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_max_epi32 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pmaxsd128 ((__v4si) __V1, (__v4si) __V2);
+    return (__m128i) __builtin_ia32_pmaxsd128 ((__v4si) __V1, (__v4si) __V2);
 }
 
 /// Compares the corresponding elements of two 128-bit vectors of
@@ -778,7 +778,7 @@ _mm_max_epi32 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_min_epu32 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pminud128((__v4si) __V1, (__v4si) __V2);
+    return (__m128i) __builtin_ia32_pminud128((__v4si) __V1, (__v4si) __V2);
 }
 
 /// Compares the corresponding elements of two 128-bit vectors of
@@ -797,7 +797,7 @@ _mm_min_epu32 (__m128i __V1, __m128i __V2)
 static __inline__  __m128i __DEFAULT_FN_ATTRS
 _mm_max_epu32 (__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_pmaxud128((__v4si) __V1, (__v4si) __V2);
+    return (__m128i) __builtin_ia32_pmaxud128((__v4si) __V1, (__v4si) __V2);
 }
 
 /* SSE4 Insertion and Extraction from XMM Register Instructions.  */
@@ -1099,7 +1099,7 @@ _mm_max_epu32 (__m128i __V1, __m128i __V2)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_testz_si128(__m128i __M, __m128i __V)
 {
-  return __builtin_ia32_ptestz128((__v2di)__M, (__v2di)__V);
+    return __builtin_ia32_ptestz128((__v2di)__M, (__v2di)__V);
 }
 
 /// Tests whether the specified bits in a 128-bit integer vector are all
@@ -1117,7 +1117,7 @@ _mm_testz_si128(__m128i __M, __m128i __V)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_testc_si128(__m128i __M, __m128i __V)
 {
-  return __builtin_ia32_ptestc128((__v2di)__M, (__v2di)__V);
+    return __builtin_ia32_ptestc128((__v2di)__M, (__v2di)__V);
 }
 
 /// Tests whether the specified bits in a 128-bit integer vector are
@@ -1136,7 +1136,7 @@ _mm_testc_si128(__m128i __M, __m128i __V)
 static __inline__ int __DEFAULT_FN_ATTRS
 _mm_testnzc_si128(__m128i __M, __m128i __V)
 {
-  return __builtin_ia32_ptestnzc128((__v2di)__M, (__v2di)__V);
+    return __builtin_ia32_ptestnzc128((__v2di)__M, (__v2di)__V);
 }
 
 /// Tests whether the specified bits in a 128-bit integer vector are all
@@ -1209,7 +1209,7 @@ _mm_testnzc_si128(__m128i __M, __m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cmpeq_epi64(__m128i __V1, __m128i __V2)
 {
-  return (__m128i)((__v2di)__V1 == (__v2di)__V2);
+    return (__m128i)((__v2di)__V1 == (__v2di)__V2);
 }
 
 /* SSE4 Packed Integer Sign-Extension.  */
@@ -1229,9 +1229,9 @@ _mm_cmpeq_epi64(__m128i __V1, __m128i __V2)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepi8_epi16(__m128i __V)
 {
-  /* This function always performs a signed extension, but __v16qi is a char
-     which may be signed or unsigned, so use __v16qs. */
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qs)__V, (__v16qs)__V, 0, 1, 2, 3, 4, 5, 6, 7), __v8hi);
+    /* This function always performs a signed extension, but __v16qi is a char
+       which may be signed or unsigned, so use __v16qs. */
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qs)__V, (__v16qs)__V, 0, 1, 2, 3, 4, 5, 6, 7), __v8hi);
 }
 
 /// Sign-extends each of the lower four 8-bit integer elements of a
@@ -1250,9 +1250,9 @@ _mm_cvtepi8_epi16(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepi8_epi32(__m128i __V)
 {
-  /* This function always performs a signed extension, but __v16qi is a char
-     which may be signed or unsigned, so use __v16qs. */
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qs)__V, (__v16qs)__V, 0, 1, 2, 3), __v4si);
+    /* This function always performs a signed extension, but __v16qi is a char
+       which may be signed or unsigned, so use __v16qs. */
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qs)__V, (__v16qs)__V, 0, 1, 2, 3), __v4si);
 }
 
 /// Sign-extends each of the lower two 8-bit integer elements of a
@@ -1271,9 +1271,9 @@ _mm_cvtepi8_epi32(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepi8_epi64(__m128i __V)
 {
-  /* This function always performs a signed extension, but __v16qi is a char
-     which may be signed or unsigned, so use __v16qs. */
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qs)__V, (__v16qs)__V, 0, 1), __v2di);
+    /* This function always performs a signed extension, but __v16qi is a char
+       which may be signed or unsigned, so use __v16qs. */
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qs)__V, (__v16qs)__V, 0, 1), __v2di);
 }
 
 /// Sign-extends each of the lower four 16-bit integer elements of a
@@ -1292,7 +1292,7 @@ _mm_cvtepi8_epi64(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepi16_epi32(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hi)__V, (__v8hi)__V, 0, 1, 2, 3), __v4si);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hi)__V, (__v8hi)__V, 0, 1, 2, 3), __v4si);
 }
 
 /// Sign-extends each of the lower two 16-bit integer elements of a
@@ -1311,7 +1311,7 @@ _mm_cvtepi16_epi32(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepi16_epi64(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hi)__V, (__v8hi)__V, 0, 1), __v2di);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hi)__V, (__v8hi)__V, 0, 1), __v2di);
 }
 
 /// Sign-extends each of the lower two 32-bit integer elements of a
@@ -1330,7 +1330,7 @@ _mm_cvtepi16_epi64(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepi32_epi64(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v4si)__V, (__v4si)__V, 0, 1), __v2di);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v4si)__V, (__v4si)__V, 0, 1), __v2di);
 }
 
 /* SSE4 Packed Integer Zero-Extension.  */
@@ -1350,7 +1350,7 @@ _mm_cvtepi32_epi64(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepu8_epi16(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qu)__V, (__v16qu)__V, 0, 1, 2, 3, 4, 5, 6, 7), __v8hi);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qu)__V, (__v16qu)__V, 0, 1, 2, 3, 4, 5, 6, 7), __v8hi);
 }
 
 /// Zero-extends each of the lower four 8-bit integer elements of a
@@ -1369,7 +1369,7 @@ _mm_cvtepu8_epi16(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepu8_epi32(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qu)__V, (__v16qu)__V, 0, 1, 2, 3), __v4si);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qu)__V, (__v16qu)__V, 0, 1, 2, 3), __v4si);
 }
 
 /// Zero-extends each of the lower two 8-bit integer elements of a
@@ -1388,7 +1388,7 @@ _mm_cvtepu8_epi32(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepu8_epi64(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qu)__V, (__v16qu)__V, 0, 1), __v2di);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v16qu)__V, (__v16qu)__V, 0, 1), __v2di);
 }
 
 /// Zero-extends each of the lower four 16-bit integer elements of a
@@ -1407,7 +1407,7 @@ _mm_cvtepu8_epi64(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepu16_epi32(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hu)__V, (__v8hu)__V, 0, 1, 2, 3), __v4si);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hu)__V, (__v8hu)__V, 0, 1, 2, 3), __v4si);
 }
 
 /// Zero-extends each of the lower two 16-bit integer elements of a
@@ -1426,7 +1426,7 @@ _mm_cvtepu16_epi32(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepu16_epi64(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hu)__V, (__v8hu)__V, 0, 1), __v2di);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v8hu)__V, (__v8hu)__V, 0, 1), __v2di);
 }
 
 /// Zero-extends each of the lower two 32-bit integer elements of a
@@ -1445,7 +1445,7 @@ _mm_cvtepu16_epi64(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cvtepu32_epi64(__m128i __V)
 {
-  return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v4su)__V, (__v4su)__V, 0, 1), __v2di);
+    return (__m128i)__builtin_convertvector(__builtin_shufflevector((__v4su)__V, (__v4su)__V, 0, 1), __v2di);
 }
 
 /* SSE4 Pack with Unsigned Saturation.  */
@@ -1474,7 +1474,7 @@ _mm_cvtepu32_epi64(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_packus_epi32(__m128i __V1, __m128i __V2)
 {
-  return (__m128i) __builtin_ia32_packusdw128((__v4si)__V1, (__v4si)__V2);
+    return (__m128i) __builtin_ia32_packusdw128((__v4si)__V1, (__v4si)__V2);
 }
 
 /* SSE4 Multiple Packed Sums of Absolute Difference.  */
@@ -1533,7 +1533,7 @@ _mm_packus_epi32(__m128i __V1, __m128i __V2)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_minpos_epu16(__m128i __V)
 {
-  return (__m128i) __builtin_ia32_phminposuw128((__v8hi)__V);
+    return (__m128i) __builtin_ia32_phminposuw128((__v8hi)__V);
 }
 
 /* Handle the sse4.2 definitions here. */
@@ -2337,7 +2337,7 @@ _mm_minpos_epu16(__m128i __V)
 static __inline__ __m128i __DEFAULT_FN_ATTRS
 _mm_cmpgt_epi64(__m128i __V1, __m128i __V2)
 {
-  return (__m128i)((__v2di)__V1 > (__v2di)__V2);
+    return (__m128i)((__v2di)__V1 > (__v2di)__V2);
 }
 
 /* SSE4.2 Accumulate CRC32.  */
@@ -2358,7 +2358,7 @@ _mm_cmpgt_epi64(__m128i __V1, __m128i __V2)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 _mm_crc32_u8(unsigned int __C, unsigned char __D)
 {
-  return __builtin_ia32_crc32qi(__C, __D);
+    return __builtin_ia32_crc32qi(__C, __D);
 }
 
 /// Adds the unsigned integer operand to the CRC-32C checksum of the
@@ -2378,7 +2378,7 @@ _mm_crc32_u8(unsigned int __C, unsigned char __D)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 _mm_crc32_u16(unsigned int __C, unsigned short __D)
 {
-  return __builtin_ia32_crc32hi(__C, __D);
+    return __builtin_ia32_crc32hi(__C, __D);
 }
 
 /// Adds the first unsigned integer operand to the CRC-32C checksum of
@@ -2398,7 +2398,7 @@ _mm_crc32_u16(unsigned int __C, unsigned short __D)
 static __inline__ unsigned int __DEFAULT_FN_ATTRS
 _mm_crc32_u32(unsigned int __C, unsigned int __D)
 {
-  return __builtin_ia32_crc32si(__C, __D);
+    return __builtin_ia32_crc32si(__C, __D);
 }
 
 #ifdef __x86_64__
@@ -2419,7 +2419,7 @@ _mm_crc32_u32(unsigned int __C, unsigned int __D)
 static __inline__ unsigned long long __DEFAULT_FN_ATTRS
 _mm_crc32_u64(unsigned long long __C, unsigned long long __D)
 {
-  return __builtin_ia32_crc32di(__C, __D);
+    return __builtin_ia32_crc32di(__C, __D);
 }
 #endif /* __x86_64__ */
 

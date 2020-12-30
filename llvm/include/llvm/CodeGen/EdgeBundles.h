@@ -22,39 +22,47 @@
 namespace llvm {
 
 class EdgeBundles : public MachineFunctionPass {
-  const MachineFunction *MF;
+    const MachineFunction *MF;
 
-  /// EC - Each edge bundle is an equivalence class. The keys are:
-  ///   2*BB->getNumber()   -> Ingoing bundle.
-  ///   2*BB->getNumber()+1 -> Outgoing bundle.
-  IntEqClasses EC;
+    /// EC - Each edge bundle is an equivalence class. The keys are:
+    ///   2*BB->getNumber()   -> Ingoing bundle.
+    ///   2*BB->getNumber()+1 -> Outgoing bundle.
+    IntEqClasses EC;
 
-  /// Blocks - Map each bundle to a list of basic block numbers.
-  SmallVector<SmallVector<unsigned, 8>, 4> Blocks;
+    /// Blocks - Map each bundle to a list of basic block numbers.
+    SmallVector<SmallVector<unsigned, 8>, 4> Blocks;
 
 public:
-  static char ID;
-  EdgeBundles() : MachineFunctionPass(ID) {}
+    static char ID;
+    EdgeBundles() : MachineFunctionPass(ID) {}
 
-  /// getBundle - Return the ingoing (Out = false) or outgoing (Out = true)
-  /// bundle number for basic block #N
-  unsigned getBundle(unsigned N, bool Out) const { return EC[2 * N + Out]; }
+    /// getBundle - Return the ingoing (Out = false) or outgoing (Out = true)
+    /// bundle number for basic block #N
+    unsigned getBundle(unsigned N, bool Out) const {
+        return EC[2 * N + Out];
+    }
 
-  /// getNumBundles - Return the total number of bundles in the CFG.
-  unsigned getNumBundles() const { return EC.getNumClasses(); }
+    /// getNumBundles - Return the total number of bundles in the CFG.
+    unsigned getNumBundles() const {
+        return EC.getNumClasses();
+    }
 
-  /// getBlocks - Return an array of blocks that are connected to Bundle.
-  ArrayRef<unsigned> getBlocks(unsigned Bundle) const { return Blocks[Bundle]; }
+    /// getBlocks - Return an array of blocks that are connected to Bundle.
+    ArrayRef<unsigned> getBlocks(unsigned Bundle) const {
+        return Blocks[Bundle];
+    }
 
-  /// getMachineFunction - Return the last machine function computed.
-  const MachineFunction *getMachineFunction() const { return MF; }
+    /// getMachineFunction - Return the last machine function computed.
+    const MachineFunction *getMachineFunction() const {
+        return MF;
+    }
 
-  /// view - Visualize the annotated bipartite CFG with Graphviz.
-  void view() const;
+    /// view - Visualize the annotated bipartite CFG with Graphviz.
+    void view() const;
 
 private:
-  bool runOnMachineFunction(MachineFunction&) override;
-  void getAnalysisUsage(AnalysisUsage&) const override;
+    bool runOnMachineFunction(MachineFunction&) override;
+    void getAnalysisUsage(AnalysisUsage&) const override;
 };
 
 } // end namespace llvm

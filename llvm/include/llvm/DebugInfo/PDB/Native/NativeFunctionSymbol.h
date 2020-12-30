@@ -19,26 +19,26 @@ namespace pdb {
 
 class NativeFunctionSymbol : public NativeRawSymbol {
 public:
-  NativeFunctionSymbol(NativeSession &Session, SymIndexId Id,
-                       const codeview::ProcSym &Sym, uint32_t RecordOffset);
+    NativeFunctionSymbol(NativeSession &Session, SymIndexId Id,
+                         const codeview::ProcSym &Sym, uint32_t RecordOffset);
 
-  ~NativeFunctionSymbol() override;
+    ~NativeFunctionSymbol() override;
 
-  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-            PdbSymbolIdField RecurseIdFields) const override;
+    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+              PdbSymbolIdField RecurseIdFields) const override;
 
-  uint32_t getAddressOffset() const override;
-  uint32_t getAddressSection() const override;
-  std::string getName() const override;
-  uint64_t getLength() const override;
-  uint32_t getRelativeVirtualAddress() const override;
-  uint64_t getVirtualAddress() const override;
-  std::unique_ptr<IPDBEnumSymbols>
-  findInlineFramesByVA(uint64_t VA) const override;
+    uint32_t getAddressOffset() const override;
+    uint32_t getAddressSection() const override;
+    std::string getName() const override;
+    uint64_t getLength() const override;
+    uint32_t getRelativeVirtualAddress() const override;
+    uint64_t getVirtualAddress() const override;
+    std::unique_ptr<IPDBEnumSymbols>
+    findInlineFramesByVA(uint64_t VA) const override;
 
 protected:
-  const codeview::ProcSym Sym;
-  uint32_t RecordOffset = 0;
+    const codeview::ProcSym Sym;
+    uint32_t RecordOffset = 0;
 };
 
 } // namespace pdb

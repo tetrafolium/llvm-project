@@ -48,11 +48,11 @@ VLOAD_TYPES()
 
 #ifdef cl_khr_fp64
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
-    VLOAD_ADDR_SPACES(double)
+VLOAD_ADDR_SPACES(double)
 #endif
 #ifdef cl_khr_fp16
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
-    VLOAD_ADDR_SPACES(half)
+VLOAD_ADDR_SPACES(half)
 #endif
 
 /* vload_half are legal even without cl_khr_fp16 */

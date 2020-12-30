@@ -22,59 +22,61 @@ namespace detail {
 class OpToOpPassAdaptor
     : public PassWrapper<OpToOpPassAdaptor, OperationPass<>> {
 public:
-  OpToOpPassAdaptor(OpPassManager &&mgr);
-  OpToOpPassAdaptor(const OpToOpPassAdaptor &rhs) = default;
+    OpToOpPassAdaptor(OpPassManager &&mgr);
+    OpToOpPassAdaptor(const OpToOpPassAdaptor &rhs) = default;
 
-  /// Run the held pipeline over all operations.
-  void runOnOperation(bool verifyPasses);
-  void runOnOperation() override;
+    /// Run the held pipeline over all operations.
+    void runOnOperation(bool verifyPasses);
+    void runOnOperation() override;
 
-  /// Merge the current pass adaptor into given 'rhs'.
-  void mergeInto(OpToOpPassAdaptor &rhs);
+    /// Merge the current pass adaptor into given 'rhs'.
+    void mergeInto(OpToOpPassAdaptor &rhs);
 
-  /// Returns the pass managers held by this adaptor.
-  MutableArrayRef<OpPassManager> getPassManagers() { return mgrs; }
+    /// Returns the pass managers held by this adaptor.
+    MutableArrayRef<OpPassManager> getPassManagers() {
+        return mgrs;
+    }
 
-  /// Populate the set of dependent dialects for the passes in the current
-  /// adaptor.
-  void getDependentDialects(DialectRegistry &dialects) const override;
+    /// Populate the set of dependent dialects for the passes in the current
+    /// adaptor.
+    void getDependentDialects(DialectRegistry &dialects) const override;
 
-  /// Return the async pass managers held by this parallel adaptor.
-  MutableArrayRef<SmallVector<OpPassManager, 1>> getParallelPassManagers() {
-    return asyncExecutors;
-  }
+    /// Return the async pass managers held by this parallel adaptor.
+    MutableArrayRef<SmallVector<OpPassManager, 1>> getParallelPassManagers() {
+        return asyncExecutors;
+    }
 
-  /// Returns the adaptor pass name.
-  std::string getAdaptorName();
+    /// Returns the adaptor pass name.
+    std::string getAdaptorName();
 
 private:
-  /// Run this pass adaptor synchronously.
-  void runOnOperationImpl(bool verifyPasses);
+    /// Run this pass adaptor synchronously.
+    void runOnOperationImpl(bool verifyPasses);
 
-  /// Run this pass adaptor asynchronously.
-  void runOnOperationAsyncImpl(bool verifyPasses);
+    /// Run this pass adaptor asynchronously.
+    void runOnOperationAsyncImpl(bool verifyPasses);
 
-  /// Run the given operation and analysis manager on a single pass.
-  static LogicalResult run(Pass *pass, Operation *op, AnalysisManager am,
-                           bool verifyPasses);
+    /// Run the given operation and analysis manager on a single pass.
+    static LogicalResult run(Pass *pass, Operation *op, AnalysisManager am,
+                             bool verifyPasses);
 
-  /// Run the given operation and analysis manager on a provided op pass
-  /// manager.
-  static LogicalResult runPipeline(
-      iterator_range<OpPassManager::pass_iterator> passes, Operation *op,
-      AnalysisManager am, bool verifyPasses,
-      PassInstrumentor *instrumentor = nullptr,
-      const PassInstrumentation::PipelineParentInfo *parentInfo = nullptr);
+    /// Run the given operation and analysis manager on a provided op pass
+    /// manager.
+    static LogicalResult runPipeline(
+        iterator_range<OpPassManager::pass_iterator> passes, Operation *op,
+        AnalysisManager am, bool verifyPasses,
+        PassInstrumentor *instrumentor = nullptr,
+        const PassInstrumentation::PipelineParentInfo *parentInfo = nullptr);
 
-  /// A set of adaptors to run.
-  SmallVector<OpPassManager, 1> mgrs;
+    /// A set of adaptors to run.
+    SmallVector<OpPassManager, 1> mgrs;
 
-  /// A set of executors, cloned from the main executor, that run asynchronously
-  /// on different threads. This is used when threading is enabled.
-  SmallVector<SmallVector<OpPassManager, 1>, 8> asyncExecutors;
+    /// A set of executors, cloned from the main executor, that run asynchronously
+    /// on different threads. This is used when threading is enabled.
+    SmallVector<SmallVector<OpPassManager, 1>, 8> asyncExecutors;
 
-  // For accessing "runPipeline".
-  friend class mlir::PassManager;
+    // For accessing "runPipeline".
+    friend class mlir::PassManager;
 };
 
 } // end namespace detail

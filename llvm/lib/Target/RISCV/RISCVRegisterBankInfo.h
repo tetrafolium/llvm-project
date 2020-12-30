@@ -31,7 +31,7 @@ protected:
 /// This class provides the information for the target register banks.
 class RISCVRegisterBankInfo final : public RISCVGenRegisterBankInfo {
 public:
-  RISCVRegisterBankInfo(const TargetRegisterInfo &TRI);
+    RISCVRegisterBankInfo(const TargetRegisterInfo &TRI);
 };
 } // end namespace llvm
 #endif

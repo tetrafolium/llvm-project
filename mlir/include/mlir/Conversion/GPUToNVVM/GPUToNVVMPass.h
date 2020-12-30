@@ -27,13 +27,13 @@ void configureGpuToNVVMConversionLegality(ConversionTarget &target);
 
 /// Collect a set of patterns to convert from the GPU dialect to NVVM.
 void populateGpuToNVVMConversionPatterns(LLVMTypeConverter &converter,
-                                         OwningRewritePatternList &patterns);
+        OwningRewritePatternList &patterns);
 
 /// Creates a pass that lowers GPU dialect operations to NVVM counterparts. The
 /// index bitwidth used for the lowering of the device side index computations
 /// is configurable.
 std::unique_ptr<OperationPass<gpu::GPUModuleOp>> createLowerGpuOpsToNVVMOpsPass(
-    unsigned indexBitwidth = kDeriveIndexBitwidthFromDataLayout);
+            unsigned indexBitwidth = kDeriveIndexBitwidthFromDataLayout);
 
 } // namespace mlir
 

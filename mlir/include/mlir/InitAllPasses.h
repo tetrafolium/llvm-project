@@ -41,25 +41,25 @@ namespace mlir {
 // individual passes.
 // The global registry is interesting to interact with the command-line tools.
 inline void registerAllPasses() {
-  // General passes
-  registerTransformsPasses();
+    // General passes
+    registerTransformsPasses();
 
-  // Conversion passes
-  registerConversionPasses();
+    // Conversion passes
+    registerConversionPasses();
 
-  // Dialect passes
-  registerAffinePasses();
-  registerAsyncPasses();
-  registerGPUPasses();
-  registerLinalgPasses();
-  LLVM::registerLLVMPasses();
-  quant::registerQuantPasses();
-  registerSCFPasses();
-  registerShapePasses();
-  spirv::registerSPIRVPasses();
-  registerStandardPasses();
-  tensor::registerTensorPasses();
-  tosa::registerTosaOptPasses();
+    // Dialect passes
+    registerAffinePasses();
+    registerAsyncPasses();
+    registerGPUPasses();
+    registerLinalgPasses();
+    LLVM::registerLLVMPasses();
+    quant::registerQuantPasses();
+    registerSCFPasses();
+    registerShapePasses();
+    spirv::registerSPIRVPasses();
+    registerStandardPasses();
+    tensor::registerTensorPasses();
+    tosa::registerTosaOptPasses();
 }
 
 } // namespace mlir

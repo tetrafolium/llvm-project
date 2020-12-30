@@ -32,8 +32,8 @@ using namespace llvm;
 
 #define DEBUG_TYPE "regalloc"
 
-STATISTIC(NumAssigned   , "Number of registers assigned");
-STATISTIC(NumUnassigned , "Number of registers unassigned");
+STATISTIC(NumAssigned, "Number of registers assigned");
+STATISTIC(NumUnassigned, "Number of registers unassigned");
 
 char LiveRegMatrix::ID = 0;
 INITIALIZE_PASS_BEGIN(LiveRegMatrix, "liveregmatrix",
@@ -46,188 +46,188 @@ INITIALIZE_PASS_END(LiveRegMatrix, "liveregmatrix",
 LiveRegMatrix::LiveRegMatrix() : MachineFunctionPass(ID) {}
 
 void LiveRegMatrix::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesAll();
-  AU.addRequiredTransitive<LiveIntervals>();
-  AU.addRequiredTransitive<VirtRegMap>();
-  MachineFunctionPass::getAnalysisUsage(AU);
+    AU.setPreservesAll();
+    AU.addRequiredTransitive<LiveIntervals>();
+    AU.addRequiredTransitive<VirtRegMap>();
+    MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 bool LiveRegMatrix::runOnMachineFunction(MachineFunction &MF) {
-  TRI = MF.getSubtarget().getRegisterInfo();
-  LIS = &getAnalysis<LiveIntervals>();
-  VRM = &getAnalysis<VirtRegMap>();
+    TRI = MF.getSubtarget().getRegisterInfo();
+    LIS = &getAnalysis<LiveIntervals>();
+    VRM = &getAnalysis<VirtRegMap>();
 
-  unsigned NumRegUnits = TRI->getNumRegUnits();
-  if (NumRegUnits != Matrix.size())
-    Queries.reset(new LiveIntervalUnion::Query[NumRegUnits]);
-  Matrix.init(LIUAlloc, NumRegUnits);
+    unsigned NumRegUnits = TRI->getNumRegUnits();
+    if (NumRegUnits != Matrix.size())
+        Queries.reset(new LiveIntervalUnion::Query[NumRegUnits]);
+    Matrix.init(LIUAlloc, NumRegUnits);
 
-  // Make sure no stale queries get reused.
-  invalidateVirtRegs();
-  return false;
+    // Make sure no stale queries get reused.
+    invalidateVirtRegs();
+    return false;
 }
 
 void LiveRegMatrix::releaseMemory() {
-  for (unsigned i = 0, e = Matrix.size(); i != e; ++i) {
-    Matrix[i].clear();
-    // No need to clear Queries here, since LiveIntervalUnion::Query doesn't
-    // have anything important to clear and LiveRegMatrix's runOnFunction()
-    // does a std::unique_ptr::reset anyways.
-  }
+    for (unsigned i = 0, e = Matrix.size(); i != e; ++i) {
+        Matrix[i].clear();
+        // No need to clear Queries here, since LiveIntervalUnion::Query doesn't
+        // have anything important to clear and LiveRegMatrix's runOnFunction()
+        // does a std::unique_ptr::reset anyways.
+    }
 }
 
 template <typename Callable>
 static bool foreachUnit(const TargetRegisterInfo *TRI,
                         LiveInterval &VRegInterval, MCRegister PhysReg,
                         Callable Func) {
-  if (VRegInterval.hasSubRanges()) {
-    for (MCRegUnitMaskIterator Units(PhysReg, TRI); Units.isValid(); ++Units) {
-      unsigned Unit = (*Units).first;
-      LaneBitmask Mask = (*Units).second;
-      for (LiveInterval::SubRange &S : VRegInterval.subranges()) {
-        if ((S.LaneMask & Mask).any()) {
-          if (Func(Unit, S))
-            return true;
-          break;
+    if (VRegInterval.hasSubRanges()) {
+        for (MCRegUnitMaskIterator Units(PhysReg, TRI); Units.isValid(); ++Units) {
+            unsigned Unit = (*Units).first;
+            LaneBitmask Mask = (*Units).second;
+            for (LiveInterval::SubRange &S : VRegInterval.subranges()) {
+                if ((S.LaneMask & Mask).any()) {
+                    if (Func(Unit, S))
+                        return true;
+                    break;
+                }
+            }
         }
-      }
+    } else {
+        for (MCRegUnitIterator Units(PhysReg, TRI); Units.isValid(); ++Units) {
+            if (Func(*Units, VRegInterval))
+                return true;
+        }
     }
-  } else {
-    for (MCRegUnitIterator Units(PhysReg, TRI); Units.isValid(); ++Units) {
-      if (Func(*Units, VRegInterval))
-        return true;
-    }
-  }
-  return false;
+    return false;
 }
 
 void LiveRegMatrix::assign(LiveInterval &VirtReg, MCRegister PhysReg) {
-  LLVM_DEBUG(dbgs() << "assigning " << printReg(VirtReg.reg(), TRI) << " to "
-                    << printReg(PhysReg, TRI) << ':');
-  assert(!VRM->hasPhys(VirtReg.reg()) && "Duplicate VirtReg assignment");
-  VRM->assignVirt2Phys(VirtReg.reg(), PhysReg);
+    LLVM_DEBUG(dbgs() << "assigning " << printReg(VirtReg.reg(), TRI) << " to "
+               << printReg(PhysReg, TRI) << ':');
+    assert(!VRM->hasPhys(VirtReg.reg()) && "Duplicate VirtReg assignment");
+    VRM->assignVirt2Phys(VirtReg.reg(), PhysReg);
 
-  foreachUnit(
-      TRI, VirtReg, PhysReg, [&](unsigned Unit, const LiveRange &Range) {
+    foreachUnit(
+    TRI, VirtReg, PhysReg, [&](unsigned Unit, const LiveRange &Range) {
         LLVM_DEBUG(dbgs() << ' ' << printRegUnit(Unit, TRI) << ' ' << Range);
         Matrix[Unit].unify(VirtReg, Range);
         return false;
-      });
+    });
 
-  ++NumAssigned;
-  LLVM_DEBUG(dbgs() << '\n');
+    ++NumAssigned;
+    LLVM_DEBUG(dbgs() << '\n');
 }
 
 void LiveRegMatrix::unassign(LiveInterval &VirtReg) {
-  Register PhysReg = VRM->getPhys(VirtReg.reg());
-  LLVM_DEBUG(dbgs() << "unassigning " << printReg(VirtReg.reg(), TRI)
-                    << " from " << printReg(PhysReg, TRI) << ':');
-  VRM->clearVirt(VirtReg.reg());
+    Register PhysReg = VRM->getPhys(VirtReg.reg());
+    LLVM_DEBUG(dbgs() << "unassigning " << printReg(VirtReg.reg(), TRI)
+               << " from " << printReg(PhysReg, TRI) << ':');
+    VRM->clearVirt(VirtReg.reg());
 
-  foreachUnit(TRI, VirtReg, PhysReg,
-              [&](unsigned Unit, const LiveRange &Range) {
-                LLVM_DEBUG(dbgs() << ' ' << printRegUnit(Unit, TRI));
-                Matrix[Unit].extract(VirtReg, Range);
-                return false;
-              });
+    foreachUnit(TRI, VirtReg, PhysReg,
+    [&](unsigned Unit, const LiveRange &Range) {
+        LLVM_DEBUG(dbgs() << ' ' << printRegUnit(Unit, TRI));
+        Matrix[Unit].extract(VirtReg, Range);
+        return false;
+    });
 
-  ++NumUnassigned;
-  LLVM_DEBUG(dbgs() << '\n');
+    ++NumUnassigned;
+    LLVM_DEBUG(dbgs() << '\n');
 }
 
 bool LiveRegMatrix::isPhysRegUsed(MCRegister PhysReg) const {
-  for (MCRegUnitIterator Unit(PhysReg, TRI); Unit.isValid(); ++Unit) {
-    if (!Matrix[*Unit].empty())
-      return true;
-  }
-  return false;
+    for (MCRegUnitIterator Unit(PhysReg, TRI); Unit.isValid(); ++Unit) {
+        if (!Matrix[*Unit].empty())
+            return true;
+    }
+    return false;
 }
 
 bool LiveRegMatrix::checkRegMaskInterference(LiveInterval &VirtReg,
-                                             MCRegister PhysReg) {
-  // Check if the cached information is valid.
-  // The same BitVector can be reused for all PhysRegs.
-  // We could cache multiple VirtRegs if it becomes necessary.
-  if (RegMaskVirtReg != VirtReg.reg() || RegMaskTag != UserTag) {
-    RegMaskVirtReg = VirtReg.reg();
-    RegMaskTag = UserTag;
-    RegMaskUsable.clear();
-    LIS->checkRegMaskInterference(VirtReg, RegMaskUsable);
-  }
+        MCRegister PhysReg) {
+    // Check if the cached information is valid.
+    // The same BitVector can be reused for all PhysRegs.
+    // We could cache multiple VirtRegs if it becomes necessary.
+    if (RegMaskVirtReg != VirtReg.reg() || RegMaskTag != UserTag) {
+        RegMaskVirtReg = VirtReg.reg();
+        RegMaskTag = UserTag;
+        RegMaskUsable.clear();
+        LIS->checkRegMaskInterference(VirtReg, RegMaskUsable);
+    }
 
-  // The BitVector is indexed by PhysReg, not register unit.
-  // Regmask interference is more fine grained than regunits.
-  // For example, a Win64 call can clobber %ymm8 yet preserve %xmm8.
-  return !RegMaskUsable.empty() && (!PhysReg || !RegMaskUsable.test(PhysReg));
+    // The BitVector is indexed by PhysReg, not register unit.
+    // Regmask interference is more fine grained than regunits.
+    // For example, a Win64 call can clobber %ymm8 yet preserve %xmm8.
+    return !RegMaskUsable.empty() && (!PhysReg || !RegMaskUsable.test(PhysReg));
 }
 
 bool LiveRegMatrix::checkRegUnitInterference(LiveInterval &VirtReg,
-                                             MCRegister PhysReg) {
-  if (VirtReg.empty())
-    return false;
-  CoalescerPair CP(VirtReg.reg(), PhysReg, *TRI);
+        MCRegister PhysReg) {
+    if (VirtReg.empty())
+        return false;
+    CoalescerPair CP(VirtReg.reg(), PhysReg, *TRI);
 
-  bool Result = foreachUnit(TRI, VirtReg, PhysReg, [&](unsigned Unit,
-                                                       const LiveRange &Range) {
-    const LiveRange &UnitRange = LIS->getRegUnit(Unit);
-    return Range.overlaps(UnitRange, CP, *LIS->getSlotIndexes());
-  });
-  return Result;
+    bool Result = foreachUnit(TRI, VirtReg, PhysReg, [&](unsigned Unit,
+    const LiveRange &Range) {
+        const LiveRange &UnitRange = LIS->getRegUnit(Unit);
+        return Range.overlaps(UnitRange, CP, *LIS->getSlotIndexes());
+    });
+    return Result;
 }
 
 LiveIntervalUnion::Query &LiveRegMatrix::query(const LiveRange &LR,
-                                               MCRegister RegUnit) {
-  LiveIntervalUnion::Query &Q = Queries[RegUnit];
-  Q.init(UserTag, LR, Matrix[RegUnit]);
-  return Q;
+        MCRegister RegUnit) {
+    LiveIntervalUnion::Query &Q = Queries[RegUnit];
+    Q.init(UserTag, LR, Matrix[RegUnit]);
+    return Q;
 }
 
 LiveRegMatrix::InterferenceKind
 LiveRegMatrix::checkInterference(LiveInterval &VirtReg, MCRegister PhysReg) {
-  if (VirtReg.empty())
+    if (VirtReg.empty())
+        return IK_Free;
+
+    // Regmask interference is the fastest check.
+    if (checkRegMaskInterference(VirtReg, PhysReg))
+        return IK_RegMask;
+
+    // Check for fixed interference.
+    if (checkRegUnitInterference(VirtReg, PhysReg))
+        return IK_RegUnit;
+
+    // Check the matrix for virtual register interference.
+    bool Interference = foreachUnit(TRI, VirtReg, PhysReg,
+    [&](MCRegister Unit, const LiveRange &LR) {
+        return query(LR, Unit).checkInterference();
+    });
+    if (Interference)
+        return IK_VirtReg;
+
     return IK_Free;
-
-  // Regmask interference is the fastest check.
-  if (checkRegMaskInterference(VirtReg, PhysReg))
-    return IK_RegMask;
-
-  // Check for fixed interference.
-  if (checkRegUnitInterference(VirtReg, PhysReg))
-    return IK_RegUnit;
-
-  // Check the matrix for virtual register interference.
-  bool Interference = foreachUnit(TRI, VirtReg, PhysReg,
-                                  [&](MCRegister Unit, const LiveRange &LR) {
-                                    return query(LR, Unit).checkInterference();
-                                  });
-  if (Interference)
-    return IK_VirtReg;
-
-  return IK_Free;
 }
 
 bool LiveRegMatrix::checkInterference(SlotIndex Start, SlotIndex End,
                                       MCRegister PhysReg) {
-  // Construct artificial live range containing only one segment [Start, End).
-  VNInfo valno(0, Start);
-  LiveRange::Segment Seg(Start, End, &valno);
-  LiveRange LR;
-  LR.addSegment(Seg);
+    // Construct artificial live range containing only one segment [Start, End).
+    VNInfo valno(0, Start);
+    LiveRange::Segment Seg(Start, End, &valno);
+    LiveRange LR;
+    LR.addSegment(Seg);
 
-  // Check for interference with that segment
-  for (MCRegUnitIterator Units(PhysReg, TRI); Units.isValid(); ++Units) {
-    if (query(LR, *Units).checkInterference())
-      return true;
-  }
-  return false;
+    // Check for interference with that segment
+    for (MCRegUnitIterator Units(PhysReg, TRI); Units.isValid(); ++Units) {
+        if (query(LR, *Units).checkInterference())
+            return true;
+    }
+    return false;
 }
 
 Register LiveRegMatrix::getOneVReg(unsigned PhysReg) const {
-  LiveInterval *VRegInterval = nullptr;
-  for (MCRegUnitIterator Unit(PhysReg, TRI); Unit.isValid(); ++Unit) {
-    if ((VRegInterval = Matrix[*Unit].getOneVReg()))
-      return VRegInterval->reg();
-  }
+    LiveInterval *VRegInterval = nullptr;
+    for (MCRegUnitIterator Unit(PhysReg, TRI); Unit.isValid(); ++Unit) {
+        if ((VRegInterval = Matrix[*Unit].getOneVReg()))
+            return VRegInterval->reg();
+    }
 
-  return MCRegister::NoRegister;
+    return MCRegister::NoRegister;
 }

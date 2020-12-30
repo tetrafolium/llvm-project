@@ -28,29 +28,29 @@ namespace clang {
 namespace doc {
 
 class MapASTVisitor : public clang::RecursiveASTVisitor<MapASTVisitor>,
-                      public ASTConsumer {
+    public ASTConsumer {
 public:
-  explicit MapASTVisitor(ASTContext *Ctx, ClangDocContext CDCtx)
-      : CDCtx(CDCtx) {}
+    explicit MapASTVisitor(ASTContext *Ctx, ClangDocContext CDCtx)
+        : CDCtx(CDCtx) {}
 
-  void HandleTranslationUnit(ASTContext &Context) override;
-  bool VisitNamespaceDecl(const NamespaceDecl *D);
-  bool VisitRecordDecl(const RecordDecl *D);
-  bool VisitEnumDecl(const EnumDecl *D);
-  bool VisitCXXMethodDecl(const CXXMethodDecl *D);
-  bool VisitFunctionDecl(const FunctionDecl *D);
+    void HandleTranslationUnit(ASTContext &Context) override;
+    bool VisitNamespaceDecl(const NamespaceDecl *D);
+    bool VisitRecordDecl(const RecordDecl *D);
+    bool VisitEnumDecl(const EnumDecl *D);
+    bool VisitCXXMethodDecl(const CXXMethodDecl *D);
+    bool VisitFunctionDecl(const FunctionDecl *D);
 
 private:
-  template <typename T> bool mapDecl(const T *D);
+    template <typename T> bool mapDecl(const T *D);
 
-  int getLine(const NamedDecl *D, const ASTContext &Context) const;
-  llvm::SmallString<128> getFile(const NamedDecl *D, const ASTContext &Context,
-                                 StringRef RootDir,
-                                 bool &IsFileInRootDir) const;
-  comments::FullComment *getComment(const NamedDecl *D,
-                                    const ASTContext &Context) const;
+    int getLine(const NamedDecl *D, const ASTContext &Context) const;
+    llvm::SmallString<128> getFile(const NamedDecl *D, const ASTContext &Context,
+                                   StringRef RootDir,
+                                   bool &IsFileInRootDir) const;
+    comments::FullComment *getComment(const NamedDecl *D,
+                                      const ASTContext &Context) const;
 
-  ClangDocContext CDCtx;
+    ClangDocContext CDCtx;
 };
 
 } // namespace doc

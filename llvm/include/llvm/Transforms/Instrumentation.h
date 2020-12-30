@@ -36,12 +36,12 @@ class CallBase;
 /// allocas and llvm.localescape calls, for example, must remain in the entry
 /// block.
 BasicBlock::iterator PrepareToSplitEntryBlock(BasicBlock &BB,
-                                              BasicBlock::iterator IP);
+        BasicBlock::iterator IP);
 
 // Create a constant for Str so that we can pass it to the run-time lib.
 GlobalVariable *createPrivateGlobalForString(Module &M, StringRef Str,
-                                             bool AllowMerging,
-                                             const char *NamePrefix = "");
+        bool AllowMerging,
+        const char *NamePrefix = "");
 
 // Returns F.getComdat() if it exists.
 // Otherwise creates a new comdat, sets F's comdat, and returns it.
@@ -51,33 +51,33 @@ Comdat *GetOrCreateFunctionComdat(Function &F, Triple &T,
 
 // Insert GCOV profiling instrumentation
 struct GCOVOptions {
-  static GCOVOptions getDefault();
+    static GCOVOptions getDefault();
 
-  // Specify whether to emit .gcno files.
-  bool EmitNotes;
+    // Specify whether to emit .gcno files.
+    bool EmitNotes;
 
-  // Specify whether to modify the program to emit .gcda files when run.
-  bool EmitData;
+    // Specify whether to modify the program to emit .gcda files when run.
+    bool EmitData;
 
-  // A four-byte version string. The meaning of a version string is described in
-  // gcc's gcov-io.h
-  char Version[4];
+    // A four-byte version string. The meaning of a version string is described in
+    // gcc's gcov-io.h
+    char Version[4];
 
-  // Add the 'noredzone' attribute to added runtime library calls.
-  bool NoRedZone;
+    // Add the 'noredzone' attribute to added runtime library calls.
+    bool NoRedZone;
 
-  // Use atomic profile counter increments.
-  bool Atomic = false;
+    // Use atomic profile counter increments.
+    bool Atomic = false;
 
-  // Regexes separated by a semi-colon to filter the files to instrument.
-  std::string Filter;
+    // Regexes separated by a semi-colon to filter the files to instrument.
+    std::string Filter;
 
-  // Regexes separated by a semi-colon to filter the files to not instrument.
-  std::string Exclude;
+    // Regexes separated by a semi-colon to filter the files to not instrument.
+    std::string Exclude;
 };
 
 ModulePass *createGCOVProfilerPass(const GCOVOptions &Options =
-                                   GCOVOptions::getDefault());
+                                       GCOVOptions::getDefault());
 
 // PGO Instrumention. Parameter IsCS indicates if this is the context senstive
 // instrumentation.
@@ -88,7 +88,7 @@ createPGOInstrumentationUseLegacyPass(StringRef Filename = StringRef(""),
 ModulePass *createPGOInstrumentationGenCreateVarLegacyPass(
     StringRef CSInstrName = StringRef(""));
 ModulePass *createPGOIndirectCallPromotionLegacyPass(bool InLTO = false,
-                                                     bool SamplePGO = false);
+        bool SamplePGO = false);
 FunctionPass *createPGOMemOPSizeOptLegacyPass();
 
 ModulePass *createCGProfileLegacyPass();
@@ -120,22 +120,22 @@ CallBase &promoteIndirectCall(CallBase &CB, Function *F, uint64_t Count,
 
 /// Options for the frontend instrumentation based profiling pass.
 struct InstrProfOptions {
-  // Add the 'noredzone' attribute to added runtime library calls.
-  bool NoRedZone = false;
+    // Add the 'noredzone' attribute to added runtime library calls.
+    bool NoRedZone = false;
 
-  // Do counter register promotion
-  bool DoCounterPromotion = false;
+    // Do counter register promotion
+    bool DoCounterPromotion = false;
 
-  // Use atomic profile counter increments.
-  bool Atomic = false;
+    // Use atomic profile counter increments.
+    bool Atomic = false;
 
-  // Use BFI to guide register promotion
-  bool UseBFIInPromotion = false;
+    // Use BFI to guide register promotion
+    bool UseBFIInPromotion = false;
 
-  // Name of the profile file to use as output
-  std::string InstrProfileOutput;
+    // Name of the profile file to use as output
+    std::string InstrProfileOutput;
 
-  InstrProfOptions() = default;
+    InstrProfOptions() = default;
 };
 
 /// Insert frontend instrumentation based profiling. Parameter IsCS indicates if
@@ -151,27 +151,27 @@ ModulePass *createDataFlowSanitizerLegacyPassPass(
 
 // Options for sanitizer coverage instrumentation.
 struct SanitizerCoverageOptions {
-  enum Type {
-    SCK_None = 0,
-    SCK_Function,
-    SCK_BB,
-    SCK_Edge
-  } CoverageType = SCK_None;
-  bool IndirectCalls = false;
-  bool TraceBB = false;
-  bool TraceCmp = false;
-  bool TraceDiv = false;
-  bool TraceGep = false;
-  bool Use8bitCounters = false;
-  bool TracePC = false;
-  bool TracePCGuard = false;
-  bool Inline8bitCounters = false;
-  bool InlineBoolFlag = false;
-  bool PCTable = false;
-  bool NoPrune = false;
-  bool StackDepth = false;
+    enum Type {
+        SCK_None = 0,
+        SCK_Function,
+        SCK_BB,
+        SCK_Edge
+    } CoverageType = SCK_None;
+    bool IndirectCalls = false;
+    bool TraceBB = false;
+    bool TraceCmp = false;
+    bool TraceDiv = false;
+    bool TraceGep = false;
+    bool Use8bitCounters = false;
+    bool TracePC = false;
+    bool TracePCGuard = false;
+    bool Inline8bitCounters = false;
+    bool InlineBoolFlag = false;
+    bool PCTable = false;
+    bool NoPrune = false;
+    bool StackDepth = false;
 
-  SanitizerCoverageOptions() = default;
+    SanitizerCoverageOptions() = default;
 };
 
 /// Calculate what to divide by to scale counts.
@@ -179,9 +179,9 @@ struct SanitizerCoverageOptions {
 /// Given the maximum count, calculate a divisor that will scale all the
 /// weights to strictly less than std::numeric_limits<uint32_t>::max().
 static inline uint64_t calculateCountScale(uint64_t MaxCount) {
-  return MaxCount < std::numeric_limits<uint32_t>::max()
-             ? 1
-             : MaxCount / std::numeric_limits<uint32_t>::max() + 1;
+    return MaxCount < std::numeric_limits<uint32_t>::max()
+           ? 1
+           : MaxCount / std::numeric_limits<uint32_t>::max() + 1;
 }
 
 /// Scale an individual branch count.
@@ -189,9 +189,9 @@ static inline uint64_t calculateCountScale(uint64_t MaxCount) {
 /// Scale a 64-bit weight down to 32-bits using \c Scale.
 ///
 static inline uint32_t scaleBranchCount(uint64_t Count, uint64_t Scale) {
-  uint64_t Scaled = Count / Scale;
-  assert(Scaled <= std::numeric_limits<uint32_t>::max() && "overflow 32-bits");
-  return Scaled;
+    uint64_t Scaled = Count / Scale;
+    assert(Scaled <= std::numeric_limits<uint32_t>::max() && "overflow 32-bits");
+    return Scaled;
 }
 } // end namespace llvm
 

@@ -17,53 +17,53 @@ namespace lldb {
 
 class LLDB_API SBDeclaration {
 public:
-  SBDeclaration();
+    SBDeclaration();
 
-  SBDeclaration(const lldb::SBDeclaration &rhs);
+    SBDeclaration(const lldb::SBDeclaration &rhs);
 
-  ~SBDeclaration();
+    ~SBDeclaration();
 
-  const lldb::SBDeclaration &operator=(const lldb::SBDeclaration &rhs);
+    const lldb::SBDeclaration &operator=(const lldb::SBDeclaration &rhs);
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  lldb::SBFileSpec GetFileSpec() const;
+    lldb::SBFileSpec GetFileSpec() const;
 
-  uint32_t GetLine() const;
+    uint32_t GetLine() const;
 
-  uint32_t GetColumn() const;
+    uint32_t GetColumn() const;
 
-  void SetFileSpec(lldb::SBFileSpec filespec);
+    void SetFileSpec(lldb::SBFileSpec filespec);
 
-  void SetLine(uint32_t line);
+    void SetLine(uint32_t line);
 
-  void SetColumn(uint32_t column);
+    void SetColumn(uint32_t column);
 
-  bool operator==(const lldb::SBDeclaration &rhs) const;
+    bool operator==(const lldb::SBDeclaration &rhs) const;
 
-  bool operator!=(const lldb::SBDeclaration &rhs) const;
+    bool operator!=(const lldb::SBDeclaration &rhs) const;
 
-  bool GetDescription(lldb::SBStream &description);
+    bool GetDescription(lldb::SBStream &description);
 
 protected:
-  lldb_private::Declaration *get();
+    lldb_private::Declaration *get();
 
 private:
-  friend class SBValue;
+    friend class SBValue;
 
-  const lldb_private::Declaration *operator->() const;
+    const lldb_private::Declaration *operator->() const;
 
-  lldb_private::Declaration &ref();
+    lldb_private::Declaration &ref();
 
-  const lldb_private::Declaration &ref() const;
+    const lldb_private::Declaration &ref() const;
 
-  SBDeclaration(const lldb_private::Declaration *lldb_object_ptr);
+    SBDeclaration(const lldb_private::Declaration *lldb_object_ptr);
 
-  void SetDeclaration(const lldb_private::Declaration &lldb_object_ref);
+    void SetDeclaration(const lldb_private::Declaration &lldb_object_ref);
 
-  std::unique_ptr<lldb_private::Declaration> m_opaque_up;
+    std::unique_ptr<lldb_private::Declaration> m_opaque_up;
 };
 
 } // namespace lldb

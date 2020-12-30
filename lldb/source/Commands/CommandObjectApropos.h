@@ -18,12 +18,12 @@ namespace lldb_private {
 
 class CommandObjectApropos : public CommandObjectParsed {
 public:
-  CommandObjectApropos(CommandInterpreter &interpreter);
+    CommandObjectApropos(CommandInterpreter &interpreter);
 
-  ~CommandObjectApropos() override;
+    ~CommandObjectApropos() override;
 
 protected:
-  bool DoExecute(Args &command, CommandReturnObject &result) override;
+    bool DoExecute(Args &command, CommandReturnObject &result) override;
 };
 
 } // namespace lldb_private

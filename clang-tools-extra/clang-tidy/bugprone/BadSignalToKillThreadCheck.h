@@ -21,13 +21,13 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-bad-signal-to-kill-thread.html
 class BadSignalToKillThreadCheck : public ClangTidyCheck {
 public:
-  BadSignalToKillThreadCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
-  Optional<unsigned> SigtermValue;
+    BadSignalToKillThreadCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
+    Optional<unsigned> SigtermValue;
 };
 
 } // namespace bugprone

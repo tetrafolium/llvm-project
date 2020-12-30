@@ -23,106 +23,112 @@ namespace {
 /// them on-the-fly when the contents of chunk are to be seen.
 class ChunkIterator : public Iterator {
 public:
-  explicit ChunkIterator(const Token *Tok, llvm::ArrayRef<Chunk> Chunks)
-      : Tok(Tok), Chunks(Chunks), CurrentChunk(Chunks.begin()) {
-    if (!Chunks.empty()) {
-      DecompressedChunk = CurrentChunk->decompress();
-      CurrentID = DecompressedChunk.begin();
+    explicit ChunkIterator(const Token *Tok, llvm::ArrayRef<Chunk> Chunks)
+        : Tok(Tok), Chunks(Chunks), CurrentChunk(Chunks.begin()) {
+        if (!Chunks.empty()) {
+            DecompressedChunk = CurrentChunk->decompress();
+            CurrentID = DecompressedChunk.begin();
+        }
     }
-  }
 
-  bool reachedEnd() const override { return CurrentChunk == Chunks.end(); }
+    bool reachedEnd() const override {
+        return CurrentChunk == Chunks.end();
+    }
 
-  /// Advances cursor to the next item.
-  void advance() override {
-    assert(!reachedEnd() &&
-           "Posting List iterator can't advance() at the end.");
-    ++CurrentID;
-    normalizeCursor();
-  }
+    /// Advances cursor to the next item.
+    void advance() override {
+        assert(!reachedEnd() &&
+               "Posting List iterator can't advance() at the end.");
+        ++CurrentID;
+        normalizeCursor();
+    }
 
-  /// Applies binary search to advance cursor to the next item with DocID
-  /// equal or higher than the given one.
-  void advanceTo(DocID ID) override {
-    assert(!reachedEnd() &&
-           "Posting List iterator can't advance() at the end.");
-    if (ID <= peek())
-      return;
-    advanceToChunk(ID);
-    // Try to find ID within current chunk.
-    CurrentID = std::partition_point(CurrentID, DecompressedChunk.end(),
-                                     [&](const DocID D) { return D < ID; });
-    normalizeCursor();
-  }
+    /// Applies binary search to advance cursor to the next item with DocID
+    /// equal or higher than the given one.
+    void advanceTo(DocID ID) override {
+        assert(!reachedEnd() &&
+               "Posting List iterator can't advance() at the end.");
+        if (ID <= peek())
+            return;
+        advanceToChunk(ID);
+        // Try to find ID within current chunk.
+        CurrentID = std::partition_point(CurrentID, DecompressedChunk.end(),
+        [&](const DocID D) {
+            return D < ID;
+        });
+        normalizeCursor();
+    }
 
-  DocID peek() const override {
-    assert(!reachedEnd() && "Posting List iterator can't peek() at the end.");
-    return *CurrentID;
-  }
+    DocID peek() const override {
+        assert(!reachedEnd() && "Posting List iterator can't peek() at the end.");
+        return *CurrentID;
+    }
 
-  float consume() override {
-    assert(!reachedEnd() &&
-           "Posting List iterator can't consume() at the end.");
-    return 1;
-  }
+    float consume() override {
+        assert(!reachedEnd() &&
+               "Posting List iterator can't consume() at the end.");
+        return 1;
+    }
 
-  size_t estimateSize() const override {
-    return Chunks.size() * ApproxEntriesPerChunk;
-  }
+    size_t estimateSize() const override {
+        return Chunks.size() * ApproxEntriesPerChunk;
+    }
 
 private:
-  llvm::raw_ostream &dump(llvm::raw_ostream &OS) const override {
-    if (Tok != nullptr)
-      return OS << *Tok;
-    OS << '[';
-    const char *Sep = "";
-    for (const Chunk &C : Chunks)
-      for (const DocID Doc : C.decompress()) {
-        OS << Sep << Doc;
-        Sep = " ";
-      }
-    return OS << ']';
-  }
-
-  /// If the cursor is at the end of a chunk, place it at the start of the next
-  /// chunk.
-  void normalizeCursor() {
-    // Invariant is already established if examined chunk is not exhausted.
-    if (CurrentID != std::end(DecompressedChunk))
-      return;
-    // Advance to next chunk if current one is exhausted.
-    ++CurrentChunk;
-    if (CurrentChunk == Chunks.end()) // Reached the end of PostingList.
-      return;
-    DecompressedChunk = CurrentChunk->decompress();
-    CurrentID = DecompressedChunk.begin();
-  }
-
-  /// Advances CurrentChunk to the chunk which might contain ID.
-  void advanceToChunk(DocID ID) {
-    if ((CurrentChunk != Chunks.end() - 1) &&
-        ((CurrentChunk + 1)->Head <= ID)) {
-      CurrentChunk =
-          std::partition_point(CurrentChunk + 1, Chunks.end(),
-                               [&](const Chunk &C) { return C.Head < ID; });
-      --CurrentChunk;
-      DecompressedChunk = CurrentChunk->decompress();
-      CurrentID = DecompressedChunk.begin();
+    llvm::raw_ostream &dump(llvm::raw_ostream &OS) const override {
+        if (Tok != nullptr)
+            return OS << *Tok;
+        OS << '[';
+        const char *Sep = "";
+        for (const Chunk &C : Chunks)
+            for (const DocID Doc : C.decompress()) {
+                OS << Sep << Doc;
+                Sep = " ";
+            }
+        return OS << ']';
     }
-  }
 
-  const Token *Tok;
-  llvm::ArrayRef<Chunk> Chunks;
-  /// Iterator over chunks.
-  /// If CurrentChunk is valid, then DecompressedChunk is
-  /// CurrentChunk->decompress() and CurrentID is a valid (non-end) iterator
-  /// into it.
-  decltype(Chunks)::const_iterator CurrentChunk;
-  llvm::SmallVector<DocID, Chunk::PayloadSize + 1> DecompressedChunk;
-  /// Iterator over DecompressedChunk.
-  decltype(DecompressedChunk)::iterator CurrentID;
+    /// If the cursor is at the end of a chunk, place it at the start of the next
+    /// chunk.
+    void normalizeCursor() {
+        // Invariant is already established if examined chunk is not exhausted.
+        if (CurrentID != std::end(DecompressedChunk))
+            return;
+        // Advance to next chunk if current one is exhausted.
+        ++CurrentChunk;
+        if (CurrentChunk == Chunks.end()) // Reached the end of PostingList.
+            return;
+        DecompressedChunk = CurrentChunk->decompress();
+        CurrentID = DecompressedChunk.begin();
+    }
 
-  static constexpr size_t ApproxEntriesPerChunk = 15;
+    /// Advances CurrentChunk to the chunk which might contain ID.
+    void advanceToChunk(DocID ID) {
+        if ((CurrentChunk != Chunks.end() - 1) &&
+                ((CurrentChunk + 1)->Head <= ID)) {
+            CurrentChunk =
+                std::partition_point(CurrentChunk + 1, Chunks.end(),
+            [&](const Chunk &C) {
+                return C.Head < ID;
+            });
+            --CurrentChunk;
+            DecompressedChunk = CurrentChunk->decompress();
+            CurrentID = DecompressedChunk.begin();
+        }
+    }
+
+    const Token *Tok;
+    llvm::ArrayRef<Chunk> Chunks;
+    /// Iterator over chunks.
+    /// If CurrentChunk is valid, then DecompressedChunk is
+    /// CurrentChunk->decompress() and CurrentID is a valid (non-end) iterator
+    /// into it.
+    decltype(Chunks)::const_iterator CurrentChunk;
+    llvm::SmallVector<DocID, Chunk::PayloadSize + 1> DecompressedChunk;
+    /// Iterator over DecompressedChunk.
+    decltype(DecompressedChunk)::iterator CurrentID;
+
+    static constexpr size_t ApproxEntriesPerChunk = 15;
 };
 
 static constexpr size_t BitsPerEncodingByte = 7;
@@ -130,20 +136,20 @@ static constexpr size_t BitsPerEncodingByte = 7;
 /// Writes a variable length DocID into the buffer and updates the buffer size.
 /// If it doesn't fit, returns false and doesn't write to the buffer.
 bool encodeVByte(DocID Delta, llvm::MutableArrayRef<uint8_t> &Payload) {
-  assert(Delta != 0 && "0 is not a valid PostingList delta.");
-  // Calculate number of bytes Delta encoding would take by examining the
-  // meaningful bits.
-  unsigned Width = 1 + llvm::findLastSet(Delta) / BitsPerEncodingByte;
-  if (Width > Payload.size())
-    return false;
+    assert(Delta != 0 && "0 is not a valid PostingList delta.");
+    // Calculate number of bytes Delta encoding would take by examining the
+    // meaningful bits.
+    unsigned Width = 1 + llvm::findLastSet(Delta) / BitsPerEncodingByte;
+    if (Width > Payload.size())
+        return false;
 
-  do {
-    uint8_t Encoding = Delta & 0x7f;
-    Delta >>= 7;
-    Payload.front() = Delta ? Encoding | 0x80 : Encoding;
-    Payload = Payload.drop_front();
-  } while (Delta != 0);
-  return true;
+    do {
+        uint8_t Encoding = Delta & 0x7f;
+        Delta >>= 7;
+        Payload.front() = Delta ? Encoding | 0x80 : Encoding;
+        Payload = Payload.drop_front();
+    } while (Delta != 0);
+    return true;
 }
 
 /// Use Variable-length Byte (VByte) delta encoding to compress sorted list of
@@ -166,61 +172,61 @@ bool encodeVByte(DocID Delta, llvm::MutableArrayRef<uint8_t> &Payload) {
 /// gaps                    5         6958
 /// Encoding  (raw number)  00000101  10110110 00101110
 std::vector<Chunk> encodeStream(llvm::ArrayRef<DocID> Documents) {
-  assert(!Documents.empty() && "Can't encode empty sequence.");
-  std::vector<Chunk> Result;
-  Result.emplace_back();
-  DocID Last = Result.back().Head = Documents.front();
-  llvm::MutableArrayRef<uint8_t> RemainingPayload = Result.back().Payload;
-  for (DocID Doc : Documents.drop_front()) {
-    if (!encodeVByte(Doc - Last, RemainingPayload)) { // didn't fit, flush chunk
-      Result.emplace_back();
-      Result.back().Head = Doc;
-      RemainingPayload = Result.back().Payload;
+    assert(!Documents.empty() && "Can't encode empty sequence.");
+    std::vector<Chunk> Result;
+    Result.emplace_back();
+    DocID Last = Result.back().Head = Documents.front();
+    llvm::MutableArrayRef<uint8_t> RemainingPayload = Result.back().Payload;
+    for (DocID Doc : Documents.drop_front()) {
+        if (!encodeVByte(Doc - Last, RemainingPayload)) { // didn't fit, flush chunk
+            Result.emplace_back();
+            Result.back().Head = Doc;
+            RemainingPayload = Result.back().Payload;
+        }
+        Last = Doc;
     }
-    Last = Doc;
-  }
-  return std::vector<Chunk>(Result); // no move, shrink-to-fit
+    return std::vector<Chunk>(Result); // no move, shrink-to-fit
 }
 
 /// Reads variable length DocID from the buffer and updates the buffer size. If
 /// the stream is terminated, return None.
 llvm::Optional<DocID> readVByte(llvm::ArrayRef<uint8_t> &Bytes) {
-  if (Bytes.front() == 0 || Bytes.empty())
-    return None;
-  DocID Result = 0;
-  bool HasNextByte = true;
-  for (size_t Length = 0; HasNextByte && !Bytes.empty(); ++Length) {
-    assert(Length <= 5 && "Malformed VByte encoding sequence.");
-    // Write meaningful bits to the correct place in the document decoding.
-    Result |= (Bytes.front() & 0x7f) << (BitsPerEncodingByte * Length);
-    if ((Bytes.front() & 0x80) == 0)
-      HasNextByte = false;
-    Bytes = Bytes.drop_front();
-  }
-  return Result;
+    if (Bytes.front() == 0 || Bytes.empty())
+        return None;
+    DocID Result = 0;
+    bool HasNextByte = true;
+    for (size_t Length = 0; HasNextByte && !Bytes.empty(); ++Length) {
+        assert(Length <= 5 && "Malformed VByte encoding sequence.");
+        // Write meaningful bits to the correct place in the document decoding.
+        Result |= (Bytes.front() & 0x7f) << (BitsPerEncodingByte * Length);
+        if ((Bytes.front() & 0x80) == 0)
+            HasNextByte = false;
+        Bytes = Bytes.drop_front();
+    }
+    return Result;
 }
 
 } // namespace
 
 llvm::SmallVector<DocID, Chunk::PayloadSize + 1> Chunk::decompress() const {
-  llvm::SmallVector<DocID, Chunk::PayloadSize + 1> Result{Head};
-  llvm::ArrayRef<uint8_t> Bytes(Payload);
-  DocID Delta;
-  for (DocID Current = Head; !Bytes.empty(); Current += Delta) {
-    auto MaybeDelta = readVByte(Bytes);
-    if (!MaybeDelta)
-      break;
-    Delta = *MaybeDelta;
-    Result.push_back(Current + Delta);
-  }
-  return llvm::SmallVector<DocID, Chunk::PayloadSize + 1>{Result};
+    llvm::SmallVector<DocID, Chunk::PayloadSize + 1> Result{Head};
+    llvm::ArrayRef<uint8_t> Bytes(Payload);
+    DocID Delta;
+    for (DocID Current = Head; !Bytes.empty(); Current += Delta) {
+        auto MaybeDelta = readVByte(Bytes);
+        if (!MaybeDelta)
+            break;
+        Delta = *MaybeDelta;
+        Result.push_back(Current + Delta);
+    }
+    return llvm::SmallVector<DocID, Chunk::PayloadSize + 1> {Result};
 }
 
 PostingList::PostingList(llvm::ArrayRef<DocID> Documents)
     : Chunks(encodeStream(Documents)) {}
 
 std::unique_ptr<Iterator> PostingList::iterator(const Token *Tok) const {
-  return std::make_unique<ChunkIterator>(Tok, Chunks);
+    return std::make_unique<ChunkIterator>(Tok, Chunks);
 }
 
 } // namespace dex

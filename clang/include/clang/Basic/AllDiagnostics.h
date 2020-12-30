@@ -29,9 +29,9 @@
 namespace clang {
 template <size_t SizeOfStr, typename FieldType>
 class StringSizerHelper {
-  static_assert(SizeOfStr <= FieldType(~0U), "Field too small!");
+    static_assert(SizeOfStr <= FieldType(~0U), "Field too small!");
 public:
-  enum { Size = SizeOfStr };
+    enum { Size = SizeOfStr };
 };
 } // end namespace clang
 

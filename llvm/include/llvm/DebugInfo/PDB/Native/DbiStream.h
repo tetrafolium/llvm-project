@@ -35,102 +35,104 @@ class PDBFile;
 class ISectionContribVisitor;
 
 class DbiStream {
-  friend class DbiStreamBuilder;
+    friend class DbiStreamBuilder;
 
 public:
-  explicit DbiStream(std::unique_ptr<BinaryStream> Stream);
-  ~DbiStream();
-  Error reload(PDBFile *Pdb);
+    explicit DbiStream(std::unique_ptr<BinaryStream> Stream);
+    ~DbiStream();
+    Error reload(PDBFile *Pdb);
 
-  PdbRaw_DbiVer getDbiVersion() const;
-  uint32_t getAge() const;
-  uint16_t getPublicSymbolStreamIndex() const;
-  uint16_t getGlobalSymbolStreamIndex() const;
+    PdbRaw_DbiVer getDbiVersion() const;
+    uint32_t getAge() const;
+    uint16_t getPublicSymbolStreamIndex() const;
+    uint16_t getGlobalSymbolStreamIndex() const;
 
-  uint16_t getFlags() const;
-  bool isIncrementallyLinked() const;
-  bool hasCTypes() const;
-  bool isStripped() const;
+    uint16_t getFlags() const;
+    bool isIncrementallyLinked() const;
+    bool hasCTypes() const;
+    bool isStripped() const;
 
-  uint16_t getBuildNumber() const;
-  uint16_t getBuildMajorVersion() const;
-  uint16_t getBuildMinorVersion() const;
+    uint16_t getBuildNumber() const;
+    uint16_t getBuildMajorVersion() const;
+    uint16_t getBuildMinorVersion() const;
 
-  uint16_t getPdbDllRbld() const;
-  uint32_t getPdbDllVersion() const;
+    uint16_t getPdbDllRbld() const;
+    uint32_t getPdbDllVersion() const;
 
-  uint32_t getSymRecordStreamIndex() const;
+    uint32_t getSymRecordStreamIndex() const;
 
-  PDB_Machine getMachineType() const;
+    PDB_Machine getMachineType() const;
 
-  const DbiStreamHeader *getHeader() const { return Header; }
+    const DbiStreamHeader *getHeader() const {
+        return Header;
+    }
 
-  BinarySubstreamRef getSectionContributionData() const;
-  BinarySubstreamRef getSecMapSubstreamData() const;
-  BinarySubstreamRef getModiSubstreamData() const;
-  BinarySubstreamRef getFileInfoSubstreamData() const;
-  BinarySubstreamRef getTypeServerMapSubstreamData() const;
-  BinarySubstreamRef getECSubstreamData() const;
+    BinarySubstreamRef getSectionContributionData() const;
+    BinarySubstreamRef getSecMapSubstreamData() const;
+    BinarySubstreamRef getModiSubstreamData() const;
+    BinarySubstreamRef getFileInfoSubstreamData() const;
+    BinarySubstreamRef getTypeServerMapSubstreamData() const;
+    BinarySubstreamRef getECSubstreamData() const;
 
-  /// If the given stream type is present, returns its stream index. If it is
-  /// not present, returns InvalidStreamIndex.
-  uint32_t getDebugStreamIndex(DbgHeaderType Type) const;
+    /// If the given stream type is present, returns its stream index. If it is
+    /// not present, returns InvalidStreamIndex.
+    uint32_t getDebugStreamIndex(DbgHeaderType Type) const;
 
-  const DbiModuleList &modules() const;
+    const DbiModuleList &modules() const;
 
-  FixedStreamArray<object::coff_section> getSectionHeaders() const;
+    FixedStreamArray<object::coff_section> getSectionHeaders() const;
 
-  bool hasOldFpoRecords() const;
-  FixedStreamArray<object::FpoData> getOldFpoRecords() const;
-  bool hasNewFpoRecords() const;
-  const codeview::DebugFrameDataSubsectionRef &getNewFpoRecords() const;
+    bool hasOldFpoRecords() const;
+    FixedStreamArray<object::FpoData> getOldFpoRecords() const;
+    bool hasNewFpoRecords() const;
+    const codeview::DebugFrameDataSubsectionRef &getNewFpoRecords() const;
 
-  FixedStreamArray<SecMapEntry> getSectionMap() const;
-  void visitSectionContributions(ISectionContribVisitor &Visitor) const;
+    FixedStreamArray<SecMapEntry> getSectionMap() const;
+    void visitSectionContributions(ISectionContribVisitor &Visitor) const;
 
-  Expected<StringRef> getECName(uint32_t NI) const;
+    Expected<StringRef> getECName(uint32_t NI) const;
 
 private:
-  Error initializeSectionContributionData();
-  Error initializeSectionHeadersData(PDBFile *Pdb);
-  Error initializeSectionMapData();
-  Error initializeOldFpoRecords(PDBFile *Pdb);
-  Error initializeNewFpoRecords(PDBFile *Pdb);
+    Error initializeSectionContributionData();
+    Error initializeSectionHeadersData(PDBFile *Pdb);
+    Error initializeSectionMapData();
+    Error initializeOldFpoRecords(PDBFile *Pdb);
+    Error initializeNewFpoRecords(PDBFile *Pdb);
 
-  Expected<std::unique_ptr<msf::MappedBlockStream>>
-  createIndexedStreamForHeaderType(PDBFile *Pdb, DbgHeaderType Type) const;
+    Expected<std::unique_ptr<msf::MappedBlockStream>>
+            createIndexedStreamForHeaderType(PDBFile *Pdb, DbgHeaderType Type) const;
 
-  std::unique_ptr<BinaryStream> Stream;
+    std::unique_ptr<BinaryStream> Stream;
 
-  PDBStringTable ECNames;
+    PDBStringTable ECNames;
 
-  BinarySubstreamRef SecContrSubstream;
-  BinarySubstreamRef SecMapSubstream;
-  BinarySubstreamRef ModiSubstream;
-  BinarySubstreamRef FileInfoSubstream;
-  BinarySubstreamRef TypeServerMapSubstream;
-  BinarySubstreamRef ECSubstream;
+    BinarySubstreamRef SecContrSubstream;
+    BinarySubstreamRef SecMapSubstream;
+    BinarySubstreamRef ModiSubstream;
+    BinarySubstreamRef FileInfoSubstream;
+    BinarySubstreamRef TypeServerMapSubstream;
+    BinarySubstreamRef ECSubstream;
 
-  DbiModuleList Modules;
+    DbiModuleList Modules;
 
-  FixedStreamArray<support::ulittle16_t> DbgStreams;
+    FixedStreamArray<support::ulittle16_t> DbgStreams;
 
-  PdbRaw_DbiSecContribVer SectionContribVersion =
-      PdbRaw_DbiSecContribVer::DbiSecContribVer60;
-  FixedStreamArray<SectionContrib> SectionContribs;
-  FixedStreamArray<SectionContrib2> SectionContribs2;
-  FixedStreamArray<SecMapEntry> SectionMap;
+    PdbRaw_DbiSecContribVer SectionContribVersion =
+        PdbRaw_DbiSecContribVer::DbiSecContribVer60;
+    FixedStreamArray<SectionContrib> SectionContribs;
+    FixedStreamArray<SectionContrib2> SectionContribs2;
+    FixedStreamArray<SecMapEntry> SectionMap;
 
-  std::unique_ptr<msf::MappedBlockStream> SectionHeaderStream;
-  FixedStreamArray<object::coff_section> SectionHeaders;
+    std::unique_ptr<msf::MappedBlockStream> SectionHeaderStream;
+    FixedStreamArray<object::coff_section> SectionHeaders;
 
-  std::unique_ptr<msf::MappedBlockStream> OldFpoStream;
-  FixedStreamArray<object::FpoData> OldFpoRecords;
-  
-  std::unique_ptr<msf::MappedBlockStream> NewFpoStream;
-  codeview::DebugFrameDataSubsectionRef NewFpoRecords;
+    std::unique_ptr<msf::MappedBlockStream> OldFpoStream;
+    FixedStreamArray<object::FpoData> OldFpoRecords;
 
-  const DbiStreamHeader *Header;
+    std::unique_ptr<msf::MappedBlockStream> NewFpoStream;
+    codeview::DebugFrameDataSubsectionRef NewFpoRecords;
+
+    const DbiStreamHeader *Header;
 };
 }
 }

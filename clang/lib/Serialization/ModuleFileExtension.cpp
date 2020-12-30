@@ -12,7 +12,7 @@ using namespace clang;
 ModuleFileExtension::~ModuleFileExtension() { }
 
 llvm::hash_code ModuleFileExtension::hashExtension(llvm::hash_code Code) const {
-  return Code;
+    return Code;
 }
 
 ModuleFileExtensionWriter::~ModuleFileExtensionWriter() { }

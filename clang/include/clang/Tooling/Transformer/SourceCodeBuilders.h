@@ -37,7 +37,7 @@ bool mayEverNeedParens(const Expr &E);
 /// dot/arrow are (effectively) the highest precedence, this is equivalent to
 /// asking whether it ever needs parens.
 inline bool needParensBeforeDotOrArrow(const Expr &E) {
-  return mayEverNeedParens(E);
+    return mayEverNeedParens(E);
 }
 
 /// Determines whether printing this expression to the right of a unary operator
@@ -56,12 +56,12 @@ llvm::Optional<std::string> buildParens(const Expr &E,
 /// Builds idiomatic source for the dereferencing of `E`: prefix with `*` but
 /// simplify when it already begins with `&`.  \returns empty string on failure.
 llvm::Optional<std::string> buildDereference(const Expr &E,
-                                             const ASTContext &Context);
+        const ASTContext &Context);
 
 /// Builds idiomatic source for taking the address of `E`: prefix with `&` but
 /// simplify when it already begins with `*`.  \returns empty string on failure.
 llvm::Optional<std::string> buildAddressOf(const Expr &E,
-                                           const ASTContext &Context);
+        const ASTContext &Context);
 
 /// Adds a dot to the end of the given expression, but adds parentheses when
 /// needed by the syntax, and simplifies to `->` when possible, e.g.:

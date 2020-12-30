@@ -31,7 +31,7 @@
 static __inline__ void __DEFAULT_FN_ATTRS
 __llwpcb (void *__addr)
 {
-  __builtin_ia32_llwpcb(__addr);
+    __builtin_ia32_llwpcb(__addr);
 }
 
 /// Flushes the LWP state to memory and returns the address of the LWPCB.
@@ -46,7 +46,7 @@ __llwpcb (void *__addr)
 static __inline__ void* __DEFAULT_FN_ATTRS
 __slwpcb (void)
 {
-  return __builtin_ia32_slwpcb();
+    return __builtin_ia32_slwpcb();
 }
 
 /// Inserts programmed event record into the LWP event ring buffer

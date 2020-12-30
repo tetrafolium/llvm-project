@@ -24,26 +24,26 @@ class LPMUpdater;
 
 /// Loop unroll pass that only does full loop unrolling.
 class LoopFullUnrollPass : public PassInfoMixin<LoopFullUnrollPass> {
-  const int OptLevel;
+    const int OptLevel;
 
-  /// If false, use a cost model to determine whether unrolling of a loop is
-  /// profitable. If true, only loops that explicitly request unrolling via
-  /// metadata are considered. All other loops are skipped.
-  const bool OnlyWhenForced;
+    /// If false, use a cost model to determine whether unrolling of a loop is
+    /// profitable. If true, only loops that explicitly request unrolling via
+    /// metadata are considered. All other loops are skipped.
+    const bool OnlyWhenForced;
 
-  /// If true, forget all loops when unrolling. If false, forget top-most loop
-  /// of the currently processed loops, which removes one entry at a time from
-  /// the internal SCEV records. For large loops, the former is faster.
-  const bool ForgetSCEV;
+    /// If true, forget all loops when unrolling. If false, forget top-most loop
+    /// of the currently processed loops, which removes one entry at a time from
+    /// the internal SCEV records. For large loops, the former is faster.
+    const bool ForgetSCEV;
 
 public:
-  explicit LoopFullUnrollPass(int OptLevel = 2, bool OnlyWhenForced = false,
-                              bool ForgetSCEV = false)
-      : OptLevel(OptLevel), OnlyWhenForced(OnlyWhenForced),
-        ForgetSCEV(ForgetSCEV) {}
+    explicit LoopFullUnrollPass(int OptLevel = 2, bool OnlyWhenForced = false,
+                                bool ForgetSCEV = false)
+        : OptLevel(OptLevel), OnlyWhenForced(OnlyWhenForced),
+          ForgetSCEV(ForgetSCEV) {}
 
-  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
+    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
 /// A set of parameters used to control various transforms performed by the
@@ -59,87 +59,87 @@ public:
 /// additional setters and then pass it to LoopUnrollPass.
 ///
 struct LoopUnrollOptions {
-  Optional<bool> AllowPartial;
-  Optional<bool> AllowPeeling;
-  Optional<bool> AllowRuntime;
-  Optional<bool> AllowUpperBound;
-  Optional<bool> AllowProfileBasedPeeling;
-  Optional<unsigned> FullUnrollMaxCount;
-  int OptLevel;
+    Optional<bool> AllowPartial;
+    Optional<bool> AllowPeeling;
+    Optional<bool> AllowRuntime;
+    Optional<bool> AllowUpperBound;
+    Optional<bool> AllowProfileBasedPeeling;
+    Optional<unsigned> FullUnrollMaxCount;
+    int OptLevel;
 
-  /// If false, use a cost model to determine whether unrolling of a loop is
-  /// profitable. If true, only loops that explicitly request unrolling via
-  /// metadata are considered. All other loops are skipped.
-  bool OnlyWhenForced;
+    /// If false, use a cost model to determine whether unrolling of a loop is
+    /// profitable. If true, only loops that explicitly request unrolling via
+    /// metadata are considered. All other loops are skipped.
+    bool OnlyWhenForced;
 
-  /// If true, forget all loops when unrolling. If false, forget top-most loop
-  /// of the currently processed loops, which removes one entry at a time from
-  /// the internal SCEV records. For large loops, the former is faster.
-  const bool ForgetSCEV;
+    /// If true, forget all loops when unrolling. If false, forget top-most loop
+    /// of the currently processed loops, which removes one entry at a time from
+    /// the internal SCEV records. For large loops, the former is faster.
+    const bool ForgetSCEV;
 
-  LoopUnrollOptions(int OptLevel = 2, bool OnlyWhenForced = false,
-                    bool ForgetSCEV = false)
-      : OptLevel(OptLevel), OnlyWhenForced(OnlyWhenForced),
-        ForgetSCEV(ForgetSCEV) {}
+    LoopUnrollOptions(int OptLevel = 2, bool OnlyWhenForced = false,
+                      bool ForgetSCEV = false)
+        : OptLevel(OptLevel), OnlyWhenForced(OnlyWhenForced),
+          ForgetSCEV(ForgetSCEV) {}
 
-  /// Enables or disables partial unrolling. When disabled only full unrolling
-  /// is allowed.
-  LoopUnrollOptions &setPartial(bool Partial) {
-    AllowPartial = Partial;
-    return *this;
-  }
+    /// Enables or disables partial unrolling. When disabled only full unrolling
+    /// is allowed.
+    LoopUnrollOptions &setPartial(bool Partial) {
+        AllowPartial = Partial;
+        return *this;
+    }
 
-  /// Enables or disables unrolling of loops with runtime trip count.
-  LoopUnrollOptions &setRuntime(bool Runtime) {
-    AllowRuntime = Runtime;
-    return *this;
-  }
+    /// Enables or disables unrolling of loops with runtime trip count.
+    LoopUnrollOptions &setRuntime(bool Runtime) {
+        AllowRuntime = Runtime;
+        return *this;
+    }
 
-  /// Enables or disables loop peeling.
-  LoopUnrollOptions &setPeeling(bool Peeling) {
-    AllowPeeling = Peeling;
-    return *this;
-  }
+    /// Enables or disables loop peeling.
+    LoopUnrollOptions &setPeeling(bool Peeling) {
+        AllowPeeling = Peeling;
+        return *this;
+    }
 
-  /// Enables or disables the use of trip count upper bound
-  /// in loop unrolling.
-  LoopUnrollOptions &setUpperBound(bool UpperBound) {
-    AllowUpperBound = UpperBound;
-    return *this;
-  }
+    /// Enables or disables the use of trip count upper bound
+    /// in loop unrolling.
+    LoopUnrollOptions &setUpperBound(bool UpperBound) {
+        AllowUpperBound = UpperBound;
+        return *this;
+    }
 
-  // Sets "optimization level" tuning parameter for loop unrolling.
-  LoopUnrollOptions &setOptLevel(int O) {
-    OptLevel = O;
-    return *this;
-  }
+    // Sets "optimization level" tuning parameter for loop unrolling.
+    LoopUnrollOptions &setOptLevel(int O) {
+        OptLevel = O;
+        return *this;
+    }
 
-  // Enables or disables loop peeling basing on profile.
-  LoopUnrollOptions &setProfileBasedPeeling(int O) {
-    AllowProfileBasedPeeling = O;
-    return *this;
-  }
+    // Enables or disables loop peeling basing on profile.
+    LoopUnrollOptions &setProfileBasedPeeling(int O) {
+        AllowProfileBasedPeeling = O;
+        return *this;
+    }
 
-  // Sets the max full unroll count.
-  LoopUnrollOptions &setFullUnrollMaxCount(unsigned O) {
-    FullUnrollMaxCount = O;
-    return *this;
-  }
+    // Sets the max full unroll count.
+    LoopUnrollOptions &setFullUnrollMaxCount(unsigned O) {
+        FullUnrollMaxCount = O;
+        return *this;
+    }
 };
 
 /// Loop unroll pass that will support both full and partial unrolling.
 /// It is a function pass to have access to function and module analyses.
 /// It will also put loops into canonical form (simplified and LCSSA).
 class LoopUnrollPass : public PassInfoMixin<LoopUnrollPass> {
-  LoopUnrollOptions UnrollOpts;
+    LoopUnrollOptions UnrollOpts;
 
 public:
-  /// This uses the target information (or flags) to control the thresholds for
-  /// different unrolling stategies but supports all of them.
-  explicit LoopUnrollPass(LoopUnrollOptions UnrollOpts = {})
-      : UnrollOpts(UnrollOpts) {}
+    /// This uses the target information (or flags) to control the thresholds for
+    /// different unrolling stategies but supports all of them.
+    explicit LoopUnrollPass(LoopUnrollOptions UnrollOpts = {})
+        : UnrollOpts(UnrollOpts) {}
 
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

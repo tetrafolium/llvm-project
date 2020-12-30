@@ -20,12 +20,14 @@ namespace driver {
 /// The information about the darwin SDK that was used during this compilation.
 class DarwinSDKInfo {
 public:
-  DarwinSDKInfo(llvm::VersionTuple Version) : Version(Version) {}
+    DarwinSDKInfo(llvm::VersionTuple Version) : Version(Version) {}
 
-  const llvm::VersionTuple &getVersion() const { return Version; }
+    const llvm::VersionTuple &getVersion() const {
+        return Version;
+    }
 
 private:
-  llvm::VersionTuple Version;
+    llvm::VersionTuple Version;
 };
 
 /// Parse the SDK information from the SDKSettings.json file.
@@ -33,7 +35,7 @@ private:
 /// \returns an error if the SDKSettings.json file is invalid, None if the
 /// SDK has no SDKSettings.json, or a valid \c DarwinSDKInfo otherwise.
 Expected<Optional<DarwinSDKInfo>> parseDarwinSDKInfo(llvm::vfs::FileSystem &VFS,
-                                                     StringRef SDKRootPath);
+                               StringRef SDKRootPath);
 
 } // end namespace driver
 } // end namespace clang

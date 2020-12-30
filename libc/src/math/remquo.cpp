@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 double LLVM_LIBC_ENTRYPOINT(remquo)(double x, double y, int *exp) {
-  return fputil::remquo(x, y, *exp);
+    return fputil::remquo(x, y, *exp);
 }
 
 } // namespace __llvm_libc

@@ -19,18 +19,18 @@ class DIASession;
 
 class DIAEnumSectionContribs : public IPDBEnumChildren<IPDBSectionContrib> {
 public:
-  explicit DIAEnumSectionContribs(
-      const DIASession &PDBSession,
-      CComPtr<IDiaEnumSectionContribs> DiaEnumerator);
+    explicit DIAEnumSectionContribs(
+        const DIASession &PDBSession,
+        CComPtr<IDiaEnumSectionContribs> DiaEnumerator);
 
-  uint32_t getChildCount() const override;
-  ChildTypePtr getChildAtIndex(uint32_t Index) const override;
-  ChildTypePtr getNext() override;
-  void reset() override;
+    uint32_t getChildCount() const override;
+    ChildTypePtr getChildAtIndex(uint32_t Index) const override;
+    ChildTypePtr getNext() override;
+    void reset() override;
 
 private:
-  const DIASession &Session;
-  CComPtr<IDiaEnumSectionContribs> Enumerator;
+    const DIASession &Session;
+    CComPtr<IDiaEnumSectionContribs> Enumerator;
 };
 } // namespace pdb
 } // namespace llvm

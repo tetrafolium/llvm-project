@@ -31,24 +31,26 @@ namespace __xray {
 ///   }
 ///
 class RecursionGuard {
-  atomic_uint8_t &Running;
-  const bool Valid;
+    atomic_uint8_t &Running;
+    const bool Valid;
 
 public:
-  explicit inline RecursionGuard(atomic_uint8_t &R)
-      : Running(R), Valid(!atomic_exchange(&R, 1, memory_order_acq_rel)) {}
+    explicit inline RecursionGuard(atomic_uint8_t &R)
+        : Running(R), Valid(!atomic_exchange(&R, 1, memory_order_acq_rel)) {}
 
-  inline RecursionGuard(const RecursionGuard &) = delete;
-  inline RecursionGuard(RecursionGuard &&) = delete;
-  inline RecursionGuard &operator=(const RecursionGuard &) = delete;
-  inline RecursionGuard &operator=(RecursionGuard &&) = delete;
+    inline RecursionGuard(const RecursionGuard &) = delete;
+    inline RecursionGuard(RecursionGuard &&) = delete;
+    inline RecursionGuard &operator=(const RecursionGuard &) = delete;
+    inline RecursionGuard &operator=(RecursionGuard &&) = delete;
 
-  explicit inline operator bool() const { return Valid; }
+    explicit inline operator bool() const {
+        return Valid;
+    }
 
-  inline ~RecursionGuard() noexcept {
-    if (Valid)
-      atomic_store(&Running, 0, memory_order_release);
-  }
+    inline ~RecursionGuard() noexcept {
+        if (Valid)
+            atomic_store(&Running, 0, memory_order_release);
+    }
 };
 
 } // namespace __xray

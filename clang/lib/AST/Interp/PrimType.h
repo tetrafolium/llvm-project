@@ -25,54 +25,74 @@ namespace interp {
 
 /// Enumeration of the primitive types of the VM.
 enum PrimType : unsigned {
-  PT_Sint8,
-  PT_Uint8,
-  PT_Sint16,
-  PT_Uint16,
-  PT_Sint32,
-  PT_Uint32,
-  PT_Sint64,
-  PT_Uint64,
-  PT_Bool,
-  PT_Ptr,
+    PT_Sint8,
+    PT_Uint8,
+    PT_Sint16,
+    PT_Uint16,
+    PT_Sint32,
+    PT_Uint32,
+    PT_Sint64,
+    PT_Uint64,
+    PT_Bool,
+    PT_Ptr,
 };
 
 /// Mapping from primitive types to their representation.
 template <PrimType T> struct PrimConv;
-template <> struct PrimConv<PT_Sint8> { using T = Integral<8, true>; };
-template <> struct PrimConv<PT_Uint8> { using T = Integral<8, false>; };
-template <> struct PrimConv<PT_Sint16> { using T = Integral<16, true>; };
-template <> struct PrimConv<PT_Uint16> { using T = Integral<16, false>; };
-template <> struct PrimConv<PT_Sint32> { using T = Integral<32, true>; };
-template <> struct PrimConv<PT_Uint32> { using T = Integral<32, false>; };
-template <> struct PrimConv<PT_Sint64> { using T = Integral<64, true>; };
-template <> struct PrimConv<PT_Uint64> { using T = Integral<64, false>; };
-template <> struct PrimConv<PT_Bool> { using T = Boolean; };
-template <> struct PrimConv<PT_Ptr> { using T = Pointer; };
+template <> struct PrimConv<PT_Sint8> {
+    using T = Integral<8, true>;
+};
+template <> struct PrimConv<PT_Uint8> {
+    using T = Integral<8, false>;
+};
+template <> struct PrimConv<PT_Sint16> {
+    using T = Integral<16, true>;
+};
+template <> struct PrimConv<PT_Uint16> {
+    using T = Integral<16, false>;
+};
+template <> struct PrimConv<PT_Sint32> {
+    using T = Integral<32, true>;
+};
+template <> struct PrimConv<PT_Uint32> {
+    using T = Integral<32, false>;
+};
+template <> struct PrimConv<PT_Sint64> {
+    using T = Integral<64, true>;
+};
+template <> struct PrimConv<PT_Uint64> {
+    using T = Integral<64, false>;
+};
+template <> struct PrimConv<PT_Bool> {
+    using T = Boolean;
+};
+template <> struct PrimConv<PT_Ptr> {
+    using T = Pointer;
+};
 
 /// Returns the size of a primitive type in bytes.
 size_t primSize(PrimType Type);
 
 /// Aligns a size to the pointer alignment.
 constexpr size_t align(size_t Size) {
-  return ((Size + alignof(void *) - 1) / alignof(void *)) * alignof(void *);
+    return ((Size + alignof(void *) - 1) / alignof(void *)) * alignof(void *);
 }
 
 inline bool isPrimitiveIntegral(PrimType Type) {
-  switch (Type) {
-  case PT_Bool:
-  case PT_Sint8:
-  case PT_Uint8:
-  case PT_Sint16:
-  case PT_Uint16:
-  case PT_Sint32:
-  case PT_Uint32:
-  case PT_Sint64:
-  case PT_Uint64:
-    return true;
-  default:
-    return false;
-  }
+    switch (Type) {
+    case PT_Bool:
+    case PT_Sint8:
+    case PT_Uint8:
+    case PT_Sint16:
+    case PT_Uint16:
+    case PT_Sint32:
+    case PT_Uint32:
+    case PT_Sint64:
+    case PT_Uint64:
+        return true;
+    default:
+        return false;
+    }
 }
 
 } // namespace interp

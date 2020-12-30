@@ -30,18 +30,18 @@ using namespace llvm;
 namespace {
 
 class Printer : public FunctionPass {
-  static char ID;
+    static char ID;
 
-  raw_ostream &OS;
+    raw_ostream &OS;
 
 public:
-  explicit Printer(raw_ostream &OS) : FunctionPass(ID), OS(OS) {}
+    explicit Printer(raw_ostream &OS) : FunctionPass(ID), OS(OS) {}
 
-  StringRef getPassName() const override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    StringRef getPassName() const override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-  bool runOnFunction(Function &F) override;
-  bool doFinalization(Module &M) override;
+    bool runOnFunction(Function &F) override;
+    bool doFinalization(Module &M) override;
 };
 
 } // end anonymous namespace
@@ -61,28 +61,28 @@ GCFunctionInfo::~GCFunctionInfo() = default;
 char GCModuleInfo::ID = 0;
 
 GCModuleInfo::GCModuleInfo() : ImmutablePass(ID) {
-  initializeGCModuleInfoPass(*PassRegistry::getPassRegistry());
+    initializeGCModuleInfoPass(*PassRegistry::getPassRegistry());
 }
 
 GCFunctionInfo &GCModuleInfo::getFunctionInfo(const Function &F) {
-  assert(!F.isDeclaration() && "Can only get GCFunctionInfo for a definition!");
-  assert(F.hasGC());
+    assert(!F.isDeclaration() && "Can only get GCFunctionInfo for a definition!");
+    assert(F.hasGC());
 
-  finfo_map_type::iterator I = FInfoMap.find(&F);
-  if (I != FInfoMap.end())
-    return *I->second;
+    finfo_map_type::iterator I = FInfoMap.find(&F);
+    if (I != FInfoMap.end())
+        return *I->second;
 
-  GCStrategy *S = getGCStrategy(F.getGC());
-  Functions.push_back(std::make_unique<GCFunctionInfo>(F, *S));
-  GCFunctionInfo *GFI = Functions.back().get();
-  FInfoMap[&F] = GFI;
-  return *GFI;
+    GCStrategy *S = getGCStrategy(F.getGC());
+    Functions.push_back(std::make_unique<GCFunctionInfo>(F, *S));
+    GCFunctionInfo *GFI = Functions.back().get();
+    FInfoMap[&F] = GFI;
+    return *GFI;
 }
 
 void GCModuleInfo::clear() {
-  Functions.clear();
-  FInfoMap.clear();
-  GCStrategyList.clear();
+    Functions.clear();
+    FInfoMap.clear();
+    GCStrategyList.clear();
 }
 
 // -----------------------------------------------------------------------------
@@ -90,84 +90,84 @@ void GCModuleInfo::clear() {
 char Printer::ID = 0;
 
 FunctionPass *llvm::createGCInfoPrinter(raw_ostream &OS) {
-  return new Printer(OS);
+    return new Printer(OS);
 }
 
 StringRef Printer::getPassName() const {
-  return "Print Garbage Collector Information";
+    return "Print Garbage Collector Information";
 }
 
 void Printer::getAnalysisUsage(AnalysisUsage &AU) const {
-  FunctionPass::getAnalysisUsage(AU);
-  AU.setPreservesAll();
-  AU.addRequired<GCModuleInfo>();
+    FunctionPass::getAnalysisUsage(AU);
+    AU.setPreservesAll();
+    AU.addRequired<GCModuleInfo>();
 }
 
 bool Printer::runOnFunction(Function &F) {
-  if (F.hasGC())
-    return false;
+    if (F.hasGC())
+        return false;
 
-  GCFunctionInfo *FD = &getAnalysis<GCModuleInfo>().getFunctionInfo(F);
+    GCFunctionInfo *FD = &getAnalysis<GCModuleInfo>().getFunctionInfo(F);
 
-  OS << "GC roots for " << FD->getFunction().getName() << ":\n";
-  for (GCFunctionInfo::roots_iterator RI = FD->roots_begin(),
-                                      RE = FD->roots_end();
-       RI != RE; ++RI)
-    OS << "\t" << RI->Num << "\t" << RI->StackOffset << "[sp]\n";
+    OS << "GC roots for " << FD->getFunction().getName() << ":\n";
+    for (GCFunctionInfo::roots_iterator RI = FD->roots_begin(),
+            RE = FD->roots_end();
+            RI != RE; ++RI)
+        OS << "\t" << RI->Num << "\t" << RI->StackOffset << "[sp]\n";
 
-  OS << "GC safe points for " << FD->getFunction().getName() << ":\n";
-  for (GCFunctionInfo::iterator PI = FD->begin(), PE = FD->end(); PI != PE;
-       ++PI) {
+    OS << "GC safe points for " << FD->getFunction().getName() << ":\n";
+    for (GCFunctionInfo::iterator PI = FD->begin(), PE = FD->end(); PI != PE;
+            ++PI) {
 
-    OS << "\t" << PI->Label->getName() << ": " << "post-call"
-       << ", live = {";
+        OS << "\t" << PI->Label->getName() << ": " << "post-call"
+           << ", live = {";
 
-    for (GCFunctionInfo::live_iterator RI = FD->live_begin(PI),
-                                       RE = FD->live_end(PI);
-         ;) {
-      OS << " " << RI->Num;
-      if (++RI == RE)
-        break;
-      OS << ",";
+        for (GCFunctionInfo::live_iterator RI = FD->live_begin(PI),
+                RE = FD->live_end(PI);
+                ;) {
+            OS << " " << RI->Num;
+            if (++RI == RE)
+                break;
+            OS << ",";
+        }
+
+        OS << " }\n";
     }
 
-    OS << " }\n";
-  }
-
-  return false;
+    return false;
 }
 
 bool Printer::doFinalization(Module &M) {
-  GCModuleInfo *GMI = getAnalysisIfAvailable<GCModuleInfo>();
-  assert(GMI && "Printer didn't require GCModuleInfo?!");
-  GMI->clear();
-  return false;
+    GCModuleInfo *GMI = getAnalysisIfAvailable<GCModuleInfo>();
+    assert(GMI && "Printer didn't require GCModuleInfo?!");
+    GMI->clear();
+    return false;
 }
 
 GCStrategy *GCModuleInfo::getGCStrategy(const StringRef Name) {
-  // TODO: Arguably, just doing a linear search would be faster for small N
-  auto NMI = GCStrategyMap.find(Name);
-  if (NMI != GCStrategyMap.end())
-    return NMI->getValue();
+    // TODO: Arguably, just doing a linear search would be faster for small N
+    auto NMI = GCStrategyMap.find(Name);
+    if (NMI != GCStrategyMap.end())
+        return NMI->getValue();
 
-  for (auto& Entry : GCRegistry::entries()) {
-    if (Name == Entry.getName()) {
-      std::unique_ptr<GCStrategy> S = Entry.instantiate();
-      S->Name = std::string(Name);
-      GCStrategyMap[Name] = S.get();
-      GCStrategyList.push_back(std::move(S));
-      return GCStrategyList.back().get();
+    for (auto& Entry : GCRegistry::entries()) {
+        if (Name == Entry.getName()) {
+            std::unique_ptr<GCStrategy> S = Entry.instantiate();
+            S->Name = std::string(Name);
+            GCStrategyMap[Name] = S.get();
+            GCStrategyList.push_back(std::move(S));
+            return GCStrategyList.back().get();
+        }
     }
-  }
 
-  if (GCRegistry::begin() == GCRegistry::end()) {
-    // In normal operation, the registry should not be empty.  There should
-    // be the builtin GCs if nothing else.  The most likely scenario here is
-    // that we got here without running the initializers used by the Registry
-    // itself and it's registration mechanism.
-    const std::string error = ("unsupported GC: " + Name).str() +
-      " (did you remember to link and initialize the CodeGen library?)";
-    report_fatal_error(error);
-  } else
-    report_fatal_error(std::string("unsupported GC: ") + Name);
+    if (GCRegistry::begin() == GCRegistry::end()) {
+        // In normal operation, the registry should not be empty.  There should
+        // be the builtin GCs if nothing else.  The most likely scenario here is
+        // that we got here without running the initializers used by the Registry
+        // itself and it's registration mechanism.
+        const std::string error = ("unsupported GC: " + Name).str() +
+                                  " (did you remember to link and initialize the CodeGen library?)";
+        report_fatal_error(error);
+    } else
+        report_fatal_error(std::string("unsupported GC: ") + Name);
 }

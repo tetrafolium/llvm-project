@@ -14,7 +14,7 @@
 namespace __llvm_libc {
 
 size_t LLVM_LIBC_ENTRYPOINT(strcspn)(const char *src, const char *segment) {
-  return internal::complementary_span(src, segment);
+    return internal::complementary_span(src, segment);
 }
 
 } // namespace __llvm_libc

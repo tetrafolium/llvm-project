@@ -33,7 +33,7 @@ void createPDB(SymbolTable *symtab,
                llvm::codeview::DebugInfo *buildId);
 
 llvm::Optional<std::pair<llvm::StringRef, uint32_t>>
-getFileLineCodeView(const SectionChunk *c, uint32_t addr);
+        getFileLineCodeView(const SectionChunk *c, uint32_t addr);
 
 extern Timer loadGHashTimer;
 extern Timer mergeGHashTimer;

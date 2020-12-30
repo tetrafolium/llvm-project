@@ -35,111 +35,111 @@ ScriptInterpreter::~ScriptInterpreter() {}
 void ScriptInterpreter::CollectDataForBreakpointCommandCallback(
     std::vector<BreakpointOptions *> &bp_options_vec,
     CommandReturnObject &result) {
-  result.SetStatus(eReturnStatusFailed);
-  result.AppendError(
-      "This script interpreter does not support breakpoint callbacks.");
+    result.SetStatus(eReturnStatusFailed);
+    result.AppendError(
+        "This script interpreter does not support breakpoint callbacks.");
 }
 
 void ScriptInterpreter::CollectDataForWatchpointCommandCallback(
     WatchpointOptions *bp_options, CommandReturnObject &result) {
-  result.SetStatus(eReturnStatusFailed);
-  result.AppendError(
-      "This script interpreter does not support watchpoint callbacks.");
+    result.SetStatus(eReturnStatusFailed);
+    result.AppendError(
+        "This script interpreter does not support watchpoint callbacks.");
 }
 
 bool ScriptInterpreter::LoadScriptingModule(const char *filename,
-                                            bool init_session,
-                                            lldb_private::Status &error,
-                                            StructuredData::ObjectSP *module_sp,
-                                            FileSpec extra_search_dir) {
-  error.SetErrorString(
-      "This script interpreter does not support importing modules.");
-  return false;
+        bool init_session,
+        lldb_private::Status &error,
+        StructuredData::ObjectSP *module_sp,
+        FileSpec extra_search_dir) {
+    error.SetErrorString(
+        "This script interpreter does not support importing modules.");
+    return false;
 }
 
 std::string ScriptInterpreter::LanguageToString(lldb::ScriptLanguage language) {
-  switch (language) {
-  case eScriptLanguageNone:
-    return "None";
-  case eScriptLanguagePython:
-    return "Python";
-  case eScriptLanguageLua:
-    return "Lua";
-  case eScriptLanguageUnknown:
-    return "Unknown";
-  }
-  llvm_unreachable("Unhandled ScriptInterpreter!");
+    switch (language) {
+    case eScriptLanguageNone:
+        return "None";
+    case eScriptLanguagePython:
+        return "Python";
+    case eScriptLanguageLua:
+        return "Lua";
+    case eScriptLanguageUnknown:
+        return "Unknown";
+    }
+    llvm_unreachable("Unhandled ScriptInterpreter!");
 }
 
 lldb::ScriptLanguage
 ScriptInterpreter::StringToLanguage(const llvm::StringRef &language) {
-  if (language.equals_lower(LanguageToString(eScriptLanguageNone)))
-    return eScriptLanguageNone;
-  if (language.equals_lower(LanguageToString(eScriptLanguagePython)))
-    return eScriptLanguagePython;
-  if (language.equals_lower(LanguageToString(eScriptLanguageLua)))
-    return eScriptLanguageLua;
-  return eScriptLanguageUnknown;
+    if (language.equals_lower(LanguageToString(eScriptLanguageNone)))
+        return eScriptLanguageNone;
+    if (language.equals_lower(LanguageToString(eScriptLanguagePython)))
+        return eScriptLanguagePython;
+    if (language.equals_lower(LanguageToString(eScriptLanguageLua)))
+        return eScriptLanguageLua;
+    return eScriptLanguageUnknown;
 }
 
 Status ScriptInterpreter::SetBreakpointCommandCallback(
     std::vector<BreakpointOptions *> &bp_options_vec,
     const char *callback_text) {
-  Status return_error;
-  for (BreakpointOptions *bp_options : bp_options_vec) {
-    return_error = SetBreakpointCommandCallback(bp_options, callback_text);
-    if (return_error.Success())
-      break;
-  }
-  return return_error;
+    Status return_error;
+    for (BreakpointOptions *bp_options : bp_options_vec) {
+        return_error = SetBreakpointCommandCallback(bp_options, callback_text);
+        if (return_error.Success())
+            break;
+    }
+    return return_error;
 }
 
 Status ScriptInterpreter::SetBreakpointCommandCallbackFunction(
     std::vector<BreakpointOptions *> &bp_options_vec, const char *function_name,
     StructuredData::ObjectSP extra_args_sp) {
-  Status error;
-  for (BreakpointOptions *bp_options : bp_options_vec) {
-    error = SetBreakpointCommandCallbackFunction(bp_options, function_name,
-                                                 extra_args_sp);
-    if (!error.Success())
-      return error;
-  }
-  return error;
+    Status error;
+    for (BreakpointOptions *bp_options : bp_options_vec) {
+        error = SetBreakpointCommandCallbackFunction(bp_options, function_name,
+                extra_args_sp);
+        if (!error.Success())
+            return error;
+    }
+    return error;
 }
 
 std::unique_ptr<ScriptInterpreterLocker>
 ScriptInterpreter::AcquireInterpreterLock() {
-  return std::make_unique<ScriptInterpreterLocker>();
+    return std::make_unique<ScriptInterpreterLocker>();
 }
 
 static void ReadThreadBytesReceived(void *baton, const void *src,
                                     size_t src_len) {
-  if (src && src_len) {
-    Stream *strm = (Stream *)baton;
-    strm->Write(src, src_len);
-    strm->Flush();
-  }
+    if (src && src_len) {
+        Stream *strm = (Stream *)baton;
+        strm->Write(src, src_len);
+        strm->Flush();
+    }
 }
 
 llvm::Expected<std::unique_ptr<ScriptInterpreterIORedirect>>
-ScriptInterpreterIORedirect::Create(bool enable_io, Debugger &debugger,
-                                    CommandReturnObject *result) {
-  if (enable_io)
+        ScriptInterpreterIORedirect::Create(bool enable_io, Debugger &debugger,
+CommandReturnObject *result) {
+    if (enable_io)
+        return std::unique_ptr<ScriptInterpreterIORedirect>(
+                   new ScriptInterpreterIORedirect(debugger, result));
+
+    auto nullin = FileSystem::Instance().Open(FileSpec(FileSystem::DEV_NULL),
+                  File::eOpenOptionRead);
+    if (!nullin)
+        return nullin.takeError();
+
+    auto nullout = FileSystem::Instance().Open(FileSpec(FileSystem::DEV_NULL),
+                   File::eOpenOptionWrite);
+    if (!nullout)
+        return nullin.takeError();
+
     return std::unique_ptr<ScriptInterpreterIORedirect>(
-        new ScriptInterpreterIORedirect(debugger, result));
-
-  auto nullin = FileSystem::Instance().Open(FileSpec(FileSystem::DEV_NULL),
-                                            File::eOpenOptionRead);
-  if (!nullin)
-    return nullin.takeError();
-
-  auto nullout = FileSystem::Instance().Open(FileSpec(FileSystem::DEV_NULL),
-                                             File::eOpenOptionWrite);
-  if (!nullout)
-    return nullin.takeError();
-
-  return std::unique_ptr<ScriptInterpreterIORedirect>(
-      new ScriptInterpreterIORedirect(std::move(*nullin), std::move(*nullout)));
+               new ScriptInterpreterIORedirect(std::move(*nullin), std::move(*nullout)));
 }
 
 ScriptInterpreterIORedirect::ScriptInterpreterIORedirect(
@@ -155,67 +155,67 @@ ScriptInterpreterIORedirect::ScriptInterpreterIORedirect(
     : m_communication("lldb.ScriptInterpreterIORedirect.comm"),
       m_disconnect(false) {
 
-  if (result) {
-    m_input_file_sp = debugger.GetInputFileSP();
+    if (result) {
+        m_input_file_sp = debugger.GetInputFileSP();
 
-    Pipe pipe;
-    Status pipe_result = pipe.CreateNew(false);
+        Pipe pipe;
+        Status pipe_result = pipe.CreateNew(false);
 #if defined(_WIN32)
-    lldb::file_t read_file = pipe.GetReadNativeHandle();
-    pipe.ReleaseReadFileDescriptor();
-    std::unique_ptr<ConnectionGenericFile> conn_up =
-        std::make_unique<ConnectionGenericFile>(read_file, true);
+        lldb::file_t read_file = pipe.GetReadNativeHandle();
+        pipe.ReleaseReadFileDescriptor();
+        std::unique_ptr<ConnectionGenericFile> conn_up =
+            std::make_unique<ConnectionGenericFile>(read_file, true);
 #else
-    std::unique_ptr<ConnectionFileDescriptor> conn_up =
-        std::make_unique<ConnectionFileDescriptor>(
-            pipe.ReleaseReadFileDescriptor(), true);
+        std::unique_ptr<ConnectionFileDescriptor> conn_up =
+            std::make_unique<ConnectionFileDescriptor>(
+                pipe.ReleaseReadFileDescriptor(), true);
 #endif
 
-    if (conn_up->IsConnected()) {
-      m_communication.SetConnection(std::move(conn_up));
-      m_communication.SetReadThreadBytesReceivedCallback(
-          ReadThreadBytesReceived, &result->GetOutputStream());
-      m_communication.StartReadThread();
-      m_disconnect = true;
+        if (conn_up->IsConnected()) {
+            m_communication.SetConnection(std::move(conn_up));
+            m_communication.SetReadThreadBytesReceivedCallback(
+                ReadThreadBytesReceived, &result->GetOutputStream());
+            m_communication.StartReadThread();
+            m_disconnect = true;
 
-      FILE *outfile_handle = fdopen(pipe.ReleaseWriteFileDescriptor(), "w");
-      m_output_file_sp = std::make_shared<StreamFile>(outfile_handle, true);
-      m_error_file_sp = m_output_file_sp;
-      if (outfile_handle)
-        ::setbuf(outfile_handle, nullptr);
+            FILE *outfile_handle = fdopen(pipe.ReleaseWriteFileDescriptor(), "w");
+            m_output_file_sp = std::make_shared<StreamFile>(outfile_handle, true);
+            m_error_file_sp = m_output_file_sp;
+            if (outfile_handle)
+                ::setbuf(outfile_handle, nullptr);
 
-      result->SetImmediateOutputFile(debugger.GetOutputStream().GetFileSP());
-      result->SetImmediateErrorFile(debugger.GetErrorStream().GetFileSP());
+            result->SetImmediateOutputFile(debugger.GetOutputStream().GetFileSP());
+            result->SetImmediateErrorFile(debugger.GetErrorStream().GetFileSP());
+        }
     }
-  }
 
-  if (!m_input_file_sp || !m_output_file_sp || !m_error_file_sp)
-    debugger.AdoptTopIOHandlerFilesIfInvalid(m_input_file_sp, m_output_file_sp,
-                                             m_error_file_sp);
+    if (!m_input_file_sp || !m_output_file_sp || !m_error_file_sp)
+        debugger.AdoptTopIOHandlerFilesIfInvalid(m_input_file_sp, m_output_file_sp,
+                m_error_file_sp);
 }
 
 void ScriptInterpreterIORedirect::Flush() {
-  if (m_output_file_sp)
-    m_output_file_sp->Flush();
-  if (m_error_file_sp)
-    m_error_file_sp->Flush();
+    if (m_output_file_sp)
+        m_output_file_sp->Flush();
+    if (m_error_file_sp)
+        m_error_file_sp->Flush();
 }
 
 ScriptInterpreterIORedirect::~ScriptInterpreterIORedirect() {
-  if (!m_disconnect)
-    return;
+    if (!m_disconnect)
+        return;
 
-  assert(m_output_file_sp);
-  assert(m_error_file_sp);
-  assert(m_output_file_sp == m_error_file_sp);
+    assert(m_output_file_sp);
+    assert(m_error_file_sp);
+    assert(m_output_file_sp == m_error_file_sp);
 
-  // Close the write end of the pipe since we are done with our one line
-  // script. This should cause the read thread that output_comm is using to
-  // exit.
-  m_output_file_sp->GetFile().Close();
-  // The close above should cause this thread to exit when it gets to the end
-  // of file, so let it get all its data.
-  m_communication.JoinReadThread();
-  // Now we can close the read end of the pipe.
-  m_communication.Disconnect();
+    // Close the write end of the pipe since we are done with our one line
+    // script. This should cause the read thread that output_comm is using to
+    // exit.
+    m_output_file_sp->GetFile().Close();
+    // The close above should cause this thread to exit when it gets to the end
+    // of file, so let it get all its data.
+    m_communication.JoinReadThread();
+    // Now we can close the read end of the pipe.
+    m_communication.Disconnect();
 }

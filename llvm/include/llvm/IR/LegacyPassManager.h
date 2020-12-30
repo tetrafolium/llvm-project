@@ -34,62 +34,62 @@ class FunctionPassManagerImpl;
 /// it is.
 class PassManagerBase {
 public:
-  virtual ~PassManagerBase();
+    virtual ~PassManagerBase();
 
-  /// Add a pass to the queue of passes to run.  This passes ownership of
-  /// the Pass to the PassManager.  When the PassManager is destroyed, the pass
-  /// will be destroyed as well, so there is no need to delete the pass.  This
-  /// may even destroy the pass right away if it is found to be redundant. This
-  /// implies that all passes MUST be allocated with 'new'.
-  virtual void add(Pass *P) = 0;
+    /// Add a pass to the queue of passes to run.  This passes ownership of
+    /// the Pass to the PassManager.  When the PassManager is destroyed, the pass
+    /// will be destroyed as well, so there is no need to delete the pass.  This
+    /// may even destroy the pass right away if it is found to be redundant. This
+    /// implies that all passes MUST be allocated with 'new'.
+    virtual void add(Pass *P) = 0;
 };
 
 /// PassManager manages ModulePassManagers
 class PassManager : public PassManagerBase {
 public:
 
-  PassManager();
-  ~PassManager() override;
+    PassManager();
+    ~PassManager() override;
 
-  void add(Pass *P) override;
+    void add(Pass *P) override;
 
-  /// run - Execute all of the passes scheduled for execution.  Keep track of
-  /// whether any of the passes modifies the module, and if so, return true.
-  bool run(Module &M);
+    /// run - Execute all of the passes scheduled for execution.  Keep track of
+    /// whether any of the passes modifies the module, and if so, return true.
+    bool run(Module &M);
 
 private:
-  /// PassManagerImpl_New is the actual class. PassManager is just the
-  /// wraper to publish simple pass manager interface
-  PassManagerImpl *PM;
+    /// PassManagerImpl_New is the actual class. PassManager is just the
+    /// wraper to publish simple pass manager interface
+    PassManagerImpl *PM;
 };
 
 /// FunctionPassManager manages FunctionPasses.
 class FunctionPassManager : public PassManagerBase {
 public:
-  /// FunctionPassManager ctor - This initializes the pass manager.  It needs,
-  /// but does not take ownership of, the specified Module.
-  explicit FunctionPassManager(Module *M);
-  ~FunctionPassManager() override;
+    /// FunctionPassManager ctor - This initializes the pass manager.  It needs,
+    /// but does not take ownership of, the specified Module.
+    explicit FunctionPassManager(Module *M);
+    ~FunctionPassManager() override;
 
-  void add(Pass *P) override;
+    void add(Pass *P) override;
 
-  /// run - Execute all of the passes scheduled for execution.  Keep
-  /// track of whether any of the passes modifies the function, and if
-  /// so, return true.
-  ///
-  bool run(Function &F);
+    /// run - Execute all of the passes scheduled for execution.  Keep
+    /// track of whether any of the passes modifies the function, and if
+    /// so, return true.
+    ///
+    bool run(Function &F);
 
-  /// doInitialization - Run all of the initializers for the function passes.
-  ///
-  bool doInitialization();
+    /// doInitialization - Run all of the initializers for the function passes.
+    ///
+    bool doInitialization();
 
-  /// doFinalization - Run all of the finalizers for the function passes.
-  ///
-  bool doFinalization();
+    /// doFinalization - Run all of the finalizers for the function passes.
+    ///
+    bool doFinalization();
 
 private:
-  FunctionPassManagerImpl *FPM;
-  Module *M;
+    FunctionPassManagerImpl *FPM;
+    Module *M;
 };
 
 } // End legacy namespace

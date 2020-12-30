@@ -41,11 +41,11 @@ struct GetTypes;
 
 template <typename R, typename... Args>
 struct GetTypes<R(Args...)> {
-  using Result = R;
-  template <size_t i>
-  struct Arg {
-    using Type = typename std::tuple_element<i, std::tuple<Args...>>::type;
-  };
+    using Result = R;
+    template <size_t i>
+    struct Arg {
+        using Type = typename std::tuple_element<i, std::tuple<Args...>>::type;
+    };
 };
 
 #define LLVM_SYMBOLIZER_GET_FUNC(Function) \
@@ -110,82 +110,92 @@ extern "C" {
   }                                                   \
   return (T)res;
 
-int open(const char *filename, int flags, ...) {
-  unsigned long res;
-  if (flags | O_CREAT) {
-    va_list va;
-    va_start(va, flags);
-    unsigned mode = va_arg(va, unsigned);
-    va_end(va);
-    res = __sanitizer::internal_open(filename, flags, mode);
-  } else {
-    res = __sanitizer::internal_open(filename, flags);
-  }
-  RETURN_OR_SET_ERRNO(int, res);
-}
+    int open(const char *filename, int flags, ...) {
+        unsigned long res;
+        if (flags | O_CREAT) {
+            va_list va;
+            va_start(va, flags);
+            unsigned mode = va_arg(va, unsigned);
+            va_end(va);
+            res = __sanitizer::internal_open(filename, flags, mode);
+        } else {
+            res = __sanitizer::internal_open(filename, flags);
+        }
+        RETURN_OR_SET_ERRNO(int, res);
+    }
 
-int close(int fd) {
-  unsigned long res = __sanitizer::internal_close(fd);
-  RETURN_OR_SET_ERRNO(int, res);
-}
+    int close(int fd) {
+        unsigned long res = __sanitizer::internal_close(fd);
+        RETURN_OR_SET_ERRNO(int, res);
+    }
 
 #define STAT(func, arg, buf)                                  \
   unsigned long res = __sanitizer::internal_##func(arg, buf); \
   RETURN_OR_SET_ERRNO(int, res);
 
-int stat(const char *path, struct stat *buf) { STAT(stat, path, buf); }
+    int stat(const char *path, struct stat *buf) {
+        STAT(stat, path, buf);
+    }
 
-int lstat(const char *path, struct stat *buf) { STAT(lstat, path, buf); }
+    int lstat(const char *path, struct stat *buf) {
+        STAT(lstat, path, buf);
+    }
 
-int fstat(int fd, struct stat *buf) { STAT(fstat, fd, buf); }
+    int fstat(int fd, struct stat *buf) {
+        STAT(fstat, fd, buf);
+    }
 
 // Redirect versioned stat functions to the __sanitizer::internal() as well.
-int __xstat(int version, const char *path, struct stat *buf) {
-  STAT(stat, path, buf);
-}
+    int __xstat(int version, const char *path, struct stat *buf) {
+        STAT(stat, path, buf);
+    }
 
-int __lxstat(int version, const char *path, struct stat *buf) {
-  STAT(lstat, path, buf);
-}
+    int __lxstat(int version, const char *path, struct stat *buf) {
+        STAT(lstat, path, buf);
+    }
 
-int __fxstat(int version, int fd, struct stat *buf) { STAT(fstat, fd, buf); }
+    int __fxstat(int version, int fd, struct stat *buf) {
+        STAT(fstat, fd, buf);
+    }
 
-size_t strlen(const char *s) { return __sanitizer::internal_strlen(s); }
+    size_t strlen(const char *s) {
+        return __sanitizer::internal_strlen(s);
+    }
 
-void *mmap(void *addr, size_t length, int prot, int flags, int fd,
-           off_t offset) {
-  unsigned long res = __sanitizer::internal_mmap(
-      addr, (unsigned long)length, prot, flags, fd, (unsigned long long)offset);
-  RETURN_OR_SET_ERRNO(void *, res);
-}
+    void *mmap(void *addr, size_t length, int prot, int flags, int fd,
+               off_t offset) {
+        unsigned long res = __sanitizer::internal_mmap(
+                                addr, (unsigned long)length, prot, flags, fd, (unsigned long long)offset);
+        RETURN_OR_SET_ERRNO(void *, res);
+    }
 
-LLVM_SYMBOLIZER_INTERCEPTOR3(read, ssize_t(int, void *, size_t))
-LLVM_SYMBOLIZER_INTERCEPTOR4(pread, ssize_t(int, void *, size_t, off_t))
-LLVM_SYMBOLIZER_INTERCEPTOR4(pread64, ssize_t(int, void *, size_t, off64_t))
-LLVM_SYMBOLIZER_INTERCEPTOR2(realpath, char *(const char *, char *))
+    LLVM_SYMBOLIZER_INTERCEPTOR3(read, ssize_t(int, void *, size_t))
+    LLVM_SYMBOLIZER_INTERCEPTOR4(pread, ssize_t(int, void *, size_t, off_t))
+    LLVM_SYMBOLIZER_INTERCEPTOR4(pread64, ssize_t(int, void *, size_t, off64_t))
+    LLVM_SYMBOLIZER_INTERCEPTOR2(realpath, char *(const char *, char *))
 
-LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_cond_broadcast, int(pthread_cond_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_cond_wait,
-                             int(pthread_cond_t *, pthread_mutex_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutex_lock, int(pthread_mutex_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutex_unlock, int(pthread_mutex_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutex_destroy, int(pthread_mutex_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_mutex_init,
-                             int(pthread_mutex_t *,
-                                 const pthread_mutexattr_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutexattr_destroy,
-                             int(pthread_mutexattr_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutexattr_init, int(pthread_mutexattr_t *))
-LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_mutexattr_settype,
-                             int(pthread_mutexattr_t *, int))
-LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_getspecific, void *(pthread_key_t))
-LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_key_create,
-                             int(pthread_key_t *, void (*)(void *)))
-LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_once,
-                             int(pthread_once_t *, void (*)(void)))
-LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_setspecific,
-                             int(pthread_key_t, const void *))
-LLVM_SYMBOLIZER_INTERCEPTOR3(pthread_sigmask,
-                             int(int, const sigset_t *, sigset_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_cond_broadcast, int(pthread_cond_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_cond_wait,
+                                 int(pthread_cond_t *, pthread_mutex_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutex_lock, int(pthread_mutex_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutex_unlock, int(pthread_mutex_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutex_destroy, int(pthread_mutex_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_mutex_init,
+                                 int(pthread_mutex_t *,
+                                     const pthread_mutexattr_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutexattr_destroy,
+                                 int(pthread_mutexattr_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_mutexattr_init, int(pthread_mutexattr_t *))
+    LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_mutexattr_settype,
+                                 int(pthread_mutexattr_t *, int))
+    LLVM_SYMBOLIZER_INTERCEPTOR1(pthread_getspecific, void *(pthread_key_t))
+    LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_key_create,
+                                 int(pthread_key_t *, void (*)(void *)))
+    LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_once,
+                                 int(pthread_once_t *, void (*)(void)))
+    LLVM_SYMBOLIZER_INTERCEPTOR2(pthread_setspecific,
+                                 int(pthread_key_t, const void *))
+    LLVM_SYMBOLIZER_INTERCEPTOR3(pthread_sigmask,
+                                 int(int, const sigset_t *, sigset_t *))
 
 }  // extern "C"

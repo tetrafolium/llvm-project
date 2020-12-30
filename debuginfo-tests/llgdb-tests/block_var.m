@@ -1,6 +1,6 @@
 // RUN: %clang %target_itanium_abi_host_triple -O0 -g %s -c -o %t.o
 // RUN: %clang %target_itanium_abi_host_triple %t.o -o %t.out -framework Foundation
-// RUN: %test_debuginfo %s %t.out 
+// RUN: %test_debuginfo %s %t.out
 
 // REQUIRES: system-darwin
 
@@ -18,7 +18,7 @@ int I(int n)
 {
     __block int result;
     int i = 2;
-    doBlock(^{
+    doBlock(^ {
         result = n;
     });
     return result + i; /* Check value of 'result' */
@@ -26,7 +26,7 @@ int I(int n)
 
 
 int main (int argc, const char * argv[]) {
-  return I(42);
+    return I(42);
 }
 
 

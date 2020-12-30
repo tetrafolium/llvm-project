@@ -26,24 +26,24 @@ using namespace lldb;
 using namespace lldb_private;
 
 bool RegisterContextPOSIX_arm64::IsGPR(unsigned reg) {
-  if (m_register_info_up->GetRegisterSetFromRegisterIndex(reg) ==
-      RegisterInfoPOSIX_arm64::GPRegSet)
-    return true;
-  return false;
+    if (m_register_info_up->GetRegisterSetFromRegisterIndex(reg) ==
+            RegisterInfoPOSIX_arm64::GPRegSet)
+        return true;
+    return false;
 }
 
 bool RegisterContextPOSIX_arm64::IsFPR(unsigned reg) {
-  if (m_register_info_up->GetRegisterSetFromRegisterIndex(reg) ==
-      RegisterInfoPOSIX_arm64::FPRegSet)
-    return true;
-  return false;
+    if (m_register_info_up->GetRegisterSetFromRegisterIndex(reg) ==
+            RegisterInfoPOSIX_arm64::FPRegSet)
+        return true;
+    return false;
 }
 
 bool RegisterContextPOSIX_arm64::IsSVE(unsigned reg) const {
-  if (m_register_info_up->GetRegisterSetFromRegisterIndex(reg) ==
-      RegisterInfoPOSIX_arm64::SVERegSet)
-    return true;
-  return false;
+    if (m_register_info_up->GetRegisterSetFromRegisterIndex(reg) ==
+            RegisterInfoPOSIX_arm64::SVERegSet)
+        return true;
+    return false;
 }
 
 RegisterContextPOSIX_arm64::RegisterContextPOSIX_arm64(
@@ -59,48 +59,48 @@ void RegisterContextPOSIX_arm64::Invalidate() {}
 void RegisterContextPOSIX_arm64::InvalidateAllRegisters() {}
 
 unsigned RegisterContextPOSIX_arm64::GetRegisterOffset(unsigned reg) {
-  return m_register_info_up->GetRegisterInfo()[reg].byte_offset;
+    return m_register_info_up->GetRegisterInfo()[reg].byte_offset;
 }
 
 unsigned RegisterContextPOSIX_arm64::GetRegisterSize(unsigned reg) {
-  return m_register_info_up->GetRegisterInfo()[reg].byte_size;
+    return m_register_info_up->GetRegisterInfo()[reg].byte_size;
 }
 
 size_t RegisterContextPOSIX_arm64::GetRegisterCount() {
-  return m_register_info_up->GetRegisterCount();
+    return m_register_info_up->GetRegisterCount();
 }
 
 size_t RegisterContextPOSIX_arm64::GetGPRSize() {
-  return m_register_info_up->GetGPRSize();
+    return m_register_info_up->GetGPRSize();
 }
 
 const lldb_private::RegisterInfo *
 RegisterContextPOSIX_arm64::GetRegisterInfo() {
-  // Commonly, this method is overridden and g_register_infos is copied and
-  // specialized. So, use GetRegisterInfo() rather than g_register_infos in
-  // this scope.
-  return m_register_info_up->GetRegisterInfo();
+    // Commonly, this method is overridden and g_register_infos is copied and
+    // specialized. So, use GetRegisterInfo() rather than g_register_infos in
+    // this scope.
+    return m_register_info_up->GetRegisterInfo();
 }
 
 const lldb_private::RegisterInfo *
 RegisterContextPOSIX_arm64::GetRegisterInfoAtIndex(size_t reg) {
-  if (reg < GetRegisterCount())
-    return &GetRegisterInfo()[reg];
+    if (reg < GetRegisterCount())
+        return &GetRegisterInfo()[reg];
 
-  return nullptr;
+    return nullptr;
 }
 
 size_t RegisterContextPOSIX_arm64::GetRegisterSetCount() {
-  return m_register_info_up->GetRegisterSetCount();
+    return m_register_info_up->GetRegisterSetCount();
 }
 
 const lldb_private::RegisterSet *
 RegisterContextPOSIX_arm64::GetRegisterSet(size_t set) {
-  return m_register_info_up->GetRegisterSet(set);
+    return m_register_info_up->GetRegisterSet(set);
 }
 
 const char *RegisterContextPOSIX_arm64::GetRegisterName(unsigned reg) {
-  if (reg < GetRegisterCount())
-    return GetRegisterInfo()[reg].name;
-  return nullptr;
+    if (reg < GetRegisterCount())
+        return GetRegisterInfo()[reg].name;
+    return nullptr;
 }

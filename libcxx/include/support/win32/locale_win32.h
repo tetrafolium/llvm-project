@@ -147,7 +147,9 @@ public:
         return __locale != nullptr;
     }
 
-    const char* __get_locale() const { return __locale_str; }
+    const char* __get_locale() const {
+        return __locale_str;
+    }
 
     operator _locale_t() const {
         return __locale;
@@ -208,14 +210,14 @@ inline _LIBCPP_INLINE_VISIBILITY
 int
 islower_l(int c, _locale_t loc)
 {
- return _islower_l((int)c, loc);
+    return _islower_l((int)c, loc);
 }
 
 inline _LIBCPP_INLINE_VISIBILITY
 int
 isupper_l(int c, _locale_t loc)
 {
- return _isupper_l((int)c, loc);
+    return _isupper_l((int)c, loc);
 }
 
 #define isdigit_l _isdigit_l

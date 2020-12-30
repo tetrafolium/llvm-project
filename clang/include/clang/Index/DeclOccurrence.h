@@ -20,19 +20,19 @@ class Decl;
 namespace index {
 
 struct DeclOccurrence {
-  SymbolRoleSet Roles;
-  unsigned Offset;
-  const Decl *Dcl;
-  SmallVector<SymbolRelation, 3> Relations;
+    SymbolRoleSet Roles;
+    unsigned Offset;
+    const Decl *Dcl;
+    SmallVector<SymbolRelation, 3> Relations;
 
-  DeclOccurrence(SymbolRoleSet R, unsigned Offset, const Decl *D,
-                 ArrayRef<SymbolRelation> Relations)
-      : Roles(R), Offset(Offset), Dcl(D),
-        Relations(Relations.begin(), Relations.end()) {}
+    DeclOccurrence(SymbolRoleSet R, unsigned Offset, const Decl *D,
+                   ArrayRef<SymbolRelation> Relations)
+        : Roles(R), Offset(Offset), Dcl(D),
+          Relations(Relations.begin(), Relations.end()) {}
 
-  friend bool operator<(const DeclOccurrence &LHS, const DeclOccurrence &RHS) {
-    return LHS.Offset < RHS.Offset;
-  }
+    friend bool operator<(const DeclOccurrence &LHS, const DeclOccurrence &RHS) {
+        return LHS.Offset < RHS.Offset;
+    }
 };
 
 } // namespace index

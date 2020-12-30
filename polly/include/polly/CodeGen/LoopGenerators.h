@@ -24,11 +24,11 @@ using namespace llvm;
 /// Initialization values taken from OpenMP's enum in kmp.h: sched_type.
 /// Currently, only 'static' scheduling may change from chunked to non-chunked.
 enum class OMPGeneralSchedulingType {
-  StaticChunked = 33,
-  StaticNonChunked = 34,
-  Dynamic = 35,
-  Guided = 36,
-  Runtime = 37
+    StaticChunked = 33,
+    StaticNonChunked = 34,
+    Dynamic = 35,
+    Guided = 36,
+    Runtime = 37
 };
 
 extern int PollyNumThreads;
@@ -110,109 +110,109 @@ Value *createLoop(Value *LowerBound, Value *UpperBound, Value *Stride,
 ///   }
 class ParallelLoopGenerator {
 public:
-  /// Create a parallel loop generator for the current function.
-  ParallelLoopGenerator(PollyIRBuilder &Builder, LoopInfo &LI,
-                        DominatorTree &DT, const DataLayout &DL)
-      : Builder(Builder), LI(LI), DT(DT),
-        LongType(
-            Type::getIntNTy(Builder.getContext(), DL.getPointerSizeInBits())),
-        M(Builder.GetInsertBlock()->getParent()->getParent()) {}
+    /// Create a parallel loop generator for the current function.
+    ParallelLoopGenerator(PollyIRBuilder &Builder, LoopInfo &LI,
+                          DominatorTree &DT, const DataLayout &DL)
+        : Builder(Builder), LI(LI), DT(DT),
+          LongType(
+              Type::getIntNTy(Builder.getContext(), DL.getPointerSizeInBits())),
+          M(Builder.GetInsertBlock()->getParent()->getParent()) {}
 
-  virtual ~ParallelLoopGenerator() {}
+    virtual ~ParallelLoopGenerator() {}
 
-  /// Create a parallel loop.
-  ///
-  /// This function is the main function to automatically generate a parallel
-  /// loop with all its components.
-  ///
-  /// @param LB        The lower bound for the loop we parallelize.
-  /// @param UB        The upper bound for the loop we parallelize.
-  /// @param Stride    The stride of the loop we parallelize.
-  /// @param Values    A set of LLVM-IR Values that should be available in
-  ///                  the new loop body.
-  /// @param VMap      A map to allow outside access to the new versions of
-  ///                  the values in @p Values.
-  /// @param LoopBody  A pointer to an iterator that is set to point to the
-  ///                  body of the created loop. It should be used to insert
-  ///                  instructions that form the actual loop body.
-  ///
-  /// @return The newly created induction variable for this loop.
-  Value *createParallelLoop(Value *LB, Value *UB, Value *Stride,
-                            SetVector<Value *> &Values, ValueMapT &VMap,
-                            BasicBlock::iterator *LoopBody);
+    /// Create a parallel loop.
+    ///
+    /// This function is the main function to automatically generate a parallel
+    /// loop with all its components.
+    ///
+    /// @param LB        The lower bound for the loop we parallelize.
+    /// @param UB        The upper bound for the loop we parallelize.
+    /// @param Stride    The stride of the loop we parallelize.
+    /// @param Values    A set of LLVM-IR Values that should be available in
+    ///                  the new loop body.
+    /// @param VMap      A map to allow outside access to the new versions of
+    ///                  the values in @p Values.
+    /// @param LoopBody  A pointer to an iterator that is set to point to the
+    ///                  body of the created loop. It should be used to insert
+    ///                  instructions that form the actual loop body.
+    ///
+    /// @return The newly created induction variable for this loop.
+    Value *createParallelLoop(Value *LB, Value *UB, Value *Stride,
+                              SetVector<Value *> &Values, ValueMapT &VMap,
+                              BasicBlock::iterator *LoopBody);
 
 protected:
-  /// The IR builder we use to create instructions.
-  PollyIRBuilder &Builder;
+    /// The IR builder we use to create instructions.
+    PollyIRBuilder &Builder;
 
-  /// The loop info of the current function we need to update.
-  LoopInfo &LI;
+    /// The loop info of the current function we need to update.
+    LoopInfo &LI;
 
-  /// The dominance tree of the current function we need to update.
-  DominatorTree &DT;
+    /// The dominance tree of the current function we need to update.
+    DominatorTree &DT;
 
-  /// The type of a "long" on this hardware used for backend calls.
-  Type *LongType;
+    /// The type of a "long" on this hardware used for backend calls.
+    Type *LongType;
 
-  /// The current module
-  Module *M;
+    /// The current module
+    Module *M;
 
 public:
-  /// Create a struct for all @p Values and store them in there.
-  ///
-  /// @param Values The values which should be stored in the struct.
-  ///
-  /// @return The created struct.
-  AllocaInst *storeValuesIntoStruct(SetVector<Value *> &Values);
+    /// Create a struct for all @p Values and store them in there.
+    ///
+    /// @param Values The values which should be stored in the struct.
+    ///
+    /// @return The created struct.
+    AllocaInst *storeValuesIntoStruct(SetVector<Value *> &Values);
 
-  /// Extract all values from the @p Struct and construct the mapping.
-  ///
-  /// @param Values The values which were stored in the struct.
-  /// @param Struct The struct holding all the values in @p Values.
-  /// @param VMap   A map to associate every element of @p Values with the
-  ///               new llvm value loaded from the @p Struct.
-  void extractValuesFromStruct(SetVector<Value *> Values, Type *Ty,
-                               Value *Struct, ValueMapT &VMap);
+    /// Extract all values from the @p Struct and construct the mapping.
+    ///
+    /// @param Values The values which were stored in the struct.
+    /// @param Struct The struct holding all the values in @p Values.
+    /// @param VMap   A map to associate every element of @p Values with the
+    ///               new llvm value loaded from the @p Struct.
+    void extractValuesFromStruct(SetVector<Value *> Values, Type *Ty,
+                                 Value *Struct, ValueMapT &VMap);
 
-  /// Create the definition of the parallel subfunction.
-  ///
-  /// @return A pointer to the subfunction.
-  Function *createSubFnDefinition();
+    /// Create the definition of the parallel subfunction.
+    ///
+    /// @return A pointer to the subfunction.
+    Function *createSubFnDefinition();
 
-  /// Create the runtime library calls for spawn and join of the worker threads.
-  /// Additionally, places a call to the specified subfunction.
-  ///
-  /// @param SubFn      The subfunction which holds the loop body.
-  /// @param SubFnParam The parameter for the subfunction (basically the struct
-  ///                   filled with the outside values).
-  /// @param LB         The lower bound for the loop we parallelize.
-  /// @param UB         The upper bound for the loop we parallelize.
-  /// @param Stride     The stride of the loop we parallelize.
-  virtual void deployParallelExecution(Function *SubFn, Value *SubFnParam,
-                                       Value *LB, Value *UB, Value *Stride) = 0;
+    /// Create the runtime library calls for spawn and join of the worker threads.
+    /// Additionally, places a call to the specified subfunction.
+    ///
+    /// @param SubFn      The subfunction which holds the loop body.
+    /// @param SubFnParam The parameter for the subfunction (basically the struct
+    ///                   filled with the outside values).
+    /// @param LB         The lower bound for the loop we parallelize.
+    /// @param UB         The upper bound for the loop we parallelize.
+    /// @param Stride     The stride of the loop we parallelize.
+    virtual void deployParallelExecution(Function *SubFn, Value *SubFnParam,
+                                         Value *LB, Value *UB, Value *Stride) = 0;
 
-  /// Prepare the definition of the parallel subfunction.
-  /// Creates the argument list and names them (as well as the subfunction).
-  ///
-  /// @param F A pointer to the (parallel) subfunction's parent function.
-  ///
-  /// @return The pointer to the (parallel) subfunction.
-  virtual Function *prepareSubFnDefinition(Function *F) const = 0;
+    /// Prepare the definition of the parallel subfunction.
+    /// Creates the argument list and names them (as well as the subfunction).
+    ///
+    /// @param F A pointer to the (parallel) subfunction's parent function.
+    ///
+    /// @return The pointer to the (parallel) subfunction.
+    virtual Function *prepareSubFnDefinition(Function *F) const = 0;
 
-  /// Create the parallel subfunction.
-  ///
-  /// @param Stride The induction variable increment.
-  /// @param Struct A struct holding all values in @p Values.
-  /// @param Values A set of LLVM-IR Values that should be available in
-  ///               the new loop body.
-  /// @param VMap   A map to allow outside access to the new versions of
-  ///               the values in @p Values.
-  /// @param SubFn  The newly created subfunction is returned here.
-  ///
-  /// @return The newly created induction variable.
-  virtual std::tuple<Value *, Function *>
-  createSubFn(Value *Stride, AllocaInst *Struct, SetVector<Value *> UsedValues,
-              ValueMapT &VMap) = 0;
+    /// Create the parallel subfunction.
+    ///
+    /// @param Stride The induction variable increment.
+    /// @param Struct A struct holding all values in @p Values.
+    /// @param Values A set of LLVM-IR Values that should be available in
+    ///               the new loop body.
+    /// @param VMap   A map to allow outside access to the new versions of
+    ///               the values in @p Values.
+    /// @param SubFn  The newly created subfunction is returned here.
+    ///
+    /// @return The newly created induction variable.
+    virtual std::tuple<Value *, Function *>
+    createSubFn(Value *Stride, AllocaInst *Struct, SetVector<Value *> UsedValues,
+                ValueMapT &VMap) = 0;
 };
 } // end namespace polly
 #endif

@@ -28,54 +28,54 @@ using namespace llvm;
 /// \returns true on success.
 static bool translateCodePointToUTF8(unsigned CodePoint,
                                      SmallVectorImpl<char> &CLiteral) {
-  char Translated[UNI_MAX_UTF8_BYTES_PER_CODE_POINT];
-  char *TranslatedPtr = Translated;
-  if (!ConvertCodePointToUTF8(CodePoint, TranslatedPtr))
-    return false;
+    char Translated[UNI_MAX_UTF8_BYTES_PER_CODE_POINT];
+    char *TranslatedPtr = Translated;
+    if (!ConvertCodePointToUTF8(CodePoint, TranslatedPtr))
+        return false;
 
-  StringRef UTF8(Translated, TranslatedPtr - Translated);
+    StringRef UTF8(Translated, TranslatedPtr - Translated);
 
-  raw_svector_ostream OS(CLiteral);
-  OS << "\"";
-  for (size_t i = 0, e = UTF8.size(); i != e; ++i) {
-    OS << "\\x";
-    OS.write_hex(static_cast<unsigned char>(UTF8[i]));
-  }
-  OS << "\"";
+    raw_svector_ostream OS(CLiteral);
+    OS << "\"";
+    for (size_t i = 0, e = UTF8.size(); i != e; ++i) {
+        OS << "\\x";
+        OS.write_hex(static_cast<unsigned char>(UTF8[i]));
+    }
+    OS << "\"";
 
-  return true;
+    return true;
 }
 
 void clang::EmitClangCommentHTMLNamedCharacterReferences(RecordKeeper &Records,
-                                                         raw_ostream &OS) {
-  std::vector<Record *> Tags = Records.getAllDerivedDefinitions("NCR");
-  std::vector<StringMatcher::StringPair> NameToUTF8;
-  SmallString<32> CLiteral;
-  for (std::vector<Record *>::iterator I = Tags.begin(), E = Tags.end();
-       I != E; ++I) {
-    Record &Tag = **I;
-    std::string Spelling = std::string(Tag.getValueAsString("Spelling"));
-    uint64_t CodePoint = Tag.getValueAsInt("CodePoint");
-    CLiteral.clear();
-    CLiteral.append("return ");
-    if (!translateCodePointToUTF8(CodePoint, CLiteral)) {
-      SrcMgr.PrintMessage(Tag.getLoc().front(),
-                          SourceMgr::DK_Error,
-                          Twine("invalid code point"));
-      continue;
+        raw_ostream &OS) {
+    std::vector<Record *> Tags = Records.getAllDerivedDefinitions("NCR");
+    std::vector<StringMatcher::StringPair> NameToUTF8;
+    SmallString<32> CLiteral;
+    for (std::vector<Record *>::iterator I = Tags.begin(), E = Tags.end();
+            I != E; ++I) {
+        Record &Tag = **I;
+        std::string Spelling = std::string(Tag.getValueAsString("Spelling"));
+        uint64_t CodePoint = Tag.getValueAsInt("CodePoint");
+        CLiteral.clear();
+        CLiteral.append("return ");
+        if (!translateCodePointToUTF8(CodePoint, CLiteral)) {
+            SrcMgr.PrintMessage(Tag.getLoc().front(),
+                                SourceMgr::DK_Error,
+                                Twine("invalid code point"));
+            continue;
+        }
+        CLiteral.append(";");
+
+        StringMatcher::StringPair Match(Spelling, std::string(CLiteral.str()));
+        NameToUTF8.push_back(Match);
     }
-    CLiteral.append(";");
 
-    StringMatcher::StringPair Match(Spelling, std::string(CLiteral.str()));
-    NameToUTF8.push_back(Match);
-  }
+    emitSourceFileHeader("HTML named character reference to UTF-8 "
+                         "translation", OS);
 
-  emitSourceFileHeader("HTML named character reference to UTF-8 "
-                       "translation", OS);
-
-  OS << "StringRef translateHTMLNamedCharacterReferenceToUTF8(\n"
-        "                                             StringRef Name) {\n";
-  StringMatcher("Name", NameToUTF8, OS).Emit();
-  OS << "  return StringRef();\n"
-     << "}\n\n";
+    OS << "StringRef translateHTMLNamedCharacterReferenceToUTF8(\n"
+       "                                             StringRef Name) {\n";
+    StringMatcher("Name", NameToUTF8, OS).Emit();
+    OS << "  return StringRef();\n"
+       << "}\n\n";
 }

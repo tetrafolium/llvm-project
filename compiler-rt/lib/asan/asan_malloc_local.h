@@ -18,8 +18,8 @@
 #include "asan_internal.h"
 
 static inline bool EarlyMalloc() {
-  return SANITIZER_RTEMS &&
-         (!__asan::asan_inited || __asan::asan_init_is_running);
+    return SANITIZER_RTEMS &&
+           (!__asan::asan_inited || __asan::asan_init_is_running);
 }
 
 #if SANITIZER_RTEMS

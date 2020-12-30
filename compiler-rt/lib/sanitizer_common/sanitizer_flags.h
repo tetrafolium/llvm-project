@@ -18,9 +18,9 @@
 namespace __sanitizer {
 
 enum HandleSignalMode {
-  kHandleSignalNo,
-  kHandleSignalYes,
-  kHandleSignalExclusive,
+    kHandleSignalNo,
+    kHandleSignalYes,
+    kHandleSignalExclusive,
 };
 
 struct CommonFlags {
@@ -28,18 +28,18 @@ struct CommonFlags {
 #include "sanitizer_flags.inc"
 #undef COMMON_FLAG
 
-  void SetDefaults();
-  void CopyFrom(const CommonFlags &other);
+    void SetDefaults();
+    void CopyFrom(const CommonFlags &other);
 };
 
 // Functions to get/set global CommonFlags shared by all sanitizer runtimes:
 extern CommonFlags common_flags_dont_use;
 inline const CommonFlags *common_flags() {
-  return &common_flags_dont_use;
+    return &common_flags_dont_use;
 }
 
 inline void SetCommonFlagsDefaults() {
-  common_flags_dont_use.SetDefaults();
+    common_flags_dont_use.SetDefaults();
 }
 
 // This function can only be used to setup tool-specific overrides for
@@ -48,7 +48,7 @@ inline void SetCommonFlagsDefaults() {
 // only during the flags initialization (i.e. before they are used for
 // the first time).
 inline void OverrideCommonFlags(const CommonFlags &cf) {
-  common_flags_dont_use.CopyFrom(cf);
+    common_flags_dont_use.CopyFrom(cf);
 }
 
 void SubstituteForFlagValue(const char *s, char *out, uptr out_size);

@@ -18,51 +18,55 @@
 
 namespace {
 size_t Backtrace(uintptr_t *TraceBuffer, size_t Size) {
-  static_assert(sizeof(uintptr_t) == sizeof(void *), "uintptr_t is not void*");
+    static_assert(sizeof(uintptr_t) == sizeof(void *), "uintptr_t is not void*");
 
-  return backtrace(reinterpret_cast<void **>(TraceBuffer), Size);
+    return backtrace(reinterpret_cast<void **>(TraceBuffer), Size);
 }
 
 // We don't need any custom handling for the Segv backtrace - the libc unwinder
 // has no problems with unwinding through a signal handler. Force inlining here
 // to avoid the additional frame.
 GWP_ASAN_ALWAYS_INLINE size_t SegvBacktrace(uintptr_t *TraceBuffer, size_t Size,
-                                            void * /*Context*/) {
-  return Backtrace(TraceBuffer, Size);
+        void * /*Context*/) {
+    return Backtrace(TraceBuffer, Size);
 }
 
 static void PrintBacktrace(uintptr_t *Trace, size_t TraceLength,
                            gwp_asan::crash_handler::Printf_t Printf) {
-  if (TraceLength == 0) {
-    Printf("  <not found (does your allocator support backtracing?)>\n\n");
-    return;
-  }
+    if (TraceLength == 0) {
+        Printf("  <not found (does your allocator support backtracing?)>\n\n");
+        return;
+    }
 
-  char **BacktraceSymbols =
-      backtrace_symbols(reinterpret_cast<void **>(Trace), TraceLength);
+    char **BacktraceSymbols =
+        backtrace_symbols(reinterpret_cast<void **>(Trace), TraceLength);
 
-  for (size_t i = 0; i < TraceLength; ++i) {
-    if (!BacktraceSymbols)
-      Printf("  #%zu %p\n", i, Trace[i]);
-    else
-      Printf("  #%zu %s\n", i, BacktraceSymbols[i]);
-  }
+    for (size_t i = 0; i < TraceLength; ++i) {
+        if (!BacktraceSymbols)
+            Printf("  #%zu %p\n", i, Trace[i]);
+        else
+            Printf("  #%zu %s\n", i, BacktraceSymbols[i]);
+    }
 
-  Printf("\n");
-  if (BacktraceSymbols)
-    free(BacktraceSymbols);
+    Printf("\n");
+    if (BacktraceSymbols)
+        free(BacktraceSymbols);
 }
 } // anonymous namespace
 
 namespace gwp_asan {
 namespace options {
-Backtrace_t getBacktraceFunction() { return Backtrace; }
+Backtrace_t getBacktraceFunction() {
+    return Backtrace;
+}
 crash_handler::PrintBacktrace_t getPrintBacktraceFunction() {
-  return PrintBacktrace;
+    return PrintBacktrace;
 }
 } // namespace options
 
 namespace crash_handler {
-SegvBacktrace_t getSegvBacktraceFunction() { return SegvBacktrace; }
+SegvBacktrace_t getSegvBacktraceFunction() {
+    return SegvBacktrace;
+}
 } // namespace crash_handler
 } // namespace gwp_asan

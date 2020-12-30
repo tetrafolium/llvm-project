@@ -17,29 +17,29 @@ namespace lldb {
 
 class LLDB_API SBSourceManager {
 public:
-  SBSourceManager(const SBDebugger &debugger);
-  SBSourceManager(const SBTarget &target);
-  SBSourceManager(const SBSourceManager &rhs);
+    SBSourceManager(const SBDebugger &debugger);
+    SBSourceManager(const SBTarget &target);
+    SBSourceManager(const SBSourceManager &rhs);
 
-  ~SBSourceManager();
+    ~SBSourceManager();
 
-  const lldb::SBSourceManager &operator=(const lldb::SBSourceManager &rhs);
+    const lldb::SBSourceManager &operator=(const lldb::SBSourceManager &rhs);
 
-  size_t DisplaySourceLinesWithLineNumbers(
-      const lldb::SBFileSpec &file, uint32_t line, uint32_t context_before,
-      uint32_t context_after, const char *current_line_cstr, lldb::SBStream &s);
+    size_t DisplaySourceLinesWithLineNumbers(
+        const lldb::SBFileSpec &file, uint32_t line, uint32_t context_before,
+        uint32_t context_after, const char *current_line_cstr, lldb::SBStream &s);
 
-  size_t DisplaySourceLinesWithLineNumbersAndColumn(
-      const lldb::SBFileSpec &file, uint32_t line, uint32_t column,
-      uint32_t context_before, uint32_t context_after,
-      const char *current_line_cstr, lldb::SBStream &s);
+    size_t DisplaySourceLinesWithLineNumbersAndColumn(
+        const lldb::SBFileSpec &file, uint32_t line, uint32_t column,
+        uint32_t context_before, uint32_t context_after,
+        const char *current_line_cstr, lldb::SBStream &s);
 
 protected:
-  friend class SBCommandInterpreter;
-  friend class SBDebugger;
+    friend class SBCommandInterpreter;
+    friend class SBDebugger;
 
 private:
-  std::unique_ptr<lldb_private::SourceManagerImpl> m_opaque_up;
+    std::unique_ptr<lldb_private::SourceManagerImpl> m_opaque_up;
 };
 
 } // namespace lldb

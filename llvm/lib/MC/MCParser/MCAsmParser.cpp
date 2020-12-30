@@ -30,112 +30,112 @@ MCAsmParser::MCAsmParser() {}
 MCAsmParser::~MCAsmParser() = default;
 
 void MCAsmParser::setTargetParser(MCTargetAsmParser &P) {
-  assert(!TargetParser && "Target parser is already initialized!");
-  TargetParser = &P;
-  TargetParser->Initialize(*this);
+    assert(!TargetParser && "Target parser is already initialized!");
+    TargetParser = &P;
+    TargetParser->Initialize(*this);
 }
 
 const AsmToken &MCAsmParser::getTok() const {
-  return getLexer().getTok();
+    return getLexer().getTok();
 }
 
 bool MCAsmParser::parseTokenLoc(SMLoc &Loc) {
-  Loc = getTok().getLoc();
-  return false;
+    Loc = getTok().getLoc();
+    return false;
 }
 
 bool MCAsmParser::parseEOL(const Twine &Msg) {
-  if (getTok().getKind() != AsmToken::EndOfStatement)
-    return Error(getTok().getLoc(), Msg);
-  Lex();
-  return false;
+    if (getTok().getKind() != AsmToken::EndOfStatement)
+        return Error(getTok().getLoc(), Msg);
+    Lex();
+    return false;
 }
 
 bool MCAsmParser::parseToken(AsmToken::TokenKind T, const Twine &Msg) {
-  if (T == AsmToken::EndOfStatement)
-    return parseEOL(Msg);
-  if (getTok().getKind() != T)
-    return Error(getTok().getLoc(), Msg);
-  Lex();
-  return false;
+    if (T == AsmToken::EndOfStatement)
+        return parseEOL(Msg);
+    if (getTok().getKind() != T)
+        return Error(getTok().getLoc(), Msg);
+    Lex();
+    return false;
 }
 
 bool MCAsmParser::parseIntToken(int64_t &V, const Twine &Msg) {
-  if (getTok().getKind() != AsmToken::Integer)
-    return TokError(Msg);
-  V = getTok().getIntVal();
-  Lex();
-  return false;
+    if (getTok().getKind() != AsmToken::Integer)
+        return TokError(Msg);
+    V = getTok().getIntVal();
+    Lex();
+    return false;
 }
 
 bool MCAsmParser::parseOptionalToken(AsmToken::TokenKind T) {
-  bool Present = (getTok().getKind() == T);
-  if (Present)
-    parseToken(T);
-  return Present;
+    bool Present = (getTok().getKind() == T);
+    if (Present)
+        parseToken(T);
+    return Present;
 }
 
 bool MCAsmParser::check(bool P, const Twine &Msg) {
-  return check(P, getTok().getLoc(), Msg);
+    return check(P, getTok().getLoc(), Msg);
 }
 
 bool MCAsmParser::check(bool P, SMLoc Loc, const Twine &Msg) {
-  if (P)
-    return Error(Loc, Msg);
-  return false;
+    if (P)
+        return Error(Loc, Msg);
+    return false;
 }
 
 bool MCAsmParser::TokError(const Twine &Msg, SMRange Range) {
-  return Error(getLexer().getLoc(), Msg, Range);
+    return Error(getLexer().getLoc(), Msg, Range);
 }
 
 bool MCAsmParser::Error(SMLoc L, const Twine &Msg, SMRange Range) {
 
-  MCPendingError PErr;
-  PErr.Loc = L;
-  Msg.toVector(PErr.Msg);
-  PErr.Range = Range;
-  PendingErrors.push_back(PErr);
+    MCPendingError PErr;
+    PErr.Loc = L;
+    Msg.toVector(PErr.Msg);
+    PErr.Range = Range;
+    PendingErrors.push_back(PErr);
 
-  // If we threw this parsing error after a lexing error, this should
-  // supercede the lexing error and so we remove it from the Lexer
-  // before it can propagate
-  if (getTok().is(AsmToken::Error))
-    getLexer().Lex();
-  return true;
+    // If we threw this parsing error after a lexing error, this should
+    // supercede the lexing error and so we remove it from the Lexer
+    // before it can propagate
+    if (getTok().is(AsmToken::Error))
+        getLexer().Lex();
+    return true;
 }
 
 bool MCAsmParser::addErrorSuffix(const Twine &Suffix) {
-  // Make sure lexing errors have propagated to the parser.
-  if (getTok().is(AsmToken::Error))
-    Lex();
-  for (auto &PErr : PendingErrors)
-    Suffix.toVector(PErr.Msg);
-  return true;
+    // Make sure lexing errors have propagated to the parser.
+    if (getTok().is(AsmToken::Error))
+        Lex();
+    for (auto &PErr : PendingErrors)
+        Suffix.toVector(PErr.Msg);
+    return true;
 }
 
 bool MCAsmParser::parseMany(function_ref<bool()> parseOne, bool hasComma) {
-  if (parseOptionalToken(AsmToken::EndOfStatement))
-    return false;
-  while (true) {
-    if (parseOne())
-      return true;
     if (parseOptionalToken(AsmToken::EndOfStatement))
-      return false;
-    if (hasComma && parseToken(AsmToken::Comma))
-      return true;
-  }
-  return false;
+        return false;
+    while (true) {
+        if (parseOne())
+            return true;
+        if (parseOptionalToken(AsmToken::EndOfStatement))
+            return false;
+        if (hasComma && parseToken(AsmToken::Comma))
+            return true;
+    }
+    return false;
 }
 
 bool MCAsmParser::parseExpression(const MCExpr *&Res) {
-  SMLoc L;
-  return parseExpression(Res, L);
+    SMLoc L;
+    return parseExpression(Res, L);
 }
 
 void MCParsedAsmOperand::dump() const {
-  // Cannot completely remove virtual function even in release mode.
+    // Cannot completely remove virtual function even in release mode.
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-  dbgs() << "  " << *this;
+    dbgs() << "  " << *this;
 #endif
 }

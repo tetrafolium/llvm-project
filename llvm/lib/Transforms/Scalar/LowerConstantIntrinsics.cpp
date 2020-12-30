@@ -43,108 +43,108 @@ STATISTIC(ObjectSizeIntrinsicsHandled,
           "Number of 'objectsize' intrinsic calls handled");
 
 static Value *lowerIsConstantIntrinsic(IntrinsicInst *II) {
-  Value *Op = II->getOperand(0);
+    Value *Op = II->getOperand(0);
 
-  return isa<Constant>(Op) ? ConstantInt::getTrue(II->getType())
-                           : ConstantInt::getFalse(II->getType());
+    return isa<Constant>(Op) ? ConstantInt::getTrue(II->getType())
+           : ConstantInt::getFalse(II->getType());
 }
 
 static bool replaceConditionalBranchesOnConstant(Instruction *II,
-                                                 Value *NewValue) {
-  bool HasDeadBlocks = false;
-  SmallSetVector<Instruction *, 8> Worklist;
-  replaceAndRecursivelySimplify(II, NewValue, nullptr, nullptr, nullptr,
-                                &Worklist);
-  for (auto I : Worklist) {
-    BranchInst *BI = dyn_cast<BranchInst>(I);
-    if (!BI)
-      continue;
-    if (BI->isUnconditional())
-      continue;
+        Value *NewValue) {
+    bool HasDeadBlocks = false;
+    SmallSetVector<Instruction *, 8> Worklist;
+    replaceAndRecursivelySimplify(II, NewValue, nullptr, nullptr, nullptr,
+                                  &Worklist);
+    for (auto I : Worklist) {
+        BranchInst *BI = dyn_cast<BranchInst>(I);
+        if (!BI)
+            continue;
+        if (BI->isUnconditional())
+            continue;
 
-    BasicBlock *Target, *Other;
-    if (match(BI->getOperand(0), m_Zero())) {
-      Target = BI->getSuccessor(1);
-      Other = BI->getSuccessor(0);
-    } else if (match(BI->getOperand(0), m_One())) {
-      Target = BI->getSuccessor(0);
-      Other = BI->getSuccessor(1);
-    } else {
-      Target = nullptr;
-      Other = nullptr;
+        BasicBlock *Target, *Other;
+        if (match(BI->getOperand(0), m_Zero())) {
+            Target = BI->getSuccessor(1);
+            Other = BI->getSuccessor(0);
+        } else if (match(BI->getOperand(0), m_One())) {
+            Target = BI->getSuccessor(0);
+            Other = BI->getSuccessor(1);
+        } else {
+            Target = nullptr;
+            Other = nullptr;
+        }
+        if (Target && Target != Other) {
+            BasicBlock *Source = BI->getParent();
+            Other->removePredecessor(Source);
+            BI->eraseFromParent();
+            BranchInst::Create(Target, Source);
+            if (pred_empty(Other))
+                HasDeadBlocks = true;
+        }
     }
-    if (Target && Target != Other) {
-      BasicBlock *Source = BI->getParent();
-      Other->removePredecessor(Source);
-      BI->eraseFromParent();
-      BranchInst::Create(Target, Source);
-      if (pred_empty(Other))
-        HasDeadBlocks = true;
-    }
-  }
-  return HasDeadBlocks;
+    return HasDeadBlocks;
 }
 
 static bool lowerConstantIntrinsics(Function &F, const TargetLibraryInfo *TLI) {
-  bool HasDeadBlocks = false;
-  const auto &DL = F.getParent()->getDataLayout();
-  SmallVector<WeakTrackingVH, 8> Worklist;
+    bool HasDeadBlocks = false;
+    const auto &DL = F.getParent()->getDataLayout();
+    SmallVector<WeakTrackingVH, 8> Worklist;
 
-  ReversePostOrderTraversal<Function *> RPOT(&F);
-  for (BasicBlock *BB : RPOT) {
-    for (Instruction &I: *BB) {
-      IntrinsicInst *II = dyn_cast<IntrinsicInst>(&I);
-      if (!II)
-        continue;
-      switch (II->getIntrinsicID()) {
-      default:
-        break;
-      case Intrinsic::is_constant:
-      case Intrinsic::objectsize:
-        Worklist.push_back(WeakTrackingVH(&I));
-        break;
-      }
+    ReversePostOrderTraversal<Function *> RPOT(&F);
+    for (BasicBlock *BB : RPOT) {
+        for (Instruction &I: *BB) {
+            IntrinsicInst *II = dyn_cast<IntrinsicInst>(&I);
+            if (!II)
+                continue;
+            switch (II->getIntrinsicID()) {
+            default:
+                break;
+            case Intrinsic::is_constant:
+            case Intrinsic::objectsize:
+                Worklist.push_back(WeakTrackingVH(&I));
+                break;
+            }
+        }
     }
-  }
-  for (WeakTrackingVH &VH: Worklist) {
-    // Items on the worklist can be mutated by earlier recursive replaces.
-    // This can remove the intrinsic as dead (VH == null), but also replace
-    // the intrinsic in place.
-    if (!VH)
-      continue;
-    IntrinsicInst *II = dyn_cast<IntrinsicInst>(&*VH);
-    if (!II)
-      continue;
-    Value *NewValue;
-    switch (II->getIntrinsicID()) {
-    default:
-      continue;
-    case Intrinsic::is_constant:
-      NewValue = lowerIsConstantIntrinsic(II);
-      IsConstantIntrinsicsHandled++;
-      break;
-    case Intrinsic::objectsize:
-      NewValue = lowerObjectSizeCall(II, DL, TLI, true);
-      ObjectSizeIntrinsicsHandled++;
-      break;
+    for (WeakTrackingVH &VH: Worklist) {
+        // Items on the worklist can be mutated by earlier recursive replaces.
+        // This can remove the intrinsic as dead (VH == null), but also replace
+        // the intrinsic in place.
+        if (!VH)
+            continue;
+        IntrinsicInst *II = dyn_cast<IntrinsicInst>(&*VH);
+        if (!II)
+            continue;
+        Value *NewValue;
+        switch (II->getIntrinsicID()) {
+        default:
+            continue;
+        case Intrinsic::is_constant:
+            NewValue = lowerIsConstantIntrinsic(II);
+            IsConstantIntrinsicsHandled++;
+            break;
+        case Intrinsic::objectsize:
+            NewValue = lowerObjectSizeCall(II, DL, TLI, true);
+            ObjectSizeIntrinsicsHandled++;
+            break;
+        }
+        HasDeadBlocks |= replaceConditionalBranchesOnConstant(II, NewValue);
     }
-    HasDeadBlocks |= replaceConditionalBranchesOnConstant(II, NewValue);
-  }
-  if (HasDeadBlocks)
-    removeUnreachableBlocks(F);
-  return !Worklist.empty();
+    if (HasDeadBlocks)
+        removeUnreachableBlocks(F);
+    return !Worklist.empty();
 }
 
 PreservedAnalyses
 LowerConstantIntrinsicsPass::run(Function &F, FunctionAnalysisManager &AM) {
-  if (lowerConstantIntrinsics(F,
-                              AM.getCachedResult<TargetLibraryAnalysis>(F))) {
-    PreservedAnalyses PA;
-    PA.preserve<GlobalsAA>();
-    return PA;
-  }
+    if (lowerConstantIntrinsics(F,
+                                AM.getCachedResult<TargetLibraryAnalysis>(F))) {
+        PreservedAnalyses PA;
+        PA.preserve<GlobalsAA>();
+        return PA;
+    }
 
-  return PreservedAnalyses::all();
+    return PreservedAnalyses::all();
 }
 
 namespace {
@@ -155,20 +155,20 @@ namespace {
 /// to 'true' as part of Instruction Simplify passes.
 class LowerConstantIntrinsics : public FunctionPass {
 public:
-  static char ID;
-  LowerConstantIntrinsics() : FunctionPass(ID) {
-    initializeLowerConstantIntrinsicsPass(*PassRegistry::getPassRegistry());
-  }
+    static char ID;
+    LowerConstantIntrinsics() : FunctionPass(ID) {
+        initializeLowerConstantIntrinsicsPass(*PassRegistry::getPassRegistry());
+    }
 
-  bool runOnFunction(Function &F) override {
-    auto *TLIP = getAnalysisIfAvailable<TargetLibraryInfoWrapperPass>();
-    const TargetLibraryInfo *TLI = TLIP ? &TLIP->getTLI(F) : nullptr;
-    return lowerConstantIntrinsics(F, TLI);
-  }
+    bool runOnFunction(Function &F) override {
+        auto *TLIP = getAnalysisIfAvailable<TargetLibraryInfoWrapperPass>();
+        const TargetLibraryInfo *TLI = TLIP ? &TLIP->getTLI(F) : nullptr;
+        return lowerConstantIntrinsics(F, TLI);
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addPreserved<GlobalsAAWrapperPass>();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addPreserved<GlobalsAAWrapperPass>();
+    }
 };
 } // namespace
 
@@ -177,5 +177,5 @@ INITIALIZE_PASS(LowerConstantIntrinsics, "lower-constant-intrinsics",
                 "Lower constant intrinsics", false, false)
 
 FunctionPass *llvm::createLowerConstantIntrinsicsPass() {
-  return new LowerConstantIntrinsics();
+    return new LowerConstantIntrinsics();
 }

@@ -23,17 +23,17 @@
 using namespace llvm;
 
 void LanaiSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
-  std::string CPUName = std::string(CPU);
-  if (CPUName.empty())
-    CPUName = "generic";
+    std::string CPUName = std::string(CPU);
+    if (CPUName.empty())
+        CPUName = "generic";
 
-  ParseSubtargetFeatures(CPUName, /*TuneCPU*/ CPUName, FS);
+    ParseSubtargetFeatures(CPUName, /*TuneCPU*/ CPUName, FS);
 }
 
 LanaiSubtarget &LanaiSubtarget::initializeSubtargetDependencies(StringRef CPU,
-                                                                StringRef FS) {
-  initSubtargetFeatures(CPU, FS);
-  return *this;
+        StringRef FS) {
+    initSubtargetFeatures(CPU, FS);
+    return *this;
 }
 
 LanaiSubtarget::LanaiSubtarget(const Triple &TargetTriple, StringRef Cpu,

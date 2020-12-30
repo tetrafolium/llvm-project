@@ -209,14 +209,14 @@ static RegisterInfo g_register_infos_powerpc64_32[] = {
 
 static_assert((sizeof(g_register_infos_powerpc32) /
                sizeof(g_register_infos_powerpc32[0])) ==
-                  k_num_registers_powerpc,
+              k_num_registers_powerpc,
               "g_register_infos_powerpc32 has wrong number of register infos");
 static_assert((sizeof(g_register_infos_powerpc64) /
                sizeof(g_register_infos_powerpc64[0])) ==
-                  k_num_registers_powerpc,
+              k_num_registers_powerpc,
               "g_register_infos_powerpc64 has wrong number of register infos");
 static_assert(sizeof(g_register_infos_powerpc64_32) ==
-                  sizeof(g_register_infos_powerpc64),
+              sizeof(g_register_infos_powerpc64),
               "g_register_infos_powerpc64_32 doesn't match size of "
               "g_register_infos_powerpc64");
 

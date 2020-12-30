@@ -21,123 +21,128 @@ using namespace llvm;
 
 static void insertCall(Function &CurFn, StringRef Func,
                        Instruction *InsertionPt, DebugLoc DL) {
-  Module &M = *InsertionPt->getParent()->getParent()->getParent();
-  LLVMContext &C = InsertionPt->getParent()->getContext();
+    Module &M = *InsertionPt->getParent()->getParent()->getParent();
+    LLVMContext &C = InsertionPt->getParent()->getContext();
 
-  if (Func == "mcount" ||
-      Func == ".mcount" ||
-      Func == "llvm.arm.gnu.eabi.mcount" ||
-      Func == "\01_mcount" ||
-      Func == "\01mcount" ||
-      Func == "__mcount" ||
-      Func == "_mcount" ||
-      Func == "__cyg_profile_func_enter_bare") {
-    FunctionCallee Fn = M.getOrInsertFunction(Func, Type::getVoidTy(C));
-    CallInst *Call = CallInst::Create(Fn, "", InsertionPt);
-    Call->setDebugLoc(DL);
-    return;
-  }
+    if (Func == "mcount" ||
+            Func == ".mcount" ||
+            Func == "llvm.arm.gnu.eabi.mcount" ||
+            Func == "\01_mcount" ||
+            Func == "\01mcount" ||
+            Func == "__mcount" ||
+            Func == "_mcount" ||
+            Func == "__cyg_profile_func_enter_bare") {
+        FunctionCallee Fn = M.getOrInsertFunction(Func, Type::getVoidTy(C));
+        CallInst *Call = CallInst::Create(Fn, "", InsertionPt);
+        Call->setDebugLoc(DL);
+        return;
+    }
 
-  if (Func == "__cyg_profile_func_enter" || Func == "__cyg_profile_func_exit") {
-    Type *ArgTypes[] = {Type::getInt8PtrTy(C), Type::getInt8PtrTy(C)};
+    if (Func == "__cyg_profile_func_enter" || Func == "__cyg_profile_func_exit") {
+        Type *ArgTypes[] = {Type::getInt8PtrTy(C), Type::getInt8PtrTy(C)};
 
-    FunctionCallee Fn = M.getOrInsertFunction(
-        Func, FunctionType::get(Type::getVoidTy(C), ArgTypes, false));
+        FunctionCallee Fn = M.getOrInsertFunction(
+                                Func, FunctionType::get(Type::getVoidTy(C), ArgTypes, false));
 
-    Instruction *RetAddr = CallInst::Create(
-        Intrinsic::getDeclaration(&M, Intrinsic::returnaddress),
-        ArrayRef<Value *>(ConstantInt::get(Type::getInt32Ty(C), 0)), "",
-        InsertionPt);
-    RetAddr->setDebugLoc(DL);
+        Instruction *RetAddr = CallInst::Create(
+                                   Intrinsic::getDeclaration(&M, Intrinsic::returnaddress),
+                                   ArrayRef<Value *>(ConstantInt::get(Type::getInt32Ty(C), 0)), "",
+                                   InsertionPt);
+        RetAddr->setDebugLoc(DL);
 
-    Value *Args[] = {ConstantExpr::getBitCast(&CurFn, Type::getInt8PtrTy(C)),
-                     RetAddr};
+        Value *Args[] = {ConstantExpr::getBitCast(&CurFn, Type::getInt8PtrTy(C)),
+                         RetAddr
+                        };
 
-    CallInst *Call =
-        CallInst::Create(Fn, ArrayRef<Value *>(Args), "", InsertionPt);
-    Call->setDebugLoc(DL);
-    return;
-  }
+        CallInst *Call =
+            CallInst::Create(Fn, ArrayRef<Value *>(Args), "", InsertionPt);
+        Call->setDebugLoc(DL);
+        return;
+    }
 
-  // We only know how to call a fixed set of instrumentation functions, because
-  // they all expect different arguments, etc.
-  report_fatal_error(Twine("Unknown instrumentation function: '") + Func + "'");
+    // We only know how to call a fixed set of instrumentation functions, because
+    // they all expect different arguments, etc.
+    report_fatal_error(Twine("Unknown instrumentation function: '") + Func + "'");
 }
 
 static bool runOnFunction(Function &F, bool PostInlining) {
-  StringRef EntryAttr = PostInlining ? "instrument-function-entry-inlined"
-                                     : "instrument-function-entry";
+    StringRef EntryAttr = PostInlining ? "instrument-function-entry-inlined"
+                          : "instrument-function-entry";
 
-  StringRef ExitAttr = PostInlining ? "instrument-function-exit-inlined"
-                                    : "instrument-function-exit";
+    StringRef ExitAttr = PostInlining ? "instrument-function-exit-inlined"
+                         : "instrument-function-exit";
 
-  StringRef EntryFunc = F.getFnAttribute(EntryAttr).getValueAsString();
-  StringRef ExitFunc = F.getFnAttribute(ExitAttr).getValueAsString();
+    StringRef EntryFunc = F.getFnAttribute(EntryAttr).getValueAsString();
+    StringRef ExitFunc = F.getFnAttribute(ExitAttr).getValueAsString();
 
-  bool Changed = false;
+    bool Changed = false;
 
-  // If the attribute is specified, insert instrumentation and then "consume"
-  // the attribute so that it's not inserted again if the pass should happen to
-  // run later for some reason.
+    // If the attribute is specified, insert instrumentation and then "consume"
+    // the attribute so that it's not inserted again if the pass should happen to
+    // run later for some reason.
 
-  if (!EntryFunc.empty()) {
-    DebugLoc DL;
-    if (auto SP = F.getSubprogram())
-      DL = DILocation::get(SP->getContext(), SP->getScopeLine(), 0, SP);
+    if (!EntryFunc.empty()) {
+        DebugLoc DL;
+        if (auto SP = F.getSubprogram())
+            DL = DILocation::get(SP->getContext(), SP->getScopeLine(), 0, SP);
 
-    insertCall(F, EntryFunc, &*F.begin()->getFirstInsertionPt(), DL);
-    Changed = true;
-    F.removeAttribute(AttributeList::FunctionIndex, EntryAttr);
-  }
-
-  if (!ExitFunc.empty()) {
-    for (BasicBlock &BB : F) {
-      Instruction *T = BB.getTerminator();
-      if (!isa<ReturnInst>(T))
-        continue;
-
-      // If T is preceded by a musttail call, that's the real terminator.
-      if (CallInst *CI = BB.getTerminatingMustTailCall())
-        T = CI;
-
-      DebugLoc DL;
-      if (DebugLoc TerminatorDL = T->getDebugLoc())
-        DL = TerminatorDL;
-      else if (auto SP = F.getSubprogram())
-        DL = DILocation::get(SP->getContext(), 0, 0, SP);
-
-      insertCall(F, ExitFunc, T, DL);
-      Changed = true;
+        insertCall(F, EntryFunc, &*F.begin()->getFirstInsertionPt(), DL);
+        Changed = true;
+        F.removeAttribute(AttributeList::FunctionIndex, EntryAttr);
     }
-    F.removeAttribute(AttributeList::FunctionIndex, ExitAttr);
-  }
 
-  return Changed;
+    if (!ExitFunc.empty()) {
+        for (BasicBlock &BB : F) {
+            Instruction *T = BB.getTerminator();
+            if (!isa<ReturnInst>(T))
+                continue;
+
+            // If T is preceded by a musttail call, that's the real terminator.
+            if (CallInst *CI = BB.getTerminatingMustTailCall())
+                T = CI;
+
+            DebugLoc DL;
+            if (DebugLoc TerminatorDL = T->getDebugLoc())
+                DL = TerminatorDL;
+            else if (auto SP = F.getSubprogram())
+                DL = DILocation::get(SP->getContext(), 0, 0, SP);
+
+            insertCall(F, ExitFunc, T, DL);
+            Changed = true;
+        }
+        F.removeAttribute(AttributeList::FunctionIndex, ExitAttr);
+    }
+
+    return Changed;
 }
 
 namespace {
 struct EntryExitInstrumenter : public FunctionPass {
-  static char ID;
-  EntryExitInstrumenter() : FunctionPass(ID) {
-    initializeEntryExitInstrumenterPass(*PassRegistry::getPassRegistry());
-  }
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addPreserved<GlobalsAAWrapperPass>();
-  }
-  bool runOnFunction(Function &F) override { return ::runOnFunction(F, false); }
+    static char ID;
+    EntryExitInstrumenter() : FunctionPass(ID) {
+        initializeEntryExitInstrumenterPass(*PassRegistry::getPassRegistry());
+    }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addPreserved<GlobalsAAWrapperPass>();
+    }
+    bool runOnFunction(Function &F) override {
+        return ::runOnFunction(F, false);
+    }
 };
 char EntryExitInstrumenter::ID = 0;
 
 struct PostInlineEntryExitInstrumenter : public FunctionPass {
-  static char ID;
-  PostInlineEntryExitInstrumenter() : FunctionPass(ID) {
-    initializePostInlineEntryExitInstrumenterPass(
-        *PassRegistry::getPassRegistry());
-  }
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addPreserved<GlobalsAAWrapperPass>();
-  }
-  bool runOnFunction(Function &F) override { return ::runOnFunction(F, true); }
+    static char ID;
+    PostInlineEntryExitInstrumenter() : FunctionPass(ID) {
+        initializePostInlineEntryExitInstrumenterPass(
+            *PassRegistry::getPassRegistry());
+    }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addPreserved<GlobalsAAWrapperPass>();
+    }
+    bool runOnFunction(Function &F) override {
+        return ::runOnFunction(F, true);
+    }
 };
 char PostInlineEntryExitInstrumenter::ID = 0;
 }
@@ -152,17 +157,17 @@ INITIALIZE_PASS(PostInlineEntryExitInstrumenter, "post-inline-ee-instrument",
                 false, false)
 
 FunctionPass *llvm::createEntryExitInstrumenterPass() {
-  return new EntryExitInstrumenter();
+    return new EntryExitInstrumenter();
 }
 
 FunctionPass *llvm::createPostInlineEntryExitInstrumenterPass() {
-  return new PostInlineEntryExitInstrumenter();
+    return new PostInlineEntryExitInstrumenter();
 }
 
 PreservedAnalyses
 llvm::EntryExitInstrumenterPass::run(Function &F, FunctionAnalysisManager &AM) {
-  runOnFunction(F, PostInlining);
-  PreservedAnalyses PA;
-  PA.preserveSet<CFGAnalyses>();
-  return PA;
+    runOnFunction(F, PostInlining);
+    PreservedAnalyses PA;
+    PA.preserveSet<CFGAnalyses>();
+    return PA;
 }

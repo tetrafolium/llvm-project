@@ -20,12 +20,12 @@ class ScheduleDAGInstrs;
 
 /// Mutate the DAG as a postpass after normal DAG building.
 class ScheduleDAGMutation {
-  virtual void anchor();
+    virtual void anchor();
 
 public:
-  virtual ~ScheduleDAGMutation() = default;
+    virtual ~ScheduleDAGMutation() = default;
 
-  virtual void apply(ScheduleDAGInstrs *DAG) = 0;
+    virtual void apply(ScheduleDAGInstrs *DAG) = 0;
 };
 
 } // end namespace llvm

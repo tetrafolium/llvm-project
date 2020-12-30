@@ -120,7 +120,7 @@ void LLVMAddScalarReplAggregatesPassSSA(LLVMPassManagerRef PM);
 
 /** See llvm::createSROAPass function. */
 void LLVMAddScalarReplAggregatesPassWithThreshold(LLVMPassManagerRef PM,
-                                                  int Threshold);
+        int Threshold);
 
 /** See llvm::createSimplifyLibCallsPass function. */
 void LLVMAddSimplifyLibCallsPass(LLVMPassManagerRef PM);

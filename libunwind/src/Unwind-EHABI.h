@@ -21,11 +21,11 @@
 #define UNW_EXIDX_CANTUNWIND 0x1
 
 static inline uint32_t signExtendPrel31(uint32_t data) {
-  return data | ((data & 0x40000000u) << 1);
+    return data | ((data & 0x40000000u) << 1);
 }
 
 static inline uint32_t readPrel31(const uint32_t *data) {
-  return (((uint32_t)(uintptr_t)data) + signExtendPrel31(*data));
+    return (((uint32_t)(uintptr_t)data) + signExtendPrel31(*data));
 }
 
 #if defined(__cplusplus)

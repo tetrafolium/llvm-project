@@ -15,11 +15,11 @@ namespace llvm {
 
 class SeparateConstOffsetFromGEPPass
     : public PassInfoMixin<SeparateConstOffsetFromGEPPass> {
-  bool LowerGEP;
+    bool LowerGEP;
 
 public:
-  SeparateConstOffsetFromGEPPass(bool LowerGEP = false) : LowerGEP(LowerGEP) {}
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+    SeparateConstOffsetFromGEPPass(bool LowerGEP = false) : LowerGEP(LowerGEP) {}
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 };
 
 } // end namespace llvm

@@ -28,13 +28,13 @@ using namespace ento;
 namespace {
 enum class ObjectState : bool { CtorCalled, DtorCalled };
 } // end namespace
-  // FIXME: Ascending over StackFrameContext maybe another method.
+// FIXME: Ascending over StackFrameContext maybe another method.
 
 namespace llvm {
 template <> struct FoldingSetTrait<ObjectState> {
-  static inline void Profile(ObjectState X, FoldingSetNodeID &ID) {
-    ID.AddInteger(static_cast<int>(X));
-  }
+    static inline void Profile(ObjectState X, FoldingSetNodeID &ID) {
+        ID.AddInteger(static_cast<int>(X));
+    }
 };
 } // end namespace llvm
 
@@ -42,17 +42,17 @@ namespace {
 class VirtualCallChecker
     : public Checker<check::BeginFunction, check::EndFunction, check::PreCall> {
 public:
-  // These are going to be null if the respective check is disabled.
-  mutable std::unique_ptr<BugType> BT_Pure, BT_Impure;
-  bool ShowFixIts = false;
+    // These are going to be null if the respective check is disabled.
+    mutable std::unique_ptr<BugType> BT_Pure, BT_Impure;
+    bool ShowFixIts = false;
 
-  void checkBeginFunction(CheckerContext &C) const;
-  void checkEndFunction(const ReturnStmt *RS, CheckerContext &C) const;
-  void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
+    void checkBeginFunction(CheckerContext &C) const;
+    void checkEndFunction(const ReturnStmt *RS, CheckerContext &C) const;
+    void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
 
 private:
-  void registerCtorDtorCallInState(bool IsBeginFunction,
-                                   CheckerContext &C) const;
+    void registerCtorDtorCallInState(bool IsBeginFunction,
+                                     CheckerContext &C) const;
 };
 } // end namespace
 
@@ -61,180 +61,180 @@ REGISTER_MAP_WITH_PROGRAMSTATE(CtorDtorMap, const MemRegion *, ObjectState)
 
 // The function to check if a callexpr is a virtual method call.
 static bool isVirtualCall(const CallExpr *CE) {
-  bool CallIsNonVirtual = false;
+    bool CallIsNonVirtual = false;
 
-  if (const MemberExpr *CME = dyn_cast<MemberExpr>(CE->getCallee())) {
-    // The member access is fully qualified (i.e., X::F).
-    // Treat this as a non-virtual call and do not warn.
-    if (CME->getQualifier())
-      CallIsNonVirtual = true;
+    if (const MemberExpr *CME = dyn_cast<MemberExpr>(CE->getCallee())) {
+        // The member access is fully qualified (i.e., X::F).
+        // Treat this as a non-virtual call and do not warn.
+        if (CME->getQualifier())
+            CallIsNonVirtual = true;
 
-    if (const Expr *Base = CME->getBase()) {
-      // The most derived class is marked final.
-      if (Base->getBestDynamicClassType()->hasAttr<FinalAttr>())
-        CallIsNonVirtual = true;
+        if (const Expr *Base = CME->getBase()) {
+            // The most derived class is marked final.
+            if (Base->getBestDynamicClassType()->hasAttr<FinalAttr>())
+                CallIsNonVirtual = true;
+        }
     }
-  }
 
-  const CXXMethodDecl *MD =
-      dyn_cast_or_null<CXXMethodDecl>(CE->getDirectCallee());
-  if (MD && MD->isVirtual() && !CallIsNonVirtual && !MD->hasAttr<FinalAttr>() &&
-      !MD->getParent()->hasAttr<FinalAttr>())
-    return true;
-  return false;
+    const CXXMethodDecl *MD =
+        dyn_cast_or_null<CXXMethodDecl>(CE->getDirectCallee());
+    if (MD && MD->isVirtual() && !CallIsNonVirtual && !MD->hasAttr<FinalAttr>() &&
+            !MD->getParent()->hasAttr<FinalAttr>())
+        return true;
+    return false;
 }
 
 // The BeginFunction callback when enter a constructor or a destructor.
 void VirtualCallChecker::checkBeginFunction(CheckerContext &C) const {
-  registerCtorDtorCallInState(true, C);
+    registerCtorDtorCallInState(true, C);
 }
 
 // The EndFunction callback when leave a constructor or a destructor.
 void VirtualCallChecker::checkEndFunction(const ReturnStmt *RS,
-                                          CheckerContext &C) const {
-  registerCtorDtorCallInState(false, C);
+        CheckerContext &C) const {
+    registerCtorDtorCallInState(false, C);
 }
 
 void VirtualCallChecker::checkPreCall(const CallEvent &Call,
                                       CheckerContext &C) const {
-  const auto MC = dyn_cast<CXXMemberCall>(&Call);
-  if (!MC)
-    return;
+    const auto MC = dyn_cast<CXXMemberCall>(&Call);
+    if (!MC)
+        return;
 
-  const CXXMethodDecl *MD = dyn_cast_or_null<CXXMethodDecl>(Call.getDecl());
-  if (!MD)
-    return;
+    const CXXMethodDecl *MD = dyn_cast_or_null<CXXMethodDecl>(Call.getDecl());
+    if (!MD)
+        return;
 
-  ProgramStateRef State = C.getState();
-  // Member calls are always represented by a call-expression.
-  const auto *CE = cast<CallExpr>(Call.getOriginExpr());
-  if (!isVirtualCall(CE))
-    return;
+    ProgramStateRef State = C.getState();
+    // Member calls are always represented by a call-expression.
+    const auto *CE = cast<CallExpr>(Call.getOriginExpr());
+    if (!isVirtualCall(CE))
+        return;
 
-  const MemRegion *Reg = MC->getCXXThisVal().getAsRegion();
-  const ObjectState *ObState = State->get<CtorDtorMap>(Reg);
-  if (!ObState)
-    return;
+    const MemRegion *Reg = MC->getCXXThisVal().getAsRegion();
+    const ObjectState *ObState = State->get<CtorDtorMap>(Reg);
+    if (!ObState)
+        return;
 
-  bool IsPure = MD->isPure();
+    bool IsPure = MD->isPure();
 
-  // At this point we're sure that we're calling a virtual method
-  // during construction or destruction, so we'll emit a report.
-  SmallString<128> Msg;
-  llvm::raw_svector_ostream OS(Msg);
-  OS << "Call to ";
-  if (IsPure)
-    OS << "pure ";
-  OS << "virtual method '" << MD->getParent()->getDeclName()
-     << "::" << MD->getDeclName() << "' during ";
-  if (*ObState == ObjectState::CtorCalled)
-    OS << "construction ";
-  else
-    OS << "destruction ";
-  if (IsPure)
-    OS << "has undefined behavior";
-  else
-    OS << "bypasses virtual dispatch";
+    // At this point we're sure that we're calling a virtual method
+    // during construction or destruction, so we'll emit a report.
+    SmallString<128> Msg;
+    llvm::raw_svector_ostream OS(Msg);
+    OS << "Call to ";
+    if (IsPure)
+        OS << "pure ";
+    OS << "virtual method '" << MD->getParent()->getDeclName()
+       << "::" << MD->getDeclName() << "' during ";
+    if (*ObState == ObjectState::CtorCalled)
+        OS << "construction ";
+    else
+        OS << "destruction ";
+    if (IsPure)
+        OS << "has undefined behavior";
+    else
+        OS << "bypasses virtual dispatch";
 
-  ExplodedNode *N =
-      IsPure ? C.generateErrorNode() : C.generateNonFatalErrorNode();
-  if (!N)
-    return;
+    ExplodedNode *N =
+        IsPure ? C.generateErrorNode() : C.generateNonFatalErrorNode();
+    if (!N)
+        return;
 
-  const std::unique_ptr<BugType> &BT = IsPure ? BT_Pure : BT_Impure;
-  if (!BT) {
-    // The respective check is disabled.
-    return;
-  }
+    const std::unique_ptr<BugType> &BT = IsPure ? BT_Pure : BT_Impure;
+    if (!BT) {
+        // The respective check is disabled.
+        return;
+    }
 
-  auto Report = std::make_unique<PathSensitiveBugReport>(*BT, OS.str(), N);
+    auto Report = std::make_unique<PathSensitiveBugReport>(*BT, OS.str(), N);
 
-  if (ShowFixIts && !IsPure) {
-    // FIXME: These hints are valid only when the virtual call is made
-    // directly from the constructor/destructor. Otherwise the dispatch
-    // will work just fine from other callees, and the fix may break
-    // the otherwise correct program.
-    FixItHint Fixit = FixItHint::CreateInsertion(
-        CE->getBeginLoc(), MD->getParent()->getNameAsString() + "::");
-    Report->addFixItHint(Fixit);
-  }
+    if (ShowFixIts && !IsPure) {
+        // FIXME: These hints are valid only when the virtual call is made
+        // directly from the constructor/destructor. Otherwise the dispatch
+        // will work just fine from other callees, and the fix may break
+        // the otherwise correct program.
+        FixItHint Fixit = FixItHint::CreateInsertion(
+                              CE->getBeginLoc(), MD->getParent()->getNameAsString() + "::");
+        Report->addFixItHint(Fixit);
+    }
 
-  C.emitReport(std::move(Report));
+    C.emitReport(std::move(Report));
 }
 
 void VirtualCallChecker::registerCtorDtorCallInState(bool IsBeginFunction,
-                                                     CheckerContext &C) const {
-  const auto *LCtx = C.getLocationContext();
-  const auto *MD = dyn_cast_or_null<CXXMethodDecl>(LCtx->getDecl());
-  if (!MD)
-    return;
+        CheckerContext &C) const {
+    const auto *LCtx = C.getLocationContext();
+    const auto *MD = dyn_cast_or_null<CXXMethodDecl>(LCtx->getDecl());
+    if (!MD)
+        return;
 
-  ProgramStateRef State = C.getState();
-  auto &SVB = C.getSValBuilder();
+    ProgramStateRef State = C.getState();
+    auto &SVB = C.getSValBuilder();
 
-  // Enter a constructor, set the corresponding memregion be true.
-  if (isa<CXXConstructorDecl>(MD)) {
-    auto ThiSVal =
-        State->getSVal(SVB.getCXXThis(MD, LCtx->getStackFrame()));
-    const MemRegion *Reg = ThiSVal.getAsRegion();
-    if (IsBeginFunction)
-      State = State->set<CtorDtorMap>(Reg, ObjectState::CtorCalled);
-    else
-      State = State->remove<CtorDtorMap>(Reg);
+    // Enter a constructor, set the corresponding memregion be true.
+    if (isa<CXXConstructorDecl>(MD)) {
+        auto ThiSVal =
+            State->getSVal(SVB.getCXXThis(MD, LCtx->getStackFrame()));
+        const MemRegion *Reg = ThiSVal.getAsRegion();
+        if (IsBeginFunction)
+            State = State->set<CtorDtorMap>(Reg, ObjectState::CtorCalled);
+        else
+            State = State->remove<CtorDtorMap>(Reg);
 
-    C.addTransition(State);
-    return;
-  }
+        C.addTransition(State);
+        return;
+    }
 
-  // Enter a Destructor, set the corresponding memregion be true.
-  if (isa<CXXDestructorDecl>(MD)) {
-    auto ThiSVal =
-        State->getSVal(SVB.getCXXThis(MD, LCtx->getStackFrame()));
-    const MemRegion *Reg = ThiSVal.getAsRegion();
-    if (IsBeginFunction)
-      State = State->set<CtorDtorMap>(Reg, ObjectState::DtorCalled);
-    else
-      State = State->remove<CtorDtorMap>(Reg);
+    // Enter a Destructor, set the corresponding memregion be true.
+    if (isa<CXXDestructorDecl>(MD)) {
+        auto ThiSVal =
+            State->getSVal(SVB.getCXXThis(MD, LCtx->getStackFrame()));
+        const MemRegion *Reg = ThiSVal.getAsRegion();
+        if (IsBeginFunction)
+            State = State->set<CtorDtorMap>(Reg, ObjectState::DtorCalled);
+        else
+            State = State->remove<CtorDtorMap>(Reg);
 
-    C.addTransition(State);
-    return;
-  }
+        C.addTransition(State);
+        return;
+    }
 }
 
 void ento::registerVirtualCallModeling(CheckerManager &Mgr) {
-  Mgr.registerChecker<VirtualCallChecker>();
+    Mgr.registerChecker<VirtualCallChecker>();
 }
 
 void ento::registerPureVirtualCallChecker(CheckerManager &Mgr) {
-  auto *Chk = Mgr.getChecker<VirtualCallChecker>();
-  Chk->BT_Pure = std::make_unique<BugType>(Mgr.getCurrentCheckerName(),
-                                           "Pure virtual method call",
-                                           categories::CXXObjectLifecycle);
+    auto *Chk = Mgr.getChecker<VirtualCallChecker>();
+    Chk->BT_Pure = std::make_unique<BugType>(Mgr.getCurrentCheckerName(),
+                   "Pure virtual method call",
+                   categories::CXXObjectLifecycle);
 }
 
 void ento::registerVirtualCallChecker(CheckerManager &Mgr) {
-  auto *Chk = Mgr.getChecker<VirtualCallChecker>();
-  if (!Mgr.getAnalyzerOptions().getCheckerBooleanOption(
-          Mgr.getCurrentCheckerName(), "PureOnly")) {
-    Chk->BT_Impure = std::make_unique<BugType>(
-        Mgr.getCurrentCheckerName(), "Unexpected loss of virtual dispatch",
-        categories::CXXObjectLifecycle);
-    Chk->ShowFixIts = Mgr.getAnalyzerOptions().getCheckerBooleanOption(
-        Mgr.getCurrentCheckerName(), "ShowFixIts");
-  }
+    auto *Chk = Mgr.getChecker<VirtualCallChecker>();
+    if (!Mgr.getAnalyzerOptions().getCheckerBooleanOption(
+                Mgr.getCurrentCheckerName(), "PureOnly")) {
+        Chk->BT_Impure = std::make_unique<BugType>(
+                             Mgr.getCurrentCheckerName(), "Unexpected loss of virtual dispatch",
+                             categories::CXXObjectLifecycle);
+        Chk->ShowFixIts = Mgr.getAnalyzerOptions().getCheckerBooleanOption(
+                              Mgr.getCurrentCheckerName(), "ShowFixIts");
+    }
 }
 
 bool ento::shouldRegisterVirtualCallModeling(const CheckerManager &mgr) {
-  const LangOptions &LO = mgr.getLangOpts();
-  return LO.CPlusPlus;
+    const LangOptions &LO = mgr.getLangOpts();
+    return LO.CPlusPlus;
 }
 
 bool ento::shouldRegisterPureVirtualCallChecker(const CheckerManager &mgr) {
-  const LangOptions &LO = mgr.getLangOpts();
-  return LO.CPlusPlus;
+    const LangOptions &LO = mgr.getLangOpts();
+    return LO.CPlusPlus;
 }
 
 bool ento::shouldRegisterVirtualCallChecker(const CheckerManager &mgr) {
-  const LangOptions &LO = mgr.getLangOpts();
-  return LO.CPlusPlus;
+    const LangOptions &LO = mgr.getLangOpts();
+    return LO.CPlusPlus;
 }

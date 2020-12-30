@@ -6,19 +6,19 @@
 //
 
 struct S {
-  int a[8];
+    int a[8];
 };
 
 int f(struct S s, unsigned i) {
-  // DEBUGGER: break 14
-  return s.a[i];
+    // DEBUGGER: break 14
+    return s.a[i];
 }
 
 int main(int argc, const char **argv) {
-  struct S s = {{0, 1, 2, 3, 4, 5, 6, 7}};
-  if (f(s, 4) == 4)
-    return f(s, 0);
-  return 0;
+    struct S s = {{0, 1, 2, 3, 4, 5, 6, 7}};
+    if (f(s, 4) == 4)
+        return f(s, 0);
+    return 0;
 }
 
 // DEBUGGER: r

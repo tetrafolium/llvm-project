@@ -13,5 +13,5 @@
  */
 isl_bool FN(MULTI(BASE),involves_nan)(__isl_keep MULTI(BASE) *multi)
 {
-	return FN(MULTI(BASE),any)(multi, &FN(EL,involves_nan));
+    return FN(MULTI(BASE),any)(multi, &FN(EL,involves_nan));
 }

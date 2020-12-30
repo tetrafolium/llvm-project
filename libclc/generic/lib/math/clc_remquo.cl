@@ -55,7 +55,7 @@ _CLC_DEF _CLC_OVERLOAD float __clc_remquo(float x, float y, __private int *quo)
         q = (q << 1) | c;
         xr -= c ? yr : 0.0f;
         xr += xr;
-	--k;
+        --k;
     }
 
     c = xr > yr;

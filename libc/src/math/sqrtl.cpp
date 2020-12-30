@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 long double LLVM_LIBC_ENTRYPOINT(sqrtl)(long double x) {
-  return fputil::sqrt(x);
+    return fputil::sqrt(x);
 }
 
 } // namespace __llvm_libc

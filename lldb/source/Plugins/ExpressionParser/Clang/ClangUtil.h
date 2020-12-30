@@ -22,28 +22,28 @@ class TagDecl;
 
 namespace lldb_private {
 struct ClangUtil {
-  static bool IsClangType(const CompilerType &ct);
+    static bool IsClangType(const CompilerType &ct);
 
-  /// Returns the clang::Decl of the given CompilerDecl.
-  /// CompilerDecl has to be valid and represent a clang::Decl.
-  static clang::Decl *GetDecl(const CompilerDecl &decl);
+    /// Returns the clang::Decl of the given CompilerDecl.
+    /// CompilerDecl has to be valid and represent a clang::Decl.
+    static clang::Decl *GetDecl(const CompilerDecl &decl);
 
-  static clang::QualType GetQualType(const CompilerType &ct);
+    static clang::QualType GetQualType(const CompilerType &ct);
 
-  static clang::QualType GetCanonicalQualType(const CompilerType &ct);
+    static clang::QualType GetCanonicalQualType(const CompilerType &ct);
 
-  static CompilerType RemoveFastQualifiers(const CompilerType &ct);
+    static CompilerType RemoveFastQualifiers(const CompilerType &ct);
 
-  static clang::TagDecl *GetAsTagDecl(const CompilerType &type);
+    static clang::TagDecl *GetAsTagDecl(const CompilerType &type);
 
-  /// Returns a textual representation of the given Decl's AST. Does not
-  /// deserialize any child nodes.
-  static std::string DumpDecl(const clang::Decl *d);
-  /// Returns a textual representation of the given type.
-  static std::string ToString(const clang::Type *t);
-  /// Returns a textual representation of the given CompilerType (assuming
-  /// its underlying type is a Clang type).
-  static std::string ToString(const CompilerType &c);
+    /// Returns a textual representation of the given Decl's AST. Does not
+    /// deserialize any child nodes.
+    static std::string DumpDecl(const clang::Decl *d);
+    /// Returns a textual representation of the given type.
+    static std::string ToString(const clang::Type *t);
+    /// Returns a textual representation of the given CompilerType (assuming
+    /// its underlying type is a Clang type).
+    static std::string ToString(const CompilerType &c);
 };
 }
 

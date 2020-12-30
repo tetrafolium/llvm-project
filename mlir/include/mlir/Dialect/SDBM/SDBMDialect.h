@@ -17,20 +17,24 @@ class MLIRContext;
 
 class SDBMDialect : public Dialect {
 public:
-  SDBMDialect(MLIRContext *context);
+    SDBMDialect(MLIRContext *context);
 
-  /// Since there are no other virtual methods in this derived class, override
-  /// the destructor so that key methods get defined in the corresponding
-  /// module.
-  ~SDBMDialect() override;
+    /// Since there are no other virtual methods in this derived class, override
+    /// the destructor so that key methods get defined in the corresponding
+    /// module.
+    ~SDBMDialect() override;
 
-  static StringRef getDialectNamespace() { return "sdbm"; }
+    static StringRef getDialectNamespace() {
+        return "sdbm";
+    }
 
-  /// Get the uniquer for SDBM expressions. This should not be used directly.
-  StorageUniquer &getUniquer() { return uniquer; }
+    /// Get the uniquer for SDBM expressions. This should not be used directly.
+    StorageUniquer &getUniquer() {
+        return uniquer;
+    }
 
 private:
-  StorageUniquer uniquer;
+    StorageUniquer uniquer;
 };
 } // namespace mlir
 

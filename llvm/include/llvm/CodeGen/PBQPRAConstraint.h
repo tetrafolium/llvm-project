@@ -36,11 +36,11 @@ using PBQPRAGraph = PBQP::RegAlloc::PBQPRAGraph;
 ///        constraints (e.g. Spill-costs, interference, coalescing).
 class PBQPRAConstraint {
 public:
-  virtual ~PBQPRAConstraint() = 0;
-  virtual void apply(PBQPRAGraph &G) = 0;
+    virtual ~PBQPRAConstraint() = 0;
+    virtual void apply(PBQPRAGraph &G) = 0;
 
 private:
-  virtual void anchor();
+    virtual void anchor();
 };
 
 /// PBQP register allocation constraint composer.
@@ -49,20 +49,20 @@ private:
 /// added, to the PBQP graph.
 class PBQPRAConstraintList : public PBQPRAConstraint {
 public:
-  void apply(PBQPRAGraph &G) override {
-    for (auto &C : Constraints)
-      C->apply(G);
-  }
+    void apply(PBQPRAGraph &G) override {
+        for (auto &C : Constraints)
+            C->apply(G);
+    }
 
-  void addConstraint(std::unique_ptr<PBQPRAConstraint> C) {
-    if (C)
-      Constraints.push_back(std::move(C));
-  }
+    void addConstraint(std::unique_ptr<PBQPRAConstraint> C) {
+        if (C)
+            Constraints.push_back(std::move(C));
+    }
 
 private:
-  std::vector<std::unique_ptr<PBQPRAConstraint>> Constraints;
+    std::vector<std::unique_ptr<PBQPRAConstraint>> Constraints;
 
-  void anchor() override;
+    void anchor() override;
 };
 
 } // end namespace llvm

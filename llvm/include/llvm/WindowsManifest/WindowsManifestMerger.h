@@ -37,27 +37,27 @@ bool isAvailable();
 
 class WindowsManifestError : public ErrorInfo<WindowsManifestError, ECError> {
 public:
-  static char ID;
-  WindowsManifestError(const Twine &Msg);
-  void log(raw_ostream &OS) const override;
+    static char ID;
+    WindowsManifestError(const Twine &Msg);
+    void log(raw_ostream &OS) const override;
 
 private:
-  std::string Msg;
+    std::string Msg;
 };
 
 class WindowsManifestMerger {
 public:
-  WindowsManifestMerger();
-  ~WindowsManifestMerger();
-  Error merge(const MemoryBuffer &Manifest);
+    WindowsManifestMerger();
+    ~WindowsManifestMerger();
+    Error merge(const MemoryBuffer &Manifest);
 
-  // Returns vector containing merged xml manifest, or uninitialized vector for
-  // empty manifest.
-  std::unique_ptr<MemoryBuffer> getMergedManifest();
+    // Returns vector containing merged xml manifest, or uninitialized vector for
+    // empty manifest.
+    std::unique_ptr<MemoryBuffer> getMergedManifest();
 
 private:
-  class WindowsManifestMergerImpl;
-  std::unique_ptr<WindowsManifestMergerImpl> Impl;
+    class WindowsManifestMergerImpl;
+    std::unique_ptr<WindowsManifestMergerImpl> Impl;
 };
 
 } // namespace windows_manifest

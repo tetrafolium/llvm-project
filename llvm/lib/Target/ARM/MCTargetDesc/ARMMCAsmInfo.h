@@ -21,33 +21,33 @@ namespace llvm {
 class Triple;
 
 class ARMMCAsmInfoDarwin : public MCAsmInfoDarwin {
-  virtual void anchor();
+    virtual void anchor();
 
 public:
-  explicit ARMMCAsmInfoDarwin(const Triple &TheTriple);
+    explicit ARMMCAsmInfoDarwin(const Triple &TheTriple);
 };
 
 class ARMELFMCAsmInfo : public MCAsmInfoELF {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit ARMELFMCAsmInfo(const Triple &TT);
+    explicit ARMELFMCAsmInfo(const Triple &TT);
 
-  void setUseIntegratedAssembler(bool Value) override;
+    void setUseIntegratedAssembler(bool Value) override;
 };
 
 class ARMCOFFMCAsmInfoMicrosoft : public MCAsmInfoMicrosoft {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit ARMCOFFMCAsmInfoMicrosoft();
+    explicit ARMCOFFMCAsmInfoMicrosoft();
 };
 
 class ARMCOFFMCAsmInfoGNU : public MCAsmInfoGNUCOFF {
-  void anchor() override;
+    void anchor() override;
 
 public:
-  explicit ARMCOFFMCAsmInfoGNU();
+    explicit ARMCOFFMCAsmInfoGNU();
 };
 
 } // namespace llvm

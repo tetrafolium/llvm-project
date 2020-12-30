@@ -21,7 +21,7 @@ namespace syntax {
 /// Computes textual replacements required to mimic the tree modifications made
 /// to the syntax tree.
 tooling::Replacements computeReplacements(const Arena &A,
-                                          const syntax::TranslationUnit &TU);
+        const syntax::TranslationUnit &TU);
 
 /// Removes a statement or replaces it with an empty statement where one is
 /// required syntactically. E.g., in the following example:

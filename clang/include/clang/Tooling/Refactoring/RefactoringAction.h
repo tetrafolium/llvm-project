@@ -38,20 +38,20 @@ namespace tooling {
 ///     the declaration is passed using a command-line argument.
 class RefactoringAction {
 public:
-  virtual ~RefactoringAction() {}
+    virtual ~RefactoringAction() {}
 
-  /// Returns the name of the subcommand that's used by clang-refactor for this
-  /// action.
-  virtual StringRef getCommand() const = 0;
+    /// Returns the name of the subcommand that's used by clang-refactor for this
+    /// action.
+    virtual StringRef getCommand() const = 0;
 
-  virtual StringRef getDescription() const = 0;
+    virtual StringRef getDescription() const = 0;
 
-  RefactoringActionRules createActiveActionRules();
+    RefactoringActionRules createActiveActionRules();
 
 protected:
-  /// Returns a set of refactoring actions rules that are defined by this
-  /// action.
-  virtual RefactoringActionRules createActionRules() const = 0;
+    /// Returns a set of refactoring actions rules that are defined by this
+    /// action.
+    virtual RefactoringActionRules createActionRules() const = 0;
 };
 
 /// Returns the list of all the available refactoring actions.

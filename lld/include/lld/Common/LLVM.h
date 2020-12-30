@@ -95,9 +95,9 @@ using llvm::wasm::WasmSignature;
 namespace std {
 template <> struct hash<llvm::StringRef> {
 public:
-  size_t operator()(const llvm::StringRef &s) const {
-    return llvm::hash_value(s);
-  }
+    size_t operator()(const llvm::StringRef &s) const {
+        return llvm::hash_value(s);
+    }
 };
 } // namespace std
 

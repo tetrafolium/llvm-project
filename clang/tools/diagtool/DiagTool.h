@@ -22,27 +22,31 @@
 namespace diagtool {
 
 class DiagTool {
-  const std::string cmd;
-  const std::string description;
+    const std::string cmd;
+    const std::string description;
 public:
-  DiagTool(llvm::StringRef toolCmd, llvm::StringRef toolDesc);
-  virtual ~DiagTool();
-  
-  llvm::StringRef getName() const { return cmd; }  
-  llvm::StringRef getDescription() const { return description; }  
+    DiagTool(llvm::StringRef toolCmd, llvm::StringRef toolDesc);
+    virtual ~DiagTool();
 
-  virtual int run(unsigned argc, char *argv[], llvm::raw_ostream &out) = 0;
+    llvm::StringRef getName() const {
+        return cmd;
+    }
+    llvm::StringRef getDescription() const {
+        return description;
+    }
+
+    virtual int run(unsigned argc, char *argv[], llvm::raw_ostream &out) = 0;
 };
-  
+
 class DiagTools {
-  void *tools;
+    void *tools;
 public:
-  DiagTools();
-  ~DiagTools();
-  
-  DiagTool *getTool(llvm::StringRef toolCmd);
-  void registerTool(DiagTool *tool);  
-  void printCommands(llvm::raw_ostream &out);  
+    DiagTools();
+    ~DiagTools();
+
+    DiagTool *getTool(llvm::StringRef toolCmd);
+    void registerTool(DiagTool *tool);
+    void printCommands(llvm::raw_ostream &out);
 };
 
 extern llvm::ManagedStatic<DiagTools> diagTools;
@@ -50,7 +54,9 @@ extern llvm::ManagedStatic<DiagTools> diagTools;
 template <typename DIAGTOOL>
 class RegisterDiagTool {
 public:
-  RegisterDiagTool() { diagTools->registerTool(new DIAGTOOL()); }
+    RegisterDiagTool() {
+        diagTools->registerTool(new DIAGTOOL());
+    }
 };
 
 } // end diagtool namespace

@@ -15,7 +15,7 @@ namespace lldb_private {
 
 class CommandObjectSession : public CommandObjectMultiword {
 public:
-  CommandObjectSession(CommandInterpreter &interpreter);
+    CommandObjectSession(CommandInterpreter &interpreter);
 };
 
 } // namespace lldb_private

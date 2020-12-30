@@ -43,21 +43,23 @@ extern int CheckDeviceAndCtors(int64_t device_id);
 
 // This structure stores information of a mapped memory region.
 struct MapComponentInfoTy {
-  void *Base;
-  void *Begin;
-  int64_t Size;
-  int64_t Type;
-  MapComponentInfoTy() = default;
-  MapComponentInfoTy(void *Base, void *Begin, int64_t Size, int64_t Type)
-      : Base(Base), Begin(Begin), Size(Size), Type(Type) {}
+    void *Base;
+    void *Begin;
+    int64_t Size;
+    int64_t Type;
+    MapComponentInfoTy() = default;
+    MapComponentInfoTy(void *Base, void *Begin, int64_t Size, int64_t Type)
+        : Base(Base), Begin(Begin), Size(Size), Type(Type) {}
 };
 
 // This structure stores all components of a user-defined mapper. The number of
 // components are dynamically decided, so we utilize C++ STL vector
 // implementation here.
 struct MapperComponentsTy {
-  std::vector<MapComponentInfoTy> Components;
-  int32_t size() { return Components.size(); }
+    std::vector<MapComponentInfoTy> Components;
+    int32_t size() {
+        return Components.size();
+    }
 };
 
 // The mapper function pointer type. It follows the signature below:
@@ -91,20 +93,20 @@ int __kmpc_get_target_offload(void) __attribute__((weak));
 ////////////////////////////////////////////////////////////////////////////////
 /// dump a table of all the host-target pointer pairs on failure
 static inline void dumpTargetPointerMappings(const DeviceTy &Device) {
-  if (Device.HostDataToTargetMap.empty())
-    return;
+    if (Device.HostDataToTargetMap.empty())
+        return;
 
-  fprintf(stderr, "Device %d Host-Device Pointer Mappings:\n", Device.DeviceID);
-  fprintf(stderr, "%-18s %-18s %s %s\n", "Host Ptr", "Target Ptr", "Size (B)",
-          "Declaration");
-  for (const auto &HostTargetMap : Device.HostDataToTargetMap) {
-    SourceInfo info(HostTargetMap.HstPtrName);
-    fprintf(stderr, DPxMOD " " DPxMOD " %-8lu %s at %s:%d:%d\n",
-            DPxPTR(HostTargetMap.HstPtrBegin),
-            DPxPTR(HostTargetMap.TgtPtrBegin),
-            HostTargetMap.HstPtrEnd - HostTargetMap.HstPtrBegin, info.getName(),
-            info.getFilename(), info.getLine(), info.getColumn());
-  }
+    fprintf(stderr, "Device %d Host-Device Pointer Mappings:\n", Device.DeviceID);
+    fprintf(stderr, "%-18s %-18s %s %s\n", "Host Ptr", "Target Ptr", "Size (B)",
+            "Declaration");
+    for (const auto &HostTargetMap : Device.HostDataToTargetMap) {
+        SourceInfo info(HostTargetMap.HstPtrName);
+        fprintf(stderr, DPxMOD " " DPxMOD " %-8lu %s at %s:%d:%d\n",
+                DPxPTR(HostTargetMap.HstPtrBegin),
+                DPxPTR(HostTargetMap.TgtPtrBegin),
+                HostTargetMap.HstPtrEnd - HostTargetMap.HstPtrBegin, info.getName(),
+                info.getFilename(), info.getLine(), info.getColumn());
+    }
 }
 
 #ifdef OMPTARGET_PROFILE_ENABLED

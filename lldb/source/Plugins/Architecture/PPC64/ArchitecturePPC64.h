@@ -15,25 +15,25 @@ namespace lldb_private {
 
 class ArchitecturePPC64 : public Architecture {
 public:
-  static ConstString GetPluginNameStatic();
-  static void Initialize();
-  static void Terminate();
+    static ConstString GetPluginNameStatic();
+    static void Initialize();
+    static void Terminate();
 
-  ConstString GetPluginName() override;
-  uint32_t GetPluginVersion() override;
+    ConstString GetPluginName() override;
+    uint32_t GetPluginVersion() override;
 
-  void OverrideStopInfo(Thread &thread) const override {}
+    void OverrideStopInfo(Thread &thread) const override {}
 
-  /// This method compares current address with current function's
-  /// local entry point, returning the bytes to skip if they match.
-  size_t GetBytesToSkip(Symbol &func, const Address &curr_addr) const override;
+    /// This method compares current address with current function's
+    /// local entry point, returning the bytes to skip if they match.
+    size_t GetBytesToSkip(Symbol &func, const Address &curr_addr) const override;
 
-  void AdjustBreakpointAddress(const Symbol &func,
-                               Address &addr) const override;
+    void AdjustBreakpointAddress(const Symbol &func,
+                                 Address &addr) const override;
 
 private:
-  static std::unique_ptr<Architecture> Create(const ArchSpec &arch);
-  ArchitecturePPC64() = default;
+    static std::unique_ptr<Architecture> Create(const ArchSpec &arch);
+    ArchitecturePPC64() = default;
 };
 
 } // namespace lldb_private

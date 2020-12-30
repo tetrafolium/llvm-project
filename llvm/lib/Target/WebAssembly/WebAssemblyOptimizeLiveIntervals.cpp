@@ -34,26 +34,26 @@ using namespace llvm;
 
 namespace {
 class WebAssemblyOptimizeLiveIntervals final : public MachineFunctionPass {
-  StringRef getPassName() const override {
-    return "WebAssembly Optimize Live Intervals";
-  }
+    StringRef getPassName() const override {
+        return "WebAssembly Optimize Live Intervals";
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesCFG();
-    AU.addRequired<LiveIntervals>();
-    AU.addPreserved<MachineBlockFrequencyInfo>();
-    AU.addPreserved<SlotIndexes>();
-    AU.addPreserved<LiveIntervals>();
-    AU.addPreservedID(LiveVariablesID);
-    AU.addPreservedID(MachineDominatorsID);
-    MachineFunctionPass::getAnalysisUsage(AU);
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesCFG();
+        AU.addRequired<LiveIntervals>();
+        AU.addPreserved<MachineBlockFrequencyInfo>();
+        AU.addPreserved<SlotIndexes>();
+        AU.addPreserved<LiveIntervals>();
+        AU.addPreservedID(LiveVariablesID);
+        AU.addPreservedID(MachineDominatorsID);
+        MachineFunctionPass::getAnalysisUsage(AU);
+    }
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 
 public:
-  static char ID; // Pass identification, replacement for typeid
-  WebAssemblyOptimizeLiveIntervals() : MachineFunctionPass(ID) {}
+    static char ID; // Pass identification, replacement for typeid
+    WebAssemblyOptimizeLiveIntervals() : MachineFunctionPass(ID) {}
 };
 } // end anonymous namespace
 
@@ -62,59 +62,59 @@ INITIALIZE_PASS(WebAssemblyOptimizeLiveIntervals, DEBUG_TYPE,
                 "Optimize LiveIntervals for WebAssembly", false, false)
 
 FunctionPass *llvm::createWebAssemblyOptimizeLiveIntervals() {
-  return new WebAssemblyOptimizeLiveIntervals();
+    return new WebAssemblyOptimizeLiveIntervals();
 }
 
 bool WebAssemblyOptimizeLiveIntervals::runOnMachineFunction(
     MachineFunction &MF) {
-  LLVM_DEBUG(dbgs() << "********** Optimize LiveIntervals **********\n"
-                       "********** Function: "
-                    << MF.getName() << '\n');
+    LLVM_DEBUG(dbgs() << "********** Optimize LiveIntervals **********\n"
+               "********** Function: "
+               << MF.getName() << '\n');
 
-  MachineRegisterInfo &MRI = MF.getRegInfo();
-  auto &LIS = getAnalysis<LiveIntervals>();
+    MachineRegisterInfo &MRI = MF.getRegInfo();
+    auto &LIS = getAnalysis<LiveIntervals>();
 
-  // We don't preserve SSA form.
-  MRI.leaveSSA();
+    // We don't preserve SSA form.
+    MRI.leaveSSA();
 
-  assert(MRI.tracksLiveness() && "OptimizeLiveIntervals expects liveness");
+    assert(MRI.tracksLiveness() && "OptimizeLiveIntervals expects liveness");
 
-  // Split multiple-VN LiveIntervals into multiple LiveIntervals.
-  SmallVector<LiveInterval *, 4> SplitLIs;
-  for (unsigned I = 0, E = MRI.getNumVirtRegs(); I < E; ++I) {
-    unsigned Reg = Register::index2VirtReg(I);
-    auto &TRI = *MF.getSubtarget<WebAssemblySubtarget>().getRegisterInfo();
+    // Split multiple-VN LiveIntervals into multiple LiveIntervals.
+    SmallVector<LiveInterval *, 4> SplitLIs;
+    for (unsigned I = 0, E = MRI.getNumVirtRegs(); I < E; ++I) {
+        unsigned Reg = Register::index2VirtReg(I);
+        auto &TRI = *MF.getSubtarget<WebAssemblySubtarget>().getRegisterInfo();
 
-    if (MRI.reg_nodbg_empty(Reg))
-      continue;
+        if (MRI.reg_nodbg_empty(Reg))
+            continue;
 
-    LIS.splitSeparateComponents(LIS.getInterval(Reg), SplitLIs);
-    if (Reg == TRI.getFrameRegister(MF) && SplitLIs.size() > 0) {
-      // The live interval for the frame register was split, resulting in a new
-      // VReg. For now we only support debug info output for a single frame base
-      // value for the function, so just use the last one. It will certainly be
-      // wrong for some part of the function, but until we are able to track
-      // values through live-range splitting and stackification, it will have to
-      // do.
-      MF.getInfo<WebAssemblyFunctionInfo>()->setFrameBaseVreg(
-          SplitLIs.back()->reg());
+        LIS.splitSeparateComponents(LIS.getInterval(Reg), SplitLIs);
+        if (Reg == TRI.getFrameRegister(MF) && SplitLIs.size() > 0) {
+            // The live interval for the frame register was split, resulting in a new
+            // VReg. For now we only support debug info output for a single frame base
+            // value for the function, so just use the last one. It will certainly be
+            // wrong for some part of the function, but until we are able to track
+            // values through live-range splitting and stackification, it will have to
+            // do.
+            MF.getInfo<WebAssemblyFunctionInfo>()->setFrameBaseVreg(
+                SplitLIs.back()->reg());
+        }
+        SplitLIs.clear();
     }
-    SplitLIs.clear();
-  }
 
-  // In PrepareForLiveIntervals, we conservatively inserted IMPLICIT_DEF
-  // instructions to satisfy LiveIntervals' requirement that all uses be
-  // dominated by defs. Now that LiveIntervals has computed which of these
-  // defs are actually needed and which are dead, remove the dead ones.
-  for (auto MII = MF.begin()->begin(), MIE = MF.begin()->end(); MII != MIE;) {
-    MachineInstr *MI = &*MII++;
-    if (MI->isImplicitDef() && MI->getOperand(0).isDead()) {
-      LiveInterval &LI = LIS.getInterval(MI->getOperand(0).getReg());
-      LIS.removeVRegDefAt(LI, LIS.getInstructionIndex(*MI).getRegSlot());
-      LIS.RemoveMachineInstrFromMaps(*MI);
-      MI->eraseFromParent();
+    // In PrepareForLiveIntervals, we conservatively inserted IMPLICIT_DEF
+    // instructions to satisfy LiveIntervals' requirement that all uses be
+    // dominated by defs. Now that LiveIntervals has computed which of these
+    // defs are actually needed and which are dead, remove the dead ones.
+    for (auto MII = MF.begin()->begin(), MIE = MF.begin()->end(); MII != MIE;) {
+        MachineInstr *MI = &*MII++;
+        if (MI->isImplicitDef() && MI->getOperand(0).isDead()) {
+            LiveInterval &LI = LIS.getInterval(MI->getOperand(0).getReg());
+            LIS.removeVRegDefAt(LI, LIS.getInstructionIndex(*MI).getRegSlot());
+            LIS.RemoveMachineInstrFromMaps(*MI);
+            MI->eraseFromParent();
+        }
     }
-  }
 
-  return true;
+    return true;
 }

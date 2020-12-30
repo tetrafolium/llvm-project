@@ -20,11 +20,11 @@ namespace llvm_libc {
 
 class IncludeFileCommand : public Command {
 public:
-  static const char Name[];
+    static const char Name[];
 
-  void run(llvm::raw_ostream &OS, const ArgVector &Args,
-           llvm::StringRef StdHeader, llvm::RecordKeeper &Records,
-           const Command::ErrorReporter &Reporter) const override;
+    void run(llvm::raw_ostream &OS, const ArgVector &Args,
+             llvm::StringRef StdHeader, llvm::RecordKeeper &Records,
+             const Command::ErrorReporter &Reporter) const override;
 };
 
 } // namespace llvm_libc

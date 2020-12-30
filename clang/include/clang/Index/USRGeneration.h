@@ -24,7 +24,7 @@ class QualType;
 namespace index {
 
 static inline StringRef getUSRSpacePrefix() {
-  return "c:";
+    return "c:";
 }
 
 /// Generate a USR for a Decl, including the USR prefix.

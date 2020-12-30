@@ -14,16 +14,16 @@
 
 extern "C" {
 
-__attribute__((weak)) const char *__scudo_default_options();
+    __attribute__((weak)) const char *__scudo_default_options();
 
 // Post-allocation & pre-deallocation hooks.
 // They must be thread-safe and not use heap related functions.
-__attribute__((weak)) void __scudo_allocate_hook(void *ptr, size_t size);
-__attribute__((weak)) void __scudo_deallocate_hook(void *ptr);
+    __attribute__((weak)) void __scudo_allocate_hook(void *ptr, size_t size);
+    __attribute__((weak)) void __scudo_deallocate_hook(void *ptr);
 
-void __scudo_print_stats(void);
+    void __scudo_print_stats(void);
 
-typedef void (*iterate_callback)(uintptr_t base, size_t size, void *arg);
+    typedef void (*iterate_callback)(uintptr_t base, size_t size, void *arg);
 
 // Determine the likely cause of a tag check fault or other memory protection
 // error on a system with memory tagging support. The results are returned via
@@ -70,41 +70,41 @@ typedef void (*iterate_callback)(uintptr_t base, size_t size, void *arg);
 //
 // memory_size is the size of the memory region referred to by the memory
 // pointer.
-void __scudo_get_error_info(struct scudo_error_info *error_info,
-                            uintptr_t fault_addr, const char *stack_depot,
-                            const char *region_info, const char *memory,
-                            const char *memory_tags, uintptr_t memory_addr,
-                            size_t memory_size);
+    void __scudo_get_error_info(struct scudo_error_info *error_info,
+                                uintptr_t fault_addr, const char *stack_depot,
+                                const char *region_info, const char *memory,
+                                const char *memory_tags, uintptr_t memory_addr,
+                                size_t memory_size);
 
-enum scudo_error_type {
-  UNKNOWN,
-  USE_AFTER_FREE,
-  BUFFER_OVERFLOW,
-  BUFFER_UNDERFLOW,
-};
+    enum scudo_error_type {
+        UNKNOWN,
+        USE_AFTER_FREE,
+        BUFFER_OVERFLOW,
+        BUFFER_UNDERFLOW,
+    };
 
-struct scudo_error_report {
-  enum scudo_error_type error_type;
+    struct scudo_error_report {
+        enum scudo_error_type error_type;
 
-  uintptr_t allocation_address;
-  uintptr_t allocation_size;
+        uintptr_t allocation_address;
+        uintptr_t allocation_size;
 
-  uint32_t allocation_tid;
-  uintptr_t allocation_trace[64];
+        uint32_t allocation_tid;
+        uintptr_t allocation_trace[64];
 
-  uint32_t deallocation_tid;
-  uintptr_t deallocation_trace[64];
-};
+        uint32_t deallocation_tid;
+        uintptr_t deallocation_trace[64];
+    };
 
-struct scudo_error_info {
-  struct scudo_error_report reports[3];
-};
+    struct scudo_error_info {
+        struct scudo_error_report reports[3];
+    };
 
-const char *__scudo_get_stack_depot_addr();
-size_t __scudo_get_stack_depot_size();
+    const char *__scudo_get_stack_depot_addr();
+    size_t __scudo_get_stack_depot_size();
 
-const char *__scudo_get_region_info_addr();
-size_t __scudo_get_region_info_size();
+    const char *__scudo_get_region_info_addr();
+    size_t __scudo_get_region_info_size();
 
 #ifndef M_DECAY_TIME
 #define M_DECAY_TIME -100
@@ -141,13 +141,13 @@ size_t __scudo_get_region_info_size();
 #define M_TSDS_COUNT_MAX -202
 #endif
 
-enum scudo_memtag_tuning {
-  // Tune for buffer overflows.
-  M_MEMTAG_TUNING_BUFFER_OVERFLOW,
+    enum scudo_memtag_tuning {
+        // Tune for buffer overflows.
+        M_MEMTAG_TUNING_BUFFER_OVERFLOW,
 
-  // Tune for use-after-free.
-  M_MEMTAG_TUNING_UAF,
-};
+        // Tune for use-after-free.
+        M_MEMTAG_TUNING_UAF,
+    };
 
 } // extern "C"
 

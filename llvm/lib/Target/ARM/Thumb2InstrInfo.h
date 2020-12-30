@@ -21,55 +21,57 @@ class ARMSubtarget;
 class ScheduleHazardRecognizer;
 
 class Thumb2InstrInfo : public ARMBaseInstrInfo {
-  ThumbRegisterInfo RI;
+    ThumbRegisterInfo RI;
 public:
-  explicit Thumb2InstrInfo(const ARMSubtarget &STI);
+    explicit Thumb2InstrInfo(const ARMSubtarget &STI);
 
-  /// Return the noop instruction to use for a noop.
-  void getNoop(MCInst &NopInst) const override;
+    /// Return the noop instruction to use for a noop.
+    void getNoop(MCInst &NopInst) const override;
 
-  // Return the non-pre/post incrementing version of 'Opc'. Return 0
-  // if there is not such an opcode.
-  unsigned getUnindexedOpcode(unsigned Opc) const override;
+    // Return the non-pre/post incrementing version of 'Opc'. Return 0
+    // if there is not such an opcode.
+    unsigned getUnindexedOpcode(unsigned Opc) const override;
 
-  void ReplaceTailWithBranchTo(MachineBasicBlock::iterator Tail,
-                               MachineBasicBlock *NewDest) const override;
+    void ReplaceTailWithBranchTo(MachineBasicBlock::iterator Tail,
+                                 MachineBasicBlock *NewDest) const override;
 
-  bool isLegalToSplitMBBAt(MachineBasicBlock &MBB,
-                           MachineBasicBlock::iterator MBBI) const override;
+    bool isLegalToSplitMBBAt(MachineBasicBlock &MBB,
+                             MachineBasicBlock::iterator MBBI) const override;
 
-  void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
-                   const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
-                   bool KillSrc) const override;
+    void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                     const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
+                     bool KillSrc) const override;
 
-  void storeRegToStackSlot(MachineBasicBlock &MBB,
-                           MachineBasicBlock::iterator MBBI,
-                           Register SrcReg, bool isKill, int FrameIndex,
-                           const TargetRegisterClass *RC,
-                           const TargetRegisterInfo *TRI) const override;
+    void storeRegToStackSlot(MachineBasicBlock &MBB,
+                             MachineBasicBlock::iterator MBBI,
+                             Register SrcReg, bool isKill, int FrameIndex,
+                             const TargetRegisterClass *RC,
+                             const TargetRegisterInfo *TRI) const override;
 
-  void loadRegFromStackSlot(MachineBasicBlock &MBB,
-                            MachineBasicBlock::iterator MBBI,
-                            Register DestReg, int FrameIndex,
-                            const TargetRegisterClass *RC,
-                            const TargetRegisterInfo *TRI) const override;
+    void loadRegFromStackSlot(MachineBasicBlock &MBB,
+                              MachineBasicBlock::iterator MBBI,
+                              Register DestReg, int FrameIndex,
+                              const TargetRegisterClass *RC,
+                              const TargetRegisterInfo *TRI) const override;
 
-  /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
-  /// such, whenever a client has an instance of instruction info, it should
-  /// always be able to get register info as well (through this method).
-  ///
-  const ThumbRegisterInfo &getRegisterInfo() const override { return RI; }
+    /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
+    /// such, whenever a client has an instance of instruction info, it should
+    /// always be able to get register info as well (through this method).
+    ///
+    const ThumbRegisterInfo &getRegisterInfo() const override {
+        return RI;
+    }
 
-  MachineInstr *optimizeSelect(MachineInstr &MI,
-                               SmallPtrSetImpl<MachineInstr *> &SeenMIs,
-                               bool) const override;
+    MachineInstr *optimizeSelect(MachineInstr &MI,
+                                 SmallPtrSetImpl<MachineInstr *> &SeenMIs,
+                                 bool) const override;
 
-  MachineInstr *commuteInstructionImpl(MachineInstr &MI, bool NewMI,
-                                       unsigned OpIdx1,
-                                       unsigned OpIdx2) const override;
+    MachineInstr *commuteInstructionImpl(MachineInstr &MI, bool NewMI,
+                                         unsigned OpIdx1,
+                                         unsigned OpIdx2) const override;
 
 private:
-  void expandLoadStackGuard(MachineBasicBlock::iterator MI) const override;
+    void expandLoadStackGuard(MachineBasicBlock::iterator MI) const override;
 };
 
 /// getITInstrPredicate - Valid only in Thumb2 mode. This function is identical
@@ -83,8 +85,8 @@ int findFirstVPTPredOperandIdx(const MachineInstr &MI);
 ARMVCC::VPTCodes getVPTInstrPredicate(const MachineInstr &MI,
                                       Register &PredReg);
 inline ARMVCC::VPTCodes getVPTInstrPredicate(const MachineInstr &MI) {
-  Register PredReg;
-  return getVPTInstrPredicate(MI, PredReg);
+    Register PredReg;
+    return getVPTInstrPredicate(MI, PredReg);
 }
 
 // Recomputes the Block Mask of Instr, a VPT or VPST instruction.

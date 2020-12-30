@@ -51,105 +51,105 @@ namespace {
 
 // Target features to propagate.
 static constexpr const FeatureBitset TargetFeatures = {
-  AMDGPU::FeatureWavefrontSize16,
-  AMDGPU::FeatureWavefrontSize32,
-  AMDGPU::FeatureWavefrontSize64
+    AMDGPU::FeatureWavefrontSize16,
+    AMDGPU::FeatureWavefrontSize32,
+    AMDGPU::FeatureWavefrontSize64
 };
 
 // Attributes to propagate.
 // TODO: Support conservative min/max merging instead of cloning.
 static constexpr const char* AttributeNames[] = {
-  "amdgpu-waves-per-eu",
-  "amdgpu-flat-work-group-size"
+    "amdgpu-waves-per-eu",
+    "amdgpu-flat-work-group-size"
 };
 
 static constexpr unsigned NumAttr =
-  sizeof(AttributeNames) / sizeof(AttributeNames[0]);
+    sizeof(AttributeNames) / sizeof(AttributeNames[0]);
 
 class AMDGPUPropagateAttributes {
 
-  class FnProperties {
-  private:
-    explicit FnProperties(const FeatureBitset &&FB) : Features(FB) {}
+    class FnProperties {
+    private:
+        explicit FnProperties(const FeatureBitset &&FB) : Features(FB) {}
 
-  public:
-    explicit FnProperties(const TargetMachine &TM, const Function &F) {
-      Features = TM.getSubtargetImpl(F)->getFeatureBits();
+    public:
+        explicit FnProperties(const TargetMachine &TM, const Function &F) {
+            Features = TM.getSubtargetImpl(F)->getFeatureBits();
 
-      for (unsigned I = 0; I < NumAttr; ++I)
-        if (F.hasFnAttribute(AttributeNames[I]))
-          Attributes[I] = F.getFnAttribute(AttributeNames[I]);
-    }
+            for (unsigned I = 0; I < NumAttr; ++I)
+                if (F.hasFnAttribute(AttributeNames[I]))
+                    Attributes[I] = F.getFnAttribute(AttributeNames[I]);
+        }
 
-    bool operator == (const FnProperties &Other) const {
-      if ((Features & TargetFeatures) != (Other.Features & TargetFeatures))
-        return false;
-      for (unsigned I = 0; I < NumAttr; ++I)
-        if (Attributes[I] != Other.Attributes[I])
-          return false;
-      return true;
-    }
+        bool operator == (const FnProperties &Other) const {
+            if ((Features & TargetFeatures) != (Other.Features & TargetFeatures))
+                return false;
+            for (unsigned I = 0; I < NumAttr; ++I)
+                if (Attributes[I] != Other.Attributes[I])
+                    return false;
+            return true;
+        }
 
-    FnProperties adjustToCaller(const FnProperties &CallerProps) const {
-      FnProperties New((Features & ~TargetFeatures) | CallerProps.Features);
-      for (unsigned I = 0; I < NumAttr; ++I)
-        New.Attributes[I] = CallerProps.Attributes[I];
-      return New;
-    }
+        FnProperties adjustToCaller(const FnProperties &CallerProps) const {
+            FnProperties New((Features & ~TargetFeatures) | CallerProps.Features);
+            for (unsigned I = 0; I < NumAttr; ++I)
+                New.Attributes[I] = CallerProps.Attributes[I];
+            return New;
+        }
 
-    FeatureBitset Features;
-    Optional<Attribute> Attributes[NumAttr];
-  };
+        FeatureBitset Features;
+        Optional<Attribute> Attributes[NumAttr];
+    };
 
-  class Clone {
-  public:
-    Clone(const FnProperties &Props, Function *OrigF, Function *NewF) :
-      Properties(Props), OrigF(OrigF), NewF(NewF) {}
+    class Clone {
+    public:
+        Clone(const FnProperties &Props, Function *OrigF, Function *NewF) :
+            Properties(Props), OrigF(OrigF), NewF(NewF) {}
 
-    FnProperties Properties;
-    Function *OrigF;
-    Function *NewF;
-  };
+        FnProperties Properties;
+        Function *OrigF;
+        Function *NewF;
+    };
 
-  const TargetMachine *TM;
+    const TargetMachine *TM;
 
-  // Clone functions as needed or just set attributes.
-  bool AllowClone;
+    // Clone functions as needed or just set attributes.
+    bool AllowClone;
 
-  // Option propagation roots.
-  SmallSet<Function *, 32> Roots;
+    // Option propagation roots.
+    SmallSet<Function *, 32> Roots;
 
-  // Clones of functions with their attributes.
-  SmallVector<Clone, 32> Clones;
+    // Clones of functions with their attributes.
+    SmallVector<Clone, 32> Clones;
 
-  // Find a clone with required features.
-  Function *findFunction(const FnProperties &PropsNeeded,
-                         Function *OrigF);
+    // Find a clone with required features.
+    Function *findFunction(const FnProperties &PropsNeeded,
+                           Function *OrigF);
 
-  // Clone function \p F and set \p NewProps on the clone.
-  // Cole takes the name of original function.
-  Function *cloneWithProperties(Function &F, const FnProperties &NewProps);
+    // Clone function \p F and set \p NewProps on the clone.
+    // Cole takes the name of original function.
+    Function *cloneWithProperties(Function &F, const FnProperties &NewProps);
 
-  // Set new function's features in place.
-  void setFeatures(Function &F, const FeatureBitset &NewFeatures);
+    // Set new function's features in place.
+    void setFeatures(Function &F, const FeatureBitset &NewFeatures);
 
-  // Set new function's attributes in place.
-  void setAttributes(Function &F, const ArrayRef<Optional<Attribute>> NewAttrs);
+    // Set new function's attributes in place.
+    void setAttributes(Function &F, const ArrayRef<Optional<Attribute>> NewAttrs);
 
-  std::string getFeatureString(const FeatureBitset &Features) const;
+    std::string getFeatureString(const FeatureBitset &Features) const;
 
-  // Propagate attributes from Roots.
-  bool process();
+    // Propagate attributes from Roots.
+    bool process();
 
 public:
-  AMDGPUPropagateAttributes(const TargetMachine *TM, bool AllowClone) :
-    TM(TM), AllowClone(AllowClone) {}
+    AMDGPUPropagateAttributes(const TargetMachine *TM, bool AllowClone) :
+        TM(TM), AllowClone(AllowClone) {}
 
-  // Use F as a root and propagate its attributes.
-  bool process(Function &F);
+    // Use F as a root and propagate its attributes.
+    bool process(Function &F);
 
-  // Propagate attributes starting from kernel functions.
-  bool process(Module &M);
+    // Propagate attributes starting from kernel functions.
+    bool process(Module &M);
 };
 
 // Allows to propagate attributes early, but no clonning is allowed as it must
@@ -157,35 +157,35 @@ public:
 // TODO: We shall only need a one instance of module pass, but that needs to be
 // in the linker pipeline which is currently not possible.
 class AMDGPUPropagateAttributesEarly : public FunctionPass {
-  const TargetMachine *TM;
+    const TargetMachine *TM;
 
 public:
-  static char ID; // Pass identification
+    static char ID; // Pass identification
 
-  AMDGPUPropagateAttributesEarly(const TargetMachine *TM = nullptr) :
-    FunctionPass(ID), TM(TM) {
-    initializeAMDGPUPropagateAttributesEarlyPass(
-      *PassRegistry::getPassRegistry());
-  }
+    AMDGPUPropagateAttributesEarly(const TargetMachine *TM = nullptr) :
+        FunctionPass(ID), TM(TM) {
+        initializeAMDGPUPropagateAttributesEarlyPass(
+            *PassRegistry::getPassRegistry());
+    }
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 };
 
 // Allows to propagate attributes with clonning but does that late in the
 // pipeline.
 class AMDGPUPropagateAttributesLate : public ModulePass {
-  const TargetMachine *TM;
+    const TargetMachine *TM;
 
 public:
-  static char ID; // Pass identification
+    static char ID; // Pass identification
 
-  AMDGPUPropagateAttributesLate(const TargetMachine *TM = nullptr) :
-    ModulePass(ID), TM(TM) {
-    initializeAMDGPUPropagateAttributesLatePass(
-      *PassRegistry::getPassRegistry());
-  }
+    AMDGPUPropagateAttributesLate(const TargetMachine *TM = nullptr) :
+        ModulePass(ID), TM(TM) {
+        initializeAMDGPUPropagateAttributesLatePass(
+            *PassRegistry::getPassRegistry());
+    }
 
-  bool runOnModule(Module &M) override;
+    bool runOnModule(Module &M) override;
 };
 
 }  // end anonymous namespace.
@@ -205,207 +205,207 @@ INITIALIZE_PASS(AMDGPUPropagateAttributesLate,
 Function *
 AMDGPUPropagateAttributes::findFunction(const FnProperties &PropsNeeded,
                                         Function *OrigF) {
-  // TODO: search for clone's clones.
-  for (Clone &C : Clones)
-    if (C.OrigF == OrigF && PropsNeeded == C.Properties)
-      return C.NewF;
+    // TODO: search for clone's clones.
+    for (Clone &C : Clones)
+        if (C.OrigF == OrigF && PropsNeeded == C.Properties)
+            return C.NewF;
 
-  return nullptr;
+    return nullptr;
 }
 
 bool AMDGPUPropagateAttributes::process(Module &M) {
-  for (auto &F : M.functions())
-    if (AMDGPU::isEntryFunctionCC(F.getCallingConv()))
-      Roots.insert(&F);
+    for (auto &F : M.functions())
+        if (AMDGPU::isEntryFunctionCC(F.getCallingConv()))
+            Roots.insert(&F);
 
-  return process();
+    return process();
 }
 
 bool AMDGPUPropagateAttributes::process(Function &F) {
-  Roots.insert(&F);
-  return process();
+    Roots.insert(&F);
+    return process();
 }
 
 bool AMDGPUPropagateAttributes::process() {
-  bool Changed = false;
-  SmallSet<Function *, 32> NewRoots;
-  SmallSet<Function *, 32> Replaced;
+    bool Changed = false;
+    SmallSet<Function *, 32> NewRoots;
+    SmallSet<Function *, 32> Replaced;
 
-  if (Roots.empty())
-    return false;
-  Module &M = *(*Roots.begin())->getParent();
+    if (Roots.empty())
+        return false;
+    Module &M = *(*Roots.begin())->getParent();
 
-  do {
-    Roots.insert(NewRoots.begin(), NewRoots.end());
-    NewRoots.clear();
+    do {
+        Roots.insert(NewRoots.begin(), NewRoots.end());
+        NewRoots.clear();
 
-    for (auto &F : M.functions()) {
-      if (F.isDeclaration())
-        continue;
+        for (auto &F : M.functions()) {
+            if (F.isDeclaration())
+                continue;
 
-      const FnProperties CalleeProps(*TM, F);
-      SmallVector<std::pair<CallBase *, Function *>, 32> ToReplace;
-      SmallSet<CallBase *, 32> Visited;
+            const FnProperties CalleeProps(*TM, F);
+            SmallVector<std::pair<CallBase *, Function *>, 32> ToReplace;
+            SmallSet<CallBase *, 32> Visited;
 
-      for (User *U : F.users()) {
-        Instruction *I = dyn_cast<Instruction>(U);
-        if (!I)
-          continue;
-        CallBase *CI = dyn_cast<CallBase>(I);
-        if (!CI)
-          continue;
-        Function *Caller = CI->getCaller();
-        if (!Caller || !Visited.insert(CI).second)
-          continue;
-        if (!Roots.count(Caller) && !NewRoots.count(Caller))
-          continue;
+            for (User *U : F.users()) {
+                Instruction *I = dyn_cast<Instruction>(U);
+                if (!I)
+                    continue;
+                CallBase *CI = dyn_cast<CallBase>(I);
+                if (!CI)
+                    continue;
+                Function *Caller = CI->getCaller();
+                if (!Caller || !Visited.insert(CI).second)
+                    continue;
+                if (!Roots.count(Caller) && !NewRoots.count(Caller))
+                    continue;
 
-        const FnProperties CallerProps(*TM, *Caller);
+                const FnProperties CallerProps(*TM, *Caller);
 
-        if (CalleeProps == CallerProps) {
-          if (!Roots.count(&F))
-            NewRoots.insert(&F);
-          continue;
+                if (CalleeProps == CallerProps) {
+                    if (!Roots.count(&F))
+                        NewRoots.insert(&F);
+                    continue;
+                }
+
+                Function *NewF = findFunction(CallerProps, &F);
+                if (!NewF) {
+                    const FnProperties NewProps = CalleeProps.adjustToCaller(CallerProps);
+                    if (!AllowClone) {
+                        // This may set different features on different iteartions if
+                        // there is a contradiction in callers' attributes. In this case
+                        // we rely on a second pass running on Module, which is allowed
+                        // to clone.
+                        setFeatures(F, NewProps.Features);
+                        setAttributes(F, NewProps.Attributes);
+                        NewRoots.insert(&F);
+                        Changed = true;
+                        break;
+                    }
+
+                    NewF = cloneWithProperties(F, NewProps);
+                    Clones.push_back(Clone(CallerProps, &F, NewF));
+                    NewRoots.insert(NewF);
+                }
+
+                ToReplace.push_back(std::make_pair(CI, NewF));
+                Replaced.insert(&F);
+
+                Changed = true;
+            }
+
+            while (!ToReplace.empty()) {
+                auto R = ToReplace.pop_back_val();
+                R.first->setCalledFunction(R.second);
+            }
         }
+    } while (!NewRoots.empty());
 
-        Function *NewF = findFunction(CallerProps, &F);
-        if (!NewF) {
-          const FnProperties NewProps = CalleeProps.adjustToCaller(CallerProps);
-          if (!AllowClone) {
-            // This may set different features on different iteartions if
-            // there is a contradiction in callers' attributes. In this case
-            // we rely on a second pass running on Module, which is allowed
-            // to clone.
-            setFeatures(F, NewProps.Features);
-            setAttributes(F, NewProps.Attributes);
-            NewRoots.insert(&F);
-            Changed = true;
-            break;
-          }
-
-          NewF = cloneWithProperties(F, NewProps);
-          Clones.push_back(Clone(CallerProps, &F, NewF));
-          NewRoots.insert(NewF);
-        }
-
-        ToReplace.push_back(std::make_pair(CI, NewF));
-        Replaced.insert(&F);
-
-        Changed = true;
-      }
-
-      while (!ToReplace.empty()) {
-        auto R = ToReplace.pop_back_val();
-        R.first->setCalledFunction(R.second);
-      }
+    for (Function *F : Replaced) {
+        if (F->use_empty())
+            F->eraseFromParent();
     }
-  } while (!NewRoots.empty());
 
-  for (Function *F : Replaced) {
-    if (F->use_empty())
-      F->eraseFromParent();
-  }
+    Roots.clear();
+    Clones.clear();
 
-  Roots.clear();
-  Clones.clear();
-
-  return Changed;
+    return Changed;
 }
 
 Function *
 AMDGPUPropagateAttributes::cloneWithProperties(Function &F,
-                                               const FnProperties &NewProps) {
-  LLVM_DEBUG(dbgs() << "Cloning " << F.getName() << '\n');
+        const FnProperties &NewProps) {
+    LLVM_DEBUG(dbgs() << "Cloning " << F.getName() << '\n');
 
-  ValueToValueMapTy dummy;
-  Function *NewF = CloneFunction(&F, dummy);
-  setFeatures(*NewF, NewProps.Features);
-  setAttributes(*NewF, NewProps.Attributes);
-  NewF->setVisibility(GlobalValue::DefaultVisibility);
-  NewF->setLinkage(GlobalValue::InternalLinkage);
+    ValueToValueMapTy dummy;
+    Function *NewF = CloneFunction(&F, dummy);
+    setFeatures(*NewF, NewProps.Features);
+    setAttributes(*NewF, NewProps.Attributes);
+    NewF->setVisibility(GlobalValue::DefaultVisibility);
+    NewF->setLinkage(GlobalValue::InternalLinkage);
 
-  // Swap names. If that is the only clone it will retain the name of now
-  // dead value. Preserve original name for externally visible functions.
-  if (F.hasName() && F.hasLocalLinkage()) {
-    std::string NewName = std::string(NewF->getName());
-    NewF->takeName(&F);
-    F.setName(NewName);
-  }
+    // Swap names. If that is the only clone it will retain the name of now
+    // dead value. Preserve original name for externally visible functions.
+    if (F.hasName() && F.hasLocalLinkage()) {
+        std::string NewName = std::string(NewF->getName());
+        NewF->takeName(&F);
+        F.setName(NewName);
+    }
 
-  return NewF;
+    return NewF;
 }
 
 void AMDGPUPropagateAttributes::setFeatures(Function &F,
-                                            const FeatureBitset &NewFeatures) {
-  std::string NewFeatureStr = getFeatureString(NewFeatures);
+        const FeatureBitset &NewFeatures) {
+    std::string NewFeatureStr = getFeatureString(NewFeatures);
 
-  LLVM_DEBUG(dbgs() << "Set features "
-                    << getFeatureString(NewFeatures & TargetFeatures)
-                    << " on " << F.getName() << '\n');
+    LLVM_DEBUG(dbgs() << "Set features "
+               << getFeatureString(NewFeatures & TargetFeatures)
+               << " on " << F.getName() << '\n');
 
-  F.removeFnAttr("target-features");
-  F.addFnAttr("target-features", NewFeatureStr);
+    F.removeFnAttr("target-features");
+    F.addFnAttr("target-features", NewFeatureStr);
 }
 
 void AMDGPUPropagateAttributes::setAttributes(Function &F,
-    const ArrayRef<Optional<Attribute>> NewAttrs) {
-  LLVM_DEBUG(dbgs() << "Set attributes on " << F.getName() << ":\n");
-  for (unsigned I = 0; I < NumAttr; ++I) {
-    F.removeFnAttr(AttributeNames[I]);
-    if (NewAttrs[I]) {
-      LLVM_DEBUG(dbgs() << '\t' << NewAttrs[I]->getAsString() << '\n');
-      F.addFnAttr(*NewAttrs[I]);
+        const ArrayRef<Optional<Attribute>> NewAttrs) {
+    LLVM_DEBUG(dbgs() << "Set attributes on " << F.getName() << ":\n");
+    for (unsigned I = 0; I < NumAttr; ++I) {
+        F.removeFnAttr(AttributeNames[I]);
+        if (NewAttrs[I]) {
+            LLVM_DEBUG(dbgs() << '\t' << NewAttrs[I]->getAsString() << '\n');
+            F.addFnAttr(*NewAttrs[I]);
+        }
     }
-  }
 }
 
 std::string
 AMDGPUPropagateAttributes::getFeatureString(const FeatureBitset &Features) const
 {
-  std::string Ret;
-  for (const SubtargetFeatureKV &KV : AMDGPUFeatureKV) {
-    if (Features[KV.Value])
-      Ret += (StringRef("+") + KV.Key + ",").str();
-    else if (TargetFeatures[KV.Value])
-      Ret += (StringRef("-") + KV.Key + ",").str();
-  }
-  Ret.pop_back(); // Remove last comma.
-  return Ret;
+    std::string Ret;
+    for (const SubtargetFeatureKV &KV : AMDGPUFeatureKV) {
+        if (Features[KV.Value])
+            Ret += (StringRef("+") + KV.Key + ",").str();
+        else if (TargetFeatures[KV.Value])
+            Ret += (StringRef("-") + KV.Key + ",").str();
+    }
+    Ret.pop_back(); // Remove last comma.
+    return Ret;
 }
 
 bool AMDGPUPropagateAttributesEarly::runOnFunction(Function &F) {
-  if (!TM) {
-    auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
-    if (!TPC)
-      return false;
+    if (!TM) {
+        auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
+        if (!TPC)
+            return false;
 
-    TM = &TPC->getTM<TargetMachine>();
-  }
+        TM = &TPC->getTM<TargetMachine>();
+    }
 
-  if (!AMDGPU::isEntryFunctionCC(F.getCallingConv()))
-    return false;
+    if (!AMDGPU::isEntryFunctionCC(F.getCallingConv()))
+        return false;
 
-  return AMDGPUPropagateAttributes(TM, false).process(F);
+    return AMDGPUPropagateAttributes(TM, false).process(F);
 }
 
 bool AMDGPUPropagateAttributesLate::runOnModule(Module &M) {
-  if (!TM) {
-    auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
-    if (!TPC)
-      return false;
+    if (!TM) {
+        auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
+        if (!TPC)
+            return false;
 
-    TM = &TPC->getTM<TargetMachine>();
-  }
+        TM = &TPC->getTM<TargetMachine>();
+    }
 
-  return AMDGPUPropagateAttributes(TM, true).process(M);
+    return AMDGPUPropagateAttributes(TM, true).process(M);
 }
 
 FunctionPass
 *llvm::createAMDGPUPropagateAttributesEarlyPass(const TargetMachine *TM) {
-  return new AMDGPUPropagateAttributesEarly(TM);
+    return new AMDGPUPropagateAttributesEarly(TM);
 }
 
 ModulePass
 *llvm::createAMDGPUPropagateAttributesLatePass(const TargetMachine *TM) {
-  return new AMDGPUPropagateAttributesLate(TM);
+    return new AMDGPUPropagateAttributesLate(TM);
 }

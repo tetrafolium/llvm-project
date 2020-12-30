@@ -40,9 +40,9 @@ void registerXRayBasicFlags(FlagParser *P,
 
 const char *useCompilerDefinedBasicFlags() XRAY_NEVER_INSTRUMENT {
 #ifdef XRAY_BASIC_OPTIONS
-  return SANITIZER_STRINGIFY(XRAY_BASIC_OPTIONS);
+    return SANITIZER_STRINGIFY(XRAY_BASIC_OPTIONS);
 #else
-  return "";
+    return "";
 #endif
 }
 

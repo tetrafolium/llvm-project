@@ -26,50 +26,50 @@ class ARCInstrInfo;
 
 class ARCFrameLowering : public TargetFrameLowering {
 public:
-  ARCFrameLowering(const ARCSubtarget &st)
-      : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(4), 0),
-        ST(st) {}
+    ARCFrameLowering(const ARCSubtarget &st)
+        : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(4), 0),
+          ST(st) {}
 
-  /// Insert Prologue into the function.
-  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+    /// Insert Prologue into the function.
+    void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-  /// Insert Epilogue into the function.
-  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+    /// Insert Epilogue into the function.
+    void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-  /// Add explicit callee save registers.
-  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
-                            RegScavenger *RS) const override;
+    /// Add explicit callee save registers.
+    void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+                              RegScavenger *RS) const override;
 
-  bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
-                                 MachineBasicBlock::iterator MI,
-                                 ArrayRef<CalleeSavedInfo> CSI,
-                                 const TargetRegisterInfo *TRI) const override;
+    bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
+                                   MachineBasicBlock::iterator MI,
+                                   ArrayRef<CalleeSavedInfo> CSI,
+                                   const TargetRegisterInfo *TRI) const override;
 
-  bool
-  restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
-                              MachineBasicBlock::iterator MI,
-                              MutableArrayRef<CalleeSavedInfo> CSI,
-                              const TargetRegisterInfo *TRI) const override;
+    bool
+    restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
+                                MachineBasicBlock::iterator MI,
+                                MutableArrayRef<CalleeSavedInfo> CSI,
+                                const TargetRegisterInfo *TRI) const override;
 
-  void processFunctionBeforeFrameFinalized(MachineFunction &MF,
-                                           RegScavenger *RS) const override;
+    void processFunctionBeforeFrameFinalized(MachineFunction &MF,
+            RegScavenger *RS) const override;
 
-  bool hasFP(const MachineFunction &MF) const override;
+    bool hasFP(const MachineFunction &MF) const override;
 
-  MachineBasicBlock::iterator
-  eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
-                                MachineBasicBlock::iterator I) const override;
+    MachineBasicBlock::iterator
+    eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
+                                  MachineBasicBlock::iterator I) const override;
 
-  bool assignCalleeSavedSpillSlots(
-      llvm::MachineFunction &, const llvm::TargetRegisterInfo *,
-      std::vector<llvm::CalleeSavedInfo> &) const override;
+    bool assignCalleeSavedSpillSlots(
+        llvm::MachineFunction &, const llvm::TargetRegisterInfo *,
+        std::vector<llvm::CalleeSavedInfo> &) const override;
 
 private:
-  void adjustStackToMatchRecords(MachineBasicBlock &MBB,
-                                 MachineBasicBlock::iterator MI,
-                                 bool allocate) const;
+    void adjustStackToMatchRecords(MachineBasicBlock &MBB,
+                                   MachineBasicBlock::iterator MI,
+                                   bool allocate) const;
 
-  const ARCSubtarget &ST;
+    const ARCSubtarget &ST;
 };
 
 } // end namespace llvm

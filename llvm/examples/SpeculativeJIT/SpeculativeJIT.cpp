@@ -40,151 +40,155 @@ ExitOnError ExitOnErr;
 // Add Layers
 class SpeculativeJIT {
 public:
-  static Expected<std::unique_ptr<SpeculativeJIT>> Create() {
-    auto JTMB = orc::JITTargetMachineBuilder::detectHost();
-    if (!JTMB)
-      return JTMB.takeError();
+    static Expected<std::unique_ptr<SpeculativeJIT>> Create() {
+        auto JTMB = orc::JITTargetMachineBuilder::detectHost();
+        if (!JTMB)
+            return JTMB.takeError();
 
-    auto DL = JTMB->getDefaultDataLayoutForTarget();
-    if (!DL)
-      return DL.takeError();
+        auto DL = JTMB->getDefaultDataLayoutForTarget();
+        if (!DL)
+            return DL.takeError();
 
-    auto ES = std::make_unique<ExecutionSession>();
+        auto ES = std::make_unique<ExecutionSession>();
 
-    auto LCTMgr = createLocalLazyCallThroughManager(
-        JTMB->getTargetTriple(), *ES,
-        pointerToJITTargetAddress(explodeOnLazyCompileFailure));
-    if (!LCTMgr)
-      return LCTMgr.takeError();
+        auto LCTMgr = createLocalLazyCallThroughManager(
+                          JTMB->getTargetTriple(), *ES,
+                          pointerToJITTargetAddress(explodeOnLazyCompileFailure));
+        if (!LCTMgr)
+            return LCTMgr.takeError();
 
-    auto ISMBuilder =
-        createLocalIndirectStubsManagerBuilder(JTMB->getTargetTriple());
-    if (!ISMBuilder)
-      return make_error<StringError>("No indirect stubs manager for target",
-                                     inconvertibleErrorCode());
+        auto ISMBuilder =
+            createLocalIndirectStubsManagerBuilder(JTMB->getTargetTriple());
+        if (!ISMBuilder)
+            return make_error<StringError>("No indirect stubs manager for target",
+                                           inconvertibleErrorCode());
 
-    auto ProcessSymbolsSearchGenerator =
-        DynamicLibrarySearchGenerator::GetForCurrentProcess(
-            DL->getGlobalPrefix());
-    if (!ProcessSymbolsSearchGenerator)
-      return ProcessSymbolsSearchGenerator.takeError();
+        auto ProcessSymbolsSearchGenerator =
+            DynamicLibrarySearchGenerator::GetForCurrentProcess(
+                DL->getGlobalPrefix());
+        if (!ProcessSymbolsSearchGenerator)
+            return ProcessSymbolsSearchGenerator.takeError();
 
-    std::unique_ptr<SpeculativeJIT> SJ(new SpeculativeJIT(
-        std::move(ES), std::move(*DL), std::move(*JTMB), std::move(*LCTMgr),
-        std::move(ISMBuilder), std::move(*ProcessSymbolsSearchGenerator)));
-    return std::move(SJ);
-  }
+        std::unique_ptr<SpeculativeJIT> SJ(new SpeculativeJIT(
+                                               std::move(ES), std::move(*DL), std::move(*JTMB), std::move(*LCTMgr),
+                                               std::move(ISMBuilder), std::move(*ProcessSymbolsSearchGenerator)));
+        return std::move(SJ);
+    }
 
-  ExecutionSession &getES() { return *ES; }
+    ExecutionSession &getES() {
+        return *ES;
+    }
 
-  Error addModule(ThreadSafeModule TSM) {
-    return CODLayer.add(MainJD, std::move(TSM));
-  }
+    Error addModule(ThreadSafeModule TSM) {
+        return CODLayer.add(MainJD, std::move(TSM));
+    }
 
-  Expected<JITEvaluatedSymbol> lookup(StringRef UnmangledName) {
-    return ES->lookup({&MainJD}, Mangle(UnmangledName));
-  }
+    Expected<JITEvaluatedSymbol> lookup(StringRef UnmangledName) {
+        return ES->lookup({&MainJD}, Mangle(UnmangledName));
+    }
 
-  ~SpeculativeJIT() { CompileThreads.wait(); }
+    ~SpeculativeJIT() {
+        CompileThreads.wait();
+    }
 
 private:
-  using IndirectStubsManagerBuilderFunction =
-      std::function<std::unique_ptr<IndirectStubsManager>()>;
+    using IndirectStubsManagerBuilderFunction =
+        std::function<std::unique_ptr<IndirectStubsManager>()>;
 
-  static void explodeOnLazyCompileFailure() {
-    errs() << "Lazy compilation failed, Symbol Implmentation not found!\n";
-    exit(1);
-  }
+    static void explodeOnLazyCompileFailure() {
+        errs() << "Lazy compilation failed, Symbol Implmentation not found!\n";
+        exit(1);
+    }
 
-  SpeculativeJIT(
-      std::unique_ptr<ExecutionSession> ES, DataLayout DL,
-      orc::JITTargetMachineBuilder JTMB,
-      std::unique_ptr<LazyCallThroughManager> LCTMgr,
-      IndirectStubsManagerBuilderFunction ISMBuilder,
-      std::unique_ptr<DynamicLibrarySearchGenerator> ProcessSymbolsGenerator)
-      : ES(std::move(ES)), DL(std::move(DL)),
-        MainJD(this->ES->createBareJITDylib("<main>")), LCTMgr(std::move(LCTMgr)),
-        CompileLayer(*this->ES, ObjLayer,
-                     std::make_unique<ConcurrentIRCompiler>(std::move(JTMB))),
-        S(Imps, *this->ES),
-        SpeculateLayer(*this->ES, CompileLayer, S, Mangle, BlockFreqQuery()),
-        CODLayer(*this->ES, SpeculateLayer, *this->LCTMgr,
-                 std::move(ISMBuilder)) {
-    MainJD.addGenerator(std::move(ProcessSymbolsGenerator));
-    this->CODLayer.setImplMap(&Imps);
-    this->ES->setDispatchMaterialization(
-        [this](std::unique_ptr<MaterializationUnit> MU,
-               std::unique_ptr<MaterializationResponsibility> MR) {
-          CompileThreads.async(
-              [UnownedMU = MU.release(), UnownedMR = MR.release()]() {
+    SpeculativeJIT(
+        std::unique_ptr<ExecutionSession> ES, DataLayout DL,
+        orc::JITTargetMachineBuilder JTMB,
+        std::unique_ptr<LazyCallThroughManager> LCTMgr,
+        IndirectStubsManagerBuilderFunction ISMBuilder,
+        std::unique_ptr<DynamicLibrarySearchGenerator> ProcessSymbolsGenerator)
+        : ES(std::move(ES)), DL(std::move(DL)),
+          MainJD(this->ES->createBareJITDylib("<main>")), LCTMgr(std::move(LCTMgr)),
+          CompileLayer(*this->ES, ObjLayer,
+                       std::make_unique<ConcurrentIRCompiler>(std::move(JTMB))),
+          S(Imps, *this->ES),
+          SpeculateLayer(*this->ES, CompileLayer, S, Mangle, BlockFreqQuery()),
+          CODLayer(*this->ES, SpeculateLayer, *this->LCTMgr,
+                   std::move(ISMBuilder)) {
+        MainJD.addGenerator(std::move(ProcessSymbolsGenerator));
+        this->CODLayer.setImplMap(&Imps);
+        this->ES->setDispatchMaterialization(
+            [this](std::unique_ptr<MaterializationUnit> MU,
+        std::unique_ptr<MaterializationResponsibility> MR) {
+            CompileThreads.async(
+            [UnownedMU = MU.release(), UnownedMR = MR.release()]() {
                 std::unique_ptr<MaterializationUnit> MU(UnownedMU);
                 std::unique_ptr<MaterializationResponsibility> MR(UnownedMR);
                 MU->materialize(std::move(MR));
-              });
+            });
         });
-    ExitOnErr(S.addSpeculationRuntime(MainJD, Mangle));
-    LocalCXXRuntimeOverrides CXXRuntimeoverrides;
-    ExitOnErr(CXXRuntimeoverrides.enable(MainJD, Mangle));
-  }
+        ExitOnErr(S.addSpeculationRuntime(MainJD, Mangle));
+        LocalCXXRuntimeOverrides CXXRuntimeoverrides;
+        ExitOnErr(CXXRuntimeoverrides.enable(MainJD, Mangle));
+    }
 
-  static std::unique_ptr<SectionMemoryManager> createMemMgr() {
-    return std::make_unique<SectionMemoryManager>();
-  }
+    static std::unique_ptr<SectionMemoryManager> createMemMgr() {
+        return std::make_unique<SectionMemoryManager>();
+    }
 
-  std::unique_ptr<ExecutionSession> ES;
-  DataLayout DL;
-  MangleAndInterner Mangle{*ES, DL};
-  ThreadPool CompileThreads{llvm::hardware_concurrency(NumThreads)};
+    std::unique_ptr<ExecutionSession> ES;
+    DataLayout DL;
+    MangleAndInterner Mangle{*ES, DL};
+    ThreadPool CompileThreads{llvm::hardware_concurrency(NumThreads)};
 
-  JITDylib &MainJD;
+    JITDylib &MainJD;
 
-  Triple TT;
-  std::unique_ptr<LazyCallThroughManager> LCTMgr;
-  IRCompileLayer CompileLayer;
-  ImplSymbolMap Imps;
-  Speculator S;
-  RTDyldObjectLinkingLayer ObjLayer{*ES, createMemMgr};
-  IRSpeculationLayer SpeculateLayer;
-  CompileOnDemandLayer CODLayer;
+    Triple TT;
+    std::unique_ptr<LazyCallThroughManager> LCTMgr;
+    IRCompileLayer CompileLayer;
+    ImplSymbolMap Imps;
+    Speculator S;
+    RTDyldObjectLinkingLayer ObjLayer{*ES, createMemMgr};
+    IRSpeculationLayer SpeculateLayer;
+    CompileOnDemandLayer CODLayer;
 };
 
 int main(int argc, char *argv[]) {
-  // Initialize LLVM.
-  InitLLVM X(argc, argv);
+    // Initialize LLVM.
+    InitLLVM X(argc, argv);
 
-  InitializeNativeTarget();
-  InitializeNativeTargetAsmPrinter();
+    InitializeNativeTarget();
+    InitializeNativeTargetAsmPrinter();
 
-  cl::ParseCommandLineOptions(argc, argv, "SpeculativeJIT");
-  ExitOnErr.setBanner(std::string(argv[0]) + ": ");
+    cl::ParseCommandLineOptions(argc, argv, "SpeculativeJIT");
+    ExitOnErr.setBanner(std::string(argv[0]) + ": ");
 
-  if (NumThreads < 1) {
-    errs() << "Speculative compilation requires one or more dedicated compile "
-              "threads\n";
-    return 1;
-  }
-
-  // Create a JIT instance.
-  auto SJ = ExitOnErr(SpeculativeJIT::Create());
-
-  // Load the IR inputs.
-  for (const auto &InputFile : InputFiles) {
-    SMDiagnostic Err;
-    auto Ctx = std::make_unique<LLVMContext>();
-    auto M = parseIRFile(InputFile, Err, *Ctx);
-    if (!M) {
-      Err.print(argv[0], errs());
-      return 1;
+    if (NumThreads < 1) {
+        errs() << "Speculative compilation requires one or more dedicated compile "
+               "threads\n";
+        return 1;
     }
 
-    ExitOnErr(SJ->addModule(ThreadSafeModule(std::move(M), std::move(Ctx))));
-  }
+    // Create a JIT instance.
+    auto SJ = ExitOnErr(SpeculativeJIT::Create());
 
-  auto MainSym = ExitOnErr(SJ->lookup("main"));
-  auto Main =
-      jitTargetAddressToFunction<int (*)(int, char *[])>(MainSym.getAddress());
+    // Load the IR inputs.
+    for (const auto &InputFile : InputFiles) {
+        SMDiagnostic Err;
+        auto Ctx = std::make_unique<LLVMContext>();
+        auto M = parseIRFile(InputFile, Err, *Ctx);
+        if (!M) {
+            Err.print(argv[0], errs());
+            return 1;
+        }
 
-  return runAsMain(Main, InputArgv, StringRef(InputFiles.front()));
+        ExitOnErr(SJ->addModule(ThreadSafeModule(std::move(M), std::move(Ctx))));
+    }
 
-  return 0;
+    auto MainSym = ExitOnErr(SJ->lookup("main"));
+    auto Main =
+        jitTargetAddressToFunction<int (*)(int, char *[])>(MainSym.getAddress());
+
+    return runAsMain(Main, InputArgv, StringRef(InputFiles.front()));
+
+    return 0;
 }

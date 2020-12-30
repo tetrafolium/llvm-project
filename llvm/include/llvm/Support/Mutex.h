@@ -19,59 +19,59 @@
 
 namespace llvm
 {
-  namespace sys
-  {
-    /// SmartMutex - A mutex with a compile time constant parameter that
-    /// indicates whether this mutex should become a no-op when we're not
-    /// running in multithreaded mode.
-    template<bool mt_only>
-    class SmartMutex {
-      std::recursive_mutex impl;
-      unsigned acquired = 0;
+namespace sys
+{
+/// SmartMutex - A mutex with a compile time constant parameter that
+/// indicates whether this mutex should become a no-op when we're not
+/// running in multithreaded mode.
+template<bool mt_only>
+class SmartMutex {
+    std::recursive_mutex impl;
+    unsigned acquired = 0;
 
-    public:
-      bool lock() {
+public:
+    bool lock() {
         if (!mt_only || llvm_is_multithreaded()) {
-          impl.lock();
-          return true;
+            impl.lock();
+            return true;
         } else {
-          // Single-threaded debugging code.  This would be racy in
-          // multithreaded mode, but provides not sanity checks in single
-          // threaded mode.
-          ++acquired;
-          return true;
+            // Single-threaded debugging code.  This would be racy in
+            // multithreaded mode, but provides not sanity checks in single
+            // threaded mode.
+            ++acquired;
+            return true;
         }
-      }
+    }
 
-      bool unlock() {
+    bool unlock() {
         if (!mt_only || llvm_is_multithreaded()) {
-          impl.unlock();
-          return true;
+            impl.unlock();
+            return true;
         } else {
-          // Single-threaded debugging code.  This would be racy in
-          // multithreaded mode, but provides not sanity checks in single
-          // threaded mode.
-          assert(acquired && "Lock not acquired before release!");
-          --acquired;
-          return true;
+            // Single-threaded debugging code.  This would be racy in
+            // multithreaded mode, but provides not sanity checks in single
+            // threaded mode.
+            assert(acquired && "Lock not acquired before release!");
+            --acquired;
+            return true;
         }
-      }
+    }
 
-      bool try_lock() {
+    bool try_lock() {
         if (!mt_only || llvm_is_multithreaded())
-          return impl.try_lock();
+            return impl.try_lock();
         else return true;
-      }
-    };
+    }
+};
 
-    /// Mutex - A standard, always enforced mutex.
-    typedef SmartMutex<false> Mutex;
+/// Mutex - A standard, always enforced mutex.
+typedef SmartMutex<false> Mutex;
 
-    template <bool mt_only>
-    using SmartScopedLock = std::lock_guard<SmartMutex<mt_only>>;
+template <bool mt_only>
+using SmartScopedLock = std::lock_guard<SmartMutex<mt_only>>;
 
-    typedef SmartScopedLock<false> ScopedLock;
-  }
+typedef SmartScopedLock<false> ScopedLock;
+}
 }
 
 #endif

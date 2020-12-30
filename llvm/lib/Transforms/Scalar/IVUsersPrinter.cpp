@@ -14,8 +14,8 @@ using namespace llvm;
 #define DEBUG_TYPE "iv-users"
 
 PreservedAnalyses IVUsersPrinterPass::run(Loop &L, LoopAnalysisManager &AM,
-                                          LoopStandardAnalysisResults &AR,
-                                          LPMUpdater &U) {
-  AM.getResult<IVUsersAnalysis>(L, AR).print(OS);
-  return PreservedAnalyses::all();
+        LoopStandardAnalysisResults &AR,
+        LPMUpdater &U) {
+    AM.getResult<IVUsersAnalysis>(L, AR).print(OS);
+    return PreservedAnalyses::all();
 }

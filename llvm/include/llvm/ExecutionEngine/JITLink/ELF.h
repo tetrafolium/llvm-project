@@ -25,7 +25,7 @@ namespace jitlink {
 /// its contents. The caller is responsible for ensuring that the object buffer
 /// outlives the graph.
 Expected<std::unique_ptr<LinkGraph>>
-createLinkGraphFromELFObject(MemoryBufferRef ObjectBuffer);
+                                  createLinkGraphFromELFObject(MemoryBufferRef ObjectBuffer);
 
 /// Link the given graph.
 ///

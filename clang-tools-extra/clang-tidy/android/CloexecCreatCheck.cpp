@@ -17,24 +17,24 @@ namespace tidy {
 namespace android {
 
 void CloexecCreatCheck::registerMatchers(MatchFinder *Finder) {
-  auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
-  auto MODETType = hasType(namedDecl(hasName("mode_t")));
-  registerMatchersImpl(Finder,
-                       functionDecl(isExternC(), returns(isInteger()),
-                                    hasName("creat"),
-                                    hasParameter(0, CharPointerType),
-                                    hasParameter(1, MODETType)));
+    auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
+    auto MODETType = hasType(namedDecl(hasName("mode_t")));
+    registerMatchersImpl(Finder,
+                         functionDecl(isExternC(), returns(isInteger()),
+                                      hasName("creat"),
+                                      hasParameter(0, CharPointerType),
+                                      hasParameter(1, MODETType)));
 }
 
 void CloexecCreatCheck::check(const MatchFinder::MatchResult &Result) {
-  const std::string &ReplacementText =
-      (Twine("open (") + getSpellingArg(Result, 0) +
-       ", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, " +
-       getSpellingArg(Result, 1) + ")")
-          .str();
-  replaceFunc(Result,
-              "prefer open() to creat() because open() allows O_CLOEXEC",
-              ReplacementText);
+    const std::string &ReplacementText =
+        (Twine("open (") + getSpellingArg(Result, 0) +
+         ", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, " +
+         getSpellingArg(Result, 1) + ")")
+        .str();
+    replaceFunc(Result,
+                "prefer open() to creat() because open() allows O_CLOEXEC",
+                ReplacementText);
 }
 
 } // namespace android

@@ -32,23 +32,23 @@ __terminate(terminate_handler func) _NOEXCEPT;
 extern "C"
 {
 
-_LIBCXXABI_DATA_VIS extern void (*__cxa_terminate_handler)();
-_LIBCXXABI_DATA_VIS extern void (*__cxa_unexpected_handler)();
-_LIBCXXABI_DATA_VIS extern void (*__cxa_new_handler)();
+    _LIBCXXABI_DATA_VIS extern void (*__cxa_terminate_handler)();
+    _LIBCXXABI_DATA_VIS extern void (*__cxa_unexpected_handler)();
+    _LIBCXXABI_DATA_VIS extern void (*__cxa_new_handler)();
 
-/*
+    /*
 
-    At some point in the future these three symbols will become
-    C++11 atomic variables:
+        At some point in the future these three symbols will become
+        C++11 atomic variables:
 
-    extern std::atomic<std::terminate_handler>  __cxa_terminate_handler;
-    extern std::atomic<std::unexpected_handler> __cxa_unexpected_handler;
-    extern std::atomic<std::new_handler>        __cxa_new_handler;
+        extern std::atomic<std::terminate_handler>  __cxa_terminate_handler;
+        extern std::atomic<std::unexpected_handler> __cxa_unexpected_handler;
+        extern std::atomic<std::new_handler>        __cxa_new_handler;
 
-    This change will not impact their ABI.  But it will allow for a
-    portable performance optimization.
+        This change will not impact their ABI.  But it will allow for a
+        portable performance optimization.
 
-*/
+    */
 
 } // extern "C"
 

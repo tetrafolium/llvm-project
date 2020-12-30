@@ -27,40 +27,42 @@ using namespace ento;
 namespace {
 class PutenvWithAutoChecker : public Checker<check::PostCall> {
 private:
-  BugType BT{this, "'putenv' function should not be called with auto variables",
-             categories::SecurityError};
-  const CallDescription Putenv{"putenv", 1};
+    BugType BT{this, "'putenv' function should not be called with auto variables",
+        categories::SecurityError};
+    const CallDescription Putenv{"putenv", 1};
 
 public:
-  void checkPostCall(const CallEvent &Call, CheckerContext &C) const;
+    void checkPostCall(const CallEvent &Call, CheckerContext &C) const;
 };
 } // namespace
 
 void PutenvWithAutoChecker::checkPostCall(const CallEvent &Call,
-                                          CheckerContext &C) const {
-  if (!Call.isCalled(Putenv))
-    return;
+        CheckerContext &C) const {
+    if (!Call.isCalled(Putenv))
+        return;
 
-  SVal ArgV = Call.getArgSVal(0);
-  const Expr *ArgExpr = Call.getArgExpr(0);
-  const MemSpaceRegion *MSR = ArgV.getAsRegion()->getMemorySpace();
+    SVal ArgV = Call.getArgSVal(0);
+    const Expr *ArgExpr = Call.getArgExpr(0);
+    const MemSpaceRegion *MSR = ArgV.getAsRegion()->getMemorySpace();
 
-  if (!isa<StackSpaceRegion>(MSR))
-    return;
+    if (!isa<StackSpaceRegion>(MSR))
+        return;
 
-  StringRef ErrorMsg = "The 'putenv' function should not be called with "
-                       "arguments that have automatic storage";
-  ExplodedNode *N = C.generateErrorNode();
-  auto Report = std::make_unique<PathSensitiveBugReport>(BT, ErrorMsg, N);
+    StringRef ErrorMsg = "The 'putenv' function should not be called with "
+                         "arguments that have automatic storage";
+    ExplodedNode *N = C.generateErrorNode();
+    auto Report = std::make_unique<PathSensitiveBugReport>(BT, ErrorMsg, N);
 
-  // Track the argument.
-  bugreporter::trackExpressionValue(Report->getErrorNode(), ArgExpr, *Report);
+    // Track the argument.
+    bugreporter::trackExpressionValue(Report->getErrorNode(), ArgExpr, *Report);
 
-  C.emitReport(std::move(Report));
+    C.emitReport(std::move(Report));
 }
 
 void ento::registerPutenvWithAuto(CheckerManager &Mgr) {
-  Mgr.registerChecker<PutenvWithAutoChecker>();
+    Mgr.registerChecker<PutenvWithAutoChecker>();
 }
 
-bool ento::shouldRegisterPutenvWithAuto(const CheckerManager &) { return true; }
+bool ento::shouldRegisterPutenvWithAuto(const CheckerManager &) {
+    return true;
+}

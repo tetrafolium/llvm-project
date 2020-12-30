@@ -37,47 +37,51 @@ enum PrimType : unsigned;
 /// Holds all information required to evaluate constexpr code in a module.
 class Context {
 public:
-  /// Initialises the constexpr VM.
-  Context(ASTContext &Ctx);
+    /// Initialises the constexpr VM.
+    Context(ASTContext &Ctx);
 
-  /// Cleans up the constexpr VM.
-  ~Context();
+    /// Cleans up the constexpr VM.
+    ~Context();
 
-  /// Checks if a function is a potential constant expression.
-  bool isPotentialConstantExpr(State &Parent, const FunctionDecl *FnDecl);
+    /// Checks if a function is a potential constant expression.
+    bool isPotentialConstantExpr(State &Parent, const FunctionDecl *FnDecl);
 
-  /// Evaluates a toplevel expression as an rvalue.
-  bool evaluateAsRValue(State &Parent, const Expr *E, APValue &Result);
+    /// Evaluates a toplevel expression as an rvalue.
+    bool evaluateAsRValue(State &Parent, const Expr *E, APValue &Result);
 
-  /// Evaluates a toplevel initializer.
-  bool evaluateAsInitializer(State &Parent, const VarDecl *VD, APValue &Result);
+    /// Evaluates a toplevel initializer.
+    bool evaluateAsInitializer(State &Parent, const VarDecl *VD, APValue &Result);
 
-  /// Returns the AST context.
-  ASTContext &getASTContext() const { return Ctx; }
-  /// Returns the language options.
-  const LangOptions &getLangOpts() const;
-  /// Returns the interpreter stack.
-  InterpStack &getStack() { return Stk; }
-  /// Returns CHAR_BIT.
-  unsigned getCharBit() const;
+    /// Returns the AST context.
+    ASTContext &getASTContext() const {
+        return Ctx;
+    }
+    /// Returns the language options.
+    const LangOptions &getLangOpts() const;
+    /// Returns the interpreter stack.
+    InterpStack &getStack() {
+        return Stk;
+    }
+    /// Returns CHAR_BIT.
+    unsigned getCharBit() const;
 
-  /// Classifies an expression.
-  llvm::Optional<PrimType> classify(QualType T);
-
-private:
-  /// Runs a function.
-  bool Run(State &Parent, Function *Func, APValue &Result);
-
-  /// Checks a result fromt the interpreter.
-  bool Check(State &Parent, llvm::Expected<bool> &&R);
+    /// Classifies an expression.
+    llvm::Optional<PrimType> classify(QualType T);
 
 private:
-  /// Current compilation context.
-  ASTContext &Ctx;
-  /// Interpreter stack, shared across invocations.
-  InterpStack Stk;
-  /// Constexpr program.
-  std::unique_ptr<Program> P;
+    /// Runs a function.
+    bool Run(State &Parent, Function *Func, APValue &Result);
+
+    /// Checks a result fromt the interpreter.
+    bool Check(State &Parent, llvm::Expected<bool> &&R);
+
+private:
+    /// Current compilation context.
+    ASTContext &Ctx;
+    /// Interpreter stack, shared across invocations.
+    InterpStack Stk;
+    /// Constexpr program.
+    std::unique_ptr<Program> P;
 };
 
 } // namespace interp

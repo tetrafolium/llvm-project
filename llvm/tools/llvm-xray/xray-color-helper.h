@@ -41,47 +41,49 @@ namespace xray {
 ///   cout() << D.getColor(p) << " \n"; // sample the gradient at 0.1 intervals
 /// }
 class ColorHelper {
-  double MinIn;
-  double MaxIn;
+    double MinIn;
+    double MaxIn;
 
-  ArrayRef<std::tuple<uint8_t, uint8_t, uint8_t>> ColorMap;
-  ArrayRef<std::tuple<uint8_t, uint8_t, uint8_t>> BoundMap;
+    ArrayRef<std::tuple<uint8_t, uint8_t, uint8_t>> ColorMap;
+    ArrayRef<std::tuple<uint8_t, uint8_t, uint8_t>> BoundMap;
 
 public:
-  /// Enum of the availible Sequential Color Schemes
-  enum class SequentialScheme {
-    // Schemes based on the ColorBrewer Color schemes of the same name from
-    // http://www.colorbrewer.org/ by Cynthis A Brewer Penn State University.
-    Greys,
-    OrRd,
-    PuBu
-  };
+    /// Enum of the availible Sequential Color Schemes
+    enum class SequentialScheme {
+        // Schemes based on the ColorBrewer Color schemes of the same name from
+        // http://www.colorbrewer.org/ by Cynthis A Brewer Penn State University.
+        Greys,
+        OrRd,
+        PuBu
+    };
 
-  ColorHelper(SequentialScheme S);
+    ColorHelper(SequentialScheme S);
 
-  /// Enum of the availible Diverging Color Schemes
-  enum class DivergingScheme {
-    // Schemes based on the ColorBrewer Color schemes of the same name from
-    // http://www.colorbrewer.org/ by Cynthis A Brewer Penn State University.
-    PiYG
-  };
+    /// Enum of the availible Diverging Color Schemes
+    enum class DivergingScheme {
+        // Schemes based on the ColorBrewer Color schemes of the same name from
+        // http://www.colorbrewer.org/ by Cynthis A Brewer Penn State University.
+        PiYG
+    };
 
-  ColorHelper(DivergingScheme S);
+    ColorHelper(DivergingScheme S);
 
-  // Sample the gradient at the input point.
-  std::tuple<uint8_t, uint8_t, uint8_t> getColorTuple(double Point) const;
+    // Sample the gradient at the input point.
+    std::tuple<uint8_t, uint8_t, uint8_t> getColorTuple(double Point) const;
 
-  std::string getColorString(double Point) const;
+    std::string getColorString(double Point) const;
 
-  // Get the Default color, at the moment allways black.
-  std::tuple<uint8_t, uint8_t, uint8_t> getDefaultColorTuple() const {
-    return std::make_tuple(0, 0, 0);
-  }
+    // Get the Default color, at the moment allways black.
+    std::tuple<uint8_t, uint8_t, uint8_t> getDefaultColorTuple() const {
+        return std::make_tuple(0, 0, 0);
+    }
 
-  std::string getDefaultColorString() const { return "black"; }
+    std::string getDefaultColorString() const {
+        return "black";
+    }
 
-  // Convert a tuple to a string
-  static std::string getColorString(std::tuple<uint8_t, uint8_t, uint8_t> t);
+    // Convert a tuple to a string
+    static std::string getColorString(std::tuple<uint8_t, uint8_t, uint8_t> t);
 };
 } // namespace xray
 } // namespace llvm

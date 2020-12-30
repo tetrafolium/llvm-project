@@ -27,31 +27,31 @@ namespace symbolize {
 
 class DIPrinter {
 public:
-  enum class OutputStyle { LLVM, GNU };
+    enum class OutputStyle { LLVM, GNU };
 
 private:
-  raw_ostream &OS;
-  bool PrintFunctionNames;
-  bool PrintPretty;
-  int PrintSourceContext;
-  bool Verbose;
-  OutputStyle Style;
+    raw_ostream &OS;
+    bool PrintFunctionNames;
+    bool PrintPretty;
+    int PrintSourceContext;
+    bool Verbose;
+    OutputStyle Style;
 
-  void print(const DILineInfo &Info, bool Inlined);
-  void printContext(const std::string &FileName, int64_t Line);
+    void print(const DILineInfo &Info, bool Inlined);
+    void printContext(const std::string &FileName, int64_t Line);
 
 public:
-  DIPrinter(raw_ostream &OS, bool PrintFunctionNames = true,
-            bool PrintPretty = false, int PrintSourceContext = 0,
-            bool Verbose = false, OutputStyle Style = OutputStyle::LLVM)
-      : OS(OS), PrintFunctionNames(PrintFunctionNames),
-        PrintPretty(PrintPretty), PrintSourceContext(PrintSourceContext),
-        Verbose(Verbose), Style(Style) {}
+    DIPrinter(raw_ostream &OS, bool PrintFunctionNames = true,
+              bool PrintPretty = false, int PrintSourceContext = 0,
+              bool Verbose = false, OutputStyle Style = OutputStyle::LLVM)
+        : OS(OS), PrintFunctionNames(PrintFunctionNames),
+          PrintPretty(PrintPretty), PrintSourceContext(PrintSourceContext),
+          Verbose(Verbose), Style(Style) {}
 
-  DIPrinter &operator<<(const DILineInfo &Info);
-  DIPrinter &operator<<(const DIInliningInfo &Info);
-  DIPrinter &operator<<(const DIGlobal &Global);
-  DIPrinter &operator<<(const DILocal &Local);
+    DIPrinter &operator<<(const DILineInfo &Info);
+    DIPrinter &operator<<(const DIInliningInfo &Info);
+    DIPrinter &operator<<(const DIGlobal &Global);
+    DIPrinter &operator<<(const DILocal &Local);
 };
 }
 }

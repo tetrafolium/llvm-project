@@ -17,14 +17,14 @@
 
 class LogFilterExactMatch : public LogFilter {
 public:
-  LogFilterExactMatch(bool match_accepts, FilterTarget filter_target,
-                      const std::string &match_text);
+    LogFilterExactMatch(bool match_accepts, FilterTarget filter_target,
+                        const std::string &match_text);
 
-  bool DoesMatch(const LogMessage &message) const override;
+    bool DoesMatch(const LogMessage &message) const override;
 
 private:
-  const FilterTarget m_filter_target;
-  const std::string m_match_text;
+    const FilterTarget m_filter_target;
+    const std::string m_match_text;
 };
 
 #endif

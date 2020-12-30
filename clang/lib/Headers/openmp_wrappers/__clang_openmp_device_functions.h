@@ -15,7 +15,7 @@
 #endif
 
 #pragma omp begin declare variant match(                                       \
-    device = {arch(nvptx, nvptx64)}, implementation = {extension(match_any)})
+device = {arch(nvptx, nvptx64)}, implementation = {extension(match_any)})
 
 #ifdef __cplusplus
 extern "C" {

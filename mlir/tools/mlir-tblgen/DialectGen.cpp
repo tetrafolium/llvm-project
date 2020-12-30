@@ -32,14 +32,14 @@ using namespace mlir::tblgen;
 
 static llvm::cl::OptionCategory dialectGenCat("Options for -gen-dialect-*");
 static llvm::cl::opt<std::string>
-    selectedDialect("dialect", llvm::cl::desc("The dialect to gen for"),
-                    llvm::cl::cat(dialectGenCat), llvm::cl::CommaSeparated);
+selectedDialect("dialect", llvm::cl::desc("The dialect to gen for"),
+                llvm::cl::cat(dialectGenCat), llvm::cl::CommaSeparated);
 
 /// Utility iterator used for filtering records for a specific dialect.
 namespace {
 using DialectFilterIterator =
     llvm::filter_iterator<ArrayRef<llvm::Record *>::iterator,
-                          std::function<bool(const llvm::Record *)>>;
+    std::function<bool(const llvm::Record *)>>;
 } // end anonymous namespace
 
 /// Given a set of records for a T, filter the ones that correspond to
@@ -47,11 +47,11 @@ using DialectFilterIterator =
 template <typename T>
 static iterator_range<DialectFilterIterator>
 filterForDialect(ArrayRef<llvm::Record *> records, Dialect &dialect) {
-  auto filterFn = [&](const llvm::Record *record) {
-    return T(record).getDialect() == dialect;
-  };
-  return {DialectFilterIterator(records.begin(), records.end(), filterFn),
-          DialectFilterIterator(records.end(), records.end(), filterFn)};
+    auto filterFn = [&](const llvm::Record *record) {
+        return T(record).getDialect() == dialect;
+    };
+    return {DialectFilterIterator(records.begin(), records.end(), filterFn),
+            DialectFilterIterator(records.end(), records.end(), filterFn)};
 }
 
 //===----------------------------------------------------------------------===//

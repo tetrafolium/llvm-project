@@ -14,7 +14,9 @@
 #include "llvm/Support/Error.h"
 
 namespace llvm {
-namespace opt { class Arg; }
+namespace opt {
+class Arg;
+}
 }
 
 namespace lld {

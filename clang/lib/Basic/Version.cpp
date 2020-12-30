@@ -23,104 +23,104 @@ namespace clang {
 
 std::string getClangRepositoryPath() {
 #if defined(CLANG_REPOSITORY_STRING)
-  return CLANG_REPOSITORY_STRING;
+    return CLANG_REPOSITORY_STRING;
 #else
 #ifdef CLANG_REPOSITORY
-  return CLANG_REPOSITORY;
+    return CLANG_REPOSITORY;
 #else
-  return "";
+    return "";
 #endif
 #endif
 }
 
 std::string getLLVMRepositoryPath() {
 #ifdef LLVM_REPOSITORY
-  return LLVM_REPOSITORY;
+    return LLVM_REPOSITORY;
 #else
-  return "";
+    return "";
 #endif
 }
 
 std::string getClangRevision() {
 #ifdef CLANG_REVISION
-  return CLANG_REVISION;
+    return CLANG_REVISION;
 #else
-  return "";
+    return "";
 #endif
 }
 
 std::string getLLVMRevision() {
 #ifdef LLVM_REVISION
-  return LLVM_REVISION;
+    return LLVM_REVISION;
 #else
-  return "";
+    return "";
 #endif
 }
 
 std::string getClangFullRepositoryVersion() {
-  std::string buf;
-  llvm::raw_string_ostream OS(buf);
-  std::string Path = getClangRepositoryPath();
-  std::string Revision = getClangRevision();
-  if (!Path.empty() || !Revision.empty()) {
-    OS << '(';
-    if (!Path.empty())
-      OS << Path;
-    if (!Revision.empty()) {
-      if (!Path.empty())
-        OS << ' ';
-      OS << Revision;
+    std::string buf;
+    llvm::raw_string_ostream OS(buf);
+    std::string Path = getClangRepositoryPath();
+    std::string Revision = getClangRevision();
+    if (!Path.empty() || !Revision.empty()) {
+        OS << '(';
+        if (!Path.empty())
+            OS << Path;
+        if (!Revision.empty()) {
+            if (!Path.empty())
+                OS << ' ';
+            OS << Revision;
+        }
+        OS << ')';
     }
-    OS << ')';
-  }
-  // Support LLVM in a separate repository.
-  std::string LLVMRev = getLLVMRevision();
-  if (!LLVMRev.empty() && LLVMRev != Revision) {
-    OS << " (";
-    std::string LLVMRepo = getLLVMRepositoryPath();
-    if (!LLVMRepo.empty())
-      OS << LLVMRepo << ' ';
-    OS << LLVMRev << ')';
-  }
-  return OS.str();
+    // Support LLVM in a separate repository.
+    std::string LLVMRev = getLLVMRevision();
+    if (!LLVMRev.empty() && LLVMRev != Revision) {
+        OS << " (";
+        std::string LLVMRepo = getLLVMRepositoryPath();
+        if (!LLVMRepo.empty())
+            OS << LLVMRepo << ' ';
+        OS << LLVMRev << ')';
+    }
+    return OS.str();
 }
 
 std::string getClangFullVersion() {
-  return getClangToolFullVersion("clang");
+    return getClangToolFullVersion("clang");
 }
 
 std::string getClangToolFullVersion(StringRef ToolName) {
-  std::string buf;
-  llvm::raw_string_ostream OS(buf);
+    std::string buf;
+    llvm::raw_string_ostream OS(buf);
 #ifdef CLANG_VENDOR
-  OS << CLANG_VENDOR;
+    OS << CLANG_VENDOR;
 #endif
-  OS << ToolName << " version " CLANG_VERSION_STRING;
+    OS << ToolName << " version " CLANG_VERSION_STRING;
 
-  std::string repo = getClangFullRepositoryVersion();
-  if (!repo.empty()) {
-    OS << " " << repo;
-  }
+    std::string repo = getClangFullRepositoryVersion();
+    if (!repo.empty()) {
+        OS << " " << repo;
+    }
 
-  return OS.str();
+    return OS.str();
 }
 
 std::string getClangFullCPPVersion() {
-  // The version string we report in __VERSION__ is just a compacted version of
-  // the one we report on the command line.
-  std::string buf;
-  llvm::raw_string_ostream OS(buf);
+    // The version string we report in __VERSION__ is just a compacted version of
+    // the one we report on the command line.
+    std::string buf;
+    llvm::raw_string_ostream OS(buf);
 #ifdef CLANG_VENDOR
-  OS << CLANG_VENDOR;
+    OS << CLANG_VENDOR;
 #endif
-  OS << "Clang " CLANG_VERSION_STRING;
+    OS << "Clang " CLANG_VERSION_STRING;
 
-  std::string repo = getClangFullRepositoryVersion();
-  if (!repo.empty()) {
-    OS << " " << repo;
-  }
+    std::string repo = getClangFullRepositoryVersion();
+    if (!repo.empty()) {
+        OS << " " << repo;
+    }
 
-  return OS.str();
+    return OS.str();
 }
 
 } // end namespace clang

@@ -24,68 +24,68 @@ using namespace llvm;
 DiagnosticInfoMIROptimization::MachineArgument::MachineArgument(
     StringRef MKey, const MachineInstr &MI)
     : Argument() {
-  Key = std::string(MKey);
+    Key = std::string(MKey);
 
-  raw_string_ostream OS(Val);
-  MI.print(OS, /*IsStandalone=*/true, /*SkipOpers=*/false,
-           /*SkipDebugLoc=*/true);
+    raw_string_ostream OS(Val);
+    MI.print(OS, /*IsStandalone=*/true, /*SkipOpers=*/false,
+             /*SkipDebugLoc=*/true);
 }
 
 Optional<uint64_t>
 MachineOptimizationRemarkEmitter::computeHotness(const MachineBasicBlock &MBB) {
-  if (!MBFI)
-    return None;
+    if (!MBFI)
+        return None;
 
-  return MBFI->getBlockProfileCount(&MBB);
+    return MBFI->getBlockProfileCount(&MBB);
 }
 
 void MachineOptimizationRemarkEmitter::computeHotness(
     DiagnosticInfoMIROptimization &Remark) {
-  const MachineBasicBlock *MBB = Remark.getBlock();
-  if (MBB)
-    Remark.setHotness(computeHotness(*MBB));
+    const MachineBasicBlock *MBB = Remark.getBlock();
+    if (MBB)
+        Remark.setHotness(computeHotness(*MBB));
 }
 
 void MachineOptimizationRemarkEmitter::emit(
     DiagnosticInfoOptimizationBase &OptDiagCommon) {
-  auto &OptDiag = cast<DiagnosticInfoMIROptimization>(OptDiagCommon);
-  computeHotness(OptDiag);
+    auto &OptDiag = cast<DiagnosticInfoMIROptimization>(OptDiagCommon);
+    computeHotness(OptDiag);
 
-  LLVMContext &Ctx = MF.getFunction().getContext();
+    LLVMContext &Ctx = MF.getFunction().getContext();
 
-  // Only emit it if its hotness meets the threshold.
-  if (OptDiag.getHotness().getValueOr(0) <
-      Ctx.getDiagnosticsHotnessThreshold()) {
-    return;
-  }
+    // Only emit it if its hotness meets the threshold.
+    if (OptDiag.getHotness().getValueOr(0) <
+            Ctx.getDiagnosticsHotnessThreshold()) {
+        return;
+    }
 
-  Ctx.diagnose(OptDiag);
+    Ctx.diagnose(OptDiag);
 }
 
 MachineOptimizationRemarkEmitterPass::MachineOptimizationRemarkEmitterPass()
     : MachineFunctionPass(ID) {
-  initializeMachineOptimizationRemarkEmitterPassPass(
-      *PassRegistry::getPassRegistry());
+    initializeMachineOptimizationRemarkEmitterPassPass(
+        *PassRegistry::getPassRegistry());
 }
 
 bool MachineOptimizationRemarkEmitterPass::runOnMachineFunction(
     MachineFunction &MF) {
-  MachineBlockFrequencyInfo *MBFI;
+    MachineBlockFrequencyInfo *MBFI;
 
-  if (MF.getFunction().getContext().getDiagnosticsHotnessRequested())
-    MBFI = &getAnalysis<LazyMachineBlockFrequencyInfoPass>().getBFI();
-  else
-    MBFI = nullptr;
+    if (MF.getFunction().getContext().getDiagnosticsHotnessRequested())
+        MBFI = &getAnalysis<LazyMachineBlockFrequencyInfoPass>().getBFI();
+    else
+        MBFI = nullptr;
 
-  ORE = std::make_unique<MachineOptimizationRemarkEmitter>(MF, MBFI);
-  return false;
+    ORE = std::make_unique<MachineOptimizationRemarkEmitter>(MF, MBFI);
+    return false;
 }
 
 void MachineOptimizationRemarkEmitterPass::getAnalysisUsage(
     AnalysisUsage &AU) const {
-  AU.addRequired<LazyMachineBlockFrequencyInfoPass>();
-  AU.setPreservesAll();
-  MachineFunctionPass::getAnalysisUsage(AU);
+    AU.addRequired<LazyMachineBlockFrequencyInfoPass>();
+    AU.setPreservesAll();
+    MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 char MachineOptimizationRemarkEmitterPass::ID = 0;

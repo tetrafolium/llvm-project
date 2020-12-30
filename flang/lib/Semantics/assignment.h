@@ -31,26 +31,26 @@ class Symbol;
 
 // Applies checks from C1594(1-2) on definitions in pure subprograms
 bool CheckDefinabilityInPureScope(parser::ContextualMessages &, const Symbol &,
-    const Scope &context, const Scope &pure);
+                                  const Scope &context, const Scope &pure);
 // Applies checks from C1594(5-6) on copying pointers in pure subprograms
 bool CheckCopyabilityInPureScope(parser::ContextualMessages &,
-    const evaluate::Expr<evaluate::SomeType> &, const Scope &);
+                                 const evaluate::Expr<evaluate::SomeType> &, const Scope &);
 
 class AssignmentChecker : public virtual BaseChecker {
 public:
-  explicit AssignmentChecker(SemanticsContext &);
-  ~AssignmentChecker();
-  void Enter(const parser::AssignmentStmt &);
-  void Enter(const parser::PointerAssignmentStmt &);
-  void Enter(const parser::WhereStmt &);
-  void Leave(const parser::WhereStmt &);
-  void Enter(const parser::WhereConstructStmt &);
-  void Leave(const parser::EndWhereStmt &);
-  void Enter(const parser::MaskedElsewhereStmt &);
-  void Leave(const parser::MaskedElsewhereStmt &);
+    explicit AssignmentChecker(SemanticsContext &);
+    ~AssignmentChecker();
+    void Enter(const parser::AssignmentStmt &);
+    void Enter(const parser::PointerAssignmentStmt &);
+    void Enter(const parser::WhereStmt &);
+    void Leave(const parser::WhereStmt &);
+    void Enter(const parser::WhereConstructStmt &);
+    void Leave(const parser::EndWhereStmt &);
+    void Enter(const parser::MaskedElsewhereStmt &);
+    void Leave(const parser::MaskedElsewhereStmt &);
 
 private:
-  common::Indirection<AssignmentContext> context_;
+    common::Indirection<AssignmentContext> context_;
 };
 
 } // namespace Fortran::semantics

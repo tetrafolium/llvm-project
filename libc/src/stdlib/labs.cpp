@@ -13,8 +13,8 @@
 namespace __llvm_libc {
 
 long LLVM_LIBC_ENTRYPOINT(labs)(long n) {
-  // integer_abs from abs_utils.h.
-  return integer_abs(n);
+    // integer_abs from abs_utils.h.
+    return integer_abs(n);
 }
 
 } // namespace __llvm_libc

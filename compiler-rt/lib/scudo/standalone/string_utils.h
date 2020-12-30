@@ -18,22 +18,28 @@ namespace scudo {
 
 class ScopedString {
 public:
-  explicit ScopedString(uptr MaxLength) : String(MaxLength), Length(0) {
-    String[0] = '\0';
-  }
-  uptr length() { return Length; }
-  const char *data() { return String.data(); }
-  void clear() {
-    String[0] = '\0';
-    Length = 0;
-  }
-  void append(const char *Format, va_list Args);
-  void append(const char *Format, ...);
-  void output() const { outputRaw(String.data()); }
+    explicit ScopedString(uptr MaxLength) : String(MaxLength), Length(0) {
+        String[0] = '\0';
+    }
+    uptr length() {
+        return Length;
+    }
+    const char *data() {
+        return String.data();
+    }
+    void clear() {
+        String[0] = '\0';
+        Length = 0;
+    }
+    void append(const char *Format, va_list Args);
+    void append(const char *Format, ...);
+    void output() const {
+        outputRaw(String.data());
+    }
 
 private:
-  Vector<char> String;
-  uptr Length;
+    Vector<char> String;
+    uptr Length;
 };
 
 void Printf(const char *Format, ...);

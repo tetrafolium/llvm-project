@@ -17,10 +17,10 @@
 #define FP_MODE
 
 typedef enum {
-  FE_TONEAREST,
-  FE_DOWNWARD,
-  FE_UPWARD,
-  FE_TOWARDZERO
+    FE_TONEAREST,
+    FE_DOWNWARD,
+    FE_UPWARD,
+    FE_TOWARDZERO
 } FE_ROUND_MODE;
 
 FE_ROUND_MODE __fe_getround(void);

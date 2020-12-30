@@ -28,18 +28,18 @@ namespace misc {
 /// http://clang.llvm.org/extra/clang-tidy/checks/misc-non-private-member-variables-in-classes.html
 class NonPrivateMemberVariablesInClassesCheck : public ClangTidyCheck {
 public:
-  NonPrivateMemberVariablesInClassesCheck(StringRef Name,
-                                          ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    NonPrivateMemberVariablesInClassesCheck(StringRef Name,
+                                            ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  const bool IgnoreClassesWithAllMemberVariablesBeingPublic;
-  const bool IgnorePublicMemberVariables;
+    const bool IgnoreClassesWithAllMemberVariablesBeingPublic;
+    const bool IgnorePublicMemberVariables;
 };
 
 } // namespace misc

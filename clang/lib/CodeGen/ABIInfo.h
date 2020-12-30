@@ -15,52 +15,56 @@
 #include "llvm/IR/Type.h"
 
 namespace llvm {
-  class Value;
-  class LLVMContext;
-  class DataLayout;
-  class Type;
+class Value;
+class LLVMContext;
+class DataLayout;
+class Type;
 }
 
 namespace clang {
-  class ASTContext;
-  class CodeGenOptions;
-  class TargetInfo;
+class ASTContext;
+class CodeGenOptions;
+class TargetInfo;
 
 namespace CodeGen {
-  class ABIArgInfo;
-  class Address;
-  class CGCXXABI;
-  class CGFunctionInfo;
-  class CodeGenFunction;
-  class CodeGenTypes;
-  class SwiftABIInfo;
+class ABIArgInfo;
+class Address;
+class CGCXXABI;
+class CGFunctionInfo;
+class CodeGenFunction;
+class CodeGenTypes;
+class SwiftABIInfo;
 
 namespace swiftcall {
-  class SwiftAggLowering;
+class SwiftAggLowering;
 }
 
-  // FIXME: All of this stuff should be part of the target interface
-  // somehow. It is currently here because it is not clear how to factor
-  // the targets to support this, since the Targets currently live in a
-  // layer below types n'stuff.
+// FIXME: All of this stuff should be part of the target interface
+// somehow. It is currently here because it is not clear how to factor
+// the targets to support this, since the Targets currently live in a
+// layer below types n'stuff.
 
 
-  /// ABIInfo - Target specific hooks for defining how a type should be
-  /// passed or returned from functions.
-  class ABIInfo {
-  public:
+/// ABIInfo - Target specific hooks for defining how a type should be
+/// passed or returned from functions.
+class ABIInfo {
+public:
     CodeGen::CodeGenTypes &CGT;
-  protected:
+protected:
     llvm::CallingConv::ID RuntimeCC;
-  public:
+public:
     ABIInfo(CodeGen::CodeGenTypes &cgt)
         : CGT(cgt), RuntimeCC(llvm::CallingConv::C) {}
 
     virtual ~ABIInfo();
 
-    virtual bool supportsSwift() const { return false; }
+    virtual bool supportsSwift() const {
+        return false;
+    }
 
-    virtual bool allowBFloatArgsAndRet() const { return false; }
+    virtual bool allowBFloatArgsAndRet() const {
+        return false;
+    }
 
     CodeGen::CGCXXABI &getCXXABI() const;
     ASTContext &getContext() const;
@@ -72,7 +76,7 @@ namespace swiftcall {
     /// Return the calling convention to use for system runtime
     /// functions.
     llvm::CallingConv::ID getRuntimeCC() const {
-      return RuntimeCC;
+        return RuntimeCC;
     }
 
     virtual void computeInfo(CodeGen::CGFunctionInfo &FI) const = 0;
@@ -99,7 +103,7 @@ namespace swiftcall {
     virtual bool isHomogeneousAggregateBaseType(QualType Ty) const;
 
     virtual bool isHomogeneousAggregateSmallEnough(const Type *Base,
-                                                   uint64_t Members) const;
+            uint64_t Members) const;
 
     bool isHomogeneousAggregate(QualType Ty, const Type *&Base,
                                 uint64_t &Members) const;
@@ -119,21 +123,23 @@ namespace swiftcall {
     getNaturalAlignIndirectInReg(QualType Ty, bool Realign = false) const;
 
 
-  };
+};
 
-  /// A refining implementation of ABIInfo for targets that support swiftcall.
-  ///
-  /// If we find ourselves wanting multiple such refinements, they'll probably
-  /// be independent refinements, and we should probably find another way
-  /// to do it than simple inheritance.
-  class SwiftABIInfo : public ABIInfo {
-  public:
+/// A refining implementation of ABIInfo for targets that support swiftcall.
+///
+/// If we find ourselves wanting multiple such refinements, they'll probably
+/// be independent refinements, and we should probably find another way
+/// to do it than simple inheritance.
+class SwiftABIInfo : public ABIInfo {
+public:
     SwiftABIInfo(CodeGen::CodeGenTypes &cgt) : ABIInfo(cgt) {}
 
-    bool supportsSwift() const final override { return true; }
+    bool supportsSwift() const final override {
+        return true;
+    }
 
     virtual bool shouldPassIndirectlyForSwift(ArrayRef<llvm::Type*> types,
-                                              bool asReturnValue) const = 0;
+            bool asReturnValue) const = 0;
 
     virtual bool isLegalVectorTypeForSwift(CharUnits totalSize,
                                            llvm::Type *eltTy,
@@ -142,9 +148,9 @@ namespace swiftcall {
     virtual bool isSwiftErrorInRegister() const = 0;
 
     static bool classof(const ABIInfo *info) {
-      return info->supportsSwift();
+        return info->supportsSwift();
     }
-  };
+};
 }  // end namespace CodeGen
 }  // end namespace clang
 

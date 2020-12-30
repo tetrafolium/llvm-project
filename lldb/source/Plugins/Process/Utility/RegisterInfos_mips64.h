@@ -68,7 +68,8 @@
 const uint8_t dwarf_opcode_mips64[] = {
     llvm::dwarf::DW_OP_regx,  dwarf_sr_mips64,        llvm::dwarf::DW_OP_lit1,
     llvm::dwarf::DW_OP_lit26, llvm::dwarf::DW_OP_shl, llvm::dwarf::DW_OP_and,
-    llvm::dwarf::DW_OP_lit26, llvm::dwarf::DW_OP_shr};
+    llvm::dwarf::DW_OP_lit26, llvm::dwarf::DW_OP_shr
+};
 
 #define DEFINE_FPR(reg, alt, kind1, kind2, kind3)                              \
   {                                                                            \

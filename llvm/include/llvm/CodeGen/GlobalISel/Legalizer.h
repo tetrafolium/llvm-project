@@ -30,47 +30,49 @@ class LostDebugLocObserver;
 
 class Legalizer : public MachineFunctionPass {
 public:
-  static char ID;
+    static char ID;
 
-  struct MFResult {
-    bool Changed;
-    const MachineInstr *FailedOn;
-  };
+    struct MFResult {
+        bool Changed;
+        const MachineInstr *FailedOn;
+    };
 
 private:
-  /// Initialize the field members using \p MF.
-  void init(MachineFunction &MF);
+    /// Initialize the field members using \p MF.
+    void init(MachineFunction &MF);
 
 public:
-  // Ctor, nothing fancy.
-  Legalizer();
+    // Ctor, nothing fancy.
+    Legalizer();
 
-  StringRef getPassName() const override { return "Legalizer"; }
+    StringRef getPassName() const override {
+        return "Legalizer";
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-  MachineFunctionProperties getRequiredProperties() const override {
-    return MachineFunctionProperties().set(
-        MachineFunctionProperties::Property::IsSSA);
-  }
+    MachineFunctionProperties getRequiredProperties() const override {
+        return MachineFunctionProperties().set(
+                   MachineFunctionProperties::Property::IsSSA);
+    }
 
-  MachineFunctionProperties getSetProperties() const override {
-    return MachineFunctionProperties().set(
-        MachineFunctionProperties::Property::Legalized);
-  }
+    MachineFunctionProperties getSetProperties() const override {
+        return MachineFunctionProperties().set(
+                   MachineFunctionProperties::Property::Legalized);
+    }
 
-  MachineFunctionProperties getClearedProperties() const override {
-    return MachineFunctionProperties().set(
-        MachineFunctionProperties::Property::NoPHIs);
-  }
+    MachineFunctionProperties getClearedProperties() const override {
+        return MachineFunctionProperties().set(
+                   MachineFunctionProperties::Property::NoPHIs);
+    }
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 
-  static MFResult
-  legalizeMachineFunction(MachineFunction &MF, const LegalizerInfo &LI,
-                          ArrayRef<GISelChangeObserver *> AuxObservers,
-                          LostDebugLocObserver &LocObserver,
-                          MachineIRBuilder &MIRBuilder);
+    static MFResult
+    legalizeMachineFunction(MachineFunction &MF, const LegalizerInfo &LI,
+                            ArrayRef<GISelChangeObserver *> AuxObservers,
+                            LostDebugLocObserver &LocObserver,
+                            MachineIRBuilder &MIRBuilder);
 };
 } // End namespace llvm.
 

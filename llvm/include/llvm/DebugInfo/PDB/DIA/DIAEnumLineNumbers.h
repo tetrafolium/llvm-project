@@ -19,15 +19,15 @@ class IPDBLineNumber;
 
 class DIAEnumLineNumbers : public IPDBEnumChildren<IPDBLineNumber> {
 public:
-  explicit DIAEnumLineNumbers(CComPtr<IDiaEnumLineNumbers> DiaEnumerator);
+    explicit DIAEnumLineNumbers(CComPtr<IDiaEnumLineNumbers> DiaEnumerator);
 
-  uint32_t getChildCount() const override;
-  ChildTypePtr getChildAtIndex(uint32_t Index) const override;
-  ChildTypePtr getNext() override;
-  void reset() override;
+    uint32_t getChildCount() const override;
+    ChildTypePtr getChildAtIndex(uint32_t Index) const override;
+    ChildTypePtr getNext() override;
+    void reset() override;
 
 private:
-  CComPtr<IDiaEnumLineNumbers> Enumerator;
+    CComPtr<IDiaEnumLineNumbers> Enumerator;
 };
 }
 }

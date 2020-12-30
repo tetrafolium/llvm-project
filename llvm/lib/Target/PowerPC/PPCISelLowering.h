@@ -33,17 +33,17 @@
 
 namespace llvm {
 
-  namespace PPCISD {
+namespace PPCISD {
 
-    // When adding a NEW PPCISD node please add it to the correct position in
-    // the enum. The order of elements in this enum matters!
-    // Values that are added after this entry:
-    //     STBRX = ISD::FIRST_TARGET_MEMORY_OPCODE
-    // are considered memory opcodes and are treated differently than entries
-    // that come before it. For example, ADD or MUL should be placed before
-    // the ISD::FIRST_TARGET_MEMORY_OPCODE while a LOAD or STORE should come
-    // after it.
-  enum NodeType : unsigned {
+// When adding a NEW PPCISD node please add it to the correct position in
+// the enum. The order of elements in this enum matters!
+// Values that are added after this entry:
+//     STBRX = ISD::FIRST_TARGET_MEMORY_OPCODE
+// are considered memory opcodes and are treated differently than entries
+// that come before it. For example, ADD or MUL should be placed before
+// the ISD::FIRST_TARGET_MEMORY_OPCODE while a LOAD or STORE should come
+// after it.
+enum NodeType : unsigned {
     // Start the numbering where the builtin ops and target ops leave off.
     FIRST_NUMBER = ISD::BUILTIN_OP_END,
 
@@ -569,110 +569,110 @@ namespace llvm {
     /// Loads the entry for GA from the TOC, where the TOC base is given by
     /// the last operand.
     TOC_ENTRY
-  };
+};
 
-  } // end namespace PPCISD
+} // end namespace PPCISD
 
-  /// Define some predicates that are used for node matching.
-  namespace PPC {
+/// Define some predicates that are used for node matching.
+namespace PPC {
 
-    /// isVPKUHUMShuffleMask - Return true if this is the shuffle mask for a
-    /// VPKUHUM instruction.
-    bool isVPKUHUMShuffleMask(ShuffleVectorSDNode *N, unsigned ShuffleKind,
-                              SelectionDAG &DAG);
+/// isVPKUHUMShuffleMask - Return true if this is the shuffle mask for a
+/// VPKUHUM instruction.
+bool isVPKUHUMShuffleMask(ShuffleVectorSDNode *N, unsigned ShuffleKind,
+                          SelectionDAG &DAG);
 
-    /// isVPKUWUMShuffleMask - Return true if this is the shuffle mask for a
-    /// VPKUWUM instruction.
-    bool isVPKUWUMShuffleMask(ShuffleVectorSDNode *N, unsigned ShuffleKind,
-                              SelectionDAG &DAG);
+/// isVPKUWUMShuffleMask - Return true if this is the shuffle mask for a
+/// VPKUWUM instruction.
+bool isVPKUWUMShuffleMask(ShuffleVectorSDNode *N, unsigned ShuffleKind,
+                          SelectionDAG &DAG);
 
-    /// isVPKUDUMShuffleMask - Return true if this is the shuffle mask for a
-    /// VPKUDUM instruction.
-    bool isVPKUDUMShuffleMask(ShuffleVectorSDNode *N, unsigned ShuffleKind,
-                              SelectionDAG &DAG);
+/// isVPKUDUMShuffleMask - Return true if this is the shuffle mask for a
+/// VPKUDUM instruction.
+bool isVPKUDUMShuffleMask(ShuffleVectorSDNode *N, unsigned ShuffleKind,
+                          SelectionDAG &DAG);
 
-    /// isVMRGLShuffleMask - Return true if this is a shuffle mask suitable for
-    /// a VRGL* instruction with the specified unit size (1,2 or 4 bytes).
-    bool isVMRGLShuffleMask(ShuffleVectorSDNode *N, unsigned UnitSize,
-                            unsigned ShuffleKind, SelectionDAG &DAG);
+/// isVMRGLShuffleMask - Return true if this is a shuffle mask suitable for
+/// a VRGL* instruction with the specified unit size (1,2 or 4 bytes).
+bool isVMRGLShuffleMask(ShuffleVectorSDNode *N, unsigned UnitSize,
+                        unsigned ShuffleKind, SelectionDAG &DAG);
 
-    /// isVMRGHShuffleMask - Return true if this is a shuffle mask suitable for
-    /// a VRGH* instruction with the specified unit size (1,2 or 4 bytes).
-    bool isVMRGHShuffleMask(ShuffleVectorSDNode *N, unsigned UnitSize,
-                            unsigned ShuffleKind, SelectionDAG &DAG);
+/// isVMRGHShuffleMask - Return true if this is a shuffle mask suitable for
+/// a VRGH* instruction with the specified unit size (1,2 or 4 bytes).
+bool isVMRGHShuffleMask(ShuffleVectorSDNode *N, unsigned UnitSize,
+                        unsigned ShuffleKind, SelectionDAG &DAG);
 
-    /// isVMRGEOShuffleMask - Return true if this is a shuffle mask suitable for
-    /// a VMRGEW or VMRGOW instruction
-    bool isVMRGEOShuffleMask(ShuffleVectorSDNode *N, bool CheckEven,
-                             unsigned ShuffleKind, SelectionDAG &DAG);
-    /// isXXSLDWIShuffleMask - Return true if this is a shuffle mask suitable
-    /// for a XXSLDWI instruction.
-    bool isXXSLDWIShuffleMask(ShuffleVectorSDNode *N, unsigned &ShiftElts,
-                              bool &Swap, bool IsLE);
+/// isVMRGEOShuffleMask - Return true if this is a shuffle mask suitable for
+/// a VMRGEW or VMRGOW instruction
+bool isVMRGEOShuffleMask(ShuffleVectorSDNode *N, bool CheckEven,
+                         unsigned ShuffleKind, SelectionDAG &DAG);
+/// isXXSLDWIShuffleMask - Return true if this is a shuffle mask suitable
+/// for a XXSLDWI instruction.
+bool isXXSLDWIShuffleMask(ShuffleVectorSDNode *N, unsigned &ShiftElts,
+                          bool &Swap, bool IsLE);
 
-    /// isXXBRHShuffleMask - Return true if this is a shuffle mask suitable
-    /// for a XXBRH instruction.
-    bool isXXBRHShuffleMask(ShuffleVectorSDNode *N);
+/// isXXBRHShuffleMask - Return true if this is a shuffle mask suitable
+/// for a XXBRH instruction.
+bool isXXBRHShuffleMask(ShuffleVectorSDNode *N);
 
-    /// isXXBRWShuffleMask - Return true if this is a shuffle mask suitable
-    /// for a XXBRW instruction.
-    bool isXXBRWShuffleMask(ShuffleVectorSDNode *N);
+/// isXXBRWShuffleMask - Return true if this is a shuffle mask suitable
+/// for a XXBRW instruction.
+bool isXXBRWShuffleMask(ShuffleVectorSDNode *N);
 
-    /// isXXBRDShuffleMask - Return true if this is a shuffle mask suitable
-    /// for a XXBRD instruction.
-    bool isXXBRDShuffleMask(ShuffleVectorSDNode *N);
+/// isXXBRDShuffleMask - Return true if this is a shuffle mask suitable
+/// for a XXBRD instruction.
+bool isXXBRDShuffleMask(ShuffleVectorSDNode *N);
 
-    /// isXXBRQShuffleMask - Return true if this is a shuffle mask suitable
-    /// for a XXBRQ instruction.
-    bool isXXBRQShuffleMask(ShuffleVectorSDNode *N);
+/// isXXBRQShuffleMask - Return true if this is a shuffle mask suitable
+/// for a XXBRQ instruction.
+bool isXXBRQShuffleMask(ShuffleVectorSDNode *N);
 
-    /// isXXPERMDIShuffleMask - Return true if this is a shuffle mask suitable
-    /// for a XXPERMDI instruction.
-    bool isXXPERMDIShuffleMask(ShuffleVectorSDNode *N, unsigned &ShiftElts,
-                              bool &Swap, bool IsLE);
+/// isXXPERMDIShuffleMask - Return true if this is a shuffle mask suitable
+/// for a XXPERMDI instruction.
+bool isXXPERMDIShuffleMask(ShuffleVectorSDNode *N, unsigned &ShiftElts,
+                           bool &Swap, bool IsLE);
 
-    /// isVSLDOIShuffleMask - If this is a vsldoi shuffle mask, return the
-    /// shift amount, otherwise return -1.
-    int isVSLDOIShuffleMask(SDNode *N, unsigned ShuffleKind,
-                            SelectionDAG &DAG);
+/// isVSLDOIShuffleMask - If this is a vsldoi shuffle mask, return the
+/// shift amount, otherwise return -1.
+int isVSLDOIShuffleMask(SDNode *N, unsigned ShuffleKind,
+                        SelectionDAG &DAG);
 
-    /// isSplatShuffleMask - Return true if the specified VECTOR_SHUFFLE operand
-    /// specifies a splat of a single element that is suitable for input to
-    /// VSPLTB/VSPLTH/VSPLTW.
-    bool isSplatShuffleMask(ShuffleVectorSDNode *N, unsigned EltSize);
+/// isSplatShuffleMask - Return true if the specified VECTOR_SHUFFLE operand
+/// specifies a splat of a single element that is suitable for input to
+/// VSPLTB/VSPLTH/VSPLTW.
+bool isSplatShuffleMask(ShuffleVectorSDNode *N, unsigned EltSize);
 
-    /// isXXINSERTWMask - Return true if this VECTOR_SHUFFLE can be handled by
-    /// the XXINSERTW instruction introduced in ISA 3.0. This is essentially any
-    /// shuffle of v4f32/v4i32 vectors that just inserts one element from one
-    /// vector into the other. This function will also set a couple of
-    /// output parameters for how much the source vector needs to be shifted and
-    /// what byte number needs to be specified for the instruction to put the
-    /// element in the desired location of the target vector.
-    bool isXXINSERTWMask(ShuffleVectorSDNode *N, unsigned &ShiftElts,
-                         unsigned &InsertAtByte, bool &Swap, bool IsLE);
+/// isXXINSERTWMask - Return true if this VECTOR_SHUFFLE can be handled by
+/// the XXINSERTW instruction introduced in ISA 3.0. This is essentially any
+/// shuffle of v4f32/v4i32 vectors that just inserts one element from one
+/// vector into the other. This function will also set a couple of
+/// output parameters for how much the source vector needs to be shifted and
+/// what byte number needs to be specified for the instruction to put the
+/// element in the desired location of the target vector.
+bool isXXINSERTWMask(ShuffleVectorSDNode *N, unsigned &ShiftElts,
+                     unsigned &InsertAtByte, bool &Swap, bool IsLE);
 
-    /// getSplatIdxForPPCMnemonics - Return the splat index as a value that is
-    /// appropriate for PPC mnemonics (which have a big endian bias - namely
-    /// elements are counted from the left of the vector register).
-    unsigned getSplatIdxForPPCMnemonics(SDNode *N, unsigned EltSize,
-                                        SelectionDAG &DAG);
+/// getSplatIdxForPPCMnemonics - Return the splat index as a value that is
+/// appropriate for PPC mnemonics (which have a big endian bias - namely
+/// elements are counted from the left of the vector register).
+unsigned getSplatIdxForPPCMnemonics(SDNode *N, unsigned EltSize,
+                                    SelectionDAG &DAG);
 
-    /// get_VSPLTI_elt - If this is a build_vector of constants which can be
-    /// formed by using a vspltis[bhw] instruction of the specified element
-    /// size, return the constant being splatted.  The ByteSize field indicates
-    /// the number of bytes of each element [124] -> [bhw].
-    SDValue get_VSPLTI_elt(SDNode *N, unsigned ByteSize, SelectionDAG &DAG);
+/// get_VSPLTI_elt - If this is a build_vector of constants which can be
+/// formed by using a vspltis[bhw] instruction of the specified element
+/// size, return the constant being splatted.  The ByteSize field indicates
+/// the number of bytes of each element [124] -> [bhw].
+SDValue get_VSPLTI_elt(SDNode *N, unsigned ByteSize, SelectionDAG &DAG);
 
-    /// If this is a qvaligni shuffle mask, return the shift
-    /// amount, otherwise return -1.
-    int isQVALIGNIShuffleMask(SDNode *N);
+/// If this is a qvaligni shuffle mask, return the shift
+/// amount, otherwise return -1.
+int isQVALIGNIShuffleMask(SDNode *N);
 
-  } // end namespace PPC
+} // end namespace PPC
 
-  class PPCTargetLowering : public TargetLowering {
+class PPCTargetLowering : public TargetLowering {
     const PPCSubtarget &Subtarget;
 
-  public:
+public:
     explicit PPCTargetLowering(const PPCTargetMachine &TM,
                                const PPCSubtarget &STI);
 
@@ -681,8 +681,8 @@ namespace llvm {
     const char *getTargetNodeName(unsigned Opcode) const override;
 
     bool isSelectSupported(SelectSupportKind Kind) const override {
-      // PowerPC does not support scalar condition selects on vectors.
-      return (Kind != SelectSupportKind::ScalarCondVectorVal);
+        // PowerPC does not support scalar condition selects on vectors.
+        return (Kind != SelectSupportKind::ScalarCondVectorVal);
     }
 
     /// getPreferredVectorAction - The code we generate when vector types are
@@ -694,10 +694,10 @@ namespace llvm {
     /// loads, moves back into VSR's (or memory ops if we don't have moves) and
     /// then the VPERM for the shuffle. All in all a very slow sequence.
     TargetLoweringBase::LegalizeTypeAction getPreferredVectorAction(MVT VT)
-      const override {
-      if (VT.getVectorNumElements() != 1 && VT.getScalarSizeInBits() % 8 == 0)
-        return TypeWidenVector;
-      return TargetLoweringBase::getPreferredVectorAction(VT);
+    const override {
+        if (VT.getVectorNumElements() != 1 && VT.getScalarSizeInBits() % 8 == 0)
+            return TypeWidenVector;
+        return TargetLoweringBase::getPreferredVectorAction(VT);
     }
 
     bool useSoftFloat() const override;
@@ -705,33 +705,33 @@ namespace llvm {
     bool hasSPE() const;
 
     MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override {
-      return MVT::i32;
+        return MVT::i32;
     }
 
     bool isCheapToSpeculateCttz() const override {
-      return true;
+        return true;
     }
 
     bool isCheapToSpeculateCtlz() const override {
-      return true;
+        return true;
     }
 
     bool isCtlzFast() const override {
-      return true;
+        return true;
     }
 
     bool isEqualityCmpFoldedWithSignedCmp() const override {
-      return false;
+        return false;
     }
 
     bool hasAndNotCompare(SDValue) const override {
-      return true;
+        return true;
     }
 
     bool preferIncOfAddToSubOfNot(EVT VT) const override;
 
     bool convertSetCCLogicToBitwiseLogic(EVT VT) const override {
-      return VT.isScalarInteger();
+        return VT.isScalarInteger();
     }
 
     SDValue getNegatedExpression(SDValue Op, SelectionDAG &DAG, bool LegalOps,
@@ -820,7 +820,7 @@ namespace llvm {
     Align getPrefLoopAlignment(MachineLoop *ML) const override;
 
     bool shouldInsertFencesForAtomic(const Instruction *I) const override {
-      return true;
+        return true;
     }
 
     Instruction *emitLeadingFence(IRBuilder<> &Builder, Instruction *Inst,
@@ -838,11 +838,11 @@ namespace llvm {
                                         unsigned CmpOpcode = 0,
                                         unsigned CmpPred = 0) const;
     MachineBasicBlock *EmitPartwordAtomicBinary(MachineInstr &MI,
-                                                MachineBasicBlock *MBB,
-                                                bool is8bit,
-                                                unsigned Opcode,
-                                                unsigned CmpOpcode = 0,
-                                                unsigned CmpPred = 0) const;
+            MachineBasicBlock *MBB,
+            bool is8bit,
+            unsigned Opcode,
+            unsigned CmpOpcode = 0,
+            unsigned CmpPred = 0) const;
 
     MachineBasicBlock *emitEHSjLjSetJmp(MachineInstr &MI,
                                         MachineBasicBlock *MBB) const;
@@ -862,7 +862,7 @@ namespace llvm {
     /// Examine constraint string and operand type and determine a weight value.
     /// The operand object must already have been set up with the operand type.
     ConstraintWeight getSingleConstraintMatchWeight(
-      AsmOperandInfo &info, const char *constraint) const override;
+        AsmOperandInfo &info, const char *constraint) const override;
 
     std::pair<unsigned, const TargetRegisterClass *>
     getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
@@ -883,17 +883,17 @@ namespace llvm {
 
     unsigned
     getInlineAsmMemConstraint(StringRef ConstraintCode) const override {
-      if (ConstraintCode == "es")
-        return InlineAsm::Constraint_es;
-      else if (ConstraintCode == "o")
-        return InlineAsm::Constraint_o;
-      else if (ConstraintCode == "Q")
-        return InlineAsm::Constraint_Q;
-      else if (ConstraintCode == "Z")
-        return InlineAsm::Constraint_Z;
-      else if (ConstraintCode == "Zy")
-        return InlineAsm::Constraint_Zy;
-      return TargetLowering::getInlineAsmMemConstraint(ConstraintCode);
+        if (ConstraintCode == "es")
+            return InlineAsm::Constraint_es;
+        else if (ConstraintCode == "o")
+            return InlineAsm::Constraint_o;
+        else if (ConstraintCode == "Q")
+            return InlineAsm::Constraint_Q;
+        else if (ConstraintCode == "Z")
+            return InlineAsm::Constraint_Z;
+        else if (ConstraintCode == "Zy")
+            return InlineAsm::Constraint_Zy;
+        return TargetLowering::getInlineAsmMemConstraint(ConstraintCode);
     }
 
     /// isLegalAddressingMode - Return true if the addressing mode represented
@@ -930,7 +930,7 @@ namespace llvm {
                                            Type *Ty) const override;
 
     bool convertSelectOfConstantsToMath(EVT VT) const override {
-      return true;
+        return true;
     }
 
     bool decomposeMulByConstant(LLVMContext &Context, EVT VT,
@@ -938,14 +938,14 @@ namespace llvm {
 
     bool isDesirableToTransformToIntegerOp(unsigned Opc,
                                            EVT VT) const override {
-      // Only handle float load/store pair because float(fpr) load/store
-      // instruction has more cycles than integer(gpr) load/store in PPC.
-      if (Opc != ISD::LOAD && Opc != ISD::STORE)
-        return false;
-      if (VT != MVT::f32 && VT != MVT::f64)
-        return false;
+        // Only handle float load/store pair because float(fpr) load/store
+        // instruction has more cycles than integer(gpr) load/store in PPC.
+        if (Opc != ISD::LOAD && Opc != ISD::STORE)
+            return false;
+        if (VT != MVT::f32 && VT != MVT::f64)
+            return false;
 
-      return true;
+        return true;
     }
 
     // Returns true if the address of the global is stored in TOC entry.
@@ -1000,15 +1000,15 @@ namespace llvm {
     /// Returns true if an argument of type Ty needs to be passed in a
     /// contiguous block of registers in calling convention CallConv.
     bool functionArgumentNeedsConsecutiveRegisters(
-      Type *Ty, CallingConv::ID CallConv, bool isVarArg) const override {
-      // We support any array type as "consecutive" block in the parameter
-      // save area.  The element type defines the alignment requirement and
-      // whether the argument should go in GPRs, FPRs, or VRs if available.
-      //
-      // Note that clang uses this capability both to implement the ELFv2
-      // homogeneous float/vector aggregate ABI, and to avoid having to use
-      // "byval" when passing aggregates that might fully fit in registers.
-      return Ty->isArrayTy();
+        Type *Ty, CallingConv::ID CallConv, bool isVarArg) const override {
+        // We support any array type as "consecutive" block in the parameter
+        // save area.  The element type defines the alignment requirement and
+        // whether the argument should go in GPRs, FPRs, or VRs if available.
+        //
+        // Note that clang uses this capability both to implement the ELFv2
+        // homogeneous float/vector aggregate ABI, and to avoid having to use
+        // "byval" when passing aggregates that might fully fit in registers.
+        return Ty->isArrayTy();
     }
 
     /// If a physical register, this returns the register that receives the
@@ -1033,49 +1033,49 @@ namespace llvm {
     SDValue getPICJumpTableRelocBase(SDValue Table,
                                      SelectionDAG &DAG) const override;
     const MCExpr *getPICJumpTableRelocBaseExpr(const MachineFunction *MF,
-                                               unsigned JTI,
-                                               MCContext &Ctx) const override;
+            unsigned JTI,
+            MCContext &Ctx) const override;
 
     /// Structure that collects some common arguments that get passed around
     /// between the functions for call lowering.
     struct CallFlags {
-      const CallingConv::ID CallConv;
-      const bool IsTailCall : 1;
-      const bool IsVarArg : 1;
-      const bool IsPatchPoint : 1;
-      const bool IsIndirect : 1;
-      const bool HasNest : 1;
-      const bool NoMerge : 1;
+        const CallingConv::ID CallConv;
+        const bool IsTailCall : 1;
+        const bool IsVarArg : 1;
+        const bool IsPatchPoint : 1;
+        const bool IsIndirect : 1;
+        const bool HasNest : 1;
+        const bool NoMerge : 1;
 
-      CallFlags(CallingConv::ID CC, bool IsTailCall, bool IsVarArg,
-                bool IsPatchPoint, bool IsIndirect, bool HasNest, bool NoMerge)
-          : CallConv(CC), IsTailCall(IsTailCall), IsVarArg(IsVarArg),
-            IsPatchPoint(IsPatchPoint), IsIndirect(IsIndirect),
-            HasNest(HasNest), NoMerge(NoMerge) {}
+        CallFlags(CallingConv::ID CC, bool IsTailCall, bool IsVarArg,
+                  bool IsPatchPoint, bool IsIndirect, bool HasNest, bool NoMerge)
+            : CallConv(CC), IsTailCall(IsTailCall), IsVarArg(IsVarArg),
+              IsPatchPoint(IsPatchPoint), IsIndirect(IsIndirect),
+              HasNest(HasNest), NoMerge(NoMerge) {}
     };
 
-  private:
+private:
     struct ReuseLoadInfo {
-      SDValue Ptr;
-      SDValue Chain;
-      SDValue ResChain;
-      MachinePointerInfo MPI;
-      bool IsDereferenceable = false;
-      bool IsInvariant = false;
-      Align Alignment;
-      AAMDNodes AAInfo;
-      const MDNode *Ranges = nullptr;
+        SDValue Ptr;
+        SDValue Chain;
+        SDValue ResChain;
+        MachinePointerInfo MPI;
+        bool IsDereferenceable = false;
+        bool IsInvariant = false;
+        Align Alignment;
+        AAMDNodes AAInfo;
+        const MDNode *Ranges = nullptr;
 
-      ReuseLoadInfo() = default;
+        ReuseLoadInfo() = default;
 
-      MachineMemOperand::Flags MMOFlags() const {
-        MachineMemOperand::Flags F = MachineMemOperand::MONone;
-        if (IsDereferenceable)
-          F |= MachineMemOperand::MODereferenceable;
-        if (IsInvariant)
-          F |= MachineMemOperand::MOInvariant;
-        return F;
-      }
+        MachineMemOperand::Flags MMOFlags() const {
+            MachineMemOperand::Flags F = MachineMemOperand::MONone;
+            if (IsDereferenceable)
+                F |= MachineMemOperand::MODereferenceable;
+            if (IsInvariant)
+                F |= MachineMemOperand::MOInvariant;
+            return F;
+        }
     };
 
     bool canReuseLoadAddress(SDValue Op, EVT MemVT, ReuseLoadInfo &RLI,
@@ -1297,7 +1297,7 @@ namespace llvm {
 
     SDValue
     combineElementTruncationToVectorTruncation(SDNode *N,
-                                               DAGCombinerInfo &DCI) const;
+            DAGCombinerInfo &DCI) const;
 
     /// lowerToVINSERTH - Return the SDValue if this VECTOR_SHUFFLE can be
     /// handled by the VINSERTH instruction introduced in ISA 3.0. This is
@@ -1320,22 +1320,22 @@ namespace llvm {
     bool mayBeEmittedAsTailCall(const CallInst *CI) const override;
     bool hasBitPreservingFPLogic(EVT VT) const override;
     bool isMaskAndCmp0FoldingBeneficial(const Instruction &AndI) const override;
-  }; // end class PPCTargetLowering
+}; // end class PPCTargetLowering
 
-  namespace PPC {
+namespace PPC {
 
-    FastISel *createFastISel(FunctionLoweringInfo &FuncInfo,
-                             const TargetLibraryInfo *LibInfo);
+FastISel *createFastISel(FunctionLoweringInfo &FuncInfo,
+                         const TargetLibraryInfo *LibInfo);
 
-  } // end namespace PPC
+} // end namespace PPC
 
-  bool isIntS16Immediate(SDNode *N, int16_t &Imm);
-  bool isIntS16Immediate(SDValue Op, int16_t &Imm);
-  bool isIntS34Immediate(SDNode *N, int64_t &Imm);
-  bool isIntS34Immediate(SDValue Op, int64_t &Imm);
+bool isIntS16Immediate(SDNode *N, int16_t &Imm);
+bool isIntS16Immediate(SDValue Op, int16_t &Imm);
+bool isIntS34Immediate(SDNode *N, int64_t &Imm);
+bool isIntS34Immediate(SDValue Op, int64_t &Imm);
 
-  bool convertToNonDenormSingle(APInt &ArgAPInt);
-  bool convertToNonDenormSingle(APFloat &ArgAPFloat);
+bool convertToNonDenormSingle(APInt &ArgAPInt);
+bool convertToNonDenormSingle(APFloat &ArgAPFloat);
 
 } // end namespace llvm
 

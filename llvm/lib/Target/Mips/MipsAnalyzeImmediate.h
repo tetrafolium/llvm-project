@@ -14,12 +14,12 @@
 
 namespace llvm {
 
-  class MipsAnalyzeImmediate {
-  public:
+class MipsAnalyzeImmediate {
+public:
     struct Inst {
-      unsigned Opc, ImmOpnd;
+        unsigned Opc, ImmOpnd;
 
-      Inst(unsigned Opc, unsigned ImmOpnd);
+        Inst(unsigned Opc, unsigned ImmOpnd);
     };
     using InstSeq = SmallVector<Inst, 7>;
 
@@ -28,7 +28,7 @@ namespace llvm {
     /// true;
     const InstSeq &Analyze(uint64_t Imm, unsigned Size, bool LastInstrIsADDiu);
 
-  private:
+private:
     using InstSeqLs = SmallVector<InstSeq, 5>;
 
     /// AddInstr - Add I to all instruction sequences in SeqLs.
@@ -59,7 +59,7 @@ namespace llvm {
     unsigned Size;
     unsigned ADDiu, ORi, SLL, LUi;
     InstSeq Insts;
-  };
+};
 
 } // end namespace llvm
 

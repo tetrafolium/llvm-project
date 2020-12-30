@@ -101,20 +101,20 @@ Constant *ConstantFoldCastOperand(unsigned Opcode, Constant *C, Type *DestTy,
 /// instruction with the specified operands and indices.  The constant result is
 /// returned if successful; if not, null is returned.
 Constant *ConstantFoldInsertValueInstruction(Constant *Agg, Constant *Val,
-                                             ArrayRef<unsigned> Idxs);
+        ArrayRef<unsigned> Idxs);
 
 /// Attempt to constant fold an extractvalue instruction with the
 /// specified operands and indices.  The constant result is returned if
 /// successful; if not, null is returned.
 Constant *ConstantFoldExtractValueInstruction(Constant *Agg,
-                                              ArrayRef<unsigned> Idxs);
+        ArrayRef<unsigned> Idxs);
 
 /// Attempt to constant fold an insertelement instruction with the
 /// specified operands and indices.  The constant result is returned if
 /// successful; if not, null is returned.
 Constant *ConstantFoldInsertElementInstruction(Constant *Val,
-                                               Constant *Elt,
-                                               Constant *Idx);
+        Constant *Elt,
+        Constant *Idx);
 
 /// Attempt to constant fold an extractelement instruction with the
 /// specified operands and indices.  The constant result is returned if
@@ -126,7 +126,7 @@ Constant *ConstantFoldExtractElementInstruction(Constant *Val, Constant *Idx);
 /// of the mask representation. The constant result is returned if successful;
 /// if not, null is returned.
 Constant *ConstantFoldShuffleVectorInstruction(Constant *V1, Constant *V2,
-                                               ArrayRef<int> Mask);
+        ArrayRef<int> Mask);
 
 /// ConstantFoldLoadFromConstPtr - Return the value that a load from C would
 /// produce if it is constant and determinable.  If this is not determinable,
@@ -143,7 +143,7 @@ Constant *ConstantFoldLoadThroughGEPConstantExpr(Constant *C, ConstantExpr *CE);
 /// return the constant value being addressed by a virtual load, or null if
 /// something is funny and we can't decide.
 Constant *ConstantFoldLoadThroughGEPIndices(Constant *C,
-                                            ArrayRef<Constant *> Indices);
+        ArrayRef<Constant *> Indices);
 
 /// canConstantFoldCallTo - Return true if its even possible to fold a call to
 /// the specified function.
@@ -159,7 +159,7 @@ Constant *ConstantFoldCall(const CallBase *Call, Function *F,
 /// returning null if unsuccessful. Can cast pointer to pointer or pointer to
 /// integer and vice versa if their sizes are equal.
 Constant *ConstantFoldLoadThroughBitcast(Constant *C, Type *DestTy,
-                                         const DataLayout &DL);
+        const DataLayout &DL);
 
 /// Check whether the given call has no side-effects.
 /// Specifically checks for math routimes which sometimes set errno.

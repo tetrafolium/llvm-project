@@ -28,28 +28,28 @@ namespace __memprof {
 static pthread_key_t tsd_key;
 static bool tsd_key_inited = false;
 void TSDInit(void (*destructor)(void *tsd)) {
-  CHECK(!tsd_key_inited);
-  tsd_key_inited = true;
-  CHECK_EQ(0, pthread_key_create(&tsd_key, destructor));
+    CHECK(!tsd_key_inited);
+    tsd_key_inited = true;
+    CHECK_EQ(0, pthread_key_create(&tsd_key, destructor));
 }
 
 void *TSDGet() {
-  CHECK(tsd_key_inited);
-  return pthread_getspecific(tsd_key);
+    CHECK(tsd_key_inited);
+    return pthread_getspecific(tsd_key);
 }
 
 void TSDSet(void *tsd) {
-  CHECK(tsd_key_inited);
-  pthread_setspecific(tsd_key, tsd);
+    CHECK(tsd_key_inited);
+    pthread_setspecific(tsd_key, tsd);
 }
 
 void PlatformTSDDtor(void *tsd) {
-  MemprofThreadContext *context = (MemprofThreadContext *)tsd;
-  if (context->destructor_iterations > 1) {
-    context->destructor_iterations--;
-    CHECK_EQ(0, pthread_setspecific(tsd_key, tsd));
-    return;
-  }
-  MemprofThread::TSDDtor(tsd);
+    MemprofThreadContext *context = (MemprofThreadContext *)tsd;
+    if (context->destructor_iterations > 1) {
+        context->destructor_iterations--;
+        CHECK_EQ(0, pthread_setspecific(tsd_key, tsd));
+        return;
+    }
+    MemprofThread::TSDDtor(tsd);
 }
 } // namespace __memprof

@@ -38,54 +38,56 @@ NSDictionarySyntheticFrontEndCreator(CXXSyntheticChildren *,
 
 class NSDictionary_Additionals {
 public:
-  class AdditionalFormatterMatching {
-  public:
-    class Matcher {
+    class AdditionalFormatterMatching {
     public:
-      virtual ~Matcher() = default;
-      virtual bool Match(ConstString class_name) = 0;
+        class Matcher {
+        public:
+            virtual ~Matcher() = default;
+            virtual bool Match(ConstString class_name) = 0;
 
-      typedef std::unique_ptr<Matcher> UP;
+            typedef std::unique_ptr<Matcher> UP;
+        };
+        class Prefix : public Matcher {
+        public:
+            Prefix(ConstString p);
+            ~Prefix() override = default;
+            bool Match(ConstString class_name) override;
+
+        private:
+            ConstString m_prefix;
+        };
+        class Full : public Matcher {
+        public:
+            Full(ConstString n);
+            ~Full() override = default;
+            bool Match(ConstString class_name) override;
+
+        private:
+            ConstString m_name;
+        };
+        typedef Matcher::UP MatcherUP;
+
+        MatcherUP GetFullMatch(ConstString n) {
+            return std::make_unique<Full>(n);
+        }
+
+        MatcherUP GetPrefixMatch(ConstString p) {
+            return std::make_unique<Prefix>(p);
+        }
     };
-    class Prefix : public Matcher {
-    public:
-      Prefix(ConstString p);
-      ~Prefix() override = default;
-      bool Match(ConstString class_name) override;
 
-    private:
-      ConstString m_prefix;
-    };
-    class Full : public Matcher {
-    public:
-      Full(ConstString n);
-      ~Full() override = default;
-      bool Match(ConstString class_name) override;
+    template <typename FormatterType>
+    using AdditionalFormatter =
+        std::pair<AdditionalFormatterMatching::MatcherUP, FormatterType>;
 
-    private:
-      ConstString m_name;
-    };
-    typedef Matcher::UP MatcherUP;
+    template <typename FormatterType>
+    using AdditionalFormatters = std::vector<AdditionalFormatter<FormatterType>>;
 
-    MatcherUP GetFullMatch(ConstString n) { return std::make_unique<Full>(n); }
+    static AdditionalFormatters<CXXFunctionSummaryFormat::Callback> &
+    GetAdditionalSummaries();
 
-    MatcherUP GetPrefixMatch(ConstString p) {
-      return std::make_unique<Prefix>(p);
-    }
-  };
-
-  template <typename FormatterType>
-  using AdditionalFormatter =
-      std::pair<AdditionalFormatterMatching::MatcherUP, FormatterType>;
-
-  template <typename FormatterType>
-  using AdditionalFormatters = std::vector<AdditionalFormatter<FormatterType>>;
-
-  static AdditionalFormatters<CXXFunctionSummaryFormat::Callback> &
-  GetAdditionalSummaries();
-
-  static AdditionalFormatters<CXXSyntheticChildren::CreateFrontEndCallback> &
-  GetAdditionalSynthetics();
+    static AdditionalFormatters<CXXSyntheticChildren::CreateFrontEndCallback> &
+    GetAdditionalSynthetics();
 };
 } // namespace formatters
 } // namespace lldb_private

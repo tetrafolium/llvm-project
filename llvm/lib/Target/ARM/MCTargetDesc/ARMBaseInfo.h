@@ -23,39 +23,46 @@
 namespace llvm {
 
 namespace ARM_PROC {
-  enum IMod {
+enum IMod {
     IE = 2,
     ID = 3
-  };
+};
 
-  enum IFlags {
+enum IFlags {
     F = 1,
     I = 2,
     A = 4
-  };
+};
 
-  inline static const char *IFlagsToString(unsigned val) {
+inline static const char *IFlagsToString(unsigned val) {
     switch (val) {
-    default: llvm_unreachable("Unknown iflags operand");
-    case F: return "f";
-    case I: return "i";
-    case A: return "a";
+    default:
+        llvm_unreachable("Unknown iflags operand");
+    case F:
+        return "f";
+    case I:
+        return "i";
+    case A:
+        return "a";
     }
-  }
+}
 
-  inline static const char *IModToString(unsigned val) {
+inline static const char *IModToString(unsigned val) {
     switch (val) {
-    default: llvm_unreachable("Unknown imod operand");
-    case IE: return "ie";
-    case ID: return "id";
+    default:
+        llvm_unreachable("Unknown imod operand");
+    case IE:
+        return "ie";
+    case ID:
+        return "id";
     }
-  }
+}
 }
 
 namespace ARM_MB {
-  // The Memory Barrier Option constants map directly to the 4-bit encoding of
-  // the option field for memory barrier operations.
-  enum MemBOpt {
+// The Memory Barrier Option constants map directly to the 4-bit encoding of
+// the option field for memory barrier operations.
+enum MemBOpt {
     RESERVED_0 = 0,
     OSHLD = 1,
     OSHST = 2,
@@ -72,47 +79,65 @@ namespace ARM_MB {
     LD = 13,
     ST    = 14,
     SY    = 15
-  };
+};
 
-  inline static const char *MemBOptToString(unsigned val, bool HasV8) {
+inline static const char *MemBOptToString(unsigned val, bool HasV8) {
     switch (val) {
-    default: llvm_unreachable("Unknown memory operation");
-    case SY:    return "sy";
-    case ST:    return "st";
-    case LD: return HasV8 ? "ld" : "#0xd";
-    case RESERVED_12: return "#0xc";
-    case ISH:   return "ish";
-    case ISHST: return "ishst";
-    case ISHLD: return HasV8 ?  "ishld" : "#0x9";
-    case RESERVED_8: return "#0x8";
-    case NSH:   return "nsh";
-    case NSHST: return "nshst";
-    case NSHLD: return HasV8 ? "nshld" : "#0x5";
-    case RESERVED_4: return "#0x4";
-    case OSH:   return "osh";
-    case OSHST: return "oshst";
-    case OSHLD: return HasV8 ? "oshld" : "#0x1";
-    case RESERVED_0: return "#0x0";
+    default:
+        llvm_unreachable("Unknown memory operation");
+    case SY:
+        return "sy";
+    case ST:
+        return "st";
+    case LD:
+        return HasV8 ? "ld" : "#0xd";
+    case RESERVED_12:
+        return "#0xc";
+    case ISH:
+        return "ish";
+    case ISHST:
+        return "ishst";
+    case ISHLD:
+        return HasV8 ?  "ishld" : "#0x9";
+    case RESERVED_8:
+        return "#0x8";
+    case NSH:
+        return "nsh";
+    case NSHST:
+        return "nshst";
+    case NSHLD:
+        return HasV8 ? "nshld" : "#0x5";
+    case RESERVED_4:
+        return "#0x4";
+    case OSH:
+        return "osh";
+    case OSHST:
+        return "oshst";
+    case OSHLD:
+        return HasV8 ? "oshld" : "#0x1";
+    case RESERVED_0:
+        return "#0x0";
     }
-  }
+}
 } // namespace ARM_MB
 
 namespace ARM_TSB {
-  enum TraceSyncBOpt {
+enum TraceSyncBOpt {
     CSYNC = 0
-  };
+};
 
-  inline static const char *TraceSyncBOptToString(unsigned val) {
+inline static const char *TraceSyncBOptToString(unsigned val) {
     switch (val) {
     default:
-      llvm_unreachable("Unknown trace synchronization barrier operation");
-      case CSYNC: return "csync";
+        llvm_unreachable("Unknown trace synchronization barrier operation");
+    case CSYNC:
+        return "csync";
     }
-  }
+}
 } // namespace ARM_TSB
 
 namespace ARM_ISB {
-  enum InstSyncBOpt {
+enum InstSyncBOpt {
     RESERVED_0 = 0,
     RESERVED_1 = 1,
     RESERVED_2 = 2,
@@ -129,43 +154,65 @@ namespace ARM_ISB {
     RESERVED_13 = 13,
     RESERVED_14 = 14,
     SY = 15
-  };
+};
 
-  inline static const char *InstSyncBOptToString(unsigned val) {
+inline static const char *InstSyncBOptToString(unsigned val) {
     switch (val) {
     default:
-      llvm_unreachable("Unknown memory operation");
-      case RESERVED_0:  return "#0x0";
-      case RESERVED_1:  return "#0x1";
-      case RESERVED_2:  return "#0x2";
-      case RESERVED_3:  return "#0x3";
-      case RESERVED_4:  return "#0x4";
-      case RESERVED_5:  return "#0x5";
-      case RESERVED_6:  return "#0x6";
-      case RESERVED_7:  return "#0x7";
-      case RESERVED_8:  return "#0x8";
-      case RESERVED_9:  return "#0x9";
-      case RESERVED_10: return "#0xa";
-      case RESERVED_11: return "#0xb";
-      case RESERVED_12: return "#0xc";
-      case RESERVED_13: return "#0xd";
-      case RESERVED_14: return "#0xe";
-      case SY:          return "sy";
+        llvm_unreachable("Unknown memory operation");
+    case RESERVED_0:
+        return "#0x0";
+    case RESERVED_1:
+        return "#0x1";
+    case RESERVED_2:
+        return "#0x2";
+    case RESERVED_3:
+        return "#0x3";
+    case RESERVED_4:
+        return "#0x4";
+    case RESERVED_5:
+        return "#0x5";
+    case RESERVED_6:
+        return "#0x6";
+    case RESERVED_7:
+        return "#0x7";
+    case RESERVED_8:
+        return "#0x8";
+    case RESERVED_9:
+        return "#0x9";
+    case RESERVED_10:
+        return "#0xa";
+    case RESERVED_11:
+        return "#0xb";
+    case RESERVED_12:
+        return "#0xc";
+    case RESERVED_13:
+        return "#0xd";
+    case RESERVED_14:
+        return "#0xe";
+    case SY:
+        return "sy";
     }
-  }
+}
 } // namespace ARM_ISB
 
 /// isARMLowRegister - Returns true if the register is a low register (r0-r7).
 ///
 static inline bool isARMLowRegister(unsigned Reg) {
-  using namespace ARM;
-  switch (Reg) {
-  case R0:  case R1:  case R2:  case R3:
-  case R4:  case R5:  case R6:  case R7:
-    return true;
-  default:
-    return false;
-  }
+    using namespace ARM;
+    switch (Reg) {
+    case R0:
+    case R1:
+    case R2:
+    case R3:
+    case R4:
+    case R5:
+    case R6:
+    case R7:
+        return true;
+    default:
+        return false;
+    }
 }
 
 /// ARMII - This namespace holds all of the target specific flags that
@@ -173,16 +220,16 @@ static inline bool isARMLowRegister(unsigned Reg) {
 ///
 namespace ARMII {
 
-  /// ARM Index Modes
-  enum IndexMode {
+/// ARM Index Modes
+enum IndexMode {
     IndexModeNone  = 0,
     IndexModePre   = 1,
     IndexModePost  = 2,
     IndexModeUpd   = 3
-  };
+};
 
-  /// ARM Addressing Modes
-  enum AddrMode {
+/// ARM Addressing Modes
+enum AddrMode {
     AddrModeNone    = 0,
     AddrMode1       = 1,
     AddrMode2       = 2,
@@ -205,37 +252,59 @@ namespace ARMII {
     AddrModeT2_i7s4 = 19, // i7 * 4
     AddrModeT2_i7s2 = 20, // i7 * 2
     AddrModeT2_i7   = 21, // i7 * 1
-  };
+};
 
-  inline static const char *AddrModeToString(AddrMode addrmode) {
+inline static const char *AddrModeToString(AddrMode addrmode) {
     switch (addrmode) {
-    case AddrModeNone:    return "AddrModeNone";
-    case AddrMode1:       return "AddrMode1";
-    case AddrMode2:       return "AddrMode2";
-    case AddrMode3:       return "AddrMode3";
-    case AddrMode4:       return "AddrMode4";
-    case AddrMode5:       return "AddrMode5";
-    case AddrMode5FP16:   return "AddrMode5FP16";
-    case AddrMode6:       return "AddrMode6";
-    case AddrModeT1_1:    return "AddrModeT1_1";
-    case AddrModeT1_2:    return "AddrModeT1_2";
-    case AddrModeT1_4:    return "AddrModeT1_4";
-    case AddrModeT1_s:    return "AddrModeT1_s";
-    case AddrModeT2_i12:  return "AddrModeT2_i12";
-    case AddrModeT2_i8:   return "AddrModeT2_i8";
-    case AddrModeT2_so:   return "AddrModeT2_so";
-    case AddrModeT2_pc:   return "AddrModeT2_pc";
-    case AddrModeT2_i8s4: return "AddrModeT2_i8s4";
-    case AddrMode_i12:    return "AddrMode_i12";
-    case AddrModeT2_ldrex:return "AddrModeT2_ldrex";
-    case AddrModeT2_i7s4: return "AddrModeT2_i7s4";
-    case AddrModeT2_i7s2: return "AddrModeT2_i7s2";
-    case AddrModeT2_i7:   return "AddrModeT2_i7";
+    case AddrModeNone:
+        return "AddrModeNone";
+    case AddrMode1:
+        return "AddrMode1";
+    case AddrMode2:
+        return "AddrMode2";
+    case AddrMode3:
+        return "AddrMode3";
+    case AddrMode4:
+        return "AddrMode4";
+    case AddrMode5:
+        return "AddrMode5";
+    case AddrMode5FP16:
+        return "AddrMode5FP16";
+    case AddrMode6:
+        return "AddrMode6";
+    case AddrModeT1_1:
+        return "AddrModeT1_1";
+    case AddrModeT1_2:
+        return "AddrModeT1_2";
+    case AddrModeT1_4:
+        return "AddrModeT1_4";
+    case AddrModeT1_s:
+        return "AddrModeT1_s";
+    case AddrModeT2_i12:
+        return "AddrModeT2_i12";
+    case AddrModeT2_i8:
+        return "AddrModeT2_i8";
+    case AddrModeT2_so:
+        return "AddrModeT2_so";
+    case AddrModeT2_pc:
+        return "AddrModeT2_pc";
+    case AddrModeT2_i8s4:
+        return "AddrModeT2_i8s4";
+    case AddrMode_i12:
+        return "AddrMode_i12";
+    case AddrModeT2_ldrex:
+        return "AddrModeT2_ldrex";
+    case AddrModeT2_i7s4:
+        return "AddrModeT2_i7s4";
+    case AddrModeT2_i7s2:
+        return "AddrModeT2_i7s2";
+    case AddrModeT2_i7:
+        return "AddrModeT2_i7";
     }
-  }
+}
 
-  /// Target Operand Flag enum.
-  enum TOF {
+/// Target Operand Flag enum.
+enum TOF {
     //===------------------------------------------------------------------===//
     // ARM Specific MachineOperand flags.
 
@@ -288,9 +357,9 @@ namespace ARMII {
     // happen. Put a sentinel in (values of this enum are stored as "unsigned
     // char").
     MO_UNUSED_MAXIMUM = 0xff
-  };
+};
 
-  enum {
+enum {
     //===------------------------------------------------------------------===//
     // Instruction Flags.
 
@@ -446,7 +515,7 @@ namespace ARMII {
     P_BitShift     = 24,
     I_BitShift     = 25,
     CondShift      = 28
-  };
+};
 
 } // end namespace ARMII
 

@@ -36,28 +36,30 @@ irManglingOptionsFromTargetOptions(const TargetOptions &Opts);
 /// For multithreaded compilation, use ConcurrentIRCompiler below.
 class SimpleCompiler : public IRCompileLayer::IRCompiler {
 public:
-  using CompileResult = std::unique_ptr<MemoryBuffer>;
+    using CompileResult = std::unique_ptr<MemoryBuffer>;
 
-  /// Construct a simple compile functor with the given target.
-  SimpleCompiler(TargetMachine &TM, ObjectCache *ObjCache = nullptr)
-      : IRCompiler(irManglingOptionsFromTargetOptions(TM.Options)), TM(TM),
-        ObjCache(ObjCache) {}
+    /// Construct a simple compile functor with the given target.
+    SimpleCompiler(TargetMachine &TM, ObjectCache *ObjCache = nullptr)
+        : IRCompiler(irManglingOptionsFromTargetOptions(TM.Options)), TM(TM),
+          ObjCache(ObjCache) {}
 
-  /// Set an ObjectCache to query before compiling.
-  void setObjectCache(ObjectCache *NewCache) { ObjCache = NewCache; }
+    /// Set an ObjectCache to query before compiling.
+    void setObjectCache(ObjectCache *NewCache) {
+        ObjCache = NewCache;
+    }
 
-  /// Compile a Module to an ObjectFile.
-  Expected<CompileResult> operator()(Module &M) override;
+    /// Compile a Module to an ObjectFile.
+    Expected<CompileResult> operator()(Module &M) override;
 
 private:
-  IRSymbolMapper::ManglingOptions
-  manglingOptionsForTargetMachine(const TargetMachine &TM);
+    IRSymbolMapper::ManglingOptions
+    manglingOptionsForTargetMachine(const TargetMachine &TM);
 
-  CompileResult tryToLoadFromObjectCache(const Module &M);
-  void notifyObjectCompiled(const Module &M, const MemoryBuffer &ObjBuffer);
+    CompileResult tryToLoadFromObjectCache(const Module &M);
+    void notifyObjectCompiled(const Module &M, const MemoryBuffer &ObjBuffer);
 
-  TargetMachine &TM;
-  ObjectCache *ObjCache = nullptr;
+    TargetMachine &TM;
+    ObjectCache *ObjCache = nullptr;
 };
 
 /// A SimpleCompiler that owns its TargetMachine.
@@ -66,14 +68,14 @@ private:
 /// e.g. LLJIT.
 class TMOwningSimpleCompiler : public SimpleCompiler {
 public:
-  TMOwningSimpleCompiler(std::unique_ptr<TargetMachine> TM,
-                         ObjectCache *ObjCache = nullptr)
-      : SimpleCompiler(*TM, ObjCache), TM(std::move(TM)) {}
+    TMOwningSimpleCompiler(std::unique_ptr<TargetMachine> TM,
+                           ObjectCache *ObjCache = nullptr)
+        : SimpleCompiler(*TM, ObjCache), TM(std::move(TM)) {}
 
 private:
-  // FIXME: shared because std::functions (and consequently
-  // IRCompileLayer::CompileFunction) are not moveable.
-  std::shared_ptr<llvm::TargetMachine> TM;
+    // FIXME: shared because std::functions (and consequently
+    // IRCompileLayer::CompileFunction) are not moveable.
+    std::shared_ptr<llvm::TargetMachine> TM;
 };
 
 /// A thread-safe version of SimpleCompiler.
@@ -82,16 +84,18 @@ private:
 /// compile.
 class ConcurrentIRCompiler : public IRCompileLayer::IRCompiler {
 public:
-  ConcurrentIRCompiler(JITTargetMachineBuilder JTMB,
-                       ObjectCache *ObjCache = nullptr);
+    ConcurrentIRCompiler(JITTargetMachineBuilder JTMB,
+                         ObjectCache *ObjCache = nullptr);
 
-  void setObjectCache(ObjectCache *ObjCache) { this->ObjCache = ObjCache; }
+    void setObjectCache(ObjectCache *ObjCache) {
+        this->ObjCache = ObjCache;
+    }
 
-  Expected<std::unique_ptr<MemoryBuffer>> operator()(Module &M) override;
+    Expected<std::unique_ptr<MemoryBuffer>> operator()(Module &M) override;
 
 private:
-  JITTargetMachineBuilder JTMB;
-  ObjectCache *ObjCache = nullptr;
+    JITTargetMachineBuilder JTMB;
+    ObjectCache *ObjCache = nullptr;
 };
 
 } // end namespace orc

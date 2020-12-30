@@ -27,10 +27,12 @@ namespace llvm_check {
 ///     empty string between ";" if there are other filename extensions.
 class LLVMHeaderGuardCheck : public utils::HeaderGuardCheck {
 public:
-  LLVMHeaderGuardCheck(StringRef Name, ClangTidyContext *Context);
+    LLVMHeaderGuardCheck(StringRef Name, ClangTidyContext *Context);
 
-  bool shouldSuggestEndifComment(StringRef Filename) override { return false; }
-  std::string getHeaderGuard(StringRef Filename, StringRef OldGuard) override;
+    bool shouldSuggestEndifComment(StringRef Filename) override {
+        return false;
+    }
+    std::string getHeaderGuard(StringRef Filename, StringRef OldGuard) override;
 };
 
 } // namespace llvm_check

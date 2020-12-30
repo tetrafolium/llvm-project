@@ -35,7 +35,7 @@
 static __inline__ int _DEFAULT_FN_ATTRS
 _enqcmd (void *__dst, const void *__src)
 {
-  return __builtin_ia32_enqcmd(__dst, __src);
+    return __builtin_ia32_enqcmd(__dst, __src);
 }
 
 /// Reads 64-byte command pointed by \a __src, formats 64-byte enqueue store
@@ -55,7 +55,7 @@ _enqcmd (void *__dst, const void *__src)
 static __inline__ int _DEFAULT_FN_ATTRS
 _enqcmds (void *__dst, const void *__src)
 {
-  return __builtin_ia32_enqcmds(__dst, __src);
+    return __builtin_ia32_enqcmds(__dst, __src);
 }
 
 #undef _DEFAULT_FN_ATTRS

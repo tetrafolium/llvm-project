@@ -54,12 +54,12 @@ namespace {
 /// Lower enqueued blocks.
 class AMDGPUOpenCLEnqueuedBlockLowering : public ModulePass {
 public:
-  static char ID;
+    static char ID;
 
-  explicit AMDGPUOpenCLEnqueuedBlockLowering() : ModulePass(ID) {}
+    explicit AMDGPUOpenCLEnqueuedBlockLowering() : ModulePass(ID) {}
 
 private:
-  bool runOnModule(Module &M) override;
+    bool runOnModule(Module &M) override;
 };
 
 } // end anonymous namespace
@@ -73,80 +73,80 @@ INITIALIZE_PASS(AMDGPUOpenCLEnqueuedBlockLowering, DEBUG_TYPE,
                 "Lower OpenCL enqueued blocks", false, false)
 
 ModulePass* llvm::createAMDGPUOpenCLEnqueuedBlockLoweringPass() {
-  return new AMDGPUOpenCLEnqueuedBlockLowering();
+    return new AMDGPUOpenCLEnqueuedBlockLowering();
 }
 
 /// Collect direct or indrect callers of \p F and save them
 /// to \p Callers.
 static void collectCallers(Function *F, DenseSet<Function *> &Callers) {
-  for (auto U : F->users()) {
-    if (auto *CI = dyn_cast<CallInst>(&*U)) {
-      auto *Caller = CI->getParent()->getParent();
-      if (Callers.insert(Caller).second)
-        collectCallers(Caller, Callers);
+    for (auto U : F->users()) {
+        if (auto *CI = dyn_cast<CallInst>(&*U)) {
+            auto *Caller = CI->getParent()->getParent();
+            if (Callers.insert(Caller).second)
+                collectCallers(Caller, Callers);
+        }
     }
-  }
 }
 
 /// If \p U is instruction or constant, collect functions which directly or
 /// indirectly use it.
 static void collectFunctionUsers(User *U, DenseSet<Function *> &Funcs) {
-  if (auto *I = dyn_cast<Instruction>(U)) {
-    auto *F = I->getParent()->getParent();
-    if (Funcs.insert(F).second)
-      collectCallers(F, Funcs);
-    return;
-  }
-  if (!isa<Constant>(U))
-    return;
-  for (auto UU : U->users())
-    collectFunctionUsers(&*UU, Funcs);
+    if (auto *I = dyn_cast<Instruction>(U)) {
+        auto *F = I->getParent()->getParent();
+        if (Funcs.insert(F).second)
+            collectCallers(F, Funcs);
+        return;
+    }
+    if (!isa<Constant>(U))
+        return;
+    for (auto UU : U->users())
+        collectFunctionUsers(&*UU, Funcs);
 }
 
 bool AMDGPUOpenCLEnqueuedBlockLowering::runOnModule(Module &M) {
-  DenseSet<Function *> Callers;
-  auto &C = M.getContext();
-  bool Changed = false;
-  for (auto &F : M.functions()) {
-    if (F.hasFnAttribute("enqueued-block")) {
-      if (!F.hasName()) {
-        SmallString<64> Name;
-        Mangler::getNameWithPrefix(Name, "__amdgpu_enqueued_kernel",
-                                   M.getDataLayout());
-        F.setName(Name);
-      }
-      LLVM_DEBUG(dbgs() << "found enqueued kernel: " << F.getName() << '\n');
-      auto RuntimeHandle = (F.getName() + ".runtime_handle").str();
-      auto T = ArrayType::get(Type::getInt64Ty(C), 2);
-      auto *GV = new GlobalVariable(
-          M, T,
-          /*isConstant=*/false, GlobalValue::ExternalLinkage,
-          /*Initializer=*/Constant::getNullValue(T), RuntimeHandle,
-          /*InsertBefore=*/nullptr, GlobalValue::NotThreadLocal,
-          AMDGPUAS::GLOBAL_ADDRESS,
-          /*isExternallyInitialized=*/false);
-      LLVM_DEBUG(dbgs() << "runtime handle created: " << *GV << '\n');
+    DenseSet<Function *> Callers;
+    auto &C = M.getContext();
+    bool Changed = false;
+    for (auto &F : M.functions()) {
+        if (F.hasFnAttribute("enqueued-block")) {
+            if (!F.hasName()) {
+                SmallString<64> Name;
+                Mangler::getNameWithPrefix(Name, "__amdgpu_enqueued_kernel",
+                                           M.getDataLayout());
+                F.setName(Name);
+            }
+            LLVM_DEBUG(dbgs() << "found enqueued kernel: " << F.getName() << '\n');
+            auto RuntimeHandle = (F.getName() + ".runtime_handle").str();
+            auto T = ArrayType::get(Type::getInt64Ty(C), 2);
+            auto *GV = new GlobalVariable(
+                M, T,
+                /*isConstant=*/false, GlobalValue::ExternalLinkage,
+                /*Initializer=*/Constant::getNullValue(T), RuntimeHandle,
+                /*InsertBefore=*/nullptr, GlobalValue::NotThreadLocal,
+                AMDGPUAS::GLOBAL_ADDRESS,
+                /*isExternallyInitialized=*/false);
+            LLVM_DEBUG(dbgs() << "runtime handle created: " << *GV << '\n');
 
-      for (auto U : F.users()) {
-        auto *UU = &*U;
-        if (!isa<ConstantExpr>(UU))
-          continue;
-        collectFunctionUsers(UU, Callers);
-        auto *BitCast = cast<ConstantExpr>(UU);
-        auto *NewPtr = ConstantExpr::getPointerCast(GV, BitCast->getType());
-        BitCast->replaceAllUsesWith(NewPtr);
-        F.addFnAttr("runtime-handle", RuntimeHandle);
-        F.setLinkage(GlobalValue::ExternalLinkage);
-        Changed = true;
-      }
+            for (auto U : F.users()) {
+                auto *UU = &*U;
+                if (!isa<ConstantExpr>(UU))
+                    continue;
+                collectFunctionUsers(UU, Callers);
+                auto *BitCast = cast<ConstantExpr>(UU);
+                auto *NewPtr = ConstantExpr::getPointerCast(GV, BitCast->getType());
+                BitCast->replaceAllUsesWith(NewPtr);
+                F.addFnAttr("runtime-handle", RuntimeHandle);
+                F.setLinkage(GlobalValue::ExternalLinkage);
+                Changed = true;
+            }
+        }
     }
-  }
 
-  for (auto F : Callers) {
-    if (F->getCallingConv() != CallingConv::AMDGPU_KERNEL)
-      continue;
-    F->addFnAttr("calls-enqueue-kernel");
-    LLVM_DEBUG(dbgs() << "mark enqueue_kernel caller:" << F->getName() << '\n');
-  }
-  return Changed;
+    for (auto F : Callers) {
+        if (F->getCallingConv() != CallingConv::AMDGPU_KERNEL)
+            continue;
+        F->addFnAttr("calls-enqueue-kernel");
+        LLVM_DEBUG(dbgs() << "mark enqueue_kernel caller:" << F->getName() << '\n');
+    }
+    return Changed;
 }

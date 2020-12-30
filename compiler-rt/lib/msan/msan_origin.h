@@ -52,115 +52,119 @@ namespace __msan {
 // of the origin chain.
 
 class Origin {
- public:
-  static bool isValidId(u32 id) { return id != 0 && id != (u32)-1; }
-
-  u32 raw_id() const { return raw_id_; }
-  bool isHeapOrigin() const {
-    // 0xxx xxxx xxxx xxxx
-    return raw_id_ >> kHeapShift == 0;
-  }
-  bool isStackOrigin() const {
-    // 1000 xxxx xxxx xxxx
-    return (raw_id_ >> kDepthShift) == (1 << kDepthBits);
-  }
-  bool isChainedOrigin() const {
-    // 1zzz xxxx xxxx xxxx, zzz != 000
-    return (raw_id_ >> kDepthShift) > (1 << kDepthBits);
-  }
-  u32 getChainedId() const {
-    CHECK(isChainedOrigin());
-    return raw_id_ & kChainedIdMask;
-  }
-  u32 getStackId() const {
-    CHECK(isStackOrigin());
-    return raw_id_ & kChainedIdMask;
-  }
-  u32 getHeapId() const {
-    CHECK(isHeapOrigin());
-    return raw_id_ & kHeapIdMask;
-  }
-
-  // Returns the next origin in the chain and the current stack trace.
-  Origin getNextChainedOrigin(StackTrace *stack) const {
-    CHECK(isChainedOrigin());
-    u32 prev_id;
-    u32 stack_id = ChainedOriginDepotGet(getChainedId(), &prev_id);
-    if (stack) *stack = StackDepotGet(stack_id);
-    return Origin(prev_id);
-  }
-
-  StackTrace getStackTraceForHeapOrigin() const {
-    return StackDepotGet(getHeapId());
-  }
-
-  static Origin CreateStackOrigin(u32 id) {
-    CHECK((id & kStackIdMask) == id);
-    return Origin((1 << kHeapShift) | id);
-  }
-
-  static Origin CreateHeapOrigin(StackTrace *stack) {
-    u32 stack_id = StackDepotPut(*stack);
-    CHECK(stack_id);
-    CHECK((stack_id & kHeapIdMask) == stack_id);
-    return Origin(stack_id);
-  }
-
-  static Origin CreateChainedOrigin(Origin prev, StackTrace *stack) {
-    int depth = prev.isChainedOrigin() ? prev.depth() : 0;
-    // depth is the length of the chain minus 1.
-    // origin_history_size of 0 means unlimited depth.
-    if (flags()->origin_history_size > 0) {
-      if (depth + 1 >= flags()->origin_history_size) {
-        return prev;
-      } else {
-        ++depth;
-        CHECK(depth < (1 << kDepthBits));
-      }
+public:
+    static bool isValidId(u32 id) {
+        return id != 0 && id != (u32)-1;
     }
 
-    StackDepotHandle h = StackDepotPut_WithHandle(*stack);
-    if (!h.valid()) return prev;
-
-    if (flags()->origin_history_per_stack_limit > 0) {
-      int use_count = h.use_count();
-      if (use_count > flags()->origin_history_per_stack_limit) return prev;
+    u32 raw_id() const {
+        return raw_id_;
+    }
+    bool isHeapOrigin() const {
+        // 0xxx xxxx xxxx xxxx
+        return raw_id_ >> kHeapShift == 0;
+    }
+    bool isStackOrigin() const {
+        // 1000 xxxx xxxx xxxx
+        return (raw_id_ >> kDepthShift) == (1 << kDepthBits);
+    }
+    bool isChainedOrigin() const {
+        // 1zzz xxxx xxxx xxxx, zzz != 000
+        return (raw_id_ >> kDepthShift) > (1 << kDepthBits);
+    }
+    u32 getChainedId() const {
+        CHECK(isChainedOrigin());
+        return raw_id_ & kChainedIdMask;
+    }
+    u32 getStackId() const {
+        CHECK(isStackOrigin());
+        return raw_id_ & kChainedIdMask;
+    }
+    u32 getHeapId() const {
+        CHECK(isHeapOrigin());
+        return raw_id_ & kHeapIdMask;
     }
 
-    u32 chained_id;
-    bool inserted = ChainedOriginDepotPut(h.id(), prev.raw_id(), &chained_id);
-    CHECK((chained_id & kChainedIdMask) == chained_id);
+    // Returns the next origin in the chain and the current stack trace.
+    Origin getNextChainedOrigin(StackTrace *stack) const {
+        CHECK(isChainedOrigin());
+        u32 prev_id;
+        u32 stack_id = ChainedOriginDepotGet(getChainedId(), &prev_id);
+        if (stack) *stack = StackDepotGet(stack_id);
+        return Origin(prev_id);
+    }
 
-    if (inserted && flags()->origin_history_per_stack_limit > 0)
-      h.inc_use_count_unsafe();
+    StackTrace getStackTraceForHeapOrigin() const {
+        return StackDepotGet(getHeapId());
+    }
 
-    return Origin((1 << kHeapShift) | (depth << kDepthShift) | chained_id);
-  }
+    static Origin CreateStackOrigin(u32 id) {
+        CHECK((id & kStackIdMask) == id);
+        return Origin((1 << kHeapShift) | id);
+    }
 
-  static Origin FromRawId(u32 id) {
-    return Origin(id);
-  }
+    static Origin CreateHeapOrigin(StackTrace *stack) {
+        u32 stack_id = StackDepotPut(*stack);
+        CHECK(stack_id);
+        CHECK((stack_id & kHeapIdMask) == stack_id);
+        return Origin(stack_id);
+    }
 
- private:
-  static const int kDepthBits = 3;
-  static const int kDepthShift = 32 - kDepthBits - 1;
+    static Origin CreateChainedOrigin(Origin prev, StackTrace *stack) {
+        int depth = prev.isChainedOrigin() ? prev.depth() : 0;
+        // depth is the length of the chain minus 1.
+        // origin_history_size of 0 means unlimited depth.
+        if (flags()->origin_history_size > 0) {
+            if (depth + 1 >= flags()->origin_history_size) {
+                return prev;
+            } else {
+                ++depth;
+                CHECK(depth < (1 << kDepthBits));
+            }
+        }
 
-  static const int kHeapShift = 31;
-  static const u32 kChainedIdMask = ((u32)-1) >> (32 - kDepthShift);
-  static const u32 kStackIdMask = ((u32)-1) >> (32 - kDepthShift);
-  static const u32 kHeapIdMask = ((u32)-1) >> (32 - kHeapShift);
+        StackDepotHandle h = StackDepotPut_WithHandle(*stack);
+        if (!h.valid()) return prev;
 
-  u32 raw_id_;
+        if (flags()->origin_history_per_stack_limit > 0) {
+            int use_count = h.use_count();
+            if (use_count > flags()->origin_history_per_stack_limit) return prev;
+        }
 
-  explicit Origin(u32 raw_id) : raw_id_(raw_id) {}
+        u32 chained_id;
+        bool inserted = ChainedOriginDepotPut(h.id(), prev.raw_id(), &chained_id);
+        CHECK((chained_id & kChainedIdMask) == chained_id);
 
-  int depth() const {
-    CHECK(isChainedOrigin());
-    return (raw_id_ >> kDepthShift) & ((1 << kDepthBits) - 1);
-  }
+        if (inserted && flags()->origin_history_per_stack_limit > 0)
+            h.inc_use_count_unsafe();
 
- public:
-  static const int kMaxDepth = (1 << kDepthBits) - 1;
+        return Origin((1 << kHeapShift) | (depth << kDepthShift) | chained_id);
+    }
+
+    static Origin FromRawId(u32 id) {
+        return Origin(id);
+    }
+
+private:
+    static const int kDepthBits = 3;
+    static const int kDepthShift = 32 - kDepthBits - 1;
+
+    static const int kHeapShift = 31;
+    static const u32 kChainedIdMask = ((u32)-1) >> (32 - kDepthShift);
+    static const u32 kStackIdMask = ((u32)-1) >> (32 - kDepthShift);
+    static const u32 kHeapIdMask = ((u32)-1) >> (32 - kHeapShift);
+
+    u32 raw_id_;
+
+    explicit Origin(u32 raw_id) : raw_id_(raw_id) {}
+
+    int depth() const {
+        CHECK(isChainedOrigin());
+        return (raw_id_ >> kDepthShift) & ((1 << kDepthBits) - 1);
+    }
+
+public:
+    static const int kMaxDepth = (1 << kDepthBits) - 1;
 };
 
 }  // namespace __msan

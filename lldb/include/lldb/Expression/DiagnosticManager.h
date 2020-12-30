@@ -21,130 +21,144 @@
 namespace lldb_private {
 
 enum DiagnosticOrigin {
-  eDiagnosticOriginUnknown = 0,
-  eDiagnosticOriginLLDB,
-  eDiagnosticOriginClang,
-  eDiagnosticOriginSwift,
-  eDiagnosticOriginLLVM
+    eDiagnosticOriginUnknown = 0,
+    eDiagnosticOriginLLDB,
+    eDiagnosticOriginClang,
+    eDiagnosticOriginSwift,
+    eDiagnosticOriginLLVM
 };
 
 enum DiagnosticSeverity {
-  eDiagnosticSeverityError,
-  eDiagnosticSeverityWarning,
-  eDiagnosticSeverityRemark
+    eDiagnosticSeverityError,
+    eDiagnosticSeverityWarning,
+    eDiagnosticSeverityRemark
 };
 
 const uint32_t LLDB_INVALID_COMPILER_ID = UINT32_MAX;
 
 class Diagnostic {
-  friend class DiagnosticManager;
+    friend class DiagnosticManager;
 
 public:
-  DiagnosticOrigin getKind() const { return m_origin; }
-
-  static bool classof(const Diagnostic *diag) {
-    DiagnosticOrigin kind = diag->getKind();
-    switch (kind) {
-    case eDiagnosticOriginUnknown:
-    case eDiagnosticOriginLLDB:
-    case eDiagnosticOriginLLVM:
-      return true;
-    case eDiagnosticOriginClang:
-    case eDiagnosticOriginSwift:
-      return false;
+    DiagnosticOrigin getKind() const {
+        return m_origin;
     }
-  }
 
-  Diagnostic(llvm::StringRef message, DiagnosticSeverity severity,
-             DiagnosticOrigin origin, uint32_t compiler_id)
-      : m_message(message), m_severity(severity), m_origin(origin),
-        m_compiler_id(compiler_id) {}
+    static bool classof(const Diagnostic *diag) {
+        DiagnosticOrigin kind = diag->getKind();
+        switch (kind) {
+        case eDiagnosticOriginUnknown:
+        case eDiagnosticOriginLLDB:
+        case eDiagnosticOriginLLVM:
+            return true;
+        case eDiagnosticOriginClang:
+        case eDiagnosticOriginSwift:
+            return false;
+        }
+    }
 
-  Diagnostic(const Diagnostic &rhs)
-      : m_message(rhs.m_message), m_severity(rhs.m_severity),
-        m_origin(rhs.m_origin), m_compiler_id(rhs.m_compiler_id) {}
+    Diagnostic(llvm::StringRef message, DiagnosticSeverity severity,
+               DiagnosticOrigin origin, uint32_t compiler_id)
+        : m_message(message), m_severity(severity), m_origin(origin),
+          m_compiler_id(compiler_id) {}
 
-  virtual ~Diagnostic() = default;
+    Diagnostic(const Diagnostic &rhs)
+        : m_message(rhs.m_message), m_severity(rhs.m_severity),
+          m_origin(rhs.m_origin), m_compiler_id(rhs.m_compiler_id) {}
 
-  virtual bool HasFixIts() const { return false; }
+    virtual ~Diagnostic() = default;
 
-  DiagnosticSeverity GetSeverity() const { return m_severity; }
+    virtual bool HasFixIts() const {
+        return false;
+    }
 
-  uint32_t GetCompilerID() const { return m_compiler_id; }
+    DiagnosticSeverity GetSeverity() const {
+        return m_severity;
+    }
 
-  llvm::StringRef GetMessage() const { return m_message; }
+    uint32_t GetCompilerID() const {
+        return m_compiler_id;
+    }
 
-  void AppendMessage(llvm::StringRef message,
-                     bool precede_with_newline = true) {
-    if (precede_with_newline)
-      m_message.push_back('\n');
-    m_message += message;
-  }
+    llvm::StringRef GetMessage() const {
+        return m_message;
+    }
+
+    void AppendMessage(llvm::StringRef message,
+                       bool precede_with_newline = true) {
+        if (precede_with_newline)
+            m_message.push_back('\n');
+        m_message += message;
+    }
 
 protected:
-  std::string m_message;
-  DiagnosticSeverity m_severity;
-  DiagnosticOrigin m_origin;
-  uint32_t m_compiler_id; // Compiler-specific diagnostic ID
+    std::string m_message;
+    DiagnosticSeverity m_severity;
+    DiagnosticOrigin m_origin;
+    uint32_t m_compiler_id; // Compiler-specific diagnostic ID
 };
 
 typedef std::vector<std::unique_ptr<Diagnostic>> DiagnosticList;
 
 class DiagnosticManager {
 public:
-  void Clear() {
-    m_diagnostics.clear();
-    m_fixed_expression.clear();
-  }
+    void Clear() {
+        m_diagnostics.clear();
+        m_fixed_expression.clear();
+    }
 
-  const DiagnosticList &Diagnostics() { return m_diagnostics; }
+    const DiagnosticList &Diagnostics() {
+        return m_diagnostics;
+    }
 
-  bool HasFixIts() const {
-    return llvm::any_of(m_diagnostics,
-                        [](const std::unique_ptr<Diagnostic> &diag) {
-                          return diag->HasFixIts();
-                        });
-  }
+    bool HasFixIts() const {
+        return llvm::any_of(m_diagnostics,
+        [](const std::unique_ptr<Diagnostic> &diag) {
+            return diag->HasFixIts();
+        });
+    }
 
-  void AddDiagnostic(llvm::StringRef message, DiagnosticSeverity severity,
-                     DiagnosticOrigin origin,
-                     uint32_t compiler_id = LLDB_INVALID_COMPILER_ID) {
-    m_diagnostics.emplace_back(
-        std::make_unique<Diagnostic>(message, severity, origin, compiler_id));
-  }
+    void AddDiagnostic(llvm::StringRef message, DiagnosticSeverity severity,
+                       DiagnosticOrigin origin,
+                       uint32_t compiler_id = LLDB_INVALID_COMPILER_ID) {
+        m_diagnostics.emplace_back(
+            std::make_unique<Diagnostic>(message, severity, origin, compiler_id));
+    }
 
-  void AddDiagnostic(std::unique_ptr<Diagnostic> diagnostic) {
-    m_diagnostics.push_back(std::move(diagnostic));
-  }
+    void AddDiagnostic(std::unique_ptr<Diagnostic> diagnostic) {
+        m_diagnostics.push_back(std::move(diagnostic));
+    }
 
-  size_t Printf(DiagnosticSeverity severity, const char *format, ...)
-      __attribute__((format(printf, 3, 4)));
-  void PutString(DiagnosticSeverity severity, llvm::StringRef str);
+    size_t Printf(DiagnosticSeverity severity, const char *format, ...)
+    __attribute__((format(printf, 3, 4)));
+    void PutString(DiagnosticSeverity severity, llvm::StringRef str);
 
-  void AppendMessageToDiagnostic(llvm::StringRef str) {
-    if (!m_diagnostics.empty())
-      m_diagnostics.back()->AppendMessage(str);
-  }
+    void AppendMessageToDiagnostic(llvm::StringRef str) {
+        if (!m_diagnostics.empty())
+            m_diagnostics.back()->AppendMessage(str);
+    }
 
-  // Returns a string containing errors in this format:
-  //
-  // "error: error text\n
-  // warning: warning text\n
-  // remark text\n"
-  std::string GetString(char separator = '\n');
+    // Returns a string containing errors in this format:
+    //
+    // "error: error text\n
+    // warning: warning text\n
+    // remark text\n"
+    std::string GetString(char separator = '\n');
 
-  void Dump(Log *log);
+    void Dump(Log *log);
 
-  const std::string &GetFixedExpression() { return m_fixed_expression; }
+    const std::string &GetFixedExpression() {
+        return m_fixed_expression;
+    }
 
-  // Moves fixed_expression to the internal storage.
-  void SetFixedExpression(std::string fixed_expression) {
-    m_fixed_expression = std::move(fixed_expression);
-  }
+    // Moves fixed_expression to the internal storage.
+    void SetFixedExpression(std::string fixed_expression) {
+        m_fixed_expression = std::move(fixed_expression);
+    }
 
 protected:
-  DiagnosticList m_diagnostics;
-  std::string m_fixed_expression;
+    DiagnosticList m_diagnostics;
+    std::string m_fixed_expression;
 };
 }
 

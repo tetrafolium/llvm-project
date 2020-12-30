@@ -23,122 +23,176 @@ namespace interp {
 
 /// Wrapper around boolean types.
 class Boolean {
- private:
-  /// Underlying boolean.
-  bool V;
+private:
+    /// Underlying boolean.
+    bool V;
 
-  /// Construct a wrapper from a boolean.
-  explicit Boolean(bool V) : V(V) {}
+    /// Construct a wrapper from a boolean.
+    explicit Boolean(bool V) : V(V) {}
 
- public:
-  /// Zero-initializes a boolean.
-  Boolean() : V(false) {}
+public:
+    /// Zero-initializes a boolean.
+    Boolean() : V(false) {}
 
-  bool operator<(Boolean RHS) const { return V < RHS.V; }
-  bool operator>(Boolean RHS) const { return V > RHS.V; }
-  bool operator<=(Boolean RHS) const { return V <= RHS.V; }
-  bool operator>=(Boolean RHS) const { return V >= RHS.V; }
-  bool operator==(Boolean RHS) const { return V == RHS.V; }
-  bool operator!=(Boolean RHS) const { return V != RHS.V; }
+    bool operator<(Boolean RHS) const {
+        return V < RHS.V;
+    }
+    bool operator>(Boolean RHS) const {
+        return V > RHS.V;
+    }
+    bool operator<=(Boolean RHS) const {
+        return V <= RHS.V;
+    }
+    bool operator>=(Boolean RHS) const {
+        return V >= RHS.V;
+    }
+    bool operator==(Boolean RHS) const {
+        return V == RHS.V;
+    }
+    bool operator!=(Boolean RHS) const {
+        return V != RHS.V;
+    }
 
-  bool operator>(unsigned RHS) const { return static_cast<unsigned>(V) > RHS; }
+    bool operator>(unsigned RHS) const {
+        return static_cast<unsigned>(V) > RHS;
+    }
 
-  Boolean operator-() const { return Boolean(V); }
-  Boolean operator~() const { return Boolean(true); }
+    Boolean operator-() const {
+        return Boolean(V);
+    }
+    Boolean operator~() const {
+        return Boolean(true);
+    }
 
-  explicit operator unsigned() const { return V; }
-  explicit operator int64_t() const { return V; }
-  explicit operator uint64_t() const { return V; }
+    explicit operator unsigned() const {
+        return V;
+    }
+    explicit operator int64_t() const {
+        return V;
+    }
+    explicit operator uint64_t() const {
+        return V;
+    }
 
-  APSInt toAPSInt() const {
-    return APSInt(APInt(1, static_cast<uint64_t>(V), false), true);
-  }
-  APSInt toAPSInt(unsigned NumBits) const {
-    return APSInt(toAPSInt().zextOrTrunc(NumBits), true);
-  }
-  APValue toAPValue() const { return APValue(toAPSInt()); }
+    APSInt toAPSInt() const {
+        return APSInt(APInt(1, static_cast<uint64_t>(V), false), true);
+    }
+    APSInt toAPSInt(unsigned NumBits) const {
+        return APSInt(toAPSInt().zextOrTrunc(NumBits), true);
+    }
+    APValue toAPValue() const {
+        return APValue(toAPSInt());
+    }
 
-  Boolean toUnsigned() const { return *this; }
+    Boolean toUnsigned() const {
+        return *this;
+    }
 
-  constexpr static unsigned bitWidth() { return true; }
-  bool isZero() const { return !V; }
-  bool isMin() const { return isZero(); }
+    constexpr static unsigned bitWidth() {
+        return true;
+    }
+    bool isZero() const {
+        return !V;
+    }
+    bool isMin() const {
+        return isZero();
+    }
 
-  constexpr static bool isMinusOne() { return false; }
+    constexpr static bool isMinusOne() {
+        return false;
+    }
 
-  constexpr static bool isSigned() { return false; }
+    constexpr static bool isSigned() {
+        return false;
+    }
 
-  constexpr static bool isNegative() { return false; }
-  constexpr static bool isPositive() { return !isNegative(); }
+    constexpr static bool isNegative() {
+        return false;
+    }
+    constexpr static bool isPositive() {
+        return !isNegative();
+    }
 
-  ComparisonCategoryResult compare(const Boolean &RHS) const {
-    return Compare(V, RHS.V);
-  }
+    ComparisonCategoryResult compare(const Boolean &RHS) const {
+        return Compare(V, RHS.V);
+    }
 
-  unsigned countLeadingZeros() const { return V ? 0 : 1; }
+    unsigned countLeadingZeros() const {
+        return V ? 0 : 1;
+    }
 
-  Boolean truncate(unsigned TruncBits) const { return *this; }
+    Boolean truncate(unsigned TruncBits) const {
+        return *this;
+    }
 
-  void print(llvm::raw_ostream &OS) const { OS << (V ? "true" : "false"); }
+    void print(llvm::raw_ostream &OS) const {
+        OS << (V ? "true" : "false");
+    }
 
-  static Boolean min(unsigned NumBits) { return Boolean(false); }
-  static Boolean max(unsigned NumBits) { return Boolean(true); }
+    static Boolean min(unsigned NumBits) {
+        return Boolean(false);
+    }
+    static Boolean max(unsigned NumBits) {
+        return Boolean(true);
+    }
 
-  template <typename T>
-  static std::enable_if_t<std::is_integral<T>::value, Boolean> from(T Value) {
-    return Boolean(Value != 0);
-  }
+    template <typename T>
+    static std::enable_if_t<std::is_integral<T>::value, Boolean> from(T Value) {
+        return Boolean(Value != 0);
+    }
 
-  template <unsigned SrcBits, bool SrcSign>
-  static std::enable_if_t<SrcBits != 0, Boolean>
-  from(Integral<SrcBits, SrcSign> Value) {
-    return Boolean(!Value.isZero());
-  }
+    template <unsigned SrcBits, bool SrcSign>
+    static std::enable_if_t<SrcBits != 0, Boolean>
+    from(Integral<SrcBits, SrcSign> Value) {
+        return Boolean(!Value.isZero());
+    }
 
-  template <bool SrcSign>
-  static Boolean from(Integral<0, SrcSign> Value) {
-    return Boolean(!Value.isZero());
-  }
+    template <bool SrcSign>
+    static Boolean from(Integral<0, SrcSign> Value) {
+        return Boolean(!Value.isZero());
+    }
 
-  static Boolean zero() { return from(false); }
+    static Boolean zero() {
+        return from(false);
+    }
 
-  template <typename T>
-  static Boolean from(T Value, unsigned NumBits) {
-    return Boolean(Value);
-  }
+    template <typename T>
+    static Boolean from(T Value, unsigned NumBits) {
+        return Boolean(Value);
+    }
 
-  static bool inRange(int64_t Value, unsigned NumBits) {
-    return Value == 0 || Value == 1;
-  }
+    static bool inRange(int64_t Value, unsigned NumBits) {
+        return Value == 0 || Value == 1;
+    }
 
-  static bool increment(Boolean A, Boolean *R) {
-    *R = Boolean(true);
-    return false;
-  }
+    static bool increment(Boolean A, Boolean *R) {
+        *R = Boolean(true);
+        return false;
+    }
 
-  static bool decrement(Boolean A, Boolean *R) {
-    llvm_unreachable("Cannot decrement booleans");
-  }
+    static bool decrement(Boolean A, Boolean *R) {
+        llvm_unreachable("Cannot decrement booleans");
+    }
 
-  static bool add(Boolean A, Boolean B, unsigned OpBits, Boolean *R) {
-    *R = Boolean(A.V || B.V);
-    return false;
-  }
+    static bool add(Boolean A, Boolean B, unsigned OpBits, Boolean *R) {
+        *R = Boolean(A.V || B.V);
+        return false;
+    }
 
-  static bool sub(Boolean A, Boolean B, unsigned OpBits, Boolean *R) {
-    *R = Boolean(A.V ^ B.V);
-    return false;
-  }
+    static bool sub(Boolean A, Boolean B, unsigned OpBits, Boolean *R) {
+        *R = Boolean(A.V ^ B.V);
+        return false;
+    }
 
-  static bool mul(Boolean A, Boolean B, unsigned OpBits, Boolean *R) {
-    *R = Boolean(A.V && B.V);
-    return false;
-  }
+    static bool mul(Boolean A, Boolean B, unsigned OpBits, Boolean *R) {
+        *R = Boolean(A.V && B.V);
+        return false;
+    }
 };
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const Boolean &B) {
-  B.print(OS);
-  return OS;
+    B.print(OS);
+    return OS;
 }
 
 }  // namespace interp

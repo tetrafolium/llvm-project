@@ -24,22 +24,28 @@ class MachineInstr;
 
 namespace rdf {
 
-  struct CopyPropagation {
+struct CopyPropagation {
     CopyPropagation(DataFlowGraph &dfg) : MDT(dfg.getDT()), DFG(dfg),
         L(dfg.getMF().getRegInfo(), dfg) {}
 
     virtual ~CopyPropagation() = default;
 
     bool run();
-    void trace(bool On) { Trace = On; }
-    bool trace() const { return Trace; }
-    DataFlowGraph &getDFG() { return DFG; }
+    void trace(bool On) {
+        Trace = On;
+    }
+    bool trace() const {
+        return Trace;
+    }
+    DataFlowGraph &getDFG() {
+        return DFG;
+    }
 
     using EqualityMap = std::map<RegisterRef, RegisterRef>;
 
     virtual bool interpretAsCopy(const MachineInstr *MI, EqualityMap &EM);
 
-  private:
+private:
     const MachineDominatorTree &MDT;
     DataFlowGraph &DFG;
     Liveness L;
@@ -52,7 +58,7 @@ namespace rdf {
     void recordCopy(NodeAddr<StmtNode*> SA, EqualityMap &EM);
     bool scanBlock(MachineBasicBlock *B);
     NodeId getLocalReachingDef(RegisterRef RefRR, NodeAddr<InstrNode*> IA);
-  };
+};
 
 } // end namespace rdf
 

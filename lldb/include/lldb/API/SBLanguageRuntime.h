@@ -15,9 +15,9 @@ namespace lldb {
 
 class SBLanguageRuntime {
 public:
-  static lldb::LanguageType GetLanguageTypeFromString(const char *string);
+    static lldb::LanguageType GetLanguageTypeFromString(const char *string);
 
-  static const char *GetNameForLanguageType(lldb::LanguageType language);
+    static const char *GetNameForLanguageType(lldb::LanguageType language);
 };
 
 } // namespace lldb

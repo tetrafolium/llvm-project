@@ -27,14 +27,14 @@ class SimpleFile;
 /// new Atoms to the graph using the File's addAtom() method.
 class Pass {
 public:
-  virtual ~Pass() = default;
+    virtual ~Pass() = default;
 
-  /// Do the actual work of the Pass.
-  virtual llvm::Error perform(SimpleFile &mergedFile) = 0;
+    /// Do the actual work of the Pass.
+    virtual llvm::Error perform(SimpleFile &mergedFile) = 0;
 
 protected:
-  // Only subclassess can be instantiated.
-  Pass() = default;
+    // Only subclassess can be instantiated.
+    Pass() = default;
 };
 
 } // end namespace lld

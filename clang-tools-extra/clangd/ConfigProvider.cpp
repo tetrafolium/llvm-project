@@ -26,153 +26,155 @@ namespace config {
 
 // Threadsafe cache around reading a YAML config file from disk.
 class FileConfigCache : public FileCache {
-  mutable llvm::SmallVector<CompiledFragment, 1> CachedValue;
-  std::string Directory;
+    mutable llvm::SmallVector<CompiledFragment, 1> CachedValue;
+    std::string Directory;
 
 public:
-  FileConfigCache(llvm::StringRef Path, llvm::StringRef Directory)
-      : FileCache(Path), Directory(Directory) {}
+    FileConfigCache(llvm::StringRef Path, llvm::StringRef Directory)
+        : FileCache(Path), Directory(Directory) {}
 
-  void get(const ThreadsafeFS &TFS, DiagnosticCallback DC,
-           std::chrono::steady_clock::time_point FreshTime,
-           std::vector<CompiledFragment> &Out) const {
-    read(
-        TFS, FreshTime,
+    void get(const ThreadsafeFS &TFS, DiagnosticCallback DC,
+             std::chrono::steady_clock::time_point FreshTime,
+             std::vector<CompiledFragment> &Out) const {
+        read(
+            TFS, FreshTime,
         [&](llvm::Optional<llvm::StringRef> Data) {
-          CachedValue.clear();
-          if (Data)
-            for (auto &Fragment : Fragment::parseYAML(*Data, path(), DC)) {
-              Fragment.Source.Directory = Directory;
-              CachedValue.push_back(std::move(Fragment).compile(DC));
-            }
+            CachedValue.clear();
+            if (Data)
+                for (auto &Fragment : Fragment::parseYAML(*Data, path(), DC)) {
+                    Fragment.Source.Directory = Directory;
+                    CachedValue.push_back(std::move(Fragment).compile(DC));
+                }
         },
-        [&]() { llvm::copy(CachedValue, std::back_inserter(Out)); });
-  }
+        [&]() {
+            llvm::copy(CachedValue, std::back_inserter(Out));
+        });
+    }
 };
 
 std::unique_ptr<Provider> Provider::fromYAMLFile(llvm::StringRef AbsPath,
-                                                 llvm::StringRef Directory,
-                                                 const ThreadsafeFS &FS) {
-  class AbsFileProvider : public Provider {
-    mutable FileConfigCache Cache; // threadsafe
-    const ThreadsafeFS &FS;
+        llvm::StringRef Directory,
+        const ThreadsafeFS &FS) {
+    class AbsFileProvider : public Provider {
+        mutable FileConfigCache Cache; // threadsafe
+        const ThreadsafeFS &FS;
 
-    std::vector<CompiledFragment>
-    getFragments(const Params &P, DiagnosticCallback DC) const override {
-      std::vector<CompiledFragment> Result;
-      Cache.get(FS, DC, P.FreshTime, Result);
-      return Result;
+        std::vector<CompiledFragment>
+        getFragments(const Params &P, DiagnosticCallback DC) const override {
+            std::vector<CompiledFragment> Result;
+            Cache.get(FS, DC, P.FreshTime, Result);
+            return Result;
+        };
+
+    public:
+        AbsFileProvider(llvm::StringRef Path, llvm::StringRef Directory,
+                        const ThreadsafeFS &FS)
+            : Cache(Path, Directory), FS(FS) {
+            assert(llvm::sys::path::is_absolute(Path));
+        }
     };
 
-  public:
-    AbsFileProvider(llvm::StringRef Path, llvm::StringRef Directory,
-                    const ThreadsafeFS &FS)
-        : Cache(Path, Directory), FS(FS) {
-      assert(llvm::sys::path::is_absolute(Path));
-    }
-  };
-
-  return std::make_unique<AbsFileProvider>(AbsPath, Directory, FS);
+    return std::make_unique<AbsFileProvider>(AbsPath, Directory, FS);
 }
 
 std::unique_ptr<Provider>
 Provider::fromAncestorRelativeYAMLFiles(llvm::StringRef RelPath,
                                         const ThreadsafeFS &FS) {
-  class RelFileProvider : public Provider {
-    std::string RelPath;
-    const ThreadsafeFS &FS;
+    class RelFileProvider : public Provider {
+        std::string RelPath;
+        const ThreadsafeFS &FS;
 
-    mutable std::mutex Mu;
-    // Keys are the (posix-style) ancestor directory, not the config within it.
-    // We only insert into this map, so pointers to values are stable forever.
-    // Mutex guards the map itself, not the values (which are threadsafe).
-    mutable llvm::StringMap<FileConfigCache> Cache;
+        mutable std::mutex Mu;
+        // Keys are the (posix-style) ancestor directory, not the config within it.
+        // We only insert into this map, so pointers to values are stable forever.
+        // Mutex guards the map itself, not the values (which are threadsafe).
+        mutable llvm::StringMap<FileConfigCache> Cache;
 
-    std::vector<CompiledFragment>
-    getFragments(const Params &P, DiagnosticCallback DC) const override {
-      namespace path = llvm::sys::path;
+        std::vector<CompiledFragment>
+        getFragments(const Params &P, DiagnosticCallback DC) const override {
+            namespace path = llvm::sys::path;
 
-      if (P.Path.empty())
-        return {};
+            if (P.Path.empty())
+                return {};
 
-      // Compute absolute paths to all ancestors (substrings of P.Path).
-      llvm::StringRef Parent = path::parent_path(P.Path);
-      llvm::SmallVector<llvm::StringRef, 8> Ancestors;
-      for (auto I = path::begin(Parent, path::Style::posix),
-                E = path::end(Parent);
-           I != E; ++I) {
-        // Avoid weird non-substring cases like phantom "." components.
-        // In practice, Component is a substring for all "normal" ancestors.
-        if (I->end() < Parent.begin() || I->end() > Parent.end())
-          continue;
-        Ancestors.emplace_back(Parent.begin(), I->end() - Parent.begin());
-      }
-      // Ensure corresponding cache entries exist in the map.
-      llvm::SmallVector<FileConfigCache *, 8> Caches;
-      {
-        std::lock_guard<std::mutex> Lock(Mu);
-        for (llvm::StringRef Ancestor : Ancestors) {
-          auto It = Cache.find(Ancestor);
-          // Assemble the actual config file path only once.
-          if (It == Cache.end()) {
-            llvm::SmallString<256> ConfigPath = Ancestor;
-            path::append(ConfigPath, RelPath);
-            // Use native slashes for reading the file, affects diagnostics.
-            llvm::sys::path::native(ConfigPath);
-            It = Cache.try_emplace(Ancestor, ConfigPath.str(), Ancestor).first;
-          }
-          Caches.push_back(&It->second);
+            // Compute absolute paths to all ancestors (substrings of P.Path).
+            llvm::StringRef Parent = path::parent_path(P.Path);
+            llvm::SmallVector<llvm::StringRef, 8> Ancestors;
+            for (auto I = path::begin(Parent, path::Style::posix),
+                    E = path::end(Parent);
+                    I != E; ++I) {
+                // Avoid weird non-substring cases like phantom "." components.
+                // In practice, Component is a substring for all "normal" ancestors.
+                if (I->end() < Parent.begin() || I->end() > Parent.end())
+                    continue;
+                Ancestors.emplace_back(Parent.begin(), I->end() - Parent.begin());
+            }
+            // Ensure corresponding cache entries exist in the map.
+            llvm::SmallVector<FileConfigCache *, 8> Caches;
+            {
+                std::lock_guard<std::mutex> Lock(Mu);
+                for (llvm::StringRef Ancestor : Ancestors) {
+                    auto It = Cache.find(Ancestor);
+                    // Assemble the actual config file path only once.
+                    if (It == Cache.end()) {
+                        llvm::SmallString<256> ConfigPath = Ancestor;
+                        path::append(ConfigPath, RelPath);
+                        // Use native slashes for reading the file, affects diagnostics.
+                        llvm::sys::path::native(ConfigPath);
+                        It = Cache.try_emplace(Ancestor, ConfigPath.str(), Ancestor).first;
+                    }
+                    Caches.push_back(&It->second);
+                }
+            }
+            // Finally query each individual file.
+            // This will take a (per-file) lock for each file that actually exists.
+            std::vector<CompiledFragment> Result;
+            for (FileConfigCache *Cache : Caches)
+                Cache->get(FS, DC, P.FreshTime, Result);
+            return Result;
+        };
+
+    public:
+        RelFileProvider(llvm::StringRef RelPath, const ThreadsafeFS &FS)
+            : RelPath(RelPath), FS(FS) {
+            assert(llvm::sys::path::is_relative(RelPath));
         }
-      }
-      // Finally query each individual file.
-      // This will take a (per-file) lock for each file that actually exists.
-      std::vector<CompiledFragment> Result;
-      for (FileConfigCache *Cache : Caches)
-        Cache->get(FS, DC, P.FreshTime, Result);
-      return Result;
     };
 
-  public:
-    RelFileProvider(llvm::StringRef RelPath, const ThreadsafeFS &FS)
-        : RelPath(RelPath), FS(FS) {
-      assert(llvm::sys::path::is_relative(RelPath));
-    }
-  };
-
-  return std::make_unique<RelFileProvider>(RelPath, FS);
+    return std::make_unique<RelFileProvider>(RelPath, FS);
 }
 
 std::unique_ptr<Provider>
 Provider::combine(std::vector<const Provider *> Providers) {
-  class CombinedProvider : public Provider {
-    std::vector<const Provider *> Providers;
+    class CombinedProvider : public Provider {
+        std::vector<const Provider *> Providers;
 
-    std::vector<CompiledFragment>
-    getFragments(const Params &P, DiagnosticCallback DC) const override {
-      std::vector<CompiledFragment> Result;
-      for (const auto &Provider : Providers) {
-        for (auto &Fragment : Provider->getFragments(P, DC))
-          Result.push_back(std::move(Fragment));
-      }
-      return Result;
-    }
+        std::vector<CompiledFragment>
+        getFragments(const Params &P, DiagnosticCallback DC) const override {
+            std::vector<CompiledFragment> Result;
+            for (const auto &Provider : Providers) {
+                for (auto &Fragment : Provider->getFragments(P, DC))
+                    Result.push_back(std::move(Fragment));
+            }
+            return Result;
+        }
 
-  public:
-    CombinedProvider(std::vector<const Provider *> Providers)
-        : Providers(std::move(Providers)) {}
-  };
+    public:
+        CombinedProvider(std::vector<const Provider *> Providers)
+            : Providers(std::move(Providers)) {}
+    };
 
-  return std::make_unique<CombinedProvider>(std::move(Providers));
+    return std::make_unique<CombinedProvider>(std::move(Providers));
 }
 
 Config Provider::getConfig(const Params &P, DiagnosticCallback DC) const {
-  trace::Span Tracer("getConfig");
-  if (!P.Path.empty())
-    SPAN_ATTACH(Tracer, "path", P.Path);
-  Config C;
-  for (const auto &Fragment : getFragments(P, DC))
-    Fragment(P, C);
-  return C;
+    trace::Span Tracer("getConfig");
+    if (!P.Path.empty())
+        SPAN_ATTACH(Tracer, "path", P.Path);
+    Config C;
+    for (const auto &Fragment : getFragments(P, DC))
+        Fragment(P, C);
+    return C;
 }
 
 } // namespace config

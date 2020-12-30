@@ -9,8 +9,8 @@
 #endif
 
 _CLC_DEF _CLC_OVERLOAD size_t get_global_offset(uint dim) {
-  CONST_AS uint *ptr = (CONST_AS uint *)__builtin_amdgcn_implicitarg_ptr();
-  if (dim < 3)
-    return ptr[dim + 1];
-  return 0;
+    CONST_AS uint *ptr = (CONST_AS uint *)__builtin_amdgcn_implicitarg_ptr();
+    if (dim < 3)
+        return ptr[dim + 1];
+    return 0;
 }

@@ -24,8 +24,8 @@ using namespace mlir::tblgen;
 
 static llvm::cl::OptionCategory passGenCat("Options for -gen-pass-decls");
 static llvm::cl::opt<std::string>
-    groupName("name", llvm::cl::desc("The name of this group of passes"),
-              llvm::cl::cat(passGenCat));
+groupName("name", llvm::cl::desc("The name of this group of passes"),
+          llvm::cl::cat(passGenCat));
 
 //===----------------------------------------------------------------------===//
 // GEN: Pass base class generation
@@ -85,49 +85,49 @@ static void emitPassOptionDecls(const Pass &pass, raw_ostream &os) {
                  << (opt.isListOption() ? "ListOption" : "Option");
 
     os << llvm::formatv("<{0}> {1}{{*this, \"{2}\", ::llvm::cl::desc(\"{3}\")",
-                        opt.getType(), opt.getCppVariableName(),
-                        opt.getArgument(), opt.getDescription());
-    if (Optional<StringRef> defaultVal = opt.getDefaultValue())
-      os << ", ::llvm::cl::init(" << defaultVal << ")";
+                                  opt.getType(), opt.getCppVariableName(),
+                                  opt.getArgument(), opt.getDescription());
+if (Optional<StringRef> defaultVal = opt.getDefaultValue())
+    os << ", ::llvm::cl::init(" << defaultVal << ")";
     if (Optional<StringRef> additionalFlags = opt.getAdditionalFlags())
-      os << ", " << *additionalFlags;
-    os << "};\n";
-  }
+        os << ", " << *additionalFlags;
+        os << "};\n";
+    }
 }
 
 /// Emit the declarations for each of the pass statistics.
 static void emitPassStatisticDecls(const Pass &pass, raw_ostream &os) {
-  for (const PassStatistic &stat : pass.getStatistics()) {
-    os << llvm::formatv(
-        "  ::mlir::Pass::Statistic {0}{{this, \"{1}\", \"{2}\"};\n",
-        stat.getCppVariableName(), stat.getName(), stat.getDescription());
-  }
+    for (const PassStatistic &stat : pass.getStatistics()) {
+        os << llvm::formatv(
+               "  ::mlir::Pass::Statistic {0}{{this, \"{1}\", \"{2}\"};\n",
+               stat.getCppVariableName(), stat.getName(), stat.getDescription());
+    }
 }
 
 static void emitPassDecl(const Pass &pass, raw_ostream &os) {
-  StringRef defName = pass.getDef()->getName();
-  std::string dependentDialectRegistrations;
-  {
-    llvm::raw_string_ostream dialectsOs(dependentDialectRegistrations);
-    for (StringRef dependentDialect : pass.getDependentDialects())
-      dialectsOs << llvm::formatv(dialectRegistrationTemplate,
-                                  dependentDialect);
-  }
-  os << llvm::formatv(passDeclBegin, defName, pass.getBaseClass(),
-                      pass.getArgument(), dependentDialectRegistrations);
-  emitPassOptionDecls(pass, os);
-  emitPassStatisticDecls(pass, os);
-  os << "};\n";
+    StringRef defName = pass.getDef()->getName();
+    std::string dependentDialectRegistrations;
+    {
+        llvm::raw_string_ostream dialectsOs(dependentDialectRegistrations);
+        for (StringRef dependentDialect : pass.getDependentDialects())
+            dialectsOs << llvm::formatv(dialectRegistrationTemplate,
+                                        dependentDialect);
+    }
+    os << llvm::formatv(passDeclBegin, defName, pass.getBaseClass(),
+                        pass.getArgument(), dependentDialectRegistrations);
+    emitPassOptionDecls(pass, os);
+    emitPassStatisticDecls(pass, os);
+    os << "};\n";
 }
 
 /// Emit the code for registering each of the given passes with the global
 /// PassRegistry.
 static void emitPassDecls(ArrayRef<Pass> passes, raw_ostream &os) {
-  os << "#ifdef GEN_PASS_CLASSES\n";
-  for (const Pass &pass : passes)
-    emitPassDecl(pass, os);
-  os << "#undef GEN_PASS_CLASSES\n";
-  os << "#endif // GEN_PASS_CLASSES\n";
+    os << "#ifdef GEN_PASS_CLASSES\n";
+    for (const Pass &pass : passes)
+        emitPassDecl(pass, os);
+    os << "#undef GEN_PASS_CLASSES\n";
+    os << "#endif // GEN_PASS_CLASSES\n";
 }
 
 //===----------------------------------------------------------------------===//

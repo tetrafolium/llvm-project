@@ -21,9 +21,9 @@ namespace MachO {
 enum FileType : unsigned;
 
 struct TextAPIContext {
-  std::string ErrorMessage;
-  std::string Path;
-  FileType FileKind;
+    std::string ErrorMessage;
+    std::string Path;
+    FileType FileKind;
 };
 
 } // end namespace MachO.

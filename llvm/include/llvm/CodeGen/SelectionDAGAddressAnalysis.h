@@ -31,63 +31,73 @@ class SelectionDAG;
 ///                                         (i32 1)))))
 class BaseIndexOffset {
 private:
-  SDValue Base;
-  SDValue Index;
-  Optional<int64_t> Offset;
-  bool IsIndexSignExt = false;
+    SDValue Base;
+    SDValue Index;
+    Optional<int64_t> Offset;
+    bool IsIndexSignExt = false;
 
 public:
-  BaseIndexOffset() = default;
-  BaseIndexOffset(SDValue Base, SDValue Index, bool IsIndexSignExt)
-      : Base(Base), Index(Index), Offset(), IsIndexSignExt(IsIndexSignExt) {}
-  BaseIndexOffset(SDValue Base, SDValue Index, int64_t Offset,
-                  bool IsIndexSignExt)
-      : Base(Base), Index(Index), Offset(Offset),
-        IsIndexSignExt(IsIndexSignExt) {}
+    BaseIndexOffset() = default;
+    BaseIndexOffset(SDValue Base, SDValue Index, bool IsIndexSignExt)
+        : Base(Base), Index(Index), Offset(), IsIndexSignExt(IsIndexSignExt) {}
+    BaseIndexOffset(SDValue Base, SDValue Index, int64_t Offset,
+                    bool IsIndexSignExt)
+        : Base(Base), Index(Index), Offset(Offset),
+          IsIndexSignExt(IsIndexSignExt) {}
 
-  SDValue getBase() { return Base; }
-  SDValue getBase() const { return Base; }
-  SDValue getIndex() { return Index; }
-  SDValue getIndex() const { return Index; }
-  bool hasValidOffset() const { return Offset.hasValue(); }
+    SDValue getBase() {
+        return Base;
+    }
+    SDValue getBase() const {
+        return Base;
+    }
+    SDValue getIndex() {
+        return Index;
+    }
+    SDValue getIndex() const {
+        return Index;
+    }
+    bool hasValidOffset() const {
+        return Offset.hasValue();
+    }
 
-  // Returns true if `Other` and `*this` are both some offset from the same base
-  // pointer. In that case, `Off` is set to the offset between `*this` and
-  // `Other` (negative if `Other` is before `*this`).
-  bool equalBaseIndex(const BaseIndexOffset &Other, const SelectionDAG &DAG,
-                      int64_t &Off) const;
+    // Returns true if `Other` and `*this` are both some offset from the same base
+    // pointer. In that case, `Off` is set to the offset between `*this` and
+    // `Other` (negative if `Other` is before `*this`).
+    bool equalBaseIndex(const BaseIndexOffset &Other, const SelectionDAG &DAG,
+                        int64_t &Off) const;
 
-  bool equalBaseIndex(const BaseIndexOffset &Other,
-                      const SelectionDAG &DAG) const {
-    int64_t Off;
-    return equalBaseIndex(Other, DAG, Off);
-  }
+    bool equalBaseIndex(const BaseIndexOffset &Other,
+                        const SelectionDAG &DAG) const {
+        int64_t Off;
+        return equalBaseIndex(Other, DAG, Off);
+    }
 
-  // Returns true if `Other` (with size `OtherSize`) can be proven to be fully
-  // contained in `*this` (with size `Size`).
-  bool contains(const SelectionDAG &DAG, int64_t BitSize,
-                const BaseIndexOffset &Other, int64_t OtherBitSize,
-                int64_t &BitOffset) const;
+    // Returns true if `Other` (with size `OtherSize`) can be proven to be fully
+    // contained in `*this` (with size `Size`).
+    bool contains(const SelectionDAG &DAG, int64_t BitSize,
+                  const BaseIndexOffset &Other, int64_t OtherBitSize,
+                  int64_t &BitOffset) const;
 
-  bool contains(const SelectionDAG &DAG, int64_t BitSize,
-                const BaseIndexOffset &Other, int64_t OtherBitSize) const {
-    int64_t BitOffset;
-    return contains(DAG, BitSize, Other, OtherBitSize, BitOffset);
-  }
+    bool contains(const SelectionDAG &DAG, int64_t BitSize,
+                  const BaseIndexOffset &Other, int64_t OtherBitSize) const {
+        int64_t BitOffset;
+        return contains(DAG, BitSize, Other, OtherBitSize, BitOffset);
+    }
 
-  // Returns true `Op0` and `Op1` can be proven to alias/not alias, in
-  // which case `IsAlias` is set to true/false.
-  static bool computeAliasing(const SDNode *Op0,
-                              const Optional<int64_t> NumBytes0,
-                              const SDNode *Op1,
-                              const Optional<int64_t> NumBytes1,
-                              const SelectionDAG &DAG, bool &IsAlias);
+    // Returns true `Op0` and `Op1` can be proven to alias/not alias, in
+    // which case `IsAlias` is set to true/false.
+    static bool computeAliasing(const SDNode *Op0,
+                                const Optional<int64_t> NumBytes0,
+                                const SDNode *Op1,
+                                const Optional<int64_t> NumBytes1,
+                                const SelectionDAG &DAG, bool &IsAlias);
 
-  /// Parses tree in N for base, index, offset addresses.
-  static BaseIndexOffset match(const SDNode *N, const SelectionDAG &DAG);
+    /// Parses tree in N for base, index, offset addresses.
+    static BaseIndexOffset match(const SDNode *N, const SelectionDAG &DAG);
 
-  void print(raw_ostream& OS) const;
-  void dump() const;
+    void print(raw_ostream& OS) const;
+    void dump() const;
 };
 
 } // end namespace llvm

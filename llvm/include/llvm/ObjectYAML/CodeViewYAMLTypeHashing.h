@@ -29,21 +29,21 @@ namespace llvm {
 namespace CodeViewYAML {
 
 struct GlobalHash {
-  GlobalHash() = default;
-  explicit GlobalHash(StringRef S) : Hash(S) {
-    assert(S.size() == 8 && "Invalid hash size!");
-  }
-  explicit GlobalHash(ArrayRef<uint8_t> S) : Hash(S) {
-    assert(S.size() == 8 && "Invalid hash size!");
-  }
-  yaml::BinaryRef Hash;
+    GlobalHash() = default;
+    explicit GlobalHash(StringRef S) : Hash(S) {
+        assert(S.size() == 8 && "Invalid hash size!");
+    }
+    explicit GlobalHash(ArrayRef<uint8_t> S) : Hash(S) {
+        assert(S.size() == 8 && "Invalid hash size!");
+    }
+    yaml::BinaryRef Hash;
 };
 
 struct DebugHSection {
-  uint32_t Magic;
-  uint16_t Version;
-  uint16_t HashAlgorithm;
-  std::vector<GlobalHash> Hashes;
+    uint32_t Magic;
+    uint16_t Version;
+    uint16_t HashAlgorithm;
+    std::vector<GlobalHash> Hashes;
 };
 
 DebugHSection fromDebugH(ArrayRef<uint8_t> DebugH);

@@ -19,12 +19,12 @@
 namespace __ubsan {
 
 struct UndefinedBehaviorReport {
-  const char *IssueKind;
-  Location &Loc;
-  InternalScopedString Buffer;
+    const char *IssueKind;
+    Location &Loc;
+    InternalScopedString Buffer;
 
-  UndefinedBehaviorReport(const char *IssueKind, Location &Loc,
-                          InternalScopedString &Msg);
+    UndefinedBehaviorReport(const char *IssueKind, Location &Loc,
+                            InternalScopedString &Msg);
 };
 
 SANITIZER_INTERFACE_ATTRIBUTE void

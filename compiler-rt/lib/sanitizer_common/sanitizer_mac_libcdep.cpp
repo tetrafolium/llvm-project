@@ -19,9 +19,9 @@
 namespace __sanitizer {
 
 void RestrictMemoryToMaxAddress(uptr max_address) {
-  uptr size_to_mmap = GetMaxUserVirtualAddress() + 1 - max_address;
-  void *res = MmapFixedNoAccess(max_address, size_to_mmap, "high gap");
-  CHECK(res != MAP_FAILED);
+    uptr size_to_mmap = GetMaxUserVirtualAddress() + 1 - max_address;
+    void *res = MmapFixedNoAccess(max_address, size_to_mmap, "high gap");
+    CHECK(res != MAP_FAILED);
 }
 
 }  // namespace __sanitizer

@@ -21,10 +21,10 @@ namespace android {
 /// http://clang.llvm.org/extra/clang-tidy/checks/android-cloexec-memfd-create.html
 class CloexecMemfdCreateCheck : public CloexecCheck {
 public:
-  CloexecMemfdCreateCheck(StringRef Name, ClangTidyContext *Context)
-      : CloexecCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    CloexecMemfdCreateCheck(StringRef Name, ClangTidyContext *Context)
+        : CloexecCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace android

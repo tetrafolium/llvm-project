@@ -17,25 +17,25 @@ namespace tidy {
 namespace android {
 
 void CloexecOpenCheck::registerMatchers(MatchFinder *Finder) {
-  auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
-  registerMatchersImpl(Finder,
-                       functionDecl(isExternC(), returns(isInteger()),
-                                    hasAnyName("open", "open64"),
-                                    hasParameter(0, CharPointerType),
-                                    hasParameter(1, hasType(isInteger()))));
-  registerMatchersImpl(Finder,
-                       functionDecl(isExternC(), returns(isInteger()),
-                                    hasName("openat"),
-                                    hasParameter(0, hasType(isInteger())),
-                                    hasParameter(1, CharPointerType),
-                                    hasParameter(2, hasType(isInteger()))));
+    auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
+    registerMatchersImpl(Finder,
+                         functionDecl(isExternC(), returns(isInteger()),
+                                      hasAnyName("open", "open64"),
+                                      hasParameter(0, CharPointerType),
+                                      hasParameter(1, hasType(isInteger()))));
+    registerMatchersImpl(Finder,
+                         functionDecl(isExternC(), returns(isInteger()),
+                                      hasName("openat"),
+                                      hasParameter(0, hasType(isInteger())),
+                                      hasParameter(1, CharPointerType),
+                                      hasParameter(2, hasType(isInteger()))));
 }
 
 void CloexecOpenCheck::check(const MatchFinder::MatchResult &Result) {
-  const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>(FuncDeclBindingStr);
-  assert(FD->param_size() > 1);
-  int ArgPos = (FD->param_size() > 2) ? 2 : 1;
-  insertMacroFlag(Result, /*MacroFlag=*/"O_CLOEXEC", ArgPos);
+    const auto *FD = Result.Nodes.getNodeAs<FunctionDecl>(FuncDeclBindingStr);
+    assert(FD->param_size() > 1);
+    int ArgPos = (FD->param_size() > 2) ? 2 : 1;
+    insertMacroFlag(Result, /*MacroFlag=*/"O_CLOEXEC", ArgPos);
 }
 
 } // namespace android

@@ -8,7 +8,7 @@
 // RUN: %dexter_regression_test -- %s | FileCheck %s
 // CHECK: small_loop.cpp:
 
-int func(int i){
+int func(int i) {
     return i;
 }
 

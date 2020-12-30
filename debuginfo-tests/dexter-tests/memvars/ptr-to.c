@@ -13,16 +13,16 @@
 int glob;
 __attribute__((__noinline__))
 void esc(int* p) {
-  glob = *p;
-  *p = 0xFF;
+    glob = *p;
+    *p = 0xFF;
 }
 
 int main() {
-  int local = 0xA;
-  int *plocal = &local;
-  esc(plocal);      // DexLabel('s1')
-  local = 0xB;      //// DSE
-  return 0;         // DexLabel('s2')
+    int local = 0xA;
+    int *plocal = &local;
+    esc(plocal);      // DexLabel('s1')
+    local = 0xB;      //// DSE
+    return 0;         // DexLabel('s2')
 }
 
 

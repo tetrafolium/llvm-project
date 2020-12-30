@@ -2067,7 +2067,7 @@ void ITTAPI __itt_frame_end_v3(const __itt_domain *domain, __itt_id *id);
  * @param[in] end Timestamp of the end of the frame
  */
 void ITTAPI __itt_frame_submit_v3(const __itt_domain *domain, __itt_id *id,
-    __itt_timestamp begin, __itt_timestamp end);
+                                  __itt_timestamp begin, __itt_timestamp end);
 
 /** @cond exclude_from_documentation */
 #ifndef INTEL_NO_MACRO_BODY
@@ -4038,7 +4038,7 @@ typedef enum __itt_error_code
     __itt_error_env_too_long  = 5, /*!< variable value too long */
     /* %1$s -- env var name, %2$d -- actual length of the var, %3$d -- max allowed length. */
     __itt_error_system        = 6  /*!< pthread_mutexattr_init or pthread_mutex_init failed */
-    /* %1$s -- function name, %2$d -- errno. */
+                                /* %1$s -- function name, %2$d -- errno. */
 } __itt_error_code;
 
 typedef void (__itt_error_handler_t)(__itt_error_code code, va_list);

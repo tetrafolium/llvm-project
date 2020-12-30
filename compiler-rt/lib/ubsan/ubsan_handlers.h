@@ -17,10 +17,10 @@
 namespace __ubsan {
 
 struct TypeMismatchData {
-  SourceLocation Loc;
-  const TypeDescriptor &Type;
-  unsigned char LogAlignment;
-  unsigned char TypeCheckKind;
+    SourceLocation Loc;
+    const TypeDescriptor &Type;
+    unsigned char LogAlignment;
+    unsigned char TypeCheckKind;
 };
 
 #define UNRECOVERABLE(checkname, ...) \
@@ -39,9 +39,9 @@ struct TypeMismatchData {
 RECOVERABLE(type_mismatch_v1, TypeMismatchData *Data, ValueHandle Pointer)
 
 struct AlignmentAssumptionData {
-  SourceLocation Loc;
-  SourceLocation AssumptionLoc;
-  const TypeDescriptor &Type;
+    SourceLocation Loc;
+    SourceLocation AssumptionLoc;
+    const TypeDescriptor &Type;
 };
 
 /// \brief Handle a runtime alignment assumption check failure,
@@ -50,8 +50,8 @@ RECOVERABLE(alignment_assumption, AlignmentAssumptionData *Data,
             ValueHandle Pointer, ValueHandle Alignment, ValueHandle Offset)
 
 struct OverflowData {
-  SourceLocation Loc;
-  const TypeDescriptor &Type;
+    SourceLocation Loc;
+    const TypeDescriptor &Type;
 };
 
 /// \brief Handle an integer addition overflow.
@@ -71,9 +71,9 @@ RECOVERABLE(divrem_overflow, OverflowData *Data,
             ValueHandle LHS, ValueHandle RHS)
 
 struct ShiftOutOfBoundsData {
-  SourceLocation Loc;
-  const TypeDescriptor &LHSType;
-  const TypeDescriptor &RHSType;
+    SourceLocation Loc;
+    const TypeDescriptor &LHSType;
+    const TypeDescriptor &RHSType;
 };
 
 /// \brief Handle a shift where the RHS is out of bounds or a left shift where
@@ -82,16 +82,16 @@ RECOVERABLE(shift_out_of_bounds, ShiftOutOfBoundsData *Data,
             ValueHandle LHS, ValueHandle RHS)
 
 struct OutOfBoundsData {
-  SourceLocation Loc;
-  const TypeDescriptor &ArrayType;
-  const TypeDescriptor &IndexType;
+    SourceLocation Loc;
+    const TypeDescriptor &ArrayType;
+    const TypeDescriptor &IndexType;
 };
 
 /// \brief Handle an array index out of bounds error.
 RECOVERABLE(out_of_bounds, OutOfBoundsData *Data, ValueHandle Index)
 
 struct UnreachableData {
-  SourceLocation Loc;
+    SourceLocation Loc;
 };
 
 /// \brief Handle a __builtin_unreachable which is reached.
@@ -100,8 +100,8 @@ UNRECOVERABLE(builtin_unreachable, UnreachableData *Data)
 UNRECOVERABLE(missing_return, UnreachableData *Data)
 
 struct VLABoundData {
-  SourceLocation Loc;
-  const TypeDescriptor &Type;
+    SourceLocation Loc;
+    const TypeDescriptor &Type;
 };
 
 /// \brief Handle a VLA with a non-positive bound.
@@ -110,14 +110,14 @@ RECOVERABLE(vla_bound_not_positive, VLABoundData *Data, ValueHandle Bound)
 // Keeping this around for binary compatibility with (sanitized) programs
 // compiled with older compilers.
 struct FloatCastOverflowData {
-  const TypeDescriptor &FromType;
-  const TypeDescriptor &ToType;
+    const TypeDescriptor &FromType;
+    const TypeDescriptor &ToType;
 };
 
 struct FloatCastOverflowDataV2 {
-  SourceLocation Loc;
-  const TypeDescriptor &FromType;
-  const TypeDescriptor &ToType;
+    SourceLocation Loc;
+    const TypeDescriptor &FromType;
+    const TypeDescriptor &ToType;
 };
 
 /// Handle overflow in a conversion to or from a floating-point type.
@@ -125,8 +125,8 @@ struct FloatCastOverflowDataV2 {
 RECOVERABLE(float_cast_overflow, void *Data, ValueHandle From)
 
 struct InvalidValueData {
-  SourceLocation Loc;
-  const TypeDescriptor &Type;
+    SourceLocation Loc;
+    const TypeDescriptor &Type;
 };
 
 /// \brief Handle a load of an invalid value for the type.
@@ -135,18 +135,18 @@ RECOVERABLE(load_invalid_value, InvalidValueData *Data, ValueHandle Val)
 /// Known implicit conversion check kinds.
 /// Keep in sync with the enum of the same name in CGExprScalar.cpp
 enum ImplicitConversionCheckKind : unsigned char {
-  ICCK_IntegerTruncation = 0, // Legacy, was only used by clang 7.
-  ICCK_UnsignedIntegerTruncation = 1,
-  ICCK_SignedIntegerTruncation = 2,
-  ICCK_IntegerSignChange = 3,
-  ICCK_SignedIntegerTruncationOrSignChange = 4,
+    ICCK_IntegerTruncation = 0, // Legacy, was only used by clang 7.
+    ICCK_UnsignedIntegerTruncation = 1,
+    ICCK_SignedIntegerTruncation = 2,
+    ICCK_IntegerSignChange = 3,
+    ICCK_SignedIntegerTruncationOrSignChange = 4,
 };
 
 struct ImplicitConversionData {
-  SourceLocation Loc;
-  const TypeDescriptor &FromType;
-  const TypeDescriptor &ToType;
-  /* ImplicitConversionCheckKind */ unsigned char Kind;
+    SourceLocation Loc;
+    const TypeDescriptor &FromType;
+    const TypeDescriptor &ToType;
+    /* ImplicitConversionCheckKind */ unsigned char Kind;
 };
 
 /// \brief Implict conversion that changed the value.
@@ -156,28 +156,28 @@ RECOVERABLE(implicit_conversion, ImplicitConversionData *Data, ValueHandle Src,
 /// Known builtin check kinds.
 /// Keep in sync with the enum of the same name in CodeGenFunction.h
 enum BuiltinCheckKind : unsigned char {
-  BCK_CTZPassedZero,
-  BCK_CLZPassedZero,
+    BCK_CTZPassedZero,
+    BCK_CLZPassedZero,
 };
 
 struct InvalidBuiltinData {
-  SourceLocation Loc;
-  unsigned char Kind;
+    SourceLocation Loc;
+    unsigned char Kind;
 };
 
 /// Handle a builtin called in an invalid way.
 RECOVERABLE(invalid_builtin, InvalidBuiltinData *Data)
 
 struct InvalidObjCCast {
-  SourceLocation Loc;
-  const TypeDescriptor &ExpectedType;
+    SourceLocation Loc;
+    const TypeDescriptor &ExpectedType;
 };
 
 /// Handle an invalid ObjC cast.
 RECOVERABLE(invalid_objc_cast, InvalidObjCCast *Data, ValueHandle Pointer)
 
 struct NonNullReturnData {
-  SourceLocation AttrLoc;
+    SourceLocation AttrLoc;
 };
 
 /// \brief Handle returning null from function with the returns_nonnull
@@ -186,9 +186,9 @@ RECOVERABLE(nonnull_return_v1, NonNullReturnData *Data, SourceLocation *Loc)
 RECOVERABLE(nullability_return_v1, NonNullReturnData *Data, SourceLocation *Loc)
 
 struct NonNullArgData {
-  SourceLocation Loc;
-  SourceLocation AttrLoc;
-  int ArgIndex;
+    SourceLocation Loc;
+    SourceLocation AttrLoc;
+    int ArgIndex;
 };
 
 /// \brief Handle passing null pointer to a function parameter with the nonnull
@@ -197,7 +197,7 @@ RECOVERABLE(nonnull_arg, NonNullArgData *Data)
 RECOVERABLE(nullability_arg, NonNullArgData *Data)
 
 struct PointerOverflowData {
-  SourceLocation Loc;
+    SourceLocation Loc;
 };
 
 RECOVERABLE(pointer_overflow, PointerOverflowData *Data, ValueHandle Base,
@@ -206,19 +206,19 @@ RECOVERABLE(pointer_overflow, PointerOverflowData *Data, ValueHandle Base,
 /// \brief Known CFI check kinds.
 /// Keep in sync with the enum of the same name in CodeGenFunction.h
 enum CFITypeCheckKind : unsigned char {
-  CFITCK_VCall,
-  CFITCK_NVCall,
-  CFITCK_DerivedCast,
-  CFITCK_UnrelatedCast,
-  CFITCK_ICall,
-  CFITCK_NVMFCall,
-  CFITCK_VMFCall,
+    CFITCK_VCall,
+    CFITCK_NVCall,
+    CFITCK_DerivedCast,
+    CFITCK_UnrelatedCast,
+    CFITCK_ICall,
+    CFITCK_NVMFCall,
+    CFITCK_VMFCall,
 };
 
 struct CFICheckFailData {
-  CFITypeCheckKind CheckKind;
-  SourceLocation Loc;
-  const TypeDescriptor &Type;
+    CFITypeCheckKind CheckKind;
+    SourceLocation Loc;
+    const TypeDescriptor &Type;
 };
 
 /// \brief Handle control flow integrity failures.

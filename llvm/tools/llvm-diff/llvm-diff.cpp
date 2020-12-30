@@ -30,62 +30,62 @@ using namespace llvm;
 /// Reads a module from a file.  On error, messages are written to stderr
 /// and null is returned.
 static std::unique_ptr<Module> readModule(LLVMContext &Context,
-                                          StringRef Name) {
-  SMDiagnostic Diag;
-  std::unique_ptr<Module> M = parseIRFile(Name, Diag, Context);
-  if (!M)
-    Diag.print("llvm-diff", errs());
-  return M;
+        StringRef Name) {
+    SMDiagnostic Diag;
+    std::unique_ptr<Module> M = parseIRFile(Name, Diag, Context);
+    if (!M)
+        Diag.print("llvm-diff", errs());
+    return M;
 }
 
 static void diffGlobal(DifferenceEngine &Engine, Module &L, Module &R,
                        StringRef Name) {
-  // Drop leading sigils from the global name.
-  if (Name.startswith("@")) Name = Name.substr(1);
+    // Drop leading sigils from the global name.
+    if (Name.startswith("@")) Name = Name.substr(1);
 
-  Function *LFn = L.getFunction(Name);
-  Function *RFn = R.getFunction(Name);
-  if (LFn && RFn)
-    Engine.diff(LFn, RFn);
-  else if (!LFn && !RFn)
-    errs() << "No function named @" << Name << " in either module\n";
-  else if (!LFn)
-    errs() << "No function named @" << Name << " in left module\n";
-  else
-    errs() << "No function named @" << Name << " in right module\n";
+    Function *LFn = L.getFunction(Name);
+    Function *RFn = R.getFunction(Name);
+    if (LFn && RFn)
+        Engine.diff(LFn, RFn);
+    else if (!LFn && !RFn)
+        errs() << "No function named @" << Name << " in either module\n";
+    else if (!LFn)
+        errs() << "No function named @" << Name << " in left module\n";
+    else
+        errs() << "No function named @" << Name << " in right module\n";
 }
 
 static cl::opt<std::string> LeftFilename(cl::Positional,
-                                         cl::desc("<first file>"),
-                                         cl::Required);
+        cl::desc("<first file>"),
+        cl::Required);
 static cl::opt<std::string> RightFilename(cl::Positional,
-                                          cl::desc("<second file>"),
-                                          cl::Required);
+        cl::desc("<second file>"),
+        cl::Required);
 static cl::list<std::string> GlobalsToCompare(cl::Positional,
-                                              cl::desc("<globals to compare>"));
+        cl::desc("<globals to compare>"));
 
 int main(int argc, char **argv) {
-  cl::ParseCommandLineOptions(argc, argv);
+    cl::ParseCommandLineOptions(argc, argv);
 
-  LLVMContext Context;
+    LLVMContext Context;
 
-  // Load both modules.  Die if that fails.
-  std::unique_ptr<Module> LModule = readModule(Context, LeftFilename);
-  std::unique_ptr<Module> RModule = readModule(Context, RightFilename);
-  if (!LModule || !RModule) return 1;
+    // Load both modules.  Die if that fails.
+    std::unique_ptr<Module> LModule = readModule(Context, LeftFilename);
+    std::unique_ptr<Module> RModule = readModule(Context, RightFilename);
+    if (!LModule || !RModule) return 1;
 
-  DiffConsumer Consumer;
-  DifferenceEngine Engine(Consumer);
+    DiffConsumer Consumer;
+    DifferenceEngine Engine(Consumer);
 
-  // If any global names were given, just diff those.
-  if (!GlobalsToCompare.empty()) {
-    for (unsigned I = 0, E = GlobalsToCompare.size(); I != E; ++I)
-      diffGlobal(Engine, *LModule, *RModule, GlobalsToCompare[I]);
+    // If any global names were given, just diff those.
+    if (!GlobalsToCompare.empty()) {
+        for (unsigned I = 0, E = GlobalsToCompare.size(); I != E; ++I)
+            diffGlobal(Engine, *LModule, *RModule, GlobalsToCompare[I]);
 
-  // Otherwise, diff everything in the module.
-  } else {
-    Engine.diff(LModule.get(), RModule.get());
-  }
+        // Otherwise, diff everything in the module.
+    } else {
+        Engine.diff(LModule.get(), RModule.get());
+    }
 
-  return Consumer.hadDifferences();
+    return Consumer.hadDifferences();
 }

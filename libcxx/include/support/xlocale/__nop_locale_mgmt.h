@@ -17,18 +17,18 @@ extern "C" {
 // Patch over lack of extended locale support
 typedef void *locale_t;
 static inline locale_t duplocale(locale_t) {
-  return NULL;
+    return NULL;
 }
 
 static inline void freelocale(locale_t) {
 }
 
 static inline locale_t newlocale(int, const char *, locale_t) {
-  return NULL;
+    return NULL;
 }
 
 static inline locale_t uselocale(locale_t) {
-  return NULL;
+    return NULL;
 }
 
 #define LC_COLLATE_MASK  (1 << LC_COLLATE)

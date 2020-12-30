@@ -20,18 +20,18 @@ using namespace llvm;
 int main(int argc, char **argv) {
 #if defined(__i386__) || defined(_M_IX86) || \
     defined(__x86_64__) || defined(_M_X64)
-  StringMap<bool> features;
+    StringMap<bool> features;
 
-  if (!sys::getHostCPUFeatures(features))
-    return 1;
+    if (!sys::getHostCPUFeatures(features))
+        return 1;
 
-  if (features["sse"])
-    outs() << "sse\n";
-  if (features["avx"])
-    outs() << "avx\n";
-  if (features["avx512f"])
-    outs() << "avx512f\n";
+    if (features["sse"])
+        outs() << "sse\n";
+    if (features["avx"])
+        outs() << "avx\n";
+    if (features["avx512f"])
+        outs() << "avx512f\n";
 #endif
 
-  return 0;
+    return 0;
 }

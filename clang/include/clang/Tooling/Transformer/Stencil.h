@@ -52,7 +52,9 @@ namespace detail {
 /// higher degree of explicitness.
 Stencil makeStencil(llvm::StringRef Text);
 Stencil makeStencil(RangeSelector Selector);
-inline Stencil makeStencil(Stencil S) { return S; }
+inline Stencil makeStencil(Stencil S) {
+    return S;
+}
 } // namespace detail
 
 /// Constructs the string representing the concatenation of the given \p
@@ -62,7 +64,7 @@ Stencil catVector(std::vector<Stencil> Parts);
 /// Concatenates 0+ stencil pieces into a single stencil. Arguments can be raw
 /// text, ranges in the matched code (\p RangeSelector) or other `Stencil`s.
 template <typename... Ts> Stencil cat(Ts &&... Parts) {
-  return catVector({detail::makeStencil(std::forward<Ts>(Parts))...});
+    return catVector({detail::makeStencil(std::forward<Ts>(Parts))...});
 }
 
 //
@@ -104,7 +106,7 @@ Stencil maybeAddressOf(llvm::StringRef ExprId);
 /// Additionally, `e` is wrapped in parentheses, if needed.
 Stencil access(llvm::StringRef BaseId, Stencil Member);
 inline Stencil access(llvm::StringRef BaseId, llvm::StringRef Member) {
-  return access(BaseId, detail::makeStencil(Member));
+    return access(BaseId, detail::makeStencil(Member));
 }
 
 /// Chooses between the two stencil parts, based on whether \p ID is bound in
@@ -115,8 +117,8 @@ Stencil ifBound(llvm::StringRef Id, Stencil TrueStencil, Stencil FalseStencil);
 /// match.
 inline Stencil ifBound(llvm::StringRef Id, llvm::StringRef TrueText,
                        llvm::StringRef FalseText) {
-  return ifBound(Id, detail::makeStencil(TrueText),
-                 detail::makeStencil(FalseText));
+    return ifBound(Id, detail::makeStencil(TrueText),
+                   detail::makeStencil(FalseText));
 }
 
 /// Wraps a \c MatchConsumer in a \c Stencil, so that it can be used in a \c

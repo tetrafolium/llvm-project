@@ -23,36 +23,36 @@
 namespace __sanitizer {
 
 struct ReportFile {
-  void Write(const char *buffer, uptr length);
-  bool SupportsColors();
-  void SetReportPath(const char *path);
-  const char *GetReportPath();
+    void Write(const char *buffer, uptr length);
+    bool SupportsColors();
+    void SetReportPath(const char *path);
+    const char *GetReportPath();
 
-  // Don't use fields directly. They are only declared public to allow
-  // aggregate initialization.
+    // Don't use fields directly. They are only declared public to allow
+    // aggregate initialization.
 
-  // Protects fields below.
-  StaticSpinMutex *mu;
-  // Opened file descriptor. Defaults to stderr. It may be equal to
-  // kInvalidFd, in which case new file will be opened when necessary.
-  fd_t fd;
-  // Path prefix of report file, set via __sanitizer_set_report_path.
-  char path_prefix[kMaxPathLength];
-  // Full path to report, obtained as <path_prefix>.PID
-  char full_path[kMaxPathLength];
-  // PID of the process that opened fd. If a fork() occurs,
-  // the PID of child will be different from fd_pid.
-  uptr fd_pid;
+    // Protects fields below.
+    StaticSpinMutex *mu;
+    // Opened file descriptor. Defaults to stderr. It may be equal to
+    // kInvalidFd, in which case new file will be opened when necessary.
+    fd_t fd;
+    // Path prefix of report file, set via __sanitizer_set_report_path.
+    char path_prefix[kMaxPathLength];
+    // Full path to report, obtained as <path_prefix>.PID
+    char full_path[kMaxPathLength];
+    // PID of the process that opened fd. If a fork() occurs,
+    // the PID of child will be different from fd_pid.
+    uptr fd_pid;
 
- private:
-  void ReopenIfNecessary();
+private:
+    void ReopenIfNecessary();
 };
 extern ReportFile report_file;
 
 enum FileAccessMode {
-  RdOnly,
-  WrOnly,
-  RdWr
+    RdOnly,
+    WrOnly,
+    RdWr
 };
 
 // Returns kInvalidFd on error.
@@ -68,9 +68,11 @@ bool WriteToFile(fd_t fd, const void *buff, uptr buff_size,
 
 // Scoped file handle closer.
 struct FileCloser {
-  explicit FileCloser(fd_t fd) : fd(fd) {}
-  ~FileCloser() { CloseFile(fd); }
-  fd_t fd;
+    explicit FileCloser(fd_t fd) : fd(fd) {}
+    ~FileCloser() {
+        CloseFile(fd);
+    }
+    fd_t fd;
 };
 
 bool SupportsColoredOutput(fd_t fd);

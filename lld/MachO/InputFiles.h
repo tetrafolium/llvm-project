@@ -51,116 +51,130 @@ using SubsectionMap = std::map<uint32_t, InputSection *>;
 
 class InputFile {
 public:
-  enum Kind {
-    ObjKind,
-    OpaqueKind,
-    DylibKind,
-    ArchiveKind,
-    BitcodeKind,
-  };
+    enum Kind {
+        ObjKind,
+        OpaqueKind,
+        DylibKind,
+        ArchiveKind,
+        BitcodeKind,
+    };
 
-  virtual ~InputFile() = default;
-  Kind kind() const { return fileKind; }
-  StringRef getName() const { return name; }
+    virtual ~InputFile() = default;
+    Kind kind() const {
+        return fileKind;
+    }
+    StringRef getName() const {
+        return name;
+    }
 
-  MemoryBufferRef mb;
+    MemoryBufferRef mb;
 
-  std::vector<Symbol *> symbols;
-  std::vector<SubsectionMap> subsections;
-  // Provides an easy way to sort InputFiles deterministically.
-  const int id;
+    std::vector<Symbol *> symbols;
+    std::vector<SubsectionMap> subsections;
+    // Provides an easy way to sort InputFiles deterministically.
+    const int id;
 
-  // If not empty, this stores the name of the archive containing this file.
-  // We use this string for creating error messages.
-  std::string archiveName;
+    // If not empty, this stores the name of the archive containing this file.
+    // We use this string for creating error messages.
+    std::string archiveName;
 
 protected:
-  InputFile(Kind kind, MemoryBufferRef mb)
-      : mb(mb), id(idCount++), fileKind(kind), name(mb.getBufferIdentifier()) {}
+    InputFile(Kind kind, MemoryBufferRef mb)
+        : mb(mb), id(idCount++), fileKind(kind), name(mb.getBufferIdentifier()) {}
 
-  InputFile(Kind kind, const llvm::MachO::InterfaceFile &interface)
-      : id(idCount++), fileKind(kind), name(saver.save(interface.getPath())) {}
+    InputFile(Kind kind, const llvm::MachO::InterfaceFile &interface)
+        : id(idCount++), fileKind(kind), name(saver.save(interface.getPath())) {}
 
 private:
-  const Kind fileKind;
-  const StringRef name;
+    const Kind fileKind;
+    const StringRef name;
 
-  static int idCount;
+    static int idCount;
 };
 
 // .o file
 class ObjFile : public InputFile {
 public:
-  ObjFile(MemoryBufferRef mb, uint32_t modTime, StringRef archiveName);
-  static bool classof(const InputFile *f) { return f->kind() == ObjKind; }
+    ObjFile(MemoryBufferRef mb, uint32_t modTime, StringRef archiveName);
+    static bool classof(const InputFile *f) {
+        return f->kind() == ObjKind;
+    }
 
-  llvm::DWARFUnit *compileUnit = nullptr;
-  const uint32_t modTime;
-  ArrayRef<llvm::MachO::section_64> sectionHeaders;
-  std::vector<InputSection *> debugSections;
+    llvm::DWARFUnit *compileUnit = nullptr;
+    const uint32_t modTime;
+    ArrayRef<llvm::MachO::section_64> sectionHeaders;
+    std::vector<InputSection *> debugSections;
 
 private:
-  void parseSections(ArrayRef<llvm::MachO::section_64>);
-  void parseSymbols(ArrayRef<lld::structs::nlist_64> nList, const char *strtab,
-                    bool subsectionsViaSymbols);
-  Symbol *parseNonSectionSymbol(const structs::nlist_64 &sym, StringRef name);
-  void parseRelocations(const llvm::MachO::section_64 &, SubsectionMap &);
-  void parseDebugInfo();
+    void parseSections(ArrayRef<llvm::MachO::section_64>);
+    void parseSymbols(ArrayRef<lld::structs::nlist_64> nList, const char *strtab,
+                      bool subsectionsViaSymbols);
+    Symbol *parseNonSectionSymbol(const structs::nlist_64 &sym, StringRef name);
+    void parseRelocations(const llvm::MachO::section_64 &, SubsectionMap &);
+    void parseDebugInfo();
 };
 
 // command-line -sectcreate file
 class OpaqueFile : public InputFile {
 public:
-  OpaqueFile(MemoryBufferRef mb, StringRef segName, StringRef sectName);
-  static bool classof(const InputFile *f) { return f->kind() == OpaqueKind; }
+    OpaqueFile(MemoryBufferRef mb, StringRef segName, StringRef sectName);
+    static bool classof(const InputFile *f) {
+        return f->kind() == OpaqueKind;
+    }
 };
 
 // .dylib file
 class DylibFile : public InputFile {
 public:
-  // Mach-O dylibs can re-export other dylibs as sub-libraries, meaning that the
-  // symbols in those sub-libraries will be available under the umbrella
-  // library's namespace. Those sub-libraries can also have their own
-  // re-exports. When loading a re-exported dylib, `umbrella` should be set to
-  // the root dylib to ensure symbols in the child library are correctly bound
-  // to the root. On the other hand, if a dylib is being directly loaded
-  // (through an -lfoo flag), then `umbrella` should be a nullptr.
-  explicit DylibFile(MemoryBufferRef mb, DylibFile *umbrella = nullptr);
+    // Mach-O dylibs can re-export other dylibs as sub-libraries, meaning that the
+    // symbols in those sub-libraries will be available under the umbrella
+    // library's namespace. Those sub-libraries can also have their own
+    // re-exports. When loading a re-exported dylib, `umbrella` should be set to
+    // the root dylib to ensure symbols in the child library are correctly bound
+    // to the root. On the other hand, if a dylib is being directly loaded
+    // (through an -lfoo flag), then `umbrella` should be a nullptr.
+    explicit DylibFile(MemoryBufferRef mb, DylibFile *umbrella = nullptr);
 
-  explicit DylibFile(const llvm::MachO::InterfaceFile &interface,
-                     DylibFile *umbrella = nullptr);
+    explicit DylibFile(const llvm::MachO::InterfaceFile &interface,
+                       DylibFile *umbrella = nullptr);
 
-  static bool classof(const InputFile *f) { return f->kind() == DylibKind; }
+    static bool classof(const InputFile *f) {
+        return f->kind() == DylibKind;
+    }
 
-  StringRef dylibName;
-  uint32_t compatibilityVersion = 0;
-  uint32_t currentVersion = 0;
-  uint64_t ordinal = 0; // Ordinal numbering starts from 1, so 0 is a sentinel
-  RefState refState;
-  bool reexport = false;
-  bool forceWeakImport = false;
+    StringRef dylibName;
+    uint32_t compatibilityVersion = 0;
+    uint32_t currentVersion = 0;
+    uint64_t ordinal = 0; // Ordinal numbering starts from 1, so 0 is a sentinel
+    RefState refState;
+    bool reexport = false;
+    bool forceWeakImport = false;
 };
 
 // .a file
 class ArchiveFile : public InputFile {
 public:
-  explicit ArchiveFile(std::unique_ptr<llvm::object::Archive> &&file);
-  static bool classof(const InputFile *f) { return f->kind() == ArchiveKind; }
-  void fetch(const llvm::object::Archive::Symbol &sym);
+    explicit ArchiveFile(std::unique_ptr<llvm::object::Archive> &&file);
+    static bool classof(const InputFile *f) {
+        return f->kind() == ArchiveKind;
+    }
+    void fetch(const llvm::object::Archive::Symbol &sym);
 
 private:
-  std::unique_ptr<llvm::object::Archive> file;
-  // Keep track of children fetched from the archive by tracking
-  // which address offsets have been fetched already.
-  llvm::DenseSet<uint64_t> seen;
+    std::unique_ptr<llvm::object::Archive> file;
+    // Keep track of children fetched from the archive by tracking
+    // which address offsets have been fetched already.
+    llvm::DenseSet<uint64_t> seen;
 };
 
 class BitcodeFile : public InputFile {
 public:
-  explicit BitcodeFile(MemoryBufferRef mb);
-  static bool classof(const InputFile *f) { return f->kind() == BitcodeKind; }
+    explicit BitcodeFile(MemoryBufferRef mb);
+    static bool classof(const InputFile *f) {
+        return f->kind() == BitcodeKind;
+    }
 
-  std::unique_ptr<llvm::lto::InputFile> obj;
+    std::unique_ptr<llvm::lto::InputFile> obj;
 };
 
 extern llvm::SetVector<InputFile *> inputFiles;

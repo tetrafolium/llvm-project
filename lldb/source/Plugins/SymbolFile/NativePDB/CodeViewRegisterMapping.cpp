@@ -423,35 +423,35 @@ static const uint32_t g_code_view_to_lldb_registers_x86_64[] = {
 
 uint32_t lldb_private::npdb::GetLLDBRegisterNumber(
     llvm::Triple::ArchType arch_type, llvm::codeview::RegisterId register_id) {
-  switch (arch_type) {
-  case llvm::Triple::x86:
-    if (static_cast<uint16_t>(register_id) <
-        sizeof(g_code_view_to_lldb_registers_x86) /
-            sizeof(g_code_view_to_lldb_registers_x86[0]))
-      return g_code_view_to_lldb_registers_x86[static_cast<uint16_t>(
-          register_id)];
+    switch (arch_type) {
+    case llvm::Triple::x86:
+        if (static_cast<uint16_t>(register_id) <
+                sizeof(g_code_view_to_lldb_registers_x86) /
+                sizeof(g_code_view_to_lldb_registers_x86[0]))
+            return g_code_view_to_lldb_registers_x86[static_cast<uint16_t>(
+                        register_id)];
 
-    switch (register_id) {
-    case llvm::codeview::RegisterId::MXCSR:
-      return lldb_mxcsr_i386;
-    case llvm::codeview::RegisterId::BND0:
-      return lldb_bnd0_i386;
-    case llvm::codeview::RegisterId::BND1:
-      return lldb_bnd1_i386;
-    case llvm::codeview::RegisterId::BND2:
-      return lldb_bnd2_i386;
+        switch (register_id) {
+        case llvm::codeview::RegisterId::MXCSR:
+            return lldb_mxcsr_i386;
+        case llvm::codeview::RegisterId::BND0:
+            return lldb_bnd0_i386;
+        case llvm::codeview::RegisterId::BND1:
+            return lldb_bnd1_i386;
+        case llvm::codeview::RegisterId::BND2:
+            return lldb_bnd2_i386;
+        default:
+            return LLDB_INVALID_REGNUM;
+        }
+    case llvm::Triple::x86_64:
+        if (static_cast<uint16_t>(register_id) <
+                sizeof(g_code_view_to_lldb_registers_x86_64) /
+                sizeof(g_code_view_to_lldb_registers_x86_64[0]))
+            return g_code_view_to_lldb_registers_x86_64[static_cast<uint16_t>(
+                        register_id)];
+
+        return LLDB_INVALID_REGNUM;
     default:
-      return LLDB_INVALID_REGNUM;
+        return LLDB_INVALID_REGNUM;
     }
-  case llvm::Triple::x86_64:
-    if (static_cast<uint16_t>(register_id) <
-        sizeof(g_code_view_to_lldb_registers_x86_64) /
-            sizeof(g_code_view_to_lldb_registers_x86_64[0]))
-      return g_code_view_to_lldb_registers_x86_64[static_cast<uint16_t>(
-          register_id)];
-
-    return LLDB_INVALID_REGNUM;
-  default:
-    return LLDB_INVALID_REGNUM;
-  }
 }

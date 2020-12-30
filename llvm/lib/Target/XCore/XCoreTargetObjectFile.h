@@ -15,13 +15,13 @@ namespace llvm {
 
 static const unsigned CodeModelLargeSize = 256;
 
-  class XCoreTargetObjectFile : public TargetLoweringObjectFileELF {
+class XCoreTargetObjectFile : public TargetLoweringObjectFileELF {
     MCSection *BSSSectionLarge;
     MCSection *DataSectionLarge;
     MCSection *ReadOnlySectionLarge;
     MCSection *DataRelROSectionLarge;
 
-  public:
+public:
     void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
     MCSection *getExplicitSectionGlobal(const GlobalObject *GO, SectionKind Kind,
@@ -33,7 +33,7 @@ static const unsigned CodeModelLargeSize = 256;
     MCSection *getSectionForConstant(const DataLayout &DL, SectionKind Kind,
                                      const Constant *C,
                                      Align &Alignment) const override;
-  };
+};
 } // end namespace llvm
 
 #endif

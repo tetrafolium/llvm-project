@@ -14,14 +14,14 @@ const int d = 100;
 extern int foo();
 
 int main() {
-  const int d = 4;
-  const float e = 4; // DexLabel("main")
-  const char *f = "Woopy";
-  return d + foo();
+    const int d = 4;
+    const float e = 4; // DexLabel("main")
+    const char *f = "Woopy";
+    return d + foo();
 }
 
 int foo() {
-  return d; // DexLabel("foo")
+    return d; // DexLabel("foo")
 }
 
 // DexExpectWatchValue('d', '4', on_line='main')

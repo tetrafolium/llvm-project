@@ -18,19 +18,19 @@ namespace darwin {
 
 class DarwinModule : public ClangTidyModule {
 public:
-  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-    CheckFactories.registerCheck<AvoidSpinlockCheck>(
-        "darwin-avoid-spinlock");
-    CheckFactories.registerCheck<DispatchOnceNonstaticCheck>(
-        "darwin-dispatch-once-nonstatic");
-  }
+    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+        CheckFactories.registerCheck<AvoidSpinlockCheck>(
+            "darwin-avoid-spinlock");
+        CheckFactories.registerCheck<DispatchOnceNonstaticCheck>(
+            "darwin-dispatch-once-nonstatic");
+    }
 };
 
 } // namespace darwin
 
 // Register the DarwinTidyModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<darwin::DarwinModule>
-    X("darwin-module", "Adds Darwin-specific lint checks.");
+X("darwin-module", "Adds Darwin-specific lint checks.");
 
 // This anchor is used to force the linker to link in the generated object file
 // and thus register the DarwinModule.

@@ -30,66 +30,78 @@ namespace llvm {
 
 class ShapeT {
 public:
-  ShapeT(MachineOperand *Row, MachineOperand *Col,
-         const MachineRegisterInfo *MRI = nullptr)
-      : Row(Row), Col(Col) {
-    if (MRI)
-      deduceImm(MRI);
-  }
-  ShapeT()
-      : Row(nullptr), Col(nullptr), RowImm(InvalidImmShape),
-        ColImm(InvalidImmShape) {}
-  bool operator==(const ShapeT &Shape) {
-    MachineOperand *R = Shape.Row;
-    MachineOperand *C = Shape.Col;
-    if (!R || !C)
-      return false;
-    if (!Row || !Col)
-      return false;
-    if (Row->getReg() == R->getReg() && Col->getReg() == C->getReg())
-      return true;
-    if ((RowImm != InvalidImmShape) && (ColImm != InvalidImmShape))
-      return RowImm == Shape.getRowImm() && ColImm == Shape.getColImm();
-    return false;
-  }
+    ShapeT(MachineOperand *Row, MachineOperand *Col,
+           const MachineRegisterInfo *MRI = nullptr)
+        : Row(Row), Col(Col) {
+        if (MRI)
+            deduceImm(MRI);
+    }
+    ShapeT()
+        : Row(nullptr), Col(nullptr), RowImm(InvalidImmShape),
+          ColImm(InvalidImmShape) {}
+    bool operator==(const ShapeT &Shape) {
+        MachineOperand *R = Shape.Row;
+        MachineOperand *C = Shape.Col;
+        if (!R || !C)
+            return false;
+        if (!Row || !Col)
+            return false;
+        if (Row->getReg() == R->getReg() && Col->getReg() == C->getReg())
+            return true;
+        if ((RowImm != InvalidImmShape) && (ColImm != InvalidImmShape))
+            return RowImm == Shape.getRowImm() && ColImm == Shape.getColImm();
+        return false;
+    }
 
-  bool operator!=(const ShapeT &Shape) { return !(*this == Shape); }
+    bool operator!=(const ShapeT &Shape) {
+        return !(*this == Shape);
+    }
 
-  MachineOperand *getRow() const { return Row; }
+    MachineOperand *getRow() const {
+        return Row;
+    }
 
-  MachineOperand *getCol() const { return Col; }
+    MachineOperand *getCol() const {
+        return Col;
+    }
 
-  int64_t getRowImm() const { return RowImm; }
+    int64_t getRowImm() const {
+        return RowImm;
+    }
 
-  int64_t getColImm() const { return ColImm; }
+    int64_t getColImm() const {
+        return ColImm;
+    }
 
-  bool isValid() { return (Row != nullptr) && (Col != nullptr); }
+    bool isValid() {
+        return (Row != nullptr) && (Col != nullptr);
+    }
 
-  void deduceImm(const MachineRegisterInfo *MRI) {
-    // All def must be the same value, otherwise it is invalid MIs.
-    // Find the immediate.
-    // TODO copy propagation.
-    auto GetImm = [&](Register Reg) {
-      int64_t Imm = InvalidImmShape;
-      for (const MachineOperand &DefMO : MRI->def_operands(Reg)) {
-        const auto *MI = DefMO.getParent();
-        if (MI->isMoveImmediate()) {
-          Imm = MI->getOperand(1).getImm();
-          break;
-        }
-      }
-      return Imm;
-    };
-    RowImm = GetImm(Row->getReg());
-    ColImm = GetImm(Col->getReg());
-  }
+    void deduceImm(const MachineRegisterInfo *MRI) {
+        // All def must be the same value, otherwise it is invalid MIs.
+        // Find the immediate.
+        // TODO copy propagation.
+        auto GetImm = [&](Register Reg) {
+            int64_t Imm = InvalidImmShape;
+            for (const MachineOperand &DefMO : MRI->def_operands(Reg)) {
+                const auto *MI = DefMO.getParent();
+                if (MI->isMoveImmediate()) {
+                    Imm = MI->getOperand(1).getImm();
+                    break;
+                }
+            }
+            return Imm;
+        };
+        RowImm = GetImm(Row->getReg());
+        ColImm = GetImm(Col->getReg());
+    }
 
 private:
-  static constexpr int64_t InvalidImmShape = -1;
-  MachineOperand *Row;
-  MachineOperand *Col;
-  int64_t RowImm;
-  int64_t ColImm;
+    static constexpr int64_t InvalidImmShape = -1;
+    MachineOperand *Row;
+    MachineOperand *Col;
+    int64_t RowImm;
+    int64_t ColImm;
 };
 
 } // namespace llvm

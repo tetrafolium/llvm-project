@@ -16,8 +16,8 @@
 // the value zero if a is zero. The least significant bit is index one.
 
 COMPILER_RT_ABI int __ffssi2(si_int a) {
-  if (a == 0) {
-    return 0;
-  }
-  return ctzsi(a) + 1;
+    if (a == 0) {
+        return 0;
+    }
+    return ctzsi(a) + 1;
 }

@@ -18,11 +18,11 @@ struct ArithmeticIfStmt;
 namespace Fortran::semantics {
 class ArithmeticIfStmtChecker : public virtual BaseChecker {
 public:
-  ArithmeticIfStmtChecker(SemanticsContext &context) : context_(context){};
-  void Leave(const parser::ArithmeticIfStmt &);
+    ArithmeticIfStmtChecker(SemanticsContext &context) : context_(context) {};
+    void Leave(const parser::ArithmeticIfStmt &);
 
 private:
-  SemanticsContext &context_;
+    SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_ARITHMETICIF_STMT_H_

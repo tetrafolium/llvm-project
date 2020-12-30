@@ -67,12 +67,12 @@ _CLC_OVERLOAD _CLC_DEF float atan2(float y, float x)
     a = y == 0.0f ? at : a;
 
     // if (!FINITE_ONLY()) {
-        // x and y are +- Inf
-        at = x > 0.0f ? piby4 : threepiby4;
-        a = ax == INFINITY & ay == INFINITY ? at : a;
+    // x and y are +- Inf
+    at = x > 0.0f ? piby4 : threepiby4;
+    a = ax == INFINITY & ay == INFINITY ? at : a;
 
-	// x or y is NaN
-	a = isnan(x) | isnan(y) ? as_float(QNANBITPATT_SP32) : a;
+    // x or y is NaN
+    a = isnan(x) | isnan(y) ? as_float(QNANBITPATT_SP32) : a;
     // }
 
     // Fixup sign and return
@@ -136,18 +136,18 @@ _CLC_OVERLOAD _CLC_DEF double atan2(double y, double x)
     {
         double val = vbyu > 0.0625 ? vbyu : 0.063;
         int index = convert_int(fma(256.0, val, 0.5));
-	double2 tv = USE_TABLE(atan_jby256_tbl, index - 16);
-	q1 = tv.s0;
-	q2 = tv.s1;
+        double2 tv = USE_TABLE(atan_jby256_tbl, index - 16);
+        q1 = tv.s0;
+        q2 = tv.s1;
         double c = (double)index * 0x1.0p-8;
 
         // We're going to scale u and v by 2^(-u_exponent) to bring them close to 1
         // u_exponent could be EMAX so we have to do it in 2 steps
         int m = -((int)(as_ulong(u) >> EXPSHIFTBITS_DP64) - EXPBIAS_DP64);
-	//double um = __amdil_ldexp_f64(u, m);
-	//double vm = __amdil_ldexp_f64(v, m);
-	double um = ldexp(u, m);
-	double vm = ldexp(v, m);
+        //double um = __amdil_ldexp_f64(u, m);
+        //double vm = __amdil_ldexp_f64(v, m);
+        double um = ldexp(u, m);
+        double vm = ldexp(v, m);
 
         // 26 leading bits of u
         double u1 = as_double(as_ulong(um) & 0xfffffffff8000000UL);
@@ -185,7 +185,7 @@ _CLC_OVERLOAD _CLC_DEF double atan2(double y, double x)
                                     0.14285713561807169030),
                                 0.19999999999393223405),
                             0.33333333333333170500),
-			 MATH_DIVIDE(fma(-u, vu2, fma(-u2, vu1, fma(-u1, vu1, v))), u));
+                        MATH_DIVIDE(fma(-u, vu2, fma(-u2, vu1, fma(-u1, vu1, v))), u));
     }
 
 

@@ -23,8 +23,8 @@ struct Flags : DDFlags {
 #include "tsan_flags.inc"
 #undef TSAN_FLAG
 
-  void SetDefaults();
-  void ParseFromString(const char *str);
+    void SetDefaults();
+    void ParseFromString(const char *str);
 };
 
 void InitializeFlags(Flags *flags, const char *env,

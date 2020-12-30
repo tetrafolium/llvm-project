@@ -341,7 +341,7 @@ _CLC_DEF _CLC_OVERLOAD double __clc_pow(double x, double y)
         q = fma(r*r, q, r);
 
         expv = fma(f, q, f2) + f1;
-	      expv = ldexp(expv, m);
+        expv = ldexp(expv, m);
 
         expv = v > max_exp_arg ? as_double(0x7FF0000000000000L) : expv;
         expv = v < min_exp_arg ? 0.0 : expv;

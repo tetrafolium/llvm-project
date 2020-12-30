@@ -22,13 +22,13 @@ namespace abseil {
 /// http://clang.llvm.org/extra/clang-tidy/checks/abseil-time-subtraction.html
 class TimeSubtractionCheck : public ClangTidyCheck {
 public:
-  TimeSubtractionCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    TimeSubtractionCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void emitDiagnostic(const Expr* Node, llvm::StringRef Replacement);
+    void emitDiagnostic(const Expr* Node, llvm::StringRef Replacement);
 };
 
 } // namespace abseil

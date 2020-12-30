@@ -17,8 +17,8 @@
 using namespace llvm;
 
 void InstructionCost::print(raw_ostream &OS) const {
-  if (isValid())
-    OS << Value;
-  else
-    OS << "Invalid";
+    if (isValid())
+        OS << Value;
+    else
+        OS << "Invalid";
 }

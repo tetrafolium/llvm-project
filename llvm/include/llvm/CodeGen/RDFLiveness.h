@@ -45,10 +45,10 @@ using NodeRef = std::pair<NodeId, LaneBitmask>;
 namespace std {
 
 template <> struct hash<llvm::rdf::detail::NodeRef> {
-  std::size_t operator()(llvm::rdf::detail::NodeRef R) const {
-    return std::hash<llvm::rdf::NodeId>{}(R.first) ^
-           std::hash<llvm::LaneBitmask::Type>{}(R.second.getAsInteger());
-  }
+    std::size_t operator()(llvm::rdf::detail::NodeRef R) const {
+        return std::hash<llvm::rdf::NodeId> {}(R.first) ^
+               std::hash<llvm::LaneBitmask::Type> {}(R.second.getAsInteger());
+    }
 };
 
 } // namespace std
@@ -56,20 +56,20 @@ template <> struct hash<llvm::rdf::detail::NodeRef> {
 namespace llvm {
 namespace rdf {
 
-  struct Liveness {
-  public:
+struct Liveness {
+public:
     // This is really a std::map, except that it provides a non-trivial
     // default constructor to the element accessed via [].
     struct LiveMapType {
-      LiveMapType(const PhysicalRegisterInfo &pri) : Empty(pri) {}
+        LiveMapType(const PhysicalRegisterInfo &pri) : Empty(pri) {}
 
-      RegisterAggr &operator[] (MachineBasicBlock *B) {
-        return Map.emplace(B, Empty).first->second;
-      }
+        RegisterAggr &operator[] (MachineBasicBlock *B) {
+            return Map.emplace(B, Empty).first->second;
+        }
 
     private:
-      RegisterAggr Empty;
-      std::map<MachineBasicBlock*,RegisterAggr> Map;
+        RegisterAggr Empty;
+        std::map<MachineBasicBlock*,RegisterAggr> Map;
     };
 
     using NodeRef = detail::NodeRef;
@@ -81,36 +81,40 @@ namespace rdf {
           MDF(g.getDF()), LiveMap(g.getPRI()), Empty(), NoRegs(g.getPRI()) {}
 
     NodeList getAllReachingDefs(RegisterRef RefRR, NodeAddr<RefNode*> RefA,
-        bool TopShadows, bool FullChain, const RegisterAggr &DefRRs);
+                                bool TopShadows, bool FullChain, const RegisterAggr &DefRRs);
 
     NodeList getAllReachingDefs(NodeAddr<RefNode*> RefA) {
-      return getAllReachingDefs(RefA.Addr->getRegRef(DFG), RefA, false,
-                                false, NoRegs);
+        return getAllReachingDefs(RefA.Addr->getRegRef(DFG), RefA, false,
+                                  false, NoRegs);
     }
 
     NodeList getAllReachingDefs(RegisterRef RefRR, NodeAddr<RefNode*> RefA) {
-      return getAllReachingDefs(RefRR, RefA, false, false, NoRegs);
+        return getAllReachingDefs(RefRR, RefA, false, false, NoRegs);
     }
 
     NodeSet getAllReachedUses(RegisterRef RefRR, NodeAddr<DefNode*> DefA,
-        const RegisterAggr &DefRRs);
+                              const RegisterAggr &DefRRs);
 
     NodeSet getAllReachedUses(RegisterRef RefRR, NodeAddr<DefNode*> DefA) {
-      return getAllReachedUses(RefRR, DefA, NoRegs);
+        return getAllReachedUses(RefRR, DefA, NoRegs);
     }
 
     std::pair<NodeSet,bool> getAllReachingDefsRec(RegisterRef RefRR,
-        NodeAddr<RefNode*> RefA, NodeSet &Visited, const NodeSet &Defs);
+            NodeAddr<RefNode*> RefA, NodeSet &Visited, const NodeSet &Defs);
 
     NodeAddr<RefNode*> getNearestAliasedRef(RegisterRef RefRR,
-        NodeAddr<InstrNode*> IA);
+                                            NodeAddr<InstrNode*> IA);
 
-    LiveMapType &getLiveMap() { return LiveMap; }
-    const LiveMapType &getLiveMap() const { return LiveMap; }
+    LiveMapType &getLiveMap() {
+        return LiveMap;
+    }
+    const LiveMapType &getLiveMap() const {
+        return LiveMap;
+    }
 
     const RefMap &getRealUses(NodeId P) const {
-      auto F = RealUseMap.find(P);
-      return F == RealUseMap.end() ? Empty : F->second;
+        auto F = RealUseMap.find(P);
+        return F == RealUseMap.end() ? Empty : F->second;
     }
 
     void computePhiInfo();
@@ -119,9 +123,11 @@ namespace rdf {
     void resetKills();
     void resetKills(MachineBasicBlock *B);
 
-    void trace(bool T) { Trace = T; }
+    void trace(bool T) {
+        Trace = T;
+    }
 
-  private:
+private:
     const DataFlowGraph &DFG;
     const TargetRegisterInfo &TRI;
     const PhysicalRegisterInfo &PRI;
@@ -162,11 +168,11 @@ namespace rdf {
     void emptify(RefMap &M);
 
     std::pair<NodeSet,bool> getAllReachingDefsRecImpl(RegisterRef RefRR,
-        NodeAddr<RefNode*> RefA, NodeSet &Visited, const NodeSet &Defs,
-        unsigned Nest, unsigned MaxNest);
-  };
+            NodeAddr<RefNode*> RefA, NodeSet &Visited, const NodeSet &Defs,
+            unsigned Nest, unsigned MaxNest);
+};
 
-  raw_ostream &operator<<(raw_ostream &OS, const Print<Liveness::RefMap> &P);
+raw_ostream &operator<<(raw_ostream &OS, const Print<Liveness::RefMap> &P);
 
 } // end namespace rdf
 

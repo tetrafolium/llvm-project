@@ -9,6 +9,6 @@
 #endif
 
 _CLC_DEF _CLC_OVERLOAD uint get_work_dim(void) {
-  CONST_AS uint *ptr = (CONST_AS uint *)__builtin_amdgcn_implicitarg_ptr();
-  return ptr[0];
+    CONST_AS uint *ptr = (CONST_AS uint *)__builtin_amdgcn_implicitarg_ptr();
+    return ptr[0];
 }

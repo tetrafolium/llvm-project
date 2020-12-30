@@ -23,7 +23,7 @@
 #include <clc/clc.h>
 
 _CLC_OVERLOAD _CLC_DEF float length(float p) {
-  return fabs(p);
+    return fabs(p);
 }
 
 #define V_FLENGTH(p)                     \
@@ -40,22 +40,22 @@ _CLC_OVERLOAD _CLC_DEF float length(float p) {
   return sqrt(l2);
 
 _CLC_OVERLOAD _CLC_DEF float length(float2 p) {
-  V_FLENGTH(p);
+    V_FLENGTH(p);
 }
 
 _CLC_OVERLOAD _CLC_DEF float length(float3 p) {
-  V_FLENGTH(p);
+    V_FLENGTH(p);
 }
 
 _CLC_OVERLOAD _CLC_DEF float length(float4 p) {
-  V_FLENGTH(p);
+    V_FLENGTH(p);
 }
 
 #ifdef cl_khr_fp64
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-_CLC_OVERLOAD _CLC_DEF double length(double p){
-  return fabs(p);
+_CLC_OVERLOAD _CLC_DEF double length(double p) {
+    return fabs(p);
 }
 
 #define V_DLENGTH(p)                       \
@@ -72,15 +72,15 @@ _CLC_OVERLOAD _CLC_DEF double length(double p){
   return sqrt(l2);
 
 _CLC_OVERLOAD _CLC_DEF double length(double2 p) {
-  V_DLENGTH(p);
+    V_DLENGTH(p);
 }
 
 _CLC_OVERLOAD _CLC_DEF double length(double3 p) {
-  V_DLENGTH(p);
+    V_DLENGTH(p);
 }
 
 _CLC_OVERLOAD _CLC_DEF double length(double4 p) {
-  V_DLENGTH(p);
+    V_DLENGTH(p);
 }
 
 #endif
@@ -88,8 +88,8 @@ _CLC_OVERLOAD _CLC_DEF double length(double4 p) {
 #ifdef cl_khr_fp16
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
 
-_CLC_OVERLOAD _CLC_DEF half length(half p){
-  return fabs(p);
+_CLC_OVERLOAD _CLC_DEF half length(half p) {
+    return fabs(p);
 }
 
 // Only available in CLC1.2
@@ -111,15 +111,15 @@ _CLC_OVERLOAD _CLC_DEF half length(half p){
   return sqrt(l2);
 
 _CLC_OVERLOAD _CLC_DEF half length(half2 p) {
-  V_HLENGTH(p);
+    V_HLENGTH(p);
 }
 
 _CLC_OVERLOAD _CLC_DEF half length(half3 p) {
-  V_HLENGTH(p);
+    V_HLENGTH(p);
 }
 
 _CLC_OVERLOAD _CLC_DEF half length(half4 p) {
-  V_HLENGTH(p);
+    V_HLENGTH(p);
 }
 
 #endif

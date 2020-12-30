@@ -25,7 +25,7 @@ class GPUModuleOp;
 
 /// Collect a set of patterns to convert from the GPU dialect to ROCDL.
 void populateGpuToROCDLConversionPatterns(LLVMTypeConverter &converter,
-                                          OwningRewritePatternList &patterns);
+        OwningRewritePatternList &patterns);
 
 /// Configure target to convert from the GPU dialect to ROCDL.
 void configureGpuToROCDLConversionLegality(ConversionTarget &target);
@@ -34,8 +34,8 @@ void configureGpuToROCDLConversionLegality(ConversionTarget &target);
 /// index bitwidth used for the lowering of the device side index computations
 /// is configurable.
 std::unique_ptr<OperationPass<gpu::GPUModuleOp>>
-createLowerGpuOpsToROCDLOpsPass(
-    unsigned indexBitwidth = kDeriveIndexBitwidthFromDataLayout);
+        createLowerGpuOpsToROCDLOpsPass(
+            unsigned indexBitwidth = kDeriveIndexBitwidthFromDataLayout);
 
 } // namespace mlir
 

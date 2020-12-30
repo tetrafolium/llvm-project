@@ -23,37 +23,39 @@ namespace mach_o {
 //
 class FlatNamespaceFile : public SharedLibraryFile {
 public:
-  FlatNamespaceFile(const MachOLinkingContext &context)
-    : SharedLibraryFile("flat namespace") { }
+    FlatNamespaceFile(const MachOLinkingContext &context)
+        : SharedLibraryFile("flat namespace") { }
 
-  OwningAtomPtr<SharedLibraryAtom> exports(StringRef name) const override {
-    return new (allocator()) MachOSharedLibraryAtom(*this, name, getDSOName(),
-                                                    false);
-  }
+    OwningAtomPtr<SharedLibraryAtom> exports(StringRef name) const override {
+        return new (allocator()) MachOSharedLibraryAtom(*this, name, getDSOName(),
+                false);
+    }
 
-  StringRef getDSOName() const override { return "flat-namespace"; }
+    StringRef getDSOName() const override {
+        return "flat-namespace";
+    }
 
-  const AtomRange<DefinedAtom> defined() const override {
-    return _noDefinedAtoms;
-  }
-  const AtomRange<UndefinedAtom> undefined() const override {
-    return _noUndefinedAtoms;
-  }
+    const AtomRange<DefinedAtom> defined() const override {
+        return _noDefinedAtoms;
+    }
+    const AtomRange<UndefinedAtom> undefined() const override {
+        return _noUndefinedAtoms;
+    }
 
-  const AtomRange<SharedLibraryAtom> sharedLibrary() const override {
-    return _noSharedLibraryAtoms;
-  }
+    const AtomRange<SharedLibraryAtom> sharedLibrary() const override {
+        return _noSharedLibraryAtoms;
+    }
 
-  const AtomRange<AbsoluteAtom> absolute() const override {
-    return _noAbsoluteAtoms;
-  }
+    const AtomRange<AbsoluteAtom> absolute() const override {
+        return _noAbsoluteAtoms;
+    }
 
-  void clearAtoms() override {
-    _noDefinedAtoms.clear();
-    _noUndefinedAtoms.clear();
-    _noSharedLibraryAtoms.clear();
-    _noAbsoluteAtoms.clear();
-  }
+    void clearAtoms() override {
+        _noDefinedAtoms.clear();
+        _noUndefinedAtoms.clear();
+        _noSharedLibraryAtoms.clear();
+        _noAbsoluteAtoms.clear();
+    }
 };
 
 } // namespace mach_o

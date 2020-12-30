@@ -142,7 +142,8 @@ _LIBCPP_SAFE_STATIC static __libcpp_mutex_t mut_back[__sp_mut_count] =
 };
 
 _LIBCPP_CONSTEXPR __sp_mut::__sp_mut(void* p) _NOEXCEPT
-   : __lx(p)
+:
+__lx(p)
 {
 }
 

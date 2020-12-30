@@ -135,12 +135,12 @@ namespace {
 /// isNewFormatTypeNode - Return true iff the given type node is in the new
 /// size-aware format.
 static bool isNewFormatTypeNode(const MDNode *N) {
-  if (N->getNumOperands() < 3)
-    return false;
-  // In the old format the first operand is a string.
-  if (!isa<MDNode>(N->getOperand(0)))
-    return false;
-  return true;
+    if (N->getNumOperands() < 3)
+        return false;
+    // In the old format the first operand is a string.
+    if (!isa<MDNode>(N->getOperand(0)))
+        return false;
+    return true;
 }
 
 /// This is a simple wrapper around an MDNode which provides a higher-level
@@ -148,44 +148,48 @@ static bool isNewFormatTypeNode(const MDNode *N) {
 /// in its operands.
 template<typename MDNodeTy>
 class TBAANodeImpl {
-  MDNodeTy *Node = nullptr;
+    MDNodeTy *Node = nullptr;
 
 public:
-  TBAANodeImpl() = default;
-  explicit TBAANodeImpl(MDNodeTy *N) : Node(N) {}
+    TBAANodeImpl() = default;
+    explicit TBAANodeImpl(MDNodeTy *N) : Node(N) {}
 
-  /// getNode - Get the MDNode for this TBAANode.
-  MDNodeTy *getNode() const { return Node; }
+    /// getNode - Get the MDNode for this TBAANode.
+    MDNodeTy *getNode() const {
+        return Node;
+    }
 
-  /// isNewFormat - Return true iff the wrapped type node is in the new
-  /// size-aware format.
-  bool isNewFormat() const { return isNewFormatTypeNode(Node); }
+    /// isNewFormat - Return true iff the wrapped type node is in the new
+    /// size-aware format.
+    bool isNewFormat() const {
+        return isNewFormatTypeNode(Node);
+    }
 
-  /// getParent - Get this TBAANode's Alias tree parent.
-  TBAANodeImpl<MDNodeTy> getParent() const {
-    if (isNewFormat())
-      return TBAANodeImpl(cast<MDNodeTy>(Node->getOperand(0)));
+    /// getParent - Get this TBAANode's Alias tree parent.
+    TBAANodeImpl<MDNodeTy> getParent() const {
+        if (isNewFormat())
+            return TBAANodeImpl(cast<MDNodeTy>(Node->getOperand(0)));
 
-    if (Node->getNumOperands() < 2)
-      return TBAANodeImpl<MDNodeTy>();
-    MDNodeTy *P = dyn_cast_or_null<MDNodeTy>(Node->getOperand(1));
-    if (!P)
-      return TBAANodeImpl<MDNodeTy>();
-    // Ok, this node has a valid parent. Return it.
-    return TBAANodeImpl<MDNodeTy>(P);
-  }
+        if (Node->getNumOperands() < 2)
+            return TBAANodeImpl<MDNodeTy>();
+        MDNodeTy *P = dyn_cast_or_null<MDNodeTy>(Node->getOperand(1));
+        if (!P)
+            return TBAANodeImpl<MDNodeTy>();
+        // Ok, this node has a valid parent. Return it.
+        return TBAANodeImpl<MDNodeTy>(P);
+    }
 
-  /// Test if this TBAANode represents a type for objects which are
-  /// not modified (by any means) in the context where this
-  /// AliasAnalysis is relevant.
-  bool isTypeImmutable() const {
-    if (Node->getNumOperands() < 3)
-      return false;
-    ConstantInt *CI = mdconst::dyn_extract<ConstantInt>(Node->getOperand(2));
-    if (!CI)
-      return false;
-    return CI->getValue()[0];
-  }
+    /// Test if this TBAANode represents a type for objects which are
+    /// not modified (by any means) in the context where this
+    /// AliasAnalysis is relevant.
+    bool isTypeImmutable() const {
+        if (Node->getNumOperands() < 3)
+            return false;
+        ConstantInt *CI = mdconst::dyn_extract<ConstantInt>(Node->getOperand(2));
+        if (!CI)
+            return false;
+        return CI->getValue()[0];
+    }
 };
 
 /// \name Specializations of \c TBAANodeImpl for const and non const qualified
@@ -200,56 +204,58 @@ using MutableTBAANode = TBAANodeImpl<MDNode>;
 /// information is encoded in its operands.
 template<typename MDNodeTy>
 class TBAAStructTagNodeImpl {
-  /// This node should be created with createTBAAAccessTag().
-  MDNodeTy *Node;
+    /// This node should be created with createTBAAAccessTag().
+    MDNodeTy *Node;
 
 public:
-  explicit TBAAStructTagNodeImpl(MDNodeTy *N) : Node(N) {}
+    explicit TBAAStructTagNodeImpl(MDNodeTy *N) : Node(N) {}
 
-  /// Get the MDNode for this TBAAStructTagNode.
-  MDNodeTy *getNode() const { return Node; }
+    /// Get the MDNode for this TBAAStructTagNode.
+    MDNodeTy *getNode() const {
+        return Node;
+    }
 
-  /// isNewFormat - Return true iff the wrapped access tag is in the new
-  /// size-aware format.
-  bool isNewFormat() const {
-    if (Node->getNumOperands() < 4)
-      return false;
-    if (MDNodeTy *AccessType = getAccessType())
-      if (!TBAANodeImpl<MDNodeTy>(AccessType).isNewFormat())
-        return false;
-    return true;
-  }
+    /// isNewFormat - Return true iff the wrapped access tag is in the new
+    /// size-aware format.
+    bool isNewFormat() const {
+        if (Node->getNumOperands() < 4)
+            return false;
+        if (MDNodeTy *AccessType = getAccessType())
+            if (!TBAANodeImpl<MDNodeTy>(AccessType).isNewFormat())
+                return false;
+        return true;
+    }
 
-  MDNodeTy *getBaseType() const {
-    return dyn_cast_or_null<MDNode>(Node->getOperand(0));
-  }
+    MDNodeTy *getBaseType() const {
+        return dyn_cast_or_null<MDNode>(Node->getOperand(0));
+    }
 
-  MDNodeTy *getAccessType() const {
-    return dyn_cast_or_null<MDNode>(Node->getOperand(1));
-  }
+    MDNodeTy *getAccessType() const {
+        return dyn_cast_or_null<MDNode>(Node->getOperand(1));
+    }
 
-  uint64_t getOffset() const {
-    return mdconst::extract<ConstantInt>(Node->getOperand(2))->getZExtValue();
-  }
+    uint64_t getOffset() const {
+        return mdconst::extract<ConstantInt>(Node->getOperand(2))->getZExtValue();
+    }
 
-  uint64_t getSize() const {
-    if (!isNewFormat())
-      return UINT64_MAX;
-    return mdconst::extract<ConstantInt>(Node->getOperand(3))->getZExtValue();
-  }
+    uint64_t getSize() const {
+        if (!isNewFormat())
+            return UINT64_MAX;
+        return mdconst::extract<ConstantInt>(Node->getOperand(3))->getZExtValue();
+    }
 
-  /// Test if this TBAAStructTagNode represents a type for objects
-  /// which are not modified (by any means) in the context where this
-  /// AliasAnalysis is relevant.
-  bool isTypeImmutable() const {
-    unsigned OpNo = isNewFormat() ? 4 : 3;
-    if (Node->getNumOperands() < OpNo + 1)
-      return false;
-    ConstantInt *CI = mdconst::dyn_extract<ConstantInt>(Node->getOperand(OpNo));
-    if (!CI)
-      return false;
-    return CI->getValue()[0];
-  }
+    /// Test if this TBAAStructTagNode represents a type for objects
+    /// which are not modified (by any means) in the context where this
+    /// AliasAnalysis is relevant.
+    bool isTypeImmutable() const {
+        unsigned OpNo = isNewFormat() ? 4 : 3;
+        if (Node->getNumOperands() < OpNo + 1)
+            return false;
+        ConstantInt *CI = mdconst::dyn_extract<ConstantInt>(Node->getOperand(OpNo));
+        if (!CI)
+            return false;
+        return CI->getValue()[0];
+    }
 };
 
 /// \name Specializations of \c TBAAStructTagNodeImpl for const and non const
@@ -263,98 +269,102 @@ using MutableTBAAStructTagNode = TBAAStructTagNodeImpl<MDNode>;
 /// higher-level interface by hiding the details of how alias analysis
 /// information is encoded in its operands.
 class TBAAStructTypeNode {
-  /// This node should be created with createTBAATypeNode().
-  const MDNode *Node = nullptr;
+    /// This node should be created with createTBAATypeNode().
+    const MDNode *Node = nullptr;
 
 public:
-  TBAAStructTypeNode() = default;
-  explicit TBAAStructTypeNode(const MDNode *N) : Node(N) {}
+    TBAAStructTypeNode() = default;
+    explicit TBAAStructTypeNode(const MDNode *N) : Node(N) {}
 
-  /// Get the MDNode for this TBAAStructTypeNode.
-  const MDNode *getNode() const { return Node; }
-
-  /// isNewFormat - Return true iff the wrapped type node is in the new
-  /// size-aware format.
-  bool isNewFormat() const { return isNewFormatTypeNode(Node); }
-
-  bool operator==(const TBAAStructTypeNode &Other) const {
-    return getNode() == Other.getNode();
-  }
-
-  /// getId - Return type identifier.
-  Metadata *getId() const {
-    return Node->getOperand(isNewFormat() ? 2 : 0);
-  }
-
-  unsigned getNumFields() const {
-    unsigned FirstFieldOpNo = isNewFormat() ? 3 : 1;
-    unsigned NumOpsPerField = isNewFormat() ? 3 : 2;
-    return (getNode()->getNumOperands() - FirstFieldOpNo) / NumOpsPerField;
-  }
-
-  TBAAStructTypeNode getFieldType(unsigned FieldIndex) const {
-    unsigned FirstFieldOpNo = isNewFormat() ? 3 : 1;
-    unsigned NumOpsPerField = isNewFormat() ? 3 : 2;
-    unsigned OpIndex = FirstFieldOpNo + FieldIndex * NumOpsPerField;
-    auto *TypeNode = cast<MDNode>(getNode()->getOperand(OpIndex));
-    return TBAAStructTypeNode(TypeNode);
-  }
-
-  /// Get this TBAAStructTypeNode's field in the type DAG with
-  /// given offset. Update the offset to be relative to the field type.
-  TBAAStructTypeNode getField(uint64_t &Offset) const {
-    bool NewFormat = isNewFormat();
-    if (NewFormat) {
-      // New-format root and scalar type nodes have no fields.
-      if (Node->getNumOperands() < 6)
-        return TBAAStructTypeNode();
-    } else {
-      // Parent can be omitted for the root node.
-      if (Node->getNumOperands() < 2)
-        return TBAAStructTypeNode();
-
-      // Fast path for a scalar type node and a struct type node with a single
-      // field.
-      if (Node->getNumOperands() <= 3) {
-        uint64_t Cur = Node->getNumOperands() == 2
-                           ? 0
-                           : mdconst::extract<ConstantInt>(Node->getOperand(2))
-                                 ->getZExtValue();
-        Offset -= Cur;
-        MDNode *P = dyn_cast_or_null<MDNode>(Node->getOperand(1));
-        if (!P)
-          return TBAAStructTypeNode();
-        return TBAAStructTypeNode(P);
-      }
+    /// Get the MDNode for this TBAAStructTypeNode.
+    const MDNode *getNode() const {
+        return Node;
     }
 
-    // Assume the offsets are in order. We return the previous field if
-    // the current offset is bigger than the given offset.
-    unsigned FirstFieldOpNo = NewFormat ? 3 : 1;
-    unsigned NumOpsPerField = NewFormat ? 3 : 2;
-    unsigned TheIdx = 0;
-    for (unsigned Idx = FirstFieldOpNo; Idx < Node->getNumOperands();
-         Idx += NumOpsPerField) {
-      uint64_t Cur = mdconst::extract<ConstantInt>(Node->getOperand(Idx + 1))
-                         ->getZExtValue();
-      if (Cur > Offset) {
-        assert(Idx >= FirstFieldOpNo + NumOpsPerField &&
-               "TBAAStructTypeNode::getField should have an offset match!");
-        TheIdx = Idx - NumOpsPerField;
-        break;
-      }
+    /// isNewFormat - Return true iff the wrapped type node is in the new
+    /// size-aware format.
+    bool isNewFormat() const {
+        return isNewFormatTypeNode(Node);
     }
-    // Move along the last field.
-    if (TheIdx == 0)
-      TheIdx = Node->getNumOperands() - NumOpsPerField;
-    uint64_t Cur = mdconst::extract<ConstantInt>(Node->getOperand(TheIdx + 1))
+
+    bool operator==(const TBAAStructTypeNode &Other) const {
+        return getNode() == Other.getNode();
+    }
+
+    /// getId - Return type identifier.
+    Metadata *getId() const {
+        return Node->getOperand(isNewFormat() ? 2 : 0);
+    }
+
+    unsigned getNumFields() const {
+        unsigned FirstFieldOpNo = isNewFormat() ? 3 : 1;
+        unsigned NumOpsPerField = isNewFormat() ? 3 : 2;
+        return (getNode()->getNumOperands() - FirstFieldOpNo) / NumOpsPerField;
+    }
+
+    TBAAStructTypeNode getFieldType(unsigned FieldIndex) const {
+        unsigned FirstFieldOpNo = isNewFormat() ? 3 : 1;
+        unsigned NumOpsPerField = isNewFormat() ? 3 : 2;
+        unsigned OpIndex = FirstFieldOpNo + FieldIndex * NumOpsPerField;
+        auto *TypeNode = cast<MDNode>(getNode()->getOperand(OpIndex));
+        return TBAAStructTypeNode(TypeNode);
+    }
+
+    /// Get this TBAAStructTypeNode's field in the type DAG with
+    /// given offset. Update the offset to be relative to the field type.
+    TBAAStructTypeNode getField(uint64_t &Offset) const {
+        bool NewFormat = isNewFormat();
+        if (NewFormat) {
+            // New-format root and scalar type nodes have no fields.
+            if (Node->getNumOperands() < 6)
+                return TBAAStructTypeNode();
+        } else {
+            // Parent can be omitted for the root node.
+            if (Node->getNumOperands() < 2)
+                return TBAAStructTypeNode();
+
+            // Fast path for a scalar type node and a struct type node with a single
+            // field.
+            if (Node->getNumOperands() <= 3) {
+                uint64_t Cur = Node->getNumOperands() == 2
+                               ? 0
+                               : mdconst::extract<ConstantInt>(Node->getOperand(2))
+                               ->getZExtValue();
+                Offset -= Cur;
+                MDNode *P = dyn_cast_or_null<MDNode>(Node->getOperand(1));
+                if (!P)
+                    return TBAAStructTypeNode();
+                return TBAAStructTypeNode(P);
+            }
+        }
+
+        // Assume the offsets are in order. We return the previous field if
+        // the current offset is bigger than the given offset.
+        unsigned FirstFieldOpNo = NewFormat ? 3 : 1;
+        unsigned NumOpsPerField = NewFormat ? 3 : 2;
+        unsigned TheIdx = 0;
+        for (unsigned Idx = FirstFieldOpNo; Idx < Node->getNumOperands();
+                Idx += NumOpsPerField) {
+            uint64_t Cur = mdconst::extract<ConstantInt>(Node->getOperand(Idx + 1))
+                           ->getZExtValue();
+            if (Cur > Offset) {
+                assert(Idx >= FirstFieldOpNo + NumOpsPerField &&
+                       "TBAAStructTypeNode::getField should have an offset match!");
+                TheIdx = Idx - NumOpsPerField;
+                break;
+            }
+        }
+        // Move along the last field.
+        if (TheIdx == 0)
+            TheIdx = Node->getNumOperands() - NumOpsPerField;
+        uint64_t Cur = mdconst::extract<ConstantInt>(Node->getOperand(TheIdx + 1))
                        ->getZExtValue();
-    Offset -= Cur;
-    MDNode *P = dyn_cast_or_null<MDNode>(Node->getOperand(TheIdx));
-    if (!P)
-      return TBAAStructTypeNode();
-    return TBAAStructTypeNode(P);
-  }
+        Offset -= Cur;
+        MDNode *P = dyn_cast_or_null<MDNode>(Node->getOperand(TheIdx));
+        if (!P)
+            return TBAAStructTypeNode();
+        return TBAAStructTypeNode(P);
+    }
 };
 
 } // end anonymous namespace
@@ -363,216 +373,218 @@ public:
 /// it as struct-path aware TBAA format, otherwise, we treat it as scalar TBAA
 /// format.
 static bool isStructPathTBAA(const MDNode *MD) {
-  // Anonymous TBAA root starts with a MDNode and dragonegg uses it as
-  // a TBAA tag.
-  return isa<MDNode>(MD->getOperand(0)) && MD->getNumOperands() >= 3;
+    // Anonymous TBAA root starts with a MDNode and dragonegg uses it as
+    // a TBAA tag.
+    return isa<MDNode>(MD->getOperand(0)) && MD->getNumOperands() >= 3;
 }
 
 AliasResult TypeBasedAAResult::alias(const MemoryLocation &LocA,
                                      const MemoryLocation &LocB,
                                      AAQueryInfo &AAQI) {
-  if (!EnableTBAA)
-    return AAResultBase::alias(LocA, LocB, AAQI);
+    if (!EnableTBAA)
+        return AAResultBase::alias(LocA, LocB, AAQI);
 
-  // If accesses may alias, chain to the next AliasAnalysis.
-  if (Aliases(LocA.AATags.TBAA, LocB.AATags.TBAA))
-    return AAResultBase::alias(LocA, LocB, AAQI);
+    // If accesses may alias, chain to the next AliasAnalysis.
+    if (Aliases(LocA.AATags.TBAA, LocB.AATags.TBAA))
+        return AAResultBase::alias(LocA, LocB, AAQI);
 
-  // Otherwise return a definitive result.
-  return NoAlias;
+    // Otherwise return a definitive result.
+    return NoAlias;
 }
 
 bool TypeBasedAAResult::pointsToConstantMemory(const MemoryLocation &Loc,
-                                               AAQueryInfo &AAQI,
-                                               bool OrLocal) {
-  if (!EnableTBAA)
+        AAQueryInfo &AAQI,
+        bool OrLocal) {
+    if (!EnableTBAA)
+        return AAResultBase::pointsToConstantMemory(Loc, AAQI, OrLocal);
+
+    const MDNode *M = Loc.AATags.TBAA;
+    if (!M)
+        return AAResultBase::pointsToConstantMemory(Loc, AAQI, OrLocal);
+
+    // If this is an "immutable" type, we can assume the pointer is pointing
+    // to constant memory.
+    if ((!isStructPathTBAA(M) && TBAANode(M).isTypeImmutable()) ||
+            (isStructPathTBAA(M) && TBAAStructTagNode(M).isTypeImmutable()))
+        return true;
+
     return AAResultBase::pointsToConstantMemory(Loc, AAQI, OrLocal);
-
-  const MDNode *M = Loc.AATags.TBAA;
-  if (!M)
-    return AAResultBase::pointsToConstantMemory(Loc, AAQI, OrLocal);
-
-  // If this is an "immutable" type, we can assume the pointer is pointing
-  // to constant memory.
-  if ((!isStructPathTBAA(M) && TBAANode(M).isTypeImmutable()) ||
-      (isStructPathTBAA(M) && TBAAStructTagNode(M).isTypeImmutable()))
-    return true;
-
-  return AAResultBase::pointsToConstantMemory(Loc, AAQI, OrLocal);
 }
 
 FunctionModRefBehavior
 TypeBasedAAResult::getModRefBehavior(const CallBase *Call) {
-  if (!EnableTBAA)
-    return AAResultBase::getModRefBehavior(Call);
+    if (!EnableTBAA)
+        return AAResultBase::getModRefBehavior(Call);
 
-  FunctionModRefBehavior Min = FMRB_UnknownModRefBehavior;
+    FunctionModRefBehavior Min = FMRB_UnknownModRefBehavior;
 
-  // If this is an "immutable" type, we can assume the call doesn't write
-  // to memory.
-  if (const MDNode *M = Call->getMetadata(LLVMContext::MD_tbaa))
-    if ((!isStructPathTBAA(M) && TBAANode(M).isTypeImmutable()) ||
-        (isStructPathTBAA(M) && TBAAStructTagNode(M).isTypeImmutable()))
-      Min = FMRB_OnlyReadsMemory;
+    // If this is an "immutable" type, we can assume the call doesn't write
+    // to memory.
+    if (const MDNode *M = Call->getMetadata(LLVMContext::MD_tbaa))
+        if ((!isStructPathTBAA(M) && TBAANode(M).isTypeImmutable()) ||
+                (isStructPathTBAA(M) && TBAAStructTagNode(M).isTypeImmutable()))
+            Min = FMRB_OnlyReadsMemory;
 
-  return FunctionModRefBehavior(AAResultBase::getModRefBehavior(Call) & Min);
+    return FunctionModRefBehavior(AAResultBase::getModRefBehavior(Call) & Min);
 }
 
 FunctionModRefBehavior TypeBasedAAResult::getModRefBehavior(const Function *F) {
-  // Functions don't have metadata. Just chain to the next implementation.
-  return AAResultBase::getModRefBehavior(F);
+    // Functions don't have metadata. Just chain to the next implementation.
+    return AAResultBase::getModRefBehavior(F);
 }
 
 ModRefInfo TypeBasedAAResult::getModRefInfo(const CallBase *Call,
-                                            const MemoryLocation &Loc,
-                                            AAQueryInfo &AAQI) {
-  if (!EnableTBAA)
+        const MemoryLocation &Loc,
+        AAQueryInfo &AAQI) {
+    if (!EnableTBAA)
+        return AAResultBase::getModRefInfo(Call, Loc, AAQI);
+
+    if (const MDNode *L = Loc.AATags.TBAA)
+        if (const MDNode *M = Call->getMetadata(LLVMContext::MD_tbaa))
+            if (!Aliases(L, M))
+                return ModRefInfo::NoModRef;
+
     return AAResultBase::getModRefInfo(Call, Loc, AAQI);
-
-  if (const MDNode *L = Loc.AATags.TBAA)
-    if (const MDNode *M = Call->getMetadata(LLVMContext::MD_tbaa))
-      if (!Aliases(L, M))
-        return ModRefInfo::NoModRef;
-
-  return AAResultBase::getModRefInfo(Call, Loc, AAQI);
 }
 
 ModRefInfo TypeBasedAAResult::getModRefInfo(const CallBase *Call1,
-                                            const CallBase *Call2,
-                                            AAQueryInfo &AAQI) {
-  if (!EnableTBAA)
+        const CallBase *Call2,
+        AAQueryInfo &AAQI) {
+    if (!EnableTBAA)
+        return AAResultBase::getModRefInfo(Call1, Call2, AAQI);
+
+    if (const MDNode *M1 = Call1->getMetadata(LLVMContext::MD_tbaa))
+        if (const MDNode *M2 = Call2->getMetadata(LLVMContext::MD_tbaa))
+            if (!Aliases(M1, M2))
+                return ModRefInfo::NoModRef;
+
     return AAResultBase::getModRefInfo(Call1, Call2, AAQI);
-
-  if (const MDNode *M1 = Call1->getMetadata(LLVMContext::MD_tbaa))
-    if (const MDNode *M2 = Call2->getMetadata(LLVMContext::MD_tbaa))
-      if (!Aliases(M1, M2))
-        return ModRefInfo::NoModRef;
-
-  return AAResultBase::getModRefInfo(Call1, Call2, AAQI);
 }
 
 bool MDNode::isTBAAVtableAccess() const {
-  if (!isStructPathTBAA(this)) {
-    if (getNumOperands() < 1)
-      return false;
-    if (MDString *Tag1 = dyn_cast<MDString>(getOperand(0))) {
-      if (Tag1->getString() == "vtable pointer")
-        return true;
+    if (!isStructPathTBAA(this)) {
+        if (getNumOperands() < 1)
+            return false;
+        if (MDString *Tag1 = dyn_cast<MDString>(getOperand(0))) {
+            if (Tag1->getString() == "vtable pointer")
+                return true;
+        }
+        return false;
     }
-    return false;
-  }
 
-  // For struct-path aware TBAA, we use the access type of the tag.
-  TBAAStructTagNode Tag(this);
-  TBAAStructTypeNode AccessType(Tag.getAccessType());
-  if(auto *Id = dyn_cast<MDString>(AccessType.getId()))
-    if (Id->getString() == "vtable pointer")
-      return true;
-  return false;
+    // For struct-path aware TBAA, we use the access type of the tag.
+    TBAAStructTagNode Tag(this);
+    TBAAStructTypeNode AccessType(Tag.getAccessType());
+    if(auto *Id = dyn_cast<MDString>(AccessType.getId()))
+        if (Id->getString() == "vtable pointer")
+            return true;
+    return false;
 }
 
 static bool matchAccessTags(const MDNode *A, const MDNode *B,
                             const MDNode **GenericTag = nullptr);
 
 MDNode *MDNode::getMostGenericTBAA(MDNode *A, MDNode *B) {
-  const MDNode *GenericTag;
-  matchAccessTags(A, B, &GenericTag);
-  return const_cast<MDNode*>(GenericTag);
+    const MDNode *GenericTag;
+    matchAccessTags(A, B, &GenericTag);
+    return const_cast<MDNode*>(GenericTag);
 }
 
 static const MDNode *getLeastCommonType(const MDNode *A, const MDNode *B) {
-  if (!A || !B)
-    return nullptr;
+    if (!A || !B)
+        return nullptr;
 
-  if (A == B)
-    return A;
+    if (A == B)
+        return A;
 
-  SmallSetVector<const MDNode *, 4> PathA;
-  TBAANode TA(A);
-  while (TA.getNode()) {
-    if (PathA.count(TA.getNode()))
-      report_fatal_error("Cycle found in TBAA metadata.");
-    PathA.insert(TA.getNode());
-    TA = TA.getParent();
-  }
+    SmallSetVector<const MDNode *, 4> PathA;
+    TBAANode TA(A);
+    while (TA.getNode()) {
+        if (PathA.count(TA.getNode()))
+            report_fatal_error("Cycle found in TBAA metadata.");
+        PathA.insert(TA.getNode());
+        TA = TA.getParent();
+    }
 
-  SmallSetVector<const MDNode *, 4> PathB;
-  TBAANode TB(B);
-  while (TB.getNode()) {
-    if (PathB.count(TB.getNode()))
-      report_fatal_error("Cycle found in TBAA metadata.");
-    PathB.insert(TB.getNode());
-    TB = TB.getParent();
-  }
+    SmallSetVector<const MDNode *, 4> PathB;
+    TBAANode TB(B);
+    while (TB.getNode()) {
+        if (PathB.count(TB.getNode()))
+            report_fatal_error("Cycle found in TBAA metadata.");
+        PathB.insert(TB.getNode());
+        TB = TB.getParent();
+    }
 
-  int IA = PathA.size() - 1;
-  int IB = PathB.size() - 1;
+    int IA = PathA.size() - 1;
+    int IB = PathB.size() - 1;
 
-  const MDNode *Ret = nullptr;
-  while (IA >= 0 && IB >= 0) {
-    if (PathA[IA] == PathB[IB])
-      Ret = PathA[IA];
-    else
-      break;
-    --IA;
-    --IB;
-  }
+    const MDNode *Ret = nullptr;
+    while (IA >= 0 && IB >= 0) {
+        if (PathA[IA] == PathB[IB])
+            Ret = PathA[IA];
+        else
+            break;
+        --IA;
+        --IB;
+    }
 
-  return Ret;
+    return Ret;
 }
 
 void Instruction::getAAMetadata(AAMDNodes &N, bool Merge) const {
-  if (Merge) {
-    N.TBAA =
-        MDNode::getMostGenericTBAA(N.TBAA, getMetadata(LLVMContext::MD_tbaa));
-    N.TBAAStruct = nullptr;
-    N.Scope = MDNode::getMostGenericAliasScope(
-        N.Scope, getMetadata(LLVMContext::MD_alias_scope));
-    N.NoAlias =
-        MDNode::intersect(N.NoAlias, getMetadata(LLVMContext::MD_noalias));
-  } else {
-    N.TBAA = getMetadata(LLVMContext::MD_tbaa);
-    N.TBAAStruct = getMetadata(LLVMContext::MD_tbaa_struct);
-    N.Scope = getMetadata(LLVMContext::MD_alias_scope);
-    N.NoAlias = getMetadata(LLVMContext::MD_noalias);
-  }
+    if (Merge) {
+        N.TBAA =
+            MDNode::getMostGenericTBAA(N.TBAA, getMetadata(LLVMContext::MD_tbaa));
+        N.TBAAStruct = nullptr;
+        N.Scope = MDNode::getMostGenericAliasScope(
+                      N.Scope, getMetadata(LLVMContext::MD_alias_scope));
+        N.NoAlias =
+            MDNode::intersect(N.NoAlias, getMetadata(LLVMContext::MD_noalias));
+    } else {
+        N.TBAA = getMetadata(LLVMContext::MD_tbaa);
+        N.TBAAStruct = getMetadata(LLVMContext::MD_tbaa_struct);
+        N.Scope = getMetadata(LLVMContext::MD_alias_scope);
+        N.NoAlias = getMetadata(LLVMContext::MD_noalias);
+    }
 }
 
 static const MDNode *createAccessTag(const MDNode *AccessType) {
-  // If there is no access type or the access type is the root node, then
-  // we don't have any useful access tag to return.
-  if (!AccessType || AccessType->getNumOperands() < 2)
-    return nullptr;
+    // If there is no access type or the access type is the root node, then
+    // we don't have any useful access tag to return.
+    if (!AccessType || AccessType->getNumOperands() < 2)
+        return nullptr;
 
-  Type *Int64 = IntegerType::get(AccessType->getContext(), 64);
-  auto *OffsetNode = ConstantAsMetadata::get(ConstantInt::get(Int64, 0));
+    Type *Int64 = IntegerType::get(AccessType->getContext(), 64);
+    auto *OffsetNode = ConstantAsMetadata::get(ConstantInt::get(Int64, 0));
 
-  if (TBAAStructTypeNode(AccessType).isNewFormat()) {
-    // TODO: Take access ranges into account when matching access tags and
-    // fix this code to generate actual access sizes for generic tags.
-    uint64_t AccessSize = UINT64_MAX;
-    auto *SizeNode =
-        ConstantAsMetadata::get(ConstantInt::get(Int64, AccessSize));
+    if (TBAAStructTypeNode(AccessType).isNewFormat()) {
+        // TODO: Take access ranges into account when matching access tags and
+        // fix this code to generate actual access sizes for generic tags.
+        uint64_t AccessSize = UINT64_MAX;
+        auto *SizeNode =
+            ConstantAsMetadata::get(ConstantInt::get(Int64, AccessSize));
+        Metadata *Ops[] = {const_cast<MDNode*>(AccessType),
+                           const_cast<MDNode*>(AccessType),
+                           OffsetNode, SizeNode
+                          };
+        return MDNode::get(AccessType->getContext(), Ops);
+    }
+
     Metadata *Ops[] = {const_cast<MDNode*>(AccessType),
                        const_cast<MDNode*>(AccessType),
-                       OffsetNode, SizeNode};
+                       OffsetNode
+                      };
     return MDNode::get(AccessType->getContext(), Ops);
-  }
-
-  Metadata *Ops[] = {const_cast<MDNode*>(AccessType),
-                     const_cast<MDNode*>(AccessType),
-                     OffsetNode};
-  return MDNode::get(AccessType->getContext(), Ops);
 }
 
 static bool hasField(TBAAStructTypeNode BaseType,
                      TBAAStructTypeNode FieldType) {
-  for (unsigned I = 0, E = BaseType.getNumFields(); I != E; ++I) {
-    TBAAStructTypeNode T = BaseType.getFieldType(I);
-    if (T == FieldType || hasField(T, FieldType))
-      return true;
-  }
-  return false;
+    for (unsigned I = 0, E = BaseType.getNumFields(); I != E; ++I) {
+        TBAAStructTypeNode T = BaseType.getFieldType(I);
+        if (T == FieldType || hasField(T, FieldType))
+            return true;
+    }
+    return false;
 }
 
 /// Return true if for two given accesses, one of the accessed objects may be a
@@ -587,67 +599,67 @@ static bool mayBeAccessToSubobjectOf(TBAAStructTagNode BaseTag,
                                      const MDNode *CommonType,
                                      const MDNode **GenericTag,
                                      bool &MayAlias) {
-  // If the base object is of the least common type, then this may be an access
-  // to its subobject.
-  if (BaseTag.getAccessType() == BaseTag.getBaseType() &&
-      BaseTag.getAccessType() == CommonType) {
-    if (GenericTag)
-      *GenericTag = createAccessTag(CommonType);
-    MayAlias = true;
-    return true;
-  }
-
-  // If the access to the base object is through a field of the subobject's
-  // type, then this may be an access to that field. To check for that we start
-  // from the base type, follow the edge with the correct offset in the type DAG
-  // and adjust the offset until we reach the field type or until we reach the
-  // access type.
-  bool NewFormat = BaseTag.isNewFormat();
-  TBAAStructTypeNode BaseType(BaseTag.getBaseType());
-  uint64_t OffsetInBase = BaseTag.getOffset();
-
-  for (;;) {
-    // In the old format there is no distinction between fields and parent
-    // types, so in this case we consider all nodes up to the root.
-    if (!BaseType.getNode()) {
-      assert(!NewFormat && "Did not see access type in access path!");
-      break;
+    // If the base object is of the least common type, then this may be an access
+    // to its subobject.
+    if (BaseTag.getAccessType() == BaseTag.getBaseType() &&
+            BaseTag.getAccessType() == CommonType) {
+        if (GenericTag)
+            *GenericTag = createAccessTag(CommonType);
+        MayAlias = true;
+        return true;
     }
 
-    if (BaseType.getNode() == SubobjectTag.getBaseType()) {
-      bool SameMemberAccess = OffsetInBase == SubobjectTag.getOffset();
-      if (GenericTag) {
-        *GenericTag = SameMemberAccess ? SubobjectTag.getNode() :
-                                         createAccessTag(CommonType);
-      }
-      MayAlias = SameMemberAccess;
-      return true;
+    // If the access to the base object is through a field of the subobject's
+    // type, then this may be an access to that field. To check for that we start
+    // from the base type, follow the edge with the correct offset in the type DAG
+    // and adjust the offset until we reach the field type or until we reach the
+    // access type.
+    bool NewFormat = BaseTag.isNewFormat();
+    TBAAStructTypeNode BaseType(BaseTag.getBaseType());
+    uint64_t OffsetInBase = BaseTag.getOffset();
+
+    for (;;) {
+        // In the old format there is no distinction between fields and parent
+        // types, so in this case we consider all nodes up to the root.
+        if (!BaseType.getNode()) {
+            assert(!NewFormat && "Did not see access type in access path!");
+            break;
+        }
+
+        if (BaseType.getNode() == SubobjectTag.getBaseType()) {
+            bool SameMemberAccess = OffsetInBase == SubobjectTag.getOffset();
+            if (GenericTag) {
+                *GenericTag = SameMemberAccess ? SubobjectTag.getNode() :
+                              createAccessTag(CommonType);
+            }
+            MayAlias = SameMemberAccess;
+            return true;
+        }
+
+        // With new-format nodes we stop at the access type.
+        if (NewFormat && BaseType.getNode() == BaseTag.getAccessType())
+            break;
+
+        // Follow the edge with the correct offset. Offset will be adjusted to
+        // be relative to the field type.
+        BaseType = BaseType.getField(OffsetInBase);
     }
 
-    // With new-format nodes we stop at the access type.
-    if (NewFormat && BaseType.getNode() == BaseTag.getAccessType())
-      break;
-
-    // Follow the edge with the correct offset. Offset will be adjusted to
-    // be relative to the field type.
-    BaseType = BaseType.getField(OffsetInBase);
-  }
-
-  // If the base object has a direct or indirect field of the subobject's type,
-  // then this may be an access to that field. We need this to check now that
-  // we support aggregates as access types.
-  if (NewFormat) {
-    // TBAAStructTypeNode BaseAccessType(BaseTag.getAccessType());
-    TBAAStructTypeNode FieldType(SubobjectTag.getBaseType());
-    if (hasField(BaseType, FieldType)) {
-      if (GenericTag)
-        *GenericTag = createAccessTag(CommonType);
-      MayAlias = true;
-      return true;
+    // If the base object has a direct or indirect field of the subobject's type,
+    // then this may be an access to that field. We need this to check now that
+    // we support aggregates as access types.
+    if (NewFormat) {
+        // TBAAStructTypeNode BaseAccessType(BaseTag.getAccessType());
+        TBAAStructTypeNode FieldType(SubobjectTag.getBaseType());
+        if (hasField(BaseType, FieldType)) {
+            if (GenericTag)
+                *GenericTag = createAccessTag(CommonType);
+            MayAlias = true;
+            return true;
+        }
     }
-  }
 
-  return false;
+    return false;
 }
 
 /// matchTags - Return true if the given couple of accesses are allowed to
@@ -655,61 +667,61 @@ static bool mayBeAccessToSubobjectOf(TBAAStructTagNode BaseTag,
 /// most generic access descriptor for the given two.
 static bool matchAccessTags(const MDNode *A, const MDNode *B,
                             const MDNode **GenericTag) {
-  if (A == B) {
+    if (A == B) {
+        if (GenericTag)
+            *GenericTag = A;
+        return true;
+    }
+
+    // Accesses with no TBAA information may alias with any other accesses.
+    if (!A || !B) {
+        if (GenericTag)
+            *GenericTag = nullptr;
+        return true;
+    }
+
+    // Verify that both input nodes are struct-path aware.  Auto-upgrade should
+    // have taken care of this.
+    assert(isStructPathTBAA(A) && "Access A is not struct-path aware!");
+    assert(isStructPathTBAA(B) && "Access B is not struct-path aware!");
+
+    TBAAStructTagNode TagA(A), TagB(B);
+    const MDNode *CommonType = getLeastCommonType(TagA.getAccessType(),
+                               TagB.getAccessType());
+
+    // If the final access types have different roots, they're part of different
+    // potentially unrelated type systems, so we must be conservative.
+    if (!CommonType) {
+        if (GenericTag)
+            *GenericTag = nullptr;
+        return true;
+    }
+
+    // If one of the accessed objects may be a subobject of the other, then such
+    // accesses may alias.
+    bool MayAlias;
+    if (mayBeAccessToSubobjectOf(/* BaseTag= */ TagA, /* SubobjectTag= */ TagB,
+            CommonType, GenericTag, MayAlias) ||
+            mayBeAccessToSubobjectOf(/* BaseTag= */ TagB, /* SubobjectTag= */ TagA,
+                    CommonType, GenericTag, MayAlias))
+        return MayAlias;
+
+    // Otherwise, we've proved there's no alias.
     if (GenericTag)
-      *GenericTag = A;
-    return true;
-  }
-
-  // Accesses with no TBAA information may alias with any other accesses.
-  if (!A || !B) {
-    if (GenericTag)
-      *GenericTag = nullptr;
-    return true;
-  }
-
-  // Verify that both input nodes are struct-path aware.  Auto-upgrade should
-  // have taken care of this.
-  assert(isStructPathTBAA(A) && "Access A is not struct-path aware!");
-  assert(isStructPathTBAA(B) && "Access B is not struct-path aware!");
-
-  TBAAStructTagNode TagA(A), TagB(B);
-  const MDNode *CommonType = getLeastCommonType(TagA.getAccessType(),
-                                                TagB.getAccessType());
-
-  // If the final access types have different roots, they're part of different
-  // potentially unrelated type systems, so we must be conservative.
-  if (!CommonType) {
-    if (GenericTag)
-      *GenericTag = nullptr;
-    return true;
-  }
-
-  // If one of the accessed objects may be a subobject of the other, then such
-  // accesses may alias.
-  bool MayAlias;
-  if (mayBeAccessToSubobjectOf(/* BaseTag= */ TagA, /* SubobjectTag= */ TagB,
-                               CommonType, GenericTag, MayAlias) ||
-      mayBeAccessToSubobjectOf(/* BaseTag= */ TagB, /* SubobjectTag= */ TagA,
-                               CommonType, GenericTag, MayAlias))
-    return MayAlias;
-
-  // Otherwise, we've proved there's no alias.
-  if (GenericTag)
-    *GenericTag = createAccessTag(CommonType);
-  return false;
+        *GenericTag = createAccessTag(CommonType);
+    return false;
 }
 
 /// Aliases - Test whether the access represented by tag A may alias the
 /// access represented by tag B.
 bool TypeBasedAAResult::Aliases(const MDNode *A, const MDNode *B) const {
-  return matchAccessTags(A, B);
+    return matchAccessTags(A, B);
 }
 
 AnalysisKey TypeBasedAA::Key;
 
 TypeBasedAAResult TypeBasedAA::run(Function &F, FunctionAnalysisManager &AM) {
-  return TypeBasedAAResult();
+    return TypeBasedAAResult();
 }
 
 char TypeBasedAAWrapperPass::ID = 0;
@@ -717,23 +729,23 @@ INITIALIZE_PASS(TypeBasedAAWrapperPass, "tbaa", "Type-Based Alias Analysis",
                 false, true)
 
 ImmutablePass *llvm::createTypeBasedAAWrapperPass() {
-  return new TypeBasedAAWrapperPass();
+    return new TypeBasedAAWrapperPass();
 }
 
 TypeBasedAAWrapperPass::TypeBasedAAWrapperPass() : ImmutablePass(ID) {
-  initializeTypeBasedAAWrapperPassPass(*PassRegistry::getPassRegistry());
+    initializeTypeBasedAAWrapperPassPass(*PassRegistry::getPassRegistry());
 }
 
 bool TypeBasedAAWrapperPass::doInitialization(Module &M) {
-  Result.reset(new TypeBasedAAResult());
-  return false;
+    Result.reset(new TypeBasedAAResult());
+    return false;
 }
 
 bool TypeBasedAAWrapperPass::doFinalization(Module &M) {
-  Result.reset();
-  return false;
+    Result.reset();
+    return false;
 }
 
 void TypeBasedAAWrapperPass::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.setPreservesAll();
+    AU.setPreservesAll();
 }

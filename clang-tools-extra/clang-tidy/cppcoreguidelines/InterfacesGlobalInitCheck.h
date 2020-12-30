@@ -21,10 +21,10 @@ namespace cppcoreguidelines {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines-interfaces-global-init.html
 class InterfacesGlobalInitCheck : public ClangTidyCheck {
 public:
-  InterfacesGlobalInitCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    InterfacesGlobalInitCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace cppcoreguidelines

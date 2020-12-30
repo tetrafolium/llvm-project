@@ -25,10 +25,10 @@ locale_t newlocale( int mask, const char * locale, locale_t /*base*/ )
 decltype(MB_CUR_MAX) MB_CUR_MAX_L( locale_t __l )
 {
 #if defined(_LIBCPP_MSVCRT)
-  return ___mb_cur_max_l_func(__l);
+    return ___mb_cur_max_l_func(__l);
 #else
-  __libcpp_locale_guard __current(__l);
-  return MB_CUR_MAX;
+    __libcpp_locale_guard __current(__l);
+    return MB_CUR_MAX;
 #endif
 }
 
@@ -94,8 +94,8 @@ int snprintf_l(char *ret, size_t n, locale_t loc, const char *format, ...)
 #if defined(_LIBCPP_MSVCRT)
     // FIXME: Remove usage of internal CRT function and globals.
     int result = __stdio_common_vsprintf(
-        _CRT_INTERNAL_LOCAL_PRINTF_OPTIONS | _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR,
-        ret, n, format, loc, ap);
+                     _CRT_INTERNAL_LOCAL_PRINTF_OPTIONS | _CRT_INTERNAL_PRINTF_STANDARD_SNPRINTF_BEHAVIOR,
+                     ret, n, format, loc, ap);
 #else
     __libcpp_locale_guard __current(loc);
     int result = vsnprintf( ret, n, format, ap );
@@ -120,20 +120,20 @@ int vasprintf_l( char **ret, locale_t loc, const char *format, va_list ap )
 
 #if !defined(_LIBCPP_MSVCRT)
 float strtof_l(const char* nptr, char** endptr, locale_t loc) {
-  __libcpp_locale_guard __current(loc);
-  return strtof(nptr, endptr);
+    __libcpp_locale_guard __current(loc);
+    return strtof(nptr, endptr);
 }
 
 long double strtold_l(const char* nptr, char** endptr, locale_t loc) {
-  __libcpp_locale_guard __current(loc);
-  return strtold(nptr, endptr);
+    __libcpp_locale_guard __current(loc);
+    return strtold(nptr, endptr);
 }
 #endif
 
 #if defined(__MINGW32__) && __MSVCRT_VERSION__ < 0x0800
 size_t strftime_l(char *ret, size_t n, const char *format, const struct tm *tm,
                   locale_t loc) {
-  __libcpp_locale_guard __current(loc);
-  return strftime(ret, n, format, tm);
+    __libcpp_locale_guard __current(loc);
+    return strftime(ret, n, format, tm);
 }
 #endif

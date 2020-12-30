@@ -15,7 +15,7 @@
 
 class SysSignal {
 public:
-  static const char *Name(int signal);
+    static const char *Name(int signal);
 };
 
 #endif

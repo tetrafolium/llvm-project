@@ -26,7 +26,7 @@ bool isTriviallyDefaultConstructible(QualType Type, const ASTContext &Context);
 
 /// Returns `true` if `RecordDecl` is trivially default constructible.
 bool recordIsTriviallyDefaultConstructible(const RecordDecl &RecordDecl,
-                                           const ASTContext &Context);
+        const ASTContext &Context);
 
 /// Returns `true` if `Type` is trivially destructible.
 bool isTriviallyDestructible(QualType Type);

@@ -64,45 +64,49 @@ template <typename NodeTy> class SymbolTableList;
 //
 template <typename ValueSubClass>
 class SymbolTableListTraits : public ilist_alloc_traits<ValueSubClass> {
-  using ListTy = SymbolTableList<ValueSubClass>;
-  using iterator = typename simple_ilist<ValueSubClass>::iterator;
-  using ItemParentClass =
-      typename SymbolTableListParentType<ValueSubClass>::type;
+    using ListTy = SymbolTableList<ValueSubClass>;
+    using iterator = typename simple_ilist<ValueSubClass>::iterator;
+    using ItemParentClass =
+        typename SymbolTableListParentType<ValueSubClass>::type;
 
 public:
-  SymbolTableListTraits() = default;
+    SymbolTableListTraits() = default;
 
 private:
-  /// getListOwner - Return the object that owns this list.  If this is a list
-  /// of instructions, it returns the BasicBlock that owns them.
-  ItemParentClass *getListOwner() {
-    size_t Offset = reinterpret_cast<size_t>(
-        &((ItemParentClass *)nullptr->*ItemParentClass::getSublistAccess(
-                                           static_cast<ValueSubClass *>(
-                                               nullptr))));
-    ListTy *Anchor = static_cast<ListTy *>(this);
-    return reinterpret_cast<ItemParentClass*>(reinterpret_cast<char*>(Anchor)-
-                                              Offset);
-  }
+    /// getListOwner - Return the object that owns this list.  If this is a list
+    /// of instructions, it returns the BasicBlock that owns them.
+    ItemParentClass *getListOwner() {
+        size_t Offset = reinterpret_cast<size_t>(
+                            &((ItemParentClass *)nullptr->*ItemParentClass::getSublistAccess(
+                                  static_cast<ValueSubClass *>(
+                                      nullptr))));
+        ListTy *Anchor = static_cast<ListTy *>(this);
+        return reinterpret_cast<ItemParentClass*>(reinterpret_cast<char*>(Anchor)-
+                Offset);
+    }
 
-  static ListTy &getList(ItemParentClass *Par) {
-    return Par->*(Par->getSublistAccess((ValueSubClass*)nullptr));
-  }
+    static ListTy &getList(ItemParentClass *Par) {
+        return Par->*(Par->getSublistAccess((ValueSubClass*)nullptr));
+    }
 
-  static ValueSymbolTable *getSymTab(ItemParentClass *Par) {
-    return Par ? toPtr(Par->getValueSymbolTable()) : nullptr;
-  }
+    static ValueSymbolTable *getSymTab(ItemParentClass *Par) {
+        return Par ? toPtr(Par->getValueSymbolTable()) : nullptr;
+    }
 
 public:
-  void addNodeToList(ValueSubClass *V);
-  void removeNodeFromList(ValueSubClass *V);
-  void transferNodesFromList(SymbolTableListTraits &L2, iterator first,
-                             iterator last);
-  // private:
-  template<typename TPtr>
-  void setSymTabObject(TPtr *, TPtr);
-  static ValueSymbolTable *toPtr(ValueSymbolTable *P) { return P; }
-  static ValueSymbolTable *toPtr(ValueSymbolTable &R) { return &R; }
+    void addNodeToList(ValueSubClass *V);
+    void removeNodeFromList(ValueSubClass *V);
+    void transferNodesFromList(SymbolTableListTraits &L2, iterator first,
+                               iterator last);
+    // private:
+    template<typename TPtr>
+    void setSymTabObject(TPtr *, TPtr);
+    static ValueSymbolTable *toPtr(ValueSymbolTable *P) {
+        return P;
+    }
+    static ValueSymbolTable *toPtr(ValueSymbolTable &R) {
+        return &R;
+    }
 };
 
 /// List that automatically updates parent links and symbol tables.

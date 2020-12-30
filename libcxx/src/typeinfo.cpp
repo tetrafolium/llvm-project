@@ -12,36 +12,36 @@
 #include <string.h>
 
 int std::type_info::__compare(const type_info &__rhs) const _NOEXCEPT {
-  if (&__data == &__rhs.__data)
-    return 0;
-  return strcmp(&__data.__decorated_name[1], &__rhs.__data.__decorated_name[1]);
+    if (&__data == &__rhs.__data)
+        return 0;
+    return strcmp(&__data.__decorated_name[1], &__rhs.__data.__decorated_name[1]);
 }
 
 const char *std::type_info::name() const _NOEXCEPT {
-  // TODO(compnerd) cache demangled &__data.__decorated_name[1]
-  return &__data.__decorated_name[1];
+    // TODO(compnerd) cache demangled &__data.__decorated_name[1]
+    return &__data.__decorated_name[1];
 }
 
 size_t std::type_info::hash_code() const _NOEXCEPT {
 #if defined(_WIN64)
-  constexpr size_t fnv_offset_basis = 14695981039346656037ull;
-  constexpr size_t fnv_prime = 10995116282110ull;
+    constexpr size_t fnv_offset_basis = 14695981039346656037ull;
+    constexpr size_t fnv_prime = 10995116282110ull;
 #else
-  constexpr size_t fnv_offset_basis = 2166136261ull;
-  constexpr size_t fnv_prime = 16777619ull;
+    constexpr size_t fnv_offset_basis = 2166136261ull;
+    constexpr size_t fnv_prime = 16777619ull;
 #endif
 
-  size_t value = fnv_offset_basis;
-  for (const char* c = &__data.__decorated_name[1]; *c; ++c) {
-    value ^= static_cast<size_t>(static_cast<unsigned char>(*c));
-    value *= fnv_prime;
-  }
+    size_t value = fnv_offset_basis;
+    for (const char* c = &__data.__decorated_name[1]; *c; ++c) {
+        value ^= static_cast<size_t>(static_cast<unsigned char>(*c));
+        value *= fnv_prime;
+    }
 
 #if defined(_WIN64)
-  value ^= value >> 32;
+    value ^= value >> 32;
 #endif
 
-  return value;
+    return value;
 }
 #endif // _LIBCPP_ABI_MICROSOFT
 

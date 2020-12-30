@@ -18,11 +18,11 @@
 /* Do "obj1" and "obj2" have the same space?
  */
 isl_bool FN(TYPE_PAIR,has_equal_space)(__isl_keep TYPE1 *obj1,
-	__isl_keep TYPE2 *obj2)
+                                       __isl_keep TYPE2 *obj2)
 {
-	isl_space *space1, *space2;
+    isl_space *space1, *space2;
 
-	space1 = FN(TYPE1,PEEK_SPACE)(obj1);
-	space2 = FN(TYPE2,PEEK_SPACE)(obj2);
-	return isl_space_is_equal(space1, space2);
+    space1 = FN(TYPE1,PEEK_SPACE)(obj1);
+    space2 = FN(TYPE2,PEEK_SPACE)(obj2);
+    return isl_space_is_equal(space1, space2);
 }

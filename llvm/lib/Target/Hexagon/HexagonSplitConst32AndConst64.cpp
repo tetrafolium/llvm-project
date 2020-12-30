@@ -30,78 +30,78 @@ using namespace llvm;
 #define DEBUG_TYPE "xfer"
 
 namespace llvm {
-  FunctionPass *createHexagonSplitConst32AndConst64();
-  void initializeHexagonSplitConst32AndConst64Pass(PassRegistry&);
+FunctionPass *createHexagonSplitConst32AndConst64();
+void initializeHexagonSplitConst32AndConst64Pass(PassRegistry&);
 }
 
 namespace {
-  class HexagonSplitConst32AndConst64 : public MachineFunctionPass {
-  public:
+class HexagonSplitConst32AndConst64 : public MachineFunctionPass {
+public:
     static char ID;
     HexagonSplitConst32AndConst64() : MachineFunctionPass(ID) {
-      PassRegistry &R = *PassRegistry::getPassRegistry();
-      initializeHexagonSplitConst32AndConst64Pass(R);
+        PassRegistry &R = *PassRegistry::getPassRegistry();
+        initializeHexagonSplitConst32AndConst64Pass(R);
     }
     StringRef getPassName() const override {
-      return "Hexagon Split Const32s and Const64s";
+        return "Hexagon Split Const32s and Const64s";
     }
     bool runOnMachineFunction(MachineFunction &Fn) override;
     MachineFunctionProperties getRequiredProperties() const override {
-      return MachineFunctionProperties().set(
-          MachineFunctionProperties::Property::NoVRegs);
+        return MachineFunctionProperties().set(
+                   MachineFunctionProperties::Property::NoVRegs);
     }
-  };
+};
 }
 
 char HexagonSplitConst32AndConst64::ID = 0;
 
 INITIALIZE_PASS(HexagonSplitConst32AndConst64, "split-const-for-sdata",
-      "Hexagon Split Const32s and Const64s", false, false)
+                "Hexagon Split Const32s and Const64s", false, false)
 
 bool HexagonSplitConst32AndConst64::runOnMachineFunction(MachineFunction &Fn) {
-  auto &HST = Fn.getSubtarget<HexagonSubtarget>();
-  auto &HTM = static_cast<const HexagonTargetMachine&>(Fn.getTarget());
-  auto &TLOF = *HTM.getObjFileLowering();
-  if (HST.useSmallData() && TLOF.isSmallDataEnabled(HTM))
-    return false;
+    auto &HST = Fn.getSubtarget<HexagonSubtarget>();
+    auto &HTM = static_cast<const HexagonTargetMachine&>(Fn.getTarget());
+    auto &TLOF = *HTM.getObjFileLowering();
+    if (HST.useSmallData() && TLOF.isSmallDataEnabled(HTM))
+        return false;
 
-  const TargetInstrInfo *TII = HST.getInstrInfo();
-  const TargetRegisterInfo *TRI = HST.getRegisterInfo();
+    const TargetInstrInfo *TII = HST.getInstrInfo();
+    const TargetRegisterInfo *TRI = HST.getRegisterInfo();
 
-  // Loop over all of the basic blocks
-  for (MachineBasicBlock &B : Fn) {
-    for (auto I = B.begin(), E = B.end(); I != E; ) {
-      MachineInstr &MI = *I;
-      ++I;
-      unsigned Opc = MI.getOpcode();
+    // Loop over all of the basic blocks
+    for (MachineBasicBlock &B : Fn) {
+        for (auto I = B.begin(), E = B.end(); I != E; ) {
+            MachineInstr &MI = *I;
+            ++I;
+            unsigned Opc = MI.getOpcode();
 
-      if (Opc == Hexagon::CONST32) {
-        Register DestReg = MI.getOperand(0).getReg();
-        uint64_t ImmValue = MI.getOperand(1).getImm();
-        const DebugLoc &DL = MI.getDebugLoc();
-        BuildMI(B, MI, DL, TII->get(Hexagon::A2_tfrsi), DestReg)
-            .addImm(ImmValue);
-        B.erase(&MI);
-      } else if (Opc == Hexagon::CONST64) {
-        Register DestReg = MI.getOperand(0).getReg();
-        int64_t ImmValue = MI.getOperand(1).getImm();
-        const DebugLoc &DL = MI.getDebugLoc();
-        Register DestLo = TRI->getSubReg(DestReg, Hexagon::isub_lo);
-        Register DestHi = TRI->getSubReg(DestReg, Hexagon::isub_hi);
+            if (Opc == Hexagon::CONST32) {
+                Register DestReg = MI.getOperand(0).getReg();
+                uint64_t ImmValue = MI.getOperand(1).getImm();
+                const DebugLoc &DL = MI.getDebugLoc();
+                BuildMI(B, MI, DL, TII->get(Hexagon::A2_tfrsi), DestReg)
+                .addImm(ImmValue);
+                B.erase(&MI);
+            } else if (Opc == Hexagon::CONST64) {
+                Register DestReg = MI.getOperand(0).getReg();
+                int64_t ImmValue = MI.getOperand(1).getImm();
+                const DebugLoc &DL = MI.getDebugLoc();
+                Register DestLo = TRI->getSubReg(DestReg, Hexagon::isub_lo);
+                Register DestHi = TRI->getSubReg(DestReg, Hexagon::isub_hi);
 
-        int32_t LowWord = (ImmValue & 0xFFFFFFFF);
-        int32_t HighWord = (ImmValue >> 32) & 0xFFFFFFFF;
+                int32_t LowWord = (ImmValue & 0xFFFFFFFF);
+                int32_t HighWord = (ImmValue >> 32) & 0xFFFFFFFF;
 
-        BuildMI(B, MI, DL, TII->get(Hexagon::A2_tfrsi), DestLo)
-            .addImm(LowWord);
-        BuildMI(B, MI, DL, TII->get(Hexagon::A2_tfrsi), DestHi)
-            .addImm(HighWord);
-        B.erase(&MI);
-      }
+                BuildMI(B, MI, DL, TII->get(Hexagon::A2_tfrsi), DestLo)
+                .addImm(LowWord);
+                BuildMI(B, MI, DL, TII->get(Hexagon::A2_tfrsi), DestHi)
+                .addImm(HighWord);
+                B.erase(&MI);
+            }
+        }
     }
-  }
 
-  return true;
+    return true;
 }
 
 
@@ -109,5 +109,5 @@ bool HexagonSplitConst32AndConst64::runOnMachineFunction(MachineFunction &Fn) {
 //                         Public Constructor Functions
 //===----------------------------------------------------------------------===//
 FunctionPass *llvm::createHexagonSplitConst32AndConst64() {
-  return new HexagonSplitConst32AndConst64();
+    return new HexagonSplitConst32AndConst64();
 }

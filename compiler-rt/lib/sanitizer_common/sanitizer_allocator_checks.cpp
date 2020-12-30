@@ -16,7 +16,7 @@
 namespace __sanitizer {
 
 void SetErrnoToENOMEM() {
-  errno = errno_ENOMEM;
+    errno = errno_ENOMEM;
 }
 
 } // namespace __sanitizer

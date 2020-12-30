@@ -21,16 +21,16 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-simplify-subscript-expr.html
 class SimplifySubscriptExprCheck : public ClangTidyCheck {
 public:
-  SimplifySubscriptExprCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap& Opts) override;
+    SimplifySubscriptExprCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap& Opts) override;
 
 private:
-  const std::vector<std::string> Types;
+    const std::vector<std::string> Types;
 };
 
 } // namespace readability

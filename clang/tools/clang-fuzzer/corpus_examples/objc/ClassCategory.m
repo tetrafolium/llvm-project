@@ -13,8 +13,8 @@
 
 @implementation BaseClass
 - (int)something {
-  self.field = self.field + 1;
-  return self.field;
+    self.field = self.field + 1;
+    return self.field;
 }
 @end
 

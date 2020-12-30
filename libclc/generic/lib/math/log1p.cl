@@ -82,8 +82,8 @@ _CLC_OVERLOAD _CLC_DEF float log1p(float x)
     z = ax >= PINFBITPATT_SP32 ? w : z;
     z = w  < -1.0f ? as_float(QNANBITPATT_SP32) : z;
     z = w == -1.0f ? as_float(NINFBITPATT_SP32) : z;
-        //fix subnormals
-        z = ax  < 0x33800000 ? x : z;
+    //fix subnormals
+    z = ax  < 0x33800000 ? x : z;
 
     return z;
 }

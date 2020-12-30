@@ -23,9 +23,9 @@
 std::error_code coff2yaml(llvm::raw_ostream &Out,
                           const llvm::object::COFFObjectFile &Obj);
 llvm::Error elf2yaml(llvm::raw_ostream &Out,
-                         const llvm::object::ObjectFile &Obj);
+                     const llvm::object::ObjectFile &Obj);
 llvm::Error macho2yaml(llvm::raw_ostream &Out,
-                           const llvm::object::Binary &Obj);
+                       const llvm::object::Binary &Obj);
 llvm::Error minidump2yaml(llvm::raw_ostream &Out,
                           const llvm::object::MinidumpFile &Obj);
 std::error_code xcoff2yaml(llvm::raw_ostream &Out,

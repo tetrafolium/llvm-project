@@ -19,11 +19,11 @@ namespace clang {
 /// Enumeration specifying the different kinds of C++ overloaded
 /// operators.
 enum OverloadedOperatorKind : int {
-  OO_None,                ///< Not an overloaded operator
+    OO_None,                ///< Not an overloaded operator
 #define OVERLOADED_OPERATOR(Name,Spelling,Token,Unary,Binary,MemberOnly) \
   OO_##Name,
 #include "clang/Basic/OperatorKinds.def"
-  NUM_OVERLOADED_OPERATORS
+    NUM_OVERLOADED_OPERATORS
 };
 
 /// Retrieve the spelling of the given overloaded operator, without
@@ -34,24 +34,24 @@ const char *getOperatorSpelling(OverloadedOperatorKind Operator);
 /// into, if any such operator exists.
 inline OverloadedOperatorKind
 getRewrittenOverloadedOperator(OverloadedOperatorKind Kind) {
-  switch (Kind) {
-  case OO_Less:
-  case OO_LessEqual:
-  case OO_Greater:
-  case OO_GreaterEqual:
-    return OO_Spaceship;
+    switch (Kind) {
+    case OO_Less:
+    case OO_LessEqual:
+    case OO_Greater:
+    case OO_GreaterEqual:
+        return OO_Spaceship;
 
-  case OO_ExclaimEqual:
-    return OO_EqualEqual;
+    case OO_ExclaimEqual:
+        return OO_EqualEqual;
 
-  default:
-    return OO_None;
-  }
+    default:
+        return OO_None;
+    }
 }
 
 /// Determine if this is a compound assignment operator.
 inline bool isCompoundAssignmentOperator(OverloadedOperatorKind Kind) {
-  return Kind >= OO_PlusEqual && Kind <= OO_PipeEqual;
+    return Kind >= OO_PlusEqual && Kind <= OO_PipeEqual;
 }
 
 } // end namespace clang

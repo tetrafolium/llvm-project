@@ -7,10 +7,12 @@
 
 #ifdef KERNEL_USE
 extern "C" void ubsan_message(const char *msg);
-static void message(const char *msg) { ubsan_message(msg); }
+static void message(const char *msg) {
+    ubsan_message(msg);
+}
 #else
 static void message(const char *msg) {
-  (void)write(2, msg, strlen(msg));
+    (void)write(2, msg, strlen(msg));
 }
 #endif
 
@@ -21,55 +23,57 @@ static __sanitizer::atomic_uintptr_t caller_pcs[kMaxCallerPcs];
 static __sanitizer::atomic_uint32_t caller_pcs_sz;
 
 __attribute__((noinline)) static bool report_this_error(void *caller_p) {
-  uintptr_t caller = reinterpret_cast<uintptr_t>(caller_p);
-  if (caller == 0) return false;
-  while (true) {
-    unsigned sz = __sanitizer::atomic_load_relaxed(&caller_pcs_sz);
-    if (sz > kMaxCallerPcs) return false;  // early exit
-    // when sz==kMaxCallerPcs print "too many errors", but only when cmpxchg
-    // succeeds in order to not print it multiple times.
-    if (sz > 0 && sz < kMaxCallerPcs) {
-      uintptr_t p;
-      for (unsigned i = 0; i < sz; ++i) {
-        p = __sanitizer::atomic_load_relaxed(&caller_pcs[i]);
-        if (p == 0) break;  // Concurrent update.
-        if (p == caller) return false;
-      }
-      if (p == 0) continue;  // FIXME: yield?
-    }
+    uintptr_t caller = reinterpret_cast<uintptr_t>(caller_p);
+    if (caller == 0) return false;
+    while (true) {
+        unsigned sz = __sanitizer::atomic_load_relaxed(&caller_pcs_sz);
+        if (sz > kMaxCallerPcs) return false;  // early exit
+        // when sz==kMaxCallerPcs print "too many errors", but only when cmpxchg
+        // succeeds in order to not print it multiple times.
+        if (sz > 0 && sz < kMaxCallerPcs) {
+            uintptr_t p;
+            for (unsigned i = 0; i < sz; ++i) {
+                p = __sanitizer::atomic_load_relaxed(&caller_pcs[i]);
+                if (p == 0) break;  // Concurrent update.
+                if (p == caller) return false;
+            }
+            if (p == 0) continue;  // FIXME: yield?
+        }
 
-    if (!__sanitizer::atomic_compare_exchange_strong(
-            &caller_pcs_sz, &sz, sz + 1, __sanitizer::memory_order_seq_cst))
-      continue;  // Concurrent update! Try again from the start.
+        if (!__sanitizer::atomic_compare_exchange_strong(
+                    &caller_pcs_sz, &sz, sz + 1, __sanitizer::memory_order_seq_cst))
+            continue;  // Concurrent update! Try again from the start.
 
-    if (sz == kMaxCallerPcs) {
-      message("ubsan: too many errors\n");
-      return false;
+        if (sz == kMaxCallerPcs) {
+            message("ubsan: too many errors\n");
+            return false;
+        }
+        __sanitizer::atomic_store_relaxed(&caller_pcs[sz], caller);
+        return true;
     }
-    __sanitizer::atomic_store_relaxed(&caller_pcs[sz], caller);
-    return true;
-  }
 }
 
 #if defined(__ANDROID__)
 extern "C" __attribute__((weak)) void android_set_abort_message(const char *);
 static void abort_with_message(const char *msg) {
-  if (&android_set_abort_message) android_set_abort_message(msg);
-  abort();
+    if (&android_set_abort_message) android_set_abort_message(msg);
+    abort();
 }
 #else
-static void abort_with_message(const char *) { abort(); }
+static void abort_with_message(const char *) {
+    abort();
+}
 #endif
 
 #if SANITIZER_DEBUG
 namespace __sanitizer {
 // The DCHECK macro needs this symbol to be defined.
 void NORETURN CheckFailed(const char *file, int, const char *cond, u64, u64) {
-  message("Sanitizer CHECK failed: ");
-  message(file);
-  message(":?? : "); // FIXME: Show line number.
-  message(cond);
-  abort();
+    message("Sanitizer CHECK failed: ");
+    message(file);
+    message(":?? : "); // FIXME: Show line number.
+    message(cond);
+    abort();
 }
 } // namespace __sanitizer
 #endif

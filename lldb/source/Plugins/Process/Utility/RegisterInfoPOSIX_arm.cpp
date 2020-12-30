@@ -50,32 +50,32 @@ using namespace lldb_private;
 
 static const lldb_private::RegisterInfo *
 GetRegisterInfoPtr(const lldb_private::ArchSpec &target_arch) {
-  switch (target_arch.GetMachine()) {
-  case llvm::Triple::arm:
-    return g_register_infos_arm;
-  default:
-    assert(false && "Unhandled target architecture.");
-    return nullptr;
-  }
+    switch (target_arch.GetMachine()) {
+    case llvm::Triple::arm:
+        return g_register_infos_arm;
+    default:
+        assert(false && "Unhandled target architecture.");
+        return nullptr;
+    }
 }
 
 static uint32_t
 GetRegisterInfoCount(const lldb_private::ArchSpec &target_arch) {
-  switch (target_arch.GetMachine()) {
-  case llvm::Triple::arm:
-    return static_cast<uint32_t>(sizeof(g_register_infos_arm) /
-                                 sizeof(g_register_infos_arm[0]));
-  default:
-    assert(false && "Unhandled target architecture.");
-    return 0;
-  }
+    switch (target_arch.GetMachine()) {
+    case llvm::Triple::arm:
+        return static_cast<uint32_t>(sizeof(g_register_infos_arm) /
+                                     sizeof(g_register_infos_arm[0]));
+    default:
+        assert(false && "Unhandled target architecture.");
+        return 0;
+    }
 }
 
 // Number of register sets provided by this context.
 enum {
-  k_num_gpr_registers = gpr_cpsr - gpr_r0 + 1,
-  k_num_fpr_registers = fpu_q15 - fpu_s0 + 1,
-  k_num_register_sets = 2
+    k_num_gpr_registers = gpr_cpsr - gpr_r0 + 1,
+    k_num_fpr_registers = fpu_q15 - fpu_s0 + 1,
+    k_num_register_sets = 2
 };
 
 // arm general purpose registers.
@@ -91,7 +91,7 @@ static const uint32_t g_gpr_regnums_arm[] = {
     gpr_cpsr, LLDB_INVALID_REGNUM // register sets need to end with this flag
 };
 static_assert(((sizeof g_gpr_regnums_arm / sizeof g_gpr_regnums_arm[0]) - 1) ==
-                  k_num_gpr_registers,
+              k_num_gpr_registers,
               "g_gpr_regnums_arm has wrong number of register infos");
 
 // arm floating point registers.
@@ -139,15 +139,18 @@ static const uint32_t g_fpu_regnums_arm[] = {
     fpu_q15,   LLDB_INVALID_REGNUM // register sets need to end with this flag
 };
 static_assert(((sizeof g_fpu_regnums_arm / sizeof g_fpu_regnums_arm[0]) - 1) ==
-                  k_num_fpr_registers,
+              k_num_fpr_registers,
               "g_fpu_regnums_arm has wrong number of register infos");
 
 // Register sets for arm.
 static const RegisterSet g_reg_sets_arm[k_num_register_sets] = {
-    {"General Purpose Registers", "gpr", k_num_gpr_registers,
-     g_gpr_regnums_arm},
-    {"Floating Point Registers", "fpu", k_num_fpr_registers,
-     g_fpu_regnums_arm}};
+    {   "General Purpose Registers", "gpr", k_num_gpr_registers,
+        g_gpr_regnums_arm
+    },
+    {   "Floating Point Registers", "fpu", k_num_fpr_registers,
+        g_fpu_regnums_arm
+    }
+};
 
 RegisterInfoPOSIX_arm::RegisterInfoPOSIX_arm(
     const lldb_private::ArchSpec &target_arch)
@@ -156,38 +159,38 @@ RegisterInfoPOSIX_arm::RegisterInfoPOSIX_arm(
       m_register_info_count(GetRegisterInfoCount(target_arch)) {}
 
 size_t RegisterInfoPOSIX_arm::GetGPRSize() const {
-  return sizeof(struct RegisterInfoPOSIX_arm::GPR);
+    return sizeof(struct RegisterInfoPOSIX_arm::GPR);
 }
 
 size_t RegisterInfoPOSIX_arm::GetFPRSize() const {
-  return sizeof(struct RegisterInfoPOSIX_arm::FPU);
+    return sizeof(struct RegisterInfoPOSIX_arm::FPU);
 }
 
 const lldb_private::RegisterInfo *
 RegisterInfoPOSIX_arm::GetRegisterInfo() const {
-  return m_register_info_p;
+    return m_register_info_p;
 }
 
 size_t RegisterInfoPOSIX_arm::GetRegisterSetCount() const {
-  return k_num_register_sets;
+    return k_num_register_sets;
 }
 
 size_t RegisterInfoPOSIX_arm::GetRegisterSetFromRegisterIndex(
     uint32_t reg_index) const {
-  if (reg_index <= gpr_cpsr)
-    return GPRegSet;
-  if (reg_index <= fpu_q15)
-    return FPRegSet;
-  return LLDB_INVALID_REGNUM;
+    if (reg_index <= gpr_cpsr)
+        return GPRegSet;
+    if (reg_index <= fpu_q15)
+        return FPRegSet;
+    return LLDB_INVALID_REGNUM;
 }
 
 const lldb_private::RegisterSet *
 RegisterInfoPOSIX_arm::GetRegisterSet(size_t set_index) const {
-  if (set_index < GetRegisterSetCount())
-    return &g_reg_sets_arm[set_index];
-  return nullptr;
+    if (set_index < GetRegisterSetCount())
+        return &g_reg_sets_arm[set_index];
+    return nullptr;
 }
 
 uint32_t RegisterInfoPOSIX_arm::GetRegisterCount() const {
-  return m_register_info_count;
+    return m_register_info_count;
 }

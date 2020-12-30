@@ -14,7 +14,7 @@
 
 #if !defined(_THROW_BAD_ALLOC) || !defined(_NOEXCEPT) || !defined(_LIBCXXABI_WEAK)
 #error The _THROW_BAD_ALLOC, _NOEXCEPT, and _LIBCXXABI_WEAK libc++ macros must \
-       already be defined by libc++.
+already be defined by libc++.
 #endif
 // Implement all new and delete operators as weak definitions
 // in this shared library, so that they can be overridden by programs
@@ -140,7 +140,7 @@ operator new(std::size_t size, std::align_val_t alignment) _THROW_BAD_ALLOC
     if (size == 0)
         size = 1;
     if (static_cast<size_t>(alignment) < sizeof(void*))
-      alignment = std::align_val_t(sizeof(void*));
+        alignment = std::align_val_t(sizeof(void*));
 
     // Try allocating memory. If allocation fails and there is a new_handler,
     // call it to try free up memory, and try again until it succeeds, or until

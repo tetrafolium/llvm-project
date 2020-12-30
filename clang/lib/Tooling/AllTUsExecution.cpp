@@ -20,46 +20,46 @@ const char *AllTUsToolExecutor::ExecutorName = "AllTUsToolExecutor";
 
 namespace {
 llvm::Error make_string_error(const llvm::Twine &Message) {
-  return llvm::make_error<llvm::StringError>(Message,
-                                             llvm::inconvertibleErrorCode());
+    return llvm::make_error<llvm::StringError>(Message,
+            llvm::inconvertibleErrorCode());
 }
 
 ArgumentsAdjuster getDefaultArgumentsAdjusters() {
-  return combineAdjusters(
-      getClangStripOutputAdjuster(),
-      combineAdjusters(getClangSyntaxOnlyAdjuster(),
-                       getClangStripDependencyFileAdjuster()));
+    return combineAdjusters(
+               getClangStripOutputAdjuster(),
+               combineAdjusters(getClangSyntaxOnlyAdjuster(),
+                                getClangStripDependencyFileAdjuster()));
 }
 
 class ThreadSafeToolResults : public ToolResults {
 public:
-  void addResult(StringRef Key, StringRef Value) override {
-    std::unique_lock<std::mutex> LockGuard(Mutex);
-    Results.addResult(Key, Value);
-  }
+    void addResult(StringRef Key, StringRef Value) override {
+        std::unique_lock<std::mutex> LockGuard(Mutex);
+        Results.addResult(Key, Value);
+    }
 
-  std::vector<std::pair<llvm::StringRef, llvm::StringRef>>
-  AllKVResults() override {
-    return Results.AllKVResults();
-  }
+    std::vector<std::pair<llvm::StringRef, llvm::StringRef>>
+    AllKVResults() override {
+        return Results.AllKVResults();
+    }
 
-  void forEachResult(llvm::function_ref<void(StringRef Key, StringRef Value)>
-                         Callback) override {
-    Results.forEachResult(Callback);
-  }
+    void forEachResult(llvm::function_ref<void(StringRef Key, StringRef Value)>
+                       Callback) override {
+        Results.forEachResult(Callback);
+    }
 
 private:
-  InMemoryToolResults Results;
-  std::mutex Mutex;
+    InMemoryToolResults Results;
+    std::mutex Mutex;
 };
 
 } // namespace
 
 llvm::cl::opt<std::string>
-    Filter("filter",
-           llvm::cl::desc("Only process files that match this filter. "
-                          "This flag only applies to all-TUs."),
-           llvm::cl::init(".*"));
+Filter("filter",
+       llvm::cl::desc("Only process files that match this filter. "
+                      "This flag only applies to all-TUs."),
+       llvm::cl::init(".*"));
 
 AllTUsToolExecutor::AllTUsToolExecutor(
     const CompilationDatabase &Compilations, unsigned ThreadCount,
@@ -77,75 +77,75 @@ AllTUsToolExecutor::AllTUsToolExecutor(
 
 llvm::Error AllTUsToolExecutor::execute(
     llvm::ArrayRef<
-        std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
-        Actions) {
-  if (Actions.empty())
-    return make_string_error("No action to execute.");
+    std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
+    Actions) {
+    if (Actions.empty())
+        return make_string_error("No action to execute.");
 
-  if (Actions.size() != 1)
-    return make_string_error(
-        "Only support executing exactly 1 action at this point.");
+    if (Actions.size() != 1)
+        return make_string_error(
+                   "Only support executing exactly 1 action at this point.");
 
-  std::string ErrorMsg;
-  std::mutex TUMutex;
-  auto AppendError = [&](llvm::Twine Err) {
-    std::unique_lock<std::mutex> LockGuard(TUMutex);
-    ErrorMsg += Err.str();
-  };
+    std::string ErrorMsg;
+    std::mutex TUMutex;
+    auto AppendError = [&](llvm::Twine Err) {
+        std::unique_lock<std::mutex> LockGuard(TUMutex);
+        ErrorMsg += Err.str();
+    };
 
-  auto Log = [&](llvm::Twine Msg) {
-    std::unique_lock<std::mutex> LockGuard(TUMutex);
-    llvm::errs() << Msg.str() << "\n";
-  };
+    auto Log = [&](llvm::Twine Msg) {
+        std::unique_lock<std::mutex> LockGuard(TUMutex);
+        llvm::errs() << Msg.str() << "\n";
+    };
 
-  std::vector<std::string> Files;
-  llvm::Regex RegexFilter(Filter);
-  for (const auto& File : Compilations.getAllFiles()) {
-    if (RegexFilter.match(File))
-      Files.push_back(File);
-  }
-  // Add a counter to track the progress.
-  const std::string TotalNumStr = std::to_string(Files.size());
-  unsigned Counter = 0;
-  auto Count = [&]() {
-    std::unique_lock<std::mutex> LockGuard(TUMutex);
-    return ++Counter;
-  };
-
-  auto &Action = Actions.front();
-
-  {
-    llvm::ThreadPool Pool(llvm::hardware_concurrency(ThreadCount));
-    for (std::string File : Files) {
-      Pool.async(
-          [&](std::string Path) {
-            Log("[" + std::to_string(Count()) + "/" + TotalNumStr +
-                "] Processing file " + Path);
-            // Each thread gets an indepent copy of a VFS to allow different
-            // concurrent working directories.
-            IntrusiveRefCntPtr<llvm::vfs::FileSystem> FS =
-                llvm::vfs::createPhysicalFileSystem();
-            ClangTool Tool(Compilations, {Path},
-                           std::make_shared<PCHContainerOperations>(), FS);
-            Tool.appendArgumentsAdjuster(Action.second);
-            Tool.appendArgumentsAdjuster(getDefaultArgumentsAdjusters());
-            for (const auto &FileAndContent : OverlayFiles)
-              Tool.mapVirtualFile(FileAndContent.first(),
-                                  FileAndContent.second);
-            if (Tool.run(Action.first.get()))
-              AppendError(llvm::Twine("Failed to run action on ") + Path +
-                          "\n");
-          },
-          File);
+    std::vector<std::string> Files;
+    llvm::Regex RegexFilter(Filter);
+    for (const auto& File : Compilations.getAllFiles()) {
+        if (RegexFilter.match(File))
+            Files.push_back(File);
     }
-    // Make sure all tasks have finished before resetting the working directory.
-    Pool.wait();
-  }
+    // Add a counter to track the progress.
+    const std::string TotalNumStr = std::to_string(Files.size());
+    unsigned Counter = 0;
+    auto Count = [&]() {
+        std::unique_lock<std::mutex> LockGuard(TUMutex);
+        return ++Counter;
+    };
 
-  if (!ErrorMsg.empty())
-    return make_string_error(ErrorMsg);
+    auto &Action = Actions.front();
 
-  return llvm::Error::success();
+    {
+        llvm::ThreadPool Pool(llvm::hardware_concurrency(ThreadCount));
+        for (std::string File : Files) {
+            Pool.async(
+            [&](std::string Path) {
+                Log("[" + std::to_string(Count()) + "/" + TotalNumStr +
+                    "] Processing file " + Path);
+                // Each thread gets an indepent copy of a VFS to allow different
+                // concurrent working directories.
+                IntrusiveRefCntPtr<llvm::vfs::FileSystem> FS =
+                    llvm::vfs::createPhysicalFileSystem();
+                ClangTool Tool(Compilations, {Path},
+                               std::make_shared<PCHContainerOperations>(), FS);
+                Tool.appendArgumentsAdjuster(Action.second);
+                Tool.appendArgumentsAdjuster(getDefaultArgumentsAdjusters());
+                for (const auto &FileAndContent : OverlayFiles)
+                    Tool.mapVirtualFile(FileAndContent.first(),
+                                        FileAndContent.second);
+                if (Tool.run(Action.first.get()))
+                    AppendError(llvm::Twine("Failed to run action on ") + Path +
+                                "\n");
+            },
+            File);
+        }
+        // Make sure all tasks have finished before resetting the working directory.
+        Pool.wait();
+    }
+
+    if (!ErrorMsg.empty())
+        return make_string_error(ErrorMsg);
+
+    return llvm::Error::success();
 }
 
 llvm::cl::opt<unsigned> ExecutorConcurrency(
@@ -157,20 +157,20 @@ llvm::cl::opt<unsigned> ExecutorConcurrency(
 
 class AllTUsToolExecutorPlugin : public ToolExecutorPlugin {
 public:
-  llvm::Expected<std::unique_ptr<ToolExecutor>>
-  create(CommonOptionsParser &OptionsParser) override {
-    if (OptionsParser.getSourcePathList().empty())
-      return make_string_error(
-          "[AllTUsToolExecutorPlugin] Please provide a directory/file path in "
-          "the compilation database.");
-    return std::make_unique<AllTUsToolExecutor>(std::move(OptionsParser),
-                                                 ExecutorConcurrency);
-  }
+    llvm::Expected<std::unique_ptr<ToolExecutor>>
+    create(CommonOptionsParser &OptionsParser) override {
+        if (OptionsParser.getSourcePathList().empty())
+            return make_string_error(
+                       "[AllTUsToolExecutorPlugin] Please provide a directory/file path in "
+                       "the compilation database.");
+        return std::make_unique<AllTUsToolExecutor>(std::move(OptionsParser),
+                ExecutorConcurrency);
+    }
 };
 
 static ToolExecutorPluginRegistry::Add<AllTUsToolExecutorPlugin>
-    X("all-TUs", "Runs FrontendActions on all TUs in the compilation database. "
-                 "Tool results are stored in memory.");
+X("all-TUs", "Runs FrontendActions on all TUs in the compilation database. "
+  "Tool results are stored in memory.");
 
 // This anchor is used to force the linker to link in the generated object file
 // and thus register the plugin.

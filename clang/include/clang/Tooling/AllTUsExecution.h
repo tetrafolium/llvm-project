@@ -24,49 +24,55 @@ namespace tooling {
 /// database.
 class AllTUsToolExecutor : public ToolExecutor {
 public:
-  static const char *ExecutorName;
+    static const char *ExecutorName;
 
-  /// Init with \p CompilationDatabase.
-  /// This uses \p ThreadCount threads to exececute the actions on all files in
-  /// parallel. If \p ThreadCount is 0, this uses `llvm::hardware_concurrency`.
-  AllTUsToolExecutor(const CompilationDatabase &Compilations,
-                     unsigned ThreadCount,
-                     std::shared_ptr<PCHContainerOperations> PCHContainerOps =
-                         std::make_shared<PCHContainerOperations>());
+    /// Init with \p CompilationDatabase.
+    /// This uses \p ThreadCount threads to exececute the actions on all files in
+    /// parallel. If \p ThreadCount is 0, this uses `llvm::hardware_concurrency`.
+    AllTUsToolExecutor(const CompilationDatabase &Compilations,
+                       unsigned ThreadCount,
+                       std::shared_ptr<PCHContainerOperations> PCHContainerOps =
+                           std::make_shared<PCHContainerOperations>());
 
-  /// Init with \p CommonOptionsParser. This is expected to be used by
-  /// `createExecutorFromCommandLineArgs` based on commandline options.
-  ///
-  /// The executor takes ownership of \p Options.
-  AllTUsToolExecutor(CommonOptionsParser Options, unsigned ThreadCount,
-                     std::shared_ptr<PCHContainerOperations> PCHContainerOps =
-                         std::make_shared<PCHContainerOperations>());
+    /// Init with \p CommonOptionsParser. This is expected to be used by
+    /// `createExecutorFromCommandLineArgs` based on commandline options.
+    ///
+    /// The executor takes ownership of \p Options.
+    AllTUsToolExecutor(CommonOptionsParser Options, unsigned ThreadCount,
+                       std::shared_ptr<PCHContainerOperations> PCHContainerOps =
+                           std::make_shared<PCHContainerOperations>());
 
-  StringRef getExecutorName() const override { return ExecutorName; }
+    StringRef getExecutorName() const override {
+        return ExecutorName;
+    }
 
-  using ToolExecutor::execute;
+    using ToolExecutor::execute;
 
-  llvm::Error
-  execute(llvm::ArrayRef<
-          std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
-              Actions) override;
+    llvm::Error
+    execute(llvm::ArrayRef<
+            std::pair<std::unique_ptr<FrontendActionFactory>, ArgumentsAdjuster>>
+            Actions) override;
 
-  ExecutionContext *getExecutionContext() override { return &Context; };
+    ExecutionContext *getExecutionContext() override {
+        return &Context;
+    };
 
-  ToolResults *getToolResults() override { return Results.get(); }
+    ToolResults *getToolResults() override {
+        return Results.get();
+    }
 
-  void mapVirtualFile(StringRef FilePath, StringRef Content) override {
-    OverlayFiles[FilePath] = std::string(Content);
-  }
+    void mapVirtualFile(StringRef FilePath, StringRef Content) override {
+        OverlayFiles[FilePath] = std::string(Content);
+    }
 
 private:
-  // Used to store the parser when the executor is initialized with parser.
-  llvm::Optional<CommonOptionsParser> OptionsParser;
-  const CompilationDatabase &Compilations;
-  std::unique_ptr<ToolResults> Results;
-  ExecutionContext Context;
-  llvm::StringMap<std::string> OverlayFiles;
-  unsigned ThreadCount;
+    // Used to store the parser when the executor is initialized with parser.
+    llvm::Optional<CommonOptionsParser> OptionsParser;
+    const CompilationDatabase &Compilations;
+    std::unique_ptr<ToolResults> Results;
+    ExecutionContext Context;
+    llvm::StringMap<std::string> OverlayFiles;
+    unsigned ThreadCount;
 };
 
 extern llvm::cl::opt<unsigned> ExecutorConcurrency;

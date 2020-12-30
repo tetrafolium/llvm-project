@@ -19,58 +19,58 @@ using namespace lldb_private;
 
 void OptionValueArch::DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
                                 uint32_t dump_mask) {
-  if (dump_mask & eDumpOptionType)
-    strm.Printf("(%s)", GetTypeAsCString());
-  if (dump_mask & eDumpOptionValue) {
     if (dump_mask & eDumpOptionType)
-      strm.PutCString(" = ");
+        strm.Printf("(%s)", GetTypeAsCString());
+    if (dump_mask & eDumpOptionValue) {
+        if (dump_mask & eDumpOptionType)
+            strm.PutCString(" = ");
 
-    if (m_current_value.IsValid()) {
-      const char *arch_name = m_current_value.GetArchitectureName();
-      if (arch_name)
-        strm.PutCString(arch_name);
+        if (m_current_value.IsValid()) {
+            const char *arch_name = m_current_value.GetArchitectureName();
+            if (arch_name)
+                strm.PutCString(arch_name);
+        }
     }
-  }
 }
 
 Status OptionValueArch::SetValueFromString(llvm::StringRef value,
-                                           VarSetOperationType op) {
-  Status error;
-  switch (op) {
-  case eVarSetOperationClear:
-    Clear();
-    NotifyValueChanged();
-    break;
+        VarSetOperationType op) {
+    Status error;
+    switch (op) {
+    case eVarSetOperationClear:
+        Clear();
+        NotifyValueChanged();
+        break;
 
-  case eVarSetOperationReplace:
-  case eVarSetOperationAssign: {
-    std::string value_str = value.trim().str();
-    if (m_current_value.SetTriple(value_str.c_str())) {
-      m_value_was_set = true;
-      NotifyValueChanged();
-    } else
-      error.SetErrorStringWithFormat("unsupported architecture '%s'",
-                                     value_str.c_str());
-    break;
-  }
-  case eVarSetOperationInsertBefore:
-  case eVarSetOperationInsertAfter:
-  case eVarSetOperationRemove:
-  case eVarSetOperationAppend:
-  case eVarSetOperationInvalid:
-    error = OptionValue::SetValueFromString(value, op);
-    break;
-  }
-  return error;
+    case eVarSetOperationReplace:
+    case eVarSetOperationAssign: {
+        std::string value_str = value.trim().str();
+        if (m_current_value.SetTriple(value_str.c_str())) {
+            m_value_was_set = true;
+            NotifyValueChanged();
+        } else
+            error.SetErrorStringWithFormat("unsupported architecture '%s'",
+                                           value_str.c_str());
+        break;
+    }
+    case eVarSetOperationInsertBefore:
+    case eVarSetOperationInsertAfter:
+    case eVarSetOperationRemove:
+    case eVarSetOperationAppend:
+    case eVarSetOperationInvalid:
+        error = OptionValue::SetValueFromString(value, op);
+        break;
+    }
+    return error;
 }
 
 lldb::OptionValueSP OptionValueArch::DeepCopy() const {
-  return OptionValueSP(new OptionValueArch(*this));
+    return OptionValueSP(new OptionValueArch(*this));
 }
 
 void OptionValueArch::AutoComplete(CommandInterpreter &interpreter,
                                    CompletionRequest &request) {
-  CommandCompletions::InvokeCommonCompletionCallbacks(
-      interpreter, CommandCompletions::eArchitectureCompletion, request,
-      nullptr);
+    CommandCompletions::InvokeCommonCompletionCallbacks(
+        interpreter, CommandCompletions::eArchitectureCompletion, request,
+        nullptr);
 }

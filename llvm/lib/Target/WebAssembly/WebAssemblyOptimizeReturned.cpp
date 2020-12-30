@@ -22,27 +22,27 @@ using namespace llvm;
 
 namespace {
 class OptimizeReturned final : public FunctionPass,
-                               public InstVisitor<OptimizeReturned> {
-  StringRef getPassName() const override {
-    return "WebAssembly Optimize Returned";
-  }
+    public InstVisitor<OptimizeReturned> {
+    StringRef getPassName() const override {
+        return "WebAssembly Optimize Returned";
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesCFG();
-    AU.addRequired<DominatorTreeWrapperPass>();
-    AU.addPreserved<DominatorTreeWrapperPass>();
-    FunctionPass::getAnalysisUsage(AU);
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesCFG();
+        AU.addRequired<DominatorTreeWrapperPass>();
+        AU.addPreserved<DominatorTreeWrapperPass>();
+        FunctionPass::getAnalysisUsage(AU);
+    }
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 
-  DominatorTree *DT = nullptr;
+    DominatorTree *DT = nullptr;
 
 public:
-  static char ID;
-  OptimizeReturned() : FunctionPass(ID) {}
+    static char ID;
+    OptimizeReturned() : FunctionPass(ID) {}
 
-  void visitCallBase(CallBase &CB);
+    void visitCallBase(CallBase &CB);
 };
 } // End anonymous namespace
 
@@ -52,28 +52,30 @@ INITIALIZE_PASS(OptimizeReturned, DEBUG_TYPE,
                 false, false)
 
 FunctionPass *llvm::createWebAssemblyOptimizeReturned() {
-  return new OptimizeReturned();
+    return new OptimizeReturned();
 }
 
 void OptimizeReturned::visitCallBase(CallBase &CB) {
-  for (unsigned I = 0, E = CB.getNumArgOperands(); I < E; ++I)
-    if (CB.paramHasAttr(I, Attribute::Returned)) {
-      Value *Arg = CB.getArgOperand(I);
-      // Ignore constants, globals, undef, etc.
-      if (isa<Constant>(Arg))
-        continue;
-      // Like replaceDominatedUsesWith but using Instruction/Use dominance.
-      Arg->replaceUsesWithIf(&CB,
-                             [&](Use &U) { return DT->dominates(&CB, U); });
-    }
+    for (unsigned I = 0, E = CB.getNumArgOperands(); I < E; ++I)
+        if (CB.paramHasAttr(I, Attribute::Returned)) {
+            Value *Arg = CB.getArgOperand(I);
+            // Ignore constants, globals, undef, etc.
+            if (isa<Constant>(Arg))
+                continue;
+            // Like replaceDominatedUsesWith but using Instruction/Use dominance.
+            Arg->replaceUsesWithIf(&CB,
+            [&](Use &U) {
+                return DT->dominates(&CB, U);
+            });
+        }
 }
 
 bool OptimizeReturned::runOnFunction(Function &F) {
-  LLVM_DEBUG(dbgs() << "********** Optimize returned Attributes **********\n"
-                       "********** Function: "
-                    << F.getName() << '\n');
+    LLVM_DEBUG(dbgs() << "********** Optimize returned Attributes **********\n"
+               "********** Function: "
+               << F.getName() << '\n');
 
-  DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
-  visit(F);
-  return true;
+    DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    visit(F);
+    return true;
 }

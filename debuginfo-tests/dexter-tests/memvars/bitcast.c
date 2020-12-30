@@ -52,24 +52,24 @@ char g = 1;
 int five = 5;
 __attribute__((__noinline__))
 int getint(int x) {
-  g = x - 4;
-  return x * g;
+    g = x - 4;
+    return x * g;
 }
 
 __attribute__((__noinline__))
 void alias(char* c) {
-  g = *c;
-  *c = (char)five;
+    g = *c;
+    *c = (char)five;
 }
 
 int main() {
-  int x = getint(5);
-  int y = getint(5); // DexLabel('s1')
-  int z = getint(5); // DexLabel('s2')
-  alias((char*)&x);  // DexLabel('s3')
-  alias((char*)&y);
-  alias((char*)&z);
-  return 0;          // DexLabel('s4')
+    int x = getint(5);
+    int y = getint(5); // DexLabel('s1')
+    int z = getint(5); // DexLabel('s2')
+    alias((char*)&x);  // DexLabel('s3')
+    alias((char*)&y);
+    alias((char*)&z);
+    return 0;          // DexLabel('s4')
 }
 
 // DexExpectWatchValue('x', '5',  from_line='s1', to_line='s4')

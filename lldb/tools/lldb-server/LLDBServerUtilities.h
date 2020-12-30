@@ -19,9 +19,9 @@ namespace lldb_server {
 
 class LLDBServerUtilities {
 public:
-  static bool SetupLogging(const std::string &log_file,
-                           const llvm::StringRef &log_channels,
-                           uint32_t log_options);
+    static bool SetupLogging(const std::string &log_file,
+                             const llvm::StringRef &log_channels,
+                             uint32_t log_options);
 };
 }
 }

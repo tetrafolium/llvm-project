@@ -69,22 +69,22 @@ namespace llvm {
 class SpeculativeExecutionPass
     : public PassInfoMixin<SpeculativeExecutionPass> {
 public:
-  SpeculativeExecutionPass(bool OnlyIfDivergentTarget = false);
+    SpeculativeExecutionPass(bool OnlyIfDivergentTarget = false);
 
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-  // Glue for old PM
-  bool runImpl(Function &F, TargetTransformInfo *TTI);
+    // Glue for old PM
+    bool runImpl(Function &F, TargetTransformInfo *TTI);
 
 private:
-  bool runOnBasicBlock(BasicBlock &B);
-  bool considerHoistingFromTo(BasicBlock &FromBlock, BasicBlock &ToBlock);
+    bool runOnBasicBlock(BasicBlock &B);
+    bool considerHoistingFromTo(BasicBlock &FromBlock, BasicBlock &ToBlock);
 
-  // If true, this pass is a nop unless the target architecture has branch
-  // divergence.
-  const bool OnlyIfDivergentTarget = false;
+    // If true, this pass is a nop unless the target architecture has branch
+    // divergence.
+    const bool OnlyIfDivergentTarget = false;
 
-  TargetTransformInfo *TTI = nullptr;
+    TargetTransformInfo *TTI = nullptr;
 };
 }
 

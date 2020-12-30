@@ -51,111 +51,111 @@ using namespace lld::macho;
 namespace {
 
 struct Edge {
-  Edge(StringRef s, TrieNode *node) : substring(s), child(node) {}
+    Edge(StringRef s, TrieNode *node) : substring(s), child(node) {}
 
-  StringRef substring;
-  struct TrieNode *child;
+    StringRef substring;
+    struct TrieNode *child;
 };
 
 struct ExportInfo {
-  uint64_t address;
-  uint8_t flags = 0;
-  ExportInfo(const Symbol &sym, uint64_t imageBase)
-      : address(sym.getVA() - imageBase) {
-    // Set the symbol type.
-    if (sym.isWeakDef())
-      flags |= EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION;
-    // TODO: Add proper support for re-exports & stub-and-resolver flags.
+    uint64_t address;
+    uint8_t flags = 0;
+    ExportInfo(const Symbol &sym, uint64_t imageBase)
+        : address(sym.getVA() - imageBase) {
+        // Set the symbol type.
+        if (sym.isWeakDef())
+            flags |= EXPORT_SYMBOL_FLAGS_WEAK_DEFINITION;
+        // TODO: Add proper support for re-exports & stub-and-resolver flags.
 
-    // Set the symbol kind.
-    if (sym.isTlv()) {
-      flags |= EXPORT_SYMBOL_FLAGS_KIND_THREAD_LOCAL;
-    } else if (auto *defined = dyn_cast<Defined>(&sym)) {
-      if (defined->isAbsolute())
-        flags |= EXPORT_SYMBOL_FLAGS_KIND_ABSOLUTE;
+        // Set the symbol kind.
+        if (sym.isTlv()) {
+            flags |= EXPORT_SYMBOL_FLAGS_KIND_THREAD_LOCAL;
+        } else if (auto *defined = dyn_cast<Defined>(&sym)) {
+            if (defined->isAbsolute())
+                flags |= EXPORT_SYMBOL_FLAGS_KIND_ABSOLUTE;
+        }
     }
-  }
 };
 
 } // namespace
 
 struct macho::TrieNode {
-  std::vector<Edge> edges;
-  Optional<ExportInfo> info;
-  // Estimated offset from the start of the serialized trie to the current node.
-  // This will converge to the true offset when updateOffset() is run to a
-  // fixpoint.
-  size_t offset = 0;
+    std::vector<Edge> edges;
+    Optional<ExportInfo> info;
+    // Estimated offset from the start of the serialized trie to the current node.
+    // This will converge to the true offset when updateOffset() is run to a
+    // fixpoint.
+    size_t offset = 0;
 
-  // Returns whether the new estimated offset differs from the old one.
-  bool updateOffset(size_t &nextOffset);
-  void writeTo(uint8_t *buf) const;
+    // Returns whether the new estimated offset differs from the old one.
+    bool updateOffset(size_t &nextOffset);
+    void writeTo(uint8_t *buf) const;
 };
 
 bool TrieNode::updateOffset(size_t &nextOffset) {
-  // Size of the whole node (including the terminalSize and the outgoing edges.)
-  // In contrast, terminalSize only records the size of the other data in the
-  // node.
-  size_t nodeSize;
-  if (info) {
-    uint32_t terminalSize =
-        getULEB128Size(info->flags) + getULEB128Size(info->address);
-    // Overall node size so far is the uleb128 size of the length of the symbol
-    // info + the symbol info itself.
-    nodeSize = terminalSize + getULEB128Size(terminalSize);
-  } else {
-    nodeSize = 1; // Size of terminalSize (which has a value of 0)
-  }
-  // Compute size of all child edges.
-  ++nodeSize; // Byte for number of children.
-  for (Edge &edge : edges) {
-    nodeSize += edge.substring.size() + 1             // String length.
-                + getULEB128Size(edge.child->offset); // Offset len.
-  }
-  // On input, 'nextOffset' is the new preferred location for this node.
-  bool result = (offset != nextOffset);
-  // Store new location in node object for use by parents.
-  offset = nextOffset;
-  nextOffset += nodeSize;
-  return result;
+    // Size of the whole node (including the terminalSize and the outgoing edges.)
+    // In contrast, terminalSize only records the size of the other data in the
+    // node.
+    size_t nodeSize;
+    if (info) {
+        uint32_t terminalSize =
+            getULEB128Size(info->flags) + getULEB128Size(info->address);
+        // Overall node size so far is the uleb128 size of the length of the symbol
+        // info + the symbol info itself.
+        nodeSize = terminalSize + getULEB128Size(terminalSize);
+    } else {
+        nodeSize = 1; // Size of terminalSize (which has a value of 0)
+    }
+    // Compute size of all child edges.
+    ++nodeSize; // Byte for number of children.
+    for (Edge &edge : edges) {
+        nodeSize += edge.substring.size() + 1             // String length.
+                    + getULEB128Size(edge.child->offset); // Offset len.
+    }
+    // On input, 'nextOffset' is the new preferred location for this node.
+    bool result = (offset != nextOffset);
+    // Store new location in node object for use by parents.
+    offset = nextOffset;
+    nextOffset += nodeSize;
+    return result;
 }
 
 void TrieNode::writeTo(uint8_t *buf) const {
-  buf += offset;
-  if (info) {
-    // TrieNodes with Symbol info: size, flags address
-    uint32_t terminalSize =
-        getULEB128Size(info->flags) + getULEB128Size(info->address);
-    buf += encodeULEB128(terminalSize, buf);
-    buf += encodeULEB128(info->flags, buf);
-    buf += encodeULEB128(info->address, buf);
-  } else {
-    // TrieNode with no Symbol info.
-    *buf++ = 0; // terminalSize
-  }
-  // Add number of children. TODO: Handle case where we have more than 256.
-  assert(edges.size() < 256);
-  *buf++ = edges.size();
-  // Append each child edge substring and node offset.
-  for (const Edge &edge : edges) {
-    memcpy(buf, edge.substring.data(), edge.substring.size());
-    buf += edge.substring.size();
-    *buf++ = '\0';
-    buf += encodeULEB128(edge.child->offset, buf);
-  }
+    buf += offset;
+    if (info) {
+        // TrieNodes with Symbol info: size, flags address
+        uint32_t terminalSize =
+            getULEB128Size(info->flags) + getULEB128Size(info->address);
+        buf += encodeULEB128(terminalSize, buf);
+        buf += encodeULEB128(info->flags, buf);
+        buf += encodeULEB128(info->address, buf);
+    } else {
+        // TrieNode with no Symbol info.
+        *buf++ = 0; // terminalSize
+    }
+    // Add number of children. TODO: Handle case where we have more than 256.
+    assert(edges.size() < 256);
+    *buf++ = edges.size();
+    // Append each child edge substring and node offset.
+    for (const Edge &edge : edges) {
+        memcpy(buf, edge.substring.data(), edge.substring.size());
+        buf += edge.substring.size();
+        *buf++ = '\0';
+        buf += encodeULEB128(edge.child->offset, buf);
+    }
 }
 
 TrieNode *TrieBuilder::makeNode() {
-  auto *node = make<TrieNode>();
-  nodes.emplace_back(node);
-  return node;
+    auto *node = make<TrieNode>();
+    nodes.emplace_back(node);
+    return node;
 }
 
 static int charAt(const Symbol *sym, size_t pos) {
-  StringRef str = sym->getName();
-  if (pos >= str.size())
-    return -1;
-  return str[pos];
+    StringRef str = sym->getName();
+    if (pos >= str.size())
+        return -1;
+    return str[pos];
 }
 
 // Build the trie by performing a three-way radix quicksort: We start by sorting
@@ -172,75 +172,75 @@ static int charAt(const Symbol *sym, size_t pos) {
 void TrieBuilder::sortAndBuild(MutableArrayRef<const Symbol *> vec,
                                TrieNode *node, size_t lastPos, size_t pos) {
 tailcall:
-  if (vec.empty())
-    return;
+    if (vec.empty())
+        return;
 
-  // Partition items so that items in [0, i) are less than the pivot,
-  // [i, j) are the same as the pivot, and [j, vec.size()) are greater than
-  // the pivot.
-  const Symbol *pivotSymbol = vec[vec.size() / 2];
-  int pivot = charAt(pivotSymbol, pos);
-  size_t i = 0;
-  size_t j = vec.size();
-  for (size_t k = 0; k < j;) {
-    int c = charAt(vec[k], pos);
-    if (c < pivot)
-      std::swap(vec[i++], vec[k++]);
-    else if (c > pivot)
-      std::swap(vec[--j], vec[k]);
-    else
-      k++;
-  }
+    // Partition items so that items in [0, i) are less than the pivot,
+    // [i, j) are the same as the pivot, and [j, vec.size()) are greater than
+    // the pivot.
+    const Symbol *pivotSymbol = vec[vec.size() / 2];
+    int pivot = charAt(pivotSymbol, pos);
+    size_t i = 0;
+    size_t j = vec.size();
+    for (size_t k = 0; k < j;) {
+        int c = charAt(vec[k], pos);
+        if (c < pivot)
+            std::swap(vec[i++], vec[k++]);
+        else if (c > pivot)
+            std::swap(vec[--j], vec[k]);
+        else
+            k++;
+    }
 
-  bool isTerminal = pivot == -1;
-  bool prefixesDiverge = i != 0 || j != vec.size();
-  if (lastPos != pos && (isTerminal || prefixesDiverge)) {
-    TrieNode *newNode = makeNode();
-    node->edges.emplace_back(pivotSymbol->getName().slice(lastPos, pos),
-                             newNode);
-    node = newNode;
-    lastPos = pos;
-  }
+    bool isTerminal = pivot == -1;
+    bool prefixesDiverge = i != 0 || j != vec.size();
+    if (lastPos != pos && (isTerminal || prefixesDiverge)) {
+        TrieNode *newNode = makeNode();
+        node->edges.emplace_back(pivotSymbol->getName().slice(lastPos, pos),
+                                 newNode);
+        node = newNode;
+        lastPos = pos;
+    }
 
-  sortAndBuild(vec.slice(0, i), node, lastPos, pos);
-  sortAndBuild(vec.slice(j), node, lastPos, pos);
+    sortAndBuild(vec.slice(0, i), node, lastPos, pos);
+    sortAndBuild(vec.slice(j), node, lastPos, pos);
 
-  if (isTerminal) {
-    assert(j - i == 1); // no duplicate symbols
-    node->info = ExportInfo(*pivotSymbol, imageBase);
-  } else {
-    // This is the tail-call-optimized version of the following:
-    // sortAndBuild(vec.slice(i, j - i), node, lastPos, pos + 1);
-    vec = vec.slice(i, j - i);
-    ++pos;
-    goto tailcall;
-  }
+    if (isTerminal) {
+        assert(j - i == 1); // no duplicate symbols
+        node->info = ExportInfo(*pivotSymbol, imageBase);
+    } else {
+        // This is the tail-call-optimized version of the following:
+        // sortAndBuild(vec.slice(i, j - i), node, lastPos, pos + 1);
+        vec = vec.slice(i, j - i);
+        ++pos;
+        goto tailcall;
+    }
 }
 
 size_t TrieBuilder::build() {
-  if (exported.empty())
-    return 0;
+    if (exported.empty())
+        return 0;
 
-  TrieNode *root = makeNode();
-  sortAndBuild(exported, root, 0, 0);
+    TrieNode *root = makeNode();
+    sortAndBuild(exported, root, 0, 0);
 
-  // Assign each node in the vector an offset in the trie stream, iterating
-  // until all uleb128 sizes have stabilized.
-  size_t offset;
-  bool more;
-  do {
-    offset = 0;
-    more = false;
-    for (TrieNode *node : nodes)
-      more |= node->updateOffset(offset);
-  } while (more);
+    // Assign each node in the vector an offset in the trie stream, iterating
+    // until all uleb128 sizes have stabilized.
+    size_t offset;
+    bool more;
+    do {
+        offset = 0;
+        more = false;
+        for (TrieNode *node : nodes)
+            more |= node->updateOffset(offset);
+    } while (more);
 
-  return offset;
+    return offset;
 }
 
 void TrieBuilder::writeTo(uint8_t *buf) const {
-  for (TrieNode *node : nodes)
-    node->writeTo(buf);
+    for (TrieNode *node : nodes)
+        node->writeTo(buf);
 }
 
 namespace {
@@ -248,49 +248,51 @@ namespace {
 // Parse a serialized trie and invoke a callback for each entry.
 class TrieParser {
 public:
-  TrieParser(const uint8_t *buf, size_t size, const TrieEntryCallback &callback)
-      : start(buf), end(start + size), callback(callback) {}
+    TrieParser(const uint8_t *buf, size_t size, const TrieEntryCallback &callback)
+        : start(buf), end(start + size), callback(callback) {}
 
-  void parse(const uint8_t *buf, const Twine &cumulativeString);
+    void parse(const uint8_t *buf, const Twine &cumulativeString);
 
-  void parse() { parse(start, ""); }
+    void parse() {
+        parse(start, "");
+    }
 
-  const uint8_t *start;
-  const uint8_t *end;
-  const TrieEntryCallback &callback;
+    const uint8_t *start;
+    const uint8_t *end;
+    const TrieEntryCallback &callback;
 };
 
 } // namespace
 
 void TrieParser::parse(const uint8_t *buf, const Twine &cumulativeString) {
-  if (buf >= end)
-    fatal("Node offset points outside export section");
+    if (buf >= end)
+        fatal("Node offset points outside export section");
 
-  unsigned ulebSize;
-  uint64_t terminalSize = decodeULEB128(buf, &ulebSize);
-  buf += ulebSize;
-  uint64_t flags = 0;
-  size_t offset;
-  if (terminalSize != 0) {
-    flags = decodeULEB128(buf, &ulebSize);
-    callback(cumulativeString, flags);
-  }
-  buf += terminalSize;
-  uint8_t numEdges = *buf++;
-  for (uint8_t i = 0; i < numEdges; ++i) {
-    const char *cbuf = reinterpret_cast<const char *>(buf);
-    StringRef substring = StringRef(cbuf, strnlen(cbuf, end - buf));
-    buf += substring.size() + 1;
-    offset = decodeULEB128(buf, &ulebSize);
+    unsigned ulebSize;
+    uint64_t terminalSize = decodeULEB128(buf, &ulebSize);
     buf += ulebSize;
-    parse(start + offset, cumulativeString + substring);
-  }
+    uint64_t flags = 0;
+    size_t offset;
+    if (terminalSize != 0) {
+        flags = decodeULEB128(buf, &ulebSize);
+        callback(cumulativeString, flags);
+    }
+    buf += terminalSize;
+    uint8_t numEdges = *buf++;
+    for (uint8_t i = 0; i < numEdges; ++i) {
+        const char *cbuf = reinterpret_cast<const char *>(buf);
+        StringRef substring = StringRef(cbuf, strnlen(cbuf, end - buf));
+        buf += substring.size() + 1;
+        offset = decodeULEB128(buf, &ulebSize);
+        buf += ulebSize;
+        parse(start + offset, cumulativeString + substring);
+    }
 }
 
 void macho::parseTrie(const uint8_t *buf, size_t size,
                       const TrieEntryCallback &callback) {
-  if (size == 0)
-    return;
+    if (size == 0)
+        return;
 
-  TrieParser(buf, size, callback).parse();
+    TrieParser(buf, size, callback).parse();
 }

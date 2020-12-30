@@ -31,11 +31,11 @@ int __kmps_get_stacksize();
 #ifndef KMP_SCHED_TYPE_DEFINED
 #define KMP_SCHED_TYPE_DEFINED
 typedef enum kmp_sched {
-  kmp_sched_static = 1, // mapped to kmp_sch_static_chunked           (33)
-  kmp_sched_dynamic = 2, // mapped to kmp_sch_dynamic_chunked          (35)
-  kmp_sched_guided = 3, // mapped to kmp_sch_guided_chunked           (36)
-  kmp_sched_auto = 4, // mapped to kmp_sch_auto                     (38)
-  kmp_sched_default = kmp_sched_static // default scheduling
+    kmp_sched_static = 1, // mapped to kmp_sch_static_chunked           (33)
+    kmp_sched_dynamic = 2, // mapped to kmp_sch_dynamic_chunked          (35)
+    kmp_sched_guided = 3, // mapped to kmp_sch_guided_chunked           (36)
+    kmp_sched_auto = 4, // mapped to kmp_sch_auto                     (38)
+    kmp_sched_default = kmp_sched_static // default scheduling
 } kmp_sched_t;
 #endif
 void __kmps_set_schedule(kmp_sched_t kind, int modifier);

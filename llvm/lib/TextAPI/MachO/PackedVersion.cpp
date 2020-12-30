@@ -21,92 +21,92 @@ namespace llvm {
 namespace MachO {
 
 bool PackedVersion::parse32(StringRef Str) {
-  Version = 0;
+    Version = 0;
 
-  if (Str.empty())
-    return false;
+    if (Str.empty())
+        return false;
 
-  SmallVector<StringRef, 3> Parts;
-  SplitString(Str, Parts, ".");
+    SmallVector<StringRef, 3> Parts;
+    SplitString(Str, Parts, ".");
 
-  if (Parts.size() > 3)
-    return false;
+    if (Parts.size() > 3)
+        return false;
 
-  unsigned long long Num;
-  if (getAsUnsignedInteger(Parts[0], 10, Num))
-    return false;
+    unsigned long long Num;
+    if (getAsUnsignedInteger(Parts[0], 10, Num))
+        return false;
 
-  if (Num > UINT16_MAX)
-    return false;
+    if (Num > UINT16_MAX)
+        return false;
 
-  Version = Num << 16;
+    Version = Num << 16;
 
-  for (unsigned i = 1, ShiftNum = 8; i < Parts.size(); ++i, ShiftNum -= 8) {
-    if (getAsUnsignedInteger(Parts[i], 10, Num))
-      return false;
+    for (unsigned i = 1, ShiftNum = 8; i < Parts.size(); ++i, ShiftNum -= 8) {
+        if (getAsUnsignedInteger(Parts[i], 10, Num))
+            return false;
 
-    if (Num > UINT8_MAX)
-      return false;
+        if (Num > UINT8_MAX)
+            return false;
 
-    Version |= (Num << ShiftNum);
-  }
+        Version |= (Num << ShiftNum);
+    }
 
-  return true;
+    return true;
 }
 
 std::pair<bool, bool> PackedVersion::parse64(StringRef Str) {
-  bool Truncated = false;
-  Version = 0;
+    bool Truncated = false;
+    Version = 0;
 
-  if (Str.empty())
-    return std::make_pair(false, Truncated);
+    if (Str.empty())
+        return std::make_pair(false, Truncated);
 
-  SmallVector<StringRef, 5> Parts;
-  SplitString(Str, Parts, ".");
+    SmallVector<StringRef, 5> Parts;
+    SplitString(Str, Parts, ".");
 
-  if (Parts.size() > 5)
-    return std::make_pair(false, Truncated);
+    if (Parts.size() > 5)
+        return std::make_pair(false, Truncated);
 
-  unsigned long long Num;
-  if (getAsUnsignedInteger(Parts[0], 10, Num))
-    return std::make_pair(false, Truncated);
+    unsigned long long Num;
+    if (getAsUnsignedInteger(Parts[0], 10, Num))
+        return std::make_pair(false, Truncated);
 
-  if (Num > 0xFFFFFFULL)
-    return std::make_pair(false, Truncated);
+    if (Num > 0xFFFFFFULL)
+        return std::make_pair(false, Truncated);
 
-  if (Num > 0xFFFFULL) {
-    Num = 0xFFFFULL;
-    Truncated = true;
-  }
-  Version = Num << 16;
-
-  for (unsigned i = 1, ShiftNum = 8; i < Parts.size() && i < 3;
-       ++i, ShiftNum -= 8) {
-    if (getAsUnsignedInteger(Parts[i], 10, Num))
-      return std::make_pair(false, Truncated);
-
-    if (Num > 0x3FFULL)
-      return std::make_pair(false, Truncated);
-
-    if (Num > 0xFFULL) {
-      Num = 0xFFULL;
-      Truncated = true;
+    if (Num > 0xFFFFULL) {
+        Num = 0xFFFFULL;
+        Truncated = true;
     }
-    Version |= (Num << ShiftNum);
-  }
+    Version = Num << 16;
 
-  if (Parts.size() > 3)
-    Truncated = true;
+    for (unsigned i = 1, ShiftNum = 8; i < Parts.size() && i < 3;
+            ++i, ShiftNum -= 8) {
+        if (getAsUnsignedInteger(Parts[i], 10, Num))
+            return std::make_pair(false, Truncated);
 
-  return std::make_pair(true, Truncated);
+        if (Num > 0x3FFULL)
+            return std::make_pair(false, Truncated);
+
+        if (Num > 0xFFULL) {
+            Num = 0xFFULL;
+            Truncated = true;
+        }
+        Version |= (Num << ShiftNum);
+    }
+
+    if (Parts.size() > 3)
+        Truncated = true;
+
+    return std::make_pair(true, Truncated);
 }
 
 void PackedVersion::print(raw_ostream &OS) const {
-  OS << format("%d", getMajor());
-  if (getMinor() || getSubminor())
-    OS << format(".%d", getMinor());
-  if (getSubminor())
-    OS << format(".%d", getSubminor());
+    OS << format("%d", getMajor());
+    if (getMinor() || getSubminor())
+        OS << format(".%d", getMinor());
+    if (getSubminor())
+        OS << format(".%d", getSubminor());
 }
 
 } // end namespace MachO.

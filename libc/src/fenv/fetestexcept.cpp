@@ -11,6 +11,8 @@
 
 namespace __llvm_libc {
 
-int LLVM_LIBC_ENTRYPOINT(fetestexcept)(int e) { return fputil::testExcept(e); }
+int LLVM_LIBC_ENTRYPOINT(fetestexcept)(int e) {
+    return fputil::testExcept(e);
+}
 
 } // namespace __llvm_libc

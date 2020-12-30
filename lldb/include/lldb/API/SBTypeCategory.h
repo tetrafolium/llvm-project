@@ -16,99 +16,99 @@ namespace lldb {
 
 class LLDB_API SBTypeCategory {
 public:
-  SBTypeCategory();
+    SBTypeCategory();
 
-  SBTypeCategory(const lldb::SBTypeCategory &rhs);
+    SBTypeCategory(const lldb::SBTypeCategory &rhs);
 
-  ~SBTypeCategory();
+    ~SBTypeCategory();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  bool GetEnabled();
+    bool GetEnabled();
 
-  void SetEnabled(bool);
+    void SetEnabled(bool);
 
-  const char *GetName();
+    const char *GetName();
 
-  lldb::LanguageType GetLanguageAtIndex(uint32_t idx);
+    lldb::LanguageType GetLanguageAtIndex(uint32_t idx);
 
-  uint32_t GetNumLanguages();
+    uint32_t GetNumLanguages();
 
-  void AddLanguage(lldb::LanguageType language);
+    void AddLanguage(lldb::LanguageType language);
 
-  bool GetDescription(lldb::SBStream &description,
-                      lldb::DescriptionLevel description_level);
+    bool GetDescription(lldb::SBStream &description,
+                        lldb::DescriptionLevel description_level);
 
-  uint32_t GetNumFormats();
+    uint32_t GetNumFormats();
 
-  uint32_t GetNumSummaries();
+    uint32_t GetNumSummaries();
 
-  uint32_t GetNumFilters();
+    uint32_t GetNumFilters();
 
-  uint32_t GetNumSynthetics();
+    uint32_t GetNumSynthetics();
 
-  SBTypeNameSpecifier GetTypeNameSpecifierForFilterAtIndex(uint32_t);
+    SBTypeNameSpecifier GetTypeNameSpecifierForFilterAtIndex(uint32_t);
 
-  SBTypeNameSpecifier GetTypeNameSpecifierForFormatAtIndex(uint32_t);
+    SBTypeNameSpecifier GetTypeNameSpecifierForFormatAtIndex(uint32_t);
 
-  SBTypeNameSpecifier GetTypeNameSpecifierForSummaryAtIndex(uint32_t);
+    SBTypeNameSpecifier GetTypeNameSpecifierForSummaryAtIndex(uint32_t);
 
-  SBTypeNameSpecifier GetTypeNameSpecifierForSyntheticAtIndex(uint32_t);
+    SBTypeNameSpecifier GetTypeNameSpecifierForSyntheticAtIndex(uint32_t);
 
-  SBTypeFilter GetFilterForType(SBTypeNameSpecifier);
+    SBTypeFilter GetFilterForType(SBTypeNameSpecifier);
 
-  SBTypeFormat GetFormatForType(SBTypeNameSpecifier);
+    SBTypeFormat GetFormatForType(SBTypeNameSpecifier);
 
-  SBTypeSummary GetSummaryForType(SBTypeNameSpecifier);
+    SBTypeSummary GetSummaryForType(SBTypeNameSpecifier);
 
-  SBTypeSynthetic GetSyntheticForType(SBTypeNameSpecifier);
+    SBTypeSynthetic GetSyntheticForType(SBTypeNameSpecifier);
 
-  SBTypeFilter GetFilterAtIndex(uint32_t);
+    SBTypeFilter GetFilterAtIndex(uint32_t);
 
-  SBTypeFormat GetFormatAtIndex(uint32_t);
+    SBTypeFormat GetFormatAtIndex(uint32_t);
 
-  SBTypeSummary GetSummaryAtIndex(uint32_t);
+    SBTypeSummary GetSummaryAtIndex(uint32_t);
 
-  SBTypeSynthetic GetSyntheticAtIndex(uint32_t);
+    SBTypeSynthetic GetSyntheticAtIndex(uint32_t);
 
-  bool AddTypeFormat(SBTypeNameSpecifier, SBTypeFormat);
+    bool AddTypeFormat(SBTypeNameSpecifier, SBTypeFormat);
 
-  bool DeleteTypeFormat(SBTypeNameSpecifier);
+    bool DeleteTypeFormat(SBTypeNameSpecifier);
 
-  bool AddTypeSummary(SBTypeNameSpecifier, SBTypeSummary);
+    bool AddTypeSummary(SBTypeNameSpecifier, SBTypeSummary);
 
-  bool DeleteTypeSummary(SBTypeNameSpecifier);
+    bool DeleteTypeSummary(SBTypeNameSpecifier);
 
-  bool AddTypeFilter(SBTypeNameSpecifier, SBTypeFilter);
+    bool AddTypeFilter(SBTypeNameSpecifier, SBTypeFilter);
 
-  bool DeleteTypeFilter(SBTypeNameSpecifier);
+    bool DeleteTypeFilter(SBTypeNameSpecifier);
 
-  bool AddTypeSynthetic(SBTypeNameSpecifier, SBTypeSynthetic);
+    bool AddTypeSynthetic(SBTypeNameSpecifier, SBTypeSynthetic);
 
-  bool DeleteTypeSynthetic(SBTypeNameSpecifier);
+    bool DeleteTypeSynthetic(SBTypeNameSpecifier);
 
-  lldb::SBTypeCategory &operator=(const lldb::SBTypeCategory &rhs);
+    lldb::SBTypeCategory &operator=(const lldb::SBTypeCategory &rhs);
 
-  bool operator==(lldb::SBTypeCategory &rhs);
+    bool operator==(lldb::SBTypeCategory &rhs);
 
-  bool operator!=(lldb::SBTypeCategory &rhs);
+    bool operator!=(lldb::SBTypeCategory &rhs);
 
 protected:
-  friend class SBDebugger;
+    friend class SBDebugger;
 
-  lldb::TypeCategoryImplSP GetSP();
+    lldb::TypeCategoryImplSP GetSP();
 
-  void SetSP(const lldb::TypeCategoryImplSP &typecategory_impl_sp);
+    void SetSP(const lldb::TypeCategoryImplSP &typecategory_impl_sp);
 
-  TypeCategoryImplSP m_opaque_sp;
+    TypeCategoryImplSP m_opaque_sp;
 
-  SBTypeCategory(const lldb::TypeCategoryImplSP &);
+    SBTypeCategory(const lldb::TypeCategoryImplSP &);
 
-  SBTypeCategory(const char *);
+    SBTypeCategory(const char *);
 
-  bool IsDefaultCategory();
+    bool IsDefaultCategory();
 };
 
 } // namespace lldb

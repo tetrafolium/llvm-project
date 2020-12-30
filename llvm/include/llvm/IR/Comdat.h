@@ -30,39 +30,43 @@ template <typename ValueTy> class StringMapEntry;
 // name but different SelectionKind. This structure makes that unrepresentable.
 class Comdat {
 public:
-  enum SelectionKind {
-    Any,          ///< The linker may choose any COMDAT.
-    ExactMatch,   ///< The data referenced by the COMDAT must be the same.
-    Largest,      ///< The linker will choose the largest COMDAT.
-    NoDuplicates, ///< No other Module may specify this COMDAT.
-    SameSize,     ///< The data referenced by the COMDAT must be the same size.
-  };
+    enum SelectionKind {
+        Any,          ///< The linker may choose any COMDAT.
+        ExactMatch,   ///< The data referenced by the COMDAT must be the same.
+        Largest,      ///< The linker will choose the largest COMDAT.
+        NoDuplicates, ///< No other Module may specify this COMDAT.
+        SameSize,     ///< The data referenced by the COMDAT must be the same size.
+    };
 
-  Comdat(const Comdat &) = delete;
-  Comdat(Comdat &&C);
+    Comdat(const Comdat &) = delete;
+    Comdat(Comdat &&C);
 
-  SelectionKind getSelectionKind() const { return SK; }
-  void setSelectionKind(SelectionKind Val) { SK = Val; }
-  StringRef getName() const;
-  void print(raw_ostream &OS, bool IsForDebug = false) const;
-  void dump() const;
+    SelectionKind getSelectionKind() const {
+        return SK;
+    }
+    void setSelectionKind(SelectionKind Val) {
+        SK = Val;
+    }
+    StringRef getName() const;
+    void print(raw_ostream &OS, bool IsForDebug = false) const;
+    void dump() const;
 
 private:
-  friend class Module;
+    friend class Module;
 
-  Comdat();
+    Comdat();
 
-  // Points to the map in Module.
-  StringMapEntry<Comdat> *Name = nullptr;
-  SelectionKind SK = Any;
+    // Points to the map in Module.
+    StringMapEntry<Comdat> *Name = nullptr;
+    SelectionKind SK = Any;
 };
 
 // Create wrappers for C Binding types (see CBindingWrapping.h).
 DEFINE_SIMPLE_CONVERSION_FUNCTIONS(Comdat, LLVMComdatRef)
 
 inline raw_ostream &operator<<(raw_ostream &OS, const Comdat &C) {
-  C.print(OS);
-  return OS;
+    C.print(OS);
+    return OS;
 }
 
 } // end namespace llvm

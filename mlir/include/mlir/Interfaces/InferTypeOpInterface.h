@@ -32,46 +32,52 @@ namespace mlir {
 ///  - A attribute, may be unset (nullptr)
 /// Used by ShapedType type inferences.
 class ShapedTypeComponents {
-  /// Internal storage type for shape.
-  using ShapeStorageT = SmallVector<int64_t, 3>;
+    /// Internal storage type for shape.
+    using ShapeStorageT = SmallVector<int64_t, 3>;
 
 public:
-  /// Default construction is an unranked shape.
-  ShapedTypeComponents() : ranked(false), elementType(nullptr), attr(nullptr){};
-  ShapedTypeComponents(Type elementType)
-      : ranked(false), elementType(elementType), attr(nullptr) {}
-  template <typename Arg, typename = typename std::enable_if_t<
-                              std::is_constructible<ShapeStorageT, Arg>::value>>
-  ShapedTypeComponents(Arg &&arg, Type elementType = nullptr,
-                       Attribute attr = nullptr)
-      : dims(std::forward<Arg>(arg)), ranked(true), elementType(elementType),
-        attr(attr) {}
-  ShapedTypeComponents(ArrayRef<int64_t> vec, Type elementType = nullptr,
-                       Attribute attr = nullptr)
-      : dims(vec.begin(), vec.end()), ranked(true), elementType(elementType),
-        attr(attr) {}
+    /// Default construction is an unranked shape.
+    ShapedTypeComponents() : ranked(false), elementType(nullptr), attr(nullptr) {};
+    ShapedTypeComponents(Type elementType)
+        : ranked(false), elementType(elementType), attr(nullptr) {}
+    template <typename Arg, typename = typename std::enable_if_t<
+                  std::is_constructible<ShapeStorageT, Arg>::value>>
+    ShapedTypeComponents(Arg &&arg, Type elementType = nullptr,
+                         Attribute attr = nullptr)
+        : dims(std::forward<Arg>(arg)), ranked(true), elementType(elementType),
+          attr(attr) {}
+    ShapedTypeComponents(ArrayRef<int64_t> vec, Type elementType = nullptr,
+                         Attribute attr = nullptr)
+        : dims(vec.begin(), vec.end()), ranked(true), elementType(elementType),
+          attr(attr) {}
 
-  /// Return the dimensions of the shape.
-  /// Requires: shape is ranked.
-  ArrayRef<int64_t> getDims() const {
-    assert(ranked && "requires ranked shape");
-    return dims;
-  }
+    /// Return the dimensions of the shape.
+    /// Requires: shape is ranked.
+    ArrayRef<int64_t> getDims() const {
+        assert(ranked && "requires ranked shape");
+        return dims;
+    }
 
-  /// Return whether the shape has a rank.
-  bool hasRank() const { return ranked; };
+    /// Return whether the shape has a rank.
+    bool hasRank() const {
+        return ranked;
+    };
 
-  /// Return the element type component.
-  Type getElementType() const { return elementType; };
+    /// Return the element type component.
+    Type getElementType() const {
+        return elementType;
+    };
 
-  /// Return the raw attribute component.
-  Attribute getAttribute() const { return attr; };
+    /// Return the raw attribute component.
+    Attribute getAttribute() const {
+        return attr;
+    };
 
 private:
-  ShapeStorageT dims;
-  bool ranked;
-  Type elementType;
-  Attribute attr;
+    ShapeStorageT dims;
+    bool ranked;
+    Type elementType;
+    Attribute attr;
 };
 
 namespace detail {
@@ -85,7 +91,7 @@ LogicalResult inferReturnTensorTypes(
         MLIRContext *, Optional<Location> location, ValueRange operands,
         DictionaryAttr attributes, RegionRange regions,
         SmallVectorImpl<ShapedTypeComponents> &retComponents)>
-        componentTypeFn,
+    componentTypeFn,
     MLIRContext *context, Optional<Location> location, ValueRange operands,
     DictionaryAttr attributes, RegionRange regions,
     SmallVectorImpl<Type> &inferredReturnTypes);
@@ -103,15 +109,15 @@ namespace OpTrait {
 template <typename ConcreteType>
 class InferTensorType : public TraitBase<ConcreteType, InferTensorType> {
 public:
-  static LogicalResult
-  inferReturnTypes(MLIRContext *context, Optional<Location> location,
-                   ValueRange operands, DictionaryAttr attributes,
-                   RegionRange regions,
-                   SmallVectorImpl<Type> &inferredReturnTypes) {
-    return ::mlir::detail::inferReturnTensorTypes(
-        ConcreteType::inferReturnTypeComponents, context, location, operands,
-        attributes, regions, inferredReturnTypes);
-  }
+    static LogicalResult
+    inferReturnTypes(MLIRContext *context, Optional<Location> location,
+                     ValueRange operands, DictionaryAttr attributes,
+                     RegionRange regions,
+                     SmallVectorImpl<Type> &inferredReturnTypes) {
+        return ::mlir::detail::inferReturnTensorTypes(
+                   ConcreteType::inferReturnTypeComponents, context, location, operands,
+                   attributes, regions, inferredReturnTypes);
+    }
 };
 
 } // namespace OpTrait

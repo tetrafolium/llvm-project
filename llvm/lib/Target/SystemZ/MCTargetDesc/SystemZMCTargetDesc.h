@@ -62,28 +62,28 @@ unsigned getFirstReg(unsigned Reg);
 
 // Return the given register as a GR64.
 inline unsigned getRegAsGR64(unsigned Reg) {
-  return GR64Regs[getFirstReg(Reg)];
+    return GR64Regs[getFirstReg(Reg)];
 }
 
 // Return the given register as a low GR32.
 inline unsigned getRegAsGR32(unsigned Reg) {
-  return GR32Regs[getFirstReg(Reg)];
+    return GR32Regs[getFirstReg(Reg)];
 }
 
 // Return the given register as a high GR32.
 inline unsigned getRegAsGRH32(unsigned Reg) {
-  return GRH32Regs[getFirstReg(Reg)];
+    return GRH32Regs[getFirstReg(Reg)];
 }
 
 // Return the given register as a VR128.
 inline unsigned getRegAsVR128(unsigned Reg) {
-  return VR128Regs[getFirstReg(Reg)];
+    return VR128Regs[getFirstReg(Reg)];
 }
 } // end namespace SystemZMC
 
 MCCodeEmitter *createSystemZMCCodeEmitter(const MCInstrInfo &MCII,
-                                          const MCRegisterInfo &MRI,
-                                          MCContext &Ctx);
+        const MCRegisterInfo &MRI,
+        MCContext &Ctx);
 
 MCAsmBackend *createSystemZMCAsmBackend(const Target &T,
                                         const MCSubtargetInfo &STI,

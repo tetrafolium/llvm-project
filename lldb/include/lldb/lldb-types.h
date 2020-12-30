@@ -72,7 +72,7 @@ typedef bool (*CommandOverrideCallback)(void *baton, const char **argv);
 typedef bool (*CommandOverrideCallbackWithResult)(
     void *baton, const char **argv, lldb_private::CommandReturnObject &result);
 typedef bool (*ExpressionCancelCallback)(ExpressionEvaluationPhase phase,
-                                         void *baton);
+        void *baton);
 } // namespace lldb
 
 #define LLDB_INVALID_PROCESS ((lldb::process_t)-1)

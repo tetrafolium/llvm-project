@@ -50,15 +50,15 @@ class TargetTransformInfo;
 /// expected expected to update these analyses if necessary to ensure they're
 /// valid after it runs.
 struct LoopStandardAnalysisResults {
-  AAResults &AA;
-  AssumptionCache &AC;
-  DominatorTree &DT;
-  LoopInfo &LI;
-  ScalarEvolution &SE;
-  TargetLibraryInfo &TLI;
-  TargetTransformInfo &TTI;
-  BlockFrequencyInfo *BFI;
-  MemorySSA *MSSA;
+    AAResults &AA;
+    AssumptionCache &AC;
+    DominatorTree &DT;
+    LoopInfo &LI;
+    ScalarEvolution &SE;
+    TargetLibraryInfo &TLI;
+    TargetTransformInfo &TTI;
+    BlockFrequencyInfo *BFI;
+    MemorySSA *MSSA;
 };
 
 /// Extern template declaration for the analysis set for this IR unit.
@@ -72,11 +72,11 @@ extern template class AnalysisManager<Loop, LoopStandardAnalysisResults &>;
 /// construct in the adaptors and proxies used to integrate this into the larger
 /// pass manager infrastructure.
 typedef AnalysisManager<Loop, LoopStandardAnalysisResults &>
-    LoopAnalysisManager;
+LoopAnalysisManager;
 
 /// A proxy from a \c LoopAnalysisManager to a \c Function.
 typedef InnerAnalysisManagerProxy<LoopAnalysisManager, Function>
-    LoopAnalysisManagerFunctionProxy;
+LoopAnalysisManagerFunctionProxy;
 
 /// A specialized result for the \c LoopAnalysisManagerFunctionProxy which
 /// retains a \c LoopInfo reference.
@@ -85,57 +85,61 @@ typedef InnerAnalysisManagerProxy<LoopAnalysisManager, Function>
 /// cached in the \c LoopAnalysisManager.
 template <> class LoopAnalysisManagerFunctionProxy::Result {
 public:
-  explicit Result(LoopAnalysisManager &InnerAM, LoopInfo &LI)
-      : InnerAM(&InnerAM), LI(&LI), MSSAUsed(false) {}
-  Result(Result &&Arg)
-      : InnerAM(std::move(Arg.InnerAM)), LI(Arg.LI), MSSAUsed(Arg.MSSAUsed) {
-    // We have to null out the analysis manager in the moved-from state
-    // because we are taking ownership of the responsibilty to clear the
-    // analysis state.
-    Arg.InnerAM = nullptr;
-  }
-  Result &operator=(Result &&RHS) {
-    InnerAM = RHS.InnerAM;
-    LI = RHS.LI;
-    MSSAUsed = RHS.MSSAUsed;
-    // We have to null out the analysis manager in the moved-from state
-    // because we are taking ownership of the responsibilty to clear the
-    // analysis state.
-    RHS.InnerAM = nullptr;
-    return *this;
-  }
-  ~Result() {
-    // InnerAM is cleared in a moved from state where there is nothing to do.
-    if (!InnerAM)
-      return;
+    explicit Result(LoopAnalysisManager &InnerAM, LoopInfo &LI)
+        : InnerAM(&InnerAM), LI(&LI), MSSAUsed(false) {}
+    Result(Result &&Arg)
+        : InnerAM(std::move(Arg.InnerAM)), LI(Arg.LI), MSSAUsed(Arg.MSSAUsed) {
+        // We have to null out the analysis manager in the moved-from state
+        // because we are taking ownership of the responsibilty to clear the
+        // analysis state.
+        Arg.InnerAM = nullptr;
+    }
+    Result &operator=(Result &&RHS) {
+        InnerAM = RHS.InnerAM;
+        LI = RHS.LI;
+        MSSAUsed = RHS.MSSAUsed;
+        // We have to null out the analysis manager in the moved-from state
+        // because we are taking ownership of the responsibilty to clear the
+        // analysis state.
+        RHS.InnerAM = nullptr;
+        return *this;
+    }
+    ~Result() {
+        // InnerAM is cleared in a moved from state where there is nothing to do.
+        if (!InnerAM)
+            return;
 
-    // Clear out the analysis manager if we're being destroyed -- it means we
-    // didn't even see an invalidate call when we got invalidated.
-    InnerAM->clear();
-  }
+        // Clear out the analysis manager if we're being destroyed -- it means we
+        // didn't even see an invalidate call when we got invalidated.
+        InnerAM->clear();
+    }
 
-  /// Mark MemorySSA as used so we can invalidate self if MSSA is invalidated.
-  void markMSSAUsed() { MSSAUsed = true; }
+    /// Mark MemorySSA as used so we can invalidate self if MSSA is invalidated.
+    void markMSSAUsed() {
+        MSSAUsed = true;
+    }
 
-  /// Accessor for the analysis manager.
-  LoopAnalysisManager &getManager() { return *InnerAM; }
+    /// Accessor for the analysis manager.
+    LoopAnalysisManager &getManager() {
+        return *InnerAM;
+    }
 
-  /// Handler for invalidation of the proxy for a particular function.
-  ///
-  /// If the proxy, \c LoopInfo, and associated analyses are preserved, this
-  /// will merely forward the invalidation event to any cached loop analysis
-  /// results for loops within this function.
-  ///
-  /// If the necessary loop infrastructure is not preserved, this will forcibly
-  /// clear all of the cached analysis results that are keyed on the \c
-  /// LoopInfo for this function.
-  bool invalidate(Function &F, const PreservedAnalyses &PA,
-                  FunctionAnalysisManager::Invalidator &Inv);
+    /// Handler for invalidation of the proxy for a particular function.
+    ///
+    /// If the proxy, \c LoopInfo, and associated analyses are preserved, this
+    /// will merely forward the invalidation event to any cached loop analysis
+    /// results for loops within this function.
+    ///
+    /// If the necessary loop infrastructure is not preserved, this will forcibly
+    /// clear all of the cached analysis results that are keyed on the \c
+    /// LoopInfo for this function.
+    bool invalidate(Function &F, const PreservedAnalyses &PA,
+                    FunctionAnalysisManager::Invalidator &Inv);
 
 private:
-  LoopAnalysisManager *InnerAM;
-  LoopInfo *LI;
-  bool MSSAUsed;
+    LoopAnalysisManager *InnerAM;
+    LoopInfo *LI;
+    bool MSSAUsed;
 };
 
 /// Provide a specialized run method for the \c LoopAnalysisManagerFunctionProxy
@@ -149,11 +153,11 @@ LoopAnalysisManagerFunctionProxy::run(Function &F, FunctionAnalysisManager &AM);
 extern template class InnerAnalysisManagerProxy<LoopAnalysisManager, Function>;
 
 extern template class OuterAnalysisManagerProxy<FunctionAnalysisManager, Loop,
-                                                LoopStandardAnalysisResults &>;
+        LoopStandardAnalysisResults &>;
 /// A proxy from a \c FunctionAnalysisManager to a \c Loop.
 typedef OuterAnalysisManagerProxy<FunctionAnalysisManager, Loop,
-                                  LoopStandardAnalysisResults &>
-    FunctionAnalysisManagerLoopProxy;
+        LoopStandardAnalysisResults &>
+        FunctionAnalysisManagerLoopProxy;
 
 /// Returns the minimum set of Analyses that all loop passes must preserve.
 PreservedAnalyses getLoopPassPreservedAnalyses();

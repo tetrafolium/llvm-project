@@ -16,25 +16,25 @@
 namespace lldb_private {
 
 class HostThreadWindows : public HostNativeThreadBase {
-  HostThreadWindows(const HostThreadWindows &) = delete;
-  const HostThreadWindows &operator=(const HostThreadWindows &) = delete;
+    HostThreadWindows(const HostThreadWindows &) = delete;
+    const HostThreadWindows &operator=(const HostThreadWindows &) = delete;
 
 public:
-  HostThreadWindows();
-  HostThreadWindows(lldb::thread_t thread);
-  virtual ~HostThreadWindows();
+    HostThreadWindows();
+    HostThreadWindows(lldb::thread_t thread);
+    virtual ~HostThreadWindows();
 
-  void SetOwnsHandle(bool owns);
+    void SetOwnsHandle(bool owns);
 
-  Status Join(lldb::thread_result_t *result) override;
-  Status Cancel() override;
-  void Reset() override;
-  bool EqualsThread(lldb::thread_t thread) const override;
+    Status Join(lldb::thread_result_t *result) override;
+    Status Cancel() override;
+    void Reset() override;
+    bool EqualsThread(lldb::thread_t thread) const override;
 
-  lldb::tid_t GetThreadId() const;
+    lldb::tid_t GetThreadId() const;
 
 private:
-  bool m_owns_handle;
+    bool m_owns_handle;
 };
 }
 

@@ -16,13 +16,13 @@
 namespace __llvm_libc {
 
 int LLVM_LIBC_ENTRYPOINT(sigdelset)(sigset_t *set, int signum) {
-  if (!set || (unsigned)(signum - 1) >= (8 * sizeof(sigset_t))) {
-    llvmlibc_errno = EINVAL;
-    return -1;
-  }
-  auto *sigset = reinterpret_cast<__llvm_libc::Sigset *>(set);
-  sigset->delset(signum);
-  return 0;
+    if (!set || (unsigned)(signum - 1) >= (8 * sizeof(sigset_t))) {
+        llvmlibc_errno = EINVAL;
+        return -1;
+    }
+    auto *sigset = reinterpret_cast<__llvm_libc::Sigset *>(set);
+    sigset->delset(signum);
+    return 0;
 }
 
 } // namespace __llvm_libc

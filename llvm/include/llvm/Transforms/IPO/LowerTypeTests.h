@@ -31,50 +31,50 @@ class raw_ostream;
 namespace lowertypetests {
 
 struct BitSetInfo {
-  // The indices of the set bits in the bitset.
-  std::set<uint64_t> Bits;
+    // The indices of the set bits in the bitset.
+    std::set<uint64_t> Bits;
 
-  // The byte offset into the combined global represented by the bitset.
-  uint64_t ByteOffset;
+    // The byte offset into the combined global represented by the bitset.
+    uint64_t ByteOffset;
 
-  // The size of the bitset in bits.
-  uint64_t BitSize;
+    // The size of the bitset in bits.
+    uint64_t BitSize;
 
-  // Log2 alignment of the bit set relative to the combined global.
-  // For example, a log2 alignment of 3 means that bits in the bitset
-  // represent addresses 8 bytes apart.
-  unsigned AlignLog2;
+    // Log2 alignment of the bit set relative to the combined global.
+    // For example, a log2 alignment of 3 means that bits in the bitset
+    // represent addresses 8 bytes apart.
+    unsigned AlignLog2;
 
-  bool isSingleOffset() const {
-    return Bits.size() == 1;
-  }
+    bool isSingleOffset() const {
+        return Bits.size() == 1;
+    }
 
-  bool isAllOnes() const {
-    return Bits.size() == BitSize;
-  }
+    bool isAllOnes() const {
+        return Bits.size() == BitSize;
+    }
 
-  bool containsGlobalOffset(uint64_t Offset) const;
+    bool containsGlobalOffset(uint64_t Offset) const;
 
-  void print(raw_ostream &OS) const;
+    void print(raw_ostream &OS) const;
 };
 
 struct BitSetBuilder {
-  SmallVector<uint64_t, 16> Offsets;
-  uint64_t Min = std::numeric_limits<uint64_t>::max();
-  uint64_t Max = 0;
+    SmallVector<uint64_t, 16> Offsets;
+    uint64_t Min = std::numeric_limits<uint64_t>::max();
+    uint64_t Max = 0;
 
-  BitSetBuilder() = default;
+    BitSetBuilder() = default;
 
-  void addOffset(uint64_t Offset) {
-    if (Min > Offset)
-      Min = Offset;
-    if (Max < Offset)
-      Max = Offset;
+    void addOffset(uint64_t Offset) {
+        if (Min > Offset)
+            Min = Offset;
+        if (Max < Offset)
+            Max = Offset;
 
-    Offsets.push_back(Offset);
-  }
+        Offsets.push_back(Offset);
+    }
 
-  BitSetInfo build();
+    BitSetInfo build();
 };
 
 /// This class implements a layout algorithm for globals referenced by bit sets
@@ -124,20 +124,20 @@ struct BitSetBuilder {
 /// indices of its referenced globals. It then assembles a layout from the
 /// computed layout in the Fragments field.
 struct GlobalLayoutBuilder {
-  /// The computed layout. Each element of this vector contains a fragment of
-  /// layout (which may be empty) consisting of object indices.
-  std::vector<std::vector<uint64_t>> Fragments;
+    /// The computed layout. Each element of this vector contains a fragment of
+    /// layout (which may be empty) consisting of object indices.
+    std::vector<std::vector<uint64_t>> Fragments;
 
-  /// Mapping from object index to fragment index.
-  std::vector<uint64_t> FragmentMap;
+    /// Mapping from object index to fragment index.
+    std::vector<uint64_t> FragmentMap;
 
-  GlobalLayoutBuilder(uint64_t NumObjects)
-      : Fragments(1), FragmentMap(NumObjects) {}
+    GlobalLayoutBuilder(uint64_t NumObjects)
+        : Fragments(1), FragmentMap(NumObjects) {}
 
-  /// Add F to the layout while trying to keep its indices contiguous.
-  /// If a previously seen fragment uses any of F's indices, that
-  /// fragment will be laid out inside F.
-  void addFragment(const std::set<uint64_t> &F);
+    /// Add F to the layout while trying to keep its indices contiguous.
+    /// If a previously seen fragment uses any of F's indices, that
+    /// fragment will be laid out inside F.
+    void addFragment(const std::set<uint64_t> &F);
 };
 
 /// This class is used to build a byte array containing overlapping bit sets. By
@@ -172,25 +172,25 @@ struct GlobalLayoutBuilder {
 /// the less evenly they will be filled), and for another, the instruction
 /// sequences can be slightly shorter, both on x86 and ARM.
 struct ByteArrayBuilder {
-  /// The byte array built so far.
-  std::vector<uint8_t> Bytes;
+    /// The byte array built so far.
+    std::vector<uint8_t> Bytes;
 
-  enum { BitsPerByte = 8 };
+    enum { BitsPerByte = 8 };
 
-  /// The number of bytes allocated so far for each of the bits.
-  uint64_t BitAllocs[BitsPerByte];
+    /// The number of bytes allocated so far for each of the bits.
+    uint64_t BitAllocs[BitsPerByte];
 
-  ByteArrayBuilder() {
-    memset(BitAllocs, 0, sizeof(BitAllocs));
-  }
+    ByteArrayBuilder() {
+        memset(BitAllocs, 0, sizeof(BitAllocs));
+    }
 
-  /// Allocate BitSize bits in the byte array where Bits contains the bits to
-  /// set. AllocByteOffset is set to the offset within the byte array and
-  /// AllocMask is set to the bitmask for those bits. This uses the LPT (Longest
-  /// Processing Time) multiprocessor scheduling algorithm to lay out the bits
-  /// efficiently; the pass allocates bit sets in decreasing size order.
-  void allocate(const std::set<uint64_t> &Bits, uint64_t BitSize,
-                uint64_t &AllocByteOffset, uint8_t &AllocMask);
+    /// Allocate BitSize bits in the byte array where Bits contains the bits to
+    /// set. AllocByteOffset is set to the offset within the byte array and
+    /// AllocMask is set to the bitmask for those bits. This uses the LPT (Longest
+    /// Processing Time) multiprocessor scheduling algorithm to lay out the bits
+    /// efficiently; the pass allocates bit sets in decreasing size order.
+    void allocate(const std::set<uint64_t> &Bits, uint64_t BitSize,
+                  uint64_t &AllocByteOffset, uint8_t &AllocMask);
 };
 
 bool isJumpTableCanonical(Function *F);
@@ -198,20 +198,20 @@ bool isJumpTableCanonical(Function *F);
 } // end namespace lowertypetests
 
 class LowerTypeTestsPass : public PassInfoMixin<LowerTypeTestsPass> {
-  bool UseCommandLine = false;
+    bool UseCommandLine = false;
 
-  ModuleSummaryIndex *ExportSummary = nullptr;
-  const ModuleSummaryIndex *ImportSummary = nullptr;
-  bool DropTypeTests = true;
+    ModuleSummaryIndex *ExportSummary = nullptr;
+    const ModuleSummaryIndex *ImportSummary = nullptr;
+    bool DropTypeTests = true;
 
 public:
-  LowerTypeTestsPass() : UseCommandLine(true) {}
-  LowerTypeTestsPass(ModuleSummaryIndex *ExportSummary,
-                     const ModuleSummaryIndex *ImportSummary,
-                     bool DropTypeTests = false)
-      : ExportSummary(ExportSummary), ImportSummary(ImportSummary),
-        DropTypeTests(DropTypeTests) {}
-  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+    LowerTypeTestsPass() : UseCommandLine(true) {}
+    LowerTypeTestsPass(ModuleSummaryIndex *ExportSummary,
+                       const ModuleSummaryIndex *ImportSummary,
+                       bool DropTypeTests = false)
+        : ExportSummary(ExportSummary), ImportSummary(ImportSummary),
+          DropTypeTests(DropTypeTests) {}
+    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

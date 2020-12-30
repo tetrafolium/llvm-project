@@ -24,55 +24,67 @@
 namespace Fortran::parser {
 
 struct Options {
-  Options() {}
+    Options() {}
 
-  using Predefinition = std::pair<std::string, std::optional<std::string>>;
+    using Predefinition = std::pair<std::string, std::optional<std::string>>;
 
-  bool isFixedForm{false};
-  int fixedFormColumns{72};
-  common::LanguageFeatureControl features;
-  std::vector<std::string> searchDirectories;
-  std::vector<Predefinition> predefinitions;
-  bool instrumentedParse{false};
-  bool isModuleFile{false};
-  bool needProvenanceRangeToCharBlockMappings{false};
+    bool isFixedForm{false};
+    int fixedFormColumns{72};
+    common::LanguageFeatureControl features;
+    std::vector<std::string> searchDirectories;
+    std::vector<Predefinition> predefinitions;
+    bool instrumentedParse{false};
+    bool isModuleFile{false};
+    bool needProvenanceRangeToCharBlockMappings{false};
 };
 
 class Parsing {
 public:
-  explicit Parsing(AllCookedSources &);
-  ~Parsing();
+    explicit Parsing(AllCookedSources &);
+    ~Parsing();
 
-  bool consumedWholeFile() const { return consumedWholeFile_; }
-  const char *finalRestingPlace() const { return finalRestingPlace_; }
-  AllCookedSources &allCooked() { return allCooked_; }
-  Messages &messages() { return messages_; }
-  std::optional<Program> &parseTree() { return parseTree_; }
+    bool consumedWholeFile() const {
+        return consumedWholeFile_;
+    }
+    const char *finalRestingPlace() const {
+        return finalRestingPlace_;
+    }
+    AllCookedSources &allCooked() {
+        return allCooked_;
+    }
+    Messages &messages() {
+        return messages_;
+    }
+    std::optional<Program> &parseTree() {
+        return parseTree_;
+    }
 
-  const CookedSource &cooked() const { return DEREF(currentCooked_); }
+    const CookedSource &cooked() const {
+        return DEREF(currentCooked_);
+    }
 
-  const SourceFile *Prescan(const std::string &path, Options);
-  void DumpCookedChars(llvm::raw_ostream &) const;
-  void DumpProvenance(llvm::raw_ostream &) const;
-  void DumpParsingLog(llvm::raw_ostream &) const;
-  void Parse(llvm::raw_ostream &debugOutput);
-  void ClearLog();
+    const SourceFile *Prescan(const std::string &path, Options);
+    void DumpCookedChars(llvm::raw_ostream &) const;
+    void DumpProvenance(llvm::raw_ostream &) const;
+    void DumpParsingLog(llvm::raw_ostream &) const;
+    void Parse(llvm::raw_ostream &debugOutput);
+    void ClearLog();
 
-  void EmitMessage(llvm::raw_ostream &o, const char *at,
-      const std::string &message, bool echoSourceLine = false) const {
-    allCooked_.allSources().EmitMessage(o,
-        allCooked_.GetProvenanceRange(CharBlock(at)), message, echoSourceLine);
-  }
+    void EmitMessage(llvm::raw_ostream &o, const char *at,
+                     const std::string &message, bool echoSourceLine = false) const {
+        allCooked_.allSources().EmitMessage(o,
+                                            allCooked_.GetProvenanceRange(CharBlock(at)), message, echoSourceLine);
+    }
 
 private:
-  Options options_;
-  AllCookedSources &allCooked_;
-  CookedSource *currentCooked_{nullptr};
-  Messages messages_;
-  bool consumedWholeFile_{false};
-  const char *finalRestingPlace_{nullptr};
-  std::optional<Program> parseTree_;
-  ParsingLog log_;
+    Options options_;
+    AllCookedSources &allCooked_;
+    CookedSource *currentCooked_{nullptr};
+    Messages messages_;
+    bool consumedWholeFile_{false};
+    const char *finalRestingPlace_{nullptr};
+    std::optional<Program> parseTree_;
+    ParsingLog log_;
 };
 } // namespace Fortran::parser
 #endif // FORTRAN_PARSER_PARSING_H_

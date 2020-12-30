@@ -39,10 +39,10 @@ using namespace clang;
 
 std::unique_ptr<ASTConsumer>
 HTMLPrintAction::CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
-  if (std::unique_ptr<raw_ostream> OS =
-          CI.createDefaultOutputFile(false, InFile))
-    return CreateHTMLPrinter(std::move(OS), CI.getPreprocessor());
-  return nullptr;
+    if (std::unique_ptr<raw_ostream> OS =
+                CI.createDefaultOutputFile(false, InFile))
+        return CreateHTMLPrinter(std::move(OS), CI.getPreprocessor());
+    return nullptr;
 }
 
 FixItAction::FixItAction() {}
@@ -50,130 +50,132 @@ FixItAction::~FixItAction() {}
 
 std::unique_ptr<ASTConsumer>
 FixItAction::CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
-  return std::make_unique<ASTConsumer>();
+    return std::make_unique<ASTConsumer>();
 }
 
 namespace {
 class FixItRewriteInPlace : public FixItOptions {
 public:
-  FixItRewriteInPlace() { InPlace = true; }
+    FixItRewriteInPlace() {
+        InPlace = true;
+    }
 
-  std::string RewriteFilename(const std::string &Filename, int &fd) override {
-    llvm_unreachable("don't call RewriteFilename for inplace rewrites");
-  }
+    std::string RewriteFilename(const std::string &Filename, int &fd) override {
+        llvm_unreachable("don't call RewriteFilename for inplace rewrites");
+    }
 };
 
 class FixItActionSuffixInserter : public FixItOptions {
-  std::string NewSuffix;
+    std::string NewSuffix;
 
 public:
-  FixItActionSuffixInserter(std::string NewSuffix, bool FixWhatYouCan)
-      : NewSuffix(std::move(NewSuffix)) {
-    this->FixWhatYouCan = FixWhatYouCan;
-  }
+    FixItActionSuffixInserter(std::string NewSuffix, bool FixWhatYouCan)
+        : NewSuffix(std::move(NewSuffix)) {
+        this->FixWhatYouCan = FixWhatYouCan;
+    }
 
-  std::string RewriteFilename(const std::string &Filename, int &fd) override {
-    fd = -1;
-    SmallString<128> Path(Filename);
-    llvm::sys::path::replace_extension(Path,
-      NewSuffix + llvm::sys::path::extension(Path));
-    return std::string(Path.str());
-  }
+    std::string RewriteFilename(const std::string &Filename, int &fd) override {
+        fd = -1;
+        SmallString<128> Path(Filename);
+        llvm::sys::path::replace_extension(Path,
+                                           NewSuffix + llvm::sys::path::extension(Path));
+        return std::string(Path.str());
+    }
 };
 
 class FixItRewriteToTemp : public FixItOptions {
 public:
-  std::string RewriteFilename(const std::string &Filename, int &fd) override {
-    SmallString<128> Path;
-    llvm::sys::fs::createTemporaryFile(llvm::sys::path::filename(Filename),
-                                       llvm::sys::path::extension(Filename).drop_front(), fd,
-                                       Path);
-    return std::string(Path.str());
-  }
+    std::string RewriteFilename(const std::string &Filename, int &fd) override {
+        SmallString<128> Path;
+        llvm::sys::fs::createTemporaryFile(llvm::sys::path::filename(Filename),
+                                           llvm::sys::path::extension(Filename).drop_front(), fd,
+                                           Path);
+        return std::string(Path.str());
+    }
 };
 } // end anonymous namespace
 
 bool FixItAction::BeginSourceFileAction(CompilerInstance &CI) {
-  const FrontendOptions &FEOpts = getCompilerInstance().getFrontendOpts();
-  if (!FEOpts.FixItSuffix.empty()) {
-    FixItOpts.reset(new FixItActionSuffixInserter(FEOpts.FixItSuffix,
-                                                  FEOpts.FixWhatYouCan));
-  } else {
-    FixItOpts.reset(new FixItRewriteInPlace);
-    FixItOpts->FixWhatYouCan = FEOpts.FixWhatYouCan;
-  }
-  Rewriter.reset(new FixItRewriter(CI.getDiagnostics(), CI.getSourceManager(),
-                                   CI.getLangOpts(), FixItOpts.get()));
-  return true;
+    const FrontendOptions &FEOpts = getCompilerInstance().getFrontendOpts();
+    if (!FEOpts.FixItSuffix.empty()) {
+        FixItOpts.reset(new FixItActionSuffixInserter(FEOpts.FixItSuffix,
+                        FEOpts.FixWhatYouCan));
+    } else {
+        FixItOpts.reset(new FixItRewriteInPlace);
+        FixItOpts->FixWhatYouCan = FEOpts.FixWhatYouCan;
+    }
+    Rewriter.reset(new FixItRewriter(CI.getDiagnostics(), CI.getSourceManager(),
+                                     CI.getLangOpts(), FixItOpts.get()));
+    return true;
 }
 
 void FixItAction::EndSourceFileAction() {
-  // Otherwise rewrite all files.
-  Rewriter->WriteFixedFiles();
+    // Otherwise rewrite all files.
+    Rewriter->WriteFixedFiles();
 }
 
 bool FixItRecompile::BeginInvocation(CompilerInstance &CI) {
 
-  std::vector<std::pair<std::string, std::string> > RewrittenFiles;
-  bool err = false;
-  {
-    const FrontendOptions &FEOpts = CI.getFrontendOpts();
-    std::unique_ptr<FrontendAction> FixAction(new SyntaxOnlyAction());
-    if (FixAction->BeginSourceFile(CI, FEOpts.Inputs[0])) {
-      std::unique_ptr<FixItOptions> FixItOpts;
-      if (FEOpts.FixToTemporaries)
-        FixItOpts.reset(new FixItRewriteToTemp());
-      else
-        FixItOpts.reset(new FixItRewriteInPlace());
-      FixItOpts->Silent = true;
-      FixItOpts->FixWhatYouCan = FEOpts.FixWhatYouCan;
-      FixItOpts->FixOnlyWarnings = FEOpts.FixOnlyWarnings;
-      FixItRewriter Rewriter(CI.getDiagnostics(), CI.getSourceManager(),
-                             CI.getLangOpts(), FixItOpts.get());
-      if (llvm::Error Err = FixAction->Execute()) {
-        // FIXME this drops the error on the floor.
-        consumeError(std::move(Err));
-        return false;
-      }
+    std::vector<std::pair<std::string, std::string> > RewrittenFiles;
+    bool err = false;
+    {
+        const FrontendOptions &FEOpts = CI.getFrontendOpts();
+        std::unique_ptr<FrontendAction> FixAction(new SyntaxOnlyAction());
+        if (FixAction->BeginSourceFile(CI, FEOpts.Inputs[0])) {
+            std::unique_ptr<FixItOptions> FixItOpts;
+            if (FEOpts.FixToTemporaries)
+                FixItOpts.reset(new FixItRewriteToTemp());
+            else
+                FixItOpts.reset(new FixItRewriteInPlace());
+            FixItOpts->Silent = true;
+            FixItOpts->FixWhatYouCan = FEOpts.FixWhatYouCan;
+            FixItOpts->FixOnlyWarnings = FEOpts.FixOnlyWarnings;
+            FixItRewriter Rewriter(CI.getDiagnostics(), CI.getSourceManager(),
+                                   CI.getLangOpts(), FixItOpts.get());
+            if (llvm::Error Err = FixAction->Execute()) {
+                // FIXME this drops the error on the floor.
+                consumeError(std::move(Err));
+                return false;
+            }
 
-      err = Rewriter.WriteFixedFiles(&RewrittenFiles);
+            err = Rewriter.WriteFixedFiles(&RewrittenFiles);
 
-      FixAction->EndSourceFile();
-      CI.setSourceManager(nullptr);
-      CI.setFileManager(nullptr);
-    } else {
-      err = true;
+            FixAction->EndSourceFile();
+            CI.setSourceManager(nullptr);
+            CI.setFileManager(nullptr);
+        } else {
+            err = true;
+        }
     }
-  }
-  if (err)
-    return false;
-  CI.getDiagnosticClient().clear();
-  CI.getDiagnostics().Reset();
+    if (err)
+        return false;
+    CI.getDiagnosticClient().clear();
+    CI.getDiagnostics().Reset();
 
-  PreprocessorOptions &PPOpts = CI.getPreprocessorOpts();
-  PPOpts.RemappedFiles.insert(PPOpts.RemappedFiles.end(),
-                              RewrittenFiles.begin(), RewrittenFiles.end());
-  PPOpts.RemappedFilesKeepOriginalName = false;
+    PreprocessorOptions &PPOpts = CI.getPreprocessorOpts();
+    PPOpts.RemappedFiles.insert(PPOpts.RemappedFiles.end(),
+                                RewrittenFiles.begin(), RewrittenFiles.end());
+    PPOpts.RemappedFilesKeepOriginalName = false;
 
-  return true;
+    return true;
 }
 
 #if CLANG_ENABLE_OBJC_REWRITER
 
 std::unique_ptr<ASTConsumer>
 RewriteObjCAction::CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
-  if (std::unique_ptr<raw_ostream> OS =
-          CI.createDefaultOutputFile(false, InFile, "cpp")) {
-    if (CI.getLangOpts().ObjCRuntime.isNonFragile())
-      return CreateModernObjCRewriter(
-          std::string(InFile), std::move(OS), CI.getDiagnostics(),
-          CI.getLangOpts(), CI.getDiagnosticOpts().NoRewriteMacros,
-          (CI.getCodeGenOpts().getDebugInfo() != codegenoptions::NoDebugInfo));
-    return CreateObjCRewriter(std::string(InFile), std::move(OS),
-                              CI.getDiagnostics(), CI.getLangOpts(),
-                              CI.getDiagnosticOpts().NoRewriteMacros);
-  }
-  return nullptr;
+    if (std::unique_ptr<raw_ostream> OS =
+                CI.createDefaultOutputFile(false, InFile, "cpp")) {
+        if (CI.getLangOpts().ObjCRuntime.isNonFragile())
+            return CreateModernObjCRewriter(
+                       std::string(InFile), std::move(OS), CI.getDiagnostics(),
+                       CI.getLangOpts(), CI.getDiagnosticOpts().NoRewriteMacros,
+                       (CI.getCodeGenOpts().getDebugInfo() != codegenoptions::NoDebugInfo));
+        return CreateObjCRewriter(std::string(InFile), std::move(OS),
+                                  CI.getDiagnostics(), CI.getLangOpts(),
+                                  CI.getDiagnosticOpts().NoRewriteMacros);
+    }
+    return nullptr;
 }
 
 #endif
@@ -183,141 +185,141 @@ RewriteObjCAction::CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
 //===----------------------------------------------------------------------===//
 
 void RewriteMacrosAction::ExecuteAction() {
-  CompilerInstance &CI = getCompilerInstance();
-  std::unique_ptr<raw_ostream> OS =
-      CI.createDefaultOutputFile(true, getCurrentFileOrBufferName());
-  if (!OS) return;
+    CompilerInstance &CI = getCompilerInstance();
+    std::unique_ptr<raw_ostream> OS =
+        CI.createDefaultOutputFile(true, getCurrentFileOrBufferName());
+    if (!OS) return;
 
-  RewriteMacrosInInput(CI.getPreprocessor(), OS.get());
+    RewriteMacrosInInput(CI.getPreprocessor(), OS.get());
 }
 
 void RewriteTestAction::ExecuteAction() {
-  CompilerInstance &CI = getCompilerInstance();
-  std::unique_ptr<raw_ostream> OS =
-      CI.createDefaultOutputFile(false, getCurrentFileOrBufferName());
-  if (!OS) return;
+    CompilerInstance &CI = getCompilerInstance();
+    std::unique_ptr<raw_ostream> OS =
+        CI.createDefaultOutputFile(false, getCurrentFileOrBufferName());
+    if (!OS) return;
 
-  DoRewriteTest(CI.getPreprocessor(), OS.get());
+    DoRewriteTest(CI.getPreprocessor(), OS.get());
 }
 
 class RewriteIncludesAction::RewriteImportsListener : public ASTReaderListener {
-  CompilerInstance &CI;
-  std::weak_ptr<raw_ostream> Out;
+    CompilerInstance &CI;
+    std::weak_ptr<raw_ostream> Out;
 
-  llvm::DenseSet<const FileEntry*> Rewritten;
+    llvm::DenseSet<const FileEntry*> Rewritten;
 
 public:
-  RewriteImportsListener(CompilerInstance &CI, std::shared_ptr<raw_ostream> Out)
-      : CI(CI), Out(Out) {}
+    RewriteImportsListener(CompilerInstance &CI, std::shared_ptr<raw_ostream> Out)
+        : CI(CI), Out(Out) {}
 
-  void visitModuleFile(StringRef Filename,
-                       serialization::ModuleKind Kind) override {
-    auto File = CI.getFileManager().getFile(Filename);
-    assert(File && "missing file for loaded module?");
+    void visitModuleFile(StringRef Filename,
+                         serialization::ModuleKind Kind) override {
+        auto File = CI.getFileManager().getFile(Filename);
+        assert(File && "missing file for loaded module?");
 
-    // Only rewrite each module file once.
-    if (!Rewritten.insert(*File).second)
-      return;
+        // Only rewrite each module file once.
+        if (!Rewritten.insert(*File).second)
+            return;
 
-    serialization::ModuleFile *MF =
-        CI.getASTReader()->getModuleManager().lookup(*File);
-    assert(MF && "missing module file for loaded module?");
+        serialization::ModuleFile *MF =
+            CI.getASTReader()->getModuleManager().lookup(*File);
+        assert(MF && "missing module file for loaded module?");
 
-    // Not interested in PCH / preambles.
-    if (!MF->isModule())
-      return;
+        // Not interested in PCH / preambles.
+        if (!MF->isModule())
+            return;
 
-    auto OS = Out.lock();
-    assert(OS && "loaded module file after finishing rewrite action?");
+        auto OS = Out.lock();
+        assert(OS && "loaded module file after finishing rewrite action?");
 
-    (*OS) << "#pragma clang module build ";
-    if (isValidIdentifier(MF->ModuleName))
-      (*OS) << MF->ModuleName;
-    else {
-      (*OS) << '"';
-      OS->write_escaped(MF->ModuleName);
-      (*OS) << '"';
+        (*OS) << "#pragma clang module build ";
+        if (isValidIdentifier(MF->ModuleName))
+            (*OS) << MF->ModuleName;
+        else {
+            (*OS) << '"';
+            OS->write_escaped(MF->ModuleName);
+            (*OS) << '"';
+        }
+        (*OS) << '\n';
+
+        // Rewrite the contents of the module in a separate compiler instance.
+        CompilerInstance Instance(CI.getPCHContainerOperations(),
+                                  &CI.getModuleCache());
+        Instance.setInvocation(
+            std::make_shared<CompilerInvocation>(CI.getInvocation()));
+        Instance.createDiagnostics(
+            new ForwardingDiagnosticConsumer(CI.getDiagnosticClient()),
+            /*ShouldOwnClient=*/true);
+        Instance.getFrontendOpts().DisableFree = false;
+        Instance.getFrontendOpts().Inputs.clear();
+        Instance.getFrontendOpts().Inputs.emplace_back(
+            Filename, InputKind(Language::Unknown, InputKind::Precompiled));
+        Instance.getFrontendOpts().ModuleFiles.clear();
+        Instance.getFrontendOpts().ModuleMapFiles.clear();
+        // Don't recursively rewrite imports. We handle them all at the top level.
+        Instance.getPreprocessorOutputOpts().RewriteImports = false;
+
+        llvm::CrashRecoveryContext().RunSafelyOnThread([&]() {
+            RewriteIncludesAction Action;
+            Action.OutputStream = OS;
+            Instance.ExecuteAction(Action);
+        });
+
+        (*OS) << "#pragma clang module endbuild /*" << MF->ModuleName << "*/\n";
     }
-    (*OS) << '\n';
-
-    // Rewrite the contents of the module in a separate compiler instance.
-    CompilerInstance Instance(CI.getPCHContainerOperations(),
-                              &CI.getModuleCache());
-    Instance.setInvocation(
-        std::make_shared<CompilerInvocation>(CI.getInvocation()));
-    Instance.createDiagnostics(
-        new ForwardingDiagnosticConsumer(CI.getDiagnosticClient()),
-        /*ShouldOwnClient=*/true);
-    Instance.getFrontendOpts().DisableFree = false;
-    Instance.getFrontendOpts().Inputs.clear();
-    Instance.getFrontendOpts().Inputs.emplace_back(
-        Filename, InputKind(Language::Unknown, InputKind::Precompiled));
-    Instance.getFrontendOpts().ModuleFiles.clear();
-    Instance.getFrontendOpts().ModuleMapFiles.clear();
-    // Don't recursively rewrite imports. We handle them all at the top level.
-    Instance.getPreprocessorOutputOpts().RewriteImports = false;
-
-    llvm::CrashRecoveryContext().RunSafelyOnThread([&]() {
-      RewriteIncludesAction Action;
-      Action.OutputStream = OS;
-      Instance.ExecuteAction(Action);
-    });
-
-    (*OS) << "#pragma clang module endbuild /*" << MF->ModuleName << "*/\n";
-  }
 };
 
 bool RewriteIncludesAction::BeginSourceFileAction(CompilerInstance &CI) {
-  if (!OutputStream) {
-    OutputStream =
-        CI.createDefaultOutputFile(true, getCurrentFileOrBufferName());
-    if (!OutputStream)
-      return false;
-  }
-
-  auto &OS = *OutputStream;
-
-  // If we're preprocessing a module map, start by dumping the contents of the
-  // module itself before switching to the input buffer.
-  auto &Input = getCurrentInput();
-  if (Input.getKind().getFormat() == InputKind::ModuleMap) {
-    if (Input.isFile()) {
-      OS << "# 1 \"";
-      OS.write_escaped(Input.getFile());
-      OS << "\"\n";
+    if (!OutputStream) {
+        OutputStream =
+            CI.createDefaultOutputFile(true, getCurrentFileOrBufferName());
+        if (!OutputStream)
+            return false;
     }
-    getCurrentModule()->print(OS);
-    OS << "#pragma clang module contents\n";
-  }
 
-  // If we're rewriting imports, set up a listener to track when we import
-  // module files.
-  if (CI.getPreprocessorOutputOpts().RewriteImports) {
-    CI.createASTReader();
-    CI.getASTReader()->addListener(
-        std::make_unique<RewriteImportsListener>(CI, OutputStream));
-  }
+    auto &OS = *OutputStream;
 
-  return true;
+    // If we're preprocessing a module map, start by dumping the contents of the
+    // module itself before switching to the input buffer.
+    auto &Input = getCurrentInput();
+    if (Input.getKind().getFormat() == InputKind::ModuleMap) {
+        if (Input.isFile()) {
+            OS << "# 1 \"";
+            OS.write_escaped(Input.getFile());
+            OS << "\"\n";
+        }
+        getCurrentModule()->print(OS);
+        OS << "#pragma clang module contents\n";
+    }
+
+    // If we're rewriting imports, set up a listener to track when we import
+    // module files.
+    if (CI.getPreprocessorOutputOpts().RewriteImports) {
+        CI.createASTReader();
+        CI.getASTReader()->addListener(
+            std::make_unique<RewriteImportsListener>(CI, OutputStream));
+    }
+
+    return true;
 }
 
 void RewriteIncludesAction::ExecuteAction() {
-  CompilerInstance &CI = getCompilerInstance();
+    CompilerInstance &CI = getCompilerInstance();
 
-  // If we're rewriting imports, emit the module build output first rather
-  // than switching back and forth (potentially in the middle of a line).
-  if (CI.getPreprocessorOutputOpts().RewriteImports) {
-    std::string Buffer;
-    llvm::raw_string_ostream OS(Buffer);
+    // If we're rewriting imports, emit the module build output first rather
+    // than switching back and forth (potentially in the middle of a line).
+    if (CI.getPreprocessorOutputOpts().RewriteImports) {
+        std::string Buffer;
+        llvm::raw_string_ostream OS(Buffer);
 
-    RewriteIncludesInInput(CI.getPreprocessor(), &OS,
-                           CI.getPreprocessorOutputOpts());
+        RewriteIncludesInInput(CI.getPreprocessor(), &OS,
+                               CI.getPreprocessorOutputOpts());
 
-    (*OutputStream) << OS.str();
-  } else {
-    RewriteIncludesInInput(CI.getPreprocessor(), OutputStream.get(),
-                           CI.getPreprocessorOutputOpts());
-  }
+        (*OutputStream) << OS.str();
+    } else {
+        RewriteIncludesInInput(CI.getPreprocessor(), OutputStream.get(),
+                               CI.getPreprocessorOutputOpts());
+    }
 
-  OutputStream.reset();
+    OutputStream.reset();
 }

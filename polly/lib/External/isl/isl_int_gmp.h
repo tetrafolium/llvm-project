@@ -73,9 +73,9 @@ uint32_t isl_gmp_hash(mpz_t v, uint32_t hash);
 
 #ifndef mp_get_memory_functions
 void mp_get_memory_functions(
-		void *(**alloc_func_ptr) (size_t),
-		void *(**realloc_func_ptr) (void *, size_t, size_t),
-		void (**free_func_ptr) (void *, size_t));
+    void *(**alloc_func_ptr) (size_t),
+    void *(**realloc_func_ptr) (void *, size_t, size_t),
+    void (**free_func_ptr) (void *, size_t));
 #endif
 
 typedef void (*isl_int_print_mp_free_t)(void *, size_t);

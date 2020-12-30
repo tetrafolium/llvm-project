@@ -40,67 +40,73 @@ class Interval;
 // nodes following it.
 //
 class IntervalPartition : public FunctionPass {
-  using IntervalMapTy = std::map<BasicBlock *, Interval *>;
-  IntervalMapTy IntervalMap;
+    using IntervalMapTy = std::map<BasicBlock *, Interval *>;
+    IntervalMapTy IntervalMap;
 
-  using IntervalListTy = std::vector<Interval *>;
-  Interval *RootInterval = nullptr;
-  std::vector<Interval *> Intervals;
+    using IntervalListTy = std::vector<Interval *>;
+    Interval *RootInterval = nullptr;
+    std::vector<Interval *> Intervals;
 
 public:
-  static char ID; // Pass identification, replacement for typeid
+    static char ID; // Pass identification, replacement for typeid
 
-  IntervalPartition();
+    IntervalPartition();
 
-  // run - Calculate the interval partition for this function
-  bool runOnFunction(Function &F) override;
+    // run - Calculate the interval partition for this function
+    bool runOnFunction(Function &F) override;
 
-  // IntervalPartition ctor - Build a reduced interval partition from an
-  // existing interval graph.  This takes an additional boolean parameter to
-  // distinguish it from a copy constructor.  Always pass in false for now.
-  IntervalPartition(IntervalPartition &I, bool);
+    // IntervalPartition ctor - Build a reduced interval partition from an
+    // existing interval graph.  This takes an additional boolean parameter to
+    // distinguish it from a copy constructor.  Always pass in false for now.
+    IntervalPartition(IntervalPartition &I, bool);
 
-  // print - Show contents in human readable format...
-  void print(raw_ostream &O, const Module* = nullptr) const override;
+    // print - Show contents in human readable format...
+    void print(raw_ostream &O, const Module* = nullptr) const override;
 
-  // getRootInterval() - Return the root interval that contains the starting
-  // block of the function.
-  inline Interval *getRootInterval() { return RootInterval; }
+    // getRootInterval() - Return the root interval that contains the starting
+    // block of the function.
+    inline Interval *getRootInterval() {
+        return RootInterval;
+    }
 
-  // isDegeneratePartition() - Returns true if the interval partition contains
-  // a single interval, and thus cannot be simplified anymore.
-  bool isDegeneratePartition() { return Intervals.size() == 1; }
+    // isDegeneratePartition() - Returns true if the interval partition contains
+    // a single interval, and thus cannot be simplified anymore.
+    bool isDegeneratePartition() {
+        return Intervals.size() == 1;
+    }
 
-  // TODO: isIrreducible - look for triangle graph.
+    // TODO: isIrreducible - look for triangle graph.
 
-  // getBlockInterval - Return the interval that a basic block exists in.
-  inline Interval *getBlockInterval(BasicBlock *BB) {
-    IntervalMapTy::iterator I = IntervalMap.find(BB);
-    return I != IntervalMap.end() ? I->second : nullptr;
-  }
+    // getBlockInterval - Return the interval that a basic block exists in.
+    inline Interval *getBlockInterval(BasicBlock *BB) {
+        IntervalMapTy::iterator I = IntervalMap.find(BB);
+        return I != IntervalMap.end() ? I->second : nullptr;
+    }
 
-  // getAnalysisUsage - Implement the Pass API
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.setPreservesAll();
-  }
+    // getAnalysisUsage - Implement the Pass API
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.setPreservesAll();
+    }
 
-  // Interface to Intervals vector...
-  const std::vector<Interval*> &getIntervals() const { return Intervals; }
+    // Interface to Intervals vector...
+    const std::vector<Interval*> &getIntervals() const {
+        return Intervals;
+    }
 
-  // releaseMemory - Reset state back to before function was analyzed
-  void releaseMemory() override;
+    // releaseMemory - Reset state back to before function was analyzed
+    void releaseMemory() override;
 
 private:
-  // addIntervalToPartition - Add an interval to the internal list of intervals,
-  // and then add mappings from all of the basic blocks in the interval to the
-  // interval itself (in the IntervalMap).
-  void addIntervalToPartition(Interval *I);
+    // addIntervalToPartition - Add an interval to the internal list of intervals,
+    // and then add mappings from all of the basic blocks in the interval to the
+    // interval itself (in the IntervalMap).
+    void addIntervalToPartition(Interval *I);
 
-  // updatePredecessors - Interval generation only sets the successor fields of
-  // the interval data structures.  After interval generation is complete,
-  // run through all of the intervals and propagate successor info as
-  // predecessor info.
-  void updatePredecessors(Interval *Int);
+    // updatePredecessors - Interval generation only sets the successor fields of
+    // the interval data structures.  After interval generation is complete,
+    // run through all of the intervals and propagate successor info as
+    // predecessor info.
+    void updatePredecessors(Interval *Int);
 };
 
 } // end namespace llvm

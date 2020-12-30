@@ -14,46 +14,46 @@ using namespace clang;
 using namespace arcmt;
 
 bool CheckAction::BeginInvocation(CompilerInstance &CI) {
-  if (arcmt::checkForManualIssues(CI.getInvocation(), getCurrentInput(),
-                                  CI.getPCHContainerOperations(),
-                                  CI.getDiagnostics().getClient()))
-    return false; // errors, stop the action.
+    if (arcmt::checkForManualIssues(CI.getInvocation(), getCurrentInput(),
+                                    CI.getPCHContainerOperations(),
+                                    CI.getDiagnostics().getClient()))
+        return false; // errors, stop the action.
 
-  // We only want to see warnings reported from arcmt::checkForManualIssues.
-  CI.getDiagnostics().setIgnoreAllWarnings(true);
-  return true;
+    // We only want to see warnings reported from arcmt::checkForManualIssues.
+    CI.getDiagnostics().setIgnoreAllWarnings(true);
+    return true;
 }
 
 CheckAction::CheckAction(std::unique_ptr<FrontendAction> WrappedAction)
-  : WrapperFrontendAction(std::move(WrappedAction)) {}
+    : WrapperFrontendAction(std::move(WrappedAction)) {}
 
 bool ModifyAction::BeginInvocation(CompilerInstance &CI) {
-  return !arcmt::applyTransformations(CI.getInvocation(), getCurrentInput(),
-                                      CI.getPCHContainerOperations(),
-                                      CI.getDiagnostics().getClient());
+    return !arcmt::applyTransformations(CI.getInvocation(), getCurrentInput(),
+                                        CI.getPCHContainerOperations(),
+                                        CI.getDiagnostics().getClient());
 }
 
 ModifyAction::ModifyAction(std::unique_ptr<FrontendAction> WrappedAction)
-  : WrapperFrontendAction(std::move(WrappedAction)) {}
+    : WrapperFrontendAction(std::move(WrappedAction)) {}
 
 bool MigrateAction::BeginInvocation(CompilerInstance &CI) {
-  if (arcmt::migrateWithTemporaryFiles(
-          CI.getInvocation(), getCurrentInput(), CI.getPCHContainerOperations(),
-          CI.getDiagnostics().getClient(), MigrateDir, EmitPremigrationARCErros,
-          PlistOut))
-    return false; // errors, stop the action.
+    if (arcmt::migrateWithTemporaryFiles(
+                CI.getInvocation(), getCurrentInput(), CI.getPCHContainerOperations(),
+                CI.getDiagnostics().getClient(), MigrateDir, EmitPremigrationARCErros,
+                PlistOut))
+        return false; // errors, stop the action.
 
-  // We only want to see diagnostics emitted by migrateWithTemporaryFiles.
-  CI.getDiagnostics().setIgnoreAllWarnings(true);
-  return true;
+    // We only want to see diagnostics emitted by migrateWithTemporaryFiles.
+    CI.getDiagnostics().setIgnoreAllWarnings(true);
+    return true;
 }
 
 MigrateAction::MigrateAction(std::unique_ptr<FrontendAction> WrappedAction,
                              StringRef migrateDir,
                              StringRef plistOut,
                              bool emitPremigrationARCErrors)
-  : WrapperFrontendAction(std::move(WrappedAction)), MigrateDir(migrateDir),
-    PlistOut(plistOut), EmitPremigrationARCErros(emitPremigrationARCErrors) {
-  if (MigrateDir.empty())
-    MigrateDir = "."; // user current directory if none is given.
+    : WrapperFrontendAction(std::move(WrappedAction)), MigrateDir(migrateDir),
+      PlistOut(plistOut), EmitPremigrationARCErros(emitPremigrationARCErrors) {
+    if (MigrateDir.empty())
+        MigrateDir = "."; // user current directory if none is given.
 }

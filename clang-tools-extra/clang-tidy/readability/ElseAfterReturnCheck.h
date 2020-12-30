@@ -21,21 +21,21 @@ namespace readability {
 /// http://llvm.org/docs/CodingStandards.html#don-t-use-else-after-a-return
 class ElseAfterReturnCheck : public ClangTidyCheck {
 public:
-  ElseAfterReturnCheck(StringRef Name, ClangTidyContext *Context);
+    ElseAfterReturnCheck(StringRef Name, ClangTidyContext *Context);
 
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
-  using ConditionalBranchMap =
-      llvm::DenseMap<FileID, SmallVector<SourceRange, 1>>;
+    using ConditionalBranchMap =
+        llvm::DenseMap<FileID, SmallVector<SourceRange, 1>>;
 
 private:
-  const bool WarnOnUnfixable;
-  const bool WarnOnConditionVariables;
-  ConditionalBranchMap PPConditionals;
+    const bool WarnOnUnfixable;
+    const bool WarnOnConditionVariables;
+    ConditionalBranchMap PPConditionals;
 };
 
 } // namespace readability

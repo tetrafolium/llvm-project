@@ -35,47 +35,57 @@ class raw_ostream;
 /// Note that this class must remain a simple POD value class, because we need
 /// it to live in unions etc.
 class MCValue {
-  const MCSymbolRefExpr *SymA = nullptr, *SymB = nullptr;
-  int64_t Cst = 0;
-  uint32_t RefKind = 0;
+    const MCSymbolRefExpr *SymA = nullptr, *SymB = nullptr;
+    int64_t Cst = 0;
+    uint32_t RefKind = 0;
 
 public:
-  MCValue() = default;
-  int64_t getConstant() const { return Cst; }
-  const MCSymbolRefExpr *getSymA() const { return SymA; }
-  const MCSymbolRefExpr *getSymB() const { return SymB; }
-  uint32_t getRefKind() const { return RefKind; }
+    MCValue() = default;
+    int64_t getConstant() const {
+        return Cst;
+    }
+    const MCSymbolRefExpr *getSymA() const {
+        return SymA;
+    }
+    const MCSymbolRefExpr *getSymB() const {
+        return SymB;
+    }
+    uint32_t getRefKind() const {
+        return RefKind;
+    }
 
-  /// Is this an absolute (as opposed to relocatable) value.
-  bool isAbsolute() const { return !SymA && !SymB; }
+    /// Is this an absolute (as opposed to relocatable) value.
+    bool isAbsolute() const {
+        return !SymA && !SymB;
+    }
 
-  /// Print the value to the stream \p OS.
-  void print(raw_ostream &OS) const;
+    /// Print the value to the stream \p OS.
+    void print(raw_ostream &OS) const;
 
-  /// Print the value to stderr.
-  void dump() const;
+    /// Print the value to stderr.
+    void dump() const;
 
-  MCSymbolRefExpr::VariantKind getAccessVariant() const;
+    MCSymbolRefExpr::VariantKind getAccessVariant() const;
 
-  static MCValue get(const MCSymbolRefExpr *SymA,
-                     const MCSymbolRefExpr *SymB = nullptr,
-                     int64_t Val = 0, uint32_t RefKind = 0) {
-    MCValue R;
-    R.Cst = Val;
-    R.SymA = SymA;
-    R.SymB = SymB;
-    R.RefKind = RefKind;
-    return R;
-  }
+    static MCValue get(const MCSymbolRefExpr *SymA,
+                       const MCSymbolRefExpr *SymB = nullptr,
+                       int64_t Val = 0, uint32_t RefKind = 0) {
+        MCValue R;
+        R.Cst = Val;
+        R.SymA = SymA;
+        R.SymB = SymB;
+        R.RefKind = RefKind;
+        return R;
+    }
 
-  static MCValue get(int64_t Val) {
-    MCValue R;
-    R.Cst = Val;
-    R.SymA = nullptr;
-    R.SymB = nullptr;
-    R.RefKind = 0;
-    return R;
-  }
+    static MCValue get(int64_t Val) {
+        MCValue R;
+        R.Cst = Val;
+        R.SymA = nullptr;
+        R.SymB = nullptr;
+        R.RefKind = 0;
+        return R;
+    }
 
 };
 

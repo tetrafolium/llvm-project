@@ -32,22 +32,24 @@ struct StructTypeStorage;
 /// methods.
 class ToyDialect : public mlir::Dialect {
 public:
-  explicit ToyDialect(mlir::MLIRContext *ctx);
+    explicit ToyDialect(mlir::MLIRContext *ctx);
 
-  /// A hook used to materialize constant values with the given type.
-  Operation *materializeConstant(OpBuilder &builder, Attribute value, Type type,
-                                 Location loc) override;
+    /// A hook used to materialize constant values with the given type.
+    Operation *materializeConstant(OpBuilder &builder, Attribute value, Type type,
+                                   Location loc) override;
 
-  /// Parse an instance of a type registered to the toy dialect.
-  mlir::Type parseType(mlir::DialectAsmParser &parser) const override;
+    /// Parse an instance of a type registered to the toy dialect.
+    mlir::Type parseType(mlir::DialectAsmParser &parser) const override;
 
-  /// Print an instance of a type registered to the toy dialect.
-  void printType(mlir::Type type,
-                 mlir::DialectAsmPrinter &printer) const override;
+    /// Print an instance of a type registered to the toy dialect.
+    void printType(mlir::Type type,
+                   mlir::DialectAsmPrinter &printer) const override;
 
-  /// Provide a utility accessor to the dialect namespace. This is used by
-  /// several utilities for casting between dialects.
-  static llvm::StringRef getDialectNamespace() { return "toy"; }
+    /// Provide a utility accessor to the dialect namespace. This is used by
+    /// several utilities for casting between dialects.
+    static llvm::StringRef getDialectNamespace() {
+        return "toy";
+    }
 };
 
 } // end namespace toy
@@ -75,20 +77,22 @@ namespace toy {
 /// (StructType), the base class to use (Type), and the storage class
 /// (StructTypeStorage).
 class StructType : public mlir::Type::TypeBase<StructType, mlir::Type,
-                                               detail::StructTypeStorage> {
+    detail::StructTypeStorage> {
 public:
-  /// Inherit some necessary constructors from 'TypeBase'.
-  using Base::Base;
+    /// Inherit some necessary constructors from 'TypeBase'.
+    using Base::Base;
 
-  /// Create an instance of a `StructType` with the given element types. There
-  /// *must* be atleast one element type.
-  static StructType get(llvm::ArrayRef<mlir::Type> elementTypes);
+    /// Create an instance of a `StructType` with the given element types. There
+    /// *must* be atleast one element type.
+    static StructType get(llvm::ArrayRef<mlir::Type> elementTypes);
 
-  /// Returns the element types of this struct type.
-  llvm::ArrayRef<mlir::Type> getElementTypes();
+    /// Returns the element types of this struct type.
+    llvm::ArrayRef<mlir::Type> getElementTypes();
 
-  /// Returns the number of element type held by this struct.
-  size_t getNumElementTypes() { return getElementTypes().size(); }
+    /// Returns the number of element type held by this struct.
+    size_t getNumElementTypes() {
+        return getElementTypes().size();
+    }
 };
 } // end namespace toy
 } // end namespace mlir

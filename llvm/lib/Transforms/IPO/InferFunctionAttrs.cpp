@@ -21,55 +21,55 @@ using namespace llvm;
 
 static bool inferAllPrototypeAttributes(
     Module &M, function_ref<TargetLibraryInfo &(Function &)> GetTLI) {
-  bool Changed = false;
+    bool Changed = false;
 
-  for (Function &F : M.functions())
-    // We only infer things using the prototype and the name; we don't need
-    // definitions.
-    if (F.isDeclaration() && !F.hasOptNone())
-      Changed |= inferLibFuncAttributes(F, GetTLI(F));
+    for (Function &F : M.functions())
+        // We only infer things using the prototype and the name; we don't need
+        // definitions.
+        if (F.isDeclaration() && !F.hasOptNone())
+            Changed |= inferLibFuncAttributes(F, GetTLI(F));
 
-  return Changed;
+    return Changed;
 }
 
 PreservedAnalyses InferFunctionAttrsPass::run(Module &M,
-                                              ModuleAnalysisManager &AM) {
-  FunctionAnalysisManager &FAM =
-      AM.getResult<FunctionAnalysisManagerModuleProxy>(M).getManager();
-  auto GetTLI = [&FAM](Function &F) -> TargetLibraryInfo & {
-    return FAM.getResult<TargetLibraryAnalysis>(F);
-  };
+        ModuleAnalysisManager &AM) {
+    FunctionAnalysisManager &FAM =
+        AM.getResult<FunctionAnalysisManagerModuleProxy>(M).getManager();
+    auto GetTLI = [&FAM](Function &F) -> TargetLibraryInfo & {
+        return FAM.getResult<TargetLibraryAnalysis>(F);
+    };
 
-  if (!inferAllPrototypeAttributes(M, GetTLI))
-    // If we didn't infer anything, preserve all analyses.
-    return PreservedAnalyses::all();
+    if (!inferAllPrototypeAttributes(M, GetTLI))
+        // If we didn't infer anything, preserve all analyses.
+        return PreservedAnalyses::all();
 
-  // Otherwise, we may have changed fundamental function attributes, so clear
-  // out all the passes.
-  return PreservedAnalyses::none();
+    // Otherwise, we may have changed fundamental function attributes, so clear
+    // out all the passes.
+    return PreservedAnalyses::none();
 }
 
 namespace {
 struct InferFunctionAttrsLegacyPass : public ModulePass {
-  static char ID; // Pass identification, replacement for typeid
-  InferFunctionAttrsLegacyPass() : ModulePass(ID) {
-    initializeInferFunctionAttrsLegacyPassPass(
-        *PassRegistry::getPassRegistry());
-  }
+    static char ID; // Pass identification, replacement for typeid
+    InferFunctionAttrsLegacyPass() : ModulePass(ID) {
+        initializeInferFunctionAttrsLegacyPassPass(
+            *PassRegistry::getPassRegistry());
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequired<TargetLibraryInfoWrapperPass>();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addRequired<TargetLibraryInfoWrapperPass>();
+    }
 
-  bool runOnModule(Module &M) override {
-    if (skipModule(M))
-      return false;
+    bool runOnModule(Module &M) override {
+        if (skipModule(M))
+            return false;
 
-    auto GetTLI = [this](Function &F) -> TargetLibraryInfo & {
-      return this->getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
-    };
-    return inferAllPrototypeAttributes(M, GetTLI);
-  }
+        auto GetTLI = [this](Function &F) -> TargetLibraryInfo & {
+            return this->getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
+        };
+        return inferAllPrototypeAttributes(M, GetTLI);
+    }
 };
 }
 
@@ -81,5 +81,5 @@ INITIALIZE_PASS_END(InferFunctionAttrsLegacyPass, "inferattrs",
                     "Infer set function attributes", false, false)
 
 Pass *llvm::createInferFunctionAttrsLegacyPass() {
-  return new InferFunctionAttrsLegacyPass();
+    return new InferFunctionAttrsLegacyPass();
 }

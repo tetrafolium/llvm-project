@@ -25,18 +25,20 @@ NativeEnumLineNumbers::NativeEnumLineNumbers(
     : Lines(std::move(LineNums)), Index(0) {}
 
 uint32_t NativeEnumLineNumbers::getChildCount() const {
-  return static_cast<uint32_t>(Lines.size());
+    return static_cast<uint32_t>(Lines.size());
 }
 
 std::unique_ptr<IPDBLineNumber>
 NativeEnumLineNumbers::getChildAtIndex(uint32_t N) const {
-  if (N >= getChildCount())
-    return nullptr;
-  return std::make_unique<NativeLineNumber>(Lines[N]);
+    if (N >= getChildCount())
+        return nullptr;
+    return std::make_unique<NativeLineNumber>(Lines[N]);
 }
 
 std::unique_ptr<IPDBLineNumber> NativeEnumLineNumbers::getNext() {
-  return getChildAtIndex(Index++);
+    return getChildAtIndex(Index++);
 }
 
-void NativeEnumLineNumbers::reset() { Index = 0; }
+void NativeEnumLineNumbers::reset() {
+    Index = 0;
+}

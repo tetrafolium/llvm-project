@@ -24,15 +24,15 @@ class PPCTargetLowering;
 
 class PPCCallLowering : public CallLowering {
 public:
-  PPCCallLowering(const PPCTargetLowering &TLI);
+    PPCCallLowering(const PPCTargetLowering &TLI);
 
-  bool lowerReturn(MachineIRBuilder &MIRBuilder, const Value *Val,
-                   ArrayRef<Register> VRegs,
-                   Register SwiftErrorVReg) const override;
-  bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
-                            ArrayRef<ArrayRef<Register>> VRegs) const override;
-  bool lowerCall(MachineIRBuilder &MIRBuilder,
-                 CallLoweringInfo &Info) const override;
+    bool lowerReturn(MachineIRBuilder &MIRBuilder, const Value *Val,
+                     ArrayRef<Register> VRegs,
+                     Register SwiftErrorVReg) const override;
+    bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
+                              ArrayRef<ArrayRef<Register>> VRegs) const override;
+    bool lowerCall(MachineIRBuilder &MIRBuilder,
+                   CallLoweringInfo &Info) const override;
 };
 } // end namespace llvm
 

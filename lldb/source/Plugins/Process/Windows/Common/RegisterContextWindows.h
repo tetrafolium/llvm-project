@@ -18,42 +18,44 @@ class Thread;
 
 class RegisterContextWindows : public lldb_private::RegisterContext {
 public:
-  // Constructors and Destructors
-  RegisterContextWindows(Thread &thread, uint32_t concrete_frame_idx);
+    // Constructors and Destructors
+    RegisterContextWindows(Thread &thread, uint32_t concrete_frame_idx);
 
-  virtual ~RegisterContextWindows();
+    virtual ~RegisterContextWindows();
 
-  // Subclasses must override these functions
-  void InvalidateAllRegisters() override;
+    // Subclasses must override these functions
+    void InvalidateAllRegisters() override;
 
-  bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+    bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-  bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+    bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-  uint32_t ConvertRegisterKindToRegisterNumber(lldb::RegisterKind kind,
-                                               uint32_t num) override;
+    uint32_t ConvertRegisterKindToRegisterNumber(lldb::RegisterKind kind,
+            uint32_t num) override;
 
-  bool HardwareSingleStep(bool enable) override;
+    bool HardwareSingleStep(bool enable) override;
 
-  static constexpr uint32_t GetNumHardwareBreakpointSlots() {
-    return NUM_HARDWARE_BREAKPOINT_SLOTS;
-  }
-  static constexpr bool DoHardwareBreakpointsTriggerAfter() { return true; }
+    static constexpr uint32_t GetNumHardwareBreakpointSlots() {
+        return NUM_HARDWARE_BREAKPOINT_SLOTS;
+    }
+    static constexpr bool DoHardwareBreakpointsTriggerAfter() {
+        return true;
+    }
 
-  bool AddHardwareBreakpoint(uint32_t slot, lldb::addr_t address, uint32_t size,
-                             bool read, bool write);
-  bool RemoveHardwareBreakpoint(uint32_t slot);
+    bool AddHardwareBreakpoint(uint32_t slot, lldb::addr_t address, uint32_t size,
+                               bool read, bool write);
+    bool RemoveHardwareBreakpoint(uint32_t slot);
 
-  uint32_t GetTriggeredHardwareBreakpointSlotId();
+    uint32_t GetTriggeredHardwareBreakpointSlotId();
 
 protected:
-  static constexpr unsigned NUM_HARDWARE_BREAKPOINT_SLOTS = 4;
+    static constexpr unsigned NUM_HARDWARE_BREAKPOINT_SLOTS = 4;
 
-  virtual bool CacheAllRegisterValues();
-  virtual bool ApplyAllRegisterValues();
+    virtual bool CacheAllRegisterValues();
+    virtual bool ApplyAllRegisterValues();
 
-  CONTEXT m_context;
-  bool m_context_stale;
+    CONTEXT m_context;
+    bool m_context_stale;
 };
 } // namespace lldb_private
 

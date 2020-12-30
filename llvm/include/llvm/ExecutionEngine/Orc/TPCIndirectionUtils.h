@@ -28,133 +28,147 @@ class TargetProcessControl;
 /// Provides TargetProcessControl based indirect stubs, trampoline pool and
 /// lazy call through manager.
 class TPCIndirectionUtils {
-  friend class TPCIndirectionUtilsAccess;
+    friend class TPCIndirectionUtilsAccess;
 
 public:
-  /// ABI support base class. Used to write resolver, stub, and trampoline
-  /// blocks.
-  class ABISupport {
-  protected:
-    ABISupport(unsigned PointerSize, unsigned TrampolineSize, unsigned StubSize,
-               unsigned StubToPointerMaxDisplacement, unsigned ResolverCodeSize)
-        : PointerSize(PointerSize), TrampolineSize(TrampolineSize),
-          StubSize(StubSize),
-          StubToPointerMaxDisplacement(StubToPointerMaxDisplacement),
-          ResolverCodeSize(ResolverCodeSize) {}
+    /// ABI support base class. Used to write resolver, stub, and trampoline
+    /// blocks.
+    class ABISupport {
+    protected:
+        ABISupport(unsigned PointerSize, unsigned TrampolineSize, unsigned StubSize,
+                   unsigned StubToPointerMaxDisplacement, unsigned ResolverCodeSize)
+            : PointerSize(PointerSize), TrampolineSize(TrampolineSize),
+              StubSize(StubSize),
+              StubToPointerMaxDisplacement(StubToPointerMaxDisplacement),
+              ResolverCodeSize(ResolverCodeSize) {}
 
-  public:
-    virtual ~ABISupport();
+    public:
+        virtual ~ABISupport();
 
-    unsigned getPointerSize() const { return PointerSize; }
-    unsigned getTrampolineSize() const { return TrampolineSize; }
-    unsigned getStubSize() const { return StubSize; }
-    unsigned getStubToPointerMaxDisplacement() const {
-      return StubToPointerMaxDisplacement;
+        unsigned getPointerSize() const {
+            return PointerSize;
+        }
+        unsigned getTrampolineSize() const {
+            return TrampolineSize;
+        }
+        unsigned getStubSize() const {
+            return StubSize;
+        }
+        unsigned getStubToPointerMaxDisplacement() const {
+            return StubToPointerMaxDisplacement;
+        }
+        unsigned getResolverCodeSize() const {
+            return ResolverCodeSize;
+        }
+
+        virtual void writeResolverCode(char *ResolverWorkingMem,
+                                       JITTargetAddress ResolverTargetAddr,
+                                       JITTargetAddress ReentryFnAddr,
+                                       JITTargetAddress ReentryCtxAddr) const = 0;
+
+        virtual void writeTrampolines(char *TrampolineBlockWorkingMem,
+                                      JITTargetAddress TrampolineBlockTragetAddr,
+                                      JITTargetAddress ResolverAddr,
+                                      unsigned NumTrampolines) const = 0;
+
+        virtual void
+        writeIndirectStubsBlock(char *StubsBlockWorkingMem,
+                                JITTargetAddress StubsBlockTargetAddress,
+                                JITTargetAddress PointersBlockTargetAddress,
+                                unsigned NumStubs) const = 0;
+
+    private:
+        unsigned PointerSize = 0;
+        unsigned TrampolineSize = 0;
+        unsigned StubSize = 0;
+        unsigned StubToPointerMaxDisplacement = 0;
+        unsigned ResolverCodeSize = 0;
+    };
+
+    /// Create using the given ABI class.
+    template <typename ORCABI>
+    static std::unique_ptr<TPCIndirectionUtils>
+    CreateWithABI(TargetProcessControl &TPC);
+
+    /// Create based on the TargetProcessControl triple.
+    static Expected<std::unique_ptr<TPCIndirectionUtils>>
+            Create(TargetProcessControl &TPC);
+
+    /// Return a reference to the TargetProcessControl object.
+    TargetProcessControl &getTargetProcessControl() const {
+        return TPC;
     }
-    unsigned getResolverCodeSize() const { return ResolverCodeSize; }
 
-    virtual void writeResolverCode(char *ResolverWorkingMem,
-                                   JITTargetAddress ResolverTargetAddr,
-                                   JITTargetAddress ReentryFnAddr,
-                                   JITTargetAddress ReentryCtxAddr) const = 0;
+    /// Return a reference to the ABISupport object for this instance.
+    ABISupport &getABISupport() const {
+        return *ABI;
+    }
 
-    virtual void writeTrampolines(char *TrampolineBlockWorkingMem,
-                                  JITTargetAddress TrampolineBlockTragetAddr,
-                                  JITTargetAddress ResolverAddr,
-                                  unsigned NumTrampolines) const = 0;
+    /// Release memory for resources held by this instance. This *must* be called
+    /// prior to destruction of the class.
+    Error cleanup();
 
-    virtual void
-    writeIndirectStubsBlock(char *StubsBlockWorkingMem,
-                            JITTargetAddress StubsBlockTargetAddress,
-                            JITTargetAddress PointersBlockTargetAddress,
-                            unsigned NumStubs) const = 0;
+    /// Write resolver code to the target process and return its address.
+    /// This must be called before any call to createTrampolinePool or
+    /// createLazyCallThroughManager.
+    Expected<JITTargetAddress>
+    writeResolverBlock(JITTargetAddress ReentryFnAddr,
+                       JITTargetAddress ReentryCtxAddr);
 
-  private:
-    unsigned PointerSize = 0;
-    unsigned TrampolineSize = 0;
-    unsigned StubSize = 0;
-    unsigned StubToPointerMaxDisplacement = 0;
-    unsigned ResolverCodeSize = 0;
-  };
+    /// Returns the address of the Resolver block. Returns zero if the
+    /// writeResolverBlock method has not previously been called.
+    JITTargetAddress getResolverBlockAddress() const {
+        return ResolverBlockAddr;
+    }
 
-  /// Create using the given ABI class.
-  template <typename ORCABI>
-  static std::unique_ptr<TPCIndirectionUtils>
-  CreateWithABI(TargetProcessControl &TPC);
+    /// Create an IndirectStubsManager for the target process.
+    std::unique_ptr<IndirectStubsManager> createIndirectStubsManager();
 
-  /// Create based on the TargetProcessControl triple.
-  static Expected<std::unique_ptr<TPCIndirectionUtils>>
-  Create(TargetProcessControl &TPC);
+    /// Create a TrampolinePool for the target process.
+    TrampolinePool &getTrampolinePool();
 
-  /// Return a reference to the TargetProcessControl object.
-  TargetProcessControl &getTargetProcessControl() const { return TPC; }
+    /// Create a LazyCallThroughManager.
+    /// This function should only be called once.
+    LazyCallThroughManager &
+    createLazyCallThroughManager(ExecutionSession &ES,
+                                 JITTargetAddress ErrorHandlerAddr);
 
-  /// Return a reference to the ABISupport object for this instance.
-  ABISupport &getABISupport() const { return *ABI; }
-
-  /// Release memory for resources held by this instance. This *must* be called
-  /// prior to destruction of the class.
-  Error cleanup();
-
-  /// Write resolver code to the target process and return its address.
-  /// This must be called before any call to createTrampolinePool or
-  /// createLazyCallThroughManager.
-  Expected<JITTargetAddress>
-  writeResolverBlock(JITTargetAddress ReentryFnAddr,
-                     JITTargetAddress ReentryCtxAddr);
-
-  /// Returns the address of the Resolver block. Returns zero if the
-  /// writeResolverBlock method has not previously been called.
-  JITTargetAddress getResolverBlockAddress() const { return ResolverBlockAddr; }
-
-  /// Create an IndirectStubsManager for the target process.
-  std::unique_ptr<IndirectStubsManager> createIndirectStubsManager();
-
-  /// Create a TrampolinePool for the target process.
-  TrampolinePool &getTrampolinePool();
-
-  /// Create a LazyCallThroughManager.
-  /// This function should only be called once.
-  LazyCallThroughManager &
-  createLazyCallThroughManager(ExecutionSession &ES,
-                               JITTargetAddress ErrorHandlerAddr);
-
-  /// Create a LazyCallThroughManager for the target process.
-  LazyCallThroughManager &getLazyCallThroughManager() {
-    assert(LCTM && "createLazyCallThroughManager must be called first");
-    return *LCTM;
-  }
+    /// Create a LazyCallThroughManager for the target process.
+    LazyCallThroughManager &getLazyCallThroughManager() {
+        assert(LCTM && "createLazyCallThroughManager must be called first");
+        return *LCTM;
+    }
 
 private:
-  using Allocation = jitlink::JITLinkMemoryManager::Allocation;
+    using Allocation = jitlink::JITLinkMemoryManager::Allocation;
 
-  struct IndirectStubInfo {
-    IndirectStubInfo() = default;
-    IndirectStubInfo(JITTargetAddress StubAddress,
-                     JITTargetAddress PointerAddress)
-        : StubAddress(StubAddress), PointerAddress(PointerAddress) {}
-    JITTargetAddress StubAddress = 0;
-    JITTargetAddress PointerAddress = 0;
-  };
+    struct IndirectStubInfo {
+        IndirectStubInfo() = default;
+        IndirectStubInfo(JITTargetAddress StubAddress,
+                         JITTargetAddress PointerAddress)
+            : StubAddress(StubAddress), PointerAddress(PointerAddress) {}
+        JITTargetAddress StubAddress = 0;
+        JITTargetAddress PointerAddress = 0;
+    };
 
-  using IndirectStubInfoVector = std::vector<IndirectStubInfo>;
+    using IndirectStubInfoVector = std::vector<IndirectStubInfo>;
 
-  /// Create a TPCIndirectionUtils instance.
-  TPCIndirectionUtils(TargetProcessControl &TPC,
-                      std::unique_ptr<ABISupport> ABI);
+    /// Create a TPCIndirectionUtils instance.
+    TPCIndirectionUtils(TargetProcessControl &TPC,
+                        std::unique_ptr<ABISupport> ABI);
 
-  Expected<IndirectStubInfoVector> getIndirectStubs(unsigned NumStubs);
+    Expected<IndirectStubInfoVector> getIndirectStubs(unsigned NumStubs);
 
-  std::mutex TPCUIMutex;
-  TargetProcessControl &TPC;
-  std::unique_ptr<ABISupport> ABI;
-  JITTargetAddress ResolverBlockAddr;
-  std::unique_ptr<jitlink::JITLinkMemoryManager::Allocation> ResolverBlock;
-  std::unique_ptr<TrampolinePool> TP;
-  std::unique_ptr<LazyCallThroughManager> LCTM;
+    std::mutex TPCUIMutex;
+    TargetProcessControl &TPC;
+    std::unique_ptr<ABISupport> ABI;
+    JITTargetAddress ResolverBlockAddr;
+    std::unique_ptr<jitlink::JITLinkMemoryManager::Allocation> ResolverBlock;
+    std::unique_ptr<TrampolinePool> TP;
+    std::unique_ptr<LazyCallThroughManager> LCTM;
 
-  std::vector<IndirectStubInfo> AvailableIndirectStubs;
-  std::vector<std::unique_ptr<Allocation>> IndirectStubAllocs;
+    std::vector<IndirectStubInfo> AvailableIndirectStubs;
+    std::vector<std::unique_ptr<Allocation>> IndirectStubAllocs;
 };
 
 /// This will call writeResolver on the given TPCIndirectionUtils instance
@@ -175,36 +189,36 @@ namespace detail {
 template <typename ORCABI>
 class ABISupportImpl : public TPCIndirectionUtils::ABISupport {
 public:
-  ABISupportImpl()
-      : ABISupport(ORCABI::PointerSize, ORCABI::TrampolineSize,
-                   ORCABI::StubSize, ORCABI::StubToPointerMaxDisplacement,
-                   ORCABI::ResolverCodeSize) {}
+    ABISupportImpl()
+        : ABISupport(ORCABI::PointerSize, ORCABI::TrampolineSize,
+                     ORCABI::StubSize, ORCABI::StubToPointerMaxDisplacement,
+                     ORCABI::ResolverCodeSize) {}
 
-  void writeResolverCode(char *ResolverWorkingMem,
-                         JITTargetAddress ResolverTargetAddr,
-                         JITTargetAddress ReentryFnAddr,
-                         JITTargetAddress ReentryCtxAddr) const override {
-    ORCABI::writeResolverCode(ResolverWorkingMem, ResolverTargetAddr,
-                              ReentryFnAddr, ReentryCtxAddr);
-  }
+    void writeResolverCode(char *ResolverWorkingMem,
+                           JITTargetAddress ResolverTargetAddr,
+                           JITTargetAddress ReentryFnAddr,
+                           JITTargetAddress ReentryCtxAddr) const override {
+        ORCABI::writeResolverCode(ResolverWorkingMem, ResolverTargetAddr,
+                                  ReentryFnAddr, ReentryCtxAddr);
+    }
 
-  void writeTrampolines(char *TrampolineBlockWorkingMem,
-                        JITTargetAddress TrampolineBlockTargetAddr,
-                        JITTargetAddress ResolverAddr,
-                        unsigned NumTrampolines) const override {
-    ORCABI::writeTrampolines(TrampolineBlockWorkingMem,
-                             TrampolineBlockTargetAddr, ResolverAddr,
-                             NumTrampolines);
-  }
+    void writeTrampolines(char *TrampolineBlockWorkingMem,
+                          JITTargetAddress TrampolineBlockTargetAddr,
+                          JITTargetAddress ResolverAddr,
+                          unsigned NumTrampolines) const override {
+        ORCABI::writeTrampolines(TrampolineBlockWorkingMem,
+                                 TrampolineBlockTargetAddr, ResolverAddr,
+                                 NumTrampolines);
+    }
 
-  void writeIndirectStubsBlock(char *StubsBlockWorkingMem,
-                               JITTargetAddress StubsBlockTargetAddress,
-                               JITTargetAddress PointersBlockTargetAddress,
-                               unsigned NumStubs) const override {
-    ORCABI::writeIndirectStubsBlock(StubsBlockWorkingMem,
-                                    StubsBlockTargetAddress,
-                                    PointersBlockTargetAddress, NumStubs);
-  }
+    void writeIndirectStubsBlock(char *StubsBlockWorkingMem,
+                                 JITTargetAddress StubsBlockTargetAddress,
+                                 JITTargetAddress PointersBlockTargetAddress,
+                                 unsigned NumStubs) const override {
+        ORCABI::writeIndirectStubsBlock(StubsBlockWorkingMem,
+                                        StubsBlockTargetAddress,
+                                        PointersBlockTargetAddress, NumStubs);
+    }
 };
 
 } // end namespace detail
@@ -212,8 +226,8 @@ public:
 template <typename ORCABI>
 std::unique_ptr<TPCIndirectionUtils>
 TPCIndirectionUtils::CreateWithABI(TargetProcessControl &TPC) {
-  return std::unique_ptr<TPCIndirectionUtils>(new TPCIndirectionUtils(
-      TPC, std::make_unique<detail::ABISupportImpl<ORCABI>>()));
+    return std::unique_ptr<TPCIndirectionUtils>(new TPCIndirectionUtils(
+                TPC, std::make_unique<detail::ABISupportImpl<ORCABI>>()));
 }
 
 } // end namespace orc

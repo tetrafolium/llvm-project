@@ -16,32 +16,32 @@ namespace lldb {
 
 class LLDB_API SBQueueItem {
 public:
-  SBQueueItem();
+    SBQueueItem();
 
-  SBQueueItem(const lldb::QueueItemSP &queue_item_sp);
+    SBQueueItem(const lldb::QueueItemSP &queue_item_sp);
 
-  ~SBQueueItem();
+    ~SBQueueItem();
 
-  explicit operator bool() const;
+    explicit operator bool() const;
 
-  bool IsValid() const;
+    bool IsValid() const;
 
-  void Clear();
+    void Clear();
 
-  lldb::QueueItemKind GetKind() const;
+    lldb::QueueItemKind GetKind() const;
 
-  void SetKind(lldb::QueueItemKind kind);
+    void SetKind(lldb::QueueItemKind kind);
 
-  lldb::SBAddress GetAddress() const;
+    lldb::SBAddress GetAddress() const;
 
-  void SetAddress(lldb::SBAddress addr);
+    void SetAddress(lldb::SBAddress addr);
 
-  void SetQueueItem(const lldb::QueueItemSP &queue_item_sp);
+    void SetQueueItem(const lldb::QueueItemSP &queue_item_sp);
 
-  SBThread GetExtendedBacktraceThread(const char *type);
+    SBThread GetExtendedBacktraceThread(const char *type);
 
 private:
-  lldb::QueueItemSP m_queue_item_sp;
+    lldb::QueueItemSP m_queue_item_sp;
 };
 
 } // namespace lldb

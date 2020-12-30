@@ -22,14 +22,14 @@ using namespace mlir::quant;
 static Attribute convertPrimitiveValueAttr(
     Attribute origRealValue, QuantizedType quantizedElementType,
     const UniformQuantizedValueConverter &converter, Type &outConvertedType) {
-  if (origRealValue.isa<FloatAttr>()) {
-    FloatAttr floatAttr = origRealValue.cast<FloatAttr>();
-    outConvertedType = quantizedElementType.getStorageType();
-    return IntegerAttr::get(quantizedElementType.getStorageType(),
-                            converter.quantizeFloatToInt(floatAttr.getValue()));
-  }
+    if (origRealValue.isa<FloatAttr>()) {
+        FloatAttr floatAttr = origRealValue.cast<FloatAttr>();
+        outConvertedType = quantizedElementType.getStorageType();
+        return IntegerAttr::get(quantizedElementType.getStorageType(),
+                                converter.quantizeFloatToInt(floatAttr.getValue()));
+    }
 
-  return nullptr;
+    return nullptr;
 }
 
 /// Converts a real expressed DenseFPElementsAttr to a corresponding
@@ -39,28 +39,28 @@ static DenseElementsAttr
 convertDenseFPElementsAttr(DenseFPElementsAttr realFPElementsAttr,
                            QuantizedType quantizedElementType,
                            const UniformQuantizedValueConverter &converter) {
-  // Convert to corresponding quantized value attributes.
-  SmallVector<APInt, 8> quantValues;
-  if (realFPElementsAttr.isSplat()) {
-    quantValues.push_back(
-        converter.quantizeFloatToInt(*realFPElementsAttr.begin()));
-  } else {
-    quantValues.reserve(realFPElementsAttr.getNumElements());
-    for (APFloat realVal : realFPElementsAttr) {
-      quantValues.push_back(converter.quantizeFloatToInt(realVal));
+    // Convert to corresponding quantized value attributes.
+    SmallVector<APInt, 8> quantValues;
+    if (realFPElementsAttr.isSplat()) {
+        quantValues.push_back(
+            converter.quantizeFloatToInt(*realFPElementsAttr.begin()));
+    } else {
+        quantValues.reserve(realFPElementsAttr.getNumElements());
+        for (APFloat realVal : realFPElementsAttr) {
+            quantValues.push_back(converter.quantizeFloatToInt(realVal));
+        }
     }
-  }
 
-  // Cast from an expressed-type-based type to storage-type-based type,
-  // preserving the dense shape (i.e. tensor<4xf32> -> tensor<4xi8>).
-  ShapedType newDenseType =
-      quantizedElementType
-          .castExpressedToStorageType(realFPElementsAttr.getType())
-          .dyn_cast_or_null<ShapedType>();
-  if (!newDenseType) {
-    return nullptr;
-  }
-  return DenseIntElementsAttr::get(newDenseType, quantValues);
+    // Cast from an expressed-type-based type to storage-type-based type,
+    // preserving the dense shape (i.e. tensor<4xf32> -> tensor<4xi8>).
+    ShapedType newDenseType =
+        quantizedElementType
+        .castExpressedToStorageType(realFPElementsAttr.getType())
+        .dyn_cast_or_null<ShapedType>();
+    if (!newDenseType) {
+        return nullptr;
+    }
+    return DenseIntElementsAttr::get(newDenseType, quantValues);
 }
 
 /// Converts a real expressed SplatElementsAttr to a corresponding
@@ -70,27 +70,27 @@ static SparseElementsAttr
 convertSparseElementsAttr(SparseElementsAttr realSparseAttr,
                           QuantizedType quantizedElementType,
                           const UniformQuantizedValueConverter &converter) {
-  DenseElementsAttr realDenseAttr = realSparseAttr.getValues();
-  if (!realDenseAttr.isa<DenseFPElementsAttr>()) {
-    return nullptr;
-  }
-  DenseElementsAttr quantDenseAttr =
-      convertDenseFPElementsAttr(realDenseAttr.cast<DenseFPElementsAttr>(),
-                                 quantizedElementType, converter);
-  if (!quantDenseAttr) {
-    return nullptr;
-  }
+    DenseElementsAttr realDenseAttr = realSparseAttr.getValues();
+    if (!realDenseAttr.isa<DenseFPElementsAttr>()) {
+        return nullptr;
+    }
+    DenseElementsAttr quantDenseAttr =
+        convertDenseFPElementsAttr(realDenseAttr.cast<DenseFPElementsAttr>(),
+                                   quantizedElementType, converter);
+    if (!quantDenseAttr) {
+        return nullptr;
+    }
 
-  // Cast from an expressed-type-based type to storage-type-based type,
-  // preserving the sparse shape (i.e. tensor<4xf32> -> tensor<4xi8>).
-  ShapedType newSparseType =
-      quantizedElementType.castExpressedToStorageType(realSparseAttr.getType())
-          .dyn_cast_or_null<ShapedType>();
-  if (!newSparseType) {
-    return nullptr;
-  }
-  return SparseElementsAttr::get(newSparseType, realSparseAttr.getIndices(),
-                                 quantDenseAttr);
+    // Cast from an expressed-type-based type to storage-type-based type,
+    // preserving the sparse shape (i.e. tensor<4xf32> -> tensor<4xi8>).
+    ShapedType newSparseType =
+        quantizedElementType.castExpressedToStorageType(realSparseAttr.getType())
+        .dyn_cast_or_null<ShapedType>();
+    if (!newSparseType) {
+        return nullptr;
+    }
+    return SparseElementsAttr::get(newSparseType, realSparseAttr.getIndices(),
+                                   quantDenseAttr);
 }
 
 /// Converts a real expressed Attribute to a corresponding Attribute containing
@@ -99,24 +99,24 @@ convertSparseElementsAttr(SparseElementsAttr realSparseAttr,
 Attribute mlir::quant::quantizeAttrUniform(
     Attribute realValue, UniformQuantizedType quantizedElementType,
     const UniformQuantizedValueConverter &converter, Type &outConvertedType) {
-  // Fork to handle different variants of constants supported.
-  if (realValue.isa<DenseFPElementsAttr>()) {
-    // Dense tensor or vector constant.
-    auto converted = convertDenseFPElementsAttr(
-        realValue.cast<DenseFPElementsAttr>(), quantizedElementType, converter);
-    outConvertedType = converted.getType();
-    return converted;
-  } else if (realValue.isa<SparseElementsAttr>()) {
-    // Sparse tensor or vector constant.
-    auto converted = convertSparseElementsAttr(
-        realValue.cast<SparseElementsAttr>(), quantizedElementType, converter);
-    outConvertedType = converted.getType();
-    return converted;
-  } else {
-    // Nothing else matched: try to convert a primitive.
-    return convertPrimitiveValueAttr(realValue, quantizedElementType, converter,
-                                     outConvertedType);
-  }
+    // Fork to handle different variants of constants supported.
+    if (realValue.isa<DenseFPElementsAttr>()) {
+        // Dense tensor or vector constant.
+        auto converted = convertDenseFPElementsAttr(
+                             realValue.cast<DenseFPElementsAttr>(), quantizedElementType, converter);
+        outConvertedType = converted.getType();
+        return converted;
+    } else if (realValue.isa<SparseElementsAttr>()) {
+        // Sparse tensor or vector constant.
+        auto converted = convertSparseElementsAttr(
+                             realValue.cast<SparseElementsAttr>(), quantizedElementType, converter);
+        outConvertedType = converted.getType();
+        return converted;
+    } else {
+        // Nothing else matched: try to convert a primitive.
+        return convertPrimitiveValueAttr(realValue, quantizedElementType, converter,
+                                         outConvertedType);
+    }
 }
 
 /// Convert an attribute from a type based on
@@ -127,22 +127,22 @@ Attribute mlir::quant::quantizeAttrUniform(
 Attribute mlir::quant::quantizeAttr(Attribute realValue,
                                     QuantizedType quantizedElementType,
                                     Type &outConvertedType) {
-  if (auto uniformQuantized =
-          quantizedElementType.dyn_cast<UniformQuantizedType>()) {
-    UniformQuantizedValueConverter converter(uniformQuantized);
-    return quantizeAttrUniform(realValue, uniformQuantized, converter,
-                               outConvertedType);
+    if (auto uniformQuantized =
+                quantizedElementType.dyn_cast<UniformQuantizedType>()) {
+        UniformQuantizedValueConverter converter(uniformQuantized);
+        return quantizeAttrUniform(realValue, uniformQuantized, converter,
+                                   outConvertedType);
 
-  } else if (auto uniformQuantizedPerAxis =
-                 quantizedElementType.dyn_cast<UniformQuantizedPerAxisType>()) {
-    UniformQuantizedPerAxisValueConverter converter(uniformQuantizedPerAxis);
-    auto converted = converter.convert(realValue);
-    // TODO: why we need this outConvertedType? remove it?
-    if (converted) {
-      outConvertedType = converted.getType();
+    } else if (auto uniformQuantizedPerAxis =
+                   quantizedElementType.dyn_cast<UniformQuantizedPerAxisType>()) {
+        UniformQuantizedPerAxisValueConverter converter(uniformQuantizedPerAxis);
+        auto converted = converter.convert(realValue);
+        // TODO: why we need this outConvertedType? remove it?
+        if (converted) {
+            outConvertedType = converted.getType();
+        }
+        return converted;
+    } else {
+        return nullptr;
     }
-    return converted;
-  } else {
-    return nullptr;
-  }
 }

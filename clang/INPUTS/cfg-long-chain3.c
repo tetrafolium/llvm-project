@@ -12,10 +12,11 @@
 #define EXPAND_4096_BRANCHES(i, x, y) EXPAND_2048_BRANCHES(i, x, y) EXPAND_2048_BRANCHES(i + 2048, x, y)
 
 unsigned cfg_long_chain_many_preds(unsigned x) {
-  unsigned y = 0;
+    unsigned y = 0;
 #define BRANCH(i, x, y) if ((x % 13171) < i) { int var = x / 13171; y ^= var; } else
-  EXPAND_4096_BRANCHES(1, x, y);
+    EXPAND_4096_BRANCHES(1, x, y);
 #undef BRANCH
-  int var = x / 13171; y^= var;
-  return y;
+    int var = x / 13171;
+    y^= var;
+    return y;
 }

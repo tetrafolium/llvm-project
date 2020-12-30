@@ -23,17 +23,17 @@ namespace performance {
 /// http://clang.llvm.org/extra/clang-tidy/checks/performance-inefficient-string-concatenation.html
 class InefficientStringConcatenationCheck : public ClangTidyCheck {
 public:
-  InefficientStringConcatenationCheck(StringRef Name,
-                                      ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    InefficientStringConcatenationCheck(StringRef Name,
+                                        ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-  const bool StrictMode;
+    const bool StrictMode;
 };
 
 } // namespace performance

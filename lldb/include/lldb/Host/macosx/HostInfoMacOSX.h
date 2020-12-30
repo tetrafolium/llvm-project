@@ -19,36 +19,36 @@ namespace lldb_private {
 class ArchSpec;
 
 class HostInfoMacOSX : public HostInfoPosix {
-  friend class HostInfoBase;
+    friend class HostInfoBase;
 
 private:
-  // Static class, unconstructable.
-  HostInfoMacOSX() = delete;
-  ~HostInfoMacOSX() = delete;
+    // Static class, unconstructable.
+    HostInfoMacOSX() = delete;
+    ~HostInfoMacOSX() = delete;
 
 public:
-  static llvm::VersionTuple GetOSVersion();
-  static llvm::VersionTuple GetMacCatalystVersion();
-  static bool GetOSBuildString(std::string &s);
-  static bool GetOSKernelDescription(std::string &s);
-  static FileSpec GetProgramFileSpec();
-  static FileSpec GetXcodeContentsDirectory();
-  static FileSpec GetXcodeDeveloperDirectory();
+    static llvm::VersionTuple GetOSVersion();
+    static llvm::VersionTuple GetMacCatalystVersion();
+    static bool GetOSBuildString(std::string &s);
+    static bool GetOSKernelDescription(std::string &s);
+    static FileSpec GetProgramFileSpec();
+    static FileSpec GetXcodeContentsDirectory();
+    static FileSpec GetXcodeDeveloperDirectory();
 
-  /// Query xcrun to find an Xcode SDK directory.
-  static llvm::StringRef GetXcodeSDKPath(XcodeSDK sdk);
+    /// Query xcrun to find an Xcode SDK directory.
+    static llvm::StringRef GetXcodeSDKPath(XcodeSDK sdk);
 
-  /// Shared cache utilities
-  static SharedCacheImageInfo
-  GetSharedCacheImageInfo(llvm::StringRef image_name);
+    /// Shared cache utilities
+    static SharedCacheImageInfo
+    GetSharedCacheImageInfo(llvm::StringRef image_name);
 
 protected:
-  static bool ComputeSupportExeDirectory(FileSpec &file_spec);
-  static void ComputeHostArchitectureSupport(ArchSpec &arch_32,
-                                             ArchSpec &arch_64);
-  static bool ComputeHeaderDirectory(FileSpec &file_spec);
-  static bool ComputeSystemPluginsDirectory(FileSpec &file_spec);
-  static bool ComputeUserPluginsDirectory(FileSpec &file_spec);
+    static bool ComputeSupportExeDirectory(FileSpec &file_spec);
+    static void ComputeHostArchitectureSupport(ArchSpec &arch_32,
+            ArchSpec &arch_64);
+    static bool ComputeHeaderDirectory(FileSpec &file_spec);
+    static bool ComputeSystemPluginsDirectory(FileSpec &file_spec);
+    static bool ComputeUserPluginsDirectory(FileSpec &file_spec);
 };
 }
 

@@ -33,81 +33,87 @@ class Commit;
 class EditsReceiver;
 
 class EditedSource {
-  const SourceManager &SourceMgr;
-  const LangOptions &LangOpts;
-  const PPConditionalDirectiveRecord *PPRec;
+    const SourceManager &SourceMgr;
+    const LangOptions &LangOpts;
+    const PPConditionalDirectiveRecord *PPRec;
 
-  struct FileEdit {
-    StringRef Text;
-    unsigned RemoveLen = 0;
+    struct FileEdit {
+        StringRef Text;
+        unsigned RemoveLen = 0;
 
-    FileEdit() = default;
-  };
+        FileEdit() = default;
+    };
 
-  using FileEditsTy = std::map<FileOffset, FileEdit>;
+    using FileEditsTy = std::map<FileOffset, FileEdit>;
 
-  FileEditsTy FileEdits;
+    FileEditsTy FileEdits;
 
-  struct MacroArgUse {
-    IdentifierInfo *Identifier;
-    SourceLocation ImmediateExpansionLoc;
+    struct MacroArgUse {
+        IdentifierInfo *Identifier;
+        SourceLocation ImmediateExpansionLoc;
 
-    // Location of argument use inside the top-level macro
-    SourceLocation UseLoc;
+        // Location of argument use inside the top-level macro
+        SourceLocation UseLoc;
 
-    bool operator==(const MacroArgUse &Other) const {
-      return std::tie(Identifier, ImmediateExpansionLoc, UseLoc) ==
-             std::tie(Other.Identifier, Other.ImmediateExpansionLoc,
-                      Other.UseLoc);
-    }
-  };
+        bool operator==(const MacroArgUse &Other) const {
+            return std::tie(Identifier, ImmediateExpansionLoc, UseLoc) ==
+                   std::tie(Other.Identifier, Other.ImmediateExpansionLoc,
+                            Other.UseLoc);
+        }
+    };
 
-  llvm::DenseMap<SourceLocation, SmallVector<MacroArgUse, 2>> ExpansionToArgMap;
-  SmallVector<std::pair<SourceLocation, MacroArgUse>, 2>
+    llvm::DenseMap<SourceLocation, SmallVector<MacroArgUse, 2>> ExpansionToArgMap;
+    SmallVector<std::pair<SourceLocation, MacroArgUse>, 2>
     CurrCommitMacroArgExps;
 
-  IdentifierTable IdentTable;
-  llvm::BumpPtrAllocator StrAlloc;
+    IdentifierTable IdentTable;
+    llvm::BumpPtrAllocator StrAlloc;
 
 public:
-  EditedSource(const SourceManager &SM, const LangOptions &LangOpts,
-               const PPConditionalDirectiveRecord *PPRec = nullptr)
-      : SourceMgr(SM), LangOpts(LangOpts), PPRec(PPRec), IdentTable(LangOpts) {}
+    EditedSource(const SourceManager &SM, const LangOptions &LangOpts,
+                 const PPConditionalDirectiveRecord *PPRec = nullptr)
+        : SourceMgr(SM), LangOpts(LangOpts), PPRec(PPRec), IdentTable(LangOpts) {}
 
-  const SourceManager &getSourceManager() const { return SourceMgr; }
-  const LangOptions &getLangOpts() const { return LangOpts; }
+    const SourceManager &getSourceManager() const {
+        return SourceMgr;
+    }
+    const LangOptions &getLangOpts() const {
+        return LangOpts;
+    }
 
-  const PPConditionalDirectiveRecord *getPPCondDirectiveRecord() const {
-    return PPRec;
-  }
+    const PPConditionalDirectiveRecord *getPPCondDirectiveRecord() const {
+        return PPRec;
+    }
 
-  bool canInsertInOffset(SourceLocation OrigLoc, FileOffset Offs);
+    bool canInsertInOffset(SourceLocation OrigLoc, FileOffset Offs);
 
-  bool commit(const Commit &commit);
+    bool commit(const Commit &commit);
 
-  void applyRewrites(EditsReceiver &receiver, bool adjustRemovals = true);
-  void clearRewrites();
+    void applyRewrites(EditsReceiver &receiver, bool adjustRemovals = true);
+    void clearRewrites();
 
-  StringRef copyString(StringRef str) { return str.copy(StrAlloc); }
-  StringRef copyString(const Twine &twine);
+    StringRef copyString(StringRef str) {
+        return str.copy(StrAlloc);
+    }
+    StringRef copyString(const Twine &twine);
 
 private:
-  bool commitInsert(SourceLocation OrigLoc, FileOffset Offs, StringRef text,
-                    bool beforePreviousInsertions);
-  bool commitInsertFromRange(SourceLocation OrigLoc, FileOffset Offs,
-                             FileOffset InsertFromRangeOffs, unsigned Len,
-                             bool beforePreviousInsertions);
-  void commitRemove(SourceLocation OrigLoc, FileOffset BeginOffs, unsigned Len);
+    bool commitInsert(SourceLocation OrigLoc, FileOffset Offs, StringRef text,
+                      bool beforePreviousInsertions);
+    bool commitInsertFromRange(SourceLocation OrigLoc, FileOffset Offs,
+                               FileOffset InsertFromRangeOffs, unsigned Len,
+                               bool beforePreviousInsertions);
+    void commitRemove(SourceLocation OrigLoc, FileOffset BeginOffs, unsigned Len);
 
-  StringRef getSourceText(FileOffset BeginOffs, FileOffset EndOffs,
-                          bool &Invalid);
-  FileEditsTy::iterator getActionForOffset(FileOffset Offs);
-  void deconstructMacroArgLoc(SourceLocation Loc,
-                              SourceLocation &ExpansionLoc,
-                              MacroArgUse &ArgUse);
+    StringRef getSourceText(FileOffset BeginOffs, FileOffset EndOffs,
+                            bool &Invalid);
+    FileEditsTy::iterator getActionForOffset(FileOffset Offs);
+    void deconstructMacroArgLoc(SourceLocation Loc,
+                                SourceLocation &ExpansionLoc,
+                                MacroArgUse &ArgUse);
 
-  void startingCommit();
-  void finishedCommit();
+    void startingCommit();
+    void finishedCommit();
 };
 
 } // namespace edit

@@ -39,28 +39,30 @@ LLDB_PLUGIN_DEFINE(InstrumentationRuntimeTSan)
 
 lldb::InstrumentationRuntimeSP
 InstrumentationRuntimeTSan::CreateInstance(const lldb::ProcessSP &process_sp) {
-  return InstrumentationRuntimeSP(new InstrumentationRuntimeTSan(process_sp));
+    return InstrumentationRuntimeSP(new InstrumentationRuntimeTSan(process_sp));
 }
 
 void InstrumentationRuntimeTSan::Initialize() {
-  PluginManager::RegisterPlugin(
-      GetPluginNameStatic(), "ThreadSanitizer instrumentation runtime plugin.",
-      CreateInstance, GetTypeStatic);
+    PluginManager::RegisterPlugin(
+        GetPluginNameStatic(), "ThreadSanitizer instrumentation runtime plugin.",
+        CreateInstance, GetTypeStatic);
 }
 
 void InstrumentationRuntimeTSan::Terminate() {
-  PluginManager::UnregisterPlugin(CreateInstance);
+    PluginManager::UnregisterPlugin(CreateInstance);
 }
 
 lldb_private::ConstString InstrumentationRuntimeTSan::GetPluginNameStatic() {
-  return ConstString("ThreadSanitizer");
+    return ConstString("ThreadSanitizer");
 }
 
 lldb::InstrumentationRuntimeType InstrumentationRuntimeTSan::GetTypeStatic() {
-  return eInstrumentationRuntimeTypeThreadSanitizer;
+    return eInstrumentationRuntimeTypeThreadSanitizer;
 }
 
-InstrumentationRuntimeTSan::~InstrumentationRuntimeTSan() { Deactivate(); }
+InstrumentationRuntimeTSan::~InstrumentationRuntimeTSan() {
+    Deactivate();
+}
 
 const char *thread_sanitizer_retrieve_report_data_prefix = R"(
 extern "C"
@@ -512,528 +514,528 @@ InstrumentationRuntimeTSan::FormatDescription(StructuredData::ObjectSP report) {
     return "Use of an uninitialized or destroyed mutex";
   } else if (description == "mutex-bad-unlock") {
     return "Unlock of an unlocked mutex (or by a wrong thread)";
-  } else if (description == "mutex-bad-read-lock") {
+} else if (description == "mutex-bad-read-lock") {
     return "Read lock of a write locked mutex";
-  } else if (description == "mutex-bad-read-unlock") {
+} else if (description == "mutex-bad-read-unlock") {
     return "Read unlock of a write locked mutex";
-  } else if (description == "signal-unsafe-call") {
+} else if (description == "signal-unsafe-call") {
     return "Signal-unsafe call inside a signal handler";
-  } else if (description == "errno-in-signal-handler") {
+} else if (description == "errno-in-signal-handler") {
     return "Overwrite of errno in a signal handler";
-  } else if (description == "lock-order-inversion") {
+} else if (description == "lock-order-inversion") {
     return "Lock order inversion (potential deadlock)";
-  } else if (description == "external-race") {
+} else if (description == "external-race") {
     return "Race on a library object";
-  } else if (description == "swift-access-race") {
+} else if (description == "swift-access-race") {
     return "Swift access race";
-  }
+}
 
-  // for unknown report codes just show the code
-  return description;
+// for unknown report codes just show the code
+return description;
 }
 
 static std::string Sprintf(const char *format, ...) {
-  StreamString s;
-  va_list args;
-  va_start(args, format);
-  s.PrintfVarArg(format, args);
-  va_end(args);
-  return std::string(s.GetString());
+    StreamString s;
+    va_list args;
+    va_start(args, format);
+    s.PrintfVarArg(format, args);
+    va_end(args);
+    return std::string(s.GetString());
 }
 
 static std::string GetSymbolNameFromAddress(ProcessSP process_sp, addr_t addr) {
-  lldb_private::Address so_addr;
-  if (!process_sp->GetTarget().GetSectionLoadList().ResolveLoadAddress(addr,
-                                                                       so_addr))
-    return "";
+    lldb_private::Address so_addr;
+    if (!process_sp->GetTarget().GetSectionLoadList().ResolveLoadAddress(addr,
+            so_addr))
+        return "";
 
-  lldb_private::Symbol *symbol = so_addr.CalculateSymbolContextSymbol();
-  if (!symbol)
-    return "";
+    lldb_private::Symbol *symbol = so_addr.CalculateSymbolContextSymbol();
+    if (!symbol)
+        return "";
 
-  std::string sym_name = symbol->GetName().GetCString();
-  return sym_name;
+    std::string sym_name = symbol->GetName().GetCString();
+    return sym_name;
 }
 
 static void GetSymbolDeclarationFromAddress(ProcessSP process_sp, addr_t addr,
-                                            Declaration &decl) {
-  lldb_private::Address so_addr;
-  if (!process_sp->GetTarget().GetSectionLoadList().ResolveLoadAddress(addr,
-                                                                       so_addr))
-    return;
+        Declaration &decl) {
+    lldb_private::Address so_addr;
+    if (!process_sp->GetTarget().GetSectionLoadList().ResolveLoadAddress(addr,
+            so_addr))
+        return;
 
-  lldb_private::Symbol *symbol = so_addr.CalculateSymbolContextSymbol();
-  if (!symbol)
-    return;
+    lldb_private::Symbol *symbol = so_addr.CalculateSymbolContextSymbol();
+    if (!symbol)
+        return;
 
-  ConstString sym_name = symbol->GetMangled().GetName(Mangled::ePreferMangled);
+    ConstString sym_name = symbol->GetMangled().GetName(Mangled::ePreferMangled);
 
-  ModuleSP module = symbol->CalculateSymbolContextModule();
-  if (!module)
-    return;
+    ModuleSP module = symbol->CalculateSymbolContextModule();
+    if (!module)
+        return;
 
-  VariableList var_list;
-  module->FindGlobalVariables(sym_name, CompilerDeclContext(), 1U, var_list);
-  if (var_list.GetSize() < 1)
-    return;
+    VariableList var_list;
+    module->FindGlobalVariables(sym_name, CompilerDeclContext(), 1U, var_list);
+    if (var_list.GetSize() < 1)
+        return;
 
-  VariableSP var = var_list.GetVariableAtIndex(0);
-  decl = var->GetDeclaration();
+    VariableSP var = var_list.GetVariableAtIndex(0);
+    decl = var->GetDeclaration();
 }
 
 addr_t InstrumentationRuntimeTSan::GetFirstNonInternalFramePc(
     StructuredData::ObjectSP trace, bool skip_one_frame) {
-  ProcessSP process_sp = GetProcessSP();
-  ModuleSP runtime_module_sp = GetRuntimeModuleSP();
+    ProcessSP process_sp = GetProcessSP();
+    ModuleSP runtime_module_sp = GetRuntimeModuleSP();
 
-  StructuredData::Array *trace_array = trace->GetAsArray();
-  for (size_t i = 0; i < trace_array->GetSize(); i++) {
-    if (skip_one_frame && i == 0)
-      continue;
+    StructuredData::Array *trace_array = trace->GetAsArray();
+    for (size_t i = 0; i < trace_array->GetSize(); i++) {
+        if (skip_one_frame && i == 0)
+            continue;
 
-    addr_t addr;
-    if (!trace_array->GetItemAtIndexAsInteger(i, addr))
-      continue;
+        addr_t addr;
+        if (!trace_array->GetItemAtIndexAsInteger(i, addr))
+            continue;
 
-    lldb_private::Address so_addr;
-    if (!process_sp->GetTarget().GetSectionLoadList().ResolveLoadAddress(
-            addr, so_addr))
-      continue;
+        lldb_private::Address so_addr;
+        if (!process_sp->GetTarget().GetSectionLoadList().ResolveLoadAddress(
+                    addr, so_addr))
+            continue;
 
-    if (so_addr.GetModule() == runtime_module_sp)
-      continue;
+        if (so_addr.GetModule() == runtime_module_sp)
+            continue;
 
-    return addr;
-  }
+        return addr;
+    }
 
-  return 0;
+    return 0;
 }
 
 std::string
 InstrumentationRuntimeTSan::GenerateSummary(StructuredData::ObjectSP report) {
-  ProcessSP process_sp = GetProcessSP();
+    ProcessSP process_sp = GetProcessSP();
 
-  std::string summary = std::string(report->GetAsDictionary()
-                                        ->GetValueForKey("description")
-                                        ->GetAsString()
-                                        ->GetValue());
-  bool skip_one_frame =
-      report->GetObjectForDotSeparatedPath("issue_type")->GetStringValue() ==
-      "external-race";
+    std::string summary = std::string(report->GetAsDictionary()
+                                      ->GetValueForKey("description")
+                                      ->GetAsString()
+                                      ->GetValue());
+    bool skip_one_frame =
+        report->GetObjectForDotSeparatedPath("issue_type")->GetStringValue() ==
+        "external-race";
 
-  addr_t pc = 0;
-  if (report->GetAsDictionary()
-          ->GetValueForKey("mops")
-          ->GetAsArray()
-          ->GetSize() > 0)
-    pc = GetFirstNonInternalFramePc(report->GetAsDictionary()
+    addr_t pc = 0;
+    if (report->GetAsDictionary()
+            ->GetValueForKey("mops")
+            ->GetAsArray()
+            ->GetSize() > 0)
+        pc = GetFirstNonInternalFramePc(report->GetAsDictionary()
                                         ->GetValueForKey("mops")
                                         ->GetAsArray()
                                         ->GetItemAtIndex(0)
                                         ->GetAsDictionary()
                                         ->GetValueForKey("trace"),
-                                    skip_one_frame);
+                                        skip_one_frame);
 
-  if (report->GetAsDictionary()
-          ->GetValueForKey("stacks")
-          ->GetAsArray()
-          ->GetSize() > 0)
-    pc = GetFirstNonInternalFramePc(report->GetAsDictionary()
+    if (report->GetAsDictionary()
+            ->GetValueForKey("stacks")
+            ->GetAsArray()
+            ->GetSize() > 0)
+        pc = GetFirstNonInternalFramePc(report->GetAsDictionary()
                                         ->GetValueForKey("stacks")
                                         ->GetAsArray()
                                         ->GetItemAtIndex(0)
                                         ->GetAsDictionary()
                                         ->GetValueForKey("trace"),
-                                    skip_one_frame);
+                                        skip_one_frame);
 
-  if (pc != 0) {
-    summary = summary + " in " + GetSymbolNameFromAddress(process_sp, pc);
-  }
+    if (pc != 0) {
+        summary = summary + " in " + GetSymbolNameFromAddress(process_sp, pc);
+    }
 
-  if (report->GetAsDictionary()
-          ->GetValueForKey("locs")
-          ->GetAsArray()
-          ->GetSize() > 0) {
-    StructuredData::ObjectSP loc = report->GetAsDictionary()
+    if (report->GetAsDictionary()
+            ->GetValueForKey("locs")
+            ->GetAsArray()
+            ->GetSize() > 0) {
+        StructuredData::ObjectSP loc = report->GetAsDictionary()
                                        ->GetValueForKey("locs")
                                        ->GetAsArray()
                                        ->GetItemAtIndex(0);
-    std::string object_type = std::string(loc->GetAsDictionary()
+        std::string object_type = std::string(loc->GetAsDictionary()
                                               ->GetValueForKey("object_type")
                                               ->GetAsString()
                                               ->GetValue());
-    if (!object_type.empty()) {
-      summary = "Race on " + object_type + " object";
-    }
-    addr_t addr = loc->GetAsDictionary()
+        if (!object_type.empty()) {
+            summary = "Race on " + object_type + " object";
+        }
+        addr_t addr = loc->GetAsDictionary()
                       ->GetValueForKey("address")
                       ->GetAsInteger()
                       ->GetValue();
-    if (addr == 0)
-      addr = loc->GetAsDictionary()
-                 ->GetValueForKey("start")
-                 ->GetAsInteger()
-                 ->GetValue();
-
-    if (addr != 0) {
-      std::string global_name = GetSymbolNameFromAddress(process_sp, addr);
-      if (!global_name.empty()) {
-        summary = summary + " at " + global_name;
-      } else {
-        summary = summary + " at " + Sprintf("0x%llx", addr);
-      }
-    } else {
-      int fd = loc->GetAsDictionary()
-                   ->GetValueForKey("file_descriptor")
+        if (addr == 0)
+            addr = loc->GetAsDictionary()
+                   ->GetValueForKey("start")
                    ->GetAsInteger()
                    ->GetValue();
-      if (fd != 0) {
-        summary = summary + " on file descriptor " + Sprintf("%d", fd);
-      }
-    }
-  }
 
-  return summary;
+        if (addr != 0) {
+            std::string global_name = GetSymbolNameFromAddress(process_sp, addr);
+            if (!global_name.empty()) {
+                summary = summary + " at " + global_name;
+            } else {
+                summary = summary + " at " + Sprintf("0x%llx", addr);
+            }
+        } else {
+            int fd = loc->GetAsDictionary()
+                     ->GetValueForKey("file_descriptor")
+                     ->GetAsInteger()
+                     ->GetValue();
+            if (fd != 0) {
+                summary = summary + " on file descriptor " + Sprintf("%d", fd);
+            }
+        }
+    }
+
+    return summary;
 }
 
 addr_t InstrumentationRuntimeTSan::GetMainRacyAddress(
     StructuredData::ObjectSP report) {
-  addr_t result = (addr_t)-1;
+    addr_t result = (addr_t)-1;
 
-  report->GetObjectForDotSeparatedPath("mops")->GetAsArray()->ForEach(
-      [&result](StructuredData::Object *o) -> bool {
+    report->GetObjectForDotSeparatedPath("mops")->GetAsArray()->ForEach(
+    [&result](StructuredData::Object *o) -> bool {
         addr_t addr =
-            o->GetObjectForDotSeparatedPath("address")->GetIntegerValue();
+        o->GetObjectForDotSeparatedPath("address")->GetIntegerValue();
         if (addr < result)
-          result = addr;
+            result = addr;
         return true;
-      });
+    });
 
-  return (result == (addr_t)-1) ? 0 : result;
+    return (result == (addr_t)-1) ? 0 : result;
 }
 
 std::string InstrumentationRuntimeTSan::GetLocationDescription(
     StructuredData::ObjectSP report, addr_t &global_addr,
     std::string &global_name, std::string &filename, uint32_t &line) {
-  std::string result = "";
+    std::string result = "";
 
-  ProcessSP process_sp = GetProcessSP();
+    ProcessSP process_sp = GetProcessSP();
 
-  if (report->GetAsDictionary()
-          ->GetValueForKey("locs")
-          ->GetAsArray()
-          ->GetSize() > 0) {
-    StructuredData::ObjectSP loc = report->GetAsDictionary()
+    if (report->GetAsDictionary()
+            ->GetValueForKey("locs")
+            ->GetAsArray()
+            ->GetSize() > 0) {
+        StructuredData::ObjectSP loc = report->GetAsDictionary()
                                        ->GetValueForKey("locs")
                                        ->GetAsArray()
                                        ->GetItemAtIndex(0);
-    std::string type = std::string(
-        loc->GetAsDictionary()->GetValueForKey("type")->GetStringValue());
-    if (type == "global") {
-      global_addr = loc->GetAsDictionary()
-                        ->GetValueForKey("address")
-                        ->GetAsInteger()
-                        ->GetValue();
-      global_name = GetSymbolNameFromAddress(process_sp, global_addr);
-      if (!global_name.empty()) {
-        result = Sprintf("'%s' is a global variable (0x%llx)",
-                         global_name.c_str(), global_addr);
-      } else {
-        result = Sprintf("0x%llx is a global variable", global_addr);
-      }
+        std::string type = std::string(
+                               loc->GetAsDictionary()->GetValueForKey("type")->GetStringValue());
+        if (type == "global") {
+            global_addr = loc->GetAsDictionary()
+                          ->GetValueForKey("address")
+                          ->GetAsInteger()
+                          ->GetValue();
+            global_name = GetSymbolNameFromAddress(process_sp, global_addr);
+            if (!global_name.empty()) {
+                result = Sprintf("'%s' is a global variable (0x%llx)",
+                                 global_name.c_str(), global_addr);
+            } else {
+                result = Sprintf("0x%llx is a global variable", global_addr);
+            }
 
-      Declaration decl;
-      GetSymbolDeclarationFromAddress(process_sp, global_addr, decl);
-      if (decl.GetFile()) {
-        filename = decl.GetFile().GetPath();
-        line = decl.GetLine();
-      }
-    } else if (type == "heap") {
-      addr_t addr = loc->GetAsDictionary()
-                        ->GetValueForKey("start")
+            Declaration decl;
+            GetSymbolDeclarationFromAddress(process_sp, global_addr, decl);
+            if (decl.GetFile()) {
+                filename = decl.GetFile().GetPath();
+                line = decl.GetLine();
+            }
+        } else if (type == "heap") {
+            addr_t addr = loc->GetAsDictionary()
+                          ->GetValueForKey("start")
+                          ->GetAsInteger()
+                          ->GetValue();
+            long size = loc->GetAsDictionary()
+                        ->GetValueForKey("size")
                         ->GetAsInteger()
                         ->GetValue();
-      long size = loc->GetAsDictionary()
-                      ->GetValueForKey("size")
+            std::string object_type = std::string(loc->GetAsDictionary()
+                                                  ->GetValueForKey("object_type")
+                                                  ->GetAsString()
+                                                  ->GetValue());
+            if (!object_type.empty()) {
+                result = Sprintf("Location is a %ld-byte %s object at 0x%llx", size,
+                                 object_type.c_str(), addr);
+            } else {
+                result =
+                    Sprintf("Location is a %ld-byte heap object at 0x%llx", size, addr);
+            }
+        } else if (type == "stack") {
+            int tid = loc->GetAsDictionary()
+                      ->GetValueForKey("thread_id")
                       ->GetAsInteger()
                       ->GetValue();
-      std::string object_type = std::string(loc->GetAsDictionary()
-                                                ->GetValueForKey("object_type")
-                                                ->GetAsString()
-                                                ->GetValue());
-      if (!object_type.empty()) {
-        result = Sprintf("Location is a %ld-byte %s object at 0x%llx", size,
-                         object_type.c_str(), addr);
-      } else {
-        result =
-            Sprintf("Location is a %ld-byte heap object at 0x%llx", size, addr);
-      }
-    } else if (type == "stack") {
-      int tid = loc->GetAsDictionary()
-                    ->GetValueForKey("thread_id")
-                    ->GetAsInteger()
-                    ->GetValue();
-      result = Sprintf("Location is stack of thread %d", tid);
-    } else if (type == "tls") {
-      int tid = loc->GetAsDictionary()
-                    ->GetValueForKey("thread_id")
-                    ->GetAsInteger()
-                    ->GetValue();
-      result = Sprintf("Location is TLS of thread %d", tid);
-    } else if (type == "fd") {
-      int fd = loc->GetAsDictionary()
-                   ->GetValueForKey("file_descriptor")
-                   ->GetAsInteger()
-                   ->GetValue();
-      result = Sprintf("Location is file descriptor %d", fd);
+            result = Sprintf("Location is stack of thread %d", tid);
+        } else if (type == "tls") {
+            int tid = loc->GetAsDictionary()
+                      ->GetValueForKey("thread_id")
+                      ->GetAsInteger()
+                      ->GetValue();
+            result = Sprintf("Location is TLS of thread %d", tid);
+        } else if (type == "fd") {
+            int fd = loc->GetAsDictionary()
+                     ->GetValueForKey("file_descriptor")
+                     ->GetAsInteger()
+                     ->GetValue();
+            result = Sprintf("Location is file descriptor %d", fd);
+        }
     }
-  }
 
-  return result;
+    return result;
 }
 
 bool InstrumentationRuntimeTSan::NotifyBreakpointHit(
     void *baton, StoppointCallbackContext *context, user_id_t break_id,
     user_id_t break_loc_id) {
-  assert(baton && "null baton");
-  if (!baton)
-    return false;
+    assert(baton && "null baton");
+    if (!baton)
+        return false;
 
-  InstrumentationRuntimeTSan *const instance =
-      static_cast<InstrumentationRuntimeTSan *>(baton);
+    InstrumentationRuntimeTSan *const instance =
+        static_cast<InstrumentationRuntimeTSan *>(baton);
 
-  ProcessSP process_sp = instance->GetProcessSP();
+    ProcessSP process_sp = instance->GetProcessSP();
 
-  if (process_sp->GetModIDRef().IsLastResumeForUserExpression())
-    return false;
+    if (process_sp->GetModIDRef().IsLastResumeForUserExpression())
+        return false;
 
-  StructuredData::ObjectSP report =
-      instance->RetrieveReportData(context->exe_ctx_ref);
-  std::string stop_reason_description =
-      "unknown thread sanitizer fault (unable to extract thread sanitizer "
-      "report)";
-  if (report) {
-    std::string issue_description = instance->FormatDescription(report);
-    report->GetAsDictionary()->AddStringItem("description", issue_description);
-    stop_reason_description = issue_description + " detected";
-    report->GetAsDictionary()->AddStringItem("stop_description",
-                                             stop_reason_description);
-    std::string summary = instance->GenerateSummary(report);
-    report->GetAsDictionary()->AddStringItem("summary", summary);
-    addr_t main_address = instance->GetMainRacyAddress(report);
-    report->GetAsDictionary()->AddIntegerItem("memory_address", main_address);
+    StructuredData::ObjectSP report =
+        instance->RetrieveReportData(context->exe_ctx_ref);
+    std::string stop_reason_description =
+        "unknown thread sanitizer fault (unable to extract thread sanitizer "
+        "report)";
+    if (report) {
+        std::string issue_description = instance->FormatDescription(report);
+        report->GetAsDictionary()->AddStringItem("description", issue_description);
+        stop_reason_description = issue_description + " detected";
+        report->GetAsDictionary()->AddStringItem("stop_description",
+                stop_reason_description);
+        std::string summary = instance->GenerateSummary(report);
+        report->GetAsDictionary()->AddStringItem("summary", summary);
+        addr_t main_address = instance->GetMainRacyAddress(report);
+        report->GetAsDictionary()->AddIntegerItem("memory_address", main_address);
 
-    addr_t global_addr = 0;
-    std::string global_name = "";
-    std::string location_filename = "";
-    uint32_t location_line = 0;
-    std::string location_description = instance->GetLocationDescription(
-        report, global_addr, global_name, location_filename, location_line);
-    report->GetAsDictionary()->AddStringItem("location_description",
-                                             location_description);
-    if (global_addr != 0) {
-      report->GetAsDictionary()->AddIntegerItem("global_address", global_addr);
-    }
-    if (!global_name.empty()) {
-      report->GetAsDictionary()->AddStringItem("global_name", global_name);
-    }
-    if (location_filename != "") {
-      report->GetAsDictionary()->AddStringItem("location_filename",
-                                               location_filename);
-      report->GetAsDictionary()->AddIntegerItem("location_line", location_line);
-    }
+        addr_t global_addr = 0;
+        std::string global_name = "";
+        std::string location_filename = "";
+        uint32_t location_line = 0;
+        std::string location_description = instance->GetLocationDescription(
+                                               report, global_addr, global_name, location_filename, location_line);
+        report->GetAsDictionary()->AddStringItem("location_description",
+                location_description);
+        if (global_addr != 0) {
+            report->GetAsDictionary()->AddIntegerItem("global_address", global_addr);
+        }
+        if (!global_name.empty()) {
+            report->GetAsDictionary()->AddStringItem("global_name", global_name);
+        }
+        if (location_filename != "") {
+            report->GetAsDictionary()->AddStringItem("location_filename",
+                    location_filename);
+            report->GetAsDictionary()->AddIntegerItem("location_line", location_line);
+        }
 
-    bool all_addresses_are_same = true;
-    report->GetObjectForDotSeparatedPath("mops")->GetAsArray()->ForEach(
-        [&all_addresses_are_same,
-         main_address](StructuredData::Object *o) -> bool {
-          addr_t addr =
-              o->GetObjectForDotSeparatedPath("address")->GetIntegerValue();
-          if (main_address != addr)
-            all_addresses_are_same = false;
-          return true;
+        bool all_addresses_are_same = true;
+        report->GetObjectForDotSeparatedPath("mops")->GetAsArray()->ForEach(
+            [&all_addresses_are_same,
+        main_address](StructuredData::Object *o) -> bool {
+            addr_t addr =
+            o->GetObjectForDotSeparatedPath("address")->GetIntegerValue();
+            if (main_address != addr)
+                all_addresses_are_same = false;
+            return true;
         });
-    report->GetAsDictionary()->AddBooleanItem("all_addresses_are_same",
-                                              all_addresses_are_same);
-  }
+        report->GetAsDictionary()->AddBooleanItem("all_addresses_are_same",
+                all_addresses_are_same);
+    }
 
-  // Make sure this is the right process
-  if (process_sp && process_sp == context->exe_ctx_ref.GetProcessSP()) {
-    ThreadSP thread_sp = context->exe_ctx_ref.GetThreadSP();
-    if (thread_sp)
-      thread_sp->SetStopInfo(
-          InstrumentationRuntimeStopInfo::
-              CreateStopReasonWithInstrumentationData(
-                  *thread_sp, stop_reason_description, report));
+    // Make sure this is the right process
+    if (process_sp && process_sp == context->exe_ctx_ref.GetProcessSP()) {
+        ThreadSP thread_sp = context->exe_ctx_ref.GetThreadSP();
+        if (thread_sp)
+            thread_sp->SetStopInfo(
+                InstrumentationRuntimeStopInfo::
+                CreateStopReasonWithInstrumentationData(
+                    *thread_sp, stop_reason_description, report));
 
-    StreamFile &s = process_sp->GetTarget().GetDebugger().GetOutputStream();
-    s.Printf("ThreadSanitizer report breakpoint hit. Use 'thread "
-             "info -s' to get extended information about the "
-             "report.\n");
+        StreamFile &s = process_sp->GetTarget().GetDebugger().GetOutputStream();
+        s.Printf("ThreadSanitizer report breakpoint hit. Use 'thread "
+                 "info -s' to get extended information about the "
+                 "report.\n");
 
-    return true; // Return true to stop the target
-  } else
-    return false; // Let target run
+        return true; // Return true to stop the target
+    } else
+        return false; // Let target run
 }
 
 const RegularExpression &
 InstrumentationRuntimeTSan::GetPatternForRuntimeLibrary() {
-  static RegularExpression regex(llvm::StringRef("libclang_rt.tsan_"));
-  return regex;
+    static RegularExpression regex(llvm::StringRef("libclang_rt.tsan_"));
+    return regex;
 }
 
 bool InstrumentationRuntimeTSan::CheckIfRuntimeIsValid(
     const lldb::ModuleSP module_sp) {
-  static ConstString g_tsan_get_current_report("__tsan_get_current_report");
-  const Symbol *symbol = module_sp->FindFirstSymbolWithNameAndType(
-      g_tsan_get_current_report, lldb::eSymbolTypeAny);
-  return symbol != nullptr;
+    static ConstString g_tsan_get_current_report("__tsan_get_current_report");
+    const Symbol *symbol = module_sp->FindFirstSymbolWithNameAndType(
+                               g_tsan_get_current_report, lldb::eSymbolTypeAny);
+    return symbol != nullptr;
 }
 
 void InstrumentationRuntimeTSan::Activate() {
-  if (IsActive())
-    return;
+    if (IsActive())
+        return;
 
-  ProcessSP process_sp = GetProcessSP();
-  if (!process_sp)
-    return;
+    ProcessSP process_sp = GetProcessSP();
+    if (!process_sp)
+        return;
 
-  ConstString symbol_name("__tsan_on_report");
-  const Symbol *symbol = GetRuntimeModuleSP()->FindFirstSymbolWithNameAndType(
-      symbol_name, eSymbolTypeCode);
+    ConstString symbol_name("__tsan_on_report");
+    const Symbol *symbol = GetRuntimeModuleSP()->FindFirstSymbolWithNameAndType(
+                               symbol_name, eSymbolTypeCode);
 
-  if (symbol == nullptr)
-    return;
+    if (symbol == nullptr)
+        return;
 
-  if (!symbol->ValueIsAddress() || !symbol->GetAddressRef().IsValid())
-    return;
+    if (!symbol->ValueIsAddress() || !symbol->GetAddressRef().IsValid())
+        return;
 
-  Target &target = process_sp->GetTarget();
-  addr_t symbol_address = symbol->GetAddressRef().GetOpcodeLoadAddress(&target);
+    Target &target = process_sp->GetTarget();
+    addr_t symbol_address = symbol->GetAddressRef().GetOpcodeLoadAddress(&target);
 
-  if (symbol_address == LLDB_INVALID_ADDRESS)
-    return;
+    if (symbol_address == LLDB_INVALID_ADDRESS)
+        return;
 
-  bool internal = true;
-  bool hardware = false;
-  Breakpoint *breakpoint =
-      process_sp->GetTarget()
-          .CreateBreakpoint(symbol_address, internal, hardware)
-          .get();
-  breakpoint->SetCallback(InstrumentationRuntimeTSan::NotifyBreakpointHit, this,
-                          true);
-  breakpoint->SetBreakpointKind("thread-sanitizer-report");
-  SetBreakpointID(breakpoint->GetID());
+    bool internal = true;
+    bool hardware = false;
+    Breakpoint *breakpoint =
+        process_sp->GetTarget()
+        .CreateBreakpoint(symbol_address, internal, hardware)
+        .get();
+    breakpoint->SetCallback(InstrumentationRuntimeTSan::NotifyBreakpointHit, this,
+                            true);
+    breakpoint->SetBreakpointKind("thread-sanitizer-report");
+    SetBreakpointID(breakpoint->GetID());
 
-  SetActive(true);
+    SetActive(true);
 }
 
 void InstrumentationRuntimeTSan::Deactivate() {
-  if (GetBreakpointID() != LLDB_INVALID_BREAK_ID) {
-    ProcessSP process_sp = GetProcessSP();
-    if (process_sp) {
-      process_sp->GetTarget().RemoveBreakpointByID(GetBreakpointID());
-      SetBreakpointID(LLDB_INVALID_BREAK_ID);
+    if (GetBreakpointID() != LLDB_INVALID_BREAK_ID) {
+        ProcessSP process_sp = GetProcessSP();
+        if (process_sp) {
+            process_sp->GetTarget().RemoveBreakpointByID(GetBreakpointID());
+            SetBreakpointID(LLDB_INVALID_BREAK_ID);
+        }
     }
-  }
-  SetActive(false);
+    SetActive(false);
 }
 static std::string GenerateThreadName(const std::string &path,
                                       StructuredData::Object *o,
                                       StructuredData::ObjectSP main_info) {
-  std::string result = "additional information";
+    std::string result = "additional information";
 
-  if (path == "mops") {
-    int size = o->GetObjectForDotSeparatedPath("size")->GetIntegerValue();
-    int thread_id =
-        o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
-    bool is_write =
-        o->GetObjectForDotSeparatedPath("is_write")->GetBooleanValue();
-    bool is_atomic =
-        o->GetObjectForDotSeparatedPath("is_atomic")->GetBooleanValue();
-    addr_t addr = o->GetObjectForDotSeparatedPath("address")->GetIntegerValue();
+    if (path == "mops") {
+        int size = o->GetObjectForDotSeparatedPath("size")->GetIntegerValue();
+        int thread_id =
+            o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
+        bool is_write =
+            o->GetObjectForDotSeparatedPath("is_write")->GetBooleanValue();
+        bool is_atomic =
+            o->GetObjectForDotSeparatedPath("is_atomic")->GetBooleanValue();
+        addr_t addr = o->GetObjectForDotSeparatedPath("address")->GetIntegerValue();
 
-    std::string addr_string = Sprintf(" at 0x%llx", addr);
+        std::string addr_string = Sprintf(" at 0x%llx", addr);
 
-    if (main_info->GetObjectForDotSeparatedPath("all_addresses_are_same")
-            ->GetBooleanValue()) {
-      addr_string = "";
-    }
+        if (main_info->GetObjectForDotSeparatedPath("all_addresses_are_same")
+                ->GetBooleanValue()) {
+            addr_string = "";
+        }
 
-    if (main_info->GetObjectForDotSeparatedPath("issue_type")
-            ->GetStringValue() == "external-race") {
-      result = Sprintf("%s access by thread %d",
-                       is_write ? "mutating" : "read-only", thread_id);
-    } else if (main_info->GetObjectForDotSeparatedPath("issue_type")
+        if (main_info->GetObjectForDotSeparatedPath("issue_type")
+                ->GetStringValue() == "external-race") {
+            result = Sprintf("%s access by thread %d",
+                             is_write ? "mutating" : "read-only", thread_id);
+        } else if (main_info->GetObjectForDotSeparatedPath("issue_type")
                    ->GetStringValue() == "swift-access-race") {
-      result = Sprintf("modifying access by thread %d", thread_id);
-    } else {
-      result = Sprintf("%s%s of size %d%s by thread %d",
-                       is_atomic ? "atomic " : "", is_write ? "write" : "read",
-                       size, addr_string.c_str(), thread_id);
+            result = Sprintf("modifying access by thread %d", thread_id);
+        } else {
+            result = Sprintf("%s%s of size %d%s by thread %d",
+                             is_atomic ? "atomic " : "", is_write ? "write" : "read",
+                             size, addr_string.c_str(), thread_id);
+        }
     }
-  }
 
-  if (path == "threads") {
-    int thread_id =
-        o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
-    result = Sprintf("Thread %d created", thread_id);
-  }
-
-  if (path == "locs") {
-    std::string type = std::string(
-        o->GetAsDictionary()->GetValueForKey("type")->GetStringValue());
-    int thread_id =
-        o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
-    int fd =
-        o->GetObjectForDotSeparatedPath("file_descriptor")->GetIntegerValue();
-    if (type == "heap") {
-      result = Sprintf("Heap block allocated by thread %d", thread_id);
-    } else if (type == "fd") {
-      result =
-          Sprintf("File descriptor %d created by thread %t", fd, thread_id);
+    if (path == "threads") {
+        int thread_id =
+            o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
+        result = Sprintf("Thread %d created", thread_id);
     }
-  }
 
-  if (path == "mutexes") {
-    int mutex_id =
-        o->GetObjectForDotSeparatedPath("mutex_id")->GetIntegerValue();
+    if (path == "locs") {
+        std::string type = std::string(
+                               o->GetAsDictionary()->GetValueForKey("type")->GetStringValue());
+        int thread_id =
+            o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
+        int fd =
+            o->GetObjectForDotSeparatedPath("file_descriptor")->GetIntegerValue();
+        if (type == "heap") {
+            result = Sprintf("Heap block allocated by thread %d", thread_id);
+        } else if (type == "fd") {
+            result =
+                Sprintf("File descriptor %d created by thread %t", fd, thread_id);
+        }
+    }
 
-    result = Sprintf("Mutex M%d created", mutex_id);
-  }
+    if (path == "mutexes") {
+        int mutex_id =
+            o->GetObjectForDotSeparatedPath("mutex_id")->GetIntegerValue();
 
-  if (path == "stacks") {
-    int thread_id =
-        o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
-    result = Sprintf("Thread %d", thread_id);
-  }
+        result = Sprintf("Mutex M%d created", mutex_id);
+    }
 
-  result[0] = toupper(result[0]);
+    if (path == "stacks") {
+        int thread_id =
+            o->GetObjectForDotSeparatedPath("thread_id")->GetIntegerValue();
+        result = Sprintf("Thread %d", thread_id);
+    }
 
-  return result;
+    result[0] = toupper(result[0]);
+
+    return result;
 }
 
 static void AddThreadsForPath(const std::string &path,
                               ThreadCollectionSP threads, ProcessSP process_sp,
                               StructuredData::ObjectSP info) {
-  info->GetObjectForDotSeparatedPath(path)->GetAsArray()->ForEach(
-      [process_sp, threads, path, info](StructuredData::Object *o) -> bool {
+    info->GetObjectForDotSeparatedPath(path)->GetAsArray()->ForEach(
+    [process_sp, threads, path, info](StructuredData::Object *o) -> bool {
         std::vector<lldb::addr_t> pcs;
         o->GetObjectForDotSeparatedPath("trace")->GetAsArray()->ForEach(
-            [&pcs](StructuredData::Object *pc) -> bool {
-              pcs.push_back(pc->GetAsInteger()->GetValue());
-              return true;
-            });
+        [&pcs](StructuredData::Object *pc) -> bool {
+            pcs.push_back(pc->GetAsInteger()->GetValue());
+            return true;
+        });
 
         if (pcs.size() == 0)
-          return true;
+            return true;
 
         StructuredData::ObjectSP thread_id_obj =
-            o->GetObjectForDotSeparatedPath("thread_os_id");
+        o->GetObjectForDotSeparatedPath("thread_os_id");
         tid_t tid = thread_id_obj ? thread_id_obj->GetIntegerValue() : 0;
 
         HistoryThread *history_thread =
-            new HistoryThread(*process_sp, tid, pcs);
+        new HistoryThread(*process_sp, tid, pcs);
         ThreadSP new_thread_sp(history_thread);
         new_thread_sp->SetName(GenerateThreadName(path, o, info).c_str());
 
@@ -1043,26 +1045,26 @@ static void AddThreadsForPath(const std::string &path,
         threads->AddThread(new_thread_sp);
 
         return true;
-      });
+    });
 }
 
 lldb::ThreadCollectionSP
 InstrumentationRuntimeTSan::GetBacktracesFromExtendedStopInfo(
     StructuredData::ObjectSP info) {
-  ThreadCollectionSP threads;
-  threads = std::make_shared<ThreadCollection>();
+    ThreadCollectionSP threads;
+    threads = std::make_shared<ThreadCollection>();
 
-  if (info->GetObjectForDotSeparatedPath("instrumentation_class")
-          ->GetStringValue() != "ThreadSanitizer")
+    if (info->GetObjectForDotSeparatedPath("instrumentation_class")
+            ->GetStringValue() != "ThreadSanitizer")
+        return threads;
+
+    ProcessSP process_sp = GetProcessSP();
+
+    AddThreadsForPath("stacks", threads, process_sp, info);
+    AddThreadsForPath("mops", threads, process_sp, info);
+    AddThreadsForPath("locs", threads, process_sp, info);
+    AddThreadsForPath("mutexes", threads, process_sp, info);
+    AddThreadsForPath("threads", threads, process_sp, info);
+
     return threads;
-
-  ProcessSP process_sp = GetProcessSP();
-
-  AddThreadsForPath("stacks", threads, process_sp, info);
-  AddThreadsForPath("mops", threads, process_sp, info);
-  AddThreadsForPath("locs", threads, process_sp, info);
-  AddThreadsForPath("mutexes", threads, process_sp, info);
-  AddThreadsForPath("threads", threads, process_sp, info);
-
-  return threads;
 }

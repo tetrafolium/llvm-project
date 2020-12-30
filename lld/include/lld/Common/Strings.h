@@ -32,28 +32,28 @@ void saveBuffer(llvm::StringRef buffer, const llvm::Twine &path);
 // glob pattern in the sense of GlobPattern.
 class SingleStringMatcher {
 public:
-  // Create a StringPattern from Pattern to be matched exactly irregardless
-  // of globbing characters if ExactMatch is true.
-  SingleStringMatcher(llvm::StringRef Pattern);
+    // Create a StringPattern from Pattern to be matched exactly irregardless
+    // of globbing characters if ExactMatch is true.
+    SingleStringMatcher(llvm::StringRef Pattern);
 
-  // Match s against this pattern, exactly if ExactMatch is true.
-  bool match(llvm::StringRef s) const;
+    // Match s against this pattern, exactly if ExactMatch is true.
+    bool match(llvm::StringRef s) const;
 
-  // Returns true for pattern "*" which will match all inputs.
-  bool isTrivialMatchAll() const {
-    return !ExactMatch && GlobPatternMatcher.isTrivialMatchAll();
-  }
+    // Returns true for pattern "*" which will match all inputs.
+    bool isTrivialMatchAll() const {
+        return !ExactMatch && GlobPatternMatcher.isTrivialMatchAll();
+    }
 
 private:
-  // Whether to do an exact match irregardless of the presence of wildcard
-  // character.
-  bool ExactMatch;
+    // Whether to do an exact match irregardless of the presence of wildcard
+    // character.
+    bool ExactMatch;
 
-  // GlobPattern object if not doing an exact match.
-  llvm::GlobPattern GlobPatternMatcher;
+    // GlobPattern object if not doing an exact match.
+    llvm::GlobPattern GlobPatternMatcher;
 
-  // StringRef to match exactly if doing an exact match.
-  llvm::StringRef ExactPattern;
+    // StringRef to match exactly if doing an exact match.
+    llvm::StringRef ExactPattern;
 };
 
 // This class represents multiple patterns to match against. A pattern can
@@ -61,23 +61,27 @@ private:
 // the quoted marks or a glob pattern.
 class StringMatcher {
 private:
-  // Patterns to match against.
-  std::vector<SingleStringMatcher> patterns;
+    // Patterns to match against.
+    std::vector<SingleStringMatcher> patterns;
 
 public:
-  StringMatcher() = default;
+    StringMatcher() = default;
 
-  // Matcher for a single pattern.
-  StringMatcher(llvm::StringRef Pattern)
-      : patterns({SingleStringMatcher(Pattern)}) {}
+    // Matcher for a single pattern.
+    StringMatcher(llvm::StringRef Pattern)
+        : patterns({SingleStringMatcher(Pattern)}) {}
 
-  // Add a new pattern to the existing ones to match against.
-  void addPattern(SingleStringMatcher Matcher) { patterns.push_back(Matcher); }
+    // Add a new pattern to the existing ones to match against.
+    void addPattern(SingleStringMatcher Matcher) {
+        patterns.push_back(Matcher);
+    }
 
-  bool empty() const { return patterns.empty(); }
+    bool empty() const {
+        return patterns.empty();
+    }
 
-  // Match s against the patterns.
-  bool match(llvm::StringRef s) const;
+    // Match s against the patterns.
+    bool match(llvm::StringRef s) const;
 };
 
 } // namespace lld

@@ -23,14 +23,14 @@ namespace objc {
 /// For the user-facing documentation see:
 /// http://clang.llvm.org/extra/clang-tidy/checks/google-objc-avoid-throwing-exception.html
 class AvoidThrowingObjCExceptionCheck : public ClangTidyCheck {
- public:
-  AvoidThrowingObjCExceptionCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.ObjC;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+public:
+    AvoidThrowingObjCExceptionCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.ObjC;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 }  // namespace objc

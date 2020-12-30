@@ -12,32 +12,32 @@
 #include "llvm/Support/Compiler.h"
 
 namespace llvm {
-  class AsmPrinter;
-  class MCContext;
-  class MCInst;
-  class MCOperand;
-  class MCSymbol;
-  class MachineInstr;
-  class MachineOperand;
+class AsmPrinter;
+class MCContext;
+class MCInst;
+class MCOperand;
+class MCSymbol;
+class MachineInstr;
+class MachineOperand;
 
-  /// MSP430MCInstLower - This class is used to lower an MachineInstr
-  /// into an MCInst.
+/// MSP430MCInstLower - This class is used to lower an MachineInstr
+/// into an MCInst.
 class LLVM_LIBRARY_VISIBILITY MSP430MCInstLower {
-  MCContext &Ctx;
+    MCContext &Ctx;
 
-  AsmPrinter &Printer;
+    AsmPrinter &Printer;
 public:
-  MSP430MCInstLower(MCContext &ctx, AsmPrinter &printer)
-    : Ctx(ctx), Printer(printer) {}
-  void Lower(const MachineInstr *MI, MCInst &OutMI) const;
+    MSP430MCInstLower(MCContext &ctx, AsmPrinter &printer)
+        : Ctx(ctx), Printer(printer) {}
+    void Lower(const MachineInstr *MI, MCInst &OutMI) const;
 
-  MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym) const;
+    MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym) const;
 
-  MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
-  MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
-  MCSymbol *GetJumpTableSymbol(const MachineOperand &MO) const;
-  MCSymbol *GetConstantPoolIndexSymbol(const MachineOperand &MO) const;
-  MCSymbol *GetBlockAddressSymbol(const MachineOperand &MO) const;
+    MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
+    MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
+    MCSymbol *GetJumpTableSymbol(const MachineOperand &MO) const;
+    MCSymbol *GetConstantPoolIndexSymbol(const MachineOperand &MO) const;
+    MCSymbol *GetBlockAddressSymbol(const MachineOperand &MO) const;
 };
 
 }

@@ -26,49 +26,49 @@ class MCRegisterInfo;
 class Target;
 
 class MipsAsmBackend : public MCAsmBackend {
-  Triple TheTriple;
-  bool IsN32;
+    Triple TheTriple;
+    bool IsN32;
 
 public:
-  MipsAsmBackend(const Target &T, const MCRegisterInfo &MRI, const Triple &TT,
-                 StringRef CPU, bool N32)
-      : MCAsmBackend(TT.isLittleEndian() ? support::little : support::big),
-        TheTriple(TT), IsN32(N32) {}
+    MipsAsmBackend(const Target &T, const MCRegisterInfo &MRI, const Triple &TT,
+                   StringRef CPU, bool N32)
+        : MCAsmBackend(TT.isLittleEndian() ? support::little : support::big),
+          TheTriple(TT), IsN32(N32) {}
 
-  std::unique_ptr<MCObjectTargetWriter>
-  createObjectTargetWriter() const override;
+    std::unique_ptr<MCObjectTargetWriter>
+    createObjectTargetWriter() const override;
 
-  void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
-                  const MCValue &Target, MutableArrayRef<char> Data,
-                  uint64_t Value, bool IsResolved,
-                  const MCSubtargetInfo *STI) const override;
+    void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
+                    const MCValue &Target, MutableArrayRef<char> Data,
+                    uint64_t Value, bool IsResolved,
+                    const MCSubtargetInfo *STI) const override;
 
-  Optional<MCFixupKind> getFixupKind(StringRef Name) const override;
-  const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override;
+    Optional<MCFixupKind> getFixupKind(StringRef Name) const override;
+    const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override;
 
-  unsigned getNumFixupKinds() const override {
-    return Mips::NumTargetFixupKinds;
-  }
+    unsigned getNumFixupKinds() const override {
+        return Mips::NumTargetFixupKinds;
+    }
 
-  /// @name Target Relaxation Interfaces
-  /// @{
+    /// @name Target Relaxation Interfaces
+    /// @{
 
-  /// fixupNeedsRelaxation - Target specific predicate for whether a given
-  /// fixup requires the associated instruction to be relaxed.
-  bool fixupNeedsRelaxation(const MCFixup &Fixup, uint64_t Value,
-                            const MCRelaxableFragment *DF,
-                            const MCAsmLayout &Layout) const override {
-    // FIXME.
-    llvm_unreachable("RelaxInstruction() unimplemented");
-    return false;
-  }
+    /// fixupNeedsRelaxation - Target specific predicate for whether a given
+    /// fixup requires the associated instruction to be relaxed.
+    bool fixupNeedsRelaxation(const MCFixup &Fixup, uint64_t Value,
+                              const MCRelaxableFragment *DF,
+                              const MCAsmLayout &Layout) const override {
+        // FIXME.
+        llvm_unreachable("RelaxInstruction() unimplemented");
+        return false;
+    }
 
-  bool writeNopData(raw_ostream &OS, uint64_t Count) const override;
+    bool writeNopData(raw_ostream &OS, uint64_t Count) const override;
 
-  bool shouldForceRelocation(const MCAssembler &Asm, const MCFixup &Fixup,
-                             const MCValue &Target) override;
+    bool shouldForceRelocation(const MCAssembler &Asm, const MCFixup &Fixup,
+                               const MCValue &Target) override;
 
-  bool isMicroMips(const MCSymbol *Sym) const override;
+    bool isMicroMips(const MCSymbol *Sym) const override;
 }; // class MipsAsmBackend
 
 } // namespace

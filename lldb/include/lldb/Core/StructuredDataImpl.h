@@ -25,136 +25,142 @@ namespace lldb_private {
 
 class StructuredDataImpl {
 public:
-  StructuredDataImpl() : m_plugin_wp(), m_data_sp() {}
+    StructuredDataImpl() : m_plugin_wp(), m_data_sp() {}
 
-  StructuredDataImpl(const StructuredDataImpl &rhs) = default;
+    StructuredDataImpl(const StructuredDataImpl &rhs) = default;
 
-  StructuredDataImpl(const lldb::EventSP &event_sp)
-      : m_plugin_wp(
-            EventDataStructuredData::GetPluginFromEvent(event_sp.get())),
-        m_data_sp(EventDataStructuredData::GetObjectFromEvent(event_sp.get())) {
-  }
-
-  ~StructuredDataImpl() = default;
-
-  StructuredDataImpl &operator=(const StructuredDataImpl &rhs) = default;
-
-  bool IsValid() const { return m_data_sp.get() != nullptr; }
-
-  void Clear() {
-    m_plugin_wp.reset();
-    m_data_sp.reset();
-  }
-
-  Status GetAsJSON(Stream &stream) const {
-    Status error;
-
-    if (!m_data_sp) {
-      error.SetErrorString("No structured data.");
-      return error;
+    StructuredDataImpl(const lldb::EventSP &event_sp)
+        : m_plugin_wp(
+              EventDataStructuredData::GetPluginFromEvent(event_sp.get())),
+          m_data_sp(EventDataStructuredData::GetObjectFromEvent(event_sp.get())) {
     }
 
-    llvm::json::OStream s(stream.AsRawOstream());
-    m_data_sp->Serialize(s);
-    return error;
-  }
+    ~StructuredDataImpl() = default;
 
-  Status GetDescription(Stream &stream) const {
-    Status error;
+    StructuredDataImpl &operator=(const StructuredDataImpl &rhs) = default;
 
-    if (!m_data_sp) {
-      error.SetErrorString("Cannot pretty print structured data: "
-                           "no data to print.");
-      return error;
+    bool IsValid() const {
+        return m_data_sp.get() != nullptr;
     }
 
-    // Grab the plugin
-    lldb::StructuredDataPluginSP plugin_sp = m_plugin_wp.lock();
+    void Clear() {
+        m_plugin_wp.reset();
+        m_data_sp.reset();
+    }
 
-    // If there's no plugin, call underlying data's dump method:
-    if (!plugin_sp) {
-      if (!m_data_sp) {
-        error.SetErrorString("No data to describe.");
+    Status GetAsJSON(Stream &stream) const {
+        Status error;
+
+        if (!m_data_sp) {
+            error.SetErrorString("No structured data.");
+            return error;
+        }
+
+        llvm::json::OStream s(stream.AsRawOstream());
+        m_data_sp->Serialize(s);
         return error;
-      }
-      m_data_sp->Dump(stream, true);
-      return error;
     }
-    // Get the data's description.
-    return plugin_sp->GetDescription(m_data_sp, stream);
-  }
 
-  StructuredData::ObjectSP GetObjectSP() { return m_data_sp; }
+    Status GetDescription(Stream &stream) const {
+        Status error;
 
-  void SetObjectSP(const StructuredData::ObjectSP &obj) { m_data_sp = obj; }
+        if (!m_data_sp) {
+            error.SetErrorString("Cannot pretty print structured data: "
+                                 "no data to print.");
+            return error;
+        }
 
-  lldb::StructuredDataType GetType() const {
-    return (m_data_sp ? m_data_sp->GetType() :
-        lldb::eStructuredDataTypeInvalid);
-  }
+        // Grab the plugin
+        lldb::StructuredDataPluginSP plugin_sp = m_plugin_wp.lock();
 
-  size_t GetSize() const {
-    if (!m_data_sp)
-      return 0;
-
-    if (m_data_sp->GetType() == lldb::eStructuredDataTypeDictionary) {
-      auto dict = m_data_sp->GetAsDictionary();
-      return (dict->GetSize());
-    } else if (m_data_sp->GetType() == lldb::eStructuredDataTypeArray) {
-      auto array = m_data_sp->GetAsArray();
-      return (array->GetSize());
-    } else
-      return 0;
-  }
-
-  StructuredData::ObjectSP GetValueForKey(const char *key) const {
-    if (m_data_sp) {
-      auto dict = m_data_sp->GetAsDictionary();
-      if (dict)
-        return dict->GetValueForKey(llvm::StringRef(key));
+        // If there's no plugin, call underlying data's dump method:
+        if (!plugin_sp) {
+            if (!m_data_sp) {
+                error.SetErrorString("No data to describe.");
+                return error;
+            }
+            m_data_sp->Dump(stream, true);
+            return error;
+        }
+        // Get the data's description.
+        return plugin_sp->GetDescription(m_data_sp, stream);
     }
-    return StructuredData::ObjectSP();
-  }
 
-  StructuredData::ObjectSP GetItemAtIndex(size_t idx) const {
-    if (m_data_sp) {
-      auto array = m_data_sp->GetAsArray();
-      if (array)
-        return array->GetItemAtIndex(idx);
+    StructuredData::ObjectSP GetObjectSP() {
+        return m_data_sp;
     }
-    return StructuredData::ObjectSP();
-  }
 
-  uint64_t GetIntegerValue(uint64_t fail_value = 0) const {
-    return (m_data_sp ? m_data_sp->GetIntegerValue(fail_value) : fail_value);
-  }
-
-  double GetFloatValue(double fail_value = 0.0) const {
-    return (m_data_sp ? m_data_sp->GetFloatValue(fail_value) : fail_value);
-  }
-
-  bool GetBooleanValue(bool fail_value = false) const {
-    return (m_data_sp ? m_data_sp->GetBooleanValue(fail_value) : fail_value);
-  }
-
-  size_t GetStringValue(char *dst, size_t dst_len) const {
-    if (!m_data_sp)
-      return 0;
-
-    llvm::StringRef result = m_data_sp->GetStringValue();
-    if (result.empty())
-      return 0;
-
-    if (!dst || !dst_len) {
-      char s[1];
-      return (::snprintf(s, 1, "%s", result.data()));
+    void SetObjectSP(const StructuredData::ObjectSP &obj) {
+        m_data_sp = obj;
     }
-    return (::snprintf(dst, dst_len, "%s", result.data()));
-  }
+
+    lldb::StructuredDataType GetType() const {
+        return (m_data_sp ? m_data_sp->GetType() :
+                lldb::eStructuredDataTypeInvalid);
+    }
+
+    size_t GetSize() const {
+        if (!m_data_sp)
+            return 0;
+
+        if (m_data_sp->GetType() == lldb::eStructuredDataTypeDictionary) {
+            auto dict = m_data_sp->GetAsDictionary();
+            return (dict->GetSize());
+        } else if (m_data_sp->GetType() == lldb::eStructuredDataTypeArray) {
+            auto array = m_data_sp->GetAsArray();
+            return (array->GetSize());
+        } else
+            return 0;
+    }
+
+    StructuredData::ObjectSP GetValueForKey(const char *key) const {
+        if (m_data_sp) {
+            auto dict = m_data_sp->GetAsDictionary();
+            if (dict)
+                return dict->GetValueForKey(llvm::StringRef(key));
+        }
+        return StructuredData::ObjectSP();
+    }
+
+    StructuredData::ObjectSP GetItemAtIndex(size_t idx) const {
+        if (m_data_sp) {
+            auto array = m_data_sp->GetAsArray();
+            if (array)
+                return array->GetItemAtIndex(idx);
+        }
+        return StructuredData::ObjectSP();
+    }
+
+    uint64_t GetIntegerValue(uint64_t fail_value = 0) const {
+        return (m_data_sp ? m_data_sp->GetIntegerValue(fail_value) : fail_value);
+    }
+
+    double GetFloatValue(double fail_value = 0.0) const {
+        return (m_data_sp ? m_data_sp->GetFloatValue(fail_value) : fail_value);
+    }
+
+    bool GetBooleanValue(bool fail_value = false) const {
+        return (m_data_sp ? m_data_sp->GetBooleanValue(fail_value) : fail_value);
+    }
+
+    size_t GetStringValue(char *dst, size_t dst_len) const {
+        if (!m_data_sp)
+            return 0;
+
+        llvm::StringRef result = m_data_sp->GetStringValue();
+        if (result.empty())
+            return 0;
+
+        if (!dst || !dst_len) {
+            char s[1];
+            return (::snprintf(s, 1, "%s", result.data()));
+        }
+        return (::snprintf(dst, dst_len, "%s", result.data()));
+    }
 
 private:
-  lldb::StructuredDataPluginWP m_plugin_wp;
-  StructuredData::ObjectSP m_data_sp;
+    lldb::StructuredDataPluginWP m_plugin_wp;
+    StructuredData::ObjectSP m_data_sp;
 };
 } // namespace lldb_private
 #endif

@@ -11,11 +11,11 @@
 #if V_SUPPORTED
 
 static const float Poly[] = {
-  /* 1.886 ulp error */
-  0x1.5b2e76p-19f,
-  -0x1.9f42eap-13f,
-  0x1.110df4p-7f,
-  -0x1.555548p-3f,
+    /* 1.886 ulp error */
+    0x1.5b2e76p-19f,
+    -0x1.9f42eap-13f,
+    0x1.110df4p-7f,
+    -0x1.555548p-3f,
 };
 #define Pi1 v_f32 (0x1.921fb6p+1f)
 #define Pi2 v_f32 (-0x1.777a5cp-24f)
@@ -34,44 +34,44 @@ VPCS_ATTR
 static v_f32_t
 specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 {
-  /* Fall back to scalar code.  */
-  return v_call_f32 (cosf, x, y, cmp);
+    /* Fall back to scalar code.  */
+    return v_call_f32 (cosf, x, y, cmp);
 }
 
 VPCS_ATTR
 v_f32_t
 V_NAME(cosf) (v_f32_t x)
 {
-  v_f32_t n, r, r2, y;
-  v_u32_t odd, cmp;
+    v_f32_t n, r, r2, y;
+    v_u32_t odd, cmp;
 
-  r = v_as_f32_u32 (v_as_u32_f32 (x) & AbsMask);
-  cmp = v_cond_u32 (v_as_u32_f32 (r) >= v_as_u32_f32 (RangeVal));
+    r = v_as_f32_u32 (v_as_u32_f32 (x) & AbsMask);
+    cmp = v_cond_u32 (v_as_u32_f32 (r) >= v_as_u32_f32 (RangeVal));
 
-  /* n = rint((|x|+pi/2)/pi) - 0.5 */
-  n = v_fma_f32 (InvPi, r + HalfPi, Shift);
-  odd = v_as_u32_f32 (n) << 31;
-  n -= Shift;
-  n -= v_f32 (0.5f);
+    /* n = rint((|x|+pi/2)/pi) - 0.5 */
+    n = v_fma_f32 (InvPi, r + HalfPi, Shift);
+    odd = v_as_u32_f32 (n) << 31;
+    n -= Shift;
+    n -= v_f32 (0.5f);
 
-  /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2) */
-  r = v_fma_f32 (-Pi1, n, r);
-  r = v_fma_f32 (-Pi2, n, r);
-  r = v_fma_f32 (-Pi3, n, r);
+    /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2) */
+    r = v_fma_f32 (-Pi1, n, r);
+    r = v_fma_f32 (-Pi2, n, r);
+    r = v_fma_f32 (-Pi3, n, r);
 
-  /* y = sin(r) */
-  r2 = r * r;
-  y = v_fma_f32 (A9, r2, A7);
-  y = v_fma_f32 (y, r2, A5);
-  y = v_fma_f32 (y, r2, A3);
-  y = v_fma_f32 (y * r2, r, r);
+    /* y = sin(r) */
+    r2 = r * r;
+    y = v_fma_f32 (A9, r2, A7);
+    y = v_fma_f32 (y, r2, A5);
+    y = v_fma_f32 (y, r2, A3);
+    y = v_fma_f32 (y * r2, r, r);
 
-  /* sign fix */
-  y = v_as_f32_u32 (v_as_u32_f32 (y) ^ odd);
+    /* sign fix */
+    y = v_as_f32_u32 (v_as_u32_f32 (y) ^ odd);
 
-  if (unlikely (v_any_u32 (cmp)))
-    return specialcase (x, y, cmp);
-  return y;
+    if (unlikely (v_any_u32 (cmp)))
+        return specialcase (x, y, cmp);
+    return y;
 }
 VPCS_ALIAS
 #endif

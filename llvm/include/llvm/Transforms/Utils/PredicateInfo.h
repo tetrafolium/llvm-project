@@ -73,41 +73,41 @@ enum PredicateType { PT_Branch, PT_Assume, PT_Switch };
 /// Constraint for a predicate of the form "cmp Pred Op, OtherOp", where Op
 /// is the value the constraint applies to (the ssa.copy result).
 struct PredicateConstraint {
-  CmpInst::Predicate Predicate;
-  Value *OtherOp;
+    CmpInst::Predicate Predicate;
+    Value *OtherOp;
 };
 
 // Base class for all predicate information we provide.
 // All of our predicate information has at least a comparison.
 class PredicateBase : public ilist_node<PredicateBase> {
 public:
-  PredicateType Type;
-  // The original operand before we renamed it.
-  // This can be use by passes, when destroying predicateinfo, to know
-  // whether they can just drop the intrinsic, or have to merge metadata.
-  Value *OriginalOp;
-  // The renamed operand in the condition used for this predicate. For nested
-  // predicates, this is different to OriginalOp which refers to the initial
-  // operand.
-  Value *RenamedOp;
-  // The condition associated with this predicate.
-  Value *Condition;
+    PredicateType Type;
+    // The original operand before we renamed it.
+    // This can be use by passes, when destroying predicateinfo, to know
+    // whether they can just drop the intrinsic, or have to merge metadata.
+    Value *OriginalOp;
+    // The renamed operand in the condition used for this predicate. For nested
+    // predicates, this is different to OriginalOp which refers to the initial
+    // operand.
+    Value *RenamedOp;
+    // The condition associated with this predicate.
+    Value *Condition;
 
-  PredicateBase(const PredicateBase &) = delete;
-  PredicateBase &operator=(const PredicateBase &) = delete;
-  PredicateBase() = delete;
-  virtual ~PredicateBase() = default;
-  static bool classof(const PredicateBase *PB) {
-    return PB->Type == PT_Assume || PB->Type == PT_Branch ||
-           PB->Type == PT_Switch;
-  }
+    PredicateBase(const PredicateBase &) = delete;
+    PredicateBase &operator=(const PredicateBase &) = delete;
+    PredicateBase() = delete;
+    virtual ~PredicateBase() = default;
+    static bool classof(const PredicateBase *PB) {
+        return PB->Type == PT_Assume || PB->Type == PT_Branch ||
+               PB->Type == PT_Switch;
+    }
 
-  /// Fetch condition in the form of PredicateConstraint, if possible.
-  Optional<PredicateConstraint> getConstraint() const;
+    /// Fetch condition in the form of PredicateConstraint, if possible.
+    Optional<PredicateConstraint> getConstraint() const;
 
 protected:
-  PredicateBase(PredicateType PT, Value *Op, Value *Condition)
-      : Type(PT), OriginalOp(Op), Condition(Condition) {}
+    PredicateBase(PredicateType PT, Value *Op, Value *Condition)
+        : Type(PT), OriginalOp(Op), Condition(Condition) {}
 };
 
 // Provides predicate information for assumes.  Since assumes are always true,
@@ -115,13 +115,13 @@ protected:
 // position to it.
 class PredicateAssume : public PredicateBase {
 public:
-  IntrinsicInst *AssumeInst;
-  PredicateAssume(Value *Op, IntrinsicInst *AssumeInst, Value *Condition)
-      : PredicateBase(PT_Assume, Op, Condition), AssumeInst(AssumeInst) {}
-  PredicateAssume() = delete;
-  static bool classof(const PredicateBase *PB) {
-    return PB->Type == PT_Assume;
-  }
+    IntrinsicInst *AssumeInst;
+    PredicateAssume(Value *Op, IntrinsicInst *AssumeInst, Value *Condition)
+        : PredicateBase(PT_Assume, Op, Condition), AssumeInst(AssumeInst) {}
+    PredicateAssume() = delete;
+    static bool classof(const PredicateBase *PB) {
+        return PB->Type == PT_Assume;
+    }
 };
 
 // Mixin class for edge predicates.  The FROM block is the block where the
@@ -129,84 +129,84 @@ public:
 // valid.
 class PredicateWithEdge : public PredicateBase {
 public:
-  BasicBlock *From;
-  BasicBlock *To;
-  PredicateWithEdge() = delete;
-  static bool classof(const PredicateBase *PB) {
-    return PB->Type == PT_Branch || PB->Type == PT_Switch;
-  }
+    BasicBlock *From;
+    BasicBlock *To;
+    PredicateWithEdge() = delete;
+    static bool classof(const PredicateBase *PB) {
+        return PB->Type == PT_Branch || PB->Type == PT_Switch;
+    }
 
 protected:
-  PredicateWithEdge(PredicateType PType, Value *Op, BasicBlock *From,
-                    BasicBlock *To, Value *Cond)
-      : PredicateBase(PType, Op, Cond), From(From), To(To) {}
+    PredicateWithEdge(PredicateType PType, Value *Op, BasicBlock *From,
+                      BasicBlock *To, Value *Cond)
+        : PredicateBase(PType, Op, Cond), From(From), To(To) {}
 };
 
 // Provides predicate information for branches.
 class PredicateBranch : public PredicateWithEdge {
 public:
-  // If true, SplitBB is the true successor, otherwise it's the false successor.
-  bool TrueEdge;
-  PredicateBranch(Value *Op, BasicBlock *BranchBB, BasicBlock *SplitBB,
-                  Value *Condition, bool TakenEdge)
-      : PredicateWithEdge(PT_Branch, Op, BranchBB, SplitBB, Condition),
-        TrueEdge(TakenEdge) {}
-  PredicateBranch() = delete;
-  static bool classof(const PredicateBase *PB) {
-    return PB->Type == PT_Branch;
-  }
+    // If true, SplitBB is the true successor, otherwise it's the false successor.
+    bool TrueEdge;
+    PredicateBranch(Value *Op, BasicBlock *BranchBB, BasicBlock *SplitBB,
+                    Value *Condition, bool TakenEdge)
+        : PredicateWithEdge(PT_Branch, Op, BranchBB, SplitBB, Condition),
+          TrueEdge(TakenEdge) {}
+    PredicateBranch() = delete;
+    static bool classof(const PredicateBase *PB) {
+        return PB->Type == PT_Branch;
+    }
 };
 
 class PredicateSwitch : public PredicateWithEdge {
 public:
-  Value *CaseValue;
-  // This is the switch instruction.
-  SwitchInst *Switch;
-  PredicateSwitch(Value *Op, BasicBlock *SwitchBB, BasicBlock *TargetBB,
-                  Value *CaseValue, SwitchInst *SI)
-      : PredicateWithEdge(PT_Switch, Op, SwitchBB, TargetBB,
-                          SI->getCondition()),
-        CaseValue(CaseValue), Switch(SI) {}
-  PredicateSwitch() = delete;
-  static bool classof(const PredicateBase *PB) {
-    return PB->Type == PT_Switch;
-  }
+    Value *CaseValue;
+    // This is the switch instruction.
+    SwitchInst *Switch;
+    PredicateSwitch(Value *Op, BasicBlock *SwitchBB, BasicBlock *TargetBB,
+                    Value *CaseValue, SwitchInst *SI)
+        : PredicateWithEdge(PT_Switch, Op, SwitchBB, TargetBB,
+                            SI->getCondition()),
+          CaseValue(CaseValue), Switch(SI) {}
+    PredicateSwitch() = delete;
+    static bool classof(const PredicateBase *PB) {
+        return PB->Type == PT_Switch;
+    }
 };
 
 /// Encapsulates PredicateInfo, including all data associated with memory
 /// accesses.
 class PredicateInfo {
 public:
-  PredicateInfo(Function &, DominatorTree &, AssumptionCache &);
-  ~PredicateInfo();
+    PredicateInfo(Function &, DominatorTree &, AssumptionCache &);
+    ~PredicateInfo();
 
-  void verifyPredicateInfo() const;
+    void verifyPredicateInfo() const;
 
-  void dump() const;
-  void print(raw_ostream &) const;
+    void dump() const;
+    void print(raw_ostream &) const;
 
-  const PredicateBase *getPredicateInfoFor(const Value *V) const {
-    return PredicateMap.lookup(V);
-  }
+    const PredicateBase *getPredicateInfoFor(const Value *V) const {
+        return PredicateMap.lookup(V);
+    }
 
 protected:
-  // Used by PredicateInfo annotater, dumpers, and wrapper pass.
-  friend class PredicateInfoAnnotatedWriter;
-  friend class PredicateInfoPrinterLegacyPass;
-  friend class PredicateInfoBuilder;
+    // Used by PredicateInfo annotater, dumpers, and wrapper pass.
+    friend class PredicateInfoAnnotatedWriter;
+    friend class PredicateInfoPrinterLegacyPass;
+    friend class PredicateInfoBuilder;
 
 private:
-  Function &F;
+    Function &F;
 
-  // This owns the all the predicate infos in the function, placed or not.
-  iplist<PredicateBase> AllInfos;
+    // This owns the all the predicate infos in the function, placed or not.
+    iplist<PredicateBase> AllInfos;
 
-  // This maps from copy operands to Predicate Info. Note that it does not own
-  // the Predicate Info, they belong to the ValueInfo structs in the ValueInfos
-  // vector.
-  DenseMap<const Value *, const PredicateBase *> PredicateMap;
-  // The set of ssa_copy declarations we created with our custom mangling.
-  SmallSet<AssertingVH<Function>, 20> CreatedDeclarations;
+    // This maps from copy operands to Predicate Info. Note that it does not own
+    // the Predicate Info, they belong to the ValueInfo structs in the ValueInfos
+    // vector.
+    DenseMap<const Value *, const PredicateBase *> PredicateMap;
+    // The set of ssa_copy declarations we created with our custom mangling.
+    SmallSet<AssertingVH<Function>, 20> CreatedDeclarations;
 };
 
 // This pass does eager building and then printing of PredicateInfo. It is used
@@ -214,26 +214,26 @@ private:
 // the tests to be able to build, dump, and verify PredicateInfo.
 class PredicateInfoPrinterLegacyPass : public FunctionPass {
 public:
-  PredicateInfoPrinterLegacyPass();
+    PredicateInfoPrinterLegacyPass();
 
-  static char ID;
-  bool runOnFunction(Function &) override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    static char ID;
+    bool runOnFunction(Function &) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 /// Printer pass for \c PredicateInfo.
 class PredicateInfoPrinterPass
     : public PassInfoMixin<PredicateInfoPrinterPass> {
-  raw_ostream &OS;
+    raw_ostream &OS;
 
 public:
-  explicit PredicateInfoPrinterPass(raw_ostream &OS) : OS(OS) {}
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    explicit PredicateInfoPrinterPass(raw_ostream &OS) : OS(OS) {}
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Verifier pass for \c PredicateInfo.
 struct PredicateInfoVerifierPass : PassInfoMixin<PredicateInfoVerifierPass> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

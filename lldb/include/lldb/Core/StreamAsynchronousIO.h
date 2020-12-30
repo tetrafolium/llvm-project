@@ -20,19 +20,19 @@ class Debugger;
 
 class StreamAsynchronousIO : public Stream {
 public:
-  StreamAsynchronousIO(Debugger &debugger, bool for_stdout);
+    StreamAsynchronousIO(Debugger &debugger, bool for_stdout);
 
-  ~StreamAsynchronousIO() override;
+    ~StreamAsynchronousIO() override;
 
-  void Flush() override;
+    void Flush() override;
 
 protected:
-  size_t WriteImpl(const void *src, size_t src_len) override;
+    size_t WriteImpl(const void *src, size_t src_len) override;
 
 private:
-  Debugger &m_debugger;
-  std::string m_data;
-  bool m_for_stdout;
+    Debugger &m_debugger;
+    std::string m_data;
+    bool m_for_stdout;
 };
 
 } // namespace lldb_private

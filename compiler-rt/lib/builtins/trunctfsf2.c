@@ -14,6 +14,8 @@
 #define DST_SINGLE
 #include "fp_trunc_impl.inc"
 
-COMPILER_RT_ABI float __trunctfsf2(long double a) { return __truncXfYf2__(a); }
+COMPILER_RT_ABI float __trunctfsf2(long double a) {
+    return __truncXfYf2__(a);
+}
 
 #endif

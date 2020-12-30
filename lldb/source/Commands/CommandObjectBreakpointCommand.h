@@ -17,9 +17,9 @@ namespace lldb_private {
 
 class CommandObjectBreakpointCommand : public CommandObjectMultiword {
 public:
-  CommandObjectBreakpointCommand(CommandInterpreter &interpreter);
+    CommandObjectBreakpointCommand(CommandInterpreter &interpreter);
 
-  ~CommandObjectBreakpointCommand() override;
+    ~CommandObjectBreakpointCommand() override;
 };
 
 } // namespace lldb_private

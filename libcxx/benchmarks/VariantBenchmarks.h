@@ -24,33 +24,35 @@ namespace VariantBenchmarks {
 
 template <std::size_t I>
 struct S {
-  static constexpr size_t v = I;
+    static constexpr size_t v = I;
 };
 
 template <std::size_t N, std::size_t... Is>
 static auto genVariants(std::index_sequence<Is...>) {
-  using V = std::variant<S<Is>...>;
-  using F = V (*)();
-  static constexpr F fs[] = {[] { return V(std::in_place_index<Is>); }...};
+    using V = std::variant<S<Is>...>;
+    using F = V (*)();
+    static constexpr F fs[] = {[] { return V(std::in_place_index<Is>); }...};
 
-  std::array<V, N> result = {};
-  for (auto& v : result) {
-    v = fs[getRandomInteger(0ul, sizeof...(Is) - 1)]();
-  }
+    std::array<V, N> result = {};
+    for (auto& v : result) {
+        v = fs[getRandomInteger(0ul, sizeof...(Is) - 1)]();
+    }
 
-  return result;
+    return result;
 }
 
 template <std::size_t N, std::size_t Alts>
 static void BM_Visit(benchmark::State& state) {
-  auto args = genVariants<N>(std::make_index_sequence<Alts>{});
-  for (auto _ : state) {
-    benchmark::DoNotOptimize(std::apply(
+    auto args = genVariants<N>(std::make_index_sequence<Alts> {});
+    for (auto _ : state) {
+        benchmark::DoNotOptimize(std::apply(
         [](auto... vs) {
-          return std::visit([](auto... is) { return (is.v + ... + 0); }, vs...);
+            return std::visit([](auto... is) {
+                return (is.v + ... + 0);
+            }, vs...);
         },
         args));
-  }
+    }
 }
 
 } // end namespace VariantBenchmarks

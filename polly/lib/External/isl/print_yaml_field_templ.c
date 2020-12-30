@@ -9,14 +9,14 @@
  * with key "name" and value "val".
  */
 static __isl_give isl_printer *FN(print_yaml_field,BASE)(
-	__isl_take isl_printer *p, const char *name, __isl_keep TYPE *val)
+    __isl_take isl_printer *p, const char *name, __isl_keep TYPE *val)
 {
-	p = isl_printer_print_str(p, name);
-	p = isl_printer_yaml_next(p);
-	p = isl_printer_print_str(p, "\"");
-	p = FN(isl_printer_print,BASE)(p, val);
-	p = isl_printer_print_str(p, "\"");
-	p = isl_printer_yaml_next(p);
+    p = isl_printer_print_str(p, name);
+    p = isl_printer_yaml_next(p);
+    p = isl_printer_print_str(p, "\"");
+    p = FN(isl_printer_print,BASE)(p, val);
+    p = isl_printer_print_str(p, "\"");
+    p = isl_printer_yaml_next(p);
 
-	return p;
+    return p;
 }

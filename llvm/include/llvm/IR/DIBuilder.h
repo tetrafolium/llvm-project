@@ -30,15 +30,15 @@
 
 namespace llvm {
 
-  class BasicBlock;
-  class Constant;
-  class Function;
-  class Instruction;
-  class LLVMContext;
-  class Module;
-  class Value;
+class BasicBlock;
+class Constant;
+class Function;
+class Instruction;
+class LLVMContext;
+class Module;
+class Value;
 
-  class DIBuilder {
+class DIBuilder {
     Module &M;
     LLVMContext &VMContext;
 
@@ -92,7 +92,7 @@ namespace llvm {
                             DIExpression *Expr, const DILocation *DL,
                             BasicBlock *InsertBB, Instruction *InsertBefore);
 
-  public:
+public:
     /// Construct a builder for a module.
     ///
     /// If \c AllowUnresolved, collect unresolved nodes attached to the module
@@ -298,12 +298,12 @@ namespace llvm {
     ///                     the default branch
     /// \param Ty           Parent type.
     DIDerivedType *createVariantMemberType(DIScope *Scope, StringRef Name,
-					   DIFile *File, unsigned LineNo,
-					   uint64_t SizeInBits,
-					   uint32_t AlignInBits,
-					   uint64_t OffsetInBits,
-					   Constant *Discriminant,
-					   DINode::DIFlags Flags, DIType *Ty);
+                                           DIFile *File, unsigned LineNo,
+                                           uint64_t SizeInBits,
+                                           uint32_t AlignInBits,
+                                           uint64_t OffsetInBits,
+                                           Constant *Discriminant,
+                                           DINode::DIFlags Flags, DIType *Ty);
 
     /// Create debugging information entry for a bit field member.
     /// \param Scope               Member scope.
@@ -440,12 +440,12 @@ namespace llvm {
     /// \param Elements     Variant elements.
     /// \param UniqueIdentifier A unique identifier for the union.
     DICompositeType *createVariantPart(DIScope *Scope, StringRef Name,
-				       DIFile *File, unsigned LineNumber,
-				       uint64_t SizeInBits, uint32_t AlignInBits,
-				       DINode::DIFlags Flags,
-				       DIDerivedType *Discriminator,
-				       DINodeArray Elements,
-				       StringRef UniqueIdentifier = "");
+                                       DIFile *File, unsigned LineNumber,
+                                       uint64_t SizeInBits, uint32_t AlignInBits,
+                                       DINode::DIFlags Flags,
+                                       DIDerivedType *Discriminator,
+                                       DINodeArray Elements,
+                                       StringRef UniqueIdentifier = "");
 
     /// Create debugging information for template
     /// type parameter.
@@ -454,9 +454,9 @@ namespace llvm {
     /// \param Ty           Parameter type.
     /// \param IsDefault    Parameter is default or not
     DITemplateTypeParameter *createTemplateTypeParameter(DIScope *Scope,
-                                                         StringRef Name,
-                                                         DIType *Ty,
-                                                         bool IsDefault);
+            StringRef Name,
+            DIType *Ty,
+            bool IsDefault);
 
     /// Create debugging information for template
     /// value parameter.
@@ -475,9 +475,9 @@ namespace llvm {
     /// \param Ty           Parameter type.
     /// \param Val          The fully qualified name of the template.
     DITemplateValueParameter *createTemplateTemplateParameter(DIScope *Scope,
-                                                              StringRef Name,
-                                                              DIType *Ty,
-                                                              StringRef Val);
+            StringRef Name,
+            DIType *Ty,
+            StringRef Val);
 
     /// Create debugging information for a template parameter pack.
     /// \param Scope        Scope in which this type is defined.
@@ -485,9 +485,9 @@ namespace llvm {
     /// \param Ty           Parameter type.
     /// \param Val          An array of types in the pack.
     DITemplateValueParameter *createTemplateParameterPack(DIScope *Scope,
-                                                          StringRef Name,
-                                                          DIType *Ty,
-                                                          DINodeArray Val);
+            StringRef Name,
+            DIType *Ty,
+            DINodeArray Val);
 
     /// Create debugging information entry for an array.
     /// \param Size         Array size.
@@ -679,8 +679,8 @@ namespace llvm {
     /// Create an expression for a variable that does not have an address, but
     /// does have a constant value.
     DIExpression *createConstantValueExpression(uint64_t Val) {
-      return DIExpression::get(
-          VMContext, {dwarf::DW_OP_constu, Val, dwarf::DW_OP_stack_value});
+        return DIExpression::get(
+                   VMContext, {dwarf::DW_OP_constu, Val, dwarf::DW_OP_stack_value});
     }
 
     /// Create a new descriptor for the specified subprogram.
@@ -792,7 +792,7 @@ namespace llvm {
     /// \param File        Source file.
     /// \param Discriminator DWARF path discriminator value.
     DILexicalBlockFile *createLexicalBlockFile(DIScope *Scope, DIFile *File,
-                                               unsigned Discriminator = 0);
+            unsigned Discriminator = 0);
 
     /// This creates a descriptor for a lexical block with the
     /// specified parent context.
@@ -835,8 +835,8 @@ namespace llvm {
     /// \param File    File where the declaration is located.
     /// \param Line    Line number of the declaration.
     DIImportedEntity *createImportedDeclaration(DIScope *Context, DINode *Decl,
-                                                DIFile *File, unsigned Line,
-                                                StringRef Name = "");
+            DIFile *File, unsigned Line,
+            StringRef Name = "");
 
     /// Insert a new llvm.dbg.declare intrinsic call.
     /// \param Storage     llvm::Value of the variable
@@ -921,16 +921,16 @@ namespace llvm {
     /// have a different address, so we return the final address.
     template <class NodeTy>
     NodeTy *replaceTemporary(TempMDNode &&N, NodeTy *Replacement) {
-      if (N.get() == Replacement)
-        return cast<NodeTy>(MDNode::replaceWithUniqued(std::move(N)));
+        if (N.get() == Replacement)
+            return cast<NodeTy>(MDNode::replaceWithUniqued(std::move(N)));
 
-      N->replaceAllUsesWith(Replacement);
-      return Replacement;
+        N->replaceAllUsesWith(Replacement);
+        return Replacement;
     }
-  };
+};
 
-  // Create wrappers for C Binding types (see CBindingWrapping.h).
-  DEFINE_ISA_CONVERSION_FUNCTIONS(DIBuilder, LLVMDIBuilderRef)
+// Create wrappers for C Binding types (see CBindingWrapping.h).
+DEFINE_ISA_CONVERSION_FUNCTIONS(DIBuilder, LLVMDIBuilderRef)
 
 } // end namespace llvm
 

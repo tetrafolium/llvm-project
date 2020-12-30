@@ -25,8 +25,8 @@
 #include "../clcmacro.h"
 
 _CLC_OVERLOAD _CLC_DEF float smoothstep(float edge0, float edge1, float x) {
-  float t = clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-  return t * t * (3.0f - 2.0f * t);
+    float t = clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+    return t * t * (3.0f - 2.0f * t);
 }
 
 _CLC_TERNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, smoothstep, float, float, float);

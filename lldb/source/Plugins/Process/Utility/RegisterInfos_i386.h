@@ -278,7 +278,8 @@ static RegisterInfo g_register_infos_i386[] = {
 
     // Debug registers for lldb internal use
     DEFINE_DR(dr, 0), DEFINE_DR(dr, 1), DEFINE_DR(dr, 2), DEFINE_DR(dr, 3),
-    DEFINE_DR(dr, 4), DEFINE_DR(dr, 5), DEFINE_DR(dr, 6), DEFINE_DR(dr, 7)};
+    DEFINE_DR(dr, 4), DEFINE_DR(dr, 5), DEFINE_DR(dr, 6), DEFINE_DR(dr, 7)
+};
 
 static_assert((sizeof(g_register_infos_i386) /
                sizeof(g_register_infos_i386[0])) == k_num_registers_i386,

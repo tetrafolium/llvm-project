@@ -34,147 +34,147 @@ namespace {
 class InnerPointerChecker
     : public Checker<check::DeadSymbols, check::PostCall> {
 
-  CallDescription AppendFn, AssignFn, ClearFn, CStrFn, DataFn, EraseFn,
-      InsertFn, PopBackFn, PushBackFn, ReplaceFn, ReserveFn, ResizeFn,
-      ShrinkToFitFn, SwapFn;
+    CallDescription AppendFn, AssignFn, ClearFn, CStrFn, DataFn, EraseFn,
+                    InsertFn, PopBackFn, PushBackFn, ReplaceFn, ReserveFn, ResizeFn,
+                    ShrinkToFitFn, SwapFn;
 
 public:
-  class InnerPointerBRVisitor : public BugReporterVisitor {
-    SymbolRef PtrToBuf;
+    class InnerPointerBRVisitor : public BugReporterVisitor {
+        SymbolRef PtrToBuf;
 
-  public:
-    InnerPointerBRVisitor(SymbolRef Sym) : PtrToBuf(Sym) {}
+    public:
+        InnerPointerBRVisitor(SymbolRef Sym) : PtrToBuf(Sym) {}
 
-    static void *getTag() {
-      static int Tag = 0;
-      return &Tag;
-    }
+        static void *getTag() {
+            static int Tag = 0;
+            return &Tag;
+        }
 
-    void Profile(llvm::FoldingSetNodeID &ID) const override {
-      ID.AddPointer(getTag());
-    }
+        void Profile(llvm::FoldingSetNodeID &ID) const override {
+            ID.AddPointer(getTag());
+        }
 
-    virtual PathDiagnosticPieceRef
-    VisitNode(const ExplodedNode *N, BugReporterContext &BRC,
-              PathSensitiveBugReport &BR) override;
+        virtual PathDiagnosticPieceRef
+        VisitNode(const ExplodedNode *N, BugReporterContext &BRC,
+                  PathSensitiveBugReport &BR) override;
 
-    // FIXME: Scan the map once in the visitor's constructor and do a direct
-    // lookup by region.
-    bool isSymbolTracked(ProgramStateRef State, SymbolRef Sym) {
-      RawPtrMapTy Map = State->get<RawPtrMap>();
-      for (const auto &Entry : Map) {
-        if (Entry.second.contains(Sym))
-          return true;
-      }
-      return false;
-    }
-  };
+        // FIXME: Scan the map once in the visitor's constructor and do a direct
+        // lookup by region.
+        bool isSymbolTracked(ProgramStateRef State, SymbolRef Sym) {
+            RawPtrMapTy Map = State->get<RawPtrMap>();
+            for (const auto &Entry : Map) {
+                if (Entry.second.contains(Sym))
+                    return true;
+            }
+            return false;
+        }
+    };
 
-  InnerPointerChecker()
-      : AppendFn({"std", "basic_string", "append"}),
-        AssignFn({"std", "basic_string", "assign"}),
-        ClearFn({"std", "basic_string", "clear"}),
-        CStrFn({"std", "basic_string", "c_str"}),
-        DataFn({"std", "basic_string", "data"}),
-        EraseFn({"std", "basic_string", "erase"}),
-        InsertFn({"std", "basic_string", "insert"}),
-        PopBackFn({"std", "basic_string", "pop_back"}),
-        PushBackFn({"std", "basic_string", "push_back"}),
-        ReplaceFn({"std", "basic_string", "replace"}),
-        ReserveFn({"std", "basic_string", "reserve"}),
-        ResizeFn({"std", "basic_string", "resize"}),
-        ShrinkToFitFn({"std", "basic_string", "shrink_to_fit"}),
-        SwapFn({"std", "basic_string", "swap"}) {}
+    InnerPointerChecker()
+        : AppendFn({"std", "basic_string", "append"}),
+    AssignFn({"std", "basic_string", "assign"}),
+    ClearFn({"std", "basic_string", "clear"}),
+    CStrFn({"std", "basic_string", "c_str"}),
+    DataFn({"std", "basic_string", "data"}),
+    EraseFn({"std", "basic_string", "erase"}),
+    InsertFn({"std", "basic_string", "insert"}),
+    PopBackFn({"std", "basic_string", "pop_back"}),
+    PushBackFn({"std", "basic_string", "push_back"}),
+    ReplaceFn({"std", "basic_string", "replace"}),
+    ReserveFn({"std", "basic_string", "reserve"}),
+    ResizeFn({"std", "basic_string", "resize"}),
+    ShrinkToFitFn({"std", "basic_string", "shrink_to_fit"}),
+    SwapFn({"std", "basic_string", "swap"}) {}
 
-  /// Check whether the called member function potentially invalidates
-  /// pointers referring to the container object's inner buffer.
-  bool isInvalidatingMemberFunction(const CallEvent &Call) const;
+    /// Check whether the called member function potentially invalidates
+    /// pointers referring to the container object's inner buffer.
+    bool isInvalidatingMemberFunction(const CallEvent &Call) const;
 
-  /// Mark pointer symbols associated with the given memory region released
-  /// in the program state.
-  void markPtrSymbolsReleased(const CallEvent &Call, ProgramStateRef State,
-                              const MemRegion *ObjRegion,
-                              CheckerContext &C) const;
+    /// Mark pointer symbols associated with the given memory region released
+    /// in the program state.
+    void markPtrSymbolsReleased(const CallEvent &Call, ProgramStateRef State,
+                                const MemRegion *ObjRegion,
+                                CheckerContext &C) const;
 
-  /// Standard library functions that take a non-const `basic_string` argument by
-  /// reference may invalidate its inner pointers. Check for these cases and
-  /// mark the pointers released.
-  void checkFunctionArguments(const CallEvent &Call, ProgramStateRef State,
-                              CheckerContext &C) const;
+    /// Standard library functions that take a non-const `basic_string` argument by
+    /// reference may invalidate its inner pointers. Check for these cases and
+    /// mark the pointers released.
+    void checkFunctionArguments(const CallEvent &Call, ProgramStateRef State,
+                                CheckerContext &C) const;
 
-  /// Record the connection between raw pointers referring to a container
-  /// object's inner buffer and the object's memory region in the program state.
-  /// Mark potentially invalidated pointers released.
-  void checkPostCall(const CallEvent &Call, CheckerContext &C) const;
+    /// Record the connection between raw pointers referring to a container
+    /// object's inner buffer and the object's memory region in the program state.
+    /// Mark potentially invalidated pointers released.
+    void checkPostCall(const CallEvent &Call, CheckerContext &C) const;
 
-  /// Clean up the program state map.
-  void checkDeadSymbols(SymbolReaper &SymReaper, CheckerContext &C) const;
+    /// Clean up the program state map.
+    void checkDeadSymbols(SymbolReaper &SymReaper, CheckerContext &C) const;
 };
 
 } // end anonymous namespace
 
 bool InnerPointerChecker::isInvalidatingMemberFunction(
-        const CallEvent &Call) const {
-  if (const auto *MemOpCall = dyn_cast<CXXMemberOperatorCall>(&Call)) {
-    OverloadedOperatorKind Opc = MemOpCall->getOriginExpr()->getOperator();
-    if (Opc == OO_Equal || Opc == OO_PlusEqual)
-      return true;
-    return false;
-  }
-  return (isa<CXXDestructorCall>(Call) || Call.isCalled(AppendFn) ||
-          Call.isCalled(AssignFn) || Call.isCalled(ClearFn) ||
-          Call.isCalled(EraseFn) || Call.isCalled(InsertFn) ||
-          Call.isCalled(PopBackFn) || Call.isCalled(PushBackFn) ||
-          Call.isCalled(ReplaceFn) || Call.isCalled(ReserveFn) ||
-          Call.isCalled(ResizeFn) || Call.isCalled(ShrinkToFitFn) ||
-          Call.isCalled(SwapFn));
+    const CallEvent &Call) const {
+    if (const auto *MemOpCall = dyn_cast<CXXMemberOperatorCall>(&Call)) {
+        OverloadedOperatorKind Opc = MemOpCall->getOriginExpr()->getOperator();
+        if (Opc == OO_Equal || Opc == OO_PlusEqual)
+            return true;
+        return false;
+    }
+    return (isa<CXXDestructorCall>(Call) || Call.isCalled(AppendFn) ||
+            Call.isCalled(AssignFn) || Call.isCalled(ClearFn) ||
+            Call.isCalled(EraseFn) || Call.isCalled(InsertFn) ||
+            Call.isCalled(PopBackFn) || Call.isCalled(PushBackFn) ||
+            Call.isCalled(ReplaceFn) || Call.isCalled(ReserveFn) ||
+            Call.isCalled(ResizeFn) || Call.isCalled(ShrinkToFitFn) ||
+            Call.isCalled(SwapFn));
 }
 
 void InnerPointerChecker::markPtrSymbolsReleased(const CallEvent &Call,
-                                                 ProgramStateRef State,
-                                                 const MemRegion *MR,
-                                                 CheckerContext &C) const {
-  if (const PtrSet *PS = State->get<RawPtrMap>(MR)) {
-    const Expr *Origin = Call.getOriginExpr();
-    for (const auto Symbol : *PS) {
-      // NOTE: `Origin` may be null, and will be stored so in the symbol's
-      // `RefState` in MallocChecker's `RegionState` program state map.
-      State = allocation_state::markReleased(State, Symbol, Origin);
+        ProgramStateRef State,
+        const MemRegion *MR,
+        CheckerContext &C) const {
+    if (const PtrSet *PS = State->get<RawPtrMap>(MR)) {
+        const Expr *Origin = Call.getOriginExpr();
+        for (const auto Symbol : *PS) {
+            // NOTE: `Origin` may be null, and will be stored so in the symbol's
+            // `RefState` in MallocChecker's `RegionState` program state map.
+            State = allocation_state::markReleased(State, Symbol, Origin);
+        }
+        State = State->remove<RawPtrMap>(MR);
+        C.addTransition(State);
+        return;
     }
-    State = State->remove<RawPtrMap>(MR);
-    C.addTransition(State);
-    return;
-  }
 }
 
 void InnerPointerChecker::checkFunctionArguments(const CallEvent &Call,
-                                                 ProgramStateRef State,
-                                                 CheckerContext &C) const {
-  if (const auto *FC = dyn_cast<AnyFunctionCall>(&Call)) {
-    const FunctionDecl *FD = FC->getDecl();
-    if (!FD || !FD->isInStdNamespace())
-      return;
+        ProgramStateRef State,
+        CheckerContext &C) const {
+    if (const auto *FC = dyn_cast<AnyFunctionCall>(&Call)) {
+        const FunctionDecl *FD = FC->getDecl();
+        if (!FD || !FD->isInStdNamespace())
+            return;
 
-    for (unsigned I = 0, E = FD->getNumParams(); I != E; ++I) {
-      QualType ParamTy = FD->getParamDecl(I)->getType();
-      if (!ParamTy->isReferenceType() ||
-          ParamTy->getPointeeType().isConstQualified())
-        continue;
+        for (unsigned I = 0, E = FD->getNumParams(); I != E; ++I) {
+            QualType ParamTy = FD->getParamDecl(I)->getType();
+            if (!ParamTy->isReferenceType() ||
+                    ParamTy->getPointeeType().isConstQualified())
+                continue;
 
-      // In case of member operator calls, `this` is counted as an
-      // argument but not as a parameter.
-      bool isaMemberOpCall = isa<CXXMemberOperatorCall>(FC);
-      unsigned ArgI = isaMemberOpCall ? I+1 : I;
+            // In case of member operator calls, `this` is counted as an
+            // argument but not as a parameter.
+            bool isaMemberOpCall = isa<CXXMemberOperatorCall>(FC);
+            unsigned ArgI = isaMemberOpCall ? I+1 : I;
 
-      SVal Arg = FC->getArgSVal(ArgI);
-      const auto *ArgRegion =
-          dyn_cast_or_null<TypedValueRegion>(Arg.getAsRegion());
-      if (!ArgRegion)
-        continue;
+            SVal Arg = FC->getArgSVal(ArgI);
+            const auto *ArgRegion =
+                dyn_cast_or_null<TypedValueRegion>(Arg.getAsRegion());
+            if (!ArgRegion)
+                continue;
 
-      markPtrSymbolsReleased(Call, State, ArgRegion, C);
+            markPtrSymbolsReleased(Call, State, ArgRegion, C);
+        }
     }
-  }
 }
 
 // [string.require]
@@ -193,67 +193,67 @@ void InnerPointerChecker::checkFunctionArguments(const CallEvent &Call,
 
 void InnerPointerChecker::checkPostCall(const CallEvent &Call,
                                         CheckerContext &C) const {
-  ProgramStateRef State = C.getState();
+    ProgramStateRef State = C.getState();
 
-  if (const auto *ICall = dyn_cast<CXXInstanceCall>(&Call)) {
-    // TODO: Do we need these to be typed?
-    const auto *ObjRegion = dyn_cast_or_null<TypedValueRegion>(
-        ICall->getCXXThisVal().getAsRegion());
-    if (!ObjRegion)
-      return;
+    if (const auto *ICall = dyn_cast<CXXInstanceCall>(&Call)) {
+        // TODO: Do we need these to be typed?
+        const auto *ObjRegion = dyn_cast_or_null<TypedValueRegion>(
+                                    ICall->getCXXThisVal().getAsRegion());
+        if (!ObjRegion)
+            return;
 
-    if (Call.isCalled(CStrFn) || Call.isCalled(DataFn)) {
-      SVal RawPtr = Call.getReturnValue();
-      if (SymbolRef Sym = RawPtr.getAsSymbol(/*IncludeBaseRegions=*/true)) {
-        // Start tracking this raw pointer by adding it to the set of symbols
-        // associated with this container object in the program state map.
+        if (Call.isCalled(CStrFn) || Call.isCalled(DataFn)) {
+            SVal RawPtr = Call.getReturnValue();
+            if (SymbolRef Sym = RawPtr.getAsSymbol(/*IncludeBaseRegions=*/true)) {
+                // Start tracking this raw pointer by adding it to the set of symbols
+                // associated with this container object in the program state map.
 
-        PtrSet::Factory &F = State->getStateManager().get_context<PtrSet>();
-        const PtrSet *SetPtr = State->get<RawPtrMap>(ObjRegion);
-        PtrSet Set = SetPtr ? *SetPtr : F.getEmptySet();
-        assert(C.wasInlined || !Set.contains(Sym));
-        Set = F.add(Set, Sym);
+                PtrSet::Factory &F = State->getStateManager().get_context<PtrSet>();
+                const PtrSet *SetPtr = State->get<RawPtrMap>(ObjRegion);
+                PtrSet Set = SetPtr ? *SetPtr : F.getEmptySet();
+                assert(C.wasInlined || !Set.contains(Sym));
+                Set = F.add(Set, Sym);
 
-        State = State->set<RawPtrMap>(ObjRegion, Set);
-        C.addTransition(State);
-      }
-      return;
+                State = State->set<RawPtrMap>(ObjRegion, Set);
+                C.addTransition(State);
+            }
+            return;
+        }
+
+        // Check [string.require] / second point.
+        if (isInvalidatingMemberFunction(Call)) {
+            markPtrSymbolsReleased(Call, State, ObjRegion, C);
+            return;
+        }
     }
 
-    // Check [string.require] / second point.
-    if (isInvalidatingMemberFunction(Call)) {
-      markPtrSymbolsReleased(Call, State, ObjRegion, C);
-      return;
-    }
-  }
-
-  // Check [string.require] / first point.
-  checkFunctionArguments(Call, State, C);
+    // Check [string.require] / first point.
+    checkFunctionArguments(Call, State, C);
 }
 
 void InnerPointerChecker::checkDeadSymbols(SymbolReaper &SymReaper,
-                                           CheckerContext &C) const {
-  ProgramStateRef State = C.getState();
-  PtrSet::Factory &F = State->getStateManager().get_context<PtrSet>();
-  RawPtrMapTy RPM = State->get<RawPtrMap>();
-  for (const auto &Entry : RPM) {
-    if (!SymReaper.isLiveRegion(Entry.first)) {
-      // Due to incomplete destructor support, some dead regions might
-      // remain in the program state map. Clean them up.
-      State = State->remove<RawPtrMap>(Entry.first);
+        CheckerContext &C) const {
+    ProgramStateRef State = C.getState();
+    PtrSet::Factory &F = State->getStateManager().get_context<PtrSet>();
+    RawPtrMapTy RPM = State->get<RawPtrMap>();
+    for (const auto &Entry : RPM) {
+        if (!SymReaper.isLiveRegion(Entry.first)) {
+            // Due to incomplete destructor support, some dead regions might
+            // remain in the program state map. Clean them up.
+            State = State->remove<RawPtrMap>(Entry.first);
+        }
+        if (const PtrSet *OldSet = State->get<RawPtrMap>(Entry.first)) {
+            PtrSet CleanedUpSet = *OldSet;
+            for (const auto Symbol : Entry.second) {
+                if (!SymReaper.isLive(Symbol))
+                    CleanedUpSet = F.remove(CleanedUpSet, Symbol);
+            }
+            State = CleanedUpSet.isEmpty()
+                    ? State->remove<RawPtrMap>(Entry.first)
+                    : State->set<RawPtrMap>(Entry.first, CleanedUpSet);
+        }
     }
-    if (const PtrSet *OldSet = State->get<RawPtrMap>(Entry.first)) {
-      PtrSet CleanedUpSet = *OldSet;
-      for (const auto Symbol : Entry.second) {
-        if (!SymReaper.isLive(Symbol))
-          CleanedUpSet = F.remove(CleanedUpSet, Symbol);
-      }
-      State = CleanedUpSet.isEmpty()
-                  ? State->remove<RawPtrMap>(Entry.first)
-                  : State->set<RawPtrMap>(Entry.first, CleanedUpSet);
-    }
-  }
-  C.addTransition(State);
+    C.addTransition(State);
 }
 
 namespace clang {
@@ -261,17 +261,17 @@ namespace ento {
 namespace allocation_state {
 
 std::unique_ptr<BugReporterVisitor> getInnerPointerBRVisitor(SymbolRef Sym) {
-  return std::make_unique<InnerPointerChecker::InnerPointerBRVisitor>(Sym);
+    return std::make_unique<InnerPointerChecker::InnerPointerBRVisitor>(Sym);
 }
 
 const MemRegion *getContainerObjRegion(ProgramStateRef State, SymbolRef Sym) {
-  RawPtrMapTy Map = State->get<RawPtrMap>();
-  for (const auto &Entry : Map) {
-    if (Entry.second.contains(Sym)) {
-      return Entry.first;
+    RawPtrMapTy Map = State->get<RawPtrMap>();
+    for (const auto &Entry : Map) {
+        if (Entry.second.contains(Sym)) {
+            return Entry.first;
+        }
     }
-  }
-  return nullptr;
+    return nullptr;
 }
 
 } // end namespace allocation_state
@@ -280,33 +280,33 @@ const MemRegion *getContainerObjRegion(ProgramStateRef State, SymbolRef Sym) {
 
 PathDiagnosticPieceRef InnerPointerChecker::InnerPointerBRVisitor::VisitNode(
     const ExplodedNode *N, BugReporterContext &BRC, PathSensitiveBugReport &) {
-  if (!isSymbolTracked(N->getState(), PtrToBuf) ||
-      isSymbolTracked(N->getFirstPred()->getState(), PtrToBuf))
-    return nullptr;
+    if (!isSymbolTracked(N->getState(), PtrToBuf) ||
+            isSymbolTracked(N->getFirstPred()->getState(), PtrToBuf))
+        return nullptr;
 
-  const Stmt *S = N->getStmtForDiagnostics();
-  if (!S)
-    return nullptr;
+    const Stmt *S = N->getStmtForDiagnostics();
+    if (!S)
+        return nullptr;
 
-  const MemRegion *ObjRegion =
-      allocation_state::getContainerObjRegion(N->getState(), PtrToBuf);
-  const auto *TypedRegion = cast<TypedValueRegion>(ObjRegion);
-  QualType ObjTy = TypedRegion->getValueType();
+    const MemRegion *ObjRegion =
+        allocation_state::getContainerObjRegion(N->getState(), PtrToBuf);
+    const auto *TypedRegion = cast<TypedValueRegion>(ObjRegion);
+    QualType ObjTy = TypedRegion->getValueType();
 
-  SmallString<256> Buf;
-  llvm::raw_svector_ostream OS(Buf);
-  OS << "Pointer to inner buffer of '" << ObjTy.getAsString()
-     << "' obtained here";
-  PathDiagnosticLocation Pos(S, BRC.getSourceManager(),
-                             N->getLocationContext());
-  return std::make_shared<PathDiagnosticEventPiece>(Pos, OS.str(), true);
+    SmallString<256> Buf;
+    llvm::raw_svector_ostream OS(Buf);
+    OS << "Pointer to inner buffer of '" << ObjTy.getAsString()
+       << "' obtained here";
+    PathDiagnosticLocation Pos(S, BRC.getSourceManager(),
+                               N->getLocationContext());
+    return std::make_shared<PathDiagnosticEventPiece>(Pos, OS.str(), true);
 }
 
 void ento::registerInnerPointerChecker(CheckerManager &Mgr) {
-  registerInnerPointerCheckerAux(Mgr);
-  Mgr.registerChecker<InnerPointerChecker>();
+    registerInnerPointerCheckerAux(Mgr);
+    Mgr.registerChecker<InnerPointerChecker>();
 }
 
 bool ento::shouldRegisterInnerPointerChecker(const CheckerManager &mgr) {
-  return true;
+    return true;
 }

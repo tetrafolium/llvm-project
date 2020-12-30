@@ -24,8 +24,8 @@ using namespace __msan;
 
 // Fake std::nothrow_t and std::align_val_t to avoid including <new>.
 namespace std {
-  struct nothrow_t {};
-  enum class align_val_t: size_t {};
+struct nothrow_t {};
+enum class align_val_t: size_t {};
 }  // namespace std
 
 
@@ -42,29 +42,41 @@ namespace std {
   return res;
 
 INTERCEPTOR_ATTRIBUTE
-void *operator new(size_t size) { OPERATOR_NEW_BODY(false /*nothrow*/); }
+void *operator new(size_t size) {
+    OPERATOR_NEW_BODY(false /*nothrow*/);
+}
 INTERCEPTOR_ATTRIBUTE
-void *operator new[](size_t size) { OPERATOR_NEW_BODY(false /*nothrow*/); }
+void *operator new[](size_t size) {
+    OPERATOR_NEW_BODY(false /*nothrow*/);
+}
 INTERCEPTOR_ATTRIBUTE
 void *operator new(size_t size, std::nothrow_t const&) {
-  OPERATOR_NEW_BODY(true /*nothrow*/);
+    OPERATOR_NEW_BODY(true /*nothrow*/);
 }
 INTERCEPTOR_ATTRIBUTE
 void *operator new[](size_t size, std::nothrow_t const&) {
-  OPERATOR_NEW_BODY(true /*nothrow*/);
+    OPERATOR_NEW_BODY(true /*nothrow*/);
 }
 INTERCEPTOR_ATTRIBUTE
 void *operator new(size_t size, std::align_val_t align)
-{ OPERATOR_NEW_BODY_ALIGN(false /*nothrow*/); }
+{
+    OPERATOR_NEW_BODY_ALIGN(false /*nothrow*/);
+}
 INTERCEPTOR_ATTRIBUTE
 void *operator new[](size_t size, std::align_val_t align)
-{ OPERATOR_NEW_BODY_ALIGN(false /*nothrow*/); }
+{
+    OPERATOR_NEW_BODY_ALIGN(false /*nothrow*/);
+}
 INTERCEPTOR_ATTRIBUTE
 void *operator new(size_t size, std::align_val_t align, std::nothrow_t const&)
-{ OPERATOR_NEW_BODY_ALIGN(true /*nothrow*/); }
+{
+    OPERATOR_NEW_BODY_ALIGN(true /*nothrow*/);
+}
 INTERCEPTOR_ATTRIBUTE
 void *operator new[](size_t size, std::align_val_t align, std::nothrow_t const&)
-{ OPERATOR_NEW_BODY_ALIGN(true /*nothrow*/); }
+{
+    OPERATOR_NEW_BODY_ALIGN(true /*nothrow*/);
+}
 
 #define OPERATOR_DELETE_BODY \
   GET_MALLOC_STACK_TRACE; \
@@ -75,10 +87,12 @@ void operator delete(void *ptr) NOEXCEPT { OPERATOR_DELETE_BODY; }
 INTERCEPTOR_ATTRIBUTE
 void operator delete[](void *ptr) NOEXCEPT { OPERATOR_DELETE_BODY; }
 INTERCEPTOR_ATTRIBUTE
-void operator delete(void *ptr, std::nothrow_t const&) { OPERATOR_DELETE_BODY; }
+void operator delete(void *ptr, std::nothrow_t const&) {
+    OPERATOR_DELETE_BODY;
+}
 INTERCEPTOR_ATTRIBUTE
 void operator delete[](void *ptr, std::nothrow_t const&) {
-  OPERATOR_DELETE_BODY;
+    OPERATOR_DELETE_BODY;
 }
 INTERCEPTOR_ATTRIBUTE
 void operator delete(void *ptr, size_t size) NOEXCEPT { OPERATOR_DELETE_BODY; }
@@ -93,10 +107,14 @@ void operator delete[](void *ptr, std::align_val_t align) NOEXCEPT
 { OPERATOR_DELETE_BODY; }
 INTERCEPTOR_ATTRIBUTE
 void operator delete(void *ptr, std::align_val_t align, std::nothrow_t const&)
-{ OPERATOR_DELETE_BODY; }
+{
+    OPERATOR_DELETE_BODY;
+}
 INTERCEPTOR_ATTRIBUTE
 void operator delete[](void *ptr, std::align_val_t align, std::nothrow_t const&)
-{ OPERATOR_DELETE_BODY; }
+{
+    OPERATOR_DELETE_BODY;
+}
 INTERCEPTOR_ATTRIBUTE
 void operator delete(void *ptr, size_t size, std::align_val_t align) NOEXCEPT
 { OPERATOR_DELETE_BODY; }

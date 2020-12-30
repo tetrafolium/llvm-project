@@ -18,11 +18,11 @@ struct NullifyStmt;
 namespace Fortran::semantics {
 class NullifyChecker : public virtual BaseChecker {
 public:
-  NullifyChecker(SemanticsContext &context) : context_{context} {}
-  void Leave(const parser::NullifyStmt &);
+    NullifyChecker(SemanticsContext &context) : context_{context} {}
+    void Leave(const parser::NullifyStmt &);
 
 private:
-  SemanticsContext &context_;
+    SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_NULLIFY_H_

@@ -23,39 +23,39 @@ HostThreadPosix::HostThreadPosix(lldb::thread_t thread)
 HostThreadPosix::~HostThreadPosix() {}
 
 Status HostThreadPosix::Join(lldb::thread_result_t *result) {
-  Status error;
-  if (IsJoinable()) {
-    int err = ::pthread_join(m_thread, result);
-    error.SetError(err, lldb::eErrorTypePOSIX);
-  } else {
-    if (result)
-      *result = nullptr;
-    error.SetError(EINVAL, eErrorTypePOSIX);
-  }
+    Status error;
+    if (IsJoinable()) {
+        int err = ::pthread_join(m_thread, result);
+        error.SetError(err, lldb::eErrorTypePOSIX);
+    } else {
+        if (result)
+            *result = nullptr;
+        error.SetError(EINVAL, eErrorTypePOSIX);
+    }
 
-  Reset();
-  return error;
+    Reset();
+    return error;
 }
 
 Status HostThreadPosix::Cancel() {
-  Status error;
-  if (IsJoinable()) {
+    Status error;
+    if (IsJoinable()) {
 #ifndef __FreeBSD__
-    llvm_unreachable("someone is calling HostThread::Cancel()");
+        llvm_unreachable("someone is calling HostThread::Cancel()");
 #else
-    int err = ::pthread_cancel(m_thread);
-    error.SetError(err, eErrorTypePOSIX);
+        int err = ::pthread_cancel(m_thread);
+        error.SetError(err, eErrorTypePOSIX);
 #endif
-  }
-  return error;
+    }
+    return error;
 }
 
 Status HostThreadPosix::Detach() {
-  Status error;
-  if (IsJoinable()) {
-    int err = ::pthread_detach(m_thread);
-    error.SetError(err, eErrorTypePOSIX);
-  }
-  Reset();
-  return error;
+    Status error;
+    if (IsJoinable()) {
+        int err = ::pthread_detach(m_thread);
+        error.SetError(err, eErrorTypePOSIX);
+    }
+    Reset();
+    return error;
 }

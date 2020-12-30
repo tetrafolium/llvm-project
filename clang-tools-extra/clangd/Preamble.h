@@ -47,28 +47,28 @@ namespace clangd {
 /// As we must avoid re-parsing the preamble, any information that can only
 /// be obtained during parsing must be eagerly captured and stored here.
 struct PreambleData {
-  PreambleData(const ParseInputs &Inputs, PrecompiledPreamble Preamble,
-               std::vector<Diag> Diags, IncludeStructure Includes,
-               MainFileMacros Macros,
-               std::unique_ptr<PreambleFileStatusCache> StatCache,
-               CanonicalIncludes CanonIncludes);
+    PreambleData(const ParseInputs &Inputs, PrecompiledPreamble Preamble,
+                 std::vector<Diag> Diags, IncludeStructure Includes,
+                 MainFileMacros Macros,
+                 std::unique_ptr<PreambleFileStatusCache> StatCache,
+                 CanonicalIncludes CanonIncludes);
 
-  // Version of the ParseInputs this preamble was built from.
-  std::string Version;
-  tooling::CompileCommand CompileCommand;
-  PrecompiledPreamble Preamble;
-  std::vector<Diag> Diags;
-  // Processes like code completions and go-to-definitions will need #include
-  // information, and their compile action skips preamble range.
-  IncludeStructure Includes;
-  // Macros defined in the preamble section of the main file.
-  // Users care about headers vs main-file, not preamble vs non-preamble.
-  // These should be treated as main-file entities e.g. for code completion.
-  MainFileMacros Macros;
-  // Cache of FS operations performed when building the preamble.
-  // When reusing a preamble, this cache can be consumed to save IO.
-  std::unique_ptr<PreambleFileStatusCache> StatCache;
-  CanonicalIncludes CanonIncludes;
+    // Version of the ParseInputs this preamble was built from.
+    std::string Version;
+    tooling::CompileCommand CompileCommand;
+    PrecompiledPreamble Preamble;
+    std::vector<Diag> Diags;
+    // Processes like code completions and go-to-definitions will need #include
+    // information, and their compile action skips preamble range.
+    IncludeStructure Includes;
+    // Macros defined in the preamble section of the main file.
+    // Users care about headers vs main-file, not preamble vs non-preamble.
+    // These should be treated as main-file entities e.g. for code completion.
+    MainFileMacros Macros;
+    // Cache of FS operations performed when building the preamble.
+    // When reusing a preamble, this cache can be consumed to save IO.
+    std::unique_ptr<PreambleFileStatusCache> StatCache;
+    CanonicalIncludes CanonIncludes;
 };
 
 using PreambleParsedCallback =
@@ -98,48 +98,52 @@ bool isPreambleCompatible(const PreambleData &Preamble,
 /// new include directives.
 class PreamblePatch {
 public:
-  /// \p Preamble is used verbatim.
-  static PreamblePatch unmodified(const PreambleData &Preamble);
-  /// Builds a patch that contains new PP directives introduced to the preamble
-  /// section of \p Modified compared to \p Baseline.
-  /// FIXME: This only handles include directives, we should at least handle
-  /// define/undef.
-  static PreamblePatch create(llvm::StringRef FileName,
-                              const ParseInputs &Modified,
-                              const PreambleData &Baseline);
-  /// Adjusts CI (which compiles the modified inputs) to be used with the
-  /// baseline preamble. This is done by inserting an artifical include to the
-  /// \p CI that contains new directives calculated in create.
-  void apply(CompilerInvocation &CI) const;
+    /// \p Preamble is used verbatim.
+    static PreamblePatch unmodified(const PreambleData &Preamble);
+    /// Builds a patch that contains new PP directives introduced to the preamble
+    /// section of \p Modified compared to \p Baseline.
+    /// FIXME: This only handles include directives, we should at least handle
+    /// define/undef.
+    static PreamblePatch create(llvm::StringRef FileName,
+                                const ParseInputs &Modified,
+                                const PreambleData &Baseline);
+    /// Adjusts CI (which compiles the modified inputs) to be used with the
+    /// baseline preamble. This is done by inserting an artifical include to the
+    /// \p CI that contains new directives calculated in create.
+    void apply(CompilerInvocation &CI) const;
 
-  /// Returns #include directives from the \c Modified preamble that were
-  /// resolved using the \c Baseline preamble. This covers the new locations of
-  /// inclusions that were moved around, but not inclusions of new files. Those
-  /// will be recorded when parsing the main file: the includes in the injected
-  /// section will be resolved back to their spelled positions in the main file
-  /// using the presumed-location mechanism.
-  std::vector<Inclusion> preambleIncludes() const;
+    /// Returns #include directives from the \c Modified preamble that were
+    /// resolved using the \c Baseline preamble. This covers the new locations of
+    /// inclusions that were moved around, but not inclusions of new files. Those
+    /// will be recorded when parsing the main file: the includes in the injected
+    /// section will be resolved back to their spelled positions in the main file
+    /// using the presumed-location mechanism.
+    std::vector<Inclusion> preambleIncludes() const;
 
-  /// Returns preamble bounds for the Modified.
-  PreambleBounds modifiedBounds() const { return ModifiedBounds; }
+    /// Returns preamble bounds for the Modified.
+    PreambleBounds modifiedBounds() const {
+        return ModifiedBounds;
+    }
 
-  /// Returns textual patch contents.
-  llvm::StringRef text() const { return PatchContents; }
+    /// Returns textual patch contents.
+    llvm::StringRef text() const {
+        return PatchContents;
+    }
 
 private:
-  PreamblePatch() = default;
-  std::string PatchContents;
-  std::string PatchFileName;
-  /// Includes that are present in both \p Baseline and \p Modified. Used for
-  /// patching includes of baseline preamble.
-  std::vector<Inclusion> PreambleIncludes;
-  PreambleBounds ModifiedBounds = {0, false};
+    PreamblePatch() = default;
+    std::string PatchContents;
+    std::string PatchFileName;
+    /// Includes that are present in both \p Baseline and \p Modified. Used for
+    /// patching includes of baseline preamble.
+    std::vector<Inclusion> PreambleIncludes;
+    PreambleBounds ModifiedBounds = {0, false};
 };
 
 /// Translates locations inside preamble patch to their main-file equivalent
 /// using presumed locations. Returns \p Loc if it isn't inside preamble patch.
 SourceLocation translatePreamblePatchLocation(SourceLocation Loc,
-                                              const SourceManager &SM);
+        const SourceManager &SM);
 
 } // namespace clangd
 } // namespace clang

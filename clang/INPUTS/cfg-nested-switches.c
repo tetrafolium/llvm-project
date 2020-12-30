@@ -15,9 +15,9 @@
 // Rather than a single monstrous fan-out, this fans out in smaller increments,
 // but to a similar size.
 unsigned cfg_nested_switch(int x) {
-  unsigned y = 0;
-  while (x > 0) {
-    switch (x) {
+    unsigned y = 0;
+    while (x > 0) {
+        switch (x) {
 #define INNER_CASE(i, x, y) \
           case i: { int case_var = 3*x + i; y += case_var - 1; break; }
 #define OUTER_CASE(i, x, y) \
@@ -28,9 +28,9 @@ unsigned cfg_nested_switch(int x) {
         } \
         break; \
       }
-EXPAND_64_OUTER_CASES(0, x, y);
+            EXPAND_64_OUTER_CASES(0, x, y);
+        }
+        --x;
     }
-    --x;
-  }
-  return y;
+    return y;
 }

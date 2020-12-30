@@ -27,28 +27,28 @@ namespace llvm {
 /// A generic AVR implementation.
 class AVRTargetMachine : public LLVMTargetMachine {
 public:
-  AVRTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                   StringRef FS, const TargetOptions &Options,
-                   Optional<Reloc::Model> RM,
-                   Optional<CodeModel::Model> CM,
-                   CodeGenOpt::Level OL, bool JIT);
+    AVRTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                     StringRef FS, const TargetOptions &Options,
+                     Optional<Reloc::Model> RM,
+                     Optional<CodeModel::Model> CM,
+                     CodeGenOpt::Level OL, bool JIT);
 
-  const AVRSubtarget *getSubtargetImpl() const;
-  const AVRSubtarget *getSubtargetImpl(const Function &) const override;
+    const AVRSubtarget *getSubtargetImpl() const;
+    const AVRSubtarget *getSubtargetImpl(const Function &) const override;
 
-  TargetLoweringObjectFile *getObjFileLowering() const override {
-    return this->TLOF.get();
-  }
+    TargetLoweringObjectFile *getObjFileLowering() const override {
+        return this->TLOF.get();
+    }
 
-  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-  bool isMachineVerifierClean() const override {
-    return false;
-  }
+    bool isMachineVerifierClean() const override {
+        return false;
+    }
 
 private:
-  std::unique_ptr<TargetLoweringObjectFile> TLOF;
-  AVRSubtarget SubTarget;
+    std::unique_ptr<TargetLoweringObjectFile> TLOF;
+    AVRSubtarget SubTarget;
 };
 
 } // end namespace llvm

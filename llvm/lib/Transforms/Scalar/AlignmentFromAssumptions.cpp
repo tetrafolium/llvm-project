@@ -40,35 +40,35 @@
 using namespace llvm;
 
 STATISTIC(NumLoadAlignChanged,
-  "Number of loads changed by alignment assumptions");
+          "Number of loads changed by alignment assumptions");
 STATISTIC(NumStoreAlignChanged,
-  "Number of stores changed by alignment assumptions");
+          "Number of stores changed by alignment assumptions");
 STATISTIC(NumMemIntAlignChanged,
-  "Number of memory intrinsics changed by alignment assumptions");
+          "Number of memory intrinsics changed by alignment assumptions");
 
 namespace {
 struct AlignmentFromAssumptions : public FunctionPass {
-  static char ID; // Pass identification, replacement for typeid
-  AlignmentFromAssumptions() : FunctionPass(ID) {
-    initializeAlignmentFromAssumptionsPass(*PassRegistry::getPassRegistry());
-  }
+    static char ID; // Pass identification, replacement for typeid
+    AlignmentFromAssumptions() : FunctionPass(ID) {
+        initializeAlignmentFromAssumptionsPass(*PassRegistry::getPassRegistry());
+    }
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequired<AssumptionCacheTracker>();
-    AU.addRequired<ScalarEvolutionWrapperPass>();
-    AU.addRequired<DominatorTreeWrapperPass>();
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addRequired<AssumptionCacheTracker>();
+        AU.addRequired<ScalarEvolutionWrapperPass>();
+        AU.addRequired<DominatorTreeWrapperPass>();
 
-    AU.setPreservesCFG();
-    AU.addPreserved<AAResultsWrapperPass>();
-    AU.addPreserved<GlobalsAAWrapperPass>();
-    AU.addPreserved<LoopInfoWrapperPass>();
-    AU.addPreserved<DominatorTreeWrapperPass>();
-    AU.addPreserved<ScalarEvolutionWrapperPass>();
-  }
+        AU.setPreservesCFG();
+        AU.addPreserved<AAResultsWrapperPass>();
+        AU.addPreserved<GlobalsAAWrapperPass>();
+        AU.addPreserved<LoopInfoWrapperPass>();
+        AU.addPreserved<DominatorTreeWrapperPass>();
+        AU.addPreserved<ScalarEvolutionWrapperPass>();
+    }
 
-  AlignmentFromAssumptionsPass Impl;
+    AlignmentFromAssumptionsPass Impl;
 };
 }
 
@@ -83,7 +83,7 @@ INITIALIZE_PASS_END(AlignmentFromAssumptions, AA_NAME,
                     aip_name, false, false)
 
 FunctionPass *llvm::createAlignmentFromAssumptionsPass() {
-  return new AlignmentFromAssumptions();
+    return new AlignmentFromAssumptions();
 }
 
 // Given an expression for the (constant) alignment, AlignSCEV, and an
@@ -95,30 +95,30 @@ FunctionPass *llvm::createAlignmentFromAssumptionsPass() {
 static MaybeAlign getNewAlignmentDiff(const SCEV *DiffSCEV,
                                       const SCEV *AlignSCEV,
                                       ScalarEvolution *SE) {
-  // DiffUnits = Diff % int64_t(Alignment)
-  const SCEV *DiffUnitsSCEV = SE->getURemExpr(DiffSCEV, AlignSCEV);
+    // DiffUnits = Diff % int64_t(Alignment)
+    const SCEV *DiffUnitsSCEV = SE->getURemExpr(DiffSCEV, AlignSCEV);
 
-  LLVM_DEBUG(dbgs() << "\talignment relative to " << *AlignSCEV << " is "
-                    << *DiffUnitsSCEV << " (diff: " << *DiffSCEV << ")\n");
+    LLVM_DEBUG(dbgs() << "\talignment relative to " << *AlignSCEV << " is "
+               << *DiffUnitsSCEV << " (diff: " << *DiffSCEV << ")\n");
 
-  if (const SCEVConstant *ConstDUSCEV =
-      dyn_cast<SCEVConstant>(DiffUnitsSCEV)) {
-    int64_t DiffUnits = ConstDUSCEV->getValue()->getSExtValue();
+    if (const SCEVConstant *ConstDUSCEV =
+                dyn_cast<SCEVConstant>(DiffUnitsSCEV)) {
+        int64_t DiffUnits = ConstDUSCEV->getValue()->getSExtValue();
 
-    // If the displacement is an exact multiple of the alignment, then the
-    // displaced pointer has the same alignment as the aligned pointer, so
-    // return the alignment value.
-    if (!DiffUnits)
-      return cast<SCEVConstant>(AlignSCEV)->getValue()->getAlignValue();
+        // If the displacement is an exact multiple of the alignment, then the
+        // displaced pointer has the same alignment as the aligned pointer, so
+        // return the alignment value.
+        if (!DiffUnits)
+            return cast<SCEVConstant>(AlignSCEV)->getValue()->getAlignValue();
 
-    // If the displacement is not an exact multiple, but the remainder is a
-    // constant, then return this remainder (but only if it is a power of 2).
-    uint64_t DiffUnitsAbs = std::abs(DiffUnits);
-    if (isPowerOf2_64(DiffUnitsAbs))
-      return Align(DiffUnitsAbs);
-  }
+        // If the displacement is not an exact multiple, but the remainder is a
+        // constant, then return this remainder (but only if it is a power of 2).
+        uint64_t DiffUnitsAbs = std::abs(DiffUnits);
+        if (isPowerOf2_64(DiffUnitsAbs))
+            return Align(DiffUnitsAbs);
+    }
 
-  return None;
+    return None;
 }
 
 // There is an address given by an offset OffSCEV from AASCEV which has an
@@ -127,233 +127,233 @@ static MaybeAlign getNewAlignmentDiff(const SCEV *DiffSCEV,
 static Align getNewAlignment(const SCEV *AASCEV, const SCEV *AlignSCEV,
                              const SCEV *OffSCEV, Value *Ptr,
                              ScalarEvolution *SE) {
-  const SCEV *PtrSCEV = SE->getSCEV(Ptr);
-  // On a platform with 32-bit allocas, but 64-bit flat/global pointer sizes
-  // (*cough* AMDGPU), the effective SCEV type of AASCEV and PtrSCEV
-  // may disagree. Trunc/extend so they agree.
-  PtrSCEV = SE->getTruncateOrZeroExtend(
-      PtrSCEV, SE->getEffectiveSCEVType(AASCEV->getType()));
-  const SCEV *DiffSCEV = SE->getMinusSCEV(PtrSCEV, AASCEV);
+    const SCEV *PtrSCEV = SE->getSCEV(Ptr);
+    // On a platform with 32-bit allocas, but 64-bit flat/global pointer sizes
+    // (*cough* AMDGPU), the effective SCEV type of AASCEV and PtrSCEV
+    // may disagree. Trunc/extend so they agree.
+    PtrSCEV = SE->getTruncateOrZeroExtend(
+                  PtrSCEV, SE->getEffectiveSCEVType(AASCEV->getType()));
+    const SCEV *DiffSCEV = SE->getMinusSCEV(PtrSCEV, AASCEV);
 
-  // On 32-bit platforms, DiffSCEV might now have type i32 -- we've always
-  // sign-extended OffSCEV to i64, so make sure they agree again.
-  DiffSCEV = SE->getNoopOrSignExtend(DiffSCEV, OffSCEV->getType());
+    // On 32-bit platforms, DiffSCEV might now have type i32 -- we've always
+    // sign-extended OffSCEV to i64, so make sure they agree again.
+    DiffSCEV = SE->getNoopOrSignExtend(DiffSCEV, OffSCEV->getType());
 
-  // What we really want to know is the overall offset to the aligned
-  // address. This address is displaced by the provided offset.
-  DiffSCEV = SE->getMinusSCEV(DiffSCEV, OffSCEV);
+    // What we really want to know is the overall offset to the aligned
+    // address. This address is displaced by the provided offset.
+    DiffSCEV = SE->getMinusSCEV(DiffSCEV, OffSCEV);
 
-  LLVM_DEBUG(dbgs() << "AFI: alignment of " << *Ptr << " relative to "
-                    << *AlignSCEV << " and offset " << *OffSCEV
-                    << " using diff " << *DiffSCEV << "\n");
+    LLVM_DEBUG(dbgs() << "AFI: alignment of " << *Ptr << " relative to "
+               << *AlignSCEV << " and offset " << *OffSCEV
+               << " using diff " << *DiffSCEV << "\n");
 
-  if (MaybeAlign NewAlignment = getNewAlignmentDiff(DiffSCEV, AlignSCEV, SE)) {
-    LLVM_DEBUG(dbgs() << "\tnew alignment: " << DebugStr(NewAlignment) << "\n");
-    return *NewAlignment;
-  }
-
-  if (const SCEVAddRecExpr *DiffARSCEV = dyn_cast<SCEVAddRecExpr>(DiffSCEV)) {
-    // The relative offset to the alignment assumption did not yield a constant,
-    // but we should try harder: if we assume that a is 32-byte aligned, then in
-    // for (i = 0; i < 1024; i += 4) r += a[i]; not all of the loads from a are
-    // 32-byte aligned, but instead alternate between 32 and 16-byte alignment.
-    // As a result, the new alignment will not be a constant, but can still
-    // be improved over the default (of 4) to 16.
-
-    const SCEV *DiffStartSCEV = DiffARSCEV->getStart();
-    const SCEV *DiffIncSCEV = DiffARSCEV->getStepRecurrence(*SE);
-
-    LLVM_DEBUG(dbgs() << "\ttrying start/inc alignment using start "
-                      << *DiffStartSCEV << " and inc " << *DiffIncSCEV << "\n");
-
-    // Now compute the new alignment using the displacement to the value in the
-    // first iteration, and also the alignment using the per-iteration delta.
-    // If these are the same, then use that answer. Otherwise, use the smaller
-    // one, but only if it divides the larger one.
-    MaybeAlign NewAlignment = getNewAlignmentDiff(DiffStartSCEV, AlignSCEV, SE);
-    MaybeAlign NewIncAlignment =
-        getNewAlignmentDiff(DiffIncSCEV, AlignSCEV, SE);
-
-    LLVM_DEBUG(dbgs() << "\tnew start alignment: " << DebugStr(NewAlignment)
-                      << "\n");
-    LLVM_DEBUG(dbgs() << "\tnew inc alignment: " << DebugStr(NewIncAlignment)
-                      << "\n");
-
-    if (!NewAlignment || !NewIncAlignment)
-      return Align(1);
-
-    const Align NewAlign = *NewAlignment;
-    const Align NewIncAlign = *NewIncAlignment;
-    if (NewAlign > NewIncAlign) {
-      LLVM_DEBUG(dbgs() << "\tnew start/inc alignment: "
-                        << DebugStr(NewIncAlign) << "\n");
-      return NewIncAlign;
+    if (MaybeAlign NewAlignment = getNewAlignmentDiff(DiffSCEV, AlignSCEV, SE)) {
+        LLVM_DEBUG(dbgs() << "\tnew alignment: " << DebugStr(NewAlignment) << "\n");
+        return *NewAlignment;
     }
-    if (NewIncAlign > NewAlign) {
-      LLVM_DEBUG(dbgs() << "\tnew start/inc alignment: " << DebugStr(NewAlign)
-                        << "\n");
-      return NewAlign;
-    }
-    assert(NewIncAlign == NewAlign);
-    LLVM_DEBUG(dbgs() << "\tnew start/inc alignment: " << DebugStr(NewAlign)
-                      << "\n");
-    return NewAlign;
-  }
 
-  return Align(1);
+    if (const SCEVAddRecExpr *DiffARSCEV = dyn_cast<SCEVAddRecExpr>(DiffSCEV)) {
+        // The relative offset to the alignment assumption did not yield a constant,
+        // but we should try harder: if we assume that a is 32-byte aligned, then in
+        // for (i = 0; i < 1024; i += 4) r += a[i]; not all of the loads from a are
+        // 32-byte aligned, but instead alternate between 32 and 16-byte alignment.
+        // As a result, the new alignment will not be a constant, but can still
+        // be improved over the default (of 4) to 16.
+
+        const SCEV *DiffStartSCEV = DiffARSCEV->getStart();
+        const SCEV *DiffIncSCEV = DiffARSCEV->getStepRecurrence(*SE);
+
+        LLVM_DEBUG(dbgs() << "\ttrying start/inc alignment using start "
+                   << *DiffStartSCEV << " and inc " << *DiffIncSCEV << "\n");
+
+        // Now compute the new alignment using the displacement to the value in the
+        // first iteration, and also the alignment using the per-iteration delta.
+        // If these are the same, then use that answer. Otherwise, use the smaller
+        // one, but only if it divides the larger one.
+        MaybeAlign NewAlignment = getNewAlignmentDiff(DiffStartSCEV, AlignSCEV, SE);
+        MaybeAlign NewIncAlignment =
+            getNewAlignmentDiff(DiffIncSCEV, AlignSCEV, SE);
+
+        LLVM_DEBUG(dbgs() << "\tnew start alignment: " << DebugStr(NewAlignment)
+                   << "\n");
+        LLVM_DEBUG(dbgs() << "\tnew inc alignment: " << DebugStr(NewIncAlignment)
+                   << "\n");
+
+        if (!NewAlignment || !NewIncAlignment)
+            return Align(1);
+
+        const Align NewAlign = *NewAlignment;
+        const Align NewIncAlign = *NewIncAlignment;
+        if (NewAlign > NewIncAlign) {
+            LLVM_DEBUG(dbgs() << "\tnew start/inc alignment: "
+                       << DebugStr(NewIncAlign) << "\n");
+            return NewIncAlign;
+        }
+        if (NewIncAlign > NewAlign) {
+            LLVM_DEBUG(dbgs() << "\tnew start/inc alignment: " << DebugStr(NewAlign)
+                       << "\n");
+            return NewAlign;
+        }
+        assert(NewIncAlign == NewAlign);
+        LLVM_DEBUG(dbgs() << "\tnew start/inc alignment: " << DebugStr(NewAlign)
+                   << "\n");
+        return NewAlign;
+    }
+
+    return Align(1);
 }
 
 bool AlignmentFromAssumptionsPass::extractAlignmentInfo(CallInst *I,
-                                                        unsigned Idx,
-                                                        Value *&AAPtr,
-                                                        const SCEV *&AlignSCEV,
-                                                        const SCEV *&OffSCEV) {
-  Type *Int64Ty = Type::getInt64Ty(I->getContext());
-  OperandBundleUse AlignOB = I->getOperandBundleAt(Idx);
-  if (AlignOB.getTagName() != "align")
-    return false;
-  assert(AlignOB.Inputs.size() >= 2);
-  AAPtr = AlignOB.Inputs[0].get();
-  // TODO: Consider accumulating the offset to the base.
-  AAPtr = AAPtr->stripPointerCastsSameRepresentation();
-  AlignSCEV = SE->getSCEV(AlignOB.Inputs[1].get());
-  AlignSCEV = SE->getTruncateOrZeroExtend(AlignSCEV, Int64Ty);
-  if (AlignOB.Inputs.size() == 3)
-    OffSCEV = SE->getSCEV(AlignOB.Inputs[2].get());
-  else
-    OffSCEV = SE->getZero(Int64Ty);
-  OffSCEV = SE->getTruncateOrZeroExtend(OffSCEV, Int64Ty);
-  return true;
+        unsigned Idx,
+        Value *&AAPtr,
+        const SCEV *&AlignSCEV,
+        const SCEV *&OffSCEV) {
+    Type *Int64Ty = Type::getInt64Ty(I->getContext());
+    OperandBundleUse AlignOB = I->getOperandBundleAt(Idx);
+    if (AlignOB.getTagName() != "align")
+        return false;
+    assert(AlignOB.Inputs.size() >= 2);
+    AAPtr = AlignOB.Inputs[0].get();
+    // TODO: Consider accumulating the offset to the base.
+    AAPtr = AAPtr->stripPointerCastsSameRepresentation();
+    AlignSCEV = SE->getSCEV(AlignOB.Inputs[1].get());
+    AlignSCEV = SE->getTruncateOrZeroExtend(AlignSCEV, Int64Ty);
+    if (AlignOB.Inputs.size() == 3)
+        OffSCEV = SE->getSCEV(AlignOB.Inputs[2].get());
+    else
+        OffSCEV = SE->getZero(Int64Ty);
+    OffSCEV = SE->getTruncateOrZeroExtend(OffSCEV, Int64Ty);
+    return true;
 }
 
 bool AlignmentFromAssumptionsPass::processAssumption(CallInst *ACall,
-                                                     unsigned Idx) {
-  Value *AAPtr;
-  const SCEV *AlignSCEV, *OffSCEV;
-  if (!extractAlignmentInfo(ACall, Idx, AAPtr, AlignSCEV, OffSCEV))
-    return false;
+        unsigned Idx) {
+    Value *AAPtr;
+    const SCEV *AlignSCEV, *OffSCEV;
+    if (!extractAlignmentInfo(ACall, Idx, AAPtr, AlignSCEV, OffSCEV))
+        return false;
 
-  // Skip ConstantPointerNull and UndefValue.  Assumptions on these shouldn't
-  // affect other users.
-  if (isa<ConstantData>(AAPtr))
-    return false;
+    // Skip ConstantPointerNull and UndefValue.  Assumptions on these shouldn't
+    // affect other users.
+    if (isa<ConstantData>(AAPtr))
+        return false;
 
-  const SCEV *AASCEV = SE->getSCEV(AAPtr);
+    const SCEV *AASCEV = SE->getSCEV(AAPtr);
 
-  // Apply the assumption to all other users of the specified pointer.
-  SmallPtrSet<Instruction *, 32> Visited;
-  SmallVector<Instruction*, 16> WorkList;
-  for (User *J : AAPtr->users()) {
-    if (J == ACall)
-      continue;
+    // Apply the assumption to all other users of the specified pointer.
+    SmallPtrSet<Instruction *, 32> Visited;
+    SmallVector<Instruction*, 16> WorkList;
+    for (User *J : AAPtr->users()) {
+        if (J == ACall)
+            continue;
 
-    if (Instruction *K = dyn_cast<Instruction>(J))
-        WorkList.push_back(K);
-  }
+        if (Instruction *K = dyn_cast<Instruction>(J))
+            WorkList.push_back(K);
+    }
 
-  while (!WorkList.empty()) {
-    Instruction *J = WorkList.pop_back_val();
-    if (LoadInst *LI = dyn_cast<LoadInst>(J)) {
-      if (!isValidAssumeForContext(ACall, J, DT))
-        continue;
-      Align NewAlignment = getNewAlignment(AASCEV, AlignSCEV, OffSCEV,
-                                           LI->getPointerOperand(), SE);
-      if (NewAlignment > LI->getAlign()) {
-        LI->setAlignment(NewAlignment);
-        ++NumLoadAlignChanged;
-      }
-    } else if (StoreInst *SI = dyn_cast<StoreInst>(J)) {
-      if (!isValidAssumeForContext(ACall, J, DT))
-        continue;
-      Align NewAlignment = getNewAlignment(AASCEV, AlignSCEV, OffSCEV,
-                                           SI->getPointerOperand(), SE);
-      if (NewAlignment > SI->getAlign()) {
-        SI->setAlignment(NewAlignment);
-        ++NumStoreAlignChanged;
-      }
-    } else if (MemIntrinsic *MI = dyn_cast<MemIntrinsic>(J)) {
-      if (!isValidAssumeForContext(ACall, J, DT))
-        continue;
-      Align NewDestAlignment =
-          getNewAlignment(AASCEV, AlignSCEV, OffSCEV, MI->getDest(), SE);
+    while (!WorkList.empty()) {
+        Instruction *J = WorkList.pop_back_val();
+        if (LoadInst *LI = dyn_cast<LoadInst>(J)) {
+            if (!isValidAssumeForContext(ACall, J, DT))
+                continue;
+            Align NewAlignment = getNewAlignment(AASCEV, AlignSCEV, OffSCEV,
+                                                 LI->getPointerOperand(), SE);
+            if (NewAlignment > LI->getAlign()) {
+                LI->setAlignment(NewAlignment);
+                ++NumLoadAlignChanged;
+            }
+        } else if (StoreInst *SI = dyn_cast<StoreInst>(J)) {
+            if (!isValidAssumeForContext(ACall, J, DT))
+                continue;
+            Align NewAlignment = getNewAlignment(AASCEV, AlignSCEV, OffSCEV,
+                                                 SI->getPointerOperand(), SE);
+            if (NewAlignment > SI->getAlign()) {
+                SI->setAlignment(NewAlignment);
+                ++NumStoreAlignChanged;
+            }
+        } else if (MemIntrinsic *MI = dyn_cast<MemIntrinsic>(J)) {
+            if (!isValidAssumeForContext(ACall, J, DT))
+                continue;
+            Align NewDestAlignment =
+                getNewAlignment(AASCEV, AlignSCEV, OffSCEV, MI->getDest(), SE);
 
-      LLVM_DEBUG(dbgs() << "\tmem inst: " << DebugStr(NewDestAlignment)
-                        << "\n";);
-      if (NewDestAlignment > *MI->getDestAlign()) {
-        MI->setDestAlignment(NewDestAlignment);
-        ++NumMemIntAlignChanged;
-      }
+            LLVM_DEBUG(dbgs() << "\tmem inst: " << DebugStr(NewDestAlignment)
+                       << "\n";);
+            if (NewDestAlignment > *MI->getDestAlign()) {
+                MI->setDestAlignment(NewDestAlignment);
+                ++NumMemIntAlignChanged;
+            }
 
-      // For memory transfers, there is also a source alignment that
-      // can be set.
-      if (MemTransferInst *MTI = dyn_cast<MemTransferInst>(MI)) {
-        Align NewSrcAlignment =
-            getNewAlignment(AASCEV, AlignSCEV, OffSCEV, MTI->getSource(), SE);
+            // For memory transfers, there is also a source alignment that
+            // can be set.
+            if (MemTransferInst *MTI = dyn_cast<MemTransferInst>(MI)) {
+                Align NewSrcAlignment =
+                    getNewAlignment(AASCEV, AlignSCEV, OffSCEV, MTI->getSource(), SE);
 
-        LLVM_DEBUG(dbgs() << "\tmem trans: " << DebugStr(NewSrcAlignment)
-                          << "\n";);
+                LLVM_DEBUG(dbgs() << "\tmem trans: " << DebugStr(NewSrcAlignment)
+                           << "\n";);
 
-        if (NewSrcAlignment > *MTI->getSourceAlign()) {
-          MTI->setSourceAlignment(NewSrcAlignment);
-          ++NumMemIntAlignChanged;
+                if (NewSrcAlignment > *MTI->getSourceAlign()) {
+                    MTI->setSourceAlignment(NewSrcAlignment);
+                    ++NumMemIntAlignChanged;
+                }
+            }
         }
-      }
+
+        // Now that we've updated that use of the pointer, look for other uses of
+        // the pointer to update.
+        Visited.insert(J);
+        for (User *UJ : J->users()) {
+            Instruction *K = cast<Instruction>(UJ);
+            if (!Visited.count(K))
+                WorkList.push_back(K);
+        }
     }
 
-    // Now that we've updated that use of the pointer, look for other uses of
-    // the pointer to update.
-    Visited.insert(J);
-    for (User *UJ : J->users()) {
-      Instruction *K = cast<Instruction>(UJ);
-      if (!Visited.count(K))
-        WorkList.push_back(K);
-    }
-  }
-
-  return true;
+    return true;
 }
 
 bool AlignmentFromAssumptions::runOnFunction(Function &F) {
-  if (skipFunction(F))
-    return false;
+    if (skipFunction(F))
+        return false;
 
-  auto &AC = getAnalysis<AssumptionCacheTracker>().getAssumptionCache(F);
-  ScalarEvolution *SE = &getAnalysis<ScalarEvolutionWrapperPass>().getSE();
-  DominatorTree *DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    auto &AC = getAnalysis<AssumptionCacheTracker>().getAssumptionCache(F);
+    ScalarEvolution *SE = &getAnalysis<ScalarEvolutionWrapperPass>().getSE();
+    DominatorTree *DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
 
-  return Impl.runImpl(F, AC, SE, DT);
+    return Impl.runImpl(F, AC, SE, DT);
 }
 
 bool AlignmentFromAssumptionsPass::runImpl(Function &F, AssumptionCache &AC,
-                                           ScalarEvolution *SE_,
-                                           DominatorTree *DT_) {
-  SE = SE_;
-  DT = DT_;
+        ScalarEvolution *SE_,
+        DominatorTree *DT_) {
+    SE = SE_;
+    DT = DT_;
 
-  bool Changed = false;
-  for (auto &AssumeVH : AC.assumptions())
-    if (AssumeVH) {
-      CallInst *Call = cast<CallInst>(AssumeVH);
-      for (unsigned Idx = 0; Idx < Call->getNumOperandBundles(); Idx++)
-        Changed |= processAssumption(Call, Idx);
-    }
+    bool Changed = false;
+    for (auto &AssumeVH : AC.assumptions())
+        if (AssumeVH) {
+            CallInst *Call = cast<CallInst>(AssumeVH);
+            for (unsigned Idx = 0; Idx < Call->getNumOperandBundles(); Idx++)
+                Changed |= processAssumption(Call, Idx);
+        }
 
-  return Changed;
+    return Changed;
 }
 
 PreservedAnalyses
 AlignmentFromAssumptionsPass::run(Function &F, FunctionAnalysisManager &AM) {
 
-  AssumptionCache &AC = AM.getResult<AssumptionAnalysis>(F);
-  ScalarEvolution &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
-  DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
-  if (!runImpl(F, AC, &SE, &DT))
-    return PreservedAnalyses::all();
+    AssumptionCache &AC = AM.getResult<AssumptionAnalysis>(F);
+    ScalarEvolution &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
+    DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
+    if (!runImpl(F, AC, &SE, &DT))
+        return PreservedAnalyses::all();
 
-  PreservedAnalyses PA;
-  PA.preserveSet<CFGAnalyses>();
-  PA.preserve<AAManager>();
-  PA.preserve<ScalarEvolutionAnalysis>();
-  PA.preserve<GlobalsAA>();
-  return PA;
+    PreservedAnalyses PA;
+    PA.preserveSet<CFGAnalyses>();
+    PA.preserve<AAManager>();
+    PA.preserve<ScalarEvolutionAnalysis>();
+    PA.preserve<GlobalsAA>();
+    return PA;
 }

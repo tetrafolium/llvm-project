@@ -49,27 +49,27 @@ static constexpr OptionEnumValueElement g_script_option_enumeration[] = {
 };
 
 static constexpr OptionEnumValues ScriptOptionEnum() {
-  return OptionEnumValues(g_script_option_enumeration);
+    return OptionEnumValues(g_script_option_enumeration);
 }
 
 #define LLDB_OPTIONS_breakpoint_command_add
 #include "CommandOptions.inc"
 
 class CommandObjectBreakpointCommandAdd : public CommandObjectParsed,
-                                          public IOHandlerDelegateMultiline {
+    public IOHandlerDelegateMultiline {
 public:
-  CommandObjectBreakpointCommandAdd(CommandInterpreter &interpreter)
-      : CommandObjectParsed(interpreter, "add",
-                            "Add LLDB commands to a breakpoint, to be executed "
-                            "whenever the breakpoint is hit."
-                            "  If no breakpoint is specified, adds the "
-                            "commands to the last created breakpoint.",
-                            nullptr),
-        IOHandlerDelegateMultiline("DONE",
-                                   IOHandlerDelegate::Completion::LLDBCommand),
-        m_options(), m_func_options("breakpoint command", false, 'F') {
-    SetHelpLong(
-        R"(
+    CommandObjectBreakpointCommandAdd(CommandInterpreter &interpreter)
+        : CommandObjectParsed(interpreter, "add",
+                              "Add LLDB commands to a breakpoint, to be executed "
+                              "whenever the breakpoint is hit."
+                              "  If no breakpoint is specified, adds the "
+                              "commands to the last created breakpoint.",
+                              nullptr),
+          IOHandlerDelegateMultiline("DONE",
+                                     IOHandlerDelegate::Completion::LLDBCommand),
+          m_options(), m_func_options("breakpoint command", false, 'F') {
+        SetHelpLong(
+            R"(
 General information about entering breakpoint commands
 ------------------------------------------------------
 
@@ -310,14 +310,14 @@ are no syntax errors may indicate that a function was declared but never called.
         break;
 
       case 'e': {
-        bool success = false;
-        m_stop_on_error =
-            OptionArgParser::ToBoolean(option_arg, false, &success);
-        if (!success)
-          error.SetErrorStringWithFormat(
-              "invalid value for stop-on-error: \"%s\"",
-              option_arg.str().c_str());
-      } break;
+    bool success = false;
+    m_stop_on_error =
+        OptionArgParser::ToBoolean(option_arg, false, &success);
+    if (!success)
+      error.SetErrorStringWithFormat(
+          "invalid value for stop-on-error: \"%s\"",
+          option_arg.str().c_str());
+  } break;
 
       case 'D':
         m_use_dummy = true;

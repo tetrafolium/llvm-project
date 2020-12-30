@@ -21,14 +21,14 @@ OpReducerImpl::OpReducerImpl(
 
 /// Return the name of this reducer class.
 StringRef OpReducerImpl::getName() {
-  return StringRef("High Level Operation Reduction");
+    return StringRef("High Level Operation Reduction");
 }
 
 /// Return the initial transformSpace containing the transformable indices.
 std::vector<bool> OpReducerImpl::initTransformSpace(ModuleOp module) {
-  auto ops = getSpecificOps(module);
-  int numOps = std::distance(ops.begin(), ops.end());
-  return ReductionTreeUtils::createTransformSpace(module, numOps);
+    auto ops = getSpecificOps(module);
+    int numOps = std::distance(ops.begin(), ops.end());
+    return ReductionTreeUtils::createTransformSpace(module, numOps);
 }
 
 /// Generate variants by removing opType operations from the module in the
@@ -36,6 +36,6 @@ std::vector<bool> OpReducerImpl::initTransformSpace(ModuleOp module) {
 void OpReducerImpl::generateVariants(
     ReductionNode *parent, const Tester &test, int numVariants,
     llvm::function_ref<void(ModuleOp, int, int)> transform) {
-  ReductionTreeUtils::createVariants(parent, test, numVariants, transform,
-                                     true);
+    ReductionTreeUtils::createVariants(parent, test, numVariants, transform,
+                                       true);
 }

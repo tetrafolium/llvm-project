@@ -26,20 +26,20 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-exception-escape.html
 class ExceptionEscapeCheck : public ClangTidyCheck {
 public:
-  ExceptionEscapeCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus && LangOpts.CXXExceptions;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    ExceptionEscapeCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus && LangOpts.CXXExceptions;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  std::string RawFunctionsThatShouldNotThrow;
-  std::string RawIgnoredExceptions;
+    std::string RawFunctionsThatShouldNotThrow;
+    std::string RawIgnoredExceptions;
 
-  llvm::StringSet<> FunctionsThatShouldNotThrow;
-  utils::ExceptionAnalyzer Tracer;
+    llvm::StringSet<> FunctionsThatShouldNotThrow;
+    utils::ExceptionAnalyzer Tracer;
 };
 
 } // namespace bugprone

@@ -20,66 +20,68 @@ namespace llvm {
 class raw_ostream;
 
 class DWARFAbbreviationDeclarationSet {
-  uint64_t Offset;
-  /// Code of the first abbreviation, if all abbreviations in the set have
-  /// consecutive codes. UINT32_MAX otherwise.
-  uint32_t FirstAbbrCode;
-  std::vector<DWARFAbbreviationDeclaration> Decls;
+    uint64_t Offset;
+    /// Code of the first abbreviation, if all abbreviations in the set have
+    /// consecutive codes. UINT32_MAX otherwise.
+    uint32_t FirstAbbrCode;
+    std::vector<DWARFAbbreviationDeclaration> Decls;
 
-  using const_iterator =
-      std::vector<DWARFAbbreviationDeclaration>::const_iterator;
+    using const_iterator =
+        std::vector<DWARFAbbreviationDeclaration>::const_iterator;
 
 public:
-  DWARFAbbreviationDeclarationSet();
+    DWARFAbbreviationDeclarationSet();
 
-  uint64_t getOffset() const { return Offset; }
-  void dump(raw_ostream &OS) const;
-  bool extract(DataExtractor Data, uint64_t *OffsetPtr);
+    uint64_t getOffset() const {
+        return Offset;
+    }
+    void dump(raw_ostream &OS) const;
+    bool extract(DataExtractor Data, uint64_t *OffsetPtr);
 
-  const DWARFAbbreviationDeclaration *
-  getAbbreviationDeclaration(uint32_t AbbrCode) const;
+    const DWARFAbbreviationDeclaration *
+    getAbbreviationDeclaration(uint32_t AbbrCode) const;
 
-  const_iterator begin() const {
-    return Decls.begin();
-  }
+    const_iterator begin() const {
+        return Decls.begin();
+    }
 
-  const_iterator end() const {
-    return Decls.end();
-  }
+    const_iterator end() const {
+        return Decls.end();
+    }
 
 private:
-  void clear();
+    void clear();
 };
 
 class DWARFDebugAbbrev {
-  using DWARFAbbreviationDeclarationSetMap =
-      std::map<uint64_t, DWARFAbbreviationDeclarationSet>;
+    using DWARFAbbreviationDeclarationSetMap =
+        std::map<uint64_t, DWARFAbbreviationDeclarationSet>;
 
-  mutable DWARFAbbreviationDeclarationSetMap AbbrDeclSets;
-  mutable DWARFAbbreviationDeclarationSetMap::const_iterator PrevAbbrOffsetPos;
-  mutable Optional<DataExtractor> Data;
+    mutable DWARFAbbreviationDeclarationSetMap AbbrDeclSets;
+    mutable DWARFAbbreviationDeclarationSetMap::const_iterator PrevAbbrOffsetPos;
+    mutable Optional<DataExtractor> Data;
 
 public:
-  DWARFDebugAbbrev();
+    DWARFDebugAbbrev();
 
-  const DWARFAbbreviationDeclarationSet *
-  getAbbreviationDeclarationSet(uint64_t CUAbbrOffset) const;
+    const DWARFAbbreviationDeclarationSet *
+    getAbbreviationDeclarationSet(uint64_t CUAbbrOffset) const;
 
-  void dump(raw_ostream &OS) const;
-  void parse() const;
-  void extract(DataExtractor Data);
+    void dump(raw_ostream &OS) const;
+    void parse() const;
+    void extract(DataExtractor Data);
 
-  DWARFAbbreviationDeclarationSetMap::const_iterator begin() const {
-    parse();
-    return AbbrDeclSets.begin();
-  }
+    DWARFAbbreviationDeclarationSetMap::const_iterator begin() const {
+        parse();
+        return AbbrDeclSets.begin();
+    }
 
-  DWARFAbbreviationDeclarationSetMap::const_iterator end() const {
-    return AbbrDeclSets.end();
-  }
+    DWARFAbbreviationDeclarationSetMap::const_iterator end() const {
+        return AbbrDeclSets.end();
+    }
 
 private:
-  void clear();
+    void clear();
 };
 
 } // end namespace llvm

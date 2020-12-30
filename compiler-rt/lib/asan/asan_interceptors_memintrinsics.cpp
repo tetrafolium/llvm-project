@@ -19,15 +19,15 @@
 using namespace __asan;
 
 void *__asan_memcpy(void *to, const void *from, uptr size) {
-  ASAN_MEMCPY_IMPL(nullptr, to, from, size);
+    ASAN_MEMCPY_IMPL(nullptr, to, from, size);
 }
 
 void *__asan_memset(void *block, int c, uptr size) {
-  ASAN_MEMSET_IMPL(nullptr, block, c, size);
+    ASAN_MEMSET_IMPL(nullptr, block, c, size);
 }
 
 void *__asan_memmove(void *to, const void *from, uptr size) {
-  ASAN_MEMMOVE_IMPL(nullptr, to, from, size);
+    ASAN_MEMMOVE_IMPL(nullptr, to, from, size);
 }
 
 #if SANITIZER_FUCHSIA || SANITIZER_RTEMS

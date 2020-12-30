@@ -31,11 +31,15 @@ class ConstantInitBuilderBase;
 namespace llvm {
 template <>
 struct PointerLikeTypeTraits< ::clang::CodeGen::ConstantInitBuilderBase*> {
-  using T = ::clang::CodeGen::ConstantInitBuilderBase*;
+    using T = ::clang::CodeGen::ConstantInitBuilderBase*;
 
-  static inline void *getAsVoidPointer(T p) { return p; }
-  static inline T getFromVoidPointer(void *p) {return static_cast<T>(p);}
-  static constexpr int NumLowBitsAvailable = 2;
+    static inline void *getAsVoidPointer(T p) {
+        return p;
+    }
+    static inline T getFromVoidPointer(void *p) {
+        return static_cast<T>(p);
+    }
+    static constexpr int NumLowBitsAvailable = 2;
 };
 }
 
@@ -45,42 +49,46 @@ namespace CodeGen {
 /// A "future" for a completed constant initializer, which can be passed
 /// around independently of any sub-builders (but not the original parent).
 class ConstantInitFuture {
-  using PairTy = llvm::PointerUnion<ConstantInitBuilderBase*, llvm::Constant*>;
+    using PairTy = llvm::PointerUnion<ConstantInitBuilderBase*, llvm::Constant*>;
 
-  PairTy Data;
+    PairTy Data;
 
-  friend class ConstantInitBuilderBase;
-  explicit ConstantInitFuture(ConstantInitBuilderBase *builder);
+    friend class ConstantInitBuilderBase;
+    explicit ConstantInitFuture(ConstantInitBuilderBase *builder);
 
 public:
-  ConstantInitFuture() {}
+    ConstantInitFuture() {}
 
-  /// A future can be explicitly created from a fixed initializer.
-  explicit ConstantInitFuture(llvm::Constant *initializer) : Data(initializer) {
-    assert(initializer && "creating null future");
-  }
+    /// A future can be explicitly created from a fixed initializer.
+    explicit ConstantInitFuture(llvm::Constant *initializer) : Data(initializer) {
+        assert(initializer && "creating null future");
+    }
 
-  /// Is this future non-null?
-  explicit operator bool() const { return bool(Data); }
+    /// Is this future non-null?
+    explicit operator bool() const {
+        return bool(Data);
+    }
 
-  /// Return the type of the initializer.
-  llvm::Type *getType() const;
+    /// Return the type of the initializer.
+    llvm::Type *getType() const;
 
-  /// Abandon this initializer.
-  void abandon();
+    /// Abandon this initializer.
+    void abandon();
 
-  /// Install the initializer into a global variable.  This cannot
-  /// be called multiple times.
-  void installInGlobal(llvm::GlobalVariable *global);
+    /// Install the initializer into a global variable.  This cannot
+    /// be called multiple times.
+    void installInGlobal(llvm::GlobalVariable *global);
 
-  void *getOpaqueValue() const { return Data.getOpaqueValue(); }
-  static ConstantInitFuture getFromOpaqueValue(void *value) {
-    ConstantInitFuture result;
-    result.Data = PairTy::getFromOpaqueValue(value);
-    return result;
-  }
-  static constexpr int NumLowBitsAvailable =
-      llvm::PointerLikeTypeTraits<PairTy>::NumLowBitsAvailable;
+    void *getOpaqueValue() const {
+        return Data.getOpaqueValue();
+    }
+    static ConstantInitFuture getFromOpaqueValue(void *value) {
+        ConstantInitFuture result;
+        result.Data = PairTy::getFromOpaqueValue(value);
+        return result;
+    }
+    static constexpr int NumLowBitsAvailable =
+        llvm::PointerLikeTypeTraits<PairTy>::NumLowBitsAvailable;
 };
 
 }  // end namespace CodeGen
@@ -90,15 +98,15 @@ namespace llvm {
 
 template <>
 struct PointerLikeTypeTraits< ::clang::CodeGen::ConstantInitFuture> {
-  using T = ::clang::CodeGen::ConstantInitFuture;
+    using T = ::clang::CodeGen::ConstantInitFuture;
 
-  static inline void *getAsVoidPointer(T future) {
-    return future.getOpaqueValue();
-  }
-  static inline T getFromVoidPointer(void *p) {
-    return T::getFromOpaqueValue(p);
-  }
-  static constexpr int NumLowBitsAvailable = T::NumLowBitsAvailable;
+    static inline void *getAsVoidPointer(T future) {
+        return future.getOpaqueValue();
+    }
+    static inline T getFromVoidPointer(void *p) {
+        return T::getFromOpaqueValue(p);
+    }
+    static constexpr int NumLowBitsAvailable = T::NumLowBitsAvailable;
 };
 
 } // end namespace llvm

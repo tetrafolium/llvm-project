@@ -24,15 +24,15 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/google-readability-todo.html
 class TodoCommentCheck : public ClangTidyCheck {
 public:
-  TodoCommentCheck(StringRef Name, ClangTidyContext *Context);
-  ~TodoCommentCheck();
+    TodoCommentCheck(StringRef Name, ClangTidyContext *Context);
+    ~TodoCommentCheck();
 
-  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                           Preprocessor *ModuleExpanderPP) override;
+    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                             Preprocessor *ModuleExpanderPP) override;
 
 private:
-  class TodoCommentHandler;
-  std::unique_ptr<TodoCommentHandler> Handler;
+    class TodoCommentHandler;
+    std::unique_ptr<TodoCommentHandler> Handler;
 };
 
 } // namespace readability

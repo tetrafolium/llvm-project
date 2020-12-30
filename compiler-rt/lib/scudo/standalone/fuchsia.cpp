@@ -23,129 +23,135 @@
 
 namespace scudo {
 
-uptr getPageSize() { return PAGE_SIZE; }
+uptr getPageSize() {
+    return PAGE_SIZE;
+}
 
-void NORETURN die() { __builtin_trap(); }
+void NORETURN die() {
+    __builtin_trap();
+}
 
 // We zero-initialize the Extra parameter of map(), make sure this is consistent
 // with ZX_HANDLE_INVALID.
 static_assert(ZX_HANDLE_INVALID == 0, "");
 
 static void *allocateVmar(uptr Size, MapPlatformData *Data, bool AllowNoMem) {
-  // Only scenario so far.
-  DCHECK(Data);
-  DCHECK_EQ(Data->Vmar, ZX_HANDLE_INVALID);
+    // Only scenario so far.
+    DCHECK(Data);
+    DCHECK_EQ(Data->Vmar, ZX_HANDLE_INVALID);
 
-  const zx_status_t Status = _zx_vmar_allocate(
-      _zx_vmar_root_self(),
-      ZX_VM_CAN_MAP_READ | ZX_VM_CAN_MAP_WRITE | ZX_VM_CAN_MAP_SPECIFIC, 0,
-      Size, &Data->Vmar, &Data->VmarBase);
-  if (UNLIKELY(Status != ZX_OK)) {
-    if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
-      dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
-    return nullptr;
-  }
-  return reinterpret_cast<void *>(Data->VmarBase);
+    const zx_status_t Status = _zx_vmar_allocate(
+                                   _zx_vmar_root_self(),
+                                   ZX_VM_CAN_MAP_READ | ZX_VM_CAN_MAP_WRITE | ZX_VM_CAN_MAP_SPECIFIC, 0,
+                                   Size, &Data->Vmar, &Data->VmarBase);
+    if (UNLIKELY(Status != ZX_OK)) {
+        if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
+            dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
+        return nullptr;
+    }
+    return reinterpret_cast<void *>(Data->VmarBase);
 }
 
 void *map(void *Addr, uptr Size, const char *Name, uptr Flags,
           MapPlatformData *Data) {
-  DCHECK_EQ(Size % PAGE_SIZE, 0);
-  const bool AllowNoMem = !!(Flags & MAP_ALLOWNOMEM);
+    DCHECK_EQ(Size % PAGE_SIZE, 0);
+    const bool AllowNoMem = !!(Flags & MAP_ALLOWNOMEM);
 
-  // For MAP_NOACCESS, just allocate a Vmar and return.
-  if (Flags & MAP_NOACCESS)
-    return allocateVmar(Size, Data, AllowNoMem);
+    // For MAP_NOACCESS, just allocate a Vmar and return.
+    if (Flags & MAP_NOACCESS)
+        return allocateVmar(Size, Data, AllowNoMem);
 
-  const zx_handle_t Vmar = Data ? Data->Vmar : _zx_vmar_root_self();
-  CHECK_NE(Vmar, ZX_HANDLE_INVALID);
+    const zx_handle_t Vmar = Data ? Data->Vmar : _zx_vmar_root_self();
+    CHECK_NE(Vmar, ZX_HANDLE_INVALID);
 
-  zx_status_t Status;
-  zx_handle_t Vmo;
-  uint64_t VmoSize = 0;
-  if (Data && Data->Vmo != ZX_HANDLE_INVALID) {
-    // If a Vmo was specified, it's a resize operation.
-    CHECK(Addr);
-    DCHECK(Flags & MAP_RESIZABLE);
-    Vmo = Data->Vmo;
-    VmoSize = Data->VmoSize;
-    Status = _zx_vmo_set_size(Vmo, VmoSize + Size);
-    if (Status != ZX_OK) {
-      if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
-        dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
-      return nullptr;
+    zx_status_t Status;
+    zx_handle_t Vmo;
+    uint64_t VmoSize = 0;
+    if (Data && Data->Vmo != ZX_HANDLE_INVALID) {
+        // If a Vmo was specified, it's a resize operation.
+        CHECK(Addr);
+        DCHECK(Flags & MAP_RESIZABLE);
+        Vmo = Data->Vmo;
+        VmoSize = Data->VmoSize;
+        Status = _zx_vmo_set_size(Vmo, VmoSize + Size);
+        if (Status != ZX_OK) {
+            if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
+                dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
+            return nullptr;
+        }
+    } else {
+        // Otherwise, create a Vmo and set its name.
+        Status = _zx_vmo_create(Size, ZX_VMO_RESIZABLE, &Vmo);
+        if (UNLIKELY(Status != ZX_OK)) {
+            if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
+                dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
+            return nullptr;
+        }
+        _zx_object_set_property(Vmo, ZX_PROP_NAME, Name, strlen(Name));
     }
-  } else {
-    // Otherwise, create a Vmo and set its name.
-    Status = _zx_vmo_create(Size, ZX_VMO_RESIZABLE, &Vmo);
+
+    uintptr_t P;
+    zx_vm_option_t MapFlags =
+        ZX_VM_PERM_READ | ZX_VM_PERM_WRITE | ZX_VM_ALLOW_FAULTS;
+    const uint64_t Offset =
+        Addr ? reinterpret_cast<uintptr_t>(Addr) - Data->VmarBase : 0;
+    if (Offset)
+        MapFlags |= ZX_VM_SPECIFIC;
+    Status = _zx_vmar_map(Vmar, MapFlags, Offset, Vmo, VmoSize, Size, &P);
+    // No need to track the Vmo if we don't intend on resizing it. Close it.
+    if (Flags & MAP_RESIZABLE) {
+        DCHECK(Data);
+        DCHECK_EQ(Data->Vmo, ZX_HANDLE_INVALID);
+        Data->Vmo = Vmo;
+    } else {
+        CHECK_EQ(_zx_handle_close(Vmo), ZX_OK);
+    }
     if (UNLIKELY(Status != ZX_OK)) {
-      if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
-        dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
-      return nullptr;
+        if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
+            dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
+        return nullptr;
     }
-    _zx_object_set_property(Vmo, ZX_PROP_NAME, Name, strlen(Name));
-  }
+    if (Data)
+        Data->VmoSize += Size;
 
-  uintptr_t P;
-  zx_vm_option_t MapFlags =
-      ZX_VM_PERM_READ | ZX_VM_PERM_WRITE | ZX_VM_ALLOW_FAULTS;
-  const uint64_t Offset =
-      Addr ? reinterpret_cast<uintptr_t>(Addr) - Data->VmarBase : 0;
-  if (Offset)
-    MapFlags |= ZX_VM_SPECIFIC;
-  Status = _zx_vmar_map(Vmar, MapFlags, Offset, Vmo, VmoSize, Size, &P);
-  // No need to track the Vmo if we don't intend on resizing it. Close it.
-  if (Flags & MAP_RESIZABLE) {
-    DCHECK(Data);
-    DCHECK_EQ(Data->Vmo, ZX_HANDLE_INVALID);
-    Data->Vmo = Vmo;
-  } else {
-    CHECK_EQ(_zx_handle_close(Vmo), ZX_OK);
-  }
-  if (UNLIKELY(Status != ZX_OK)) {
-    if (Status != ZX_ERR_NO_MEMORY || !AllowNoMem)
-      dieOnMapUnmapError(Status == ZX_ERR_NO_MEMORY);
-    return nullptr;
-  }
-  if (Data)
-    Data->VmoSize += Size;
-
-  return reinterpret_cast<void *>(P);
+    return reinterpret_cast<void *>(P);
 }
 
 void unmap(void *Addr, uptr Size, uptr Flags, MapPlatformData *Data) {
-  if (Flags & UNMAP_ALL) {
-    DCHECK_NE(Data, nullptr);
-    const zx_handle_t Vmar = Data->Vmar;
-    DCHECK_NE(Vmar, _zx_vmar_root_self());
-    // Destroying the vmar effectively unmaps the whole mapping.
-    CHECK_EQ(_zx_vmar_destroy(Vmar), ZX_OK);
-    CHECK_EQ(_zx_handle_close(Vmar), ZX_OK);
-  } else {
-    const zx_handle_t Vmar = Data ? Data->Vmar : _zx_vmar_root_self();
-    const zx_status_t Status =
-        _zx_vmar_unmap(Vmar, reinterpret_cast<uintptr_t>(Addr), Size);
-    if (UNLIKELY(Status != ZX_OK))
-      dieOnMapUnmapError();
-  }
-  if (Data) {
-    if (Data->Vmo != ZX_HANDLE_INVALID)
-      CHECK_EQ(_zx_handle_close(Data->Vmo), ZX_OK);
-    memset(Data, 0, sizeof(*Data));
-  }
+    if (Flags & UNMAP_ALL) {
+        DCHECK_NE(Data, nullptr);
+        const zx_handle_t Vmar = Data->Vmar;
+        DCHECK_NE(Vmar, _zx_vmar_root_self());
+        // Destroying the vmar effectively unmaps the whole mapping.
+        CHECK_EQ(_zx_vmar_destroy(Vmar), ZX_OK);
+        CHECK_EQ(_zx_handle_close(Vmar), ZX_OK);
+    } else {
+        const zx_handle_t Vmar = Data ? Data->Vmar : _zx_vmar_root_self();
+        const zx_status_t Status =
+            _zx_vmar_unmap(Vmar, reinterpret_cast<uintptr_t>(Addr), Size);
+        if (UNLIKELY(Status != ZX_OK))
+            dieOnMapUnmapError();
+    }
+    if (Data) {
+        if (Data->Vmo != ZX_HANDLE_INVALID)
+            CHECK_EQ(_zx_handle_close(Data->Vmo), ZX_OK);
+        memset(Data, 0, sizeof(*Data));
+    }
 }
 
 void releasePagesToOS(UNUSED uptr BaseAddress, uptr Offset, uptr Size,
                       MapPlatformData *Data) {
-  DCHECK(Data);
-  DCHECK_NE(Data->Vmar, ZX_HANDLE_INVALID);
-  DCHECK_NE(Data->Vmo, ZX_HANDLE_INVALID);
-  const zx_status_t Status =
-      _zx_vmo_op_range(Data->Vmo, ZX_VMO_OP_DECOMMIT, Offset, Size, NULL, 0);
-  CHECK_EQ(Status, ZX_OK);
+    DCHECK(Data);
+    DCHECK_NE(Data->Vmar, ZX_HANDLE_INVALID);
+    DCHECK_NE(Data->Vmo, ZX_HANDLE_INVALID);
+    const zx_status_t Status =
+        _zx_vmo_op_range(Data->Vmo, ZX_VMO_OP_DECOMMIT, Offset, Size, NULL, 0);
+    CHECK_EQ(Status, ZX_OK);
 }
 
-const char *getEnv(const char *Name) { return getenv(Name); }
+const char *getEnv(const char *Name) {
+    return getenv(Name);
+}
 
 // Note: we need to flag these methods with __TA_NO_THREAD_SAFETY_ANALYSIS
 // because the Fuchsia implementation of sync_mutex_t has clang thread safety
@@ -154,34 +160,40 @@ const char *getEnv(const char *Name) { return getenv(Name); }
 // thread analysis thinks that we are locking the mutex and accidentally leaving
 // it locked on the way out.
 bool HybridMutex::tryLock() __TA_NO_THREAD_SAFETY_ANALYSIS {
-  // Size and alignment must be compatible between both types.
-  return sync_mutex_trylock(&M) == ZX_OK;
+    // Size and alignment must be compatible between both types.
+    return sync_mutex_trylock(&M) == ZX_OK;
 }
 
 void HybridMutex::lockSlow() __TA_NO_THREAD_SAFETY_ANALYSIS {
-  sync_mutex_lock(&M);
+    sync_mutex_lock(&M);
 }
 
 void HybridMutex::unlock() __TA_NO_THREAD_SAFETY_ANALYSIS {
-  sync_mutex_unlock(&M);
+    sync_mutex_unlock(&M);
 }
 
-u64 getMonotonicTime() { return _zx_clock_get_monotonic(); }
+u64 getMonotonicTime() {
+    return _zx_clock_get_monotonic();
+}
 
-u32 getNumberOfCPUs() { return _zx_system_get_num_cpus(); }
+u32 getNumberOfCPUs() {
+    return _zx_system_get_num_cpus();
+}
 
-u32 getThreadID() { return 0; }
+u32 getThreadID() {
+    return 0;
+}
 
 bool getRandom(void *Buffer, uptr Length, UNUSED bool Blocking) {
-  static_assert(MaxRandomLength <= ZX_CPRNG_DRAW_MAX_LEN, "");
-  if (UNLIKELY(!Buffer || !Length || Length > MaxRandomLength))
-    return false;
-  _zx_cprng_draw(Buffer, Length);
-  return true;
+    static_assert(MaxRandomLength <= ZX_CPRNG_DRAW_MAX_LEN, "");
+    if (UNLIKELY(!Buffer || !Length || Length > MaxRandomLength))
+        return false;
+    _zx_cprng_draw(Buffer, Length);
+    return true;
 }
 
 void outputRaw(const char *Buffer) {
-  __sanitizer_log_write(Buffer, strlen(Buffer));
+    __sanitizer_log_write(Buffer, strlen(Buffer));
 }
 
 void setAbortMessage(const char *Message) {}

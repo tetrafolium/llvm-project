@@ -16,43 +16,43 @@
 using namespace llvm;
 
 void MCValue::print(raw_ostream &OS) const {
-  if (isAbsolute()) {
-    OS << getConstant();
-    return;
-  }
+    if (isAbsolute()) {
+        OS << getConstant();
+        return;
+    }
 
-  // FIXME: prints as a number, which isn't ideal. But the meaning will be
-  // target-specific anyway.
-  if (getRefKind())
-    OS << ':' << getRefKind() <<  ':';
+    // FIXME: prints as a number, which isn't ideal. But the meaning will be
+    // target-specific anyway.
+    if (getRefKind())
+        OS << ':' << getRefKind() <<  ':';
 
-  OS << *getSymA();
+    OS << *getSymA();
 
-  if (getSymB()) {
-    OS << " - ";
-    OS << *getSymB();
-  }
+    if (getSymB()) {
+        OS << " - ";
+        OS << *getSymB();
+    }
 
-  if (getConstant())
-    OS << " + " << getConstant();
+    if (getConstant())
+        OS << " + " << getConstant();
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void MCValue::dump() const {
-  print(dbgs());
+    print(dbgs());
 }
 #endif
 
 MCSymbolRefExpr::VariantKind MCValue::getAccessVariant() const {
-  const MCSymbolRefExpr *B = getSymB();
-  if (B) {
-    if (B->getKind() != MCSymbolRefExpr::VK_None)
-      llvm_unreachable("unsupported");
-  }
+    const MCSymbolRefExpr *B = getSymB();
+    if (B) {
+        if (B->getKind() != MCSymbolRefExpr::VK_None)
+            llvm_unreachable("unsupported");
+    }
 
-  const MCSymbolRefExpr *A = getSymA();
-  if (!A)
-    return MCSymbolRefExpr::VK_None;
+    const MCSymbolRefExpr *A = getSymA();
+    if (!A)
+        return MCSymbolRefExpr::VK_None;
 
-  return A->getKind();
+    return A->getKind();
 }

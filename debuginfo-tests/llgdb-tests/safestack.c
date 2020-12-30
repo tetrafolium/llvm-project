@@ -7,22 +7,22 @@
 //           non-asanified configurations.
 
 struct S {
-  int a[8];
+    int a[8];
 };
 
 int f(struct S s, unsigned i);
 
 int main(int argc, const char **argv) {
-  struct S s = {{0, 1, 2, 3, 4, 5, 6, 7}};
-  // DEBUGGER: break 17
-  f(s, 4);
-  // DEBUGGER: break 19
-  return 0;
+    struct S s = {{0, 1, 2, 3, 4, 5, 6, 7}};
+    // DEBUGGER: break 17
+    f(s, 4);
+    // DEBUGGER: break 19
+    return 0;
 }
 
 int f(struct S s, unsigned i) {
-  // DEBUGGER: break 24
-  return s.a[i];
+    // DEBUGGER: break 24
+    return s.a[i];
 }
 
 // DEBUGGER: r

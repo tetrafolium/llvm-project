@@ -26,91 +26,91 @@ using namespace llvm;
 namespace {
 
 struct CheckDebugMachineModule : public ModulePass {
-  bool runOnModule(Module &M) override {
-    MachineModuleInfo &MMI =
-        getAnalysis<MachineModuleInfoWrapperPass>().getMMI();
+    bool runOnModule(Module &M) override {
+        MachineModuleInfo &MMI =
+            getAnalysis<MachineModuleInfoWrapperPass>().getMMI();
 
-    NamedMDNode *NMD = M.getNamedMetadata("llvm.mir.debugify");
-    if (!NMD) {
-      errs() << "WARNING: Please run mir-debugify to generate "
-                "llvm.mir.debugify metadata first.\n";
-      return false;
-    }
-
-    auto getDebugifyOperand = [&](unsigned Idx) -> unsigned {
-      return mdconst::extract<ConstantInt>(NMD->getOperand(Idx)->getOperand(0))
-          ->getZExtValue();
-    };
-    assert(NMD->getNumOperands() == 2 &&
-           "llvm.mir.debugify should have exactly 2 operands!");
-    unsigned NumLines = getDebugifyOperand(0);
-    unsigned NumVars = getDebugifyOperand(1);
-    BitVector MissingLines{NumLines, true};
-    BitVector MissingVars{NumVars, true};
-
-    for (Function &F : M.functions()) {
-      MachineFunction *MF = MMI.getMachineFunction(F);
-      if (!MF)
-        continue;
-      for (MachineBasicBlock &MBB : *MF) {
-        // Find missing lines.
-        // TODO: Avoid meta instructions other than dbg_val.
-        for (MachineInstr &MI : MBB) {
-          if (MI.isDebugValue())
-            continue;
-          const DebugLoc DL = MI.getDebugLoc();
-          if (DL && DL.getLine() != 0) {
-            MissingLines.reset(DL.getLine() - 1);
-            continue;
-          }
-
-          if (!DL) {
-            errs() << "WARNING: Instruction with empty DebugLoc in function ";
-            errs() << F.getName() << " --";
-            MI.print(errs());
-          }
+        NamedMDNode *NMD = M.getNamedMetadata("llvm.mir.debugify");
+        if (!NMD) {
+            errs() << "WARNING: Please run mir-debugify to generate "
+                   "llvm.mir.debugify metadata first.\n";
+            return false;
         }
 
-        // Find missing variables.
-        // TODO: Handle DBG_INSTR_REF which is under an experimental option now.
-        for (MachineInstr &MI : MBB) {
-          if (!MI.isDebugValue())
-            continue;
-          const DILocalVariable *LocalVar = MI.getDebugVariable();
-          unsigned Var = ~0U;
+        auto getDebugifyOperand = [&](unsigned Idx) -> unsigned {
+            return mdconst::extract<ConstantInt>(NMD->getOperand(Idx)->getOperand(0))
+            ->getZExtValue();
+        };
+        assert(NMD->getNumOperands() == 2 &&
+               "llvm.mir.debugify should have exactly 2 operands!");
+        unsigned NumLines = getDebugifyOperand(0);
+        unsigned NumVars = getDebugifyOperand(1);
+        BitVector MissingLines{NumLines, true};
+        BitVector MissingVars{NumVars, true};
 
-          (void)to_integer(LocalVar->getName(), Var, 10);
-          assert(Var <= NumVars && "Unexpected name for DILocalVariable");
-          MissingVars.reset(Var - 1);
+        for (Function &F : M.functions()) {
+            MachineFunction *MF = MMI.getMachineFunction(F);
+            if (!MF)
+                continue;
+            for (MachineBasicBlock &MBB : *MF) {
+                // Find missing lines.
+                // TODO: Avoid meta instructions other than dbg_val.
+                for (MachineInstr &MI : MBB) {
+                    if (MI.isDebugValue())
+                        continue;
+                    const DebugLoc DL = MI.getDebugLoc();
+                    if (DL && DL.getLine() != 0) {
+                        MissingLines.reset(DL.getLine() - 1);
+                        continue;
+                    }
+
+                    if (!DL) {
+                        errs() << "WARNING: Instruction with empty DebugLoc in function ";
+                        errs() << F.getName() << " --";
+                        MI.print(errs());
+                    }
+                }
+
+                // Find missing variables.
+                // TODO: Handle DBG_INSTR_REF which is under an experimental option now.
+                for (MachineInstr &MI : MBB) {
+                    if (!MI.isDebugValue())
+                        continue;
+                    const DILocalVariable *LocalVar = MI.getDebugVariable();
+                    unsigned Var = ~0U;
+
+                    (void)to_integer(LocalVar->getName(), Var, 10);
+                    assert(Var <= NumVars && "Unexpected name for DILocalVariable");
+                    MissingVars.reset(Var - 1);
+                }
+            }
         }
-      }
+
+        bool Fail = false;
+        for (unsigned Idx : MissingLines.set_bits()) {
+            errs() << "WARNING: Missing line " << Idx + 1 << "\n";
+            Fail = true;
+        }
+
+        for (unsigned Idx : MissingVars.set_bits()) {
+            errs() << "WARNING: Missing variable " << Idx + 1 << "\n";
+            Fail = true;
+        }
+        errs() << "Machine IR debug info check: ";
+        errs() << (Fail ? "FAIL" : "PASS") << "\n";
+
+        return false;
     }
 
-    bool Fail = false;
-    for (unsigned Idx : MissingLines.set_bits()) {
-      errs() << "WARNING: Missing line " << Idx + 1 << "\n";
-      Fail = true;
+    CheckDebugMachineModule() : ModulePass(ID) {}
+
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addRequired<MachineModuleInfoWrapperPass>();
+        AU.addPreserved<MachineModuleInfoWrapperPass>();
+        AU.setPreservesCFG();
     }
 
-    for (unsigned Idx : MissingVars.set_bits()) {
-      errs() << "WARNING: Missing variable " << Idx + 1 << "\n";
-      Fail = true;
-    }
-    errs() << "Machine IR debug info check: ";
-    errs() << (Fail ? "FAIL" : "PASS") << "\n";
-
-    return false;
-  }
-
-  CheckDebugMachineModule() : ModulePass(ID) {}
-
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequired<MachineModuleInfoWrapperPass>();
-    AU.addPreserved<MachineModuleInfoWrapperPass>();
-    AU.setPreservesCFG();
-  }
-
-  static char ID; // Pass identification.
+    static char ID; // Pass identification.
 };
 char CheckDebugMachineModule::ID = 0;
 
@@ -122,5 +122,5 @@ INITIALIZE_PASS_END(CheckDebugMachineModule, DEBUG_TYPE,
                     "Machine Check Debug Module", false, false)
 
 ModulePass *llvm::createCheckDebugMachineModulePass() {
-  return new CheckDebugMachineModule();
+    return new CheckDebugMachineModule();
 }

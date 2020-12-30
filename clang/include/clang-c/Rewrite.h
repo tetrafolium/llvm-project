@@ -28,14 +28,14 @@ CINDEX_LINKAGE CXRewriter clang_CXRewriter_create(CXTranslationUnit TU);
  * Insert the specified string at the specified location in the original buffer.
  */
 CINDEX_LINKAGE void clang_CXRewriter_insertTextBefore(CXRewriter Rew, CXSourceLocation Loc,
-                                           const char *Insert);
+        const char *Insert);
 
 /**
  * Replace the specified range of characters in the input with the specified
  * replacement.
  */
 CINDEX_LINKAGE void clang_CXRewriter_replaceText(CXRewriter Rew, CXSourceRange ToBeReplaced,
-                                      const char *Replacement);
+        const char *Replacement);
 
 /**
  * Remove the specified range.

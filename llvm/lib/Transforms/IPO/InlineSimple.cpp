@@ -37,47 +37,47 @@ namespace {
 /// analyses to determine when to inline.
 class SimpleInliner : public LegacyInlinerBase {
 
-  InlineParams Params;
+    InlineParams Params;
 
 public:
-  SimpleInliner() : LegacyInlinerBase(ID), Params(llvm::getInlineParams()) {
-    initializeSimpleInlinerPass(*PassRegistry::getPassRegistry());
-  }
-
-  explicit SimpleInliner(InlineParams Params)
-      : LegacyInlinerBase(ID), Params(std::move(Params)) {
-    initializeSimpleInlinerPass(*PassRegistry::getPassRegistry());
-  }
-
-  static char ID; // Pass identification, replacement for typeid
-
-  InlineCost getInlineCost(CallBase &CB) override {
-    Function *Callee = CB.getCalledFunction();
-    TargetTransformInfo &TTI = TTIWP->getTTI(*Callee);
-
-    bool RemarksEnabled = false;
-    const auto &BBs = CB.getCaller()->getBasicBlockList();
-    if (!BBs.empty()) {
-      auto DI = OptimizationRemark(DEBUG_TYPE, "", DebugLoc(), &BBs.front());
-      if (DI.isEnabled())
-        RemarksEnabled = true;
+    SimpleInliner() : LegacyInlinerBase(ID), Params(llvm::getInlineParams()) {
+        initializeSimpleInlinerPass(*PassRegistry::getPassRegistry());
     }
-    OptimizationRemarkEmitter ORE(CB.getCaller());
 
-    std::function<AssumptionCache &(Function &)> GetAssumptionCache =
+    explicit SimpleInliner(InlineParams Params)
+        : LegacyInlinerBase(ID), Params(std::move(Params)) {
+        initializeSimpleInlinerPass(*PassRegistry::getPassRegistry());
+    }
+
+    static char ID; // Pass identification, replacement for typeid
+
+    InlineCost getInlineCost(CallBase &CB) override {
+        Function *Callee = CB.getCalledFunction();
+        TargetTransformInfo &TTI = TTIWP->getTTI(*Callee);
+
+        bool RemarksEnabled = false;
+        const auto &BBs = CB.getCaller()->getBasicBlockList();
+        if (!BBs.empty()) {
+            auto DI = OptimizationRemark(DEBUG_TYPE, "", DebugLoc(), &BBs.front());
+            if (DI.isEnabled())
+                RemarksEnabled = true;
+        }
+        OptimizationRemarkEmitter ORE(CB.getCaller());
+
+        std::function<AssumptionCache &(Function &)> GetAssumptionCache =
         [&](Function &F) -> AssumptionCache & {
-      return ACT->getAssumptionCache(F);
-    };
-    return llvm::getInlineCost(CB, Params, TTI, GetAssumptionCache, GetTLI,
-                               /*GetBFI=*/nullptr, PSI,
-                               RemarksEnabled ? &ORE : nullptr);
-  }
+            return ACT->getAssumptionCache(F);
+        };
+        return llvm::getInlineCost(CB, Params, TTI, GetAssumptionCache, GetTLI,
+                                   /*GetBFI=*/nullptr, PSI,
+                                   RemarksEnabled ? &ORE : nullptr);
+    }
 
-  bool runOnSCC(CallGraphSCC &SCC) override;
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
+    bool runOnSCC(CallGraphSCC &SCC) override;
+    void getAnalysisUsage(AnalysisUsage &AU) const override;
 
 private:
-  TargetTransformInfoWrapperPass *TTIWP;
+    TargetTransformInfoWrapperPass *TTIWP;
 
 };
 
@@ -94,31 +94,33 @@ INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)
 INITIALIZE_PASS_END(SimpleInliner, "inline", "Function Integration/Inlining",
                     false, false)
 
-Pass *llvm::createFunctionInliningPass() { return new SimpleInliner(); }
+Pass *llvm::createFunctionInliningPass() {
+    return new SimpleInliner();
+}
 
 Pass *llvm::createFunctionInliningPass(int Threshold) {
-  return new SimpleInliner(llvm::getInlineParams(Threshold));
+    return new SimpleInliner(llvm::getInlineParams(Threshold));
 }
 
 Pass *llvm::createFunctionInliningPass(unsigned OptLevel,
                                        unsigned SizeOptLevel,
                                        bool DisableInlineHotCallSite) {
-  auto Param = llvm::getInlineParams(OptLevel, SizeOptLevel);
-  if (DisableInlineHotCallSite)
-    Param.HotCallSiteThreshold = 0;
-  return new SimpleInliner(Param);
+    auto Param = llvm::getInlineParams(OptLevel, SizeOptLevel);
+    if (DisableInlineHotCallSite)
+        Param.HotCallSiteThreshold = 0;
+    return new SimpleInliner(Param);
 }
 
 Pass *llvm::createFunctionInliningPass(InlineParams &Params) {
-  return new SimpleInliner(Params);
+    return new SimpleInliner(Params);
 }
 
 bool SimpleInliner::runOnSCC(CallGraphSCC &SCC) {
-  TTIWP = &getAnalysis<TargetTransformInfoWrapperPass>();
-  return LegacyInlinerBase::runOnSCC(SCC);
+    TTIWP = &getAnalysis<TargetTransformInfoWrapperPass>();
+    return LegacyInlinerBase::runOnSCC(SCC);
 }
 
 void SimpleInliner::getAnalysisUsage(AnalysisUsage &AU) const {
-  AU.addRequired<TargetTransformInfoWrapperPass>();
-  LegacyInlinerBase::getAnalysisUsage(AU);
+    AU.addRequired<TargetTransformInfoWrapperPass>();
+    LegacyInlinerBase::getAnalysisUsage(AU);
 }

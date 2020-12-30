@@ -25,26 +25,26 @@ bool RISCVCallLowering::lowerReturn(MachineIRBuilder &MIRBuilder,
                                     const Value *Val,
                                     ArrayRef<Register> VRegs) const {
 
-  MachineInstrBuilder Ret = MIRBuilder.buildInstrNoInsert(RISCV::PseudoRET);
+    MachineInstrBuilder Ret = MIRBuilder.buildInstrNoInsert(RISCV::PseudoRET);
 
-  if (Val != nullptr) {
-    return false;
-  }
-  MIRBuilder.insertInstr(Ret);
-  return true;
+    if (Val != nullptr) {
+        return false;
+    }
+    MIRBuilder.insertInstr(Ret);
+    return true;
 }
 
 bool RISCVCallLowering::lowerFormalArguments(
     MachineIRBuilder &MIRBuilder, const Function &F,
     ArrayRef<ArrayRef<Register>> VRegs) const {
 
-  if (F.arg_empty())
-    return true;
+    if (F.arg_empty())
+        return true;
 
-  return false;
+    return false;
 }
 
 bool RISCVCallLowering::lowerCall(MachineIRBuilder &MIRBuilder,
                                   CallLoweringInfo &Info) const {
-  return false;
+    return false;
 }

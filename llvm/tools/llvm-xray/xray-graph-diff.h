@@ -25,47 +25,49 @@ namespace xray {
 // xray-graphs And allows you to print it to a dot file, with optional color
 // coding.
 class GraphDiffRenderer {
-  static const int N = 2;
+    static const int N = 2;
 
 public:
-  using StatType = GraphRenderer::StatType;
-  using TimeStat = GraphRenderer::TimeStat;
+    using StatType = GraphRenderer::StatType;
+    using TimeStat = GraphRenderer::TimeStat;
 
-  using GREdgeValueType = GraphRenderer::GraphT::EdgeValueType;
-  using GRVertexValueType = GraphRenderer::GraphT::VertexValueType;
+    using GREdgeValueType = GraphRenderer::GraphT::EdgeValueType;
+    using GRVertexValueType = GraphRenderer::GraphT::VertexValueType;
 
-  struct EdgeAttribute {
-    std::array<const GREdgeValueType *, N> CorrEdgePtr = {};
-  };
+    struct EdgeAttribute {
+        std::array<const GREdgeValueType *, N> CorrEdgePtr = {};
+    };
 
-  struct VertexAttribute {
-    std::array<const GRVertexValueType *, N> CorrVertexPtr = {};
-  };
+    struct VertexAttribute {
+        std::array<const GRVertexValueType *, N> CorrVertexPtr = {};
+    };
 
-  using GraphT = Graph<VertexAttribute, EdgeAttribute, StringRef>;
+    using GraphT = Graph<VertexAttribute, EdgeAttribute, StringRef>;
 
-  class Factory {
-    std::array<std::reference_wrapper<const GraphRenderer::GraphT>, N> G;
+    class Factory {
+        std::array<std::reference_wrapper<const GraphRenderer::GraphT>, N> G;
 
-  public:
-    template <typename... Ts> Factory(Ts &... Args) : G{{Args...}} {}
+    public:
+        template <typename... Ts> Factory(Ts &... Args) : G{{Args...}} {}
 
-    Expected<GraphDiffRenderer> getGraphDiffRenderer();
-  };
+        Expected<GraphDiffRenderer> getGraphDiffRenderer();
+    };
 
 private:
-  GraphT G;
+    GraphT G;
 
-  GraphDiffRenderer() = default;
+    GraphDiffRenderer() = default;
 
 public:
-  void exportGraphAsDOT(raw_ostream &OS, StatType EdgeLabel = StatType::NONE,
-                        StatType EdgeColor = StatType::NONE,
-                        StatType VertexLabel = StatType::NONE,
-                        StatType VertexColor = StatType::NONE,
-                        int TruncLen = 40);
+    void exportGraphAsDOT(raw_ostream &OS, StatType EdgeLabel = StatType::NONE,
+                          StatType EdgeColor = StatType::NONE,
+                          StatType VertexLabel = StatType::NONE,
+                          StatType VertexColor = StatType::NONE,
+                          int TruncLen = 40);
 
-  const GraphT &getGraph() { return G; }
+    const GraphT &getGraph() {
+        return G;
+    }
 };
 } // namespace xray
 } // namespace llvm

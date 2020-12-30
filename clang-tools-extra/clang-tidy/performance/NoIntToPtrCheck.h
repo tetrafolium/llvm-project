@@ -21,10 +21,10 @@ namespace performance {
 /// http://clang.llvm.org/extra/clang-tidy/checks/performance-no-int-to-ptr.html
 class NoIntToPtrCheck : public ClangTidyCheck {
 public:
-  NoIntToPtrCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    NoIntToPtrCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace performance

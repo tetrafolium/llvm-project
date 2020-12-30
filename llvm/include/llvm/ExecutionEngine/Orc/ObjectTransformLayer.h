@@ -24,23 +24,23 @@ namespace orc {
 
 class ObjectTransformLayer : public ObjectLayer {
 public:
-  using TransformFunction =
-      std::function<Expected<std::unique_ptr<MemoryBuffer>>(
-          std::unique_ptr<MemoryBuffer>)>;
+    using TransformFunction =
+        std::function<Expected<std::unique_ptr<MemoryBuffer>>(
+            std::unique_ptr<MemoryBuffer>)>;
 
-  ObjectTransformLayer(ExecutionSession &ES, ObjectLayer &BaseLayer,
-                       TransformFunction Transform = TransformFunction());
+    ObjectTransformLayer(ExecutionSession &ES, ObjectLayer &BaseLayer,
+                         TransformFunction Transform = TransformFunction());
 
-  void emit(std::unique_ptr<MaterializationResponsibility> R,
-            std::unique_ptr<MemoryBuffer> O) override;
+    void emit(std::unique_ptr<MaterializationResponsibility> R,
+              std::unique_ptr<MemoryBuffer> O) override;
 
-  void setTransform(TransformFunction Transform) {
-    this->Transform = std::move(Transform);
-  }
+    void setTransform(TransformFunction Transform) {
+        this->Transform = std::move(Transform);
+    }
 
 private:
-  ObjectLayer &BaseLayer;
-  TransformFunction Transform;
+    ObjectLayer &BaseLayer;
+    TransformFunction Transform;
 };
 
 } // end namespace orc

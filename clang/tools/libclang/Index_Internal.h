@@ -25,30 +25,30 @@
 
 #else
 // If we are compiled with a compiler that doesn't have native blocks support,
-// define and call the block manually. 
+// define and call the block manually.
 
 #define INVOKE_BLOCK2(block, arg1, arg2) block->invoke(block, arg1, arg2)
 
 typedef struct _CXCursorAndRangeVisitorBlock {
-  void *isa;
-  int flags;
-  int reserved;
-  enum CXVisitorResult (*invoke)(_CXCursorAndRangeVisitorBlock *,
-                                 CXCursor, CXSourceRange);
+    void *isa;
+    int flags;
+    int reserved;
+    enum CXVisitorResult (*invoke)(_CXCursorAndRangeVisitorBlock *,
+                                   CXCursor, CXSourceRange);
 } *CXCursorAndRangeVisitorBlock;
 
 #endif // !__has_feature(blocks)
 
 /// The result of comparing two source ranges.
 enum RangeComparisonResult {
-  /// Either the ranges overlap or one of the ranges is invalid.
-  RangeOverlap,
+    /// Either the ranges overlap or one of the ranges is invalid.
+    RangeOverlap,
 
-  /// The first range ends before the second range starts.
-  RangeBefore,
+    /// The first range ends before the second range starts.
+    RangeBefore,
 
-  /// The first range starts after the second range ends.
-  RangeAfter
+    /// The first range starts after the second range ends.
+    RangeAfter
 };
 
 #endif

@@ -32,51 +32,51 @@ class SemanticsContext;
 
 class ModFileWriter {
 public:
-  explicit ModFileWriter(SemanticsContext &context) : context_{context} {}
-  bool WriteAll();
+    explicit ModFileWriter(SemanticsContext &context) : context_{context} {}
+    bool WriteAll();
 
 private:
-  SemanticsContext &context_;
-  // Buffer to use with raw_string_ostream
-  std::string usesBuf_;
-  std::string useExtraAttrsBuf_;
-  std::string declsBuf_;
-  std::string containsBuf_;
+    SemanticsContext &context_;
+    // Buffer to use with raw_string_ostream
+    std::string usesBuf_;
+    std::string useExtraAttrsBuf_;
+    std::string declsBuf_;
+    std::string containsBuf_;
 
-  llvm::raw_string_ostream uses_{usesBuf_};
-  llvm::raw_string_ostream useExtraAttrs_{
-      useExtraAttrsBuf_}; // attrs added to used entity
-  llvm::raw_string_ostream decls_{declsBuf_};
-  llvm::raw_string_ostream contains_{containsBuf_};
+    llvm::raw_string_ostream uses_{usesBuf_};
+    llvm::raw_string_ostream useExtraAttrs_{
+        useExtraAttrsBuf_}; // attrs added to used entity
+    llvm::raw_string_ostream decls_{declsBuf_};
+    llvm::raw_string_ostream contains_{containsBuf_};
 
-  void WriteAll(const Scope &);
-  void WriteOne(const Scope &);
-  void Write(const Symbol &);
-  std::string GetAsString(const Symbol &);
-  // Returns true if a derived type with bindings and "contains" was emitted
-  bool PutSymbols(const Scope &);
-  void PutSymbol(llvm::raw_ostream &, const Symbol &);
-  void PutDerivedType(const Symbol &);
-  void PutSubprogram(const Symbol &);
-  void PutGeneric(const Symbol &);
-  void PutUse(const Symbol &);
-  void PutUseExtraAttr(Attr, const Symbol &, const Symbol &);
+    void WriteAll(const Scope &);
+    void WriteOne(const Scope &);
+    void Write(const Symbol &);
+    std::string GetAsString(const Symbol &);
+    // Returns true if a derived type with bindings and "contains" was emitted
+    bool PutSymbols(const Scope &);
+    void PutSymbol(llvm::raw_ostream &, const Symbol &);
+    void PutDerivedType(const Symbol &);
+    void PutSubprogram(const Symbol &);
+    void PutGeneric(const Symbol &);
+    void PutUse(const Symbol &);
+    void PutUseExtraAttr(Attr, const Symbol &, const Symbol &);
 };
 
 class ModFileReader {
 public:
-  // directories specifies where to search for module files
-  ModFileReader(SemanticsContext &context) : context_{context} {}
-  // Find and read the module file for a module or submodule.
-  // If ancestor is specified, look for a submodule of that module.
-  // Return the Scope for that module/submodule or nullptr on error.
-  Scope *Read(const SourceName &, Scope *ancestor = nullptr);
+    // directories specifies where to search for module files
+    ModFileReader(SemanticsContext &context) : context_{context} {}
+    // Find and read the module file for a module or submodule.
+    // If ancestor is specified, look for a submodule of that module.
+    // Return the Scope for that module/submodule or nullptr on error.
+    Scope *Read(const SourceName &, Scope *ancestor = nullptr);
 
 private:
-  SemanticsContext &context_;
+    SemanticsContext &context_;
 
-  parser::Message &Say(const SourceName &, const std::string &,
-      parser::MessageFixedText &&, const std::string &);
+    parser::Message &Say(const SourceName &, const std::string &,
+                         parser::MessageFixedText &&, const std::string &);
 };
 
 } // namespace Fortran::semantics

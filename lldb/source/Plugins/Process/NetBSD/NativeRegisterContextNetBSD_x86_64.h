@@ -32,39 +32,39 @@ class NativeRegisterContextNetBSD_x86_64
     : public NativeRegisterContextNetBSD,
       public NativeRegisterContextWatchpoint_x86 {
 public:
-  NativeRegisterContextNetBSD_x86_64(const ArchSpec &target_arch,
-                                     NativeThreadProtocol &native_thread);
-  uint32_t GetRegisterSetCount() const override;
+    NativeRegisterContextNetBSD_x86_64(const ArchSpec &target_arch,
+                                       NativeThreadProtocol &native_thread);
+    uint32_t GetRegisterSetCount() const override;
 
-  const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
+    const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
 
-  Status ReadRegister(const RegisterInfo *reg_info,
-                      RegisterValue &reg_value) override;
+    Status ReadRegister(const RegisterInfo *reg_info,
+                        RegisterValue &reg_value) override;
 
-  Status WriteRegister(const RegisterInfo *reg_info,
-                       const RegisterValue &reg_value) override;
+    Status WriteRegister(const RegisterInfo *reg_info,
+                         const RegisterValue &reg_value) override;
 
-  Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+    Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-  Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+    Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-  llvm::Error
-  CopyHardwareWatchpointsFrom(NativeRegisterContextNetBSD &source) override;
+    llvm::Error
+    CopyHardwareWatchpointsFrom(NativeRegisterContextNetBSD &source) override;
 
 private:
-  // Private member types.
-  enum { GPRegSet, XStateRegSet, DBRegSet };
+    // Private member types.
+    enum { GPRegSet, XStateRegSet, DBRegSet };
 
-  // Private member variables.
-  struct reg m_gpr;
-  struct xstate m_xstate;
-  struct dbreg m_dbr;
+    // Private member variables.
+    struct reg m_gpr;
+    struct xstate m_xstate;
+    struct dbreg m_dbr;
 
-  int GetSetForNativeRegNum(int reg_num) const;
-  int GetDR(int num) const;
+    int GetSetForNativeRegNum(int reg_num) const;
+    int GetDR(int num) const;
 
-  Status ReadRegisterSet(uint32_t set);
-  Status WriteRegisterSet(uint32_t set);
+    Status ReadRegisterSet(uint32_t set);
+    Status WriteRegisterSet(uint32_t set);
 };
 
 } // namespace process_netbsd

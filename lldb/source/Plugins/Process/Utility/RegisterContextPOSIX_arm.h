@@ -16,47 +16,49 @@
 
 class RegisterContextPOSIX_arm : public lldb_private::RegisterContext {
 public:
-  RegisterContextPOSIX_arm(
-      lldb_private::Thread &thread,
-      std::unique_ptr<RegisterInfoPOSIX_arm> register_info);
+    RegisterContextPOSIX_arm(
+        lldb_private::Thread &thread,
+        std::unique_ptr<RegisterInfoPOSIX_arm> register_info);
 
-  ~RegisterContextPOSIX_arm() override;
+    ~RegisterContextPOSIX_arm() override;
 
-  void Invalidate();
+    void Invalidate();
 
-  void InvalidateAllRegisters() override;
+    void InvalidateAllRegisters() override;
 
-  size_t GetRegisterCount() override;
+    size_t GetRegisterCount() override;
 
-  virtual size_t GetGPRSize();
+    virtual size_t GetGPRSize();
 
-  virtual unsigned GetRegisterSize(unsigned reg);
+    virtual unsigned GetRegisterSize(unsigned reg);
 
-  virtual unsigned GetRegisterOffset(unsigned reg);
+    virtual unsigned GetRegisterOffset(unsigned reg);
 
-  const lldb_private::RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
+    const lldb_private::RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
 
-  size_t GetRegisterSetCount() override;
+    size_t GetRegisterSetCount() override;
 
-  const lldb_private::RegisterSet *GetRegisterSet(size_t set) override;
+    const lldb_private::RegisterSet *GetRegisterSet(size_t set) override;
 
-  const char *GetRegisterName(unsigned reg);
+    const char *GetRegisterName(unsigned reg);
 
 protected:
-  std::unique_ptr<RegisterInfoPOSIX_arm> m_register_info_up;
+    std::unique_ptr<RegisterInfoPOSIX_arm> m_register_info_up;
 
-  virtual const lldb_private::RegisterInfo *GetRegisterInfo();
+    virtual const lldb_private::RegisterInfo *GetRegisterInfo();
 
-  bool IsGPR(unsigned reg);
+    bool IsGPR(unsigned reg);
 
-  bool IsFPR(unsigned reg);
+    bool IsFPR(unsigned reg);
 
-  size_t GetFPUSize() { return sizeof(RegisterInfoPOSIX_arm::FPU); }
+    size_t GetFPUSize() {
+        return sizeof(RegisterInfoPOSIX_arm::FPU);
+    }
 
-  virtual bool ReadGPR() = 0;
-  virtual bool ReadFPR() = 0;
-  virtual bool WriteGPR() = 0;
-  virtual bool WriteFPR() = 0;
+    virtual bool ReadGPR() = 0;
+    virtual bool ReadFPR() = 0;
+    virtual bool WriteGPR() = 0;
+    virtual bool WriteFPR() = 0;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_UTILITY_REGISTERCONTEXTPOSIX_ARM_H

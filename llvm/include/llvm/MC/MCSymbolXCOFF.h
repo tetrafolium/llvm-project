@@ -19,56 +19,68 @@ class MCSectionXCOFF;
 
 class MCSymbolXCOFF : public MCSymbol {
 public:
-  MCSymbolXCOFF(const StringMapEntry<bool> *Name, bool isTemporary)
-      : MCSymbol(SymbolKindXCOFF, Name, isTemporary) {}
+    MCSymbolXCOFF(const StringMapEntry<bool> *Name, bool isTemporary)
+        : MCSymbol(SymbolKindXCOFF, Name, isTemporary) {}
 
-  static bool classof(const MCSymbol *S) { return S->isXCOFF(); }
-
-  static StringRef getUnqualifiedName(StringRef Name) {
-    if (Name.back() == ']') {
-      StringRef Lhs, Rhs;
-      std::tie(Lhs, Rhs) = Name.rsplit('[');
-      assert(!Rhs.empty() && "Invalid SMC format in XCOFF symbol.");
-      return Lhs;
+    static bool classof(const MCSymbol *S) {
+        return S->isXCOFF();
     }
-    return Name;
-  }
 
-  void setStorageClass(XCOFF::StorageClass SC) {
-    StorageClass = SC;
-  };
+    static StringRef getUnqualifiedName(StringRef Name) {
+        if (Name.back() == ']') {
+            StringRef Lhs, Rhs;
+            std::tie(Lhs, Rhs) = Name.rsplit('[');
+            assert(!Rhs.empty() && "Invalid SMC format in XCOFF symbol.");
+            return Lhs;
+        }
+        return Name;
+    }
 
-  XCOFF::StorageClass getStorageClass() const {
-    assert(StorageClass.hasValue() &&
-           "StorageClass not set on XCOFF MCSymbol.");
-    return StorageClass.getValue();
-  }
+    void setStorageClass(XCOFF::StorageClass SC) {
+        StorageClass = SC;
+    };
 
-  StringRef getUnqualifiedName() const { return getUnqualifiedName(getName()); }
+    XCOFF::StorageClass getStorageClass() const {
+        assert(StorageClass.hasValue() &&
+               "StorageClass not set on XCOFF MCSymbol.");
+        return StorageClass.getValue();
+    }
 
-  MCSectionXCOFF *getRepresentedCsect() const;
+    StringRef getUnqualifiedName() const {
+        return getUnqualifiedName(getName());
+    }
 
-  void setRepresentedCsect(MCSectionXCOFF *C);
+    MCSectionXCOFF *getRepresentedCsect() const;
 
-  void setVisibilityType(XCOFF::VisibilityType SVT) { VisibilityType = SVT; };
+    void setRepresentedCsect(MCSectionXCOFF *C);
 
-  XCOFF::VisibilityType getVisibilityType() const { return VisibilityType; }
+    void setVisibilityType(XCOFF::VisibilityType SVT) {
+        VisibilityType = SVT;
+    };
 
-  bool hasRename() const { return !SymbolTableName.empty(); }
+    XCOFF::VisibilityType getVisibilityType() const {
+        return VisibilityType;
+    }
 
-  void setSymbolTableName(StringRef STN) { SymbolTableName = STN; }
+    bool hasRename() const {
+        return !SymbolTableName.empty();
+    }
 
-  StringRef getSymbolTableName() const {
-    if (hasRename())
-      return SymbolTableName;
-    return getUnqualifiedName();
-  }
+    void setSymbolTableName(StringRef STN) {
+        SymbolTableName = STN;
+    }
+
+    StringRef getSymbolTableName() const {
+        if (hasRename())
+            return SymbolTableName;
+        return getUnqualifiedName();
+    }
 
 private:
-  Optional<XCOFF::StorageClass> StorageClass;
-  MCSectionXCOFF *RepresentedCsect = nullptr;
-  XCOFF::VisibilityType VisibilityType = XCOFF::SYM_V_UNSPECIFIED;
-  StringRef SymbolTableName;
+    Optional<XCOFF::StorageClass> StorageClass;
+    MCSectionXCOFF *RepresentedCsect = nullptr;
+    XCOFF::VisibilityType VisibilityType = XCOFF::SYM_V_UNSPECIFIED;
+    StringRef SymbolTableName;
 };
 
 } // end namespace llvm

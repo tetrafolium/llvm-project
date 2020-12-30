@@ -73,7 +73,7 @@ bool isSafeToLoadUnconditionally(Value *V, Align Alignment, APInt &Size,
 /// its placement within the loop. (i.e. does not require predication beyond
 /// that required by the the header itself and could be hoisted into the header
 /// if desired.)  This is more powerful than the variants above when the
-/// address loaded from is analyzeable by SCEV.  
+/// address loaded from is analyzeable by SCEV.
 bool isDereferenceableAndAlignedInLoop(LoadInst *LI, Loop *L,
                                        ScalarEvolution &SE,
                                        DominatorTree &DT);

@@ -26,9 +26,9 @@
 #include "llvm/Analysis/ObjCARCInstKind.h"
 
 namespace llvm {
-  class BasicBlock;
-  class Instruction;
-  class Value;
+class BasicBlock;
+class Instruction;
+class Value;
 }
 
 namespace llvm {
@@ -42,12 +42,12 @@ class ProvenanceAnalysis;
 /// There are several kinds of dependence-like concepts in use here.
 ///
 enum DependenceKind {
-  NeedsPositiveRetainCount,
-  AutoreleasePoolBoundary,
-  CanChangeRetainCount,
-  RetainAutoreleaseDep,       ///< Blocks objc_retainAutorelease.
-  RetainAutoreleaseRVDep,     ///< Blocks objc_retainAutoreleaseReturnValue.
-  RetainRVDep                 ///< Blocks objc_retainAutoreleasedReturnValue.
+    NeedsPositiveRetainCount,
+    AutoreleasePoolBoundary,
+    CanChangeRetainCount,
+    RetainAutoreleaseDep,       ///< Blocks objc_retainAutorelease.
+    RetainAutoreleaseRVDep,     ///< Blocks objc_retainAutoreleaseReturnValue.
+    RetainRVDep                 ///< Blocks objc_retainAutoreleasedReturnValue.
 };
 
 /// Find dependent instructions. If there is exactly one dependent instruction,
@@ -79,7 +79,7 @@ bool CanDecrementRefCount(const Instruction *Inst, const Value *Ptr,
 static inline bool CanDecrementRefCount(const Instruction *Inst,
                                         const Value *Ptr,
                                         ProvenanceAnalysis &PA) {
-  return CanDecrementRefCount(Inst, Ptr, PA, GetARCInstKind(Inst));
+    return CanDecrementRefCount(Inst, Ptr, PA, GetARCInstKind(Inst));
 }
 
 } // namespace objcarc

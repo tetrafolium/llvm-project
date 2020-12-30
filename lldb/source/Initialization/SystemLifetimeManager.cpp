@@ -19,38 +19,38 @@ SystemLifetimeManager::SystemLifetimeManager()
     : m_mutex(), m_initialized(false) {}
 
 SystemLifetimeManager::~SystemLifetimeManager() {
-  assert(!m_initialized &&
-         "SystemLifetimeManager destroyed without calling Terminate!");
+    assert(!m_initialized &&
+           "SystemLifetimeManager destroyed without calling Terminate!");
 }
 
 llvm::Error SystemLifetimeManager::Initialize(
     std::unique_ptr<SystemInitializer> initializer,
     LoadPluginCallbackType plugin_callback) {
-  std::lock_guard<std::recursive_mutex> guard(m_mutex);
-  if (!m_initialized) {
-    assert(!m_initializer && "Attempting to call "
-                             "SystemLifetimeManager::Initialize() when it is "
-                             "already initialized");
-    m_initialized = true;
-    m_initializer = std::move(initializer);
+    std::lock_guard<std::recursive_mutex> guard(m_mutex);
+    if (!m_initialized) {
+        assert(!m_initializer && "Attempting to call "
+               "SystemLifetimeManager::Initialize() when it is "
+               "already initialized");
+        m_initialized = true;
+        m_initializer = std::move(initializer);
 
-    if (auto e = m_initializer->Initialize())
-      return e;
+        if (auto e = m_initializer->Initialize())
+            return e;
 
-    Debugger::Initialize(plugin_callback);
-  }
+        Debugger::Initialize(plugin_callback);
+    }
 
-  return llvm::Error::success();
+    return llvm::Error::success();
 }
 
 void SystemLifetimeManager::Terminate() {
-  std::lock_guard<std::recursive_mutex> guard(m_mutex);
+    std::lock_guard<std::recursive_mutex> guard(m_mutex);
 
-  if (m_initialized) {
-    Debugger::Terminate();
-    m_initializer->Terminate();
+    if (m_initialized) {
+        Debugger::Terminate();
+        m_initializer->Terminate();
 
-    m_initializer.reset();
-    m_initialized = false;
-  }
+        m_initializer.reset();
+        m_initialized = false;
+    }
 }

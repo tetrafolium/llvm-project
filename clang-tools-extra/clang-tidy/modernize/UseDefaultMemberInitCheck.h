@@ -23,22 +23,22 @@ namespace modernize {
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-use-default-member-init.html
 class UseDefaultMemberInitCheck : public ClangTidyCheck {
 public:
-  UseDefaultMemberInitCheck(StringRef Name, ClangTidyContext *Context);
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus11;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    UseDefaultMemberInitCheck(StringRef Name, ClangTidyContext *Context);
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus11;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void checkDefaultInit(const ast_matchers::MatchFinder::MatchResult &Result,
-                        const CXXCtorInitializer *Init);
-  void checkExistingInit(const ast_matchers::MatchFinder::MatchResult &Result,
-                         const CXXCtorInitializer *Init);
+    void checkDefaultInit(const ast_matchers::MatchFinder::MatchResult &Result,
+                          const CXXCtorInitializer *Init);
+    void checkExistingInit(const ast_matchers::MatchFinder::MatchResult &Result,
+                           const CXXCtorInitializer *Init);
 
-  const bool UseAssignment;
-  const bool IgnoreMacros;
+    const bool UseAssignment;
+    const bool IgnoreMacros;
 };
 
 } // namespace modernize

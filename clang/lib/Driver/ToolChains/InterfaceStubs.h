@@ -18,15 +18,19 @@ namespace tools {
 namespace ifstool {
 class LLVM_LIBRARY_VISIBILITY Merger : public Tool {
 public:
-  Merger(const ToolChain &TC) : Tool("IFS::Merger", "llvm-ifs", TC) {}
+    Merger(const ToolChain &TC) : Tool("IFS::Merger", "llvm-ifs", TC) {}
 
-  bool hasIntegratedCPP() const override { return false; }
-  bool isLinkJob() const override { return false; }
+    bool hasIntegratedCPP() const override {
+        return false;
+    }
+    bool isLinkJob() const override {
+        return false;
+    }
 
-  void ConstructJob(Compilation &C, const JobAction &JA,
-                    const InputInfo &Output, const InputInfoList &Inputs,
-                    const llvm::opt::ArgList &TCArgs,
-                    const char *LinkingOutput) const override;
+    void ConstructJob(Compilation &C, const JobAction &JA,
+                      const InputInfo &Output, const InputInfoList &Inputs,
+                      const llvm::opt::ArgList &TCArgs,
+                      const char *LinkingOutput) const override;
 };
 } // end namespace ifstool
 } // end namespace tools

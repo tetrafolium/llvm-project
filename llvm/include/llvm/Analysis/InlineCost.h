@@ -65,87 +65,101 @@ const uint64_t MaxSimplifiedDynamicAllocaToInline = 65536;
 /// directly tested to determine if inlining should occur given the cost and
 /// threshold for this cost metric.
 class InlineCost {
-  enum SentinelValues { AlwaysInlineCost = INT_MIN, NeverInlineCost = INT_MAX };
+    enum SentinelValues { AlwaysInlineCost = INT_MIN, NeverInlineCost = INT_MAX };
 
-  /// The estimated cost of inlining this callsite.
-  int Cost = 0;
+    /// The estimated cost of inlining this callsite.
+    int Cost = 0;
 
-  /// The adjusted threshold against which this cost was computed.
-  int Threshold = 0;
+    /// The adjusted threshold against which this cost was computed.
+    int Threshold = 0;
 
-  /// Must be set for Always and Never instances.
-  const char *Reason = nullptr;
+    /// Must be set for Always and Never instances.
+    const char *Reason = nullptr;
 
-  // Trivial constructor, interesting logic in the factory functions below.
-  InlineCost(int Cost, int Threshold, const char *Reason = nullptr)
-      : Cost(Cost), Threshold(Threshold), Reason(Reason) {
-    assert((isVariable() || Reason) &&
-           "Reason must be provided for Never or Always");
-  }
+    // Trivial constructor, interesting logic in the factory functions below.
+    InlineCost(int Cost, int Threshold, const char *Reason = nullptr)
+        : Cost(Cost), Threshold(Threshold), Reason(Reason) {
+        assert((isVariable() || Reason) &&
+               "Reason must be provided for Never or Always");
+    }
 
 public:
-  static InlineCost get(int Cost, int Threshold) {
-    assert(Cost > AlwaysInlineCost && "Cost crosses sentinel value");
-    assert(Cost < NeverInlineCost && "Cost crosses sentinel value");
-    return InlineCost(Cost, Threshold);
-  }
-  static InlineCost getAlways(const char *Reason) {
-    return InlineCost(AlwaysInlineCost, 0, Reason);
-  }
-  static InlineCost getNever(const char *Reason) {
-    return InlineCost(NeverInlineCost, 0, Reason);
-  }
+    static InlineCost get(int Cost, int Threshold) {
+        assert(Cost > AlwaysInlineCost && "Cost crosses sentinel value");
+        assert(Cost < NeverInlineCost && "Cost crosses sentinel value");
+        return InlineCost(Cost, Threshold);
+    }
+    static InlineCost getAlways(const char *Reason) {
+        return InlineCost(AlwaysInlineCost, 0, Reason);
+    }
+    static InlineCost getNever(const char *Reason) {
+        return InlineCost(NeverInlineCost, 0, Reason);
+    }
 
-  /// Test whether the inline cost is low enough for inlining.
-  explicit operator bool() const { return Cost < Threshold; }
+    /// Test whether the inline cost is low enough for inlining.
+    explicit operator bool() const {
+        return Cost < Threshold;
+    }
 
-  bool isAlways() const { return Cost == AlwaysInlineCost; }
-  bool isNever() const { return Cost == NeverInlineCost; }
-  bool isVariable() const { return !isAlways() && !isNever(); }
+    bool isAlways() const {
+        return Cost == AlwaysInlineCost;
+    }
+    bool isNever() const {
+        return Cost == NeverInlineCost;
+    }
+    bool isVariable() const {
+        return !isAlways() && !isNever();
+    }
 
-  /// Get the inline cost estimate.
-  /// It is an error to call this on an "always" or "never" InlineCost.
-  int getCost() const {
-    assert(isVariable() && "Invalid access of InlineCost");
-    return Cost;
-  }
+    /// Get the inline cost estimate.
+    /// It is an error to call this on an "always" or "never" InlineCost.
+    int getCost() const {
+        assert(isVariable() && "Invalid access of InlineCost");
+        return Cost;
+    }
 
-  /// Get the threshold against which the cost was computed
-  int getThreshold() const {
-    assert(isVariable() && "Invalid access of InlineCost");
-    return Threshold;
-  }
+    /// Get the threshold against which the cost was computed
+    int getThreshold() const {
+        assert(isVariable() && "Invalid access of InlineCost");
+        return Threshold;
+    }
 
-  /// Get the reason of Always or Never.
-  const char *getReason() const {
-    assert((Reason || isVariable()) &&
-           "InlineCost reason must be set for Always or Never");
-    return Reason;
-  }
+    /// Get the reason of Always or Never.
+    const char *getReason() const {
+        assert((Reason || isVariable()) &&
+               "InlineCost reason must be set for Always or Never");
+        return Reason;
+    }
 
-  /// Get the cost delta from the threshold for inlining.
-  /// Only valid if the cost is of the variable kind. Returns a negative
-  /// value if the cost is too high to inline.
-  int getCostDelta() const { return Threshold - getCost(); }
+    /// Get the cost delta from the threshold for inlining.
+    /// Only valid if the cost is of the variable kind. Returns a negative
+    /// value if the cost is too high to inline.
+    int getCostDelta() const {
+        return Threshold - getCost();
+    }
 };
 
 /// InlineResult is basically true or false. For false results the message
 /// describes a reason.
 class InlineResult {
-  const char *Message = nullptr;
-  InlineResult(const char *Message = nullptr) : Message(Message) {}
+    const char *Message = nullptr;
+    InlineResult(const char *Message = nullptr) : Message(Message) {}
 
 public:
-  static InlineResult success() { return {}; }
-  static InlineResult failure(const char *Reason) {
-    return InlineResult(Reason);
-  }
-  bool isSuccess() const { return Message == nullptr; }
-  const char *getFailureReason() const {
-    assert(!isSuccess() &&
-           "getFailureReason should only be called in failure cases");
-    return Message;
-  }
+    static InlineResult success() {
+        return {};
+    }
+    static InlineResult failure(const char *Reason) {
+        return InlineResult(Reason);
+    }
+    bool isSuccess() const {
+        return Message == nullptr;
+    }
+    const char *getFailureReason() const {
+        assert(!isSuccess() &&
+               "getFailureReason should only be called in failure cases");
+        return Message;
+    }
 };
 
 /// Thresholds to tune inline cost analysis. The inline cost analysis decides
@@ -158,36 +172,36 @@ public:
 /// object.
 
 struct InlineParams {
-  /// The default threshold to start with for a callee.
-  int DefaultThreshold = -1;
+    /// The default threshold to start with for a callee.
+    int DefaultThreshold = -1;
 
-  /// Threshold to use for callees with inline hint.
-  Optional<int> HintThreshold;
+    /// Threshold to use for callees with inline hint.
+    Optional<int> HintThreshold;
 
-  /// Threshold to use for cold callees.
-  Optional<int> ColdThreshold;
+    /// Threshold to use for cold callees.
+    Optional<int> ColdThreshold;
 
-  /// Threshold to use when the caller is optimized for size.
-  Optional<int> OptSizeThreshold;
+    /// Threshold to use when the caller is optimized for size.
+    Optional<int> OptSizeThreshold;
 
-  /// Threshold to use when the caller is optimized for minsize.
-  Optional<int> OptMinSizeThreshold;
+    /// Threshold to use when the caller is optimized for minsize.
+    Optional<int> OptMinSizeThreshold;
 
-  /// Threshold to use when the callsite is considered hot.
-  Optional<int> HotCallSiteThreshold;
+    /// Threshold to use when the callsite is considered hot.
+    Optional<int> HotCallSiteThreshold;
 
-  /// Threshold to use when the callsite is considered hot relative to function
-  /// entry.
-  Optional<int> LocallyHotCallSiteThreshold;
+    /// Threshold to use when the callsite is considered hot relative to function
+    /// entry.
+    Optional<int> LocallyHotCallSiteThreshold;
 
-  /// Threshold to use when the callsite is considered cold.
-  Optional<int> ColdCallSiteThreshold;
+    /// Threshold to use when the callsite is considered cold.
+    Optional<int> ColdCallSiteThreshold;
 
-  /// Compute inline cost even when the cost has exceeded the threshold.
-  Optional<bool> ComputeFullInlineCost;
+    /// Compute inline cost even when the cost has exceeded the threshold.
+    Optional<bool> ComputeFullInlineCost;
 
-  /// Indicate whether we should allow inline deferral.
-  Optional<bool> EnableDeferral = true;
+    /// Indicate whether we should allow inline deferral.
+    Optional<bool> EnableDeferral = true;
 };
 
 /// Generate the parameters to tune the inline cost analysis based only on the
@@ -278,11 +292,11 @@ InlineResult isInlineViable(Function &Callee);
 // inliner's decisions when creating new optimizations to InlineCost.
 struct InlineCostAnnotationPrinterPass
     : PassInfoMixin<InlineCostAnnotationPrinterPass> {
-  raw_ostream &OS;
+    raw_ostream &OS;
 
 public:
-  explicit InlineCostAnnotationPrinterPass(raw_ostream &OS) : OS(OS) {}
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM);
+    explicit InlineCostAnnotationPrinterPass(raw_ostream &OS) : OS(OS) {}
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM);
 };
 } // namespace llvm
 

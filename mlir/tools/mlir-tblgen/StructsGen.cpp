@@ -34,10 +34,10 @@ static void
 emitStructClass(const Record &structDef, StringRef structName,
                 llvm::ArrayRef<mlir::tblgen::StructFieldAttr> fields,
                 StringRef description, raw_ostream &os) {
-  const char *structInfo = R"(
+    const char *structInfo = R"(
 // {0}
 class {1} : public ::mlir::DictionaryAttr)";
-  const char *structInfoEnd = R"( {
+    const char *structInfoEnd = R"( {
 public:
   using ::mlir::DictionaryAttr::DictionaryAttr;
   static bool classof(::mlir::Attribute attr);
@@ -163,7 +163,7 @@ static void emitClassofDef(llvm::StringRef structName,
   const char *classofInfo = R"(
 bool {0}::classof(::mlir::Attribute attr))";
 
-  const char *classofInfoHeader = R"(
+    const char *classofInfoHeader = R"(
   if (!attr)
     return false;
   auto derived = attr.dyn_cast<::mlir::DictionaryAttr>();

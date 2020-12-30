@@ -24,8 +24,8 @@ llvm::Optional<Path> getCorrespondingHeaderOrSource(
 /// Given a header file, returns the best matching source file, and vice visa.
 /// The heuristics incorporate with the AST and the index (if provided).
 llvm::Optional<Path> getCorrespondingHeaderOrSource(const Path &OriginalFile,
-                                                    ParsedAST &AST,
-                                                    const SymbolIndex *Index);
+        ParsedAST &AST,
+        const SymbolIndex *Index);
 
 /// Returns all indexable decls that are present in the main file of the AST.
 /// Exposed for unittests.

@@ -19,151 +19,152 @@ using APSInt = llvm::APSInt;
 using Error = llvm::Error;
 
 Expected<Function *> ByteCodeEmitter::compileFunc(const FunctionDecl *F) {
-  // Do not try to compile undefined functions.
-  if (!F->isDefined(F) || (!F->hasBody() && F->willHaveBody()))
-    return nullptr;
+    // Do not try to compile undefined functions.
+    if (!F->isDefined(F) || (!F->hasBody() && F->willHaveBody()))
+        return nullptr;
 
-  // Set up argument indices.
-  unsigned ParamOffset = 0;
-  SmallVector<PrimType, 8> ParamTypes;
-  llvm::DenseMap<unsigned, Function::ParamDescriptor> ParamDescriptors;
+    // Set up argument indices.
+    unsigned ParamOffset = 0;
+    SmallVector<PrimType, 8> ParamTypes;
+    llvm::DenseMap<unsigned, Function::ParamDescriptor> ParamDescriptors;
 
-  // If the return is not a primitive, a pointer to the storage where the value
-  // is initialized in is passed as the first argument.
-  QualType Ty = F->getReturnType();
-  if (!Ty->isVoidType() && !Ctx.classify(Ty)) {
-    ParamTypes.push_back(PT_Ptr);
-    ParamOffset += align(primSize(PT_Ptr));
-  }
+    // If the return is not a primitive, a pointer to the storage where the value
+    // is initialized in is passed as the first argument.
+    QualType Ty = F->getReturnType();
+    if (!Ty->isVoidType() && !Ctx.classify(Ty)) {
+        ParamTypes.push_back(PT_Ptr);
+        ParamOffset += align(primSize(PT_Ptr));
+    }
 
-  // Assign descriptors to all parameters.
-  // Composite objects are lowered to pointers.
-  for (const ParmVarDecl *PD : F->parameters()) {
-    PrimType Ty;
-    if (llvm::Optional<PrimType> T = Ctx.classify(PD->getType())) {
-      Ty = *T;
+    // Assign descriptors to all parameters.
+    // Composite objects are lowered to pointers.
+    for (const ParmVarDecl *PD : F->parameters()) {
+        PrimType Ty;
+        if (llvm::Optional<PrimType> T = Ctx.classify(PD->getType())) {
+            Ty = *T;
+        } else {
+            Ty = PT_Ptr;
+        }
+
+        Descriptor *Desc = P.createDescriptor(PD, Ty);
+        ParamDescriptors.insert({ParamOffset, {Ty, Desc}});
+        Params.insert({PD, ParamOffset});
+        ParamOffset += align(primSize(Ty));
+        ParamTypes.push_back(Ty);
+    }
+
+    // Create a handle over the emitted code.
+    Function *Func = P.createFunction(F, ParamOffset, std::move(ParamTypes),
+                                      std::move(ParamDescriptors));
+    // Compile the function body.
+    if (!F->isConstexpr() || !visitFunc(F)) {
+        // Return a dummy function if compilation failed.
+        if (BailLocation)
+            return llvm::make_error<ByteCodeGenError>(*BailLocation);
+        else
+            return Func;
     } else {
-      Ty = PT_Ptr;
+        // Create scopes from descriptors.
+        llvm::SmallVector<Scope, 2> Scopes;
+        for (auto &DS : Descriptors) {
+            Scopes.emplace_back(std::move(DS));
+        }
+
+        // Set the function's code.
+        Func->setCode(NextLocalOffset, std::move(Code), std::move(SrcMap),
+                      std::move(Scopes));
+        return Func;
     }
-
-    Descriptor *Desc = P.createDescriptor(PD, Ty);
-    ParamDescriptors.insert({ParamOffset, {Ty, Desc}});
-    Params.insert({PD, ParamOffset});
-    ParamOffset += align(primSize(Ty));
-    ParamTypes.push_back(Ty);
-  }
-
-  // Create a handle over the emitted code.
-  Function *Func = P.createFunction(F, ParamOffset, std::move(ParamTypes),
-                                    std::move(ParamDescriptors));
-  // Compile the function body.
-  if (!F->isConstexpr() || !visitFunc(F)) {
-    // Return a dummy function if compilation failed.
-    if (BailLocation)
-      return llvm::make_error<ByteCodeGenError>(*BailLocation);
-    else
-      return Func;
-  } else {
-    // Create scopes from descriptors.
-    llvm::SmallVector<Scope, 2> Scopes;
-    for (auto &DS : Descriptors) {
-      Scopes.emplace_back(std::move(DS));
-    }
-
-    // Set the function's code.
-    Func->setCode(NextLocalOffset, std::move(Code), std::move(SrcMap),
-                  std::move(Scopes));
-    return Func;
-  }
 }
 
 Scope::Local ByteCodeEmitter::createLocal(Descriptor *D) {
-  NextLocalOffset += sizeof(Block);
-  unsigned Location = NextLocalOffset;
-  NextLocalOffset += align(D->getAllocSize());
-  return {Location, D};
+    NextLocalOffset += sizeof(Block);
+    unsigned Location = NextLocalOffset;
+    NextLocalOffset += align(D->getAllocSize());
+    return {Location, D};
 }
 
 void ByteCodeEmitter::emitLabel(LabelTy Label) {
-  const size_t Target = Code.size();
-  LabelOffsets.insert({Label, Target});
-  auto It = LabelRelocs.find(Label);
-  if (It != LabelRelocs.end()) {
-    for (unsigned Reloc : It->second) {
-      using namespace llvm::support;
+    const size_t Target = Code.size();
+    LabelOffsets.insert({Label, Target});
+    auto It = LabelRelocs.find(Label);
+    if (It != LabelRelocs.end()) {
+        for (unsigned Reloc : It->second) {
+            using namespace llvm::support;
 
-      /// Rewrite the operand of all jumps to this label.
-      void *Location = Code.data() + Reloc - sizeof(int32_t);
-      const int32_t Offset = Target - static_cast<int64_t>(Reloc);
-      endian::write<int32_t, endianness::native, 1>(Location, Offset);
+            /// Rewrite the operand of all jumps to this label.
+            void *Location = Code.data() + Reloc - sizeof(int32_t);
+            const int32_t Offset = Target - static_cast<int64_t>(Reloc);
+            endian::write<int32_t, endianness::native, 1>(Location, Offset);
+        }
+        LabelRelocs.erase(It);
     }
-    LabelRelocs.erase(It);
-  }
 }
 
 int32_t ByteCodeEmitter::getOffset(LabelTy Label) {
-  // Compute the PC offset which the jump is relative to.
-  const int64_t Position = Code.size() + sizeof(Opcode) + sizeof(int32_t);
+    // Compute the PC offset which the jump is relative to.
+    const int64_t Position = Code.size() + sizeof(Opcode) + sizeof(int32_t);
 
-  // If target is known, compute jump offset.
-  auto It = LabelOffsets.find(Label);
-  if (It != LabelOffsets.end()) {
-    return It->second - Position;
-  }
+    // If target is known, compute jump offset.
+    auto It = LabelOffsets.find(Label);
+    if (It != LabelOffsets.end()) {
+        return It->second - Position;
+    }
 
-  // Otherwise, record relocation and return dummy offset.
-  LabelRelocs[Label].push_back(Position);
-  return 0ull;
+    // Otherwise, record relocation and return dummy offset.
+    LabelRelocs[Label].push_back(Position);
+    return 0ull;
 }
 
 bool ByteCodeEmitter::bail(const SourceLocation &Loc) {
-  if (!BailLocation)
-    BailLocation = Loc;
-  return false;
+    if (!BailLocation)
+        BailLocation = Loc;
+    return false;
 }
 
 template <typename... Tys>
 bool ByteCodeEmitter::emitOp(Opcode Op, const Tys &... Args, const SourceInfo &SI) {
-  bool Success = true;
+    bool Success = true;
 
-  /// Helper to write bytecode and bail out if 32-bit offsets become invalid.
-  auto emit = [this, &Success](const char *Data, size_t Size) {
-    if (Code.size() + Size > std::numeric_limits<unsigned>::max()) {
-      Success = false;
-      return;
-    }
-    Code.insert(Code.end(), Data, Data + Size);
-  };
+    /// Helper to write bytecode and bail out if 32-bit offsets become invalid.
+    auto emit = [this, &Success](const char *Data, size_t Size) {
+        if (Code.size() + Size > std::numeric_limits<unsigned>::max()) {
+            Success = false;
+            return;
+        }
+        Code.insert(Code.end(), Data, Data + Size);
+    };
 
-  /// The opcode is followed by arguments. The source info is
-  /// attached to the address after the opcode.
-  emit(reinterpret_cast<const char *>(&Op), sizeof(Opcode));
-  if (SI)
-    SrcMap.emplace_back(Code.size(), SI);
+    /// The opcode is followed by arguments. The source info is
+    /// attached to the address after the opcode.
+    emit(reinterpret_cast<const char *>(&Op), sizeof(Opcode));
+    if (SI)
+        SrcMap.emplace_back(Code.size(), SI);
 
-  /// The initializer list forces the expression to be evaluated
-  /// for each argument in the variadic template, in order.
-  (void)std::initializer_list<int>{
-      (emit(reinterpret_cast<const char *>(&Args), sizeof(Args)), 0)...};
+    /// The initializer list forces the expression to be evaluated
+    /// for each argument in the variadic template, in order.
+    (void)std::initializer_list<int> {
+        (emit(reinterpret_cast<const char *>(&Args), sizeof(Args)), 0)...
+    };
 
-  return Success;
+    return Success;
 }
 
 bool ByteCodeEmitter::jumpTrue(const LabelTy &Label) {
-  return emitJt(getOffset(Label), SourceInfo{});
+    return emitJt(getOffset(Label), SourceInfo{});
 }
 
 bool ByteCodeEmitter::jumpFalse(const LabelTy &Label) {
-  return emitJf(getOffset(Label), SourceInfo{});
+    return emitJf(getOffset(Label), SourceInfo{});
 }
 
 bool ByteCodeEmitter::jump(const LabelTy &Label) {
-  return emitJmp(getOffset(Label), SourceInfo{});
+    return emitJmp(getOffset(Label), SourceInfo{});
 }
 
 bool ByteCodeEmitter::fallthrough(const LabelTy &Label) {
-  emitLabel(Label);
-  return true;
+    emitLabel(Label);
+    return true;
 }
 
 //===----------------------------------------------------------------------===//

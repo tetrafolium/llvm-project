@@ -29,12 +29,12 @@ class Symbol;
 bool CheckPointerAssignment(
     evaluate::FoldingContext &, const evaluate::Assignment &);
 bool CheckPointerAssignment(evaluate::FoldingContext &, const SomeExpr &lhs,
-    const SomeExpr &rhs, bool isBoundsRemapping = false);
+                            const SomeExpr &rhs, bool isBoundsRemapping = false);
 bool CheckPointerAssignment(
     evaluate::FoldingContext &, const Symbol &lhs, const SomeExpr &rhs);
 bool CheckPointerAssignment(evaluate::FoldingContext &,
-    parser::CharBlock source, const std::string &description,
-    const evaluate::characteristics::DummyDataObject &, const SomeExpr &rhs);
+                            parser::CharBlock source, const std::string &description,
+                            const evaluate::characteristics::DummyDataObject &, const SomeExpr &rhs);
 
 // Checks whether an expression is a valid static initializer for a
 // particular pointer designator.

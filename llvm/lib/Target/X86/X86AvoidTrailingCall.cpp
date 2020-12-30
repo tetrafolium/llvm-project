@@ -47,21 +47,23 @@ using namespace llvm;
 namespace {
 class X86AvoidTrailingCallPass : public MachineFunctionPass {
 public:
-  X86AvoidTrailingCallPass() : MachineFunctionPass(ID) {}
+    X86AvoidTrailingCallPass() : MachineFunctionPass(ID) {}
 
-  bool runOnMachineFunction(MachineFunction &MF) override;
+    bool runOnMachineFunction(MachineFunction &MF) override;
 
-  static char ID;
+    static char ID;
 
 private:
-  StringRef getPassName() const override { return AVOIDCALL_DESC; }
+    StringRef getPassName() const override {
+        return AVOIDCALL_DESC;
+    }
 };
 } // end anonymous namespace
 
 char X86AvoidTrailingCallPass::ID = 0;
 
 FunctionPass *llvm::createX86AvoidTrailingCallPass() {
-  return new X86AvoidTrailingCallPass();
+    return new X86AvoidTrailingCallPass();
 }
 
 INITIALIZE_PASS(X86AvoidTrailingCallPass, AVOIDCALL_NAME, AVOIDCALL_DESC, false, false)
@@ -70,66 +72,66 @@ INITIALIZE_PASS(X86AvoidTrailingCallPass, AVOIDCALL_NAME, AVOIDCALL_DESC, false,
 // expand to nothing, and some expand to code. This logic conservatively assumes
 // they might expand to nothing.
 static bool isRealInstruction(MachineInstr &MI) {
-  return !MI.isPseudo() && !MI.isMetaInstruction();
+    return !MI.isPseudo() && !MI.isMetaInstruction();
 }
 
 // Return true if this is a call instruction, but not a tail call.
 static bool isCallInstruction(const MachineInstr &MI) {
-  return MI.isCall() && !MI.isReturn();
+    return MI.isCall() && !MI.isReturn();
 }
 
 bool X86AvoidTrailingCallPass::runOnMachineFunction(MachineFunction &MF) {
-  const X86Subtarget &STI = MF.getSubtarget<X86Subtarget>();
-  const X86InstrInfo &TII = *STI.getInstrInfo();
-  assert(STI.isTargetWin64() && "pass only runs on Win64");
+    const X86Subtarget &STI = MF.getSubtarget<X86Subtarget>();
+    const X86InstrInfo &TII = *STI.getInstrInfo();
+    assert(STI.isTargetWin64() && "pass only runs on Win64");
 
-  // We don't need to worry about any of the invariants described above if there
-  // is no unwind info (CFI).
-  if (!MF.hasWinCFI())
-    return false;
+    // We don't need to worry about any of the invariants described above if there
+    // is no unwind info (CFI).
+    if (!MF.hasWinCFI())
+        return false;
 
-  // FIXME: Perhaps this pass should also replace SEH_Epilogue by inserting nops
-  // before epilogues.
+    // FIXME: Perhaps this pass should also replace SEH_Epilogue by inserting nops
+    // before epilogues.
 
-  bool Changed = false;
-  for (MachineBasicBlock &MBB : MF) {
-    // Look for basic blocks that precede funclet entries or are at the end of
-    // the function.
-    MachineBasicBlock *NextMBB = MBB.getNextNode();
-    if (NextMBB && !NextMBB->isEHFuncletEntry())
-      continue;
+    bool Changed = false;
+    for (MachineBasicBlock &MBB : MF) {
+        // Look for basic blocks that precede funclet entries or are at the end of
+        // the function.
+        MachineBasicBlock *NextMBB = MBB.getNextNode();
+        if (NextMBB && !NextMBB->isEHFuncletEntry())
+            continue;
 
-    // Find the last real instruction in this block.
-    auto LastRealInstr = llvm::find_if(reverse(MBB), isRealInstruction);
+        // Find the last real instruction in this block.
+        auto LastRealInstr = llvm::find_if(reverse(MBB), isRealInstruction);
 
-    // If the block is empty or the last real instruction is a call instruction,
-    // insert an int3. If there is a call instruction, insert the int3 between
-    // the call and any labels or other meta instructions. If the block is
-    // empty, insert at block end.
-    bool IsEmpty = LastRealInstr == MBB.rend();
-    bool IsCall = !IsEmpty && isCallInstruction(*LastRealInstr);
-    if (IsEmpty || IsCall) {
-      LLVM_DEBUG({
-        if (IsCall) {
-          dbgs() << "inserting int3 after trailing call instruction:\n";
-          LastRealInstr->dump();
-          dbgs() << '\n';
-        } else {
-          dbgs() << "inserting int3 in trailing empty MBB:\n";
-          MBB.dump();
+        // If the block is empty or the last real instruction is a call instruction,
+        // insert an int3. If there is a call instruction, insert the int3 between
+        // the call and any labels or other meta instructions. If the block is
+        // empty, insert at block end.
+        bool IsEmpty = LastRealInstr == MBB.rend();
+        bool IsCall = !IsEmpty && isCallInstruction(*LastRealInstr);
+        if (IsEmpty || IsCall) {
+            LLVM_DEBUG({
+                if (IsCall) {
+                    dbgs() << "inserting int3 after trailing call instruction:\n";
+                    LastRealInstr->dump();
+                    dbgs() << '\n';
+                } else {
+                    dbgs() << "inserting int3 in trailing empty MBB:\n";
+                    MBB.dump();
+                }
+            });
+
+            MachineBasicBlock::iterator MBBI = MBB.end();
+            DebugLoc DL;
+            if (IsCall) {
+                MBBI = std::next(LastRealInstr.getReverse());
+                DL = LastRealInstr->getDebugLoc();
+            }
+            BuildMI(MBB, MBBI, DL, TII.get(X86::INT3));
+            Changed = true;
         }
-      });
-
-      MachineBasicBlock::iterator MBBI = MBB.end();
-      DebugLoc DL;
-      if (IsCall) {
-        MBBI = std::next(LastRealInstr.getReverse());
-        DL = LastRealInstr->getDebugLoc();
-      }
-      BuildMI(MBB, MBBI, DL, TII.get(X86::INT3));
-      Changed = true;
     }
-  }
 
-  return Changed;
+    return Changed;
 }

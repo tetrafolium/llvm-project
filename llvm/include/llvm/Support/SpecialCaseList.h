@@ -68,88 +68,88 @@ class FileSystem;
 
 class SpecialCaseList {
 public:
-  /// Parses the special case list entries from files. On failure, returns
-  /// 0 and writes an error message to string.
-  static std::unique_ptr<SpecialCaseList>
-  create(const std::vector<std::string> &Paths, llvm::vfs::FileSystem &FS,
-         std::string &Error);
-  /// Parses the special case list from a memory buffer. On failure, returns
-  /// 0 and writes an error message to string.
-  static std::unique_ptr<SpecialCaseList> create(const MemoryBuffer *MB,
-                                                 std::string &Error);
-  /// Parses the special case list entries from files. On failure, reports a
-  /// fatal error.
-  static std::unique_ptr<SpecialCaseList>
-  createOrDie(const std::vector<std::string> &Paths, llvm::vfs::FileSystem &FS);
+    /// Parses the special case list entries from files. On failure, returns
+    /// 0 and writes an error message to string.
+    static std::unique_ptr<SpecialCaseList>
+    create(const std::vector<std::string> &Paths, llvm::vfs::FileSystem &FS,
+           std::string &Error);
+    /// Parses the special case list from a memory buffer. On failure, returns
+    /// 0 and writes an error message to string.
+    static std::unique_ptr<SpecialCaseList> create(const MemoryBuffer *MB,
+            std::string &Error);
+    /// Parses the special case list entries from files. On failure, reports a
+    /// fatal error.
+    static std::unique_ptr<SpecialCaseList>
+    createOrDie(const std::vector<std::string> &Paths, llvm::vfs::FileSystem &FS);
 
-  ~SpecialCaseList();
+    ~SpecialCaseList();
 
-  /// Returns true, if special case list contains a line
-  /// \code
-  ///   @Prefix:<E>=@Category
-  /// \endcode
-  /// where @Query satisfies wildcard expression <E> in a given @Section.
-  bool inSection(StringRef Section, StringRef Prefix, StringRef Query,
-                 StringRef Category = StringRef()) const;
+    /// Returns true, if special case list contains a line
+    /// \code
+    ///   @Prefix:<E>=@Category
+    /// \endcode
+    /// where @Query satisfies wildcard expression <E> in a given @Section.
+    bool inSection(StringRef Section, StringRef Prefix, StringRef Query,
+                   StringRef Category = StringRef()) const;
 
-  /// Returns the line number corresponding to the special case list entry if
-  /// the special case list contains a line
-  /// \code
-  ///   @Prefix:<E>=@Category
-  /// \endcode
-  /// where @Query satisfies wildcard expression <E> in a given @Section.
-  /// Returns zero if there is no exclusion entry corresponding to this
-  /// expression.
-  unsigned inSectionBlame(StringRef Section, StringRef Prefix, StringRef Query,
-                          StringRef Category = StringRef()) const;
+    /// Returns the line number corresponding to the special case list entry if
+    /// the special case list contains a line
+    /// \code
+    ///   @Prefix:<E>=@Category
+    /// \endcode
+    /// where @Query satisfies wildcard expression <E> in a given @Section.
+    /// Returns zero if there is no exclusion entry corresponding to this
+    /// expression.
+    unsigned inSectionBlame(StringRef Section, StringRef Prefix, StringRef Query,
+                            StringRef Category = StringRef()) const;
 
 protected:
-  // Implementations of the create*() functions that can also be used by derived
-  // classes.
-  bool createInternal(const std::vector<std::string> &Paths,
-                      vfs::FileSystem &VFS, std::string &Error);
-  bool createInternal(const MemoryBuffer *MB, std::string &Error);
+    // Implementations of the create*() functions that can also be used by derived
+    // classes.
+    bool createInternal(const std::vector<std::string> &Paths,
+                        vfs::FileSystem &VFS, std::string &Error);
+    bool createInternal(const MemoryBuffer *MB, std::string &Error);
 
-  SpecialCaseList() = default;
-  SpecialCaseList(SpecialCaseList const &) = delete;
-  SpecialCaseList &operator=(SpecialCaseList const &) = delete;
+    SpecialCaseList() = default;
+    SpecialCaseList(SpecialCaseList const &) = delete;
+    SpecialCaseList &operator=(SpecialCaseList const &) = delete;
 
-  /// Represents a set of regular expressions.  Regular expressions which are
-  /// "literal" (i.e. no regex metacharacters) are stored in Strings.  The
-  /// reason for doing so is efficiency; StringMap is much faster at matching
-  /// literal strings than Regex.
-  class Matcher {
-  public:
-    bool insert(std::string Regexp, unsigned LineNumber, std::string &REError);
-    // Returns the line number in the source file that this query matches to.
-    // Returns zero if no match is found.
-    unsigned match(StringRef Query) const;
+    /// Represents a set of regular expressions.  Regular expressions which are
+    /// "literal" (i.e. no regex metacharacters) are stored in Strings.  The
+    /// reason for doing so is efficiency; StringMap is much faster at matching
+    /// literal strings than Regex.
+    class Matcher {
+    public:
+        bool insert(std::string Regexp, unsigned LineNumber, std::string &REError);
+        // Returns the line number in the source file that this query matches to.
+        // Returns zero if no match is found.
+        unsigned match(StringRef Query) const;
 
-  private:
-    StringMap<unsigned> Strings;
-    TrigramIndex Trigrams;
-    std::vector<std::pair<std::unique_ptr<Regex>, unsigned>> RegExes;
-  };
+    private:
+        StringMap<unsigned> Strings;
+        TrigramIndex Trigrams;
+        std::vector<std::pair<std::unique_ptr<Regex>, unsigned>> RegExes;
+    };
 
-  using SectionEntries = StringMap<StringMap<Matcher>>;
+    using SectionEntries = StringMap<StringMap<Matcher>>;
 
-  struct Section {
-    Section(std::unique_ptr<Matcher> M) : SectionMatcher(std::move(M)){};
+    struct Section {
+        Section(std::unique_ptr<Matcher> M) : SectionMatcher(std::move(M)) {};
 
-    std::unique_ptr<Matcher> SectionMatcher;
-    SectionEntries Entries;
-  };
+        std::unique_ptr<Matcher> SectionMatcher;
+        SectionEntries Entries;
+    };
 
-  std::vector<Section> Sections;
+    std::vector<Section> Sections;
 
-  /// Parses just-constructed SpecialCaseList entries from a memory buffer.
-  bool parse(const MemoryBuffer *MB, StringMap<size_t> &SectionsMap,
-             std::string &Error);
+    /// Parses just-constructed SpecialCaseList entries from a memory buffer.
+    bool parse(const MemoryBuffer *MB, StringMap<size_t> &SectionsMap,
+               std::string &Error);
 
-  // Helper method for derived classes to search by Prefix, Query, and Category
-  // once they have already resolved a section entry.
-  unsigned inSectionBlame(const SectionEntries &Entries, StringRef Prefix,
-                          StringRef Query, StringRef Category) const;
+    // Helper method for derived classes to search by Prefix, Query, and Category
+    // once they have already resolved a section entry.
+    unsigned inSectionBlame(const SectionEntries &Entries, StringRef Prefix,
+                            StringRef Query, StringRef Category) const;
 };
 
 }  // namespace llvm

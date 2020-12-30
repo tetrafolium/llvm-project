@@ -8,24 +8,26 @@
 
 class SVal {
 public:
-  ~SVal() {}
-  const void* Data;
-  unsigned Kind;
+    ~SVal() {}
+    const void* Data;
+    unsigned Kind;
 };
 
 void bar(SVal &v) {}
 class A {
 public:
-  void foo(SVal v) { bar(v); } // DexLabel('foo')
+    void foo(SVal v) {
+        bar(v);    // DexLabel('foo')
+    }
 };
 
 int main() {
-  SVal v;
-  v.Data = 0;
-  v.Kind = 2142;
-  A a;
-  a.foo(v);
-  return 0;
+    SVal v;
+    v.Data = 0;
+    v.Kind = 2142;
+    A a;
+    a.foo(v);
+    return 0;
 }
 
 /*

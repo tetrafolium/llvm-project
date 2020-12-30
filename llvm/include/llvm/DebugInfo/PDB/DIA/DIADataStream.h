@@ -16,16 +16,16 @@ namespace llvm {
 namespace pdb {
 class DIADataStream : public IPDBDataStream {
 public:
-  explicit DIADataStream(CComPtr<IDiaEnumDebugStreamData> DiaStreamData);
+    explicit DIADataStream(CComPtr<IDiaEnumDebugStreamData> DiaStreamData);
 
-  uint32_t getRecordCount() const override;
-  std::string getName() const override;
-  llvm::Optional<RecordType> getItemAtIndex(uint32_t Index) const override;
-  bool getNext(RecordType &Record) override;
-  void reset() override;
+    uint32_t getRecordCount() const override;
+    std::string getName() const override;
+    llvm::Optional<RecordType> getItemAtIndex(uint32_t Index) const override;
+    bool getNext(RecordType &Record) override;
+    void reset() override;
 
 private:
-  CComPtr<IDiaEnumDebugStreamData> StreamData;
+    CComPtr<IDiaEnumDebugStreamData> StreamData;
 };
 }
 }

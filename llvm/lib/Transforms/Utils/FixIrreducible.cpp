@@ -80,27 +80,29 @@ using namespace llvm;
 
 namespace {
 struct FixIrreducible : public FunctionPass {
-  static char ID;
-  FixIrreducible() : FunctionPass(ID) {
-    initializeFixIrreduciblePass(*PassRegistry::getPassRegistry());
-  }
+    static char ID;
+    FixIrreducible() : FunctionPass(ID) {
+        initializeFixIrreduciblePass(*PassRegistry::getPassRegistry());
+    }
 
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequiredID(LowerSwitchID);
-    AU.addRequired<DominatorTreeWrapperPass>();
-    AU.addRequired<LoopInfoWrapperPass>();
-    AU.addPreservedID(LowerSwitchID);
-    AU.addPreserved<DominatorTreeWrapperPass>();
-    AU.addPreserved<LoopInfoWrapperPass>();
-  }
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+        AU.addRequiredID(LowerSwitchID);
+        AU.addRequired<DominatorTreeWrapperPass>();
+        AU.addRequired<LoopInfoWrapperPass>();
+        AU.addPreservedID(LowerSwitchID);
+        AU.addPreserved<DominatorTreeWrapperPass>();
+        AU.addPreserved<LoopInfoWrapperPass>();
+    }
 
-  bool runOnFunction(Function &F) override;
+    bool runOnFunction(Function &F) override;
 };
 } // namespace
 
 char FixIrreducible::ID = 0;
 
-FunctionPass *llvm::createFixIrreduciblePass() { return new FixIrreducible(); }
+FunctionPass *llvm::createFixIrreduciblePass() {
+    return new FixIrreducible();
+}
 
 INITIALIZE_PASS_BEGIN(FixIrreducible, "fix-irreducible",
                       "Convert irreducible control-flow into natural loops",
@@ -117,40 +119,40 @@ INITIALIZE_PASS_END(FixIrreducible, "fix-irreducible",
 static void reconnectChildLoops(LoopInfo &LI, Loop *ParentLoop, Loop *NewLoop,
                                 SetVector<BasicBlock *> &Blocks,
                                 SetVector<BasicBlock *> &Headers) {
-  auto &CandidateLoops = ParentLoop ? ParentLoop->getSubLoopsVector()
-                                    : LI.getTopLevelLoopsVector();
-  // The new loop cannot be its own child, and any candidate is a
-  // child iff its header is owned by the new loop. Move all the
-  // children to a new vector.
-  auto FirstChild = std::partition(
-      CandidateLoops.begin(), CandidateLoops.end(), [&](Loop *L) {
+    auto &CandidateLoops = ParentLoop ? ParentLoop->getSubLoopsVector()
+                           : LI.getTopLevelLoopsVector();
+    // The new loop cannot be its own child, and any candidate is a
+    // child iff its header is owned by the new loop. Move all the
+    // children to a new vector.
+    auto FirstChild = std::partition(
+    CandidateLoops.begin(), CandidateLoops.end(), [&](Loop *L) {
         return L == NewLoop || Blocks.count(L->getHeader()) == 0;
-      });
-  SmallVector<Loop *, 8> ChildLoops(FirstChild, CandidateLoops.end());
-  CandidateLoops.erase(FirstChild, CandidateLoops.end());
+    });
+    SmallVector<Loop *, 8> ChildLoops(FirstChild, CandidateLoops.end());
+    CandidateLoops.erase(FirstChild, CandidateLoops.end());
 
-  for (auto II = ChildLoops.begin(), IE = ChildLoops.end(); II != IE; ++II) {
-    auto Child = *II;
-    LLVM_DEBUG(dbgs() << "child loop: " << Child->getHeader()->getName()
-                      << "\n");
-    // TODO: A child loop whose header is also a header in the current
-    // SCC gets destroyed since its backedges are removed. That may
-    // not be necessary if we can retain such backedges.
-    if (Headers.count(Child->getHeader())) {
-      for (auto BB : Child->blocks()) {
-        LI.changeLoopFor(BB, NewLoop);
-        LLVM_DEBUG(dbgs() << "moved block from child: " << BB->getName()
-                          << "\n");
-      }
-      LI.destroy(Child);
-      LLVM_DEBUG(dbgs() << "subsumed child loop (common header)\n");
-      continue;
+    for (auto II = ChildLoops.begin(), IE = ChildLoops.end(); II != IE; ++II) {
+        auto Child = *II;
+        LLVM_DEBUG(dbgs() << "child loop: " << Child->getHeader()->getName()
+                   << "\n");
+        // TODO: A child loop whose header is also a header in the current
+        // SCC gets destroyed since its backedges are removed. That may
+        // not be necessary if we can retain such backedges.
+        if (Headers.count(Child->getHeader())) {
+            for (auto BB : Child->blocks()) {
+                LI.changeLoopFor(BB, NewLoop);
+                LLVM_DEBUG(dbgs() << "moved block from child: " << BB->getName()
+                           << "\n");
+            }
+            LI.destroy(Child);
+            LLVM_DEBUG(dbgs() << "subsumed child loop (common header)\n");
+            continue;
+        }
+
+        Child->setParentLoop(nullptr);
+        NewLoop->addChildLoop(Child);
+        LLVM_DEBUG(dbgs() << "added child loop to new loop\n");
     }
-
-    Child->setParentLoop(nullptr);
-    NewLoop->addChildLoop(Child);
-    LLVM_DEBUG(dbgs() << "added child loop to new loop\n");
-  }
 }
 
 // Given a set of blocks and headers in an irreducible SCC, convert it into a
@@ -161,78 +163,78 @@ static void createNaturalLoopInternal(LoopInfo &LI, DominatorTree &DT,
                                       SetVector<BasicBlock *> &Blocks,
                                       SetVector<BasicBlock *> &Headers) {
 #ifndef NDEBUG
-  // All headers are part of the SCC
-  for (auto H : Headers) {
-    assert(Blocks.count(H));
-  }
+    // All headers are part of the SCC
+    for (auto H : Headers) {
+        assert(Blocks.count(H));
+    }
 #endif
 
-  SetVector<BasicBlock *> Predecessors;
-  for (auto H : Headers) {
-    for (auto P : predecessors(H)) {
-      Predecessors.insert(P);
+    SetVector<BasicBlock *> Predecessors;
+    for (auto H : Headers) {
+        for (auto P : predecessors(H)) {
+            Predecessors.insert(P);
+        }
     }
-  }
 
-  LLVM_DEBUG(
-      dbgs() << "Found predecessors:";
-      for (auto P : Predecessors) {
-        dbgs() << " " << P->getName();
-      }
-      dbgs() << "\n");
+    LLVM_DEBUG(
+        dbgs() << "Found predecessors:";
+    for (auto P : Predecessors) {
+    dbgs() << " " << P->getName();
+    }
+    dbgs() << "\n");
 
-  // Redirect all the backedges through a "hub" consisting of a series
-  // of guard blocks that manage the flow of control from the
-  // predecessors to the headers.
-  SmallVector<BasicBlock *, 8> GuardBlocks;
-  DomTreeUpdater DTU(DT, DomTreeUpdater::UpdateStrategy::Eager);
-  CreateControlFlowHub(&DTU, GuardBlocks, Predecessors, Headers, "irr");
+    // Redirect all the backedges through a "hub" consisting of a series
+    // of guard blocks that manage the flow of control from the
+    // predecessors to the headers.
+    SmallVector<BasicBlock *, 8> GuardBlocks;
+    DomTreeUpdater DTU(DT, DomTreeUpdater::UpdateStrategy::Eager);
+    CreateControlFlowHub(&DTU, GuardBlocks, Predecessors, Headers, "irr");
 #if defined(EXPENSIVE_CHECKS)
-  assert(DT.verify(DominatorTree::VerificationLevel::Full));
+    assert(DT.verify(DominatorTree::VerificationLevel::Full));
 #else
-  assert(DT.verify(DominatorTree::VerificationLevel::Fast));
+    assert(DT.verify(DominatorTree::VerificationLevel::Fast));
 #endif
 
-  // Create a new loop from the now-transformed cycle
-  auto NewLoop = LI.AllocateLoop();
-  if (ParentLoop) {
-    ParentLoop->addChildLoop(NewLoop);
-  } else {
-    LI.addTopLevelLoop(NewLoop);
-  }
-
-  // Add the guard blocks to the new loop. The first guard block is
-  // the head of all the backedges, and it is the first to be inserted
-  // in the loop. This ensures that it is recognized as the
-  // header. Since the new loop is already in LoopInfo, the new blocks
-  // are also propagated up the chain of parent loops.
-  for (auto G : GuardBlocks) {
-    LLVM_DEBUG(dbgs() << "added guard block: " << G->getName() << "\n");
-    NewLoop->addBasicBlockToLoop(G, LI);
-  }
-
-  // Add the SCC blocks to the new loop.
-  for (auto BB : Blocks) {
-    NewLoop->addBlockEntry(BB);
-    if (LI.getLoopFor(BB) == ParentLoop) {
-      LLVM_DEBUG(dbgs() << "moved block from parent: " << BB->getName()
-                        << "\n");
-      LI.changeLoopFor(BB, NewLoop);
+    // Create a new loop from the now-transformed cycle
+    auto NewLoop = LI.AllocateLoop();
+    if (ParentLoop) {
+        ParentLoop->addChildLoop(NewLoop);
     } else {
-      LLVM_DEBUG(dbgs() << "added block from child: " << BB->getName() << "\n");
+        LI.addTopLevelLoop(NewLoop);
     }
-  }
-  LLVM_DEBUG(dbgs() << "header for new loop: "
-                    << NewLoop->getHeader()->getName() << "\n");
 
-  reconnectChildLoops(LI, ParentLoop, NewLoop, Blocks, Headers);
+    // Add the guard blocks to the new loop. The first guard block is
+    // the head of all the backedges, and it is the first to be inserted
+    // in the loop. This ensures that it is recognized as the
+    // header. Since the new loop is already in LoopInfo, the new blocks
+    // are also propagated up the chain of parent loops.
+    for (auto G : GuardBlocks) {
+        LLVM_DEBUG(dbgs() << "added guard block: " << G->getName() << "\n");
+        NewLoop->addBasicBlockToLoop(G, LI);
+    }
 
-  NewLoop->verifyLoop();
-  if (ParentLoop) {
-    ParentLoop->verifyLoop();
-  }
+    // Add the SCC blocks to the new loop.
+    for (auto BB : Blocks) {
+        NewLoop->addBlockEntry(BB);
+        if (LI.getLoopFor(BB) == ParentLoop) {
+            LLVM_DEBUG(dbgs() << "moved block from parent: " << BB->getName()
+                       << "\n");
+            LI.changeLoopFor(BB, NewLoop);
+        } else {
+            LLVM_DEBUG(dbgs() << "added block from child: " << BB->getName() << "\n");
+        }
+    }
+    LLVM_DEBUG(dbgs() << "header for new loop: "
+               << NewLoop->getHeader()->getName() << "\n");
+
+    reconnectChildLoops(LI, ParentLoop, NewLoop, Blocks, Headers);
+
+    NewLoop->verifyLoop();
+    if (ParentLoop) {
+        ParentLoop->verifyLoop();
+    }
 #if defined(EXPENSIVE_CHECKS)
-  LI.verify(DT);
+    LI.verify(DT);
 #endif // EXPENSIVE_CHECKS
 }
 
@@ -242,113 +244,117 @@ template <> struct GraphTraits<Loop> : LoopBodyTraits {};
 } // namespace llvm
 
 // Overloaded wrappers to go with the function template below.
-static BasicBlock *unwrapBlock(BasicBlock *B) { return B; }
-static BasicBlock *unwrapBlock(LoopBodyTraits::NodeRef &N) { return N.second; }
+static BasicBlock *unwrapBlock(BasicBlock *B) {
+    return B;
+}
+static BasicBlock *unwrapBlock(LoopBodyTraits::NodeRef &N) {
+    return N.second;
+}
 
 static void createNaturalLoop(LoopInfo &LI, DominatorTree &DT, Function *F,
                               SetVector<BasicBlock *> &Blocks,
                               SetVector<BasicBlock *> &Headers) {
-  createNaturalLoopInternal(LI, DT, nullptr, Blocks, Headers);
+    createNaturalLoopInternal(LI, DT, nullptr, Blocks, Headers);
 }
 
 static void createNaturalLoop(LoopInfo &LI, DominatorTree &DT, Loop &L,
                               SetVector<BasicBlock *> &Blocks,
                               SetVector<BasicBlock *> &Headers) {
-  createNaturalLoopInternal(LI, DT, &L, Blocks, Headers);
+    createNaturalLoopInternal(LI, DT, &L, Blocks, Headers);
 }
 
 // Convert irreducible SCCs; Graph G may be a Function* or a Loop&.
 template <class Graph>
 static bool makeReducible(LoopInfo &LI, DominatorTree &DT, Graph &&G) {
-  bool Changed = false;
-  for (auto Scc = scc_begin(G); !Scc.isAtEnd(); ++Scc) {
-    if (Scc->size() < 2)
-      continue;
-    SetVector<BasicBlock *> Blocks;
-    LLVM_DEBUG(dbgs() << "Found SCC:");
-    for (auto N : *Scc) {
-      auto BB = unwrapBlock(N);
-      LLVM_DEBUG(dbgs() << " " << BB->getName());
-      Blocks.insert(BB);
-    }
-    LLVM_DEBUG(dbgs() << "\n");
-
-    // Minor optimization: The SCC blocks are usually discovered in an order
-    // that is the opposite of the order in which these blocks appear as branch
-    // targets. This results in a lot of condition inversions in the control
-    // flow out of the new ControlFlowHub, which can be mitigated if the orders
-    // match. So we discover the headers using the reverse of the block order.
-    SetVector<BasicBlock *> Headers;
-    LLVM_DEBUG(dbgs() << "Found headers:");
-    for (auto BB : reverse(Blocks)) {
-      for (const auto P : predecessors(BB)) {
-        // Skip unreachable predecessors.
-        if (!DT.isReachableFromEntry(P))
-          continue;
-        if (!Blocks.count(P)) {
-          LLVM_DEBUG(dbgs() << " " << BB->getName());
-          Headers.insert(BB);
-          break;
+    bool Changed = false;
+    for (auto Scc = scc_begin(G); !Scc.isAtEnd(); ++Scc) {
+        if (Scc->size() < 2)
+            continue;
+        SetVector<BasicBlock *> Blocks;
+        LLVM_DEBUG(dbgs() << "Found SCC:");
+        for (auto N : *Scc) {
+            auto BB = unwrapBlock(N);
+            LLVM_DEBUG(dbgs() << " " << BB->getName());
+            Blocks.insert(BB);
         }
-      }
-    }
-    LLVM_DEBUG(dbgs() << "\n");
+        LLVM_DEBUG(dbgs() << "\n");
 
-    if (Headers.size() == 1) {
-      assert(LI.isLoopHeader(Headers.front()));
-      LLVM_DEBUG(dbgs() << "Natural loop with a single header: skipped\n");
-      continue;
+        // Minor optimization: The SCC blocks are usually discovered in an order
+        // that is the opposite of the order in which these blocks appear as branch
+        // targets. This results in a lot of condition inversions in the control
+        // flow out of the new ControlFlowHub, which can be mitigated if the orders
+        // match. So we discover the headers using the reverse of the block order.
+        SetVector<BasicBlock *> Headers;
+        LLVM_DEBUG(dbgs() << "Found headers:");
+        for (auto BB : reverse(Blocks)) {
+            for (const auto P : predecessors(BB)) {
+                // Skip unreachable predecessors.
+                if (!DT.isReachableFromEntry(P))
+                    continue;
+                if (!Blocks.count(P)) {
+                    LLVM_DEBUG(dbgs() << " " << BB->getName());
+                    Headers.insert(BB);
+                    break;
+                }
+            }
+        }
+        LLVM_DEBUG(dbgs() << "\n");
+
+        if (Headers.size() == 1) {
+            assert(LI.isLoopHeader(Headers.front()));
+            LLVM_DEBUG(dbgs() << "Natural loop with a single header: skipped\n");
+            continue;
+        }
+        createNaturalLoop(LI, DT, G, Blocks, Headers);
+        Changed = true;
     }
-    createNaturalLoop(LI, DT, G, Blocks, Headers);
-    Changed = true;
-  }
-  return Changed;
+    return Changed;
 }
 
 static bool FixIrreducibleImpl(Function &F, LoopInfo &LI, DominatorTree &DT) {
-  LLVM_DEBUG(dbgs() << "===== Fix irreducible control-flow in function: "
-                    << F.getName() << "\n");
+    LLVM_DEBUG(dbgs() << "===== Fix irreducible control-flow in function: "
+               << F.getName() << "\n");
 
-  bool Changed = false;
-  SmallVector<Loop *, 8> WorkList;
+    bool Changed = false;
+    SmallVector<Loop *, 8> WorkList;
 
-  LLVM_DEBUG(dbgs() << "visiting top-level\n");
-  Changed |= makeReducible(LI, DT, &F);
+    LLVM_DEBUG(dbgs() << "visiting top-level\n");
+    Changed |= makeReducible(LI, DT, &F);
 
-  // Any SCCs reduced are now already in the list of top-level loops, so simply
-  // add them all to the worklist.
-  for (auto L : LI) {
-    WorkList.push_back(L);
-  }
-
-  while (!WorkList.empty()) {
-    auto L = WorkList.back();
-    WorkList.pop_back();
-    LLVM_DEBUG(dbgs() << "visiting loop with header "
-                      << L->getHeader()->getName() << "\n");
-    Changed |= makeReducible(LI, DT, *L);
-    // Any SCCs reduced are now already in the list of child loops, so simply
+    // Any SCCs reduced are now already in the list of top-level loops, so simply
     // add them all to the worklist.
-    WorkList.append(L->begin(), L->end());
-  }
+    for (auto L : LI) {
+        WorkList.push_back(L);
+    }
 
-  return Changed;
+    while (!WorkList.empty()) {
+        auto L = WorkList.back();
+        WorkList.pop_back();
+        LLVM_DEBUG(dbgs() << "visiting loop with header "
+                   << L->getHeader()->getName() << "\n");
+        Changed |= makeReducible(LI, DT, *L);
+        // Any SCCs reduced are now already in the list of child loops, so simply
+        // add them all to the worklist.
+        WorkList.append(L->begin(), L->end());
+    }
+
+    return Changed;
 }
 
 bool FixIrreducible::runOnFunction(Function &F) {
-  auto &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-  auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
-  return FixIrreducibleImpl(F, LI, DT);
+    auto &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+    auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    return FixIrreducibleImpl(F, LI, DT);
 }
 
 PreservedAnalyses FixIrreduciblePass::run(Function &F,
-                                          FunctionAnalysisManager &AM) {
-  auto &LI = AM.getResult<LoopAnalysis>(F);
-  auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
-  if (!FixIrreducibleImpl(F, LI, DT))
-    return PreservedAnalyses::all();
-  PreservedAnalyses PA;
-  PA.preserve<LoopAnalysis>();
-  PA.preserve<DominatorTreeAnalysis>();
-  return PA;
+        FunctionAnalysisManager &AM) {
+    auto &LI = AM.getResult<LoopAnalysis>(F);
+    auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
+    if (!FixIrreducibleImpl(F, LI, DT))
+        return PreservedAnalyses::all();
+    PreservedAnalyses PA;
+    PA.preserve<LoopAnalysis>();
+    PA.preserve<DominatorTreeAnalysis>();
+    return PA;
 }

@@ -32,22 +32,24 @@ namespace Fortran::frontend {
 class TextDiagnostic;
 
 class TextDiagnosticPrinter : public clang::DiagnosticConsumer {
-  raw_ostream &os_;
-  llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> diagOpts_;
+    raw_ostream &os_;
+    llvm::IntrusiveRefCntPtr<clang::DiagnosticOptions> diagOpts_;
 
-  /// A string to prefix to error messages.
-  std::string prefix_;
+    /// A string to prefix to error messages.
+    std::string prefix_;
 
 public:
-  TextDiagnosticPrinter(raw_ostream &os, clang::DiagnosticOptions *diags);
-  ~TextDiagnosticPrinter() override;
+    TextDiagnosticPrinter(raw_ostream &os, clang::DiagnosticOptions *diags);
+    ~TextDiagnosticPrinter() override;
 
-  /// Set the diagnostic printer prefix string, which will be printed at the
-  /// start of any diagnostics. If empty, no prefix string is used.
-  void set_prefix(std::string value) { prefix_ = std::move(value); }
+    /// Set the diagnostic printer prefix string, which will be printed at the
+    /// start of any diagnostics. If empty, no prefix string is used.
+    void set_prefix(std::string value) {
+        prefix_ = std::move(value);
+    }
 
-  void HandleDiagnostic(clang::DiagnosticsEngine::Level level,
-      const clang::Diagnostic &info) override;
+    void HandleDiagnostic(clang::DiagnosticsEngine::Level level,
+                          const clang::Diagnostic &info) override;
 };
 
 } // namespace Fortran::frontend

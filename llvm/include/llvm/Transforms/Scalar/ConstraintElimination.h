@@ -16,7 +16,7 @@ namespace llvm {
 class ConstraintEliminationPass
     : public PassInfoMixin<ConstraintEliminationPass> {
 public:
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 };
 
 } // end namespace llvm

@@ -19,58 +19,58 @@
 using namespace llvm;
 
 LLT llvm::getLLTForType(Type &Ty, const DataLayout &DL) {
-  if (auto VTy = dyn_cast<VectorType>(&Ty)) {
-    auto NumElements = cast<FixedVectorType>(VTy)->getNumElements();
-    LLT ScalarTy = getLLTForType(*VTy->getElementType(), DL);
-    if (NumElements == 1)
-      return ScalarTy;
-    return LLT::vector(NumElements, ScalarTy);
-  }
+    if (auto VTy = dyn_cast<VectorType>(&Ty)) {
+        auto NumElements = cast<FixedVectorType>(VTy)->getNumElements();
+        LLT ScalarTy = getLLTForType(*VTy->getElementType(), DL);
+        if (NumElements == 1)
+            return ScalarTy;
+        return LLT::vector(NumElements, ScalarTy);
+    }
 
-  if (auto PTy = dyn_cast<PointerType>(&Ty)) {
-    unsigned AddrSpace = PTy->getAddressSpace();
-    return LLT::pointer(AddrSpace, DL.getPointerSizeInBits(AddrSpace));
-  }
+    if (auto PTy = dyn_cast<PointerType>(&Ty)) {
+        unsigned AddrSpace = PTy->getAddressSpace();
+        return LLT::pointer(AddrSpace, DL.getPointerSizeInBits(AddrSpace));
+    }
 
-  if (Ty.isSized()) {
-    // Aggregates are no different from real scalars as far as GlobalISel is
-    // concerned.
-    auto SizeInBits = DL.getTypeSizeInBits(&Ty);
-    assert(SizeInBits != 0 && "invalid zero-sized type");
-    return LLT::scalar(SizeInBits);
-  }
+    if (Ty.isSized()) {
+        // Aggregates are no different from real scalars as far as GlobalISel is
+        // concerned.
+        auto SizeInBits = DL.getTypeSizeInBits(&Ty);
+        assert(SizeInBits != 0 && "invalid zero-sized type");
+        return LLT::scalar(SizeInBits);
+    }
 
-  return LLT();
+    return LLT();
 }
 
 MVT llvm::getMVTForLLT(LLT Ty) {
-  if (!Ty.isVector())
-    return MVT::getIntegerVT(Ty.getSizeInBits());
+    if (!Ty.isVector())
+        return MVT::getIntegerVT(Ty.getSizeInBits());
 
-  return MVT::getVectorVT(
-      MVT::getIntegerVT(Ty.getElementType().getSizeInBits()),
-      Ty.getNumElements());
+    return MVT::getVectorVT(
+               MVT::getIntegerVT(Ty.getElementType().getSizeInBits()),
+               Ty.getNumElements());
 }
 
 LLT llvm::getLLTForMVT(MVT Ty) {
-  if (!Ty.isVector())
-    return LLT::scalar(Ty.getSizeInBits());
+    if (!Ty.isVector())
+        return LLT::scalar(Ty.getSizeInBits());
 
-  return LLT::vector(Ty.getVectorNumElements(),
-                     Ty.getVectorElementType().getSizeInBits());
+    return LLT::vector(Ty.getVectorNumElements(),
+                       Ty.getVectorElementType().getSizeInBits());
 }
 
 const llvm::fltSemantics &llvm::getFltSemanticForLLT(LLT Ty) {
-  assert(Ty.isScalar() && "Expected a scalar type.");
-  switch (Ty.getSizeInBits()) {
-  case 16:
-    return APFloat::IEEEhalf();
-  case 32:
-    return APFloat::IEEEsingle();
-  case 64:
-    return APFloat::IEEEdouble();
-  case 128:
-    return APFloat::IEEEquad();
-  }
-  llvm_unreachable("Invalid FP type size.");
+    assert(Ty.isScalar() && "Expected a scalar type.");
+    switch (Ty.getSizeInBits()) {
+    case 16:
+        return APFloat::IEEEhalf();
+    case 32:
+        return APFloat::IEEEsingle();
+    case 64:
+        return APFloat::IEEEdouble();
+    case 128:
+        return APFloat::IEEEquad();
+    }
+    llvm_unreachable("Invalid FP type size.");
 }

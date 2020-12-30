@@ -16,17 +16,17 @@ namespace lldb_private {
 
 class MonitoringProcessLauncher : public ProcessLauncher {
 public:
-  explicit MonitoringProcessLauncher(
-      std::unique_ptr<ProcessLauncher> delegate_launcher);
+    explicit MonitoringProcessLauncher(
+        std::unique_ptr<ProcessLauncher> delegate_launcher);
 
-  /// Launch the process specified in launch_info. The monitoring callback in
-  /// launch_info must be set, and it will be called when the process
-  /// terminates.
-  HostProcess LaunchProcess(const ProcessLaunchInfo &launch_info,
-                            Status &error) override;
+    /// Launch the process specified in launch_info. The monitoring callback in
+    /// launch_info must be set, and it will be called when the process
+    /// terminates.
+    HostProcess LaunchProcess(const ProcessLaunchInfo &launch_info,
+                              Status &error) override;
 
 private:
-  std::unique_ptr<ProcessLauncher> m_delegate_launcher;
+    std::unique_ptr<ProcessLauncher> m_delegate_launcher;
 };
 
 } // namespace lldb_private

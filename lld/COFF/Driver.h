@@ -38,7 +38,7 @@ using llvm::Optional;
 
 class COFFOptTable : public llvm::opt::OptTable {
 public:
-  COFFOptTable();
+    COFFOptTable();
 };
 
 // Constructing the option table is expensive. Use a global table to avoid doing
@@ -51,103 +51,107 @@ extern COFFOptTable optTable;
 // one memory allocation per argument, and that is prohibitively slow for
 // parsing directives.
 struct ParsedDirectives {
-  std::vector<StringRef> exports;
-  std::vector<StringRef> includes;
-  llvm::opt::InputArgList args;
+    std::vector<StringRef> exports;
+    std::vector<StringRef> includes;
+    llvm::opt::InputArgList args;
 };
 
 class ArgParser {
 public:
-  // Parses command line options.
-  llvm::opt::InputArgList parse(llvm::ArrayRef<const char *> args);
+    // Parses command line options.
+    llvm::opt::InputArgList parse(llvm::ArrayRef<const char *> args);
 
-  // Tokenizes a given string and then parses as command line options.
-  llvm::opt::InputArgList parse(StringRef s) { return parse(tokenize(s)); }
+    // Tokenizes a given string and then parses as command line options.
+    llvm::opt::InputArgList parse(StringRef s) {
+        return parse(tokenize(s));
+    }
 
-  // Tokenizes a given string and then parses as command line options in
-  // .drectve section. /EXPORT options are returned in second element
-  // to be processed in fastpath.
-  ParsedDirectives parseDirectives(StringRef s);
+    // Tokenizes a given string and then parses as command line options in
+    // .drectve section. /EXPORT options are returned in second element
+    // to be processed in fastpath.
+    ParsedDirectives parseDirectives(StringRef s);
 
 private:
-  // Concatenate LINK environment variable.
-  void addLINK(SmallVector<const char *, 256> &argv);
+    // Concatenate LINK environment variable.
+    void addLINK(SmallVector<const char *, 256> &argv);
 
-  std::vector<const char *> tokenize(StringRef s);
+    std::vector<const char *> tokenize(StringRef s);
 };
 
 class LinkerDriver {
 public:
-  void linkerMain(llvm::ArrayRef<const char *> args);
+    void linkerMain(llvm::ArrayRef<const char *> args);
 
-  // Used by the resolver to parse .drectve section contents.
-  void parseDirectives(InputFile *file);
+    // Used by the resolver to parse .drectve section contents.
+    void parseDirectives(InputFile *file);
 
-  // Used by ArchiveFile to enqueue members.
-  void enqueueArchiveMember(const Archive::Child &c, const Archive::Symbol &sym,
-                            StringRef parentName);
+    // Used by ArchiveFile to enqueue members.
+    void enqueueArchiveMember(const Archive::Child &c, const Archive::Symbol &sym,
+                              StringRef parentName);
 
-  void enqueuePDB(StringRef Path) { enqueuePath(Path, false, false); }
+    void enqueuePDB(StringRef Path) {
+        enqueuePath(Path, false, false);
+    }
 
-  MemoryBufferRef takeBuffer(std::unique_ptr<MemoryBuffer> mb);
+    MemoryBufferRef takeBuffer(std::unique_ptr<MemoryBuffer> mb);
 
-  void enqueuePath(StringRef path, bool wholeArchive, bool lazy);
+    void enqueuePath(StringRef path, bool wholeArchive, bool lazy);
 
 private:
-  std::unique_ptr<llvm::TarWriter> tar; // for /linkrepro
+    std::unique_ptr<llvm::TarWriter> tar; // for /linkrepro
 
-  // Searches a file from search paths.
-  Optional<StringRef> findFile(StringRef filename);
-  Optional<StringRef> findLib(StringRef filename);
-  StringRef doFindFile(StringRef filename);
-  StringRef doFindLib(StringRef filename);
-  StringRef doFindLibMinGW(StringRef filename);
+    // Searches a file from search paths.
+    Optional<StringRef> findFile(StringRef filename);
+    Optional<StringRef> findLib(StringRef filename);
+    StringRef doFindFile(StringRef filename);
+    StringRef doFindLib(StringRef filename);
+    StringRef doFindLibMinGW(StringRef filename);
 
-  // Parses LIB environment which contains a list of search paths.
-  void addLibSearchPaths();
+    // Parses LIB environment which contains a list of search paths.
+    void addLibSearchPaths();
 
-  // Library search path. The first element is always "" (current directory).
-  std::vector<StringRef> searchPaths;
+    // Library search path. The first element is always "" (current directory).
+    std::vector<StringRef> searchPaths;
 
-  // Convert resource files and potentially merge input resource object
-  // trees into one resource tree.
-  void convertResources();
+    // Convert resource files and potentially merge input resource object
+    // trees into one resource tree.
+    void convertResources();
 
-  void maybeExportMinGWSymbols(const llvm::opt::InputArgList &args);
+    void maybeExportMinGWSymbols(const llvm::opt::InputArgList &args);
 
-  // We don't want to add the same file more than once.
-  // Files are uniquified by their filesystem and file number.
-  std::set<llvm::sys::fs::UniqueID> visitedFiles;
+    // We don't want to add the same file more than once.
+    // Files are uniquified by their filesystem and file number.
+    std::set<llvm::sys::fs::UniqueID> visitedFiles;
 
-  std::set<std::string> visitedLibs;
+    std::set<std::string> visitedLibs;
 
-  Symbol *addUndefined(StringRef sym);
+    Symbol *addUndefined(StringRef sym);
 
-  StringRef mangleMaybe(Symbol *s);
+    StringRef mangleMaybe(Symbol *s);
 
-  // Windows specific -- "main" is not the only main function in Windows.
-  // You can choose one from these four -- {w,}{WinMain,main}.
-  // There are four different entry point functions for them,
-  // {w,}{WinMain,main}CRTStartup, respectively. The linker needs to
-  // choose the right one depending on which "main" function is defined.
-  // This function looks up the symbol table and resolve corresponding
-  // entry point name.
-  StringRef findDefaultEntry();
-  WindowsSubsystem inferSubsystem();
+    // Windows specific -- "main" is not the only main function in Windows.
+    // You can choose one from these four -- {w,}{WinMain,main}.
+    // There are four different entry point functions for them,
+    // {w,}{WinMain,main}CRTStartup, respectively. The linker needs to
+    // choose the right one depending on which "main" function is defined.
+    // This function looks up the symbol table and resolve corresponding
+    // entry point name.
+    StringRef findDefaultEntry();
+    WindowsSubsystem inferSubsystem();
 
-  void addBuffer(std::unique_ptr<MemoryBuffer> mb, bool wholeArchive,
-                 bool lazy);
-  void addArchiveBuffer(MemoryBufferRef mbref, StringRef symName,
-                        StringRef parentName, uint64_t offsetInArchive);
+    void addBuffer(std::unique_ptr<MemoryBuffer> mb, bool wholeArchive,
+                   bool lazy);
+    void addArchiveBuffer(MemoryBufferRef mbref, StringRef symName,
+                          StringRef parentName, uint64_t offsetInArchive);
 
-  void enqueueTask(std::function<void()> task);
-  bool run();
+    void enqueueTask(std::function<void()> task);
+    bool run();
 
-  std::list<std::function<void()>> taskQueue;
-  std::vector<StringRef> filePaths;
-  std::vector<MemoryBufferRef> resources;
+    std::list<std::function<void()>> taskQueue;
+    std::vector<StringRef> filePaths;
+    std::vector<MemoryBufferRef> resources;
 
-  llvm::StringSet<> directivesExports;
+    llvm::StringSet<> directivesExports;
 };
 
 // Functions below this line are defined in DriverUtils.cpp.
@@ -205,7 +209,7 @@ MemoryBufferRef convertResToCOFF(ArrayRef<MemoryBufferRef> mbs,
 
 // Create enum with OPT_xxx values for each option in Options.td
 enum {
-  OPT_INVALID = 0,
+    OPT_INVALID = 0,
 #define OPTION(_1, _2, ID, _4, _5, _6, _7, _8, _9, _10, _11, _12) OPT_##ID,
 #include "Options.inc"
 #undef OPTION

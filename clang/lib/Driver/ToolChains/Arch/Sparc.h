@@ -21,9 +21,9 @@ namespace tools {
 namespace sparc {
 
 enum class FloatABI {
-  Invalid,
-  Soft,
-  Hard,
+    Invalid,
+    Soft,
+    Hard,
 };
 
 FloatABI getSparcFloatABI(const Driver &D, const llvm::opt::ArgList &Args);

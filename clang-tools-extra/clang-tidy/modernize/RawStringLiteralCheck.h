@@ -25,23 +25,23 @@ using CharsBitSet = std::bitset<1 << CHAR_BIT>;
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-raw-string-literal.html
 class RawStringLiteralCheck : public ClangTidyCheck {
 public:
-  RawStringLiteralCheck(StringRef Name, ClangTidyContext *Context);
+    RawStringLiteralCheck(StringRef Name, ClangTidyContext *Context);
 
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus11;
-  }
-  void storeOptions(ClangTidyOptions::OptionMap &Options) override;
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus11;
+    }
+    void storeOptions(ClangTidyOptions::OptionMap &Options) override;
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-  void replaceWithRawStringLiteral(
-      const ast_matchers::MatchFinder::MatchResult &Result,
-      const StringLiteral *Literal, StringRef Replacement);
+    void replaceWithRawStringLiteral(
+        const ast_matchers::MatchFinder::MatchResult &Result,
+        const StringLiteral *Literal, StringRef Replacement);
 
-  std::string DelimiterStem;
-  CharsBitSet DisallowedChars;
-  const bool ReplaceShorterLiterals;
+    std::string DelimiterStem;
+    CharsBitSet DisallowedChars;
+    const bool ReplaceShorterLiterals;
 };
 
 } // namespace modernize

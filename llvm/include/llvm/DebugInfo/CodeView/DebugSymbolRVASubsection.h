@@ -25,38 +25,44 @@ namespace codeview {
 
 class DebugSymbolRVASubsectionRef final : public DebugSubsectionRef {
 public:
-  using ArrayType = FixedStreamArray<support::ulittle32_t>;
+    using ArrayType = FixedStreamArray<support::ulittle32_t>;
 
-  DebugSymbolRVASubsectionRef();
+    DebugSymbolRVASubsectionRef();
 
-  static bool classof(const DebugSubsectionRef *S) {
-    return S->kind() == DebugSubsectionKind::CoffSymbolRVA;
-  }
+    static bool classof(const DebugSubsectionRef *S) {
+        return S->kind() == DebugSubsectionKind::CoffSymbolRVA;
+    }
 
-  ArrayType::Iterator begin() const { return RVAs.begin(); }
-  ArrayType::Iterator end() const { return RVAs.end(); }
+    ArrayType::Iterator begin() const {
+        return RVAs.begin();
+    }
+    ArrayType::Iterator end() const {
+        return RVAs.end();
+    }
 
-  Error initialize(BinaryStreamReader &Reader);
+    Error initialize(BinaryStreamReader &Reader);
 
 private:
-  ArrayType RVAs;
+    ArrayType RVAs;
 };
 
 class DebugSymbolRVASubsection final : public DebugSubsection {
 public:
-  DebugSymbolRVASubsection();
+    DebugSymbolRVASubsection();
 
-  static bool classof(const DebugSubsection *S) {
-    return S->kind() == DebugSubsectionKind::CoffSymbolRVA;
-  }
+    static bool classof(const DebugSubsection *S) {
+        return S->kind() == DebugSubsectionKind::CoffSymbolRVA;
+    }
 
-  Error commit(BinaryStreamWriter &Writer) const override;
-  uint32_t calculateSerializedSize() const override;
+    Error commit(BinaryStreamWriter &Writer) const override;
+    uint32_t calculateSerializedSize() const override;
 
-  void addRVA(uint32_t RVA) { RVAs.push_back(support::ulittle32_t(RVA)); }
+    void addRVA(uint32_t RVA) {
+        RVAs.push_back(support::ulittle32_t(RVA));
+    }
 
 private:
-  std::vector<support::ulittle32_t> RVAs;
+    std::vector<support::ulittle32_t> RVAs;
 };
 
 } // end namespace codeview

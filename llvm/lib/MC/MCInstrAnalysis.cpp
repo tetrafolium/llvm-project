@@ -17,20 +17,20 @@
 using namespace llvm;
 
 bool MCInstrAnalysis::clearsSuperRegisters(const MCRegisterInfo &MRI,
-                                           const MCInst &Inst,
-                                           APInt &Writes) const {
-  Writes.clearAllBits();
-  return false;
+        const MCInst &Inst,
+        APInt &Writes) const {
+    Writes.clearAllBits();
+    return false;
 }
 
 bool MCInstrAnalysis::evaluateBranch(const MCInst & /*Inst*/, uint64_t /*Addr*/,
                                      uint64_t /*Size*/,
                                      uint64_t & /*Target*/) const {
-  return false;
+    return false;
 }
 
 Optional<uint64_t>
 MCInstrAnalysis::evaluateMemoryOperandAddress(const MCInst &Inst, uint64_t Addr,
-                                              uint64_t Size) const {
-  return None;
+        uint64_t Size) const {
+    return None;
 }

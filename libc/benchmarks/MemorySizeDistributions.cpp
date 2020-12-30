@@ -30,40 +30,40 @@ static constexpr double kMemsetGoogleU[] = {0.1064, 0.0986, 0.0201, 0.0042, 0.15
 // clang-format on
 
 ArrayRef<MemorySizeDistribution> getMemcpySizeDistributions() {
-  static constexpr MemorySizeDistribution kDistributions[] = {
-      {"memcpy Google A", kMemcpyGoogleA},
-      {"memcpy Google B", kMemcpyGoogleB},
-      {"memcpy Google D", kMemcpyGoogleD},
-      {"memcpy Google L", kMemcpyGoogleL},
-      {"memcpy Google M", kMemcpyGoogleM},
-      {"memcpy Google Q", kMemcpyGoogleQ},
-      {"memcpy Google S", kMemcpyGoogleS},
-      {"memcpy Google U", kMemcpyGoogleU},
-      {"memcpy Google W", kMemcpyGoogleW},
-      {"uniform 384 to 4096", kMemcpyUniform384To4096},
-  };
-  return kDistributions;
+    static constexpr MemorySizeDistribution kDistributions[] = {
+        {"memcpy Google A", kMemcpyGoogleA},
+        {"memcpy Google B", kMemcpyGoogleB},
+        {"memcpy Google D", kMemcpyGoogleD},
+        {"memcpy Google L", kMemcpyGoogleL},
+        {"memcpy Google M", kMemcpyGoogleM},
+        {"memcpy Google Q", kMemcpyGoogleQ},
+        {"memcpy Google S", kMemcpyGoogleS},
+        {"memcpy Google U", kMemcpyGoogleU},
+        {"memcpy Google W", kMemcpyGoogleW},
+        {"uniform 384 to 4096", kMemcpyUniform384To4096},
+    };
+    return kDistributions;
 }
 
 ArrayRef<MemorySizeDistribution> getMemsetSizeDistributions() {
-  static constexpr MemorySizeDistribution kDistributions[] = {
-      {"memset Google B", kMemsetGoogleB},
-      {"memset Google D", kMemsetGoogleD},
-      {"memset Google Q", kMemsetGoogleQ},
-      {"memset Google U", kMemsetGoogleU},
-  };
-  return kDistributions;
+    static constexpr MemorySizeDistribution kDistributions[] = {
+        {"memset Google B", kMemsetGoogleB},
+        {"memset Google D", kMemsetGoogleD},
+        {"memset Google Q", kMemsetGoogleQ},
+        {"memset Google U", kMemsetGoogleU},
+    };
+    return kDistributions;
 }
 
 ArrayRef<MemorySizeDistribution> getMemcmpSizeDistributions() {
-  static constexpr MemorySizeDistribution kDistributions[] = {
-      {"memcmp Google A", kMemcmpGoogleA}, {"memcmp Google B", kMemcmpGoogleB},
-      {"memcmp Google D", kMemcmpGoogleD}, {"memcmp Google L", kMemcmpGoogleL},
-      {"memcmp Google M", kMemcmpGoogleM}, {"memcmp Google Q", kMemcmpGoogleQ},
-      {"memcmp Google S", kMemcmpGoogleS}, {"memcmp Google U", kMemcmpGoogleU},
-      {"memcmp Google W", kMemcmpGoogleW},
-  };
-  return kDistributions;
+    static constexpr MemorySizeDistribution kDistributions[] = {
+        {"memcmp Google A", kMemcmpGoogleA}, {"memcmp Google B", kMemcmpGoogleB},
+        {"memcmp Google D", kMemcmpGoogleD}, {"memcmp Google L", kMemcmpGoogleL},
+        {"memcmp Google M", kMemcmpGoogleM}, {"memcmp Google Q", kMemcmpGoogleQ},
+        {"memcmp Google S", kMemcmpGoogleS}, {"memcmp Google U", kMemcmpGoogleU},
+        {"memcmp Google W", kMemcmpGoogleW},
+    };
+    return kDistributions;
 }
 } // namespace libc_benchmarks
 } // namespace llvm

@@ -17,27 +17,27 @@ namespace llvm {
 
 class NVPTXTargetObjectFile : public TargetLoweringObjectFile {
 public:
-  NVPTXTargetObjectFile() : TargetLoweringObjectFile() {}
+    NVPTXTargetObjectFile() : TargetLoweringObjectFile() {}
 
-  ~NVPTXTargetObjectFile() override;
+    ~NVPTXTargetObjectFile() override;
 
-  void Initialize(MCContext &ctx, const TargetMachine &TM) override {
-    TargetLoweringObjectFile::Initialize(ctx, TM);
-  }
+    void Initialize(MCContext &ctx, const TargetMachine &TM) override {
+        TargetLoweringObjectFile::Initialize(ctx, TM);
+    }
 
-  MCSection *getSectionForConstant(const DataLayout &DL, SectionKind Kind,
-                                   const Constant *C,
-                                   Align &Alignment) const override {
-    return ReadOnlySection;
-  }
+    MCSection *getSectionForConstant(const DataLayout &DL, SectionKind Kind,
+                                     const Constant *C,
+                                     Align &Alignment) const override {
+        return ReadOnlySection;
+    }
 
-  MCSection *getExplicitSectionGlobal(const GlobalObject *GO, SectionKind Kind,
-                                      const TargetMachine &TM) const override {
-    return DataSection;
-  }
+    MCSection *getExplicitSectionGlobal(const GlobalObject *GO, SectionKind Kind,
+                                        const TargetMachine &TM) const override {
+        return DataSection;
+    }
 
-  MCSection *SelectSectionForGlobal(const GlobalObject *GO, SectionKind Kind,
-                                    const TargetMachine &TM) const override;
+    MCSection *SelectSectionForGlobal(const GlobalObject *GO, SectionKind Kind,
+                                      const TargetMachine &TM) const override;
 };
 
 } // end namespace llvm

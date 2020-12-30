@@ -14,11 +14,11 @@
 LLDB_PLUGIN_DEFINE(ABIPowerPC)
 
 void ABIPowerPC::Initialize() {
-  ABISysV_ppc::Initialize();
-  ABISysV_ppc64::Initialize();
+    ABISysV_ppc::Initialize();
+    ABISysV_ppc64::Initialize();
 }
 
 void ABIPowerPC::Terminate() {
-  ABISysV_ppc::Terminate();
-  ABISysV_ppc64::Terminate();
+    ABISysV_ppc::Terminate();
+    ABISysV_ppc64::Terminate();
 }

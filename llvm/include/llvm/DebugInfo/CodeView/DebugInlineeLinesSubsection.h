@@ -29,93 +29,107 @@ namespace codeview {
 class DebugChecksumsSubsection;
 
 enum class InlineeLinesSignature : uint32_t {
-  Normal,    // CV_INLINEE_SOURCE_LINE_SIGNATURE
-  ExtraFiles // CV_INLINEE_SOURCE_LINE_SIGNATURE_EX
+    Normal,    // CV_INLINEE_SOURCE_LINE_SIGNATURE
+    ExtraFiles // CV_INLINEE_SOURCE_LINE_SIGNATURE_EX
 };
 
 struct InlineeSourceLineHeader {
-  TypeIndex Inlinee;                  // ID of the function that was inlined.
-  support::ulittle32_t FileID;        // Offset into FileChecksums subsection.
-  support::ulittle32_t SourceLineNum; // First line of inlined code.
-                                      // If extra files present:
-                                      //   ulittle32_t ExtraFileCount;
-                                      //   ulittle32_t Files[];
+    TypeIndex Inlinee;                  // ID of the function that was inlined.
+    support::ulittle32_t FileID;        // Offset into FileChecksums subsection.
+    support::ulittle32_t SourceLineNum; // First line of inlined code.
+    // If extra files present:
+    //   ulittle32_t ExtraFileCount;
+    //   ulittle32_t Files[];
 };
 
 struct InlineeSourceLine {
-  const InlineeSourceLineHeader *Header;
-  FixedStreamArray<support::ulittle32_t> ExtraFiles;
+    const InlineeSourceLineHeader *Header;
+    FixedStreamArray<support::ulittle32_t> ExtraFiles;
 };
 
 } // end namespace codeview
 
 template <> struct VarStreamArrayExtractor<codeview::InlineeSourceLine> {
-  Error operator()(BinaryStreamRef Stream, uint32_t &Len,
-                   codeview::InlineeSourceLine &Item);
+    Error operator()(BinaryStreamRef Stream, uint32_t &Len,
+                     codeview::InlineeSourceLine &Item);
 
-  bool HasExtraFiles = false;
+    bool HasExtraFiles = false;
 };
 
 namespace codeview {
 
 class DebugInlineeLinesSubsectionRef final : public DebugSubsectionRef {
-  using LinesArray = VarStreamArray<InlineeSourceLine>;
-  using Iterator = LinesArray::Iterator;
+    using LinesArray = VarStreamArray<InlineeSourceLine>;
+    using Iterator = LinesArray::Iterator;
 
 public:
-  DebugInlineeLinesSubsectionRef();
+    DebugInlineeLinesSubsectionRef();
 
-  static bool classof(const DebugSubsectionRef *S) {
-    return S->kind() == DebugSubsectionKind::InlineeLines;
-  }
+    static bool classof(const DebugSubsectionRef *S) {
+        return S->kind() == DebugSubsectionKind::InlineeLines;
+    }
 
-  Error initialize(BinaryStreamReader Reader);
-  Error initialize(BinaryStreamRef Section) {
-    return initialize(BinaryStreamReader(Section));
-  }
+    Error initialize(BinaryStreamReader Reader);
+    Error initialize(BinaryStreamRef Section) {
+        return initialize(BinaryStreamReader(Section));
+    }
 
-  bool valid() const { return Lines.valid(); }
-  bool hasExtraFiles() const;
+    bool valid() const {
+        return Lines.valid();
+    }
+    bool hasExtraFiles() const;
 
-  Iterator begin() const { return Lines.begin(); }
-  Iterator end() const { return Lines.end(); }
+    Iterator begin() const {
+        return Lines.begin();
+    }
+    Iterator end() const {
+        return Lines.end();
+    }
 
 private:
-  InlineeLinesSignature Signature;
-  LinesArray Lines;
+    InlineeLinesSignature Signature;
+    LinesArray Lines;
 };
 
 class DebugInlineeLinesSubsection final : public DebugSubsection {
 public:
-  struct Entry {
-    std::vector<support::ulittle32_t> ExtraFiles;
-    InlineeSourceLineHeader Header;
-  };
+    struct Entry {
+        std::vector<support::ulittle32_t> ExtraFiles;
+        InlineeSourceLineHeader Header;
+    };
 
-  DebugInlineeLinesSubsection(DebugChecksumsSubsection &Checksums,
-                              bool HasExtraFiles = false);
+    DebugInlineeLinesSubsection(DebugChecksumsSubsection &Checksums,
+                                bool HasExtraFiles = false);
 
-  static bool classof(const DebugSubsection *S) {
-    return S->kind() == DebugSubsectionKind::InlineeLines;
-  }
+    static bool classof(const DebugSubsection *S) {
+        return S->kind() == DebugSubsectionKind::InlineeLines;
+    }
 
-  Error commit(BinaryStreamWriter &Writer) const override;
-  uint32_t calculateSerializedSize() const override;
+    Error commit(BinaryStreamWriter &Writer) const override;
+    uint32_t calculateSerializedSize() const override;
 
-  void addInlineSite(TypeIndex FuncId, StringRef FileName, uint32_t SourceLine);
-  void addExtraFile(StringRef FileName);
+    void addInlineSite(TypeIndex FuncId, StringRef FileName, uint32_t SourceLine);
+    void addExtraFile(StringRef FileName);
 
-  bool hasExtraFiles() const { return HasExtraFiles; }
-  void setHasExtraFiles(bool Has) { HasExtraFiles = Has; }
+    bool hasExtraFiles() const {
+        return HasExtraFiles;
+    }
+    void setHasExtraFiles(bool Has) {
+        HasExtraFiles = Has;
+    }
 
-  std::vector<Entry>::const_iterator begin() const { return Entries.begin(); }
-  std::vector<Entry>::const_iterator end() const { return Entries.end(); }
+    std::vector<Entry>::const_iterator begin() const {
+        return Entries.begin();
+    }
+    std::vector<Entry>::const_iterator end() const {
+        return Entries.end();
+    }
 
 private:
-  DebugChecksumsSubsection &Checksums;
-  bool HasExtraFiles = false;
-  uint32_t ExtraFileCount = 0;
-  std::vector<Entry> Entries;
+    DebugChecksumsSubsection &Checksums;
+    bool HasExtraFiles = false;
+    uint32_t ExtraFileCount = 0;
+    std::vector<Entry> Entries;
 };
 
 } // end namespace codeview

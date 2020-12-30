@@ -16,7 +16,7 @@ StringSaver lld::saver{bAlloc};
 std::vector<SpecificAllocBase *> lld::SpecificAllocBase::instances;
 
 void lld::freeArena() {
-  for (SpecificAllocBase *alloc : SpecificAllocBase::instances)
-    alloc->reset();
-  bAlloc.Reset();
+    for (SpecificAllocBase *alloc : SpecificAllocBase::instances)
+        alloc->reset();
+    bAlloc.Reset();
 }

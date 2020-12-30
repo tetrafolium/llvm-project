@@ -23,26 +23,26 @@
 
 /* Llvm.llmodule -> string -> bool */
 CAMLprim value llvm_write_bitcode_file(LLVMModuleRef M, value Path) {
-  int Result = LLVMWriteBitcodeToFile(M, String_val(Path));
-  return Val_bool(Result == 0);
+    int Result = LLVMWriteBitcodeToFile(M, String_val(Path));
+    return Val_bool(Result == 0);
 }
 
 /* ?unbuffered:bool -> Llvm.llmodule -> Unix.file_descr -> bool */
 CAMLprim value llvm_write_bitcode_to_fd(value U, LLVMModuleRef M, value FD) {
-  int Unbuffered;
-  int Result;
+    int Unbuffered;
+    int Result;
 
-  if (U == Val_int(0)) {
-    Unbuffered = 0;
-  } else {
-    Unbuffered = Bool_val(Field(U, 0));
-  }
+    if (U == Val_int(0)) {
+        Unbuffered = 0;
+    } else {
+        Unbuffered = Bool_val(Field(U, 0));
+    }
 
-  Result = LLVMWriteBitcodeToFD(M, Int_val(FD), 0, Unbuffered);
-  return Val_bool(Result == 0);
+    Result = LLVMWriteBitcodeToFD(M, Int_val(FD), 0, Unbuffered);
+    return Val_bool(Result == 0);
 }
 
 /* Llvm.llmodule -> Llvm.llmemorybuffer */
 CAMLprim LLVMMemoryBufferRef llvm_write_bitcode_to_memory_buffer(LLVMModuleRef M) {
-  return LLVMWriteBitcodeToMemoryBuffer(M);
+    return LLVMWriteBitcodeToMemoryBuffer(M);
 }

@@ -14,23 +14,23 @@
 
 int main(int argc, char **argv)
 {
-	struct isl_ctx *ctx = isl_ctx_alloc();
-	struct isl_basic_set *bset;
-	struct isl_vec *sample;
-	isl_printer *p;
+    struct isl_ctx *ctx = isl_ctx_alloc();
+    struct isl_basic_set *bset;
+    struct isl_vec *sample;
+    isl_printer *p;
 
-	bset = isl_basic_set_read_from_file(ctx, stdin);
-	sample = isl_basic_set_sample_vec(isl_basic_set_copy(bset));
-	p = isl_printer_to_file(ctx, stdout);
-	p = isl_printer_print_vec(p, sample);
-	p = isl_printer_end_line(p);
-	isl_printer_free(p);
-	assert(sample);
-	if (isl_vec_size(sample) > 0)
-		assert(isl_basic_set_contains(bset, sample));
-	isl_basic_set_free(bset);
-	isl_vec_free(sample);
-	isl_ctx_free(ctx);
+    bset = isl_basic_set_read_from_file(ctx, stdin);
+    sample = isl_basic_set_sample_vec(isl_basic_set_copy(bset));
+    p = isl_printer_to_file(ctx, stdout);
+    p = isl_printer_print_vec(p, sample);
+    p = isl_printer_end_line(p);
+    isl_printer_free(p);
+    assert(sample);
+    if (isl_vec_size(sample) > 0)
+        assert(isl_basic_set_contains(bset, sample));
+    isl_basic_set_free(bset);
+    isl_vec_free(sample);
+    isl_ctx_free(ctx);
 
-	return 0;
+    return 0;
 }

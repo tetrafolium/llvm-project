@@ -15,8 +15,8 @@ namespace clang {
 namespace tidy {
 namespace abseil {
 
-/// Flags redundant calls to absl::StrCat when the result is being passed to 
-///	another call of absl::StrCat/absl::StrAppend. Also suggests a fix to 
+/// Flags redundant calls to absl::StrCat when the result is being passed to
+///	another call of absl::StrCat/absl::StrAppend. Also suggests a fix to
 ///	collapse the calls.
 /// Example:
 ///   StrCat(1, StrCat(2, 3))  ==>  StrCat(1, 2, 3)
@@ -25,13 +25,13 @@ namespace abseil {
 /// http://clang.llvm.org/extra/clang-tidy/checks/abseil-redundant-strcat-calls.html
 class RedundantStrcatCallsCheck : public ClangTidyCheck {
 public:
-  RedundantStrcatCallsCheck(StringRef Name, ClangTidyContext *Context)
-      : ClangTidyCheck(Name, Context) {}
-  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-    return LangOpts.CPlusPlus;
-  }
-  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+    RedundantStrcatCallsCheck(StringRef Name, ClangTidyContext *Context)
+        : ClangTidyCheck(Name, Context) {}
+    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+        return LangOpts.CPlusPlus;
+    }
+    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace abseil

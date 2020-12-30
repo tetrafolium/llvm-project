@@ -13,12 +13,12 @@
 
 class ABIX86 : public lldb_private::MCBasedABI {
 public:
-  static void Initialize();
-  static void Terminate();
+    static void Initialize();
+    static void Terminate();
 
-  uint32_t GetGenericNum(llvm::StringRef name) override;
+    uint32_t GetGenericNum(llvm::StringRef name) override;
 
 private:
-  using lldb_private::MCBasedABI::MCBasedABI;
+    using lldb_private::MCBasedABI::MCBasedABI;
 };
 #endif
